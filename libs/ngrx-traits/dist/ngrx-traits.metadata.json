@@ -1,0 +1,217 @@
+{
+  "__symbolic": "module",
+  "version": 4,
+  "exports": [{ "from": "./traits-local-store" }],
+  "metadata": {
+    "createTraitFactory": {
+      "__symbolic": "function",
+      "parameters": ["f"],
+      "value": { "__symbolic": "reference", "name": "f" }
+    },
+    "createEntityFeatureFactory": {
+      "__symbolic": "function",
+      "parameters": ["traits"],
+      "value": {
+        "__symbolic": "error",
+        "message": "Lambda not supported",
+        "line": 44,
+        "character": 10,
+        "module": "./create-entity-feature"
+      }
+    },
+    "setPropertyReducer": {
+      "__symbolic": "function",
+      "parameters": ["sourceReducer", "property", "propertyReducer"],
+      "value": {
+        "__symbolic": "error",
+        "message": "Lambda not supported",
+        "line": 214,
+        "character": 9,
+        "module": "./create-entity-feature"
+      }
+    },
+    "setPropertiesReducer": {
+      "__symbolic": "function",
+      "parameters": ["sourceReducer", "propertiesReducers"],
+      "value": {
+        "__symbolic": "error",
+        "message": "Lambda not supported",
+        "line": 228,
+        "character": 9,
+        "module": "./create-entity-feature"
+      }
+    },
+    "joinReducers": {
+      "__symbolic": "function",
+      "parameters": ["firstReducer", "secondReducer"],
+      "value": {
+        "__symbolic": "error",
+        "message": "Lambda not supported",
+        "line": 244,
+        "character": 9,
+        "module": "./create-entity-feature"
+      }
+    },
+    "TraitActions": { "__symbolic": "interface" },
+    "TraitSelectors": { "__symbolic": "interface" },
+    "TraitStateMutators": { "__symbolic": "interface" },
+    "FeatureTraits": { "__symbolic": "interface" },
+    "FeatureFactory": { "__symbolic": "interface" },
+    "Config": { "__symbolic": "interface" },
+    "FeatureSelectors": { "__symbolic": "interface" },
+    "AllTraitConfigs": { "__symbolic": "interface" },
+    "TraitActionsFactory": { "__symbolic": "interface" },
+    "TraitActionsFactoryConfig": { "__symbolic": "interface" },
+    "TraitSelectorsFactory": { "__symbolic": "interface" },
+    "TraitSelectorsFactoryConfig": { "__symbolic": "interface" },
+    "TraitInitialStateFactory": { "__symbolic": "interface" },
+    "TraitInitialStateFactoryConfig": { "__symbolic": "interface" },
+    "TraitStateMutatorsFactory": { "__symbolic": "interface" },
+    "TraitStateMutatorsFactoryConfig": { "__symbolic": "interface" },
+    "TraitReducerFactory": { "__symbolic": "interface" },
+    "TraitReducerFactoryConfig": { "__symbolic": "interface" },
+    "TraitEffectsFactory": { "__symbolic": "interface" },
+    "TraitEffectsFactoryConfig": { "__symbolic": "interface" },
+    "KeyedConfig": { "__symbolic": "interface" },
+    "TraitFactory": { "__symbolic": "interface" },
+    "ExtractStateType": { "__symbolic": "interface" },
+    "ExtractActionsType": { "__symbolic": "interface" },
+    "ExtractSelectorsType": { "__symbolic": "interface" },
+    "ExtractMutatorsType": { "__symbolic": "interface" },
+    "ExtractKeyedConfigType": { "__symbolic": "interface" },
+    "PrefixProps": { "__symbolic": "interface" },
+    "PostfixProps": { "__symbolic": "interface" },
+    "TraitEffect": {
+      "__symbolic": "class",
+      "decorators": [
+        {
+          "__symbolic": "call",
+          "expression": {
+            "__symbolic": "reference",
+            "module": "@angular/core",
+            "name": "Injectable",
+            "line": 11,
+            "character": 1
+          }
+        }
+      ],
+      "members": {
+        "__ctor__": [
+          {
+            "__symbolic": "constructor",
+            "parameters": [
+              {
+                "__symbolic": "reference",
+                "module": "@ngrx/effects",
+                "name": "Actions",
+                "line": 16,
+                "character": 24
+              },
+              {
+                "__symbolic": "reference",
+                "name": "Store",
+                "module": "@ngrx/store",
+                "arguments": [{ "__symbolic": "reference", "name": "any" }]
+              }
+            ]
+          }
+        ],
+        "ngrxOnIdentifyEffects": [{ "__symbolic": "method" }],
+        "ngrxOnRunEffects": [{ "__symbolic": "method" }]
+      }
+    },
+    "getDestroyActionName": {
+      "__symbolic": "function",
+      "parameters": ["id"],
+      "value": {
+        "__symbolic": "binop",
+        "operator": "+",
+        "left": {
+          "__symbolic": "binop",
+          "operator": "+",
+          "left": "[",
+          "right": { "__symbolic": "reference", "name": "id" }
+        },
+        "right": "] Destroyed"
+      }
+    },
+    "insertIf": {
+      "__symbolic": "function",
+      "parameters": ["condition", "getElement"],
+      "value": {
+        "__symbolic": "if",
+        "condition": { "__symbolic": "reference", "name": "condition" },
+        "thenExpression": [
+          {
+            "__symbolic": "call",
+            "expression": { "__symbolic": "reference", "name": "getElement" }
+          }
+        ],
+        "elseExpression": []
+      }
+    },
+    "toMap": {
+      "__symbolic": "function",
+      "parameters": ["a"],
+      "value": {
+        "__symbolic": "call",
+        "expression": {
+          "__symbolic": "select",
+          "expression": { "__symbolic": "reference", "name": "a" },
+          "member": "reduce"
+        },
+        "arguments": [
+          {
+            "__symbolic": "error",
+            "message": "Lambda not supported",
+            "line": 10,
+            "character": 18,
+            "module": "./util"
+          },
+          {}
+        ]
+      }
+    }
+  },
+  "origins": {
+    "createTraitFactory": "./create-entity-feature",
+    "createEntityFeatureFactory": "./create-entity-feature",
+    "setPropertyReducer": "./create-entity-feature",
+    "setPropertiesReducer": "./create-entity-feature",
+    "joinReducers": "./create-entity-feature",
+    "TraitActions": "./model",
+    "TraitSelectors": "./model",
+    "TraitStateMutators": "./model",
+    "FeatureTraits": "./model",
+    "FeatureFactory": "./model",
+    "Config": "./model",
+    "FeatureSelectors": "./model",
+    "AllTraitConfigs": "./model",
+    "TraitActionsFactory": "./model",
+    "TraitActionsFactoryConfig": "./model",
+    "TraitSelectorsFactory": "./model",
+    "TraitSelectorsFactoryConfig": "./model",
+    "TraitInitialStateFactory": "./model",
+    "TraitInitialStateFactoryConfig": "./model",
+    "TraitStateMutatorsFactory": "./model",
+    "TraitStateMutatorsFactoryConfig": "./model",
+    "TraitReducerFactory": "./model",
+    "TraitReducerFactoryConfig": "./model",
+    "TraitEffectsFactory": "./model",
+    "TraitEffectsFactoryConfig": "./model",
+    "KeyedConfig": "./model",
+    "TraitFactory": "./model",
+    "ExtractStateType": "./model",
+    "ExtractActionsType": "./model",
+    "ExtractSelectorsType": "./model",
+    "ExtractMutatorsType": "./model",
+    "ExtractKeyedConfigType": "./model",
+    "PrefixProps": "./model",
+    "PostfixProps": "./model",
+    "TraitEffect": "./trait-effect",
+    "getDestroyActionName": "./trait-effect",
+    "insertIf": "./util",
+    "toMap": "./util"
+  },
+  "importAs": "ngrx-traits"
+}

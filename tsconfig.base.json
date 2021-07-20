@@ -1,0 +1,24 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": ["es2017", "dom"],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "ngrx-traits": ["libs/ngrx-traits/src/lib/index.ts"],
+      "ngrx-traits/traits": ["libs/ngrx-traits/traits/src/index.ts"],
+      "@ngrx-traits/ngrx-traits": ["libs/ngrx-traits/src/index.ts"]
+    }
+  },
+  "exclude": ["node_modules", "tmp"]
+}

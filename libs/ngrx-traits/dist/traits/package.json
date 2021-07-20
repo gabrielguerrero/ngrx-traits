@@ -1,0 +1,11 @@
+{
+  "main": "../bundles/ngrx-traits-traits.umd.js",
+  "module": "../fesm2015/ngrx-traits-traits.js",
+  "es2015": "../fesm2015/ngrx-traits-traits.js",
+  "esm2015": "../esm2015/traits/ngrx-traits-traits.js",
+  "fesm2015": "../fesm2015/ngrx-traits-traits.js",
+  "typings": "ngrx-traits-traits.d.ts",
+  "metadata": "ngrx-traits-traits.metadata.json",
+  "sideEffects": false,
+  "name": "ngrx-traits/traits"
+}

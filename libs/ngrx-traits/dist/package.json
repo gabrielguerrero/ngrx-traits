@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/ng-packagr/package.schema.json",
+  "name": "ngrx-traits",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "@angular/cdk": "^11.2.5",
+    "@angular/common": "^11.2.6",
+    "@angular/compiler": "^11.2.6",
+    "@angular/core": "^11.2.6",
+    "@ngrx/effects": "11.0.1",
+    "@ngrx/entity": "11.0.1",
+    "@ngrx/router-store": "11.0.1",
+    "@ngrx/store": "11.0.1",
+    "ng-packagr": "11.2.0"
+  },
+  "main": "bundles/ngrx-traits.umd.js",
+  "module": "fesm2015/ngrx-traits.js",
+  "es2015": "fesm2015/ngrx-traits.js",
+  "esm2015": "esm2015/ngrx-traits.js",
+  "fesm2015": "fesm2015/ngrx-traits.js",
+  "typings": "ngrx-traits.d.ts",
+  "metadata": "ngrx-traits.metadata.json",
+  "sideEffects": false,
+  "dependencies": {
+    "tslib": "^2.0.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "__symbolic": "module",
+  "version": 4,
+  "exports": [
+    { "from": "./async-action.model" },
+    { "from": "./async-action.trait" },
+    { "from": "./sort.utils" }
+  ],
+  "metadata": {},
+  "origins": {},
+  "importAs": "ngrx-traits/traits"
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/ng-packagr/package.schema.json",
+  "name": "ngrx-traits",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ng-packagr -p package.json",
+      "postinstall": "ngcc"
+  },
+  "ngPackage": {
+    "dest": "../../dist/libs/ngrx-traits",
+    "lib": {
+      "entryFile": "src/lib/public_api.ts"
+    }
+  },
+  "peerDependencies": {
+    "@angular/cdk": "^11.2.5",
+    "@angular/common": "^11.2.6",
+    "@angular/compiler": "^11.2.6",
+    "@angular/core": "^11.2.6",
+    "@ngrx/effects": "11.0.1",
+    "@ngrx/entity": "11.0.1",
+    "@ngrx/router-store": "11.0.1",
+    "@ngrx/store": "11.0.1",
+    "ng-packagr": "11.2.0"
+  },
+  "devDependencies": {
+    "zone.js": "^0.11.4",
+    "jest-marbles": "^2.5.1",
+    "ts-mockito": "^2.6.1"
+  }
+}
