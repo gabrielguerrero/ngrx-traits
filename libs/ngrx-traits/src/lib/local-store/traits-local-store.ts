@@ -1,4 +1,4 @@
-import { Injectable, Injector } from '@angular/core';
+import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { FeatureFactory } from '../model';
 import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
 import { EffectSources } from '@ngrx/effects';
@@ -92,7 +92,7 @@ export interface LocalTraitsConfig<F extends FeatureFactory> {
 }
 
 @Injectable()
-export abstract class TraitsLocalStore<F extends FeatureFactory> {
+export abstract class TraitsLocalStore<F extends FeatureFactory> implements OnDestroy{
   traits: ReturnType<F> & { destroy: () => void };
 
   actions: ReturnType<F>['actions'];

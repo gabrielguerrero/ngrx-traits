@@ -13,6 +13,8 @@
       },
       "rules": {
         "@nrwl/nx/enforce-module-boundaries": "off",
+        "@typescript-eslint/ban-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
         "@typescript-eslint/no-non-null-assertion": "off",
         "@angular-eslint/directive-selector": [
           "error",
