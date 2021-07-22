@@ -26,7 +26,9 @@
     "workspace-generator": "nx workspace-generator",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "semantic-release": "semantic-release --branches main"
+    "semantic-release": "semantic-release --branches main",
+    "commit": "git-cz",
+    "adp": "git-cz"
   },
   "private": true,
   "dependencies": {
@@ -68,6 +70,7 @@
     "@typescript-eslint/eslint-plugin": "4.19.0",
     "@typescript-eslint/parser": "4.19.0",
     "cypress": "^7.3.0",
+    "cz-conventional-changelog": "^3.3.0",
     "dotenv": "8.2.0",
     "eslint": "7.22.0",
     "eslint-config-prettier": "8.1.0",
@@ -77,14 +80,19 @@
     "jest-preset-angular": "^9.0.4",
     "ng-packagr": "^12.1.0",
     "prettier": "^2.3.1",
+    "semantic-release": "^17.4.4",
     "ts-jest": "27.0.3",
     "ts-mockito": "^2.6.1",
     "ts-node": "~9.1.1",
-    "typescript": "~4.2.4",
-    "semantic-release": "^17.4.4"
+    "typescript": "~4.2.4"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/gabrielguerrero/ngrx-traits.git"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
