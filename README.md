@@ -21,11 +21,11 @@ NGRX Traits is a set of factory functions that dynamically generate actions, eff
 
 ### [Getting Started](#getting-started)
 
-### [Extensible Setup](#xxtensible-setup)
+### [Extensible Setup](#extensible-setup)
 
-### [Local store traits](local-store/README.md)
+### [Local store traits](libs/ngrx-traits/src/lib/local-store/README.md)
 
-### [Custom Traits](traits/custom-traits.md)
+### [Custom Traits](libs/ngrx-traits/traits/src/custom-traits.md)
 
 ##Getting Started
 The best way to understand how to use the traits is to see an example, lets imagine that you need to implement a page that shows a list of products which you can select and buy , lets start by creating the interface for our Product entity:
