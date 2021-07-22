@@ -1,0 +1,15 @@
+{
+  "branches": ["main", "next"],
+  "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      ["@semantic-release/exec", {
+                  "prepareCmd": "cd dist/libs/ngrx-traits/ && npm version ${nextRelease.version}",
+                }],
+      ["@semantic-release/github", {
+        "assets": ["dist/libs/ngrx-traits/**"]
+        }],
+      "@semantic-release/git"
+    ],
+}
