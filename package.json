@@ -26,9 +26,9 @@
     "workspace-generator": "nx workspace-generator",
     "dep-graph": "nx dep-graph",
     "help": "nx help",
-    "semantic-release": "semantic-release -d",
+    "semantic-release": "semantic-release",
     "commit": "git-cz",
-    "adp": "git-cz"
+    "acp": "git add . && npm run commit && git push"
   },
   "private": true,
   "dependencies": {
@@ -67,6 +67,7 @@
     "@nrwl/workspace": "12.5.8",
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/exec": "^5.0.0",
+    "@semantic-release/git": "^9.0.0",
     "@types/jest": "26.0.8",
     "@types/node": "14.14.33",
     "@typescript-eslint/eslint-plugin": "4.19.0",
