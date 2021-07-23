@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/ng-packagr/package.schema.json",
   "name": "ngrx-traits",
-  "version": "1.0.0",
+  "version": "0.0.0-development",
   "scripts": {
     "build": "ng-packagr -p package.json",
       "postinstall": "ngcc"
