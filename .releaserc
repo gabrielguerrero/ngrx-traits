@@ -10,6 +10,5 @@
       ["@semantic-release/github", {
         "assets": ["dist/libs/ngrx-traits/**"]
         }],
-      "@semantic-release/git"
     ],
 }
