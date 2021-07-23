@@ -194,6 +194,7 @@ export type ExtractActionsType<T> = T extends TraitFactory<any, infer A>
   ? UnionToIntersection<ExtractActionsType<ExtractArrayElementTypes<T>>>
   : never;
 
+
 export type ExtractSelectorsType<T> = T extends TraitFactory<any, any, infer S>
   ? S
   : T extends ReadonlyArray<TraitFactory>
