@@ -7,8 +7,8 @@
          "prepareCmd": "cd dist/libs/ngrx-traits/ && npm version ${nextRelease.version}",
        }],
       ["@semantic-release/npm",{
-        pkgRoot: "dist/libs/ngrx-traits"
+        "pkgRoot": "dist/libs/ngrx-traits"
         }],
-      @semantic-release/github",
-    ],
+      "@semantic-release/github"
+    ]
 }
