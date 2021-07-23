@@ -128,7 +128,6 @@
       "architect": {
         "build": {
           "builder": "@nrwl/angular:ng-packagr-lite",
-          "outputs": ["dist/libs/ngrx-traits"],
           "options": {
             "project": "libs/ngrx-traits/ng-package.json"
           },
