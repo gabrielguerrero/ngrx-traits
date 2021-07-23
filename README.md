@@ -71,7 +71,7 @@ Now lets check what the factory created for us, if you inspect your IDE the `pro
 - effects
 - mutations
 
-Choose actions and use the dot again to see what's inside, you will see a list of actions with `fetch`, `fetchSuccess`, `fetchFail`, and in selectors you will see `isLoading`, `selectAll`, `selectIds`. At the beginning might look like many actions, but they all have it uses, you will mostly just use a few, I'll give a brief explanation of some of them, the rest can be seen in the docs of each trait.
+Choose actions and use the dot again to see what's inside, you will see a list of actions with `fetch`, `fetchSuccess`, `fetchFail`, and in selectors you will see `isLoading`, `selectAll`, `selectIds`. I'll give a brief explanation of some of them, the rest can be seen in the docs of each trait.
 
 The most important ones you will see there is the fetch actions, they are meant to be used to create an effect that will populate the state, this actions are also use by other entities related traits like filter, sort, pagination, to fetch data when needed. Lets do one for our product list:
 
