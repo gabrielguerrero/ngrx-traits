@@ -8,7 +8,7 @@
                   "prepareCmd": "cd dist/libs/ngrx-traits/ && npm version ${nextRelease.version}",
                 }],
       ["@semantic-release/github", {
-        "assets": ["dist/libs/ngrx-traits/**"]
+        "assets": ["dist/libs/ngrx-traits"]
         }],
     ],
 }
