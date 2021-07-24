@@ -34,14 +34,10 @@ export interface TestState3
 describe('addLoadEntities Trait', () => {
   let actions$: Actions;
 
-  const globalReset = createAction('Global reset');
-
   function init() {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
-      addLoadEntities<Todo>({
-        resetOn: [globalReset],
-      })
+      addLoadEntities<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,

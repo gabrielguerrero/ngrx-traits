@@ -51,7 +51,6 @@ export const loadEntitiesTraitKey = 'loadEntities';
 export type LoadEntitiesConfig<T = unknown> = {
   selectId?: IdSelector<T>;
   sortComparer?: false | Comparer<T>;
-  resetOn?: GenericActionCreator[];
   adapter: EntityAdapter<T>;
 };
 
