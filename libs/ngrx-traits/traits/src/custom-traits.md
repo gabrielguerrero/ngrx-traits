@@ -3,13 +3,17 @@
 To create a custom trait you will need to use createTraitFactory like in the following example, have a quick look at it, and then I will explain each section,
 
 ```typescript
+import { TraitActionsFactoryConfig, TraitInitialStateFactoryConfig } from 'ngrx-traits';
+
 interface Person {
   id: string;
   name: string;
 }
+
 interface SelectedPersonState {
   selectedPerson: Person;
 }
+
 export function addLoadPerson() {
   const initialState: SelectedPersonState = { selectedPerson: null };
 
@@ -17,7 +21,7 @@ export function addLoadPerson() {
     key: 'loadPerson',
     depends: [],
     config: {},
-    actions: (actionsGroupKey: string) => ({
+    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
       loadPerson: createAction(
         `${actionsGroupKey} Load Person`,
         props<{ id: string }>()
@@ -31,7 +35,7 @@ export function addLoadPerson() {
     selectors: () => ({
       selectPerson: (state: SelectedPersonState) => state.selectedPerson,
     }),
-    initialState: (previousInitialState: any) =>
+    initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>
       (previousInitialState ?? {}) as SelectedPersonState,
     reducer: (initialState, allActions, allSelectors) =>
       createReducer(
@@ -54,6 +58,7 @@ export function addLoadPerson() {
           );
         });
       }
+
       return [LoadPersonEffect];
     },
   });
@@ -85,17 +90,18 @@ After the traits are sorted all the configs are set in map that uses as keys the
 #### actions
 
 ```typescript
-   actions: (actionsGroupKey: string: allConfigs: unkown) => ({
-      loadPerson: createAction(
-        `${actionsGroupKey} Load Person`,
-        props<{ id: string }>(),
-      ),
-      loadPersonSuccess: createAction(
-        `${actionsGroupKey} Load Person Success`,
-        props<{ person: Person }>(),
-      ),
-      loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
-    })
+
+actions: ({ actionsGroupKey, allConfigs }: TraitActionsFactoryConfig) => ({
+  loadPerson: createAction(
+    `${actionsGroupKey} Load Person`,
+    props<{ id: string }>(),
+  ),
+  loadPersonSuccess: createAction(
+    `${actionsGroupKey} Load Person Success`,
+    props<{ person: Person }>(),
+  ),
+  loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+})
 ```
 
 Actions factory is another optional property (you can create a trait that only uses other traits actions or even normal global actions), the most important thing you should see is the param actionsGroupKey, which you must use in the type of your actions to ensure they are unique when created.
@@ -103,14 +109,13 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 
 > **IMPORTANT**
 >
-> When inlining the function for actions, selectors, mutators and initialState, like we are doing in the example above, is important that you type the arguments of the function, otherwise return type of the function is not inferred correctly, in the case of effects or reducer the return type doesn't need to be inferred, so you can omit the types of the params , this is due to a [bug in the TS inference logic](https://github.com/microsoft/TypeScript/issues/42379).
+> When inlining the function for actions, selectors, mutators and initialState, like we are doing in the example above, is important that you type the arguments of the function, otherwise return type of the function is not inferred correctly there is a `TraitActionsFactoryConfig`, `TraitSelectorsFactoryConfig`, `TraitMutatorsFactoryConfig` and `TraitInitialStateFactoryConfig` that you can use on each case, in the case of effects or reducer the parameters are the inferred from the return types of the actions, selectors, mutators and initialState, so is better to not type them , this is due to a [bug in the TS inference logic](https://github.com/microsoft/TypeScript/issues/42379).
 >
-> In the example above the **allConfigs** param is not used you can either simply remove it because is the last param, or if is a middle param but not use typed it with _unknown_.
 >
-> Another way to work around it is by assigning the function to a variable, then the return type is inferred correctly, but you will still need to type the arguments you use because the type inference on then is lost, but you won't need to type the ones you don't, like:
+> Another way to work around it is by assigning the function to a variable, then the return type is inferred correctly, but you will still need to type the arguments you use because the type inference on then is lost, like:
 >
 > ```typescript
-> const actions = (actionsGroupKey: string) => ({
+> const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
 >    loadPerson: createAction(
 >    `${actionsGroupKey} Load Person`,
 >    props<{ id: string }>(),
@@ -131,7 +136,7 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 > The main advantage of this approach is when you for example in a reducer or effect you need more than the actions of your trait, you can get the type of the actions like:
 >
 > ```typescript
->  const actions = (actionsGroupKey: string) => ({
+>  const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
 >     loadPerson: createAction(
 >       `${actionsGroupKey} Load Person`,
 >       props<{ id: string }>(),
@@ -149,7 +154,8 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 >    key: 'loadPerson',
 >    actions,
 >    // ...
->    reducer: (initialState, allActions: LoadPersonActions & LoadEntitiesActions<Person>) =>
+>    reducer: ({ initialState, allActions: actions }) => {
+>    const allActions = actions  as LoadPersonActions & LoadEntitiesActions<Person>;
 >    createReducer(
 >       initialState,
 >       on(allActions.loadPersonSuccess, (state, { person }) => ({
@@ -161,7 +167,8 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 #### Selectors
 
 ```typescript
-selectors: (previousSelectors: unknown, allConfigs: unknown) => ({
+
+selectors: ({ previousSelectors, allConfigs }: TraitSelectorsFactoryConfig) => ({
   selectPerson: (state: SelectedPersonState) => state.selectedPerson,
 });
 ```
@@ -171,12 +178,13 @@ Another optional parameter, its just to create the ngrx selectors, it comes with
 I already explain what is the allConfig param, previousSelectors are the selectors of the traits that have been built before, you can see an example in multi-selection.trait.selectors.ts. After the trait actions are build all the trait selector are built and merged into an object called allSelectors which you will receive in some factories, but while each selector is build is pass as a parameter the merge of the previous traits selectors in previousSelectors param, this is needed because some selectors need to be merged with selectors of other traits.
 
 ####Mutators
-The mutators are just a set of functions that change the state, they are use inside the reducer to implement the changes of the state when an action occurs, this is another optional parameter, its use is to expose the mutators to the devs, in case he/she might need to use them in their own trait, you can see examples of them in the core traits like in [multi-selection.trait.mutators.ts](traits/multi-selection/multi-selection.trait.mutators.ts). The important param here is the previousMutators as with selectors this is the merge of the previous traits mutators. After the selectors are build all the mutators are merge in an object called allMutators, which you will receive as a param in your reducer.
+```mutators: ({ previousMutators, allConfigs }: TraitActionsFactoryConfig) => {```
+The mutators are just a set of functions that change the state, they are use inside the reducer to implement the changes of the state when an action occurs, this is another optional parameter, its use is to expose the mutators to the devs of other traits, in case he/she might need to use them in their own trait, you can see examples of them in the core traits like in [multi-selection.trait.mutators.ts](traits/multi-selection/multi-selection.trait.mutators.ts). The important param here is the previousMutators as with selectors this is the merge of the previous traits mutators. After the selectors are build all the mutators are merge in an object called allMutators, which you will receive as a param in your reducer.
 
 ####initialState
 
 ```typescript
-initialState: (previousInitialState = any) =>
+initialState: ({ previousInitialState, allConfigs }: TraitInitialStateFactoryConfig) =>
   (previousInitialState ?? {}) as SelectedPersonState;
 ```
 
@@ -195,10 +203,10 @@ The initialState factory, also optional (only needed if you are implementing a r
     ),
 ```
 
-The reducer is normal ngrx reducer code, and the params should make sense if you read the previous section, initialState is the merge of all traits initialState, allActions is the merge of all the traits actions and same goes with allSelectors, allMutators and allConfigs. If you correctly typed the params of actions, selectors,mutators and the initial state, the type of this params should be auto inferred, so you won't need to type them as long as you are only using the actions, selectors etc that you created in this trait, if you need to use action, select , etc of other traits , then you will need to get types or interfaces for your trait,action, selectors etc , here is a way to do it
+The reducer is normal ngrx reducer code, and the params should make sense if you read the previous sections, initialState is the merge of all traits initialState, allActions is the merge of all the traits actions and same goes with allSelectors, allMutators and allConfigs. If you correctly typed the params of actions, selectors,mutators and the initial state, the type of this params should be auto inferred, so you won't need to type them as long as you are only using the actions, selectors etc that you created in this trait, if you need to use action, select , etc of other traits , then you will need to get types or interfaces for your trait,action, selectors etc , here is a way to do it
 
 ```typescript
- const actions = (actionsGroupKey: string) => ({
+ const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
     loadPerson: createAction(
       `${actionsGroupKey} Load Person`,
       props<{ id: string }>(),
@@ -217,7 +225,8 @@ return createTraitFactory({
    actions,
    // ...
   //notice the allActions types
-   reducer: (initialState, allActions: LoadPersonActions & LoadEntitiesActions<Person>) =>
+   reducer: ({ initialState, allActions: actions }) => {
+   const allActions = actions as LoadPersonActions & LoadEntitiesActions<Person>; 
    createReducer(
       initialState,
       on(allActions.loadPersonSuccess, (state, { person }) => ({
@@ -230,7 +239,7 @@ As with other variables , the reducers of each trait get merge into one function
 ####effect
 
 ```typescript
-effects: (allActions, allSelectors, allConfigs) => {
+effects: ({ allActions, allSelectors, allConfigs }) => {
   @Injectable()
   class LoadPersonEffect extends TraitEffect {
     loadPerson$ = createEffect(() => {
@@ -248,7 +257,7 @@ effects: (allActions, allSelectors, allConfigs) => {
 ```
 
 The effects is again normal effects code you are used to, just be sure to use the actions and selectors of allActions an allSelectors param, and as before if you only need your custom traits actions and selectors avoid the type, so they get auto inferred , but if you need other traits actions and selectors you will need to type them like we did in the previous reducer example. There is one more important thing about the effects class it needs to extend TraitFactory, this is needed for the trait to work as local store, plus it adds the actions$ and store variables, so you don't need to declare them in your effect with a constructor to inject them.
-As before effects of each trait get merged , then that is mixed with the rest of merge of the other factories and becomes he return value of the createEntityFeatureFactory.
+As before effects of each trait get merged , then that is mixed with the rest of merge of the other factories and becomes the return value of the createEntityFeatureFactory.
 
 #### Interact with other traits
 
@@ -256,7 +265,7 @@ In the previous case we have shown that you can use actions and selectors of oth
 
 ```typescript
 //... inside addLoadPerson
-const actions = (actionsGroupKey: string) => ({
+const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
   loadPerson: createAction(
     `${actionsGroupKey} Load Person`,
     props<{ id: string }>(),
@@ -275,7 +284,8 @@ return createTraitFactory({
   actions,
   // ...
   //notice the allActions types we added SingleSelectionActions
-  effects: (allActions: LoadPersonActions & SingleSelectionActions, allSelectors, allConfigs) => {
+  effects: ({ allActions: actions, allSelectors, allConfigs }) => {
+    const allActions = actions as LoadPersonActions & SingleSelectionActions;
     @Injectable()
     class LoadPersonEffect extends TraitEffect {
       loadPerson$ = createEffect(() => {
@@ -308,7 +318,7 @@ In this case we added `SingleSelectionActions` and the effect loadPersonOnSelect
 #### Combining with other traits
 
 In the previous section we show how to interact with another trait that may or may not be present, but what happen if you need another trait always, to the point that you think that other trait should be added also if your custom trait is added.
-Let's again go to an example which should make this easier to understand, there is a bit of boilerplate in our addLoadPerson trait, for once the actions we created are the typical 3 actions you do when you call a backend, there is a trait that does that for us the addAsyncAction, not only it creates the traits it also creates the selectors like isLoading to track the progress of the call, it will be better if we use that trait instead of writing again that code, then there is also the logic to store the result of action, and a selector to read that stored result in this case the selectPerson, well there is a trait that does all that as well called loadEntity, and in reality if we use loadEntity we only need to do the effect that loads the person because loadEntity, similarly to what we will do now, already adds addAsyncAction, lets see the example:
+Let's again go to an example which should make this easier to understand, there is a bit of boilerplate in our addLoadPerson trait, like the actions we created are the typical 3 actions you do when you call a backend, there is a trait that does that for us the addAsyncAction, not only it creates the traits it also creates the selectors like isLoading to track the progress of the call, it will be better if we use that trait instead of writing again that code, then there is also the logic to store the result of action, and a selector to read that stored result in this case the selectPerson, well there is a trait that does all that as well called loadEntity, and in reality if we use loadEntity we only need to do the effect that loads the person because loadEntity, similarly to what we will do now, already adds addAsyncAction, lets see the example:
 
 ```ts
 export function addLoadPerson() {
@@ -325,7 +335,8 @@ export function addLoadPerson() {
     ...traits, // loadEntity is an array of traits so needs to be spread
     createTraitFactory({
       key: 'loadPersonEffect',
-      effects: (allActions: LoadClientActions) => {
+      effects: ({allActions: actions}) => {
+        const allActions = actions as LoadPersonActions;
         @Injectable()
         class LoadPersonEffect extends TraitEffect {
           loadPerson$ = createEffect(() => {
