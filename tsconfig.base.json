@@ -17,7 +17,8 @@
     "paths": {
       "ngrx-traits": ["libs/ngrx-traits/src/lib/index.ts"],
       "ngrx-traits/traits": ["libs/ngrx-traits/traits/src/index.ts"],
-      "@ngrx-traits/ngrx-traits": ["libs/ngrx-traits/src/index.ts"]
+      "@ngrx-traits/ngrx-traits": ["libs/ngrx-traits/src/index.ts"],
+      "ngrx-traits/testing": ["libs/ngrx-traits/testing/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
