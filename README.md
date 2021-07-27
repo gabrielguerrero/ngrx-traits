@@ -174,7 +174,12 @@ A simple product list is now ready and loaded.
 To keep this intro brief it's not intended to show much of the internals of the presentational components that are being used (can be found on the example folder).
 <!-- Add link to example folder  -->
 
-For the selection we need to add addSingleSelection trait, we will also need to add the SingleSelectionState to our ProductState, notice generally each trait has a [TraitName]State,( it also has[TraitName]Actions and [TraitName]Selectors, but those you only need for custom traits) in this case we add SingleSelectionState like:
+In order for the selection to work:
+  * add the addSingleSelection trait
+  * add the SingleSelectionState to our ProductState
+
+Notice that, generally each trait has a [TraitName]State, (also has [TraitName]Actions and [TraitName]Selectors, but those are only needed for custom traits).
+In this case the SingleSelectionState is added like:
 
 ```ts
 export interface ProductsState
@@ -182,7 +187,7 @@ export interface ProductsState
     SingleSelectionState {}
 ```
 
-Now we add the addSingleSelection trait:
+Following, add the addSingleSelection trait:
 ####products.traits.ts
 
 ```ts
@@ -196,7 +201,8 @@ export const productTraits = createEntityFeatureFactory(
 });
 ```
 
-This gives us a new select action and a selectEntitySelected selector, now we need to change our container component to use the new select action, again to see the details of the presentation components see the examples,for this we will assume you added a select output prop to your list component called on the click of the row, our container will now look like:
+The result is a new select action and a selectEntitySelected selector. Next step is to change the container component to use the new select action, (<!-- What about something like you can compose them in any way you choose  -->) 
+For this example, it is assumed that a select output is added as a prop of the list component called on the click of the row, the container will now look like:
 ####product-page.component.ts
 
 ```ts
@@ -237,7 +243,7 @@ export class ProductPageContainerComponent implements OnInit {
 </ng-container>
 ```
 
-Now let's add a checkout button, for that we can use the addAsyncAction, which again can save us some boilerplate lets first configure it, and then we see what it generates, let start by adding AsyncActionState<'checkout'> to our ProductState, like:
+Next step will be to add a checkout button, for that we can use the addAsyncAction, which again can save some boilerplate. In order to configure it, start by adding AsyncActionState<'checkout'> to our ProductState, like:
 
 ```ts
 export interface ProductsState
@@ -246,7 +252,7 @@ export interface ProductsState
     AsyncActionState<'checkout'> {}
 ```
 
-And now the addAsyncTrait
+And next the addAsyncTrait
 ####products.traits.ts
 
 ```ts
@@ -264,7 +270,10 @@ export const productTraits = createEntityFeatureFactory(
 });
 ```
 
-Now when you check the productTraits.actions you will notice `checkout()`, `checkoutSuccess({orderId:string})` and `checkoutFail()`, and in the selectors you will see `isLoadingCheckout()`, `isSuccessCheckout()` and `isFailCheckout()`, this the typical, 3 actions and 3 selectors you need to do a backend call, for more details check the docs of the addAsyncAction trait, now we just need to use them in an effect and in out container like:
+Checking the productTraits.actions, `checkout()`, `checkoutSuccess({orderId:string})` and `checkoutFail()` are now present, and in the selectors  `isLoadingCheckout()`, `isSuccessCheckout()` and `isFailCheckout()` can be foind. These are the typical 3 actions and 3 selectors that are needed to do a backend call, for more details check the docs of the addAsyncAction trait. (<!-- Paste link to addAsyncTrait  -->)
+
+Next, use them in an effect and in the container component:
+
 
 ####products.effects.ts
 
@@ -285,7 +294,7 @@ checkout$ = createEffect(() =>
 );
 ```
 
-And we add the button to our component like:
+And add the button to the component:
 ####product-page.component.ts
 
 ```ts
@@ -348,7 +357,8 @@ export class ProductPageContainerComponent implements OnInit {
 </ng-container>
 ```
 
-Now lets say your PO asks you to add a filter section at the top to search by name or description, and sorting of the results. Let's do first the filtering by creating an interface that represents that filter form
+The next requirement in this context could be to add a filter section at the top to search by name or description, and sort the results. 
+To start with the filters, create an interface that represents that filter form
 
 ```ts
 export interface ProductFilter {
@@ -356,7 +366,7 @@ export interface ProductFilter {
 }
 ```
 
-Now we will also need to add the FilterState interface to our ProductState
+Add the FilterState interface to the ProductState
 
 ```ts
 export interface ProductsState
@@ -390,9 +400,10 @@ export const productTraits = createEntityFeatureFactory(
 });
 ```
 
-This gives us a new `filter` action and a `selectFilter` selector, for local filtering we just need the action, the selector we will later use in a remote filtering case.
+This includes a new `filter` action and a `selectFilter` selector.
 
-Now we need to change our container component to use the new filter action, for that you will implement a presentational component for the filter section that has and input box for the search, the changes of that field will be piped to the output prop called search, this changes our container to look like:
+Next, change the container component to use the new filter action. 
+Implement a presentational component for the filter section that has and input box for the search. The changes of that field will be piped to the output prop called search, this changes the container to look like:
 
 ####product-page.component.ts
 
@@ -453,9 +464,9 @@ export class ProductPageContainerComponent implements OnInit {
 </ng-container>
 ```
 
-One great benefit of using the filter trait is that it already contains debouncing and distinct until change, which means you won't need to implement it in your form component making it easier to test, and saving you some code.
+One great benefit of using the filter trait is that it already contains debouncing and distinct until change, meaning that, there is no need to implement it in the form component, making it easier to test and saving you some code.
 
-Now let's add sorting, first we add the SortState interface to our product state like:
+Next stop, sorting. First, add the SortState interface to the product state like:
 
 ```ts
 export interface ProductsState
@@ -464,7 +475,7 @@ export interface ProductsState
     SortState<Product> {}
 ```
 
-Then we add our trait:
+Then, add to trait:
 ####products.traits.ts
 
 ```ts
@@ -488,8 +499,8 @@ export const productTraits = createEntityFeatureFactory(
 });
 ```
 
-That's it, you how have added the `sort` action and the `selectSort` selector, we just need to use it. By default, it does local sorting, but we can do remote as well, but for now we stick with local.
-Lets add it to the component
+That's it,  the `sort` action and the `selectSort` selector have been added, you just to use it. By default, it does local sorting (remote sorting can also be done, but for simplicity we choose local)
+Next, add it to the component
 
 ####product-page.component.ts
 
