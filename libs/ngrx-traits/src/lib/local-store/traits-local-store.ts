@@ -3,6 +3,7 @@ import { FeatureFactory } from '../model';
 import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
 import { EffectSources } from '@ngrx/effects';
 import { getDestroyActionName, TraitEffect } from '../trait-effect';
+import { DISABLE_LOCAL_TRAIT_EFFECTS } from './disable-local-trait-effects.token';
 
 let id = 0;
 function uniqueComponentId() {
@@ -38,21 +39,27 @@ export function buildLocalTraits<
     providers.push({ provide: fetchEffect });
   }
 
-  const i = Injector.create({
-    providers: providers,
-    parent: injector,
-  });
+  const disableLocalTraitsEffects = injector.get(
+    DISABLE_LOCAL_TRAIT_EFFECTS,
+    false
+  );
+  if (!disableLocalTraitsEffects) {
+    const i = Injector.create({
+      providers: providers,
+      parent: injector,
+    });
 
-  traits.effects?.forEach((e) => {
-    const effect = i.get(e) as TraitEffect;
-    effect.componentId = componentId;
-    effects.addEffects(effect);
-  });
+    traits.effects?.forEach((e) => {
+      const effect = i.get(e) as TraitEffect;
+      effect.componentId = componentId;
+      effects.addEffects(effect);
+    });
 
-  if (fetchEffectFactory) {
-    const effect = i.get(fetchEffect) as TraitEffect;
-    effect.componentId = componentId;
-    effects.addEffects(effect);
+    if (fetchEffectFactory) {
+      const effect = i.get(fetchEffect) as TraitEffect;
+      effect.componentId = componentId;
+      effects.addEffects(effect);
+    }
   }
 
   function destroy() {
@@ -92,7 +99,9 @@ export interface LocalTraitsConfig<F extends FeatureFactory> {
 }
 
 @Injectable()
-export abstract class TraitsLocalStore<F extends FeatureFactory> implements OnDestroy{
+export abstract class TraitsLocalStore<F extends FeatureFactory>
+  implements OnDestroy
+{
   traits: ReturnType<F> & { destroy: () => void };
 
   actions: ReturnType<F>['actions'];
