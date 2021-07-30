@@ -83,6 +83,7 @@ describe('addLoadEntities Trait', () => {
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
     });
+
     const state = traits.reducer(
       traits.initialState,
       traits.actions.fetchSuccess({ entities: data })
