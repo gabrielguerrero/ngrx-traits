@@ -29,9 +29,21 @@ export interface FilterActionOverload<F> {
 }
 
 export type FilterActions<F> = {
+  /**
+   * Store the filters param (read using selectFilter) and fires the fetch action
+   * if the filters param has changed, this call is also debounce by default, to disable this
+   * behavior you can use the forceLoad param as true or defaultDebounceTime to 0 in the trait config
+   * to disable permanently.
+   * If the `patch` param is set to true (default is false), the filters are merged with the previous value in the store,
+   * otherwise they are replaced.
+   */
   filter: ActionCreator<string, FilterActionOverload<F>>;
 };
 export type FilterSelectors<T, F> = {
+  /**
+   * Returns the stored filters set by the filter action
+   * @param state
+   */
   selectFilter: (state: EntityAndFilterState<T, F>) => F | undefined;
 };
 
