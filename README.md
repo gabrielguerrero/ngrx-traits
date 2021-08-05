@@ -85,8 +85,8 @@ It is advised to export the actions and selectors in the traits file, so we can 
 
 ```ts
 // in products.traits.ts
-export const ProductActions = traits.actions;
-export const ProductSelectors = traits.selectors;
+export const ProductActions = productTraits.actions;
+export const ProductSelectors = productTraits.selectors;
 ```
 
 Now we create our effect that call the backend and populates our state :
@@ -368,6 +368,8 @@ Add the FilterState interface to the ProductState
 ```ts
 export interface ProductsState
   extends EntityAndStatusState<Product>,
+    SingleSelectionState,
+    AsyncActionState<'checkout'>,
     FilterState<ProductFilter> {}
 ```
 
@@ -446,8 +448,8 @@ export class ProductPageContainerComponent implements OnInit {
     <!-- new search event ↓ -->
     <products-search-form (search)="filter($event)"></products-search-form>
     <product-list
-      [data]="data.products"
-      (select)="select($event)"
+      [list]="data.products"
+      (selectProduct)="select($event)"
     ></product-list>
   </ng-template>
   <button
@@ -468,6 +470,8 @@ Next stop, sorting. First, add the SortState interface to the product state like
 ```ts
 export interface ProductsState
   extends EntityAndStatusState<Product>,
+    SingleSelectionState,
+    AsyncActionState<'checkout'>,
     FilterState<ProductFilter>,
     SortState<Product> {}
 ```
@@ -547,7 +551,7 @@ export class ProductPageContainerComponent implements OnInit {
     <products-search-form (search)="filter($event)"></products-search-form>
     <!-- new sort event ↓ -->
     <product-list
-      [data]="data.products"
+      [list]="data.products"
       (select)="select($event)"
       (sort)="sort($event)"
     ></product-list>
@@ -722,9 +726,9 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.fetch), // on fetch
       concatLatestFrom(() => [
-        this.store.select(ProductSelectors.selectFilters),
+        this.store.select(ProductSelectors.selectFilter),
         this.store.select(ProductSelectors.selectSort),
-        // get pagination details for the requesr ↓
+        // get pagination details for the request ↓
         this.store.select(ProductSelectors.selectPagedRequest),
       ]),
       switchMap(([_, filters, sort, pagination]) =>
@@ -733,7 +737,7 @@ export class ProductsEffects {
           .getProducts({
             search: filters.search,
             sortColumn: sort.active,
-            sortAcsending: sort.direction === 'asc',
+            sortAscending: sort.direction === 'asc',
             skip: pagination.startIndex,
             take: pagination.size,
           })
