@@ -32,7 +32,7 @@ export type LoadEntitiesActions<T> = {
    */
   fetchFail: ActionCreator<
     string,
-    (props: { error?: string }) => { error?: string } & TypedAction<string>
+    (props?: { error?: string }) => { error?: string } & TypedAction<string>
   >;
 };
 

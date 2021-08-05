@@ -12,7 +12,7 @@ export function createLoadEntitiesTraitActions<Entity>(
     ),
     fetchFail: createAction(
       `${actionsGroupKey} Fetch Entities Fail`,
-      props<{ error?: string }>()
+      (props?:{ error?: string })=> ({error: props?.error})
     ),
   };
 

@@ -21,7 +21,7 @@
               "apps/example-app/src/favicon.ico",
               "apps/example-app/src/assets"
             ],
-            "styles": ["apps/example-app/src/styles.scss"],
+            "styles": ["./node_modules/@angular/material/prebuilt-themes/indigo-pink.css", "apps/example-app/src/styles.scss"],
             "scripts": []
           },
           "configurations": {
@@ -190,6 +190,19 @@
     },
     "@nrwl/angular:component": {
       "style": "scss"
+    },
+    "@schematics/angular": {
+      "component": {
+        "inlineStyle": true,
+        "inlineTemplate": true,
+        "changeDetection": "OnPush"
+      }
+    },
+    "@ngneat/spectator:spectator-component": {
+      "jest": true,
+      "inlineStyle": true,
+      "inlineTemplate": true,
+      "changeDetection": "OnPush"
     }
   },
   "defaultProject": "example-app"
