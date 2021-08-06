@@ -23,8 +23,8 @@ export class ProductsEffects {
         this.productService
           .getProducts({
             search: filters?.search,
-            sortColumn: sort?.active,
-            sortAscending: sort?.direction === 'asc',
+            sortColumn: sort.active,
+            sortAscending: sort.direction === 'asc',
             skip: pagination.startIndex,
             take: pagination.size,
           })

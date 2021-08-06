@@ -13,7 +13,7 @@ export interface Sort<T> {
 }
 
 export interface SortState<T> {
-  sort?: {
+  sort: {
     current: Sort<T>;
     default: Sort<T>;
   };
@@ -31,7 +31,7 @@ export type SortActions<T> = {
 };
 
 export type SortSelectors<T> = {
-  selectSort: (state: EntityAndSortState<T>) => Sort<T> | undefined;
+  selectSort: (state: EntityAndSortState<T>) => Sort<T>;
 };
 
 export type SortMutators<T> = {
@@ -44,7 +44,7 @@ export type SortMutators<T> = {
 export const sortTraitKey = 'sort';
 
 export interface SortConfig<T> {
-  defaultSort?: Sort<T>;
+  defaultSort: Sort<T>;
   remote?: boolean;
 }
 

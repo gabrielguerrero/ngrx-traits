@@ -23,7 +23,7 @@ import { PageEvent } from '@angular/material/paginator';
           <product-list
             [list]="data.products.entities"
             [selectedId]="data.selectedProduct?.id"
-            [selectedSort]="data.selectedSort!"
+            [selectedSort]="data.selectedSort"
             (selectProduct)="select($event)"
             (sort)="sort($event)"
           ></product-list>

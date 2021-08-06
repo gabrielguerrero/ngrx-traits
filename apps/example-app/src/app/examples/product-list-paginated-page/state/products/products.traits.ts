@@ -33,7 +33,13 @@ export const productTraits = createEntityFeatureFactory(
   }),
   addPagination<Product>(),
   addFilter<Product, ProductFilter>(),
-  addSort<Product>({ remote: true })
+  addSort<Product>({
+    remote: true,
+    defaultSort: {
+      direction: 'asc',
+      active: 'name',
+    },
+  })
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products-paginated'),

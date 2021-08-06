@@ -31,7 +31,7 @@ export class ProductService {
         direction: options.sortAscending ? 'asc' : 'desc',
       });
     }
-    return of(result).pipe(delay(1000));
+    return of(result).pipe(delay(500));
   }
 }
 
