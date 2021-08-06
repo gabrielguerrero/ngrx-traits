@@ -33,7 +33,9 @@ export const productTraits = createEntityFeatureFactory(
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
-  addSort<Product>()
+  addSort<Product>({
+    defaultSort: { direction: 'asc', active: 'name' },
+  })
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),

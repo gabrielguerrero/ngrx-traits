@@ -21,7 +21,8 @@ describe('addSort trait', () => {
 
   interface TestState
     extends EntityAndStatusState<Todo>,
-      SingleSelectionState {}
+      SingleSelectionState,
+      SortState<Todo> {}
 
   interface TestState2
     extends EntityAndStatusState<Todo>,
@@ -49,7 +50,10 @@ describe('addSort trait', () => {
   function init({ remoteSort = false } = {}) {
     const traits = createEntityFeatureFactory(
       addLoadEntities<Todo>(),
-      addSort<Todo>({ defaultSort: undefined, remote: remoteSort })
+      addSort<Todo>({
+        defaultSort: { active: 'id', direction: 'asc' },
+        remote: remoteSort,
+      })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -111,7 +115,10 @@ describe('addSort trait', () => {
   describe('selectors', () => {
     it('selectSort should return selected sort ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectSort.projector(state)).toBeFalsy();
+      expect(selectors.selectSort.projector(state)).toEqual({
+        active: 'id',
+        direction: 'asc',
+      });
       expect(
         selectors.selectSort.projector({
           ...state,
@@ -157,7 +164,10 @@ describe('addSort trait', () => {
       let result = reducer(
         {
           ...state,
-          sort: { default: { direction: 'desc', active: 'id' }, current: { active: 'content', direction: 'asc' } },
+          sort: {
+            default: { direction: 'desc', active: 'id' },
+            current: { active: 'content', direction: 'asc' },
+          },
         },
         actions.sort({ direction: 'asc', active: 'id' })
       );

@@ -33,7 +33,7 @@ import {
 export function addSort<Entity>({
   remote = false,
   defaultSort,
-}: SortConfig<Entity> = {}) {
+}: SortConfig<Entity>) {
   return createTraitFactory({
     key: sortTraitKey,
     depends: [loadEntitiesTraitKey],
