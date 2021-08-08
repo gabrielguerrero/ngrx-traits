@@ -7,39 +7,50 @@ meaning the effects, reducers and state are created and later destroyed when a c
 To use it first you need a trait factory like the following, (it can have any combination of traits)
 
 ```typescript
-const traitsFactory = createEntityFeatureFactory(
-  addLoadEntities<Practice>(),
-  addFilter<Practice, PracticeFilter>()
+const productTraits = createEntityFeatureFactory(
+  addLoadEntities<Product>(),
+  addSingleSelection<Product>(),
+  addFilter<Product, ProductFilter>({
+    filterFn: (filter, entity) => {
+      return entity.name.toLowerCase().includes(filter.search.toLowerCase());
+    },
+  }),
+  addSort<Product>({
+    defaultSort: { direction: 'asc', active: 'name' },
+  })
 );
 ```
 
 The next step is optional, if the state of your component needs to be instantiated from a backend call or needs any sort of side effects you can add an extra effect a follows:
 
 ```typescript
-const practiceEffect: TraitLocalEffectsFactory<typeof traitsFactory> = (
+const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
   allActions
 ) => {
   @Injectable()
-  class PracticesLocalEffects extends TraitEffect {
-    loadPractices$ = createEffect(() =>
+  class ProductsEffects extends TraitEffect {
+    loadProducts$ = createEffect(() =>
       this.actions$.pipe(
         ofType(allActions.fetch),
-        send(EventHubLookupMessages.getPracticesLookupList()),
-        exhaustMapToResponse(
-          EventHubLookupMessages.getPracticesLookupListResponse
-        ),
-        map(({ data }) =>
-          allActions.fetchSuccess({
-            entities: data.map((p) => ({
-              id: p.id,
-              name: p.name,
-            })),
-          })
+        switchMap(() =>
+          //call your service to get the products data
+          this.productService.getProducts().pipe(
+            map((products) => allActions.fetchSuccess({ entities: products })),
+            catchError(() => of(allActions.fetchFail()))
+          )
         )
       )
     );
+
+    constructor(
+      actions$: Actions,
+      store: Store,
+      private productService: ProductService
+    ) {
+      super(actions$, store);
+    }
   }
-  return PracticesLocalEffects;
+  return ProductsEffects;
 };
 ```
 
@@ -52,14 +63,14 @@ The next step is to create a service that will be use in your component, it need
 
 ```typescript
 @Injectable()
-export class PracticesLocalTraits extends TraitsLocalStore<
-  typeof traitsFactory
-> {
-  setup(): LocalTraitsConfig<typeof traitsFactory> {
+export class ProductsLocalTraits extends TraitsLocalStore<
+  typeof productTraits
+  > {
+  setup(): LocalTraitsConfig<typeof productTraits> {
     return {
-      componentName: 'PracticesDropdownComponent',
-      traitsFactory: traitsFactory,
-      effectFactory: practiceEffect,
+      componentName: 'ProductsPickerComponent',
+      traitsFactory: productTraits,
+      effectFactory: productsEffect,
     };
   }
 }
@@ -67,60 +78,49 @@ export class PracticesLocalTraits extends TraitsLocalStore<
 
 The **effectFactory** param in the setup method is optional. By extending **TraitsLocalStore** you get an _actions_ and _selectors_ properties in the service with all the actions and selectors you set up in your trait factory.
 
-Now we are ready to use the service in our component, basically just need to add the service we just created in the providers property of the _@Component_ like `providers: [PracticesLocalTraits],` and declare the service in the constructor of your component, after that you use like you will use normal actions and selectors for example:
+Now we are ready to use the service in our component, basically just need to add the service we just created in the providers property of the _@Component_ like `providers: [ProductsLocalTraits],` and declare the service in the constructor of your component, after that you use like you will use normal actions and selectors for example:
 
 ```typescript
 .
 .
 .
-  providers: [PracticesLocalTraits], //<- Our local store service
+  providers: [ProductsLocalTraits], //<- Our local store service
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PracticesDropdownComponent
-  extends ControlValueAccessorBase<FormControl>
-  implements OnInit {
-  @Input() label: string;
-  @Input() placeholder = 'Please Select';
-  @Input() allowAll = false;
-  @Input() allValue = '';
-
+export class ProductSelectDialogComponent implements OnInit {
   data$ = combineLatest([
     //using local traits selectors
     this.store.select(this.localTraits.selectors.selectAll),
     this.store.select(this.localTraits.selectors.isLoading),
-    this.control.disabled$,
-    // you can mix it with normal selectors
-    this.store.select(PracticesSelectors.selectDefaultPracticeId),
+    this.store.select(this.localTraits.selectors.selectEntitySelected),
+    // you could mix it with normal selectors
+    // this.store.select(UserSelectors.selectCurrentUser),
   ]).pipe(
-    tap(([practices, isLoading, disabled, defaultPracticeId]) => {
-      if (!isLoading && !this.control.value) {
-        const defaultValue = this.allowAll ? this.allValue : defaultPracticeId;
-        this.control.patchValue(defaultValue);
-      }
-    }),
-    map(([practices, isLoading, disabled]) => ({
-      practices,
-      disabled: isLoading || disabled,
+    map(([products, isLoading, selectedProduct]) => ({
+      products,
       isLoading,
-    })),
+      selectedProduct,
+    }))
   );
 
-  constructor(
-    private store: Store,
-    injector: Injector,
-    private localTraits: PracticesLocalTraits, // inject our service
-  ) {
-    super(injector);
-  }
-
-  buildControl(): FormControl {
-    return new FormControl<string>();
-  }
+  constructor(private store: Store,
+              private localTraits: ProductsLocalTraits // inject our service
+  ) {}
 
   ngOnInit() {
-    super.ngOnInit();
-    // firing a local trait action
-    this.store.dispatch(this.localTraits.actions.filter());
+    // firing a local trait action like a normal action
+    this.store.dispatch(this.localTraits.actions.fetch());
+  }
+
+  select(id: string) {
+    this.store.dispatch(this.localTraits.actions.select({ id }));
+  }
+
+  filter(filters: ProductFilter) {
+    this.store.dispatch(this.localTraits.actions.filter({ filters }));
+  }
+  sort(sort: Sort<Product>) {
+    this.store.dispatch(this.localTraits.actions.sort(sort));
   }
 }
 ```
@@ -129,16 +129,16 @@ Extending **TraitsLocalStore** allows you to only get one set of traits this nor
 
 ```typescript
 @Injectable()
-export class PracticesLocalTraits implements OnDestroy {
+export class ProductsLocalTraits implements OnDestroy {
   traits1 = buildLocalTraits(
     this.injector,
-    'PracticesDropdownComponent',
+    'ProductsDropdownComponent',
     traitsFactory1,
     practiceEffect1
   );
   traits2 = buildLocalTraits(
     this.injector,
-    'PracticesDropdownComponent',
+    'ProductsDropdownComponent',
     traitsFactory2,
     practiceEffect2
   );

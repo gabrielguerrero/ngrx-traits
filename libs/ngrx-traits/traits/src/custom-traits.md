@@ -5,61 +5,65 @@ To create a custom trait you will need to use createTraitFactory like in the fol
 ```typescript
 import { TraitActionsFactoryConfig, TraitInitialStateFactoryConfig } from 'ngrx-traits';
 
-interface Person {
+interface Product {
   id: string;
   name: string;
+  description: string;
+  maker: string;
+  price: number;
+  releaseDate: string;
 }
 
-interface SelectedPersonState {
-  selectedPerson: Person;
+interface SelectedProductState {
+  selectedProduct: Product;
 }
 
-export function addLoadPerson() {
-  const initialState: SelectedPersonState = { selectedPerson: null };
+export function addLoadProduct() {
+  const initialState: SelectedProductState = { selectedProduct: null };
 
   return createTraitFactory({
-    key: 'loadPerson',
+    key: 'loadProduct',
     depends: [],
     config: {},
     actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
-      loadPerson: createAction(
-        `${actionsGroupKey} Load Person`,
+      loadProduct: createAction(
+        `${actionsGroupKey} Load Product`,
         props<{ id: string }>()
       ),
-      loadPersonSuccess: createAction(
-        `${actionsGroupKey} Load Person Success`,
-        props<{ person: Person }>()
+      loadProductSuccess: createAction(
+        `${actionsGroupKey} Load Product Success`,
+        props<{ product: Product }>()
       ),
-      loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+      loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
     }),
     selectors: () => ({
-      selectPerson: (state: SelectedPersonState) => state.selectedPerson,
+      selectProduct: (state: SelectedProductState) => state.selectedProduct,
     }),
     initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>
-      (previousInitialState ?? {}) as SelectedPersonState,
+      (previousInitialState ?? {}) as SelectedProductState,
     reducer: (initialState, allActions, allSelectors) =>
       createReducer(
         initialState,
-        on(allActions.loadPersonSuccess, (state, { person }) => ({
+        on(allActions.loadProductSuccess, (state, { product }) => ({
           ...state,
-          selectedPerson: person,
+          selectedProduct: product,
         }))
       ),
     effects: (allActions, allSelectors, allConfigs) => {
       @Injectable()
-      class LoadPersonEffect extends TraitEffect {
-        loadPerson$ = createEffect(() => {
+      class LoadProductEffect extends TraitEffect {
+        loadProduct$ = createEffect(() => {
           return this.actions$.pipe(
-            ofType(allActions.loadPerson),
+            ofType(allActions.loadProduct),
             // call backend...
             map(({ id }) =>
-              allActions.loadPersonSuccess({ person: { id, name: 'sss' } })
+              allActions.loadProductSuccess({ product: { id, name: 'sss' } })
             )
           );
         });
       }
 
-      return [LoadPersonEffect];
+      return [LoadProductEffect];
     },
   });
 }
@@ -67,12 +71,12 @@ export function addLoadPerson() {
 
 The code should look very familiar is essentially normal ngrx code but wrap in functions, there are two ways to implement the trait you either inline the function like shown above or move the functions to separate file, there are pro and cons of each approach, but essentially inline way is better for simple traits, if the trait code start becoming to big is better to split it, the inline way has the benefit that you won't need to create interfaces for the config, actions, selectors and mutators, because there are infer by TS, the typing here is very important because is what allows the merging of the traits work, there are some cases that you will be force to do the interfaces like if you need generics or you need to reference other traits actions, selectors,..etc.
 
-Lets look at each part of the code:
+Let's look at each part of the code:
 
 #### Key and depends:
 
 ```typescript
-  key: 'loadPerson',
+  key: 'loadProduct',
   depends:[]
 ```
 
@@ -92,15 +96,15 @@ After the traits are sorted all the configs are set in map that uses as keys the
 ```typescript
 
 actions: ({ actionsGroupKey, allConfigs }: TraitActionsFactoryConfig) => ({
-  loadPerson: createAction(
-    `${actionsGroupKey} Load Person`,
+  loadProduct: createAction(
+    `${actionsGroupKey} Load Product`,
     props<{ id: string }>(),
   ),
-  loadPersonSuccess: createAction(
-    `${actionsGroupKey} Load Person Success`,
-    props<{ person: Person }>(),
+  loadProductSuccess: createAction(
+    `${actionsGroupKey} Load Product Success`,
+    props<{ product: Product }>(),
   ),
-  loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+  loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 })
 ```
 
@@ -116,18 +120,18 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 >
 > ```typescript
 > const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
->    loadPerson: createAction(
->    `${actionsGroupKey} Load Person`,
+>    loadProduct: createAction(
+>    `${actionsGroupKey} Load Product`,
 >    props<{ id: string }>(),
 >    ),
->    loadPersonSuccess: createAction(
->    `${actionsGroupKey} Load Person Success`,
->    props<{ person: Person }>(),
+>    loadProductSuccess: createAction(
+>    `${actionsGroupKey} Load Product Success`,
+>    props<{ product: Product }>(),
 >    ),
->    loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+>    loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 > });
 > return createTraitFactory({
->    key: 'loadPerson',
+>    key: 'loadProduct',
 >    depends: [],
 >    actions,//<--- function moved to a variable
 >    selectors: () => ({
@@ -137,28 +141,28 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 >
 > ```typescript
 >  const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
->     loadPerson: createAction(
->       `${actionsGroupKey} Load Person`,
+>     loadProduct: createAction(
+>       `${actionsGroupKey} Load Product`,
 >       props<{ id: string }>(),
 >     ),
->     loadPersonSuccess: createAction(
->       `${actionsGroupKey} Load Person Success`,
->       props<{ person: Person }>(),
+>     loadProductSuccess: createAction(
+>       `${actionsGroupKey} Load Product Success`,
+>       props<{ product: Product }>(),
 >     ),
->     loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+>     loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 > });
 > // now extract the actions types
-> type LoadPersonActions = ReturnType<typeof actions>
+> type LoadProductActions = ReturnType<typeof actions>
 >
 > return createTraitFactory({
->    key: 'loadPerson',
+>    key: 'loadProduct',
 >    actions,
 >    // ...
 >    reducer: ({ initialState, allActions: actions }) => {
->    const allActions = actions  as LoadPersonActions & LoadEntitiesActions<Person>;
+>    const allActions = actions  as LoadProductActions & LoadEntitiesActions<Product>;
 >    createReducer(
 >       initialState,
->       on(allActions.loadPersonSuccess, (state, { person }) => ({
+>       on(allActions.loadProductSuccess, (state, { product }) => ({
 >    // ...
 > ```
 >
@@ -169,7 +173,7 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 ```typescript
 
 selectors: ({ previousSelectors, allConfigs }: TraitSelectorsFactoryConfig) => ({
-  selectPerson: (state: SelectedPersonState) => state.selectedPerson,
+  selectProduct: (state: SelectedProductState) => state.selectedProduct,
 });
 ```
 
@@ -185,7 +189,7 @@ The mutators are just a set of functions that change the state, they are use ins
 
 ```typescript
 initialState: ({ previousInitialState, allConfigs }: TraitInitialStateFactoryConfig) =>
-  (previousInitialState ?? {}) as SelectedPersonState;
+  (previousInitialState ?? {}) as SelectedProductState;
 ```
 
 The initialState factory, also optional (only needed if you are implementing a reducer), this is the initial state that is pass to your reducer, the important parameter here is the previousInitialState, this param is null if this is the first trait, so if not null you need to merge it with your initial state. After the allMutators are built then we build the intialState for each traits , this merge intialState is what get pass to all reducers. In this function is important that you cast the return state to your state interface, this helps the type inference be pass along to your reducer and be properly mix with the other traits state interfaces.
@@ -193,12 +197,12 @@ The initialState factory, also optional (only needed if you are implementing a r
 ####reducer
 
 ```typescript
-  reducer: (initialState, allActions, allSelectors, allMutators, allConfigs) =>
+  reducer: ({initialState, allActions, allSelectors, allMutators, allConfigs}) =>
     createReducer(
       initialState,
-      on(allActions.loadPersonSuccess, (state, { person }) => ({
+      on(allActions.loadProductSuccess, (state, { product }) => ({
         ...state,
-        selectedPerson: person,
+        selectedProduct: product,
       })),
     ),
 ```
@@ -207,29 +211,29 @@ The reducer is normal ngrx reducer code, and the params should make sense if you
 
 ```typescript
  const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
-    loadPerson: createAction(
-      `${actionsGroupKey} Load Person`,
+    loadProduct: createAction(
+      `${actionsGroupKey} Load Product`,
       props<{ id: string }>(),
     ),
-    loadPersonSuccess: createAction(
-      `${actionsGroupKey} Load Person Success`,
-      props<{ person: Person }>(),
+    loadProductSuccess: createAction(
+      `${actionsGroupKey} Load Product Success`,
+      props<{ product: Product }>(),
     ),
-    loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+    loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 });
 // now extract the actions types
-type LoadPersonActions = ReturnType<typeof actions>
+type LoadProductActions = ReturnType<typeof actions>
 
 return createTraitFactory({
-   key: 'loadPerson',
+   key: 'loadProduct',
    actions,
    // ...
   //notice the allActions types
    reducer: ({ initialState, allActions: actions }) => {
-   const allActions = actions as LoadPersonActions & LoadEntitiesActions<Person>; 
+   const allActions = actions as LoadProductActions & LoadEntitiesActions<Product>; 
    createReducer(
       initialState,
-      on(allActions.loadPersonSuccess, (state, { person }) => ({
+      on(allActions.loadProductSuccess, (state, { product }) => ({
    // ...
 ```
 
@@ -241,18 +245,18 @@ As with other variables , the reducers of each trait get merge into one function
 ```typescript
 effects: ({ allActions, allSelectors, allConfigs }) => {
   @Injectable()
-  class LoadPersonEffect extends TraitEffect {
-    loadPerson$ = createEffect(() => {
+  class LoadProductEffect extends TraitEffect {
+    loadProduct$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadPerson),
+        ofType(allActions.loadProduct),
         // call backend...
         map(({ id }) =>
-          allActions.loadPersonSuccess({ person: { id, name: 'sss' } })
+          allActions.loadProductSuccess({ product: { id, name: 'sss' } })
         )
       );
     });
   }
-  return [LoadPersonEffect];
+  return [LoadProductEffect];
 };
 ```
 
@@ -261,114 +265,114 @@ As before effects of each trait get merged , then that is mixed with the rest of
 
 #### Interact with other traits
 
-In the previous case we have shown that you can use actions and selectors of other traits in your custom trait, for example to continue with addLoadPerson trait, which adds the basic logic to load a person, but let's say we wanted that if this trait is added to a list of persons where there is a single selection trait, we will like that when you select a person it automatically loads the details, to do that we will do:
+In the previous case we have shown that you can use actions and selectors of other traits in your custom trait, for example to continue with addLoadProduct trait, which adds the basic logic to load a product, but let's say we wanted that if this trait is added to a list of products where there is a single selection trait, we will like that when you select a product it automatically loads the details, to do that we will do:
 
 ```typescript
-//... inside addLoadPerson
+//... inside addLoadProduct
 const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
-  loadPerson: createAction(
-    `${actionsGroupKey} Load Person`,
+  loadProduct: createAction(
+    `${actionsGroupKey} Load Product`,
     props<{ id: string }>(),
   ),
-  loadPersonSuccess: createAction(
-    `${actionsGroupKey} Load Person Success`,
-    props<{ person: Person }>(),
+  loadProductSuccess: createAction(
+    `${actionsGroupKey} Load Product Success`,
+    props<{ product: Product }>(),
   ),
-  loadPersonFail: createAction(`${actionsGroupKey} Load Person Fail`),
+  loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 });
 // now extract the actions types
-type LoadPersonActions = ReturnType<typeof actions>
+type LoadProductActions = ReturnType<typeof actions>
 
 return createTraitFactory({
-  key: 'loadPerson',
+  key: 'loadProduct',
   actions,
   // ...
   //notice the allActions types we added SingleSelectionActions
   effects: ({ allActions: actions, allSelectors, allConfigs }) => {
-    const allActions = actions as LoadPersonActions & SingleSelectionActions;
+    const allActions = actions as LoadProductActions & SingleSelectionActions;
     @Injectable()
-    class LoadPersonEffect extends TraitEffect {
-      loadPerson$ = createEffect(() => {
+    class LoadProductEffect extends TraitEffect {
+      loadProduct$ = createEffect(() => {
         return this.actions$.pipe(
-          ofType(allActions.loadPerson),
+          ofType(allActions.loadProduct),
           // call backend...
           map(({id}) =>
-            allActions.loadPersonSuccess({person: {id, name: 'sss'}}),
+            allActions.loadProductSuccess({product: {id, name: 'sss'}}),
           ),
         );
       });
-      // if select action exist map to loadPerson when a select action happens
-      loadPersonOnSelect$ = allActions.select && createEffect(() => {
+      // if select action exist map to loadProduct when a select action happens
+      loadProductOnSelect$ = allActions.select && createEffect(() => {
           return this.actions$.pipe(
             ofType(allActions.select),
-            // map to loadPerson...
+            // map to loadProduct...
             map(({id}) =>
-              allActions.loadPerson({ id}),
+              allActions.loadProduct({ id}),
             ),
           );
       });
     }
 
-    return [LoadPersonEffect];
+    return [LoadProductEffect];
   }
 ```
 
-In this case we added `SingleSelectionActions` and the effect loadPersonOnSelect$ is only created if in allActions.select exist, that means that the addSingleSelection trait was added in the same trait config where our addLoadPerson was added, so if present it will also load the person details if one is selected on the list, but if its not present then the dev has to manually call loadPerson action to use it wherever he needs.
+In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.select exist, that means that the addSingleSelection trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
 
 #### Combining with other traits
 
 In the previous section we show how to interact with another trait that may or may not be present, but what happen if you need another trait always, to the point that you think that other trait should be added also if your custom trait is added.
-Let's again go to an example which should make this easier to understand, there is a bit of boilerplate in our addLoadPerson trait, like the actions we created are the typical 3 actions you do when you call a backend, there is a trait that does that for us the addAsyncAction, not only it creates the traits it also creates the selectors like isLoading to track the progress of the call, it will be better if we use that trait instead of writing again that code, then there is also the logic to store the result of action, and a selector to read that stored result in this case the selectPerson, well there is a trait that does all that as well called loadEntity, and in reality if we use loadEntity we only need to do the effect that loads the person because loadEntity, similarly to what we will do now, already adds addAsyncAction, lets see the example:
+Let's again go to an example which should make this easier to understand, there is a bit of boilerplate in our addLoadProduct trait, like the actions we created are the typical 3 actions you do when you call a backend, there is a trait that does that for us the addAsyncAction, not only it creates the traits it also creates the selectors like isLoading to track the progress of the call, it will be better if we use that trait instead of writing again that code, then there is also the logic to store the result of action, and a selector to read that stored result in this case the selectProduct, well there is a trait that does all that as well called loadEntity, and in reality if we use loadEntity we only need to do the effect that loads the product because loadEntity, similarly to what we will do now, already adds addAsyncAction, lets see the example:
 
 ```ts
-export function addLoadPerson() {
+export function addLoadProduct() {
   // notice how we use a trait
   const traits = addLoadEntity({
-    entityName: 'person',
+    entityName: 'product',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ clientDetails: ClientDetails }>(),
   });
 
-  type LoadPersonActions = ExtractActionsType<typeof traits>;
+  type LoadProductActions = ExtractActionsType<typeof traits>;
 
   return [
     ...traits, // loadEntity is an array of traits so needs to be spread
     createTraitFactory({
-      key: 'loadPersonEffect',
+      key: 'loadProductEffect',
       effects: ({allActions: actions}) => {
-        const allActions = actions as LoadPersonActions;
+        const allActions = actions as LoadProductActions;
         @Injectable()
-        class LoadPersonEffect extends TraitEffect {
-          loadPerson$ = createEffect(() => {
+        class LoadProductEffect extends TraitEffect {
+          loadProduct$ = createEffect(() => {
             return this.actions$.pipe(
-              ofType(allActions.loadPerson),
+              ofType(allActions.loadProduct),
               // call backend...
               map(({ id }) =>
-                allActions.loadPersonSuccess({ person: { id, name: 'sss' } })
+                allActions.loadProductSuccess({ product: { id, name: 'sss' } })
               )
             );
           });
         }
-        return [LoadPersonEffect];
+        return [LoadProductEffect];
       },
     }),
   ] as const; // important to add as const to keep the types working
 }
 ```
 
-Notice addLoadEntity returns an array of traits, so it needs to be spread when used, and the same you will need to do when you use addLoadPerson trait, if you needed more traits, you could have join then in an array like:
+Notice addLoadEntity returns an array of traits, so it needs to be spread when used, and the same you will need to do when you use addLoadProduct trait, if you needed more traits, you could have join then in an array like:
 
 ```ts
 const traits = [
-  addLoadEntities<Person>(),
-  addSingleSelection<Person>(),
+  addLoadEntities<Product>(),
+  addSingleSelection<Product>(),
   ...addLoadEntity({
-    entityName: 'person',
+    entityName: 'product',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ clientDetails: ClientDetails }>(),
   }),
 ];
-type PersonnelListActions = ExtractActionsType<typeof traits>;
+type ProductnelListActions = ExtractActionsType<typeof traits>;
 ```
 
-Also notice the `ExtractActionsType` that's a helper type that extracts the actions types of an array of traits (there is also `ExtractSelectorsType` and `ExtractStateType` if needed) which gives a type with all the actions defined in the traits.
+Also notice the `ExtractActionsType` that's a helper type that extracts and jonis the actions types of either a single trait or an array of traits (there is also `ExtractSelectorsType` and `ExtractStateType` if needed and work in the same way).

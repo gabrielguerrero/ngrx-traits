@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 
 import { RouterModule, Routes } from '@angular/router';
+import { ExamplesComponent } from './examples.component';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'product-list',
-    pathMatch: 'full',
+    component: ExamplesComponent,
   },
   {
     path: 'product-list',
@@ -19,6 +19,11 @@ const routes: Routes = [
       import('./product-list-paginated-page').then(
         (m) => m.ProductListPaginatedPageModule
       ),
+  },
+  {
+    path: 'product-picker',
+    loadChildren: () =>
+      import('./product-picker-page').then((m) => m.ProductPickerPageModule),
   },
   { path: '**', redirectTo: '/not-found' },
 ];
