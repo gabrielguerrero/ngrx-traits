@@ -5,17 +5,18 @@ To create a custom trait you will need to use createTraitFactory like in the fol
 ```typescript
 import { TraitActionsFactoryConfig, TraitInitialStateFactoryConfig } from 'ngrx-traits';
 
-interface Product {
+interface ProductDetail {
   id: string;
   name: string;
   description: string;
   maker: string;
   price: number;
   releaseDate: string;
+  image: string;
 }
 
 interface SelectedProductState {
-  selectedProduct: Product;
+  selectedProduct: ProductDetail;
 }
 
 export function addLoadProduct() {
@@ -32,7 +33,7 @@ export function addLoadProduct() {
       ),
       loadProductSuccess: createAction(
         `${actionsGroupKey} Load Product Success`,
-        props<{ product: Product }>()
+        props<{ product: ProductDetail }>()
       ),
       loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
     }),
@@ -102,7 +103,7 @@ actions: ({ actionsGroupKey, allConfigs }: TraitActionsFactoryConfig) => ({
   ),
   loadProductSuccess: createAction(
     `${actionsGroupKey} Load Product Success`,
-    props<{ product: Product }>(),
+    props<{ product: ProductDetail }>(),
   ),
   loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 })
@@ -126,7 +127,7 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 >    ),
 >    loadProductSuccess: createAction(
 >    `${actionsGroupKey} Load Product Success`,
->    props<{ product: Product }>(),
+>    props<{ product: ProductDetail }>(),
 >    ),
 >    loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 > });
@@ -147,7 +148,7 @@ After the allConfigs are build, createEntityFeatureFactory builds all the action
 >     ),
 >     loadProductSuccess: createAction(
 >       `${actionsGroupKey} Load Product Success`,
->       props<{ product: Product }>(),
+>       props<{ product: ProductDetail }>(),
 >     ),
 >     loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 > });
@@ -276,7 +277,7 @@ const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
   ),
   loadProductSuccess: createAction(
     `${actionsGroupKey} Load Product Success`,
-    props<{ product: Product }>(),
+    props<{ product: ProductDetail }>(),
   ),
   loadProductFail: createAction(`${actionsGroupKey} Load Product Fail`),
 });
@@ -330,7 +331,7 @@ export function addLoadProduct() {
   const traits = addLoadEntity({
     entityName: 'product',
     actionProps: props<{ id: string }>(),
-    actionSuccessProps: props<{ clientDetails: ClientDetails }>(),
+    actionSuccessProps: props<{ product: ProductDetail }>(),
   });
 
   type LoadProductActions = ExtractActionsType<typeof traits>;
@@ -369,7 +370,7 @@ const traits = [
   ...addLoadEntity({
     entityName: 'product',
     actionProps: props<{ id: string }>(),
-    actionSuccessProps: props<{ clientDetails: ClientDetails }>(),
+    actionSuccessProps: props<{ product: ProductDetail }>(),
   }),
 ];
 type ProductnelListActions = ExtractActionsType<typeof traits>;

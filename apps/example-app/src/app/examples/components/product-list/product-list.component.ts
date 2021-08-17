@@ -48,8 +48,8 @@ import { PageEvent } from '@angular/material/paginator';
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
-          [class.selected]="selectedId === row.id"
-          (click)="selectProduct.emit(row.id)"
+          [class.selected]="selectedProduct?.id === row.id"
+          (click)="selectProduct.emit(row)"
         ></tr>
       </table>
     </div>
@@ -70,11 +70,10 @@ import { PageEvent } from '@angular/material/paginator';
 export class ProductListComponent {
   @Input() list: Product[] = [];
   @Input() selectedSort: Sort<Product> = { active: 'name', direction: 'asc' };
-  @Input() selectedId: string | undefined;
+  @Input() selectedProduct: Product | undefined;
 
   @Output() sort = new EventEmitter<Sort<Product>>();
-  @Output() page = new EventEmitter<PageEvent>();
-  @Output() selectProduct = new EventEmitter<string>();
+  @Output() selectProduct = new EventEmitter<Product>();
 
   displayedColumns: (keyof Product)[] = ['id', 'name', 'description', 'price'];
 }

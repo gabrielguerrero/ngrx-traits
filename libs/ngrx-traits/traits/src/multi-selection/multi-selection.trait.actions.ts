@@ -6,15 +6,15 @@ export function createMultiSelectionTraitActions(
 ): MultiSelectActions {
   return {
     multiSelect: createAction(
-      `${actionsGroupKey} Select`,
+      `${actionsGroupKey} Multi Select`,
       props<{ id: number | string }>()
     ),
     multiDeselect: createAction(
-      `${actionsGroupKey} Deselect`,
+      `${actionsGroupKey} Multi Deselect`,
       props<{ id: number | string }>()
     ),
     multiToggleSelect: createAction(
-      `${actionsGroupKey} Toggle Select`,
+      `${actionsGroupKey} Multi Toggle Select`,
       props<{ id: number | string }>()
     ),
     toggleSelectAll: createAction(`${actionsGroupKey} Toggle Select All`),

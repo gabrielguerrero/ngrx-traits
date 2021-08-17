@@ -18,7 +18,7 @@ import { ProductsLocalTraits } from './products.traits';
           ></product-search-form>
           <product-list
             [list]="data.products"
-            [selectedId]="data.selectedProduct?.id"
+            [selectedProduct]="data.selectedProduct"
             (selectProduct)="select($event)"
             (sort)="sort($event)"
           ></product-list>
@@ -64,7 +64,7 @@ export class ProductSelectDialogComponent implements OnInit {
     this.store.dispatch(this.localTraits.actions.fetch());
   }
 
-  select(id: string) {
+  select({ id }: Product) {
     this.store.dispatch(this.localTraits.actions.select({ id }));
   }
 

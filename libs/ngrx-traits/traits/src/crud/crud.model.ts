@@ -54,7 +54,17 @@ export type CrudActions<T> = {
 };
 
 export type CrudSelectors<T> = {
+  /**
+   * Return all changes made to the list
+   * @param state
+   */
   selectChanges: (state: EntityAndCrudState<T>) => Change<T>[];
+  /**
+   * Return all changes made to the list plus entities, and can be filtered
+   * by change type
+   * @param state
+   * @param props
+   */
   selectAllChanges: (
     state: EntityAndCrudState<T>,
     props: { type: ChangeType }
@@ -62,13 +72,17 @@ export type CrudSelectors<T> = {
   /**
    * filters redundant changes ideal for a batch update
    * if you add and remove the same and items this changes are remove from the list
-   * if you add and then update one or more time, the updates are discarded
-   * if you update one or more time and then remove, the updates are discarded
+   * if you add and then update one or more times, the updates are discarded
+   * if you update one or more times and then remove, the updates are discarded
    * @param state
    */
   selectFilteredChanges: (state: EntityAndCrudState<T>) => Change<T>[];
   /**
-   * Returns the entities plus the kind of change
+   * Returns the entities plus the kind of change,
+   * filters redundant changes ideal for a batch update
+   * if you add and remove the same and items this changes are remove from the list
+   * if you add and then update one or more times, the updates are discarded
+   * if you update one or more times and then remove, the updates are discarded
    * @param state
    */
   selectAllFilteredChanges: (state: EntityAndCrudState<T>) => EntityChange<T>[];

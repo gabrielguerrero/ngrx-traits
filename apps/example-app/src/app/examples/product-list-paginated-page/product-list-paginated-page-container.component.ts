@@ -22,7 +22,7 @@ import { PageEvent } from '@angular/material/paginator';
           ></product-search-form>
           <product-list
             [list]="data.products.entities"
-            [selectedId]="data.selectedProduct?.id"
+            [selectedProduct]="data.selectedProduct"
             [selectedSort]="data.selectedSort"
             (selectProduct)="select($event)"
             (sort)="sort($event)"
@@ -94,7 +94,7 @@ export class ProductListPaginatedPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.fetch());
   }
 
-  select(id: string) {
+  select({ id }: Product) {
     this.store.dispatch(ProductActions.select({ id }));
   }
 

@@ -27,6 +27,9 @@ export type SortActions<T> = {
     string,
     (props: Sort<T>) => Sort<T> & TypedAction<string>
   >;
+  /**
+   * Sets the default sort back
+   */
   resetSort: ActionCreator<string, () => TypedAction<string>>;
 };
 
