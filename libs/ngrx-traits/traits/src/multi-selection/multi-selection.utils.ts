@@ -48,5 +48,3 @@ export function selectTotalSelected<
 >(state: S): number {
   return Object.keys(state.selectedIds).length;
 }
-
-export type Selected = 'all' | 'some' | 'none';
