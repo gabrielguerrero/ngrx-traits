@@ -38,7 +38,11 @@ export function createMultiSelectionTraitSelectors<Entity>(
     (state: EntityAndMultipleSelectionState<Entity>) => selectTotal(state),
     selectTotalSelected,
     (total, totalSelected) =>
-      totalSelected === total ? 'all' : totalSelected === 0 ? 'none' : 'some'
+      totalSelected > 0 && totalSelected === total
+        ? 'all'
+        : totalSelected === 0
+        ? 'none'
+        : 'some'
   );
 
   return {

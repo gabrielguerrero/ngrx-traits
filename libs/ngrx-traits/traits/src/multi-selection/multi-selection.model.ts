@@ -1,7 +1,6 @@
 import { Dictionary } from '@ngrx/entity';
 import { EntityAndStatusState } from '../load-entities/load-entities.model';
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
-import { Selected } from './multi-selection.utils';
 
 export interface MultipleSelectionState {
   selectedIds: Dictionary<boolean>;
@@ -70,3 +69,5 @@ export type MultipleSelectionMutators<T> = {
     state: S
   ): S;
 };
+
+export type Selected = 'all' | 'some' | 'none';
