@@ -46,7 +46,7 @@ import {
  * // The following trait config
  *
  * export interface TestState
- * extends EntityAndStatusState<Todo>{}
+ * extends EntityAndStatusState<Todo>,FilterState<TodoFilter>{}
  *
  *    const traits = createEntityFeatureFactory(
  *      addLoadEntities<Todo>(),

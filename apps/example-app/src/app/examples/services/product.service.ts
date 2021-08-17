@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
-import { Product } from '../models';
+import { Product, ProductDetail } from '../models';
 import { delay } from 'rxjs/operators';
 import { sortData } from 'ngrx-traits/traits';
 
@@ -32,6 +32,20 @@ export class ProductService {
       });
     }
     return of(result).pipe(delay(500));
+  }
+
+  getProductDetail(id: string) {
+    const product = mockProducts.find((p) => p.id === id);
+    const productDetail =
+      product &&
+      ({
+        ...product,
+        id: product?.id,
+        image: 'assets/' + images[getRandomInteger(0, 4)],
+        maker: 'Nintendo',
+        releaseDate: '' + getRandomInteger(1990, 2000),
+      } as ProductDetail);
+    return of(productDetail).pipe(delay(300));
   }
 }
 
@@ -160,6 +174,15 @@ const gamecube = [
   'Chibi-Robo!',
   'The Legend of Zelda: Twilight Princess',
   'Odama',
+];
+
+const images = [
+  'images/The_Legend_of_Zelda.png',
+  'images/SuperSoccer.jpg',
+  'images/Super_Metroid.png',
+  'images/Star_Fox.jpg',
+  'images/Mega_Man_6.jpg',
+  'images/Donkey_Kong_Country.png',
 ];
 
 const mockProducts: Product[] = [

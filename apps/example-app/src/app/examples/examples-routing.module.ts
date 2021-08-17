@@ -25,6 +25,11 @@ const routes: Routes = [
     loadChildren: () =>
       import('./product-picker-page').then((m) => m.ProductPickerPageModule),
   },
+  {
+    path: 'product-shop',
+    loadChildren: () =>
+      import('./product-shop-page').then((m) => m.ProductShopPageModule),
+  },
   { path: '**', redirectTo: '/not-found' },
 ];
 

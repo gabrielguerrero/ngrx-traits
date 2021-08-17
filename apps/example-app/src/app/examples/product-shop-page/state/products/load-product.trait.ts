@@ -1,0 +1,62 @@
+import { Injectable } from '@angular/core';
+import { ProductDetail } from '../../../models';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { addLoadEntity } from 'ngrx-traits/traits';
+import {
+  createTraitFactory,
+  ExtractActionsType,
+  TraitEffect,
+} from 'ngrx-traits';
+import { catchError, exhaustMap, map } from 'rxjs/operators';
+import { props, Store } from '@ngrx/store';
+import { ProductService } from '../../../services/product.service';
+import { of } from 'rxjs';
+
+export function addLoadProductDetail() {
+  // notice how we use a trait
+  const traits = addLoadEntity({
+    entityName: 'productDetail',
+    actionProps: props<{ id: string }>(),
+    actionSuccessProps: props<{ productDetail: ProductDetail }>(),
+  });
+
+  type LoadProductActions = ExtractActionsType<typeof traits>;
+
+  return [
+    ...traits, // loadEntity is an array of traits so needs to be spread
+    createTraitFactory({
+      key: 'loadProductEffect',
+      effects: ({ allActions: actions }) => {
+        const allActions = actions as LoadProductActions;
+        @Injectable()
+        class LoadProductEffect extends TraitEffect {
+          loadProduct$ = createEffect(() => {
+            return this.actions$.pipe(
+              ofType(allActions.loadProductDetail),
+              // call backend...
+              exhaustMap(({ id }) =>
+                this.productService.getProductDetail(id).pipe(
+                  map((productDetail) =>
+                    productDetail
+                      ? allActions.loadProductDetailSuccess({ productDetail })
+                      : allActions.loadProductDetailFail()
+                  ),
+                  catchError(() => of(allActions.loadProductDetailFail()))
+                )
+              )
+            );
+          });
+
+          constructor(
+            actions$: Actions,
+            store: Store,
+            private productService: ProductService
+          ) {
+            super(actions$, store);
+          }
+        }
+        return [LoadProductEffect];
+      },
+    }),
+  ] as const; // important to add as const to keep the types working
+}

@@ -41,7 +41,7 @@ export const productTraits = createEntityFeatureFactory(
     },
   })
 )({
-  actionsGroupKey: '[Products]',
+  actionsGroupKey: '[Products Paginated]',
   featureSelector: createFeatureSelector<ProductsState>('products-paginated'),
 });
 

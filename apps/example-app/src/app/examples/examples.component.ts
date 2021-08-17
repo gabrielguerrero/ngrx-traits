@@ -32,6 +32,18 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
               and sorting in memory
             </div>
           </mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item [routerLink]="'product-shop'" style="height: 110px;">
+            <div mat-line>
+              <b>Using addCrudEntities and creating loadProduct custom trait</b>
+            </div>
+            <div mat-line style="white-space: normal">
+              This is a more complex example were we add a basket so you can buy
+              more than one product at a time. Here you will see how to use the
+              addCrudEntities and we create a custom trait called loadProduct to
+              help with the preview of the product
+            </div>
+          </mat-list-item>
         </mat-list>
       </mat-card-content>
     </mat-card>

@@ -21,7 +21,7 @@ import { Sort } from 'ngrx-traits/traits';
           ></product-search-form>
           <product-list
             [list]="data.products"
-            [selectedId]="data.selectedProduct?.id"
+            [selectedProduct]="data.selectedProduct"
             (selectProduct)="select($event)"
             (sort)="sort($event)"
           ></product-list>
@@ -77,7 +77,7 @@ export class ProductListPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.fetch());
   }
 
-  select(id: string) {
+  select({ id }: Product) {
     this.store.dispatch(ProductActions.select({ id }));
   }
 

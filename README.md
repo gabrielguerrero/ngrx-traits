@@ -27,6 +27,8 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Custom Traits](libs/ngrx-traits/traits/src/custom-traits.md)
 
+### [Examples](apps/example-app/src/app/examples)
+
 ##Getting Started
 The best way to understand how to use the traits is to see an example. Let's imagine that you need to implement a page that shows a list of products which you can select and purchase. Start by creating the interface for a Product Entity:
 
@@ -49,7 +51,7 @@ export interface ProductsState extends EntityAndStatusState<Product> {}
 
 The next step is to create our traits file. We have two ways to configure them, one which we call minimal setup, that is better suited for cases where you don't intend to mix the generated actions,selectors, reducers, effects of your traits with your own normal ngrx action, selectors, reducer,effects and is the chosen one for this guide because is more compact (the extensible setup is design to mix it with normal ngrx actions, reducers, etc, you can see more [here](#extensible-setup)). The traits config for both cases is best to be contained in its own file with a _.traits.ts_ extension with a content like:
 
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 import { createFeatureSelector } from '@ngrx/store';
@@ -84,7 +86,7 @@ The most important ones you will see are the fetch actions. They are meant to be
 It is advised to export the actions and selectors in the traits file, so we can use them in the effect.
 
 ```ts
-// in products.traits.ts
+// in products-basket.traits.ts
 export const ProductActions = productTraits.actions;
 export const ProductSelectors = productTraits.selectors;
 ```
@@ -93,7 +95,7 @@ Now we create our effect that call the backend and populates our state :
 ####products.effects.ts
 
 ```ts
-import { ProductActions } from './products.traits.ts';
+import { ProductActions } from './products-basket.traits.ts';
 
 @Injectable()
 export class ProductsEffects {
@@ -168,7 +170,7 @@ export class ProductPageContainerComponent implements OnInit {
 
 A simple product list is now ready and loaded. 
 To keep this intro brief it's not intended to show much of the internals of the presentational components that are being used (can be found on the example folder).
-<!--TODO Add link to example folder  -->
+[Examples](apps/example-app/src/app/examples)
 
 In order for the selection to work:
   * add the addSingleSelection trait
@@ -184,7 +186,7 @@ export interface ProductsState
 ```
 
 Following, add the addSingleSelection trait:
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
@@ -250,7 +252,7 @@ export interface ProductsState
 ```
 
 And next the addAsyncTrait
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
@@ -477,7 +479,7 @@ export interface ProductsState
 ```
 
 Then, add to trait:
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
@@ -569,7 +571,7 @@ export class ProductPageContainerComponent implements OnInit {
 
 That's all great, but after a meeting with the backend devs it was decided that the product list is growing too much so better if we implement remote pagination, and if we do pagination that means sorting and filtering also need to be implemented in the backend, lets start with remote filtering.
 To do remote filtering you first need to remove the filterFn in the traits like:
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
@@ -625,7 +627,7 @@ export class ProductsEffects {
 ```
 
 Now lets use remote sort, in our traits we add the remote param as true
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
@@ -692,7 +694,7 @@ export interface ProductsState
 ```
 
 Then we add the addPagination to the traits like:
-####products.traits.ts
+####products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
@@ -854,7 +856,7 @@ The preferred structure we like to use is to create a state folder with a folder
 state/
     products/
           products.state.ts
-          products.traits.ts
+          products-basket.traits.ts
           products.actions.ts
           products.selectors.ts
           products.reducer.ts
@@ -890,7 +892,7 @@ export interface ProductsState
 
 The **.traits.ts** file is where we will add all the traits config, and the base selector for the state:
 
-#### products.traits.ts
+#### products-basket.traits.ts
 
 ```ts
 export const selectProductState =
@@ -925,7 +927,7 @@ Notice now how we mix the generated and manually created actions
 #### products.actions.ts
 
 ```ts
-import { productTraits } from './products.traits.ts';
+import { productTraits } from './products-basket.traits.ts';
 // we destruct the generated actions so they get mixed with the normal ones
 // it also allows us to only expose some actions, or rename them.
 export const {
@@ -955,7 +957,7 @@ Notice now how we mix the generated and manually created selectors
 #### products.selectors.ts
 
 ```ts
-import { productTraits, selectProductState } from './products.traits.ts';
+import { productTraits, selectProductState } from './products-basket.traits.ts';
 // we destruct the generated selectors so they get mixed with the normal ones
 // it also allows us only expose some selectors, or rename them.
 export const {
@@ -982,7 +984,7 @@ Here you just need to notice how we mix the reducers, and the initialStates
 #### products.selectors.ts
 
 ```ts
-import { productTraits, selectProductState } from './products.traits.ts';
+import { productTraits, selectProductState } from './products-basket.traits.ts';
 import { createReducer } from '@ngrx/store';
 import * as ProductActions from './products.actions.ts';
 
@@ -1018,7 +1020,7 @@ Here we show how we setup the reducer and effects in the module
 #### products-state.module.ts
 
 ```ts
-import { productsTraits } from './products.traits.ts';
+import { productsTraits } from './products-basket.traits.ts';
 import { ProductsEffects } from './products.effects.ts';
 import { productsReducer } from './products.reducer.ts';
 @NgModule({
