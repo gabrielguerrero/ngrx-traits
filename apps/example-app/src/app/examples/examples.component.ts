@@ -20,8 +20,8 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
           <mat-list-item [routerLink]="'product-list-paginated'">
             <div mat-line><b>Paginated List</b></div>
             <div mat-line>
-              Example using trait to load a product list with filtering and
-              sorting it remotely
+              Example using trait to load a product list with remote filtering
+              and sorting and pagination
             </div>
           </mat-list-item>
           <mat-divider></mat-divider>
@@ -38,10 +38,10 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
               <b>Using addCrudEntities and creating loadProduct custom trait</b>
             </div>
             <div mat-line style="white-space: normal">
-              This is a more complex example were we add a basket so you can buy
-              more than one product at a time. Here you will see how to use the
-              addCrudEntities and we create a custom trait called loadProduct to
-              help with the preview of the product
+              This is a more complex example were we add a product basket, so
+              you can buy more than one product at a time. Here you will see how
+              to use the addCrudEntities and we create a custom trait called
+              loadProduct to help with the preview of the product
             </div>
           </mat-list-item>
         </mat-list>
