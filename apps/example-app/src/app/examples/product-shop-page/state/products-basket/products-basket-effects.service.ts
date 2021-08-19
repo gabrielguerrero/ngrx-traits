@@ -13,21 +13,6 @@ import { Store } from '@ngrx/store';
 
 @Injectable()
 export class ProductsBasketEffects {
-  // loadProductOrders$ = createEffect(() =>
-  //   this.actions$.pipe(
-  //     ofType(ProductActions.fetch),
-  //     switchMap(() =>
-  //       //call your service to get the products data
-  //       this.productService.getProducts().pipe(
-  //         map((products) =>
-  //           ProductActions.fetchSuccess({ entities: products })
-  //         ),
-  //         catchError(() => of(ProductActions.fetchFail()))
-  //       )
-  //     )
-  //   )
-  // );
-
   checkout$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ProductBasketActions.checkout),
