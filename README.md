@@ -21,6 +21,8 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Getting Started](#getting-started)
 
+### [Playground](https://stackblitz.com/edit/github-m3f3h1?file=src/app/product-list-page/state/products/products.traits.ts)
+
 ### [Extensible Setup](#extensible-setup-1)
 
 ### [Local store traits](libs/ngrx-traits/src/lib/local-store/README.md)
@@ -29,6 +31,16 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Examples](apps/example-app/src/app/examples)
 
+## Installation
+
+Besides angular, you will need to have ngrx installed beside this lib you can do so with: 
+```
+npm i @ngrx/{store,effects,entity} --save
+```
+Now install ngrx-traits like:
+```
+npm i ngrx-traits --save
+```
 
 ## Getting Started
 
