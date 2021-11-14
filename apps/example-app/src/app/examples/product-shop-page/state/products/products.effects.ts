@@ -12,14 +12,14 @@ import { Store } from '@ngrx/store';
 export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ProductActions.fetch),
+      ofType(ProductActions.loadEntities),
       switchMap(() =>
         //call your service to get the products data
         this.productService.getProducts().pipe(
           map((products) =>
-            ProductActions.fetchSuccess({ entities: products })
+            ProductActions.loadEntitiesSuccess({ entities: products })
           ),
-          catchError(() => of(ProductActions.fetchFail()))
+          catchError(() => of(ProductActions.loadEntitiesFail()))
         )
       )
     )

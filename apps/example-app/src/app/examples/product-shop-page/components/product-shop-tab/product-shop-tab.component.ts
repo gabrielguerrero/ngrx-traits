@@ -86,7 +86,8 @@ export class ProductShopTabComponent implements OnInit {
       .select(ProductSelectors.isSuccess)
       .pipe(first())
       .subscribe(
-        (loaded) => !loaded && this.store.dispatch(ProductActions.fetch())
+        (loaded) =>
+          !loaded && this.store.dispatch(ProductActions.loadEntities())
       );
   }
 

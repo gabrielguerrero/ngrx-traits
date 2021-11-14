@@ -115,7 +115,7 @@ export function createMultiSelectionTraitReducer<
       on(allActions.filter, (state) => allMutators.multiClearSelection(state))
     ),
     ...insertIf<S>(!allActions.loadPageSuccess, () =>
-      on(allActions.fetchSuccess, (state) =>
+      on(allActions.loadEntitiesSuccess, (state) =>
         allMutators.multiClearSelection(state)
       )
     ),

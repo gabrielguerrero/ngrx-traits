@@ -1,12 +1,12 @@
 import { Dictionary } from '@ngrx/entity';
-import { EntityAndStatusState } from '../load-entities/load-entities.model';
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
 export interface MultipleSelectionState {
   selectedIds: Dictionary<boolean>;
 }
 export interface EntityAndMultipleSelectionState<Entity>
-  extends EntityAndStatusState<Entity>,
+  extends LoadEntitiesState<Entity>,
     MultipleSelectionState {}
 
 export type MultiSelectActions = {

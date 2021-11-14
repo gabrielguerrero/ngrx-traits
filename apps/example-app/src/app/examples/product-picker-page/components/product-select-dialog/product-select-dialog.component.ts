@@ -61,7 +61,7 @@ export class ProductSelectDialogComponent implements OnInit {
   constructor(private store: Store, private localTraits: ProductsLocalTraits) {}
 
   ngOnInit() {
-    this.store.dispatch(this.localTraits.actions.fetch());
+    this.store.dispatch(this.localTraits.actions.loadEntities());
   }
 
   select({ id }: Product) {

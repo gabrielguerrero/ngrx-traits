@@ -3,9 +3,9 @@ import { createAction } from '@ngrx/store';
 
 // you can rename the actions, only export a few , and add your own
 export const {
-  fetch: loadProducts,
-  fetchSuccess: loadProductsSuccess,
-  fetchFail: loadProductsFail,
+  loadEntities: loadProducts,
+  loadEntitiesSuccess: loadProductsSuccess,
+  loadEntitiesFail: loadProductsFail,
   toggleSelect,
   loadPage,
   checkout,

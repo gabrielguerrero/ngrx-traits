@@ -8,7 +8,7 @@ import {
   addSort,
   AsyncActionState,
   CrudState,
-  EntityAndStatusState,
+  LoadEntitiesState,
   FilterState,
   MultipleSelectionState,
   SingleSelectionState,
@@ -20,7 +20,7 @@ import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadProductDetail } from '../products/load-product.trait';
 
 export interface ProductsBasketState
-  extends EntityAndStatusState<ProductOrder>,
+  extends LoadEntitiesState<ProductOrder>,
     SingleSelectionState,
     MultipleSelectionState,
     CrudState<ProductOrder>,

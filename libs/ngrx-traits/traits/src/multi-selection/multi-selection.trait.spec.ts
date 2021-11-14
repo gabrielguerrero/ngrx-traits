@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { addPagination, PaginationState } from '../pagination';
 import { addSort, SortState } from '../sort';
-import { addLoadEntities, EntityAndStatusState } from '../load-entities';
+import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { addCrudEntities, CrudState } from '../crud';
 import { addFilter, FilterState } from '../filter';
 import { MultipleSelectionState } from './multi-selection.model';
@@ -19,12 +19,10 @@ describe('addMultiSelection trait', () => {
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
-  interface TestState
-    extends EntityAndStatusState<Todo>,
-      MultipleSelectionState {}
+  interface TestState extends LoadEntitiesState<Todo>, MultipleSelectionState {}
 
   interface TestState2
-    extends EntityAndStatusState<Todo>,
+    extends LoadEntitiesState<Todo>,
       MultipleSelectionState,
       FilterState<TodoFilter>,
       PaginationState,
@@ -233,12 +231,12 @@ describe('addMultiSelection trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('fetchSuccess should deselect also', () => {
+    it('loadEntitiesSuccess should deselect also', () => {
       const { reducer, actions, state } = init();
       let result = reducer(state, actions.multiSelect({ id: 3 }));
       result = reducer(
         result,
-        actions.fetchSuccess({ entities: [{ id: 3, content: '3' }] })
+        actions.loadEntitiesSuccess({ entities: [{ id: 3, content: '3' }] })
       );
       expect(result.selectedIds).toEqual({});
     });

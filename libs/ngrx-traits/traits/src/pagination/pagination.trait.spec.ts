@@ -17,7 +17,9 @@ import { addCrudEntities, CrudState } from '../crud';
 import { Dictionary } from '@ngrx/entity';
 import { ƟPaginationActions } from './pagination.model.internal';
 
-export interface PaginationTestState extends TestState, FilterState<TodoFilter> {}
+export interface PaginationTestState
+  extends TestState,
+    FilterState<TodoFilter> {}
 export interface PaginationTestState2 extends TestState, CrudState<Todo> {}
 describe('Pagination Test', () => {
   let actions$: Actions;
@@ -114,10 +116,7 @@ describe('Pagination Test', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination();
       const a = actions as unknown as ƟPaginationActions;
-      const state = reducer(
-        initialState,
-        a.setRequestPage({ index: 2 })
-      );
+      const state = reducer(initialState, a.setRequestPage({ index: 2 }));
 
       expect(state).toEqual({
         ...initialState,
@@ -179,13 +178,13 @@ describe('Pagination Test', () => {
       });
     });
 
-    it('fetchSuccess for pagination cache full set the cache for the entire result', () => {
+    it('loadEntitiesSuccess for pagination cache full set the cache for the entire result', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination('full');
 
       const state = reducer(
         initialState,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: todos,
           total: todos.length,
         })
@@ -194,7 +193,7 @@ describe('Pagination Test', () => {
       expect(state).toEqual(pageState(state, todos, 0, 0, 135));
     });
 
-    it('fetchSuccess for pagination cache partial should load all pages as it pages', () => {
+    it('loadEntitiesSuccess for pagination cache partial should load all pages as it pages', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination('partial');
 
@@ -209,7 +208,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: first3pages,
           total: todos.length,
         })
@@ -227,7 +226,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: next3pages,
           total: todos.length,
         })
@@ -244,7 +243,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: last3pages,
           total: todos.length,
         })
@@ -261,7 +260,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: page2To4,
           total: todos.length,
         })
@@ -269,7 +268,7 @@ describe('Pagination Test', () => {
       expect(state).toEqual(pageState(state, page2To4, 1, 20, 80));
     });
 
-    it('fetchSuccess for pagination cache grow should load all pages as it pages', () => {
+    it('loadEntitiesSuccess for pagination cache grow should load all pages as it pages', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination('grow');
 
@@ -284,7 +283,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: first3pages,
           total: todos.length,
         })
@@ -302,7 +301,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: next3pages,
           total: todos.length,
         })
@@ -321,7 +320,7 @@ describe('Pagination Test', () => {
       );
       state = reducer(
         state,
-        actions.fetchSuccess({
+        actions.loadEntitiesSuccess({
           entities: last3pages,
           total: todos.length,
         })
@@ -373,7 +372,7 @@ describe('Pagination Test', () => {
         );
         state = reducer(
           state,
-          actions.fetchSuccess({
+          actions.loadEntitiesSuccess({
             entities: todos,
             total: todos.length,
           })
@@ -404,7 +403,7 @@ describe('Pagination Test', () => {
         );
         state = reducer(
           state,
-          actions.fetchSuccess({
+          actions.loadEntitiesSuccess({
             entities: todos,
             total: todos.length,
           })
@@ -751,29 +750,29 @@ describe('Pagination Test', () => {
         expect(action).toEqual(actions.loadPageSuccess());
       });
 
-      it('when loadPage is fired should trigger fetch if isPageInCache is false ', async () => {
+      it('when loadPage is fired should trigger loadEntities if isPageInCache is false ', async () => {
         const { effects, selectors, actions, mockStore } =
           initWithRemoteFilterWithPagination();
         actions$ = of(actions.loadPage({ index: 1 }));
         mockStore.overrideSelector(selectors.isPageInCache, false);
         const action = await effects.loadPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.fetch());
+        expect(action).toEqual(actions.loadEntities());
       });
 
-      it('when loadPage is fired should trigger fetch if isPageInCache is true and forceLoad is true ', async () => {
+      it('when loadPage is fired should trigger loadEntities if isPageInCache is true and forceLoad is true ', async () => {
         const { effects, selectors, actions, mockStore } =
           initWithRemoteFilterWithPagination();
         actions$ = of(actions.loadPage({ index: 1, forceLoad: true }));
         mockStore.overrideSelector(selectors.isPageInCache, true);
         const action = await effects.loadPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.fetch());
+        expect(action).toEqual(actions.loadEntities());
       });
     });
 
     describe('preloadNextPage$', () => {
       async function init(
         cacheType: CacheType,
-        total: number| null = 10 * 20 ,
+        total: number | null = 10 * 20,
         hasNext = true,
         isPageInCache = false
       ) {
@@ -794,42 +793,42 @@ describe('Pagination Test', () => {
         return { actions, action };
       }
 
-      it('call fetch with nextPage if currentPage is the last cached page and cacheType is partial', async () => {
+      it('call loadEntities with nextPage if currentPage is the last cached page and cacheType is partial', async () => {
         const { actions, action } = await init('partial');
         expect(action).toEqual([
           (actions as unknown as ƟPaginationActions).setRequestPage({
             index: 4,
           }),
-          actions.fetch(),
+          actions.loadEntities(),
         ]);
       });
 
-      it('call fetch with nextPage if currentPage is the last cached page and cacheType is grow ', async () => {
+      it('call loadEntities with nextPage if currentPage is the last cached page and cacheType is grow ', async () => {
         const { actions, action } = await init('partial');
         expect(action).toEqual([
           (actions as unknown as ƟPaginationActions).setRequestPage({
             index: 4,
           }),
-          actions.fetch(),
+          actions.loadEntities(),
         ]);
       });
 
-      it('dont call fetch with nextPage if currentPage is the last cached page and cacheType is full ', async () => {
+      it('dont call loadEntities with nextPage if currentPage is the last cached page and cacheType is full ', async () => {
         const { action } = await init('full');
         expect(action).toEqual([]);
       });
 
-      it('dont call fetch with nextPage if there is no total ', async () => {
+      it('dont call loadEntities with nextPage if there is no total ', async () => {
         const { action } = await init('partial', null);
         expect(action).toEqual([]);
       });
 
-      it('dont call fetch with nextPage if there is no nextPage ', async () => {
+      it('dont call loadEntities with nextPage if there is no nextPage ', async () => {
         const { action } = await init('partial', 10 * 20, false);
         expect(action).toEqual([]);
       });
 
-      it('dont call fetch with nextPage if next page is in cahce ', async () => {
+      it('dont call loadEntities with nextPage if next page is in cahce ', async () => {
         const { action } = await init('partial', 10 * 20, true, true);
         expect(action).toEqual([]);
       });

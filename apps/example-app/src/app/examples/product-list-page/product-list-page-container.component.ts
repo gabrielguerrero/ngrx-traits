@@ -74,7 +74,7 @@ export class ProductListPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
 
   select({ id }: Product) {

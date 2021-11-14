@@ -93,9 +93,9 @@ To check what was created by the factory, using your preferred IDE intellisense,
 - effects
 - mutations
 
-Choosing actions and inspecting it, you will see a list of actions with `fetch`, `fetchSuccess`, `fetchFail`, and in selectors you will see `isLoading`, `selectAll`, `selectIds`. I'll give a brief explanation of some of them, the rest can be seen in the docs of each trait.
+Choosing actions and inspecting it, you will see a list of actions with `loadEntities`, `loadEntitiesSuccess`, `loadEntitiesFail`, and in selectors you will see `isLoading`, `selectAll`, `selectIds`. I'll give a brief explanation of some of them, the rest can be seen in the docs of each trait.
 
-The most important ones you will see are the fetch actions. They are meant to be used to create an effect that will populate the state. These actions are also used by other entities related traits like filter, sort, pagination, to fetch data when needed. Let's do one for our product list:
+The most important ones you will see are the loadEntities actions. They are meant to be used to create an effect that will populate the state. These actions are also used by other entities related traits like filter, sort, pagination, to loadEntities data when needed. Let's do one for our product list:
 
 It is advised to export the actions and selectors in the traits file, so we can use them in the effect.
 
@@ -115,14 +115,14 @@ import { ProductActions } from './products-basket.traits.ts';
 export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ProductActions.fetch),
+      ofType(ProductActions.loadEntities),
       switchMap(() =>
         //call your service to get the products data
         this.productService.getProducts().pipe(
           map((products) =>
-            ProductActions.fetchSuccess({ entities: products })
+            ProductActions.loadEntitiesSuccess({ entities: products })
           ),
-          catchError(() => of(ProductActions.fetchFail()))
+          catchError(() => of(ProductActions.loadEntitiesFail()))
         )
       )
     )
@@ -166,7 +166,7 @@ export class ProductPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
 }
 ```
@@ -232,7 +232,7 @@ export class ProductPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
   // new event handler ↓
   select(id: string) {
@@ -334,7 +334,7 @@ export class ProductPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
 
   select(id: string) {
@@ -438,7 +438,7 @@ export class ProductPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
 
   select(id: string) {
@@ -537,7 +537,7 @@ export class ProductPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
 
   select(id: string) {
@@ -612,7 +612,7 @@ And to change our effect, it needs to use the selectFilter selector to get the f
 export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ProductActions.fetch),
+      ofType(ProductActions.loadEntities),
       concatLatestFrom(() =>
         // get filters ↓
         this.store.select(ProductSelectors.selectFilters)
@@ -625,9 +625,9 @@ export class ProductsEffects {
           })
           .pipe(
             map((products) =>
-              ProductActions.fetchSuccess({ entities: products })
+              ProductActions.loadEntitiesSuccess({ entities: products })
             ),
-            catchError(() => of(ProductActions.fetchFail()))
+            catchError(() => of(ProductActions.loadEntitiesFail()))
           )
       )
     )
@@ -663,7 +663,7 @@ Now we use our selectSort in the effect , like we did with selectFilter:
 export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ProductActions.fetch), // on fetch
+      ofType(ProductActions.loadEntities), // on loadEntities
       concatLatestFrom(() => [
         this.store.select(ProductSelectors.selectFilters),
         // get sorting ↓
@@ -679,9 +679,9 @@ export class ProductsEffects {
           })
           .pipe(
             map((products) =>
-              ProductActions.fetchSuccess({ entities: products })
+              ProductActions.loadEntitiesSuccess({ entities: products })
             ),
-            catchError(() => of(ProductActions.fetchFail()))
+            catchError(() => of(ProductActions.loadEntitiesFail()))
           )
       )
     )
@@ -740,7 +740,7 @@ This gives a bunch of extra actions and selectors, for this guide we will only u
 export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ProductActions.fetch), // on fetch
+      ofType(ProductActions.loadEntities), // on loadEntities
       concatLatestFrom(() => [
         this.store.select(ProductSelectors.selectFilter),
         this.store.select(ProductSelectors.selectSort),
@@ -759,9 +759,9 @@ export class ProductsEffects {
           })
           .pipe(
             map((products) =>
-              ProductActions.fetchSuccess({ entities: products })
+              ProductActions.loadEntitiesSuccess({ entities: products })
             ),
-            catchError(() => of(ProductActions.fetchFail()))
+            catchError(() => of(ProductActions.loadEntitiesFail()))
           )
       )
     )
@@ -795,7 +795,7 @@ export class ProductPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.fetch());
+    this.store.dispatch(ProductActions.loadEntities());
   }
 
   select(id: string) {
@@ -947,11 +947,11 @@ import { productTraits } from './products-basket.traits.ts';
 // we destruct the generated actions so they get mixed with the normal ones
 // it also allows us to only expose some actions, or rename them.
 export const {
-  fetch: loadProducts, // rename example
+  loadEntities: loadProducts, // rename example
   select,
-  fetch,
-  fetchSuccess,
-  fetchFail,
+  loadEntities,
+  loadEntitiesSuccess,
+  loadEntitiesFail,
   filter,
   sort,
   loadPage,

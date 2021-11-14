@@ -31,7 +31,7 @@ import {
 /**
  * Generates the ngrx code needed to filter a list of entities locally or remotely, adds a filter
  * action and a selectFilter selector, the filter action is debounced and the filter will only
- * call the fetch action if the params have changed, so there is no need to implement that in
+ * call the loadEntities action if the params have changed, so there is no need to implement that in
  * the components. The filter action has a `forceLoad` param which can
  * be use to skip that restriction for one call or setting the `defaultDebounceTime` to 0 for all calls.
  * Calling the filter action will also replace the `filters` param in the store, if the `patch` param is set

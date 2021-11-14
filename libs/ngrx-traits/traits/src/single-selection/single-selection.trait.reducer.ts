@@ -67,7 +67,7 @@ export function createSingleSelectionTraitReducer<
       on(allActions.filter, (state) => allMutators.deselect(state))
     ),
     ...insertIf<S>(!allActions.loadPageSuccess, () =>
-      on(allActions.fetchSuccess, (state) => allMutators.deselect(state))
+      on(allActions.loadEntitiesSuccess, (state) => allMutators.deselect(state))
     ),
     ...insertIf<S>(
       !!allActions.loadPageSuccess && paginationCacheType === 'partial',

@@ -11,7 +11,7 @@ export function createPaginationTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>,
   allConfigs: FilterKeyedConfig<Entity, unknown>
 ): PaginationSelectors<Entity> {
-  const { selectAll, isLoading } = previousSelectors;
+  const { selectEntitiesList, isEntitiesLoading } = previousSelectors;
 
   const filterFunction = allConfigs?.filter?.filterFn;
 
@@ -21,21 +21,25 @@ export function createPaginationTraitSelectors<Entity>(
   const selectPaginationFiltered: (
     state: EntityAndPaginationState<Entity>
   ) => PaginationState['pagination'] = filterFunction
-    ? createSelector(selectAll, selectPagination, (entities, pagination) => {
-        return {
-          ...pagination,
-          total: entities.length,
-          cache: {
-            ...pagination.cache,
-            start: 0,
-            end: entities.length,
-          },
-        };
-      })
+    ? createSelector(
+        selectEntitiesList,
+        selectPagination,
+        (entities, pagination) => {
+          return {
+            ...pagination,
+            total: entities.length,
+            cache: {
+              ...pagination.cache,
+              start: 0,
+              end: entities.length,
+            },
+          };
+        }
+      )
     : selectPagination;
 
   const selectPageEntities = createSelector(
-    selectAll,
+    selectEntitiesList,
     selectPaginationFiltered,
     (
       entities: Entity[],
@@ -105,7 +109,7 @@ export function createPaginationTraitSelectors<Entity>(
   }));
 
   const isLoadingPage = createSelector(
-    isLoading,
+    isEntitiesLoading,
     selectPagination,
     (isLoading, pagination) =>
       isLoading && pagination.requestPage === pagination.currentPage

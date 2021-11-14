@@ -65,7 +65,7 @@ export function createFilterTraitEffects<Entity, F>(
           )
     );
 
-    fetch$ =
+    loadEntities$ =
       !traitConfig?.filterFn &&
       createEffect(() => {
         return this.actions$.pipe(
@@ -73,7 +73,7 @@ export function createFilterTraitEffects<Entity, F>(
           concatMap(() =>
             allActions?.loadFirstPage
               ? [allActions.clearPagesCache(), allActions.loadFirstPage()]
-              : [allActions.fetch()]
+              : [allActions.loadEntities()]
           )
         );
       });

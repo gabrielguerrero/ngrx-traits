@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
-  EntityAndStatusState,
+  LoadEntitiesState,
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
   LoadEntitiesMutators,
@@ -12,7 +12,7 @@ import { insertIf } from 'ngrx-traits';
 export function createLoadEntitiesInitialState<Entity>(
   previousInitialState = {},
   allConfigs: LoadEntitiesKeyedConfig<Entity>
-): EntityAndStatusState<Entity> {
+): LoadEntitiesState<Entity> {
   const traitConfig = allConfigs.loadEntities;
   const adapter = traitConfig!.adapter;
 
@@ -25,7 +25,7 @@ export function createLoadEntitiesInitialState<Entity>(
 
 export function createLoadEntitiesTraitReducer<
   T,
-  S extends EntityAndStatusState<T>
+  S extends LoadEntitiesState<T>
 >(
   initialState: S,
   actions: LoadEntitiesActions<T>,
@@ -36,20 +36,20 @@ export function createLoadEntitiesTraitReducer<
 
   return createReducer(
     initialState,
-    on(actions.fetch, (state) => ({
+    on(actions.loadEntities, (state) => ({
       ...state,
       status: 'loading',
     })),
-    on(actions.fetchFail, (state) => ({
+    on(actions.loadEntitiesFail, (state) => ({
       ...state,
       status: 'fail',
     })),
-    on(actions.fetchSuccess, (state) => ({
+    on(actions.loadEntitiesSuccess, (state) => ({
       ...state,
       status: 'success',
     })),
     ...insertIf<S>(handleEntitiesMerge, () =>
-      on(actions.fetchSuccess, (state, { entities }) =>
+      on(actions.loadEntitiesSuccess, (state, { entities }) =>
         allMutators.setAll(entities, {
           ...state,
         })

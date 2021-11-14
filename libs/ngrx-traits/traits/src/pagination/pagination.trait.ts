@@ -35,11 +35,11 @@ import {
  * - 'full': The full result is cache in memory and split in pages to render, useful
  * for small result but not so small that requires been render in pages
  * - 'partial': Backend returns partial results because is are to big, this has a cache a few pages forward
- * to avoid calling the backend on each page, the cache is clean when a new fetch is required
+ * to avoid calling the backend on each page, the cache is clean when a new loadEntities is required
  * - 'grow': Similar to partial that the backend returns partial result, but in this case the cache grows,
- * after each fetch the cache is appended to the previous cache, this mode is ideal for infinite scrolls,
+ * after each loadEntities the cache is appended to the previous cache, this mode is ideal for infinite scrolls,
  * where you will only call loadNextPage.
- * To make the pagination experience smoother the fetch to get new pages is done when the current page is change to
+ * To make the pagination experience smoother the loadEntities to get new pages is done when the current page is change to
  * the last cached page.
  * @param config
  * @param config.cacheType - Default to 'full', change the cache mode

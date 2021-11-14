@@ -1,4 +1,4 @@
-import { EntityAndStatusState } from '../load-entities/load-entities.model';
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
@@ -6,7 +6,7 @@ export interface FilterState<F> {
   filters?: F;
 }
 export interface EntityAndFilterState<T, F>
-  extends EntityAndStatusState<T>,
+  extends LoadEntitiesState<T>,
     FilterState<F> {}
 
 type FilterPatchConditionalType<F, P> = P extends true ? Partial<F> : F;
@@ -30,7 +30,7 @@ export interface FilterActionOverload<F> {
 
 export type FilterActions<F> = {
   /**
-   * Store the filters param (read using selectFilter) and fires the fetch action
+   * Store the filters param (read using selectFilter) and fires the loadEntities action
    * if the filters param has changed, this call is also debounce by default, to disable this
    * behavior you can use the forceLoad param as true or defaultDebounceTime to 0 in the trait config
    * to disable permanently.

@@ -40,12 +40,14 @@ const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
   class ProductsEffects extends TraitEffect {
     loadProducts$ = createEffect(() =>
       this.actions$.pipe(
-        ofType(allActions.fetch),
+        ofType(allActions.loadEntities),
         switchMap(() =>
           //call your service to get the products data
           this.productService.getProducts().pipe(
-            map((products) => allActions.fetchSuccess({ entities: products })),
-            catchError(() => of(allActions.fetchFail()))
+            map((products) =>
+              allActions.loadEntitiesSuccess({ entities: products })
+            ),
+            catchError(() => of(allActions.loadEntitiesFail()))
           )
         )
       )

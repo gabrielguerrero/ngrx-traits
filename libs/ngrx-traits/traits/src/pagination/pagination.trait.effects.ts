@@ -25,7 +25,7 @@ export function createPaginationTraitEffects<Entity>(
         map(([{ forceLoad }, isInCache]) =>
           !forceLoad && isInCache
             ? allActions.loadPageSuccess()
-            : allActions.fetch()
+            : allActions.loadEntities()
         )
       );
     });
@@ -55,7 +55,7 @@ export function createPaginationTraitEffects<Entity>(
         filter((pageInfo) => !!pageInfo),
         concatMap((pageInfo) => [
           allActions.setRequestPage({ index: pageInfo!.pageIndex + 1 }),
-          allActions.fetch(),
+          allActions.loadEntities(),
         ])
       );
     });

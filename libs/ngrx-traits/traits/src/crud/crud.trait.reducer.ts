@@ -67,7 +67,9 @@ export function createCrudTraitReducer<
       on(allActions.filter, (state) => allMutators.clearChanges(state))
     ),
     ...insertIf<S>(!allActions.loadPageSuccess, () =>
-      on(allActions.fetchSuccess, (state) => allMutators.clearChanges(state))
+      on(allActions.loadEntitiesSuccess, (state) =>
+        allMutators.clearChanges(state)
+      )
     ),
     ...insertIf<S>(
       !!allActions.loadPageSuccess && paginationCacheType === 'partial',

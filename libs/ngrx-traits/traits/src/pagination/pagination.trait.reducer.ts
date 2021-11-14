@@ -86,7 +86,7 @@ export function createPaginationTraitReducer<
   function recalculateTotal<S extends EntityAndPaginationState<Entity>>(
     state: S
   ): S {
-    const total = allSelectors.selectTotal(state);
+    const total = allSelectors.selectEntitiesTotal(state);
     return {
       ...state,
       status: 'success',
@@ -133,7 +133,7 @@ export function createPaginationTraitReducer<
       status: 'fail',
     })),
     on(allActions.clearPagesCache, (state) => clearPagesCache(state)),
-    on(allActions.fetchSuccess, (state, { entities, total }) =>
+    on(allActions.loadEntitiesSuccess, (state, { entities, total }) =>
       allMutators.mergePaginatedEntities(entities, total, {
         ...state,
         status: 'success',

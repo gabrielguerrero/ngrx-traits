@@ -6,7 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { addPagination, PaginationState } from '../pagination';
 import { SortState } from './sort.model';
-import { addLoadEntities, EntityAndStatusState } from '../load-entities';
+import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { addFilter, FilterState } from '../filter';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { provideMockStore } from '@ngrx/store/testing';
@@ -20,12 +20,12 @@ describe('addSort trait', () => {
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
   interface TestState
-    extends EntityAndStatusState<Todo>,
+    extends LoadEntitiesState<Todo>,
       SingleSelectionState,
       SortState<Todo> {}
 
   interface TestState2
-    extends EntityAndStatusState<Todo>,
+    extends LoadEntitiesState<Todo>,
       FilterState<TodoFilter>,
       PaginationState,
       SortState<Todo> {}
@@ -205,14 +205,14 @@ describe('addSort trait', () => {
         const { effects, actions } = init({ remoteSort: true });
         actions$ = of(actions.sort({ active: 'id', direction: 'asc' }));
         const action = await effects.remoteSort$.pipe(take(1)).toPromise();
-        expect(action).toEqual(actions.fetch());
+        expect(action).toEqual(actions.loadEntities());
       });
 
       it('should fire loadFirstPage if resetSort was fired ', async () => {
         const { effects, actions } = init({ remoteSort: true });
         actions$ = of(actions.resetSort());
         const action = await effects.remoteSort$.pipe(take(1)).toPromise();
-        expect(action).toEqual(actions.fetch());
+        expect(action).toEqual(actions.loadEntities());
       });
     });
   });

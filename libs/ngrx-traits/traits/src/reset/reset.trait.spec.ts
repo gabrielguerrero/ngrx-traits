@@ -1,6 +1,6 @@
 import { createAction, createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadEntities, EntityAndStatusState } from '../load-entities';
+import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { addFilter } from '../filter/filter.trait';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
@@ -14,7 +14,7 @@ import { FilterState } from '../filter';
 import { addReset } from './reset.trait';
 
 export interface TestState
-  extends EntityAndStatusState<Todo>,
+  extends LoadEntitiesState<Todo>,
     PaginationState,
     FilterState<TodoFilter> {}
 
@@ -51,7 +51,7 @@ describe('addReset Trait', () => {
         initWithRemoteFilterWithPagination();
       let result = reducer(
         initialState,
-        actions.fetchSuccess({ entities: [] })
+        actions.loadEntitiesSuccess({ entities: [] })
       );
       result = reducer(result, actions.reset());
       expect(result).toEqual(initialState);

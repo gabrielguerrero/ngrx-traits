@@ -5,14 +5,14 @@ export function createLoadEntitiesTraitActions<Entity>(
   actionsGroupKey: string
 ): LoadEntitiesActions<Entity> {
   const actions = {
-    fetch: createAction(`${actionsGroupKey} Fetch Entities`),
-    fetchSuccess: createAction(
-      `${actionsGroupKey} Fetch Entities Success`,
+    loadEntities: createAction(`${actionsGroupKey} loadEntities Entities`),
+    loadEntitiesSuccess: createAction(
+      `${actionsGroupKey} loadEntities Entities Success`,
       props<{ entities: Entity[]; total?: number }>()
     ),
-    fetchFail: createAction(
-      `${actionsGroupKey} Fetch Entities Fail`,
-      (props?:{ error?: string })=> ({error: props?.error})
+    loadEntitiesFail: createAction(
+      `${actionsGroupKey} loadEntities Entities Fail`,
+      (props?: { error?: string }) => ({ error: props?.error })
     ),
   };
 

@@ -13,12 +13,20 @@ export function createLoadEntitiesTraitSelectors<Entity>(
     FilterKeyedConfig<Entity, unknown>
 ) {
   const adapter = allConfigs?.loadEntities?.adapter;
-  const entitySelectors = adapter?.getSelectors();
+  const entitySelectors = adapter!.getSelectors();
 
   const filterFunction = allConfigs?.filter?.filterFn;
-  let selectors = entitySelectors;
+  let selectors: LoadEntitiesSelectors<Entity> = {
+    selectEntitiesList: entitySelectors.selectAll,
+    selectEntitiesMap: entitySelectors.selectEntities,
+    selectEntitiesIds: entitySelectors.selectIds,
+    selectEntitiesTotal: entitySelectors.selectTotal,
+    isEntitiesLoadingFail: isFail,
+    isEntitiesLoading: isLoading,
+    isEntitiesLoadingSuccess: isSuccess,
+  };
   if (filterFunction && entitySelectors) {
-    const selectAll = createSelector(
+    const selectEntitiesList = createSelector(
       entitySelectors.selectAll,
       selectFilter,
       (entities, filters) =>
@@ -26,9 +34,10 @@ export function createLoadEntitiesTraitSelectors<Entity>(
     );
 
     selectors = {
-      selectAll,
-      selectEntities: createSelector(
-        entitySelectors.selectEntities,
+      ...selectors,
+      selectEntitiesList,
+      selectEntitiesMap: createSelector(
+        selectors.selectEntitiesMap,
         selectFilter,
         (entities, filters) => {
           const result: Dictionary<Entity> = {};
@@ -41,18 +50,16 @@ export function createLoadEntitiesTraitSelectors<Entity>(
           return result;
         }
       ),
-      selectTotal: createSelector(selectAll, (entities) => entities.length),
-      selectIds: createSelector(
-        selectAll,
+      selectEntitiesTotal: createSelector(
+        selectEntitiesList,
+        (entities) => entities.length
+      ),
+      selectEntitiesIds: createSelector(
+        selectEntitiesList,
         (entities) =>
           entities.map((e) => adapter?.selectId(e)) as string[] | number[]
       ),
     };
   }
-  return {
-    ...selectors,
-    isFail,
-    isLoading,
-    isSuccess,
-  } as LoadEntitiesSelectors<Entity>;
+  return selectors;
 }

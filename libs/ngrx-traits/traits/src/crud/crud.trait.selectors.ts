@@ -49,10 +49,10 @@ export function createCrudTraitSelectors<Entity>(
     }, [] as Change<Entity>[]);
   }
 
-  const { selectEntities } = previousSelectors;
+  const { selectEntitiesMap } = previousSelectors;
 
   const selectAllChanges = createSelector(
-    (state: EntityAndCrudState<Entity>) => selectEntities(state),
+    (state: EntityAndCrudState<Entity>) => selectEntitiesMap(state),
     selectChanges,
     (
       entities: Dictionary<Entity>,
@@ -87,7 +87,7 @@ export function createCrudTraitSelectors<Entity>(
 
   const selectAllFilteredChanges = createSelector(
     selectFilteredChanges,
-    (state: EntityAndCrudState<Entity>) => selectEntities(state),
+    (state: EntityAndCrudState<Entity>) => selectEntitiesMap(state),
     (changes, entities) =>
       changes.map((c) => {
         return {

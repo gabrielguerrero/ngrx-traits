@@ -1,4 +1,4 @@
-import { EntityAndStatusState } from '../load-entities/load-entities.model';
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from 'ngrx-traits';
@@ -19,7 +19,7 @@ export interface SortState<T> {
   };
 }
 export interface EntityAndSortState<T>
-  extends EntityAndStatusState<T>,
+  extends LoadEntitiesState<T>,
     SortState<T> {}
 
 export type SortActions<T> = {
