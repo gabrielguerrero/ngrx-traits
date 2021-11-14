@@ -31,12 +31,12 @@ const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
   class ProductsEffects extends TraitEffect {
     loadProducts$ = createEffect(() =>
       this.actions$.pipe(
-        ofType(allActions.fetch),
+        ofType(allActions.loadEntities),
         switchMap(() =>
           //call your service to get the products data
           this.productService.getProducts().pipe(
-            map((products) => allActions.fetchSuccess({ entities: products })),
-            catchError(() => of(allActions.fetchFail()))
+            map((products) => allActions.loadEntitiesSuccess({ entities: products })),
+            catchError(() => of(allActions.loadEntitiesFail()))
           )
         )
       )
@@ -109,7 +109,7 @@ export class ProductSelectDialogComponent implements OnInit {
 
   ngOnInit() {
     // firing a local trait action like a normal action
-    this.store.dispatch(this.localTraits.actions.fetch());
+    this.store.dispatch(this.localTraits.actions.loadEntities());
   }
 
   select(id: string) {

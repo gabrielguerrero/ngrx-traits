@@ -36,16 +36,13 @@ describe('trait-local-store', () => {
     addLoadEntities<Todo>(),
     addFilter<Todo, TodoFilter>()
   );
-  type FF = typeof  traitsFactory;
+  type FF = typeof traitsFactory;
 
   describe('buildLocalTraits', () => {
-    function buildLocalTraitsMock<
-      State ,
-      F extends FeatureFactory
-    >(
+    function buildLocalTraitsMock<State, F extends FeatureFactory>(
       componentName: string,
       traitFactory: F,
-      fetchEffectFactory?: TraitLocalEffectsFactory<F>
+      loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>
     ) {
       const reducerManagerMock = mock(ReducerManager);
       const effectSourcesMock = mock(EffectSources);
@@ -63,11 +60,11 @@ describe('trait-local-store', () => {
         instance(effectSourcesMock)
       );
 
-      const traits = buildLocalTraits<State,F>(
+      const traits = buildLocalTraits<State, F>(
         instance(injectorMock),
         componentName,
         traitFactory,
-        fetchEffectFactory
+        loadEntitiesEffectFactory
       );
       return {
         traits,

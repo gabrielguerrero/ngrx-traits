@@ -26,7 +26,7 @@ export function createSortTraitEffect<Entity>(
         concatMap(() =>
           allActions.loadFirstPage
             ? [allActions.clearPagesCache(), allActions.loadFirstPage()]
-            : [allActions.fetch()]
+            : [allActions.loadEntities()]
         )
       );
     });

@@ -6,7 +6,7 @@ import { EntityAndSortState, Sort, SortMutators } from './sort.model';
 import { sortData } from './sort.utils';
 
 export function createSortTraitMutators<Entity>(
-  { selectAll }: LoadEntitiesSelectors<Entity>,
+  { selectEntitiesList }: LoadEntitiesSelectors<Entity>,
   allConfigs: LoadEntitiesKeyedConfig<Entity>
 ): SortMutators<Entity> {
   function sortEntities<S extends EntityAndSortState<Entity>>(
@@ -14,7 +14,7 @@ export function createSortTraitMutators<Entity>(
     state: S
   ) {
     const { adapter } = allConfigs.loadEntities!;
-    const entities = selectAll(state);
+    const entities = selectEntitiesList(state);
     const sortedIds = sortData(entities, { active, direction }).map((v) =>
       adapter.selectId(v)
     );

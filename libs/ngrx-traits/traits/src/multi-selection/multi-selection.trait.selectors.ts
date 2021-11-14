@@ -10,7 +10,7 @@ import { Dictionary } from '@ngrx/entity/src/models';
 export function createMultiSelectionTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>
 ): MultipleSelectionSelectors<Entity> {
-  const { selectEntities, selectTotal } = previousSelectors;
+  const { selectEntitiesMap, selectEntitiesTotal } = previousSelectors;
 
   function selectIdsSelected(state: EntityAndMultipleSelectionState<Entity>) {
     return state.selectedIds;
@@ -21,7 +21,7 @@ export function createMultiSelectionTraitSelectors<Entity>(
   );
   const selectEntitiesSelected = createSelector(
     selectAllIdsSelected,
-    selectEntities,
+    selectEntitiesMap,
     (selectedIds, entities) =>
       selectedIds.reduce((acum: { [id: string]: Entity | undefined }, id) => {
         acum[id] = entities[id];
@@ -30,12 +30,13 @@ export function createMultiSelectionTraitSelectors<Entity>(
   );
   const selectAllSelected = createSelector(
     selectAllIdsSelected,
-    selectEntities,
+    selectEntitiesMap,
     (selectedIds, entities) => selectedIds.map((id) => entities[id]!)
   );
 
   const isAllSelected = createSelector(
-    (state: EntityAndMultipleSelectionState<Entity>) => selectTotal(state),
+    (state: EntityAndMultipleSelectionState<Entity>) =>
+      selectEntitiesTotal(state),
     selectTotalSelected,
     (total, totalSelected) =>
       totalSelected > 0 && totalSelected === total

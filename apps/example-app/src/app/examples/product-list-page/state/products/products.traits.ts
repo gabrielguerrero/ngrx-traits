@@ -5,7 +5,7 @@ import {
   addSingleSelection,
   addSort,
   AsyncActionState,
-  EntityAndStatusState,
+  LoadEntitiesState,
   FilterState,
   SingleSelectionState,
   SortState,
@@ -15,7 +15,7 @@ import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 
 export interface ProductsState
-  extends EntityAndStatusState<Product>,
+  extends LoadEntitiesState<Product>,
     SingleSelectionState,
     AsyncActionState<'checkout'>,
     FilterState<ProductFilter>,

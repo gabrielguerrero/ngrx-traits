@@ -3,7 +3,7 @@ import {
   createLoadEntitiesTraitReducer,
 } from './load-entities.trait.reducer';
 import {
-  EntityAndStatusState,
+  LoadEntitiesState,
   LoadEntitiesConfig,
   LoadEntitiesKeyedConfig,
   loadEntitiesTraitKey,
@@ -23,10 +23,10 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
 
 /**
  * Generates the ngrx code needed to load a list of entities from the backend
- * with a fetch, fetchSuccess, fetchFail actions, and selectors to query the
+ * with a loadEntities, loadEntitiesSuccess, loadEntitiesFail actions, and selectors to query the
  * entities like selectAll, selectIds, selectEntities, and its progress loading
  * with isLoading,isSuccess, isFail. This trait is the base for all other traits related
- * to a list of entities, the other will call fetch when needing data.
+ * to a list of entities, the other will call loadEntities when needing data.
  * @param traitConfig - Config object fot the trait factory
  * @param traitConfig.selectId - Function that returns the id of an entity
  * @param traitConfig.sortComparer - Default sort function for to @ngrx/entity EntityAdapter
@@ -46,9 +46,9 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  *      ),
  *    });
  * // will generate the actions and selectors
- * traits.actions.fetch()
- * traits.actions.fetchSuccess({entities: todos})
- * traits.actions.fetchFail();
+ * traits.actions.loadEntities()
+ * traits.actions.loadEntitiesSuccess({entities: todos})
+ * traits.actions.loadEntitiesFail();
  * traits.selectors.selectAll
  * traits.selectors.selectEntities
  * traits.selectors.selectIds
@@ -81,7 +81,7 @@ export function addLoadEntities<Entity>(
     }: TraitInitialStateFactoryConfig) =>
       createLoadEntitiesInitialState<Entity>(previousInitialState, allConfigs),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
-      createLoadEntitiesTraitReducer<Entity, EntityAndStatusState<Entity>>(
+      createLoadEntitiesTraitReducer<Entity, LoadEntitiesState<Entity>>(
         initialState,
         allActions,
         allMutators,

@@ -17,7 +17,7 @@ export function buildLocalTraits<
   injector: Injector,
   componentName: string,
   traitFactory: F,
-  fetchEffectFactory?: TraitLocalEffectsFactory<F>
+  loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>
 ) {
   const reducers = injector.get(ReducerManager);
   const effects = injector.get(EffectSources);
@@ -31,12 +31,15 @@ export function buildLocalTraits<
 
   traits.reducer && reducers.addReducer(componentId, traits.reducer);
 
-  const fetchEffect = fetchEffectFactory?.(traits.actions, traits.selectors);
+  const loadEntitiesEffect = loadEntitiesEffectFactory?.(
+    traits.actions,
+    traits.selectors
+  );
 
   const providers =
     (traits.effects && [...traits.effects.map((e) => ({ provide: e }))]) || [];
-  if (fetchEffect) {
-    providers.push({ provide: fetchEffect });
+  if (loadEntitiesEffect) {
+    providers.push({ provide: loadEntitiesEffect });
   }
 
   const disableLocalTraitsEffects = injector.get(
@@ -55,8 +58,8 @@ export function buildLocalTraits<
       effects.addEffects(effect);
     });
 
-    if (fetchEffectFactory) {
-      const effect = i.get(fetchEffect) as TraitEffect;
+    if (loadEntitiesEffectFactory) {
+      const effect = i.get(loadEntitiesEffect) as TraitEffect;
       effect.componentId = componentId;
       effects.addEffects(effect);
     }

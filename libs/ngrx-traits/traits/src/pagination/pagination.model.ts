@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { EntityAndStatusState } from '../load-entities';
+import { LoadEntitiesState } from '../load-entities';
 
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
@@ -20,7 +20,7 @@ export interface PaginationState {
 }
 
 export interface EntityAndPaginationState<T>
-  extends EntityAndStatusState<T>,
+  extends LoadEntitiesState<T>,
     PaginationState {}
 
 export type PaginationActions = {

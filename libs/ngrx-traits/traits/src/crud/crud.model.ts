@@ -1,5 +1,5 @@
 import { Predicate, Update } from '@ngrx/entity/src/models';
-import { EntityAndStatusState } from '../load-entities/load-entities.model';
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 import { ActionCreator } from '@ngrx/store';
 import { TypedAction } from '@ngrx/store/src/models';
 
@@ -21,7 +21,7 @@ export interface CrudState<T> {
   changes: Change<T>[];
 }
 export interface EntityAndCrudState<T>
-  extends EntityAndStatusState<T>,
+  extends LoadEntitiesState<T>,
     CrudState<T> {}
 
 export type CrudActions<T> = {

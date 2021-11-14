@@ -10,17 +10,17 @@ export interface StatusState {
   status?: Status;
 }
 
-export interface EntityAndStatusState<T> extends EntityState<T>, StatusState {}
+export interface LoadEntitiesState<T> extends EntityState<T>, StatusState {}
 
 export type LoadEntitiesActions<T> = {
   /**
    * load entities from backend
    */
-  fetch: ActionCreator<string, () => TypedAction<string>>;
+  loadEntities: ActionCreator<string, () => TypedAction<string>>;
   /**
    * entities where loaded successfully
    */
-  fetchSuccess: ActionCreator<
+  loadEntitiesSuccess: ActionCreator<
     string,
     (props: {
       entities: T[];
@@ -30,7 +30,7 @@ export type LoadEntitiesActions<T> = {
   /**
    * entities failed loading
    */
-  fetchFail: ActionCreator<
+  loadEntitiesFail: ActionCreator<
     string,
     (props?: { error?: string }) => { error?: string } & TypedAction<string>
   >;
@@ -41,37 +41,37 @@ export type LoadEntitiesSelectors<T> = {
    * returns all ids of the entities in an array
    * @param state
    */
-  selectIds: (state: EntityAndStatusState<T>) => string[] | number[];
+  selectEntitiesIds: (state: LoadEntitiesState<T>) => string[] | number[];
   /**
    * returns all entities in a map with the id as key of the map
    * @param state
    */
-  selectEntities: (state: EntityAndStatusState<T>) => Dictionary<T>;
+  selectEntitiesMap: (state: LoadEntitiesState<T>) => Dictionary<T>;
   /**
    * returns all entities in an array
    * @param state
    */
-  selectAll: (state: EntityAndStatusState<T>) => T[];
+  selectEntitiesList: (state: LoadEntitiesState<T>) => T[];
   /**
    * returns the total number of entities
    * @param state
    */
-  selectTotal: (state: EntityAndStatusState<T>) => number;
+  selectEntitiesTotal: (state: LoadEntitiesState<T>) => number;
   /**
    * is currently loading entities
    * @param state
    */
-  isLoading: (state: EntityAndStatusState<T>) => boolean;
+  isEntitiesLoading: (state: LoadEntitiesState<T>) => boolean;
   /**
    * were the entities loaded successfully
    * @param state
    */
-  isSuccess: (state: EntityAndStatusState<T>) => boolean;
+  isEntitiesLoadingSuccess: (state: LoadEntitiesState<T>) => boolean;
   /**
    * did the entities fail loading
    * @param state
    */
-  isFail: (state: EntityAndStatusState<T>) => boolean;
+  isEntitiesLoadingFail: (state: LoadEntitiesState<T>) => boolean;
 };
 
 export type LoadEntitiesMutators<T> = {
@@ -80,7 +80,7 @@ export type LoadEntitiesMutators<T> = {
    * @param entities
    * @param state
    */
-  setAll<S extends EntityAndStatusState<T>>(entities: T[], state: S): S;
+  setAll<S extends LoadEntitiesState<T>>(entities: T[], state: S): S;
 };
 
 export type GenericActionCreator = ActionCreator<

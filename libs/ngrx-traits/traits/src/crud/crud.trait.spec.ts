@@ -3,7 +3,7 @@ import { createEntityFeatureFactory } from 'ngrx-traits';
 import { ChangeType, CrudState } from '../crud/crud.model';
 import { addCrudEntities } from '../crud/crud.trait';
 import { addFilter, FilterState } from '../filter';
-import { addLoadEntities, EntityAndStatusState } from '../load-entities';
+import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { addPagination, PaginationState } from '../pagination';
 import { addSort, SortState } from '../sort';
@@ -17,10 +17,10 @@ describe('addCrud trait', () => {
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
-  interface TestState extends EntityAndStatusState<Todo>, CrudState<Todo> {}
+  interface TestState extends LoadEntitiesState<Todo>, CrudState<Todo> {}
 
   interface TestState2
-    extends EntityAndStatusState<Todo>,
+    extends LoadEntitiesState<Todo>,
       CrudState<Todo>,
       FilterState<TodoFilter>,
       PaginationState,
@@ -489,7 +489,7 @@ describe('addCrud trait', () => {
       expect(result.changes).toEqual([]);
     });
 
-    it('if no pagination fetchSuccess should also clear changes', async () => {
+    it('if no pagination loadEntitiesSuccess should also clear changes', async () => {
       const { actions, reducer, initialState } = init();
       let result = reducer(
         initialState,
@@ -497,7 +497,7 @@ describe('addCrud trait', () => {
       );
       result = reducer(
         result,
-        actions.fetchSuccess({ entities: [{ id: 1, content: 'one' }] })
+        actions.loadEntitiesSuccess({ entities: [{ id: 1, content: 'one' }] })
       );
       expect(result.changes).toEqual([]);
     });

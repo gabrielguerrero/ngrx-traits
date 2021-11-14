@@ -4,7 +4,7 @@ import { addPagination, PaginationState } from '../pagination';
 import { addSort, SortState } from '../sort';
 import { createFeatureSelector } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
-import { addLoadEntities, EntityAndStatusState } from '../load-entities';
+import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { addCrudEntities, CrudState } from '../crud';
 import { addFilter, FilterState } from '../filter';
 import { createEntityFeatureFactory } from 'ngrx-traits';
@@ -18,12 +18,10 @@ describe('addSingleSelection trait', () => {
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
-  interface TestState
-    extends EntityAndStatusState<Todo>,
-      SingleSelectionState {}
+  interface TestState extends LoadEntitiesState<Todo>, SingleSelectionState {}
 
   interface TestState2
-    extends EntityAndStatusState<Todo>,
+    extends LoadEntitiesState<Todo>,
       SingleSelectionState,
       FilterState<TodoFilter>,
       PaginationState,
@@ -146,12 +144,12 @@ describe('addSingleSelection trait', () => {
       expect(result).toEqual({ ...state, selectedId: undefined });
     });
 
-    it('fetchSuccess should deselect also', () => {
+    it('loadEntitiesSuccess should deselect also', () => {
       const { reducer, actions, state } = init();
       let result = reducer(state, actions.select({ id: 3 }));
       result = reducer(
         result,
-        actions.fetchSuccess({ entities: [{ id: 3, content: '3' }] })
+        actions.loadEntitiesSuccess({ entities: [{ id: 3, content: '3' }] })
       );
       expect(result.selectedId).toEqual(undefined);
     });

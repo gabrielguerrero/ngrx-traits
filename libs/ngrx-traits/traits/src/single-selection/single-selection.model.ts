@@ -1,12 +1,12 @@
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from 'ngrx-traits';
-import { EntityAndStatusState } from '../load-entities/load-entities.model';
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 export interface SingleSelectionState {
   selectedId?: number | string;
 }
 export interface EntityAndSingleSelectionState<T>
-  extends EntityAndStatusState<T>,
+  extends LoadEntitiesState<T>,
     SingleSelectionState {}
 
 export type SingleSelectionActions = {

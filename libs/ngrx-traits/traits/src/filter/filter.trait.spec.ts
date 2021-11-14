@@ -1,6 +1,6 @@
 import { createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadEntities, EntityAndStatusState } from '../load-entities';
+import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { addFilter } from '../filter/filter.trait';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
@@ -14,12 +14,12 @@ import { hot, Scheduler } from 'jest-marbles';
 import { ƟFilterActions } from './filter.model.internal';
 import { FilterState } from 'ngrx-traits/traits';
 
-
 export interface TestState
-  extends EntityAndStatusState<Todo>,
-    PaginationState , FilterState<TodoFilter>{}
+  extends LoadEntitiesState<Todo>,
+    PaginationState,
+    FilterState<TodoFilter> {}
 export interface TestState2
-  extends EntityAndStatusState<Todo>,
+  extends LoadEntitiesState<Todo>,
     FilterState<TodoFilter> {}
 
 describe('addFilter Trait', () => {
@@ -96,15 +96,15 @@ describe('addFilter Trait', () => {
   });
 
   describe('effects', () => {
-    it('should fire fetch when storeFilter is fired and no pagination', async () => {
+    it('should fire loadEntities when storeFilter is fired and no pagination', async () => {
       const { effects, actions } = initWithRemoteFilter();
       actions$ = of(
         (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
           filters: { content: 'x' },
         })
       );
-      const action = await effects.fetch$.pipe(first()).toPromise();
-      expect(action).toEqual(actions.fetch());
+      const action = await effects.loadEntities$.pipe(first()).toPromise();
+      expect(action).toEqual(actions.loadEntities());
     });
 
     it('should fire loadFirstPage when storeFilter is fired and has pagination', async () => {
@@ -114,7 +114,9 @@ describe('addFilter Trait', () => {
           filters: { content: 'x' },
         })
       );
-      const action = await effects.fetch$.pipe(take(2), toArray()).toPromise();
+      const action = await effects.loadEntities$
+        .pipe(take(2), toArray())
+        .toPromise();
       expect(action).toEqual([
         actions.clearPagesCache(),
         actions.loadFirstPage(),
