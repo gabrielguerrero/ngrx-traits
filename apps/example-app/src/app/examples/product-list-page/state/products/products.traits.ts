@@ -12,7 +12,7 @@ import {
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
-import { createEntityFeatureFactory } from 'ngrx-traits';
+import { createEntityFeatureFactory, ExtractActionsType, ReplaceEntityNames } from 'ngrx-traits';
 
 export interface ProductsState
   extends LoadEntitiesState<Product>,
@@ -21,7 +21,8 @@ export interface ProductsState
     FilterState<ProductFilter>,
     SortState<Product> {}
 
-export const productTraits = createEntityFeatureFactory(
+let entityFeatureFactory = createEntityFeatureFactory(
+  { entityName: 'product'},
   addLoadEntities<Product>(),
   addSingleSelection<Product>(),
   addAsyncAction({
@@ -36,10 +37,16 @@ export const productTraits = createEntityFeatureFactory(
   addSort<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
-)({
+);
+export const productTraits = entityFeatureFactory({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
 });
-
+productTraits.actions.;
 export const ProductActions = productTraits.actions;
 export const ProductSelectors = productTraits.selectors;
+
+const c = [addLoadEntities<Product>(), addSingleSelection<Product>()] as const;
+type G = ExtractActionsType<typeof c>;
+const g: ReplaceEntityNames<G, 'product', 'products'> = null;
+// g.

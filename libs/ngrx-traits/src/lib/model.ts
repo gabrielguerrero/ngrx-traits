@@ -39,11 +39,24 @@ export interface FeatureTraits<
 }
 
 export type FeatureFactory<
+  EntityName extends string | undefined,
+  EntitiesName extends string,
   State = any,
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>,
   M extends TraitStateMutators<State> = TraitStateMutators<State>
-> = (config: Config<State>) => FeatureTraits<State, A, S, M>;
+> = (
+  config: Config<State>
+) => FeatureTraits<
+  State,
+  EntityName extends string
+    ? ReplaceEntityNames<A, EntityName, EntitiesName>
+    : A,
+  EntityName extends string
+    ? ReplaceEntityNames<S, EntityName, EntitiesName>
+    : S,
+  M
+>;
 
 export interface Config<
   State,
@@ -194,7 +207,6 @@ export type ExtractActionsType<T> = T extends TraitFactory<any, infer A>
   ? UnionToIntersection<ExtractActionsType<ExtractArrayElementTypes<T>>>
   : never;
 
-
 export type ExtractSelectorsType<T> = T extends TraitFactory<any, any, infer S>
   ? S
   : T extends ReadonlyArray<TraitFactory>
@@ -234,3 +246,59 @@ export type PrefixProps<T, P extends string> = {
 export type PostfixProps<T, P extends string> = {
   [K in keyof T as `${Uncapitalize<string & K>}${Capitalize<P>}`]: T[K];
 };
+
+type Replace<
+  Target extends string,
+  FindKey extends string,
+  ReplaceKey extends string
+> = Target extends `${infer Prefix}${FindKey}${infer Postfix}`
+  ? `${Prefix}${Capitalize<ReplaceKey>}${Postfix}`
+  : Target;
+
+type t = Replace<'loadEntitiesSuccess', 'Entities', 'Products'>;
+
+export type ReplaceProps<
+  Target,
+  FindKey extends string,
+  ReplaceKey extends string
+> = {
+  [Prop in keyof Target as Replace<
+    string & Prop,
+    FindKey,
+    ReplaceKey
+  >]: Target[Prop];
+};
+export type ReplaceEntityNames<
+  T,
+  EntityName extends string,
+  EntitiesName extends string
+> = ReplaceProps<
+  ReplaceProps<T, 'Entities', EntitiesName>,
+  'Entity',
+  EntityName
+>;
+// type G = ReplaceProps<
+//   ReplaceProps<
+//     {
+//       loadEntities: 1;
+//       loadEntitiesSuccess: 2;
+//       selectEntities: 3;
+//       selectEntity: 4;
+//     },
+//     'Entities',
+//     'products'
+//   >,
+//   'Entity',
+//   'product'
+// >;
+//
+// const g: G = {};
+// // g.
+//   type F= ReplaceEntityNames<{
+//   loadEntities: 1;
+//   loadEntitiesSuccess: 2;
+//   selectEntities: 3;
+//   selectEntity: 4;
+// }, 'product','products'>;
+// const f: F = {};
+// f.
