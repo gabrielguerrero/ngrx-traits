@@ -33,10 +33,48 @@ export function createTraitFactory<
 >(f: TraitFactory<State, A, S, M, KEY, C, KC>) {
   return f;
 }
-
-export function createEntityFeatureFactory<F extends readonly TraitFactory[]>(
+export function createEntityFeatureFactory<
+  F extends readonly TraitFactory[]
+  // EntityName extends string,
+  // EntitiesName extends string = `${EntityName}s`
+>(
+  // entityName: EntityName,
+  // entitiesName: EntitiesName,
   ...traits: F
 ): FeatureFactory<
+  undefined,
+  '',
+  ExtractStateType<F>,
+  ExtractActionsType<F>,
+  ExtractSelectorsType<F>,
+  ExtractMutatorsType<F>
+>;
+export function createEntityFeatureFactory<
+  F extends readonly TraitFactory[],
+  EntityName extends string,
+  EntitiesName extends string = `${EntityName}s`
+>(
+  name: { entityName: EntityName; entitiesName?: EntitiesName },
+  ...traits: F
+): FeatureFactory<
+  EntityName,
+  EntitiesName,
+  ExtractStateType<F>,
+  ExtractActionsType<F>,
+  ExtractSelectorsType<F>,
+  ExtractMutatorsType<F>
+>;
+
+export function createEntityFeatureFactory<
+  F extends readonly TraitFactory[],
+  EntityName extends string,
+  EntitiesName extends string = `${EntityName}s`
+>(
+  name: { entityName: EntityName; entitiesName?: EntitiesName } | undefined,
+  ...traits: F
+): FeatureFactory<
+  EntityName,
+  EntitiesName,
   ExtractStateType<F>,
   ExtractActionsType<F>,
   ExtractSelectorsType<F>,
@@ -153,6 +191,8 @@ export function createEntityFeatureFactory<F extends readonly TraitFactory[]>(
       effects: allEffects,
     };
   }) as FeatureFactory<
+    EntityName,
+    EntitiesName,
     ExtractStateType<F>,
     ExtractActionsType<F>,
     ExtractSelectorsType<F>,
