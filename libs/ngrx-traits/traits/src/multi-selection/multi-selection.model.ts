@@ -10,41 +10,47 @@ export interface EntityAndMultipleSelectionState<Entity>
     MultipleSelectionState {}
 
 export type MultiSelectActions = {
-  multiSelect: ActionCreator<
+  selectEntities: ActionCreator<
     string,
     (props: {
       id: number | string;
     }) => { id: number | string } & TypedAction<string>
   >;
-  multiDeselect: ActionCreator<
+  deselectEntities: ActionCreator<
     string,
     (props: {
       id: number | string;
     }) => { id: number | string } & TypedAction<string>
   >;
-  multiToggleSelect: ActionCreator<
+  toggleSelectEntities: ActionCreator<
     string,
     (props: {
       id: number | string;
     }) => { id: number | string } & TypedAction<string>
   >;
-  toggleSelectAll: ActionCreator<string, () => TypedAction<string>>;
-  multiClearSelection: ActionCreator<string, () => TypedAction<string>>;
+  toggleSelectAllEntities: ActionCreator<string, () => TypedAction<string>>;
+  clearEntitiesSelection: ActionCreator<string, () => TypedAction<string>>;
 };
 
 export type MultipleSelectionSelectors<T> = {
-  isAllSelected: (state: EntityAndMultipleSelectionState<T>) => Selected;
-  selectIdsSelected: (
+  isAllEntitiesSelected: (
+    state: EntityAndMultipleSelectionState<T>
+  ) => Selected;
+  selectEntitiesIdsSelectedMap: (
     state: EntityAndMultipleSelectionState<T>
   ) => Dictionary<boolean>;
-  selectAllIdsSelected: (
+  selectEntitiesIdsSelectedList: (
     state: EntityAndMultipleSelectionState<T>
   ) => number[] | string[];
-  selectEntitiesSelected: (
+  selectEntitiesSelectedMap: (
     state: EntityAndMultipleSelectionState<T>
   ) => Dictionary<T>;
-  selectAllSelected: (state: EntityAndMultipleSelectionState<T>) => T[];
-  selectTotalSelected: (state: EntityAndMultipleSelectionState<T>) => number;
+  selectEntitiesSelectedList: (
+    state: EntityAndMultipleSelectionState<T>
+  ) => T[];
+  selectTotalSelectedEntities: (
+    state: EntityAndMultipleSelectionState<T>
+  ) => number;
 };
 
 export type MultipleSelectionMutators<T> = {

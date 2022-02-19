@@ -5,12 +5,12 @@ export function createSingleSelectionTraitActions(
   actionsGroupKey: string
 ): SingleSelectionActions {
   return {
-    select: createAction(
+    selectEntity: createAction(
       `${actionsGroupKey} Select`,
       props<{ id: string | number }>()
     ),
-    deselect: createAction(`${actionsGroupKey} Deselect`),
-    toggleSelect: createAction(
+    deselectEntity: createAction(`${actionsGroupKey} Deselect`),
+    toggleSelectEntity: createAction(
       `${actionsGroupKey} Toggle Select`,
       props<{ id: string | number }>()
     ),

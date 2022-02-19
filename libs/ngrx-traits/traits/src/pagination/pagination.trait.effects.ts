@@ -20,11 +20,13 @@ export function createPaginationTraitEffects<Entity>(
   class PaginationEffect extends TraitEffect {
     loadPage$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadPage),
-        concatLatestFrom(() => this.store.select(allSelectors.isPageInCache)),
+        ofType(allActions.loadEntitiesPage),
+        concatLatestFrom(() =>
+          this.store.select(allSelectors.isEntitiesPageInCache)
+        ),
         map(([{ forceLoad }, isInCache]) =>
           !forceLoad && isInCache
-            ? allActions.loadPageSuccess()
+            ? allActions.loadEntitiesPageSuccess()
             : allActions.loadEntities()
         )
       );
@@ -32,9 +34,9 @@ export function createPaginationTraitEffects<Entity>(
 
     preloadNextPage$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadPageSuccess),
+        ofType(allActions.loadEntitiesPageSuccess),
         concatMapTo(
-          this.store.select(allSelectors.selectPageInfo).pipe(first())
+          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
         ),
         filter(
           (pageInfo) =>
@@ -44,7 +46,7 @@ export function createPaginationTraitEffects<Entity>(
         ),
         concatMap((pageInfo) =>
           this.store
-            .select(allSelectors.isPageInCache, {
+            .select(allSelectors.isEntitiesPageInCache, {
               page: pageInfo.pageIndex + 1,
             })
             .pipe(
@@ -62,49 +64,49 @@ export function createPaginationTraitEffects<Entity>(
 
     loadFirstPage$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadFirstPage),
-        map(() => allActions.loadPage({ index: 0 }))
+        ofType(allActions.loadEntitiesFirstPage),
+        map(() => allActions.loadEntitiesPage({ index: 0 }))
       );
     });
 
     loadPreviousPage$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadPreviousPage),
+        ofType(allActions.loadEntitiesPreviousPage),
         concatMapTo(
-          this.store.select(allSelectors.selectPageInfo).pipe(first())
+          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
         ),
         map((page) =>
           page.hasPrevious
-            ? allActions.loadPage({ index: page.pageIndex - 1 })
-            : allActions.loadPageFail()
+            ? allActions.loadEntitiesPage({ index: page.pageIndex - 1 })
+            : allActions.loadEntitiesPageFail()
         )
       );
     });
 
     loadNextPage$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadNextPage),
+        ofType(allActions.loadEntitiesNextPage),
         concatMapTo(
-          this.store.select(allSelectors.selectPageInfo).pipe(first())
+          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
         ),
         map((page) =>
           page.hasNext
-            ? allActions.loadPage({ index: page.pageIndex + 1 })
-            : allActions.loadPageFail()
+            ? allActions.loadEntitiesPage({ index: page.pageIndex + 1 })
+            : allActions.loadEntitiesPageFail()
         )
       );
     });
 
     loadLastPage$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.loadLastPage),
+        ofType(allActions.loadEntitiesLastPage),
         concatMapTo(
-          this.store.select(allSelectors.selectPageInfo).pipe(first())
+          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
         ),
         map((page) =>
           page.hasNext && page.pagesCount
-            ? allActions.loadPage({ index: page.pagesCount - 1 })
-            : allActions.loadPageFail()
+            ? allActions.loadEntitiesPage({ index: page.pagesCount - 1 })
+            : allActions.loadEntitiesPageFail()
         )
       );
     });

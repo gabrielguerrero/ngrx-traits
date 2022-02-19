@@ -38,7 +38,7 @@ export function createPaginationTraitMutators<Entity>(
 
         const start = state.pagination.currentPage * state.pagination.pageSize;
         const newEntities = isPreloadNextPages
-          ? [...allSelectors.selectPageEntities(state), ...entities]
+          ? [...allSelectors.selectPageEntitiesList(state), ...entities]
           : entities;
         return adapter.setAll(newEntities, {
           ...state,

@@ -38,7 +38,7 @@ export function createPaginationTraitSelectors<Entity>(
       )
     : selectPagination;
 
-  const selectPageEntities = createSelector(
+  const selectPageEntitiesList = createSelector(
     selectEntitiesList,
     selectPaginationFiltered,
     (
@@ -54,7 +54,7 @@ export function createPaginationTraitSelectors<Entity>(
     }
   );
 
-  const selectPageInfo = createSelector(
+  const selectEntitiesPageInfo = createSelector(
     selectPaginationFiltered,
     (pagination) => {
       const pagesCount =
@@ -76,7 +76,7 @@ export function createPaginationTraitSelectors<Entity>(
     }
   );
 
-  const isPageInCache = createSelector(
+  const isEntitiesPageInCache = createSelector(
     selectPaginationFiltered,
     (pagination, { page } = { page: pagination.currentPage }) => {
       const startIndex = page * pagination.pageSize;
@@ -91,9 +91,9 @@ export function createPaginationTraitSelectors<Entity>(
     }
   );
 
-  const selectPage = createSelector(
-    selectPageEntities,
-    selectPageInfo,
+  const selectEntitiesPage = createSelector(
+    selectPageEntitiesList,
+    selectEntitiesPageInfo,
     // props look unsued but they are pass to the selectPageEntities
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (entities, pageInfo, props = { page: pageInfo.pageIndex }) => ({
@@ -102,13 +102,16 @@ export function createPaginationTraitSelectors<Entity>(
     })
   );
 
-  const selectPagedRequest = createSelector(selectPagination, (pagination) => ({
-    startIndex: pagination.pageSize * pagination.requestPage,
-    size: pagination.pageSize * pagination.pagesToCache,
-    page: pagination.requestPage,
-  }));
+  const selectEntitiesPagedRequest = createSelector(
+    selectPagination,
+    (pagination) => ({
+      startIndex: pagination.pageSize * pagination.requestPage,
+      size: pagination.pageSize * pagination.pagesToCache,
+      page: pagination.requestPage,
+    })
+  );
 
-  const isLoadingPage = createSelector(
+  const isLoadingEntitiesPage = createSelector(
     isEntitiesLoading,
     selectPagination,
     (isLoading, pagination) =>
@@ -116,11 +119,11 @@ export function createPaginationTraitSelectors<Entity>(
   );
 
   return {
-    selectPageEntities,
-    isPageInCache,
-    selectPage,
-    selectPagedRequest,
-    selectPageInfo,
-    isLoadingPage,
+    selectPageEntitiesList,
+    isEntitiesPageInCache,
+    selectEntitiesPage,
+    selectEntitiesPagedRequest,
+    selectEntitiesPageInfo,
+    isLoadingEntitiesPage,
   };
 }

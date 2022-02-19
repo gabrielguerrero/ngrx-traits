@@ -37,14 +37,14 @@ export type FilterActions<F> = {
    * If the `patch` param is set to true (default is false), the filters are merged with the previous value in the store,
    * otherwise they are replaced.
    */
-  filter: ActionCreator<string, FilterActionOverload<F>>;
+  filterEntities: ActionCreator<string, FilterActionOverload<F>>;
 };
 export type FilterSelectors<T, F> = {
   /**
    * Returns the stored filters set by the filter action
    * @param state
    */
-  selectFilter: (state: EntityAndFilterState<T, F>) => F | undefined;
+  selectEntitiesFilter: (state: EntityAndFilterState<T, F>) => F | undefined;
 };
 
 export type FilterMutators<T, F> = {

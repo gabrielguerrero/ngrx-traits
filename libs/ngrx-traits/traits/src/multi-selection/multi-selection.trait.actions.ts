@@ -5,19 +5,21 @@ export function createMultiSelectionTraitActions(
   actionsGroupKey: string
 ): MultiSelectActions {
   return {
-    multiSelect: createAction(
+    selectEntities: createAction(
       `${actionsGroupKey} Multi Select`,
       props<{ id: number | string }>()
     ),
-    multiDeselect: createAction(
+    deselectEntities: createAction(
       `${actionsGroupKey} Multi Deselect`,
       props<{ id: number | string }>()
     ),
-    multiToggleSelect: createAction(
+    toggleSelectEntities: createAction(
       `${actionsGroupKey} Multi Toggle Select`,
       props<{ id: number | string }>()
     ),
-    toggleSelectAll: createAction(`${actionsGroupKey} Toggle Select All`),
-    multiClearSelection: createAction(`${actionsGroupKey} Clear Selection`),
+    toggleSelectAllEntities: createAction(
+      `${actionsGroupKey} Toggle Select All`
+    ),
+    clearEntitiesSelection: createAction(`${actionsGroupKey} Clear Selection`),
   };
 }

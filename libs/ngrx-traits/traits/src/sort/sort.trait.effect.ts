@@ -22,10 +22,13 @@ export function createSortTraitEffect<Entity>(
   class SortEffect extends TraitEffect {
     remoteSort$ = createEffect(() => {
       return this.actions$.pipe(
-        ofType(allActions.sort, allActions.resetSort),
+        ofType(allActions.sortEntities, allActions.resetEntitiesSort),
         concatMap(() =>
-          allActions.loadFirstPage
-            ? [allActions.clearPagesCache(), allActions.loadFirstPage()]
+          allActions.loadEntitiesFirstPage
+            ? [
+                allActions.clearEntitiesPagesCache(),
+                allActions.loadEntitiesFirstPage(),
+              ]
             : [allActions.loadEntities()]
         )
       );

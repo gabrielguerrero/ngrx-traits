@@ -7,7 +7,7 @@ import {
 export function createSingleSelectionTraitSelectors<
   Entity
 >(): SingleSelectionSelectors<Entity> {
-  function selectIdSelected(state: SingleSelectionState) {
+  function selectEntityIdSelected(state: SingleSelectionState) {
     return state.selectedId;
   }
   function selectEntitySelected<Entity>(
@@ -17,7 +17,7 @@ export function createSingleSelectionTraitSelectors<
   }
 
   return {
-    selectIdSelected,
+    selectEntityIdSelected,
     selectEntitySelected,
   };
 }

@@ -6,7 +6,7 @@ import {
 import { FilterKeyedConfig } from '../filter';
 import { isFail, isLoading, isSuccess } from './load-entities.utils';
 import { createSelector } from '@ngrx/store';
-import { selectFilter } from '../filter/filter.trait.selectors';
+import { selectEntitiesFilter } from '../filter/filter.trait.selectors';
 
 export function createLoadEntitiesTraitSelectors<Entity>(
   allConfigs?: LoadEntitiesKeyedConfig<Entity> &
@@ -28,7 +28,7 @@ export function createLoadEntitiesTraitSelectors<Entity>(
   if (filterFunction && entitySelectors) {
     const selectEntitiesList = createSelector(
       entitySelectors.selectAll,
-      selectFilter,
+      selectEntitiesFilter,
       (entities, filters) =>
         filters ? entities.filter((e) => filterFunction(filters, e)) : entities
     );
@@ -38,7 +38,7 @@ export function createLoadEntitiesTraitSelectors<Entity>(
       selectEntitiesList,
       selectEntitiesMap: createSelector(
         selectors.selectEntitiesMap,
-        selectFilter,
+        selectEntitiesFilter,
         (entities, filters) => {
           const result: Dictionary<Entity> = {};
           for (const id in entities) {

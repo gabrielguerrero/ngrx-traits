@@ -74,20 +74,20 @@ export function createMultiSelectionTraitReducer<
 
   return createReducer(
     initialState,
-    on(allActions.multiSelect, (state, { id }) =>
+    on(allActions.selectEntities, (state, { id }) =>
       allMutators.multiSelect(id, state)
     ),
-    on(allActions.multiDeselect, (state, { id }) =>
+    on(allActions.deselectEntities, (state, { id }) =>
       allMutators.multiDeselect(id, state)
     ),
-    on(allActions.multiToggleSelect, (state, { id }) =>
+    on(allActions.toggleSelectEntities, (state, { id }) =>
       allMutators.multiToggleSelect(id, state)
     ),
-    on(allActions.toggleSelectAll, (state) =>
+    on(allActions.toggleSelectAllEntities, (state) =>
       allMutators.toggleSelectAll(state)
     ),
-    ...insertIf<S>(allActions.remove, () =>
-      on(allActions.remove, (state, { keys }) => {
+    ...insertIf<S>(allActions.removeEntities, () =>
+      on(allActions.removeEntities, (state, { keys }) => {
         const selectedIds = { ...state.selectedIds };
         keys.forEach((v: string | number) => {
           delete selectedIds[v];
@@ -95,34 +95,38 @@ export function createMultiSelectionTraitReducer<
         return { ...state, selectedIds };
       })
     ),
-    ...insertIf<S>(allActions.update, () =>
-      on(allActions.update, (state, { updates }) =>
+    ...insertIf<S>(allActions.updateEntities, () =>
+      on(allActions.updateEntities, (state, { updates }) =>
         updateSelectedIdsChanged(state, updates)
       )
     ),
-    on(allActions.multiClearSelection, (state) =>
+    on(allActions.clearEntitiesSelection, (state) =>
       allMutators.multiClearSelection(state)
     ),
-    ...insertIf<S>(allActions.removeAll, () =>
-      on(allActions.removeAll, (state) =>
+    ...insertIf<S>(allActions.removeAllEntities, () =>
+      on(allActions.removeAllEntities, (state) =>
         allMutators.multiClearSelection(state)
       )
     ),
     ...insertIf<S>(sortRemote, () =>
-      on(allActions.sort, (state) => allMutators.multiClearSelection(state))
+      on(allActions.sortEntities, (state) =>
+        allMutators.multiClearSelection(state)
+      )
     ),
-    ...insertIf<S>(allActions.filter, () =>
-      on(allActions.filter, (state) => allMutators.multiClearSelection(state))
+    ...insertIf<S>(allActions.filterEntities, () =>
+      on(allActions.filterEntities, (state) =>
+        allMutators.multiClearSelection(state)
+      )
     ),
-    ...insertIf<S>(!allActions.loadPageSuccess, () =>
+    ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) =>
         allMutators.multiClearSelection(state)
       )
     ),
     ...insertIf<S>(
-      !!allActions.loadPageSuccess && paginationCacheType === 'partial',
+      !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
-        on(allActions.loadPageSuccess, (state) =>
+        on(allActions.loadEntitiesPageSuccess, (state) =>
           allMutators.multiClearSelection(state)
         )
     )

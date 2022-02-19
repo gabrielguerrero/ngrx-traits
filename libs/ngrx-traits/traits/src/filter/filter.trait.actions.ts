@@ -7,7 +7,7 @@ export function createFilterTraitActions<F>(
   actionsGroupKey: string
 ): FilterActions<F> {
   const actions: ƟFilterActions<F> = {
-    filter: createAction(
+    filterEntities: createAction(
       `${actionsGroupKey} filter`,
       (props?: {
         filters: F | Partial<F>;
@@ -19,7 +19,7 @@ export function createFilterTraitActions<F>(
         patch: props?.patch,
       })
     ) as ActionCreator<string, FilterActionOverload<F>>,
-    storeFilter: createAction(
+    storeEntitiesFilter: createAction(
       `${actionsGroupKey} store filter`,
       (props: { filters?: F; patch?: boolean }) => ({
         filters: props?.filters,

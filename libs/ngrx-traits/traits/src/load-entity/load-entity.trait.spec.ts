@@ -20,6 +20,7 @@ describe('addLoadEntity trait', () => {
 
   function init() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       ...addLoadEntity({
         entityName: 'client',
         actionProps: props<{ id: string }>(),
@@ -35,6 +36,7 @@ describe('addLoadEntity trait', () => {
 
   function initMultiple() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       ...addLoadEntity({
         entityName: 'client',
         actionProps: props<{ id: string }>(),

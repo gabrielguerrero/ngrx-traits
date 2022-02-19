@@ -40,22 +40,22 @@ export function createTraitFactory<
 >(f: TraitFactory<State, A, S, M, KEY, C, KC>) {
   return f;
 }
-export function createEntityFeatureFactory<
-  F extends readonly TraitFactory[]
-  // EntityName extends string,
-  // EntitiesName extends string = `${EntityName}s`
->(
-  // entityName: EntityName,
-  // entitiesName: EntitiesName,
-  ...traits: F
-): FeatureFactory<
-  undefined,
-  '',
-  ExtractStateType<F>,
-  ExtractActionsType<F>,
-  ExtractSelectorsType<F>,
-  ExtractMutatorsType<F>
->;
+// export function createEntityFeatureFactory<
+//   F extends readonly TraitFactory[]
+//   // EntityName extends string,
+//   // EntitiesName extends string = `${EntityName}s`
+// >(
+//   // entityName: EntityName,
+//   // entitiesName: EntitiesName,
+//   ...traits: F
+// ): FeatureFactory<
+//   undefined,
+//   '',
+//   ExtractStateType<F>,
+//   ExtractActionsType<F>,
+//   ExtractSelectorsType<F>,
+//   ExtractMutatorsType<F>
+// >;
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
   EntityName extends string,
@@ -131,10 +131,12 @@ export function createEntityFeatureFactory<
       allFeatureSelectors,
       allConfigs
     );
-
+    // TODO we need to create a function that renames all actions selectors and maybe mutators? using the probided entityName
     return {
       actions: allActions,
       selectors: allFeatureSelectors,
+      // TODO remove mutators from result, they are not used after built
+      // and simplifies the api
       mutators: allMutators,
       initialState,
       reducer: reducer ?? createReducer(initialState),

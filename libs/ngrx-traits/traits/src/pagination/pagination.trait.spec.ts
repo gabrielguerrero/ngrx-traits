@@ -21,6 +21,7 @@ export interface PaginationTestState
   extends TestState,
     FilterState<TodoFilter> {}
 export interface PaginationTestState2 extends TestState, CrudState<Todo> {}
+
 describe('Pagination Test', () => {
   let actions$: Actions;
 
@@ -31,6 +32,7 @@ describe('Pagination Test', () => {
   function initWithRemoteFilterWithPagination(cacheType: CacheType = 'full') {
     const featureSelector = createFeatureSelector<PaginationTestState>('test');
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addFilter<Todo, TodoFilter>(),
       addPagination<Todo>({ cacheType })
@@ -52,6 +54,7 @@ describe('Pagination Test', () => {
   function initWithCrudWithPagination(cacheType: CacheType = 'full') {
     const featureSelector = createFeatureSelector<PaginationTestState2>('test');
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addCrudEntities<Todo>(),
       addPagination<Todo>({ cacheType })
@@ -99,7 +102,10 @@ describe('Pagination Test', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination();
 
-      const state = reducer(initialState, actions.loadPage({ index: 3 }));
+      const state = reducer(
+        initialState,
+        actions.loadEntitiesPage({ index: 3 })
+      );
 
       expect(state).toEqual({
         ...initialState,
@@ -132,7 +138,7 @@ describe('Pagination Test', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination();
 
-      const state = reducer(initialState, actions.loadPageSuccess());
+      const state = reducer(initialState, actions.loadEntitiesPageSuccess());
 
       expect(state).toEqual({
         ...initialState,
@@ -140,11 +146,11 @@ describe('Pagination Test', () => {
       });
     });
 
-    it('loadPageFail should store set status to fail ', () => {
+    it('loadEntitiesPageFail should store set status to fail ', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination();
 
-      const state = reducer(initialState, actions.loadPageFail());
+      const state = reducer(initialState, actions.loadEntitiesPageFail());
 
       expect(state).toEqual({
         ...initialState,
@@ -165,7 +171,7 @@ describe('Pagination Test', () => {
           cache: { ...initialState.pagination.cache, start: 20, end: 60 },
         },
       };
-      const state = reducer(s, actions.clearPagesCache());
+      const state = reducer(s, actions.clearEntitiesPagesCache());
 
       expect(state).toEqual({
         ...s,
@@ -202,7 +208,7 @@ describe('Pagination Test', () => {
 
       let state = reducer(
         initialState,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 0,
         })
       );
@@ -220,7 +226,7 @@ describe('Pagination Test', () => {
       const next3pages = todos.slice(60, 120);
       state = reducer(
         state,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 3,
         })
       );
@@ -237,7 +243,7 @@ describe('Pagination Test', () => {
       const last3pages = todos.slice(120, todos.length);
       state = reducer(
         state,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 6,
         })
       );
@@ -254,7 +260,7 @@ describe('Pagination Test', () => {
       const page2To4 = todos.slice(20, 80);
       state = reducer(
         state,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 1,
         })
       );
@@ -277,7 +283,7 @@ describe('Pagination Test', () => {
 
       let state = reducer(
         initialState,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 0,
         })
       );
@@ -295,7 +301,7 @@ describe('Pagination Test', () => {
       const next3pages = todos.slice(60, 120);
       state = reducer(
         state,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 3,
         })
       );
@@ -314,7 +320,7 @@ describe('Pagination Test', () => {
       const last3pages = todos.slice(120, todos.length);
       state = reducer(
         state,
-        actions.loadPage({
+        actions.loadEntitiesPage({
           index: 6,
         })
       );
@@ -349,7 +355,7 @@ describe('Pagination Test', () => {
             cache: { ...initialState.pagination.cache, start: 20, end: 60 },
           },
         };
-        const state = reducer(s, actions.removeAll());
+        const state = reducer(s, actions.removeAllEntities());
 
         expect(state).toEqual({
           ...s,
@@ -366,7 +372,7 @@ describe('Pagination Test', () => {
 
         let state = reducer(
           initialState,
-          actions.loadPage({
+          actions.loadEntitiesPage({
             index: 0,
           })
         );
@@ -380,7 +386,7 @@ describe('Pagination Test', () => {
 
         const resultState = reducer(
           state,
-          actions.add(
+          actions.addEntities(
             { id: 123123, content: 'some' },
             { id: 324324, content: 'some2' }
           )
@@ -397,7 +403,7 @@ describe('Pagination Test', () => {
 
         let state = reducer(
           initialState,
-          actions.loadPage({
+          actions.loadEntitiesPage({
             index: 0,
           })
         );
@@ -409,7 +415,7 @@ describe('Pagination Test', () => {
           })
         );
 
-        const resultState = reducer(state, actions.remove(1, 2));
+        const resultState = reducer(state, actions.removeEntities(1, 2));
 
         expect(resultState.pagination).toEqual({
           ...state.pagination,
@@ -421,59 +427,59 @@ describe('Pagination Test', () => {
   });
 
   describe('selectors', () => {
-    it('selectPageEntities should the rights entities array for each page', () => {
+    it('selectPageEntitiesList should the return entities array for each page', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
       const state = pageState(initialState, todos, 2, 0, 75);
       // if no page return currentPage
-      expect(selectors.selectPageEntities.projector(state)).toEqual(
+      expect(selectors.selectPageEntitiesList.projector(state)).toEqual(
         todos.slice(40, 60)
       );
       // with page parameter
       expect(
-        selectors.selectPageEntities.projector(state, { page: 0 })
+        selectors.selectPageEntitiesList.projector(state, { page: 0 })
       ).toEqual(todos.slice(0, 20));
       expect(
-        selectors.selectPageEntities.projector(state, { page: 1 })
+        selectors.selectPageEntitiesList.projector(state, { page: 1 })
       ).toEqual(todos.slice(20, 40));
       expect(
-        selectors.selectPageEntities.projector(state, { page: 2 })
+        selectors.selectPageEntitiesList.projector(state, { page: 2 })
       ).toEqual(todos.slice(40, 60));
       expect(
-        selectors.selectPageEntities.projector(state, { page: 3 })
+        selectors.selectPageEntitiesList.projector(state, { page: 3 })
       ).toEqual(todos.slice(60, 75));
     });
 
-    it('isPageInCache should return true or false deping on the page', () => {
+    it('isEntitiesPageInCache should return true or false deping on the page', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
       //TODO check with cache valid and disabled
       const state = pageState(initialState, todos, 2, 0, 60);
       // using currentPage
-      expect(selectors.isPageInCache.projector(state)).toEqual(true);
+      expect(selectors.isEntitiesPageInCache.projector(state)).toEqual(true);
       // using explicit page
-      expect(selectors.isPageInCache.projector(state, { page: 0 })).toEqual(
-        true
-      );
-      expect(selectors.isPageInCache.projector(state, { page: 1 })).toEqual(
-        true
-      );
-      expect(selectors.isPageInCache.projector(state, { page: 2 })).toEqual(
-        true
-      );
-      expect(selectors.isPageInCache.projector(state, { page: 3 })).toEqual(
-        false
-      );
-      expect(selectors.isPageInCache.projector(state, { page: 4 })).toEqual(
-        false
-      );
-      expect(selectors.isPageInCache.projector(state, { page: 5 })).toEqual(
-        false
-      );
+      expect(
+        selectors.isEntitiesPageInCache.projector(state, { page: 0 })
+      ).toEqual(true);
+      expect(
+        selectors.isEntitiesPageInCache.projector(state, { page: 1 })
+      ).toEqual(true);
+      expect(
+        selectors.isEntitiesPageInCache.projector(state, { page: 2 })
+      ).toEqual(true);
+      expect(
+        selectors.isEntitiesPageInCache.projector(state, { page: 3 })
+      ).toEqual(false);
+      expect(
+        selectors.isEntitiesPageInCache.projector(state, { page: 4 })
+      ).toEqual(false);
+      expect(
+        selectors.isEntitiesPageInCache.projector(state, { page: 5 })
+      ).toEqual(false);
     });
 
-    it('selectPage ', () => {
+    it('selectEntitiesPage ', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
       expect(
-        selectors.selectPage.projector(
+        selectors.selectEntitiesPage.projector(
           pageState(initialState, todos.slice(0, 75), 2, 0, 75, 75)
         )
       ).toEqual({
@@ -488,7 +494,7 @@ describe('Pagination Test', () => {
       });
 
       expect(
-        selectors.selectPage.projector(
+        selectors.selectEntitiesPage.projector(
           pageState(initialState, todos.slice(0, 75), 2, 0, 75, 75),
           { page: 1 }
         )
@@ -504,10 +510,10 @@ describe('Pagination Test', () => {
       });
     });
 
-    it('selectPageInfo ', () => {
+    it('selectEntitiesPageInfo ', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
       expect(
-        selectors.selectPageInfo.projector(
+        selectors.selectEntitiesPageInfo.projector(
           pageState(initialState, todos.slice(0, 75), 0, 0, 75, 75)
         )
       ).toEqual({
@@ -520,7 +526,7 @@ describe('Pagination Test', () => {
         cacheType: 'full',
       });
       expect(
-        selectors.selectPageInfo.projector(
+        selectors.selectEntitiesPageInfo.projector(
           pageState(initialState, todos.slice(0, 75), 1, 0, 75, 75)
         )
       ).toEqual({
@@ -533,7 +539,7 @@ describe('Pagination Test', () => {
         cacheType: 'full',
       });
       expect(
-        selectors.selectPageInfo.projector(
+        selectors.selectEntitiesPageInfo.projector(
           pageState(initialState, todos.slice(0, 75), 2, 0, 75, 75)
         )
       ).toEqual({
@@ -546,7 +552,7 @@ describe('Pagination Test', () => {
         cacheType: 'full',
       });
       expect(
-        selectors.selectPageInfo.projector(
+        selectors.selectEntitiesPageInfo.projector(
           pageState(initialState, todos.slice(0, 75), 3, 0, 75, 75)
         )
       ).toEqual({
@@ -560,9 +566,11 @@ describe('Pagination Test', () => {
       });
     });
 
-    it('selectPagedRequest ', () => {
+    it('selectEntitiesPagedRequest ', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
-      expect(selectors.selectPagedRequest.projector(initialState)).toEqual({
+      expect(
+        selectors.selectEntitiesPagedRequest.projector(initialState)
+      ).toEqual({
         page: 0,
         size: 60,
         startIndex: 0,
@@ -577,7 +585,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.selectPagedRequest.projector({
+        selectors.selectEntitiesPagedRequest.projector({
           ...testState,
           pagination: { ...testState.pagination, requestPage: 3 },
         })
@@ -588,7 +596,7 @@ describe('Pagination Test', () => {
       });
     });
 
-    it('isLoadingPage should return false if status is loading and currentPage is different to requestPage', () => {
+    it('isLoadingEntitiesPage should return false if status is loading and currentPage is different to requestPage', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
 
       const testState = pageState(
@@ -600,7 +608,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.isLoadingPage.projector({
+        selectors.isLoadingEntitiesPage.projector({
           ...testState,
           status: 'loading',
           pagination: { ...testState.pagination, requestPage: 3 },
@@ -608,7 +616,7 @@ describe('Pagination Test', () => {
       ).toEqual(false);
     });
 
-    it('isLoadingPage should return true if status is loading and currentPage is same to requestPage', () => {
+    it('isLoadingEntitiesPage should return true if status is loading and currentPage is same to requestPage', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
 
       const testState = pageState(
@@ -620,7 +628,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.isLoadingPage.projector({
+        selectors.isLoadingEntitiesPage.projector({
           ...testState,
           status: 'loading',
           pagination: { ...testState.pagination, requestPage: 3 },
@@ -628,7 +636,7 @@ describe('Pagination Test', () => {
       ).toEqual(true);
     });
 
-    it('isLoadingPage should return false if status is success and currentPage is same to requestPage', () => {
+    it('isLoadingEntitiesPage should return false if status is success and currentPage is same to requestPage', () => {
       const { selectors, initialState } = initWithRemoteFilterWithPagination();
 
       const testState = pageState(
@@ -640,7 +648,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.isLoadingPage.projector({
+        selectors.isLoadingEntitiesPage.projector({
           ...testState,
           status: 'success',
           pagination: { ...testState.pagination, requestPage: 3 },
@@ -650,137 +658,140 @@ describe('Pagination Test', () => {
   });
 
   describe('effects', () => {
-    it('should fire loadPage(0) if loadFirstPage was fired ', async () => {
+    it('should fire loadEntitiesPage(0) if loadEntitiesFirstPage was fired ', async () => {
       const { effects, actions } = initWithRemoteFilterWithPagination();
-      actions$ = of(actions.loadFirstPage());
+      actions$ = of(actions.loadEntitiesFirstPage());
       const action = await effects.loadFirstPage$.pipe(first()).toPromise();
-      expect(action).toEqual(actions.loadPage({ index: 0 }));
+      expect(action).toEqual(actions.loadEntitiesPage({ index: 0 }));
     });
 
     describe('loadPreviousPage$', () => {
-      it('should fire loadPage(1) if loadPreviousPage was fired and current page is 2 ', async () => {
+      it('should fire loadEntitiesPage(1) if loadEntitiesPreviousPage was fired and current page is 2 ', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilterWithPagination();
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasPrevious: true,
           pageIndex: 2,
         } as PageInfoModel);
-        actions$ = of(actions.loadPreviousPage());
+        actions$ = of(actions.loadEntitiesPreviousPage());
         const action = await effects.loadPreviousPage$
           .pipe(first())
           .toPromise();
-        expect(action).toEqual(actions.loadPage({ index: 1 }));
+        expect(action).toEqual(actions.loadEntitiesPage({ index: 1 }));
       });
 
-      it('should fire loadPageFail() if loadPreviousPage was there is no previous page ', async () => {
+      it('should fire loadEntitiesPageFail() if loadEntitiesPreviousPage was there is no previous page ', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilterWithPagination();
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasPrevious: false,
           pageIndex: 0,
         } as PageInfoModel);
-        actions$ = of(actions.loadPreviousPage());
+        actions$ = of(actions.loadEntitiesPreviousPage());
         const action = await effects.loadPreviousPage$
           .pipe(first())
           .toPromise();
-        expect(action).toEqual(actions.loadPageFail());
+        expect(action).toEqual(actions.loadEntitiesPageFail());
       });
     });
 
-    describe('loadNextPage$', () => {
-      it('should fire loadPage(3) if loadNextPage was fired and current page is 2 ', async () => {
+    describe('loadEntitiesNextPage$', () => {
+      it('should fire loadEntitiesPage(3) if loadEntitiesNextPage was fired and current page is 2 ', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilterWithPagination();
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasNext: true,
           pageIndex: 2,
         } as PageInfoModel);
-        actions$ = of(actions.loadNextPage());
+        actions$ = of(actions.loadEntitiesNextPage());
         const action = await effects.loadNextPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.loadPage({ index: 3 }));
+        expect(action).toEqual(actions.loadEntitiesPage({ index: 3 }));
       });
 
-      it('should fire loadPageFail() if loadNextPage was there is no next page ', async () => {
+      it('should fire loadEntitiesPageFail() if loadEntitiesNextPage was there is no next page ', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilterWithPagination();
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasNext: false,
           pageIndex: 2,
         } as PageInfoModel);
-        actions$ = of(actions.loadNextPage());
+        actions$ = of(actions.loadEntitiesNextPage());
         const action = await effects.loadNextPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.loadPageFail());
+        expect(action).toEqual(actions.loadEntitiesPageFail());
       });
     });
 
-    describe('loadLastPage$', () => {
-      it('should fire loadPage(9) if loadLastPage was fired and pagesCount is 10 ', async () => {
+    describe('loadEntitiesLastPage$', () => {
+      it('should fire loadEntitiesPage(9) if loadEntitiesLastPage was fired and pagesCount is 10 ', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilterWithPagination();
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasNext: true,
           pageIndex: 2,
           pagesCount: 10,
         } as PageInfoModel);
-        actions$ = of(actions.loadLastPage());
+        actions$ = of(actions.loadEntitiesLastPage());
         const action = await effects.loadLastPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.loadPage({ index: 9 }));
+        expect(action).toEqual(actions.loadEntitiesPage({ index: 9 }));
       });
 
-      it('should fire loadPageFail() if loadLastPage was there is no next page ', async () => {
+      it('should fire loadEntitiesPageFail() if loadEntitiesLastPage was there is no next page ', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilterWithPagination();
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasNext: false,
           pageIndex: 2,
         } as PageInfoModel);
-        actions$ = of(actions.loadLastPage());
+        actions$ = of(actions.loadEntitiesLastPage());
         const action = await effects.loadLastPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.loadPageFail());
+        expect(action).toEqual(actions.loadEntitiesPageFail());
       });
     });
 
     describe('loadPage$', () => {
-      it('when loadPage is fired should trigger loadPageSuccess if isPageInCache is true ', async () => {
+      it('when loadPage is fired should trigger loadEntitiesPageSuccess if isEntitiesPageInCache is true ', async () => {
         const { effects, selectors, actions, mockStore } =
           initWithRemoteFilterWithPagination();
-        actions$ = of(actions.loadPage({ index: 1 }));
-        mockStore.overrideSelector(selectors.isPageInCache, true);
+        actions$ = of(actions.loadEntitiesPage({ index: 1 }));
+        mockStore.overrideSelector(selectors.isEntitiesPageInCache, true);
         const action = await effects.loadPage$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.loadPageSuccess());
+        expect(action).toEqual(actions.loadEntitiesPageSuccess());
       });
 
-      it('when loadPage is fired should trigger loadEntities if isPageInCache is false ', async () => {
+      it('when loadPage is fired should trigger loadEntities if isEntitiesPageInCache is false ', async () => {
         const { effects, selectors, actions, mockStore } =
           initWithRemoteFilterWithPagination();
-        actions$ = of(actions.loadPage({ index: 1 }));
-        mockStore.overrideSelector(selectors.isPageInCache, false);
+        actions$ = of(actions.loadEntitiesPage({ index: 1 }));
+        mockStore.overrideSelector(selectors.isEntitiesPageInCache, false);
         const action = await effects.loadPage$.pipe(first()).toPromise();
         expect(action).toEqual(actions.loadEntities());
       });
 
-      it('when loadPage is fired should trigger loadEntities if isPageInCache is true and forceLoad is true ', async () => {
+      it('when loadEntitiesPage is fired should trigger loadEntities if isEntitiesPageInCache is true and forceLoad is true ', async () => {
         const { effects, selectors, actions, mockStore } =
           initWithRemoteFilterWithPagination();
-        actions$ = of(actions.loadPage({ index: 1, forceLoad: true }));
-        mockStore.overrideSelector(selectors.isPageInCache, true);
+        actions$ = of(actions.loadEntitiesPage({ index: 1, forceLoad: true }));
+        mockStore.overrideSelector(selectors.isEntitiesPageInCache, true);
         const action = await effects.loadPage$.pipe(first()).toPromise();
         expect(action).toEqual(actions.loadEntities());
       });
     });
 
-    describe('preloadNextPage$', () => {
+    describe('preloadEntitiesNextPage$', () => {
       async function init(
         cacheType: CacheType,
         total: number | null = 10 * 20,
         hasNext = true,
-        isPageInCache = false
+        isEntitiesPageInCache = false
       ) {
         const { effects, selectors, actions, mockStore } =
           initWithRemoteFilterWithPagination(cacheType);
-        actions$ = of(actions.loadPageSuccess());
-        mockStore.overrideSelector(selectors.isPageInCache, isPageInCache);
-        mockStore.overrideSelector(selectors.selectPageInfo, {
+        actions$ = of(actions.loadEntitiesPageSuccess());
+        mockStore.overrideSelector(
+          selectors.isEntitiesPageInCache,
+          isEntitiesPageInCache
+        );
+        mockStore.overrideSelector(selectors.selectEntitiesPageInfo, {
           hasNext,
           pageIndex: 3,
           pagesCount: 10,

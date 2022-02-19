@@ -52,30 +52,34 @@ export function createSingleSelectionTraitReducer<
 
   return createReducer(
     initialState,
-    on(allActions.select, (state, { id }) => allMutators.select(id, state)),
-    on(allActions.deselect, (state) => allMutators.deselect(state)),
-    on(allActions.toggleSelect, (state, { id }) =>
+    on(allActions.selectEntity, (state, { id }) =>
+      allMutators.select(id, state)
+    ),
+    on(allActions.deselectEntity, (state) => allMutators.deselect(state)),
+    on(allActions.toggleSelectEntity, (state, { id }) =>
       allMutators.toggleSelect(id, state)
     ),
-    ...insertIf<S>(allActions.removeAll, () =>
-      on(allActions.removeAll, (state) => allMutators.deselect(state))
+    ...insertIf<S>(allActions.removeAllEntities, () =>
+      on(allActions.removeAllEntities, (state) => allMutators.deselect(state))
     ),
     ...insertIf<S>(sortRemote, () =>
-      on(allActions.sort, (state) => allMutators.deselect(state))
+      on(allActions.sortEntities, (state) => allMutators.deselect(state))
     ),
-    ...insertIf<S>(allActions.filter, () =>
-      on(allActions.filter, (state) => allMutators.deselect(state))
+    ...insertIf<S>(allActions.filterEntities, () =>
+      on(allActions.filterEntities, (state) => allMutators.deselect(state))
     ),
-    ...insertIf<S>(!allActions.loadPageSuccess, () =>
+    ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) => allMutators.deselect(state))
     ),
     ...insertIf<S>(
-      !!allActions.loadPageSuccess && paginationCacheType === 'partial',
+      !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
-        on(allActions.loadPageSuccess, (state) => allMutators.deselect(state))
+        on(allActions.loadEntitiesPageSuccess, (state) =>
+          allMutators.deselect(state)
+        )
     ),
-    ...insertIf<S>(allActions.remove, () =>
-      on(allActions.remove, (state, { keys }) => {
+    ...insertIf<S>(allActions.removeEntities, () =>
+      on(allActions.removeEntities, (state, { keys }) => {
         const shouldDeselect = keys.some(
           (v: string | number) => v === state.selectedId
         );
@@ -87,8 +91,8 @@ export function createSingleSelectionTraitReducer<
           : state;
       })
     ),
-    ...insertIf<S>(allActions.update, () =>
-      on(allActions.update, (state, { updates }) => {
+    ...insertIf<S>(allActions.updateEntities, () =>
+      on(allActions.updateEntities, (state, { updates }) => {
         const change = updates.find((updated) => {
           const id = adapter.selectId(updated.changes as Entity);
           return id && id !== updated.id && state.selectedId === updated.id;

@@ -28,7 +28,7 @@ export function createFilterTraitReducer<
 ) {
   return createReducer(
     initialState,
-    on(allActions.storeFilter, (state, { filters }) =>
+    on(allActions.storeEntitiesFilter, (state, { filters }) =>
       allMutators.setFilters(filters, state)
     )
   );

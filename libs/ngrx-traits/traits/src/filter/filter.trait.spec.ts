@@ -28,6 +28,7 @@ describe('addFilter Trait', () => {
   function initWithRemoteFilter() {
     const featureSelector = createFeatureSelector<TestState2>('test');
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addFilter<Todo, TodoFilter>()
     )({
@@ -48,6 +49,7 @@ describe('addFilter Trait', () => {
   function initWithRemoteFilterWithPagination() {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addFilter<Todo, TodoFilter>(),
       addPagination<Todo>()
@@ -72,7 +74,7 @@ describe('addFilter Trait', () => {
       const { reducer, actions, initialState } = initWithRemoteFilter();
       const state = reducer(
         initialState,
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -84,14 +86,16 @@ describe('addFilter Trait', () => {
     it('selectFilter should return stored filter', () => {
       const { reducer, actions, initialState, selectors } =
         initWithRemoteFilter();
-      selectors.selectFilter.projector;
+      selectors.selectEntitiesFilter.projector;
       const state = reducer(
         initialState,
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
-      expect(selectors.selectFilter.projector(state)).toEqual({ content: 'x' });
+      expect(selectors.selectEntitiesFilter.projector(state)).toEqual({
+        content: 'x',
+      });
     });
   });
 
@@ -99,7 +103,7 @@ describe('addFilter Trait', () => {
     it('should fire loadEntities when storeFilter is fired and no pagination', async () => {
       const { effects, actions } = initWithRemoteFilter();
       actions$ = of(
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -110,7 +114,7 @@ describe('addFilter Trait', () => {
     it('should fire loadFirstPage when storeFilter is fired and has pagination', async () => {
       const { effects, actions } = initWithRemoteFilterWithPagination();
       actions$ = of(
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -118,17 +122,17 @@ describe('addFilter Trait', () => {
         .pipe(take(2), toArray())
         .toPromise();
       expect(action).toEqual([
-        actions.clearPagesCache(),
-        actions.loadFirstPage(),
+        actions.clearEntitiesPagesCache(),
+        actions.loadEntitiesFirstPage(),
       ]);
     });
     describe('storeFilter$', () => {
       it('should fire immediately  storeFilter action after filter if forceLoad is true', async () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilter();
-        mockStore.overrideSelector(selectors.selectFilter, {});
+        mockStore.overrideSelector(selectors.selectEntitiesFilter, {});
         actions$ = of(
-          actions.filter({ filters: { content: 'x' }, forceLoad: true })
+          actions.filterEntities({ filters: { content: 'x' }, forceLoad: true })
         );
         const action = await effects
           .storeFilter$({
@@ -138,7 +142,9 @@ describe('addFilter Trait', () => {
           .pipe(take(1))
           .toPromise();
         expect(action).toEqual(
-          (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+          (
+            actions as unknown as ƟFilterActions<TodoFilter>
+          ).storeEntitiesFilter({
             filters: { content: 'x' },
           })
         );
@@ -147,13 +153,15 @@ describe('addFilter Trait', () => {
       it('should fire a debounced storeFilter action after filter action is fired', () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilter();
-        mockStore.overrideSelector(selectors.selectFilter, {});
+        mockStore.overrideSelector(selectors.selectEntitiesFilter, {});
         actions$ = hot('a-b', {
-          a: actions.filter({ filters: { content: 'x' } }),
-          b: actions.filter({ filters: { content: 'y' } }),
+          a: actions.filterEntities({ filters: { content: 'x' } }),
+          b: actions.filterEntities({ filters: { content: 'y' } }),
         });
         const expected = hot('-----b', {
-          b: (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+          b: (
+            actions as unknown as ƟFilterActions<TodoFilter>
+          ).storeEntitiesFilter({
             filters: { content: 'y' },
           }),
         });
@@ -168,12 +176,14 @@ describe('addFilter Trait', () => {
       it('should not fire  storeFilter action after filter if payload is the same as before', () => {
         const { effects, actions, mockStore, selectors } =
           initWithRemoteFilter();
-        mockStore.overrideSelector(selectors.selectFilter, {});
+        mockStore.overrideSelector(selectors.selectEntitiesFilter, {});
         actions$ = hot('a----a', {
-          a: actions.filter({ filters: { content: 'x' } }),
+          a: actions.filterEntities({ filters: { content: 'x' } }),
         });
         const expected = hot('---a', {
-          a: (actions as unknown as ƟFilterActions<TodoFilter>).storeFilter({
+          a: (
+            actions as unknown as ƟFilterActions<TodoFilter>
+          ).storeEntitiesFilter({
             filters: { content: 'x' },
           }),
         });

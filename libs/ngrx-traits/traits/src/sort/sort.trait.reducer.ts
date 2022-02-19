@@ -35,7 +35,7 @@ export function createSortTraitReducer<
 
   return createReducer(
     initialState,
-    on(allActions.sort, (state, { active, direction }) =>
+    on(allActions.sortEntities, (state, { active, direction }) =>
       !remote
         ? allMutators.sortEntities({ active, direction }, state)
         : {
@@ -43,7 +43,7 @@ export function createSortTraitReducer<
             sort: { ...state.sort, current: { active, direction } },
           }
     ),
-    on(allActions.resetSort, (state) =>
+    on(allActions.resetEntitiesSort, (state) =>
       state.sort?.default
         ? !remote
           ? allMutators.sortEntities(state.sort?.default, state)

@@ -42,7 +42,7 @@ export function multiClearSelection<S extends MultipleSelectionState>(
   return { ...state, selectedIds: {} };
 }
 
-export function selectTotalSelected<
+export function selectTotalSelectedEntities<
   T,
   S extends EntityAndMultipleSelectionState<T>
 >(state: S): number {

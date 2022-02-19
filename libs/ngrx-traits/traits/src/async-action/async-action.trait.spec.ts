@@ -12,6 +12,7 @@ describe('addApiCall trait', () => {
 
   function init() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addAsyncAction({
         name: 'createClient',
         actionProps: props<{ name: string }>(),
@@ -26,6 +27,7 @@ describe('addApiCall trait', () => {
 
   function initMultiple() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addAsyncAction({
         name: 'createClient',
         actionProps: props<{ name: string }>(),
