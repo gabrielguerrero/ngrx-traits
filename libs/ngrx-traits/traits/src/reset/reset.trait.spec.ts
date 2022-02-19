@@ -1,7 +1,7 @@
 import { createAction, createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addFilterEntities } from '../filter/filter.trait';
+import { addFilterEntities } from '../filter-entities/filter-entities.trait';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
@@ -10,7 +10,7 @@ import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { FilterEntitiesState } from '../filter';
+import { FilterEntitiesState } from '../filter-entities';
 import { addResetEntitiesState } from './reset.trait';
 
 export interface TestState

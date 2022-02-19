@@ -7,7 +7,7 @@ import { Actions } from '@ngrx/effects';
 import { LoadEntitiesState } from './load-entities.model';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addFilterEntities } from '../filter/filter.trait';
+import { addFilterEntities } from '../filter-entities/filter-entities.trait';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { FilterEntitiesState } from 'ngrx-traits/traits';
 

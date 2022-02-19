@@ -10,7 +10,7 @@ import { createPaginationTraitActions } from './pagination.trait.actions';
 import {
   FilterEntitiesActions,
   FilterEntitiesKeyedConfig,
-} from '../filter/filter.model';
+} from '../filter-entities/filter-entities.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -24,7 +24,7 @@ import {
 } from './pagination.trait.reducer';
 import { createPaginationTraitEffects } from './pagination.trait.effects';
 import { createTraitFactory } from 'ngrx-traits';
-import { CrudEntitiesActions } from '../crud/crud.model';
+import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import { createPaginationTraitMutators } from './pagination.trait.mutators';
 import { ƟPaginationActions } from './pagination.model.internal';
 import {

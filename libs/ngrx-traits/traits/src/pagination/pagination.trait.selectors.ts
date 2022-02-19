@@ -5,7 +5,7 @@ import {
   EntitiesPaginationState,
 } from './pagination.model';
 import { LoadEntitiesSelectors } from '../load-entities/load-entities.model';
-import { FilterEntitiesKeyedConfig } from '../filter/filter.model';
+import { FilterEntitiesKeyedConfig } from '../filter-entities/filter-entities.model';
 
 export function createPaginationTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>,
