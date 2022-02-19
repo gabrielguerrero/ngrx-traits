@@ -39,8 +39,8 @@ export interface FeatureTraits<
 }
 
 export type FeatureFactory<
-  EntityName extends string | undefined,
-  EntitiesName extends string,
+  EntityName extends string | undefined, // TODO make required
+  EntitiesName extends string, // TODO default to `${EntityName}s`
   State = any,
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>,
@@ -63,7 +63,7 @@ export interface Config<
   F extends MemoizedSelector<object, State> = MemoizedSelector<object, State>
 > {
   actionsGroupKey: string;
-  featureSelector: F;
+  featureSelector: F | string;
 }
 
 export type FeatureSelectors<State, S extends TraitSelectors<State>> = {
@@ -189,9 +189,9 @@ export interface TraitFactory<
 }
 type ExtractArrayElementTypes<X> = X extends ReadonlyArray<infer T> ? T : never;
 
-type UnionToIntersection<T> = (T extends any ? (x: T) => any : never) extends (
-  x: infer R
-) => any
+export type UnionToIntersection<T> = (
+  T extends any ? (x: T) => any : never
+) extends (x: infer R) => any
   ? R
   : never;
 
@@ -199,18 +199,24 @@ export type ExtractStateType<T> = T extends TraitFactory<infer State>
   ? State
   : T extends ReadonlyArray<TraitFactory>
   ? UnionToIntersection<ExtractStateType<ExtractArrayElementTypes<T>>>
+  : T extends FeatureTraits<infer State>
+  ? State
   : never;
 
 export type ExtractActionsType<T> = T extends TraitFactory<any, infer A>
   ? A
   : T extends ReadonlyArray<TraitFactory>
   ? UnionToIntersection<ExtractActionsType<ExtractArrayElementTypes<T>>>
+  : T extends FeatureTraits<any, infer A>
+  ? A
   : never;
 
 export type ExtractSelectorsType<T> = T extends TraitFactory<any, any, infer S>
   ? S
   : T extends ReadonlyArray<TraitFactory>
   ? UnionToIntersection<ExtractSelectorsType<ExtractArrayElementTypes<T>>>
+  : T extends FeatureTraits<any, any, infer S>
+  ? S
   : never;
 
 export type ExtractMutatorsType<T> = T extends TraitFactory<
@@ -302,3 +308,4 @@ export type ReplaceEntityNames<
 // }, 'product','products'>;
 // const f: F = {};
 // f.
+// TODO clean up file
