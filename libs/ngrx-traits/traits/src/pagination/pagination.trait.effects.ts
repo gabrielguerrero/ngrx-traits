@@ -2,19 +2,20 @@ import { Injectable } from '@angular/core';
 import { TraitEffect } from 'ngrx-traits';
 import { concatMap, concatMapTo, filter, first, map } from 'rxjs/operators';
 import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
-import { FilterActions } from '../filter/filter.model';
+import { FilterEntitiesActions } from '../filter/filter.model';
 import { LoadEntitiesActions, LoadEntitiesSelectors } from '../load-entities';
-import { CrudActions } from '../crud/crud.model';
-import { PaginationSelectors } from './pagination.model';
+import { CrudEntitiesActions } from '../crud/crud.model';
+import { EntitiesPaginationSelectors } from './pagination.model';
 import { Type } from 'ngrx-traits';
 import { ƟPaginationActions } from './pagination.model.internal';
 
 export function createPaginationTraitEffects<Entity>(
   allActions: ƟPaginationActions &
-    FilterActions<Entity> &
+    FilterEntitiesActions<Entity> &
     LoadEntitiesActions<Entity> &
-    CrudActions<Entity>,
-  allSelectors: LoadEntitiesSelectors<Entity> & PaginationSelectors<Entity>
+    CrudEntitiesActions<Entity>,
+  allSelectors: LoadEntitiesSelectors<Entity> &
+    EntitiesPaginationSelectors<Entity>
 ): Type<TraitEffect>[] {
   @Injectable()
   class PaginationEffect extends TraitEffect {

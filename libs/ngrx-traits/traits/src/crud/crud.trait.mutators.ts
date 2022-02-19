@@ -1,16 +1,16 @@
 import {
   Change,
   ChangeType,
-  CrudKeyedConfig,
-  CrudMutators,
-  EntityAndCrudState,
+  CrudEntitiesKeyedConfig,
+  CrudEntitiesMutators,
+  ƟLoadEntitiesCrudEntitiesState,
 } from '../crud/crud.model';
 import { Predicate, Update } from '@ngrx/entity';
 import { LoadEntitiesKeyedConfig } from '../load-entities/load-entities.model';
 
 export function createCrudTraitMutators<Entity>(
-  allConfigs: CrudKeyedConfig & LoadEntitiesKeyedConfig<Entity>
-): CrudMutators<Entity> {
+  allConfigs: CrudEntitiesKeyedConfig & LoadEntitiesKeyedConfig<Entity>
+): CrudEntitiesMutators<Entity> {
   const { storeChanges } = allConfigs.crud || {};
   const adapter = allConfigs!.loadEntities!.adapter;
 
@@ -26,7 +26,7 @@ export function createCrudTraitMutators<Entity>(
     };
   }
 
-  function add<S extends EntityAndCrudState<Entity>>(
+  function add<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     entities: Entity[],
     state: S,
     addFirst = false
@@ -57,7 +57,7 @@ export function createCrudTraitMutators<Entity>(
     };
   }
 
-  function upsert<S extends EntityAndCrudState<Entity>>(
+  function upsert<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     entities: Entity[],
     state: S
   ) {
@@ -87,19 +87,19 @@ export function createCrudTraitMutators<Entity>(
     });
   }
 
-  function remove<S extends EntityAndCrudState<Entity>>(
+  function remove<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     keys: number[],
     state: S
   ): S;
-  function remove<S extends EntityAndCrudState<Entity>>(
+  function remove<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     keys: string[],
     state: S
   ): S;
-  function remove<S extends EntityAndCrudState<Entity>>(
+  function remove<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     predicate: Predicate<Entity>,
     state: S
   ): S;
-  function remove<S extends EntityAndCrudState<Entity>>(
+  function remove<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     keysOrPredicate: Predicate<Entity> | string[] | number[],
     state: S
   ): S {
@@ -127,7 +127,9 @@ export function createCrudTraitMutators<Entity>(
       ],
     });
   }
-  function removeAll<S extends EntityAndCrudState<Entity>>(state: S): S {
+  function removeAll<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
+    state: S
+  ): S {
     return adapter.removeAll({
       ...state,
       changes: [
@@ -139,11 +141,13 @@ export function createCrudTraitMutators<Entity>(
       ],
     });
   }
-  function clearChanges<S extends EntityAndCrudState<Entity>>(state: S) {
+  function clearChanges<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
+    state: S
+  ) {
     return { ...state, changes: [] };
   }
 
-  function update<S extends EntityAndCrudState<Entity>>(
+  function update<S extends ƟLoadEntitiesCrudEntitiesState<Entity>>(
     updates: Update<Entity>[],
     state: S
   ) {

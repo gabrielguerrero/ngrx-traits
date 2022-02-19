@@ -1,9 +1,9 @@
 import { createAction, props } from '@ngrx/store';
-import { MultiSelectActions } from './multi-selection.model';
+import { SelectEntitiesActions } from './multi-selection.model';
 
 export function createMultiSelectionTraitActions(
   actionsGroupKey: string
-): MultiSelectActions {
+): SelectEntitiesActions {
   return {
     selectEntities: createAction(
       `${actionsGroupKey} Multi Select`,

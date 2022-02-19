@@ -2,14 +2,18 @@ import {
   LoadEntitiesKeyedConfig,
   LoadEntitiesSelectors,
 } from '../load-entities/load-entities.model';
-import { EntityAndSortState, Sort, SortMutators } from './sort.model';
+import {
+  ƟLoadEntitiesSortEntitiesState,
+  Sort,
+  SortEntitiesMutators,
+} from './sort.model';
 import { sortData } from './sort.utils';
 
 export function createSortTraitMutators<Entity>(
   { selectEntitiesList }: LoadEntitiesSelectors<Entity>,
   allConfigs: LoadEntitiesKeyedConfig<Entity>
-): SortMutators<Entity> {
-  function sortEntities<S extends EntityAndSortState<Entity>>(
+): SortEntitiesMutators<Entity> {
+  function sortEntities<S extends ƟLoadEntitiesSortEntitiesState<Entity>>(
     { active, direction }: Sort<Entity>,
     state: S
   ) {

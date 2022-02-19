@@ -2,32 +2,32 @@ import { Actions } from '@ngrx/effects';
 import { createFeatureSelector } from '@ngrx/store';
 import { TestBed } from '@angular/core/testing';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addPagination, PaginationState } from '../pagination';
-import { addSort, SortState } from '../sort';
+import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
+import { addSortEntities, SortEntitiesState } from '../sort';
 import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addCrudEntities, CrudState } from '../crud';
-import { addFilter, FilterState } from '../filter';
-import { MultipleSelectionState } from './multi-selection.model';
+import { addCrudEntities, CrudEntitiesState } from '../crud';
+import { addFilterEntities, FilterEntitiesState } from '../filter';
+import { SelectEntitiesState } from './multi-selection.model';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { toMap } from 'ngrx-traits';
-import { addMultiSelection } from './multi-selection.trait';
+import { addSelectEntities } from './multi-selection.trait';
 
 describe('addMultiSelection trait', () => {
   let actions$: Actions;
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
-  interface TestState extends LoadEntitiesState<Todo>, MultipleSelectionState {}
+  interface TestState extends LoadEntitiesState<Todo>, SelectEntitiesState {}
 
   interface TestState2
     extends LoadEntitiesState<Todo>,
-      MultipleSelectionState,
-      FilterState<TodoFilter>,
-      PaginationState,
-      SortState<Todo>,
-      CrudState<Todo> {}
+      SelectEntitiesState,
+      FilterEntitiesState<TodoFilter>,
+      EntitiesPaginationState,
+      SortEntitiesState<Todo>,
+      CrudEntitiesState<Todo> {}
 
   function getTestState(initialState: TestState) {
     const state: TestState = {
@@ -50,7 +50,7 @@ describe('addMultiSelection trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addMultiSelection<Todo>()
+      addSelectEntities<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -75,13 +75,13 @@ describe('addMultiSelection trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addPagination({ cacheType: 'partial' }),
-      addFilter<Todo, TodoFilter>(),
-      addSort<Todo>({
+      addEntitiesPagination({ cacheType: 'partial' }),
+      addFilterEntities<Todo, TodoFilter>(),
+      addSortEntities<Todo>({
         defaultSort: { direction: 'asc', active: 'id' },
         remote: true,
       }),
-      addMultiSelection<Todo>(),
+      addSelectEntities<Todo>(),
       addCrudEntities<Todo>()
     )({
       actionsGroupKey: 'test',

@@ -4,7 +4,7 @@ import { LoadEntitiesState } from '../load-entities';
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
 export type CacheType = 'full' | 'partial' | 'grow';
-export interface PaginationState {
+export interface EntitiesPaginationState {
   pagination: {
     currentPage: number;
     requestPage: number;
@@ -18,12 +18,14 @@ export interface PaginationState {
     };
   };
 }
-
-export interface EntityAndPaginationState<T>
+/**
+ * @internal
+ */
+export interface ƟLoadEntitiesEntitiesPaginationState<T>
   extends LoadEntitiesState<T>,
-    PaginationState {}
+    EntitiesPaginationState {}
 
-export type PaginationActions = {
+export type EntitiesPaginationActions = {
   loadEntitiesPage: ActionCreator<
     string,
     (props: {
@@ -43,28 +45,32 @@ export type PaginationActions = {
   clearEntitiesPagesCache: ActionCreator<string, () => TypedAction<string>>;
 };
 
-export type PaginationSelectors<T> = {
+export type EntitiesPaginationSelectors<T> = {
   isEntitiesPageInCache: (
-    state: EntityAndPaginationState<T>,
+    state: ƟLoadEntitiesEntitiesPaginationState<T>,
     props?: { page?: number }
   ) => boolean;
   selectPageEntitiesList: (
-    state: EntityAndPaginationState<T>,
+    state: ƟLoadEntitiesEntitiesPaginationState<T>,
     props?: { page?: number }
   ) => T[];
   selectEntitiesPage: (
-    state: EntityAndPaginationState<T>,
+    state: ƟLoadEntitiesEntitiesPaginationState<T>,
     props?: { page?: number }
   ) => PageModel<T>;
   selectEntitiesPagedRequest: (
-    state: EntityAndPaginationState<T>
+    state: ƟLoadEntitiesEntitiesPaginationState<T>
   ) => PagedRequest;
-  selectEntitiesPageInfo: (state: EntityAndPaginationState<T>) => PageInfoModel;
-  isLoadingEntitiesPage: (state: EntityAndPaginationState<T>) => boolean;
+  selectEntitiesPageInfo: (
+    state: ƟLoadEntitiesEntitiesPaginationState<T>
+  ) => PageInfoModel;
+  isLoadingEntitiesPage: (
+    state: ƟLoadEntitiesEntitiesPaginationState<T>
+  ) => boolean;
 };
 
-export type PaginationMutators<T> = {
-  mergePaginatedEntities<S extends EntityAndPaginationState<T>>(
+export type EntitiesPaginationMutators<T> = {
+  mergePaginatedEntities<S extends ƟLoadEntitiesEntitiesPaginationState<T>>(
     entities: T[],
     total: number | undefined,
     state: S
@@ -94,15 +100,15 @@ export interface PagedRequest {
   page: number;
 }
 
-export const paginationTraitKey = 'pagination';
+export const entitiesPaginationTraitKey = 'pagination';
 
-export interface PaginationConfig {
+export interface EntitiesPaginationConfig {
   cacheType?: CacheType;
   pageSize?: number;
   currentPage?: number;
   pagesToCache?: number;
 }
 
-export interface PaginationKeyedConfig {
-  pagination?: PaginationConfig;
+export interface EntitiesPaginationKeyedConfig {
+  pagination?: EntitiesPaginationConfig;
 }

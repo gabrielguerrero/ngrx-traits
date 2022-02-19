@@ -1,32 +1,32 @@
 import { TestBed } from '@angular/core/testing';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addPagination, PaginationState } from '../pagination';
-import { addSort, SortState } from '../sort';
+import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
+import { addSortEntities, SortEntitiesState } from '../sort';
 import { createFeatureSelector } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
 import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addCrudEntities, CrudState } from '../crud';
-import { addFilter, FilterState } from '../filter';
+import { addCrudEntities, CrudEntitiesState } from '../crud';
+import { addFilterEntities, FilterEntitiesState } from '../filter';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { SingleSelectionState } from './single-selection.model';
-import { addSingleSelection } from './single-selection.trait';
+import { SelectEntityState } from './single-selection.model';
+import { addSelectEntity } from './single-selection.trait';
 
-describe('addSingleSelection trait', () => {
+describe('addSelectEntity trait', () => {
   let actions$: Actions;
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
-  interface TestState extends LoadEntitiesState<Todo>, SingleSelectionState {}
+  interface TestState extends LoadEntitiesState<Todo>, SelectEntityState {}
 
   interface TestState2
     extends LoadEntitiesState<Todo>,
-      SingleSelectionState,
-      FilterState<TodoFilter>,
-      PaginationState,
-      SortState<Todo>,
-      CrudState<Todo> {}
+      SelectEntityState,
+      FilterEntitiesState<TodoFilter>,
+      EntitiesPaginationState,
+      SortEntitiesState<Todo>,
+      CrudEntitiesState<Todo> {}
 
   function getTestState(initialState: TestState) {
     const state: TestState = {
@@ -49,7 +49,7 @@ describe('addSingleSelection trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addSingleSelection<Todo>()
+      addSelectEntity<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -72,14 +72,14 @@ describe('addSingleSelection trait', () => {
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addPagination({ cacheType: 'partial' }),
-      addFilter<Todo, TodoFilter>(),
-      addSort<Todo>({
+      addEntitiesPagination({ cacheType: 'partial' }),
+      addFilterEntities<Todo, TodoFilter>(),
+      addSortEntities<Todo>({
         defaultSort: { direction: 'asc', active: 'id' },
         remote: true,
       }),
       addLoadEntities<Todo>(),
-      addSingleSelection<Todo>(),
+      addSelectEntity<Todo>(),
       addCrudEntities<Todo>()
     )({
       actionsGroupKey: 'test',

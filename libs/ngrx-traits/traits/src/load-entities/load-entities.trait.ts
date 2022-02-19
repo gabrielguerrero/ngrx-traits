@@ -14,7 +14,7 @@ import {
   TraitSelectorsFactoryConfig,
   TraitStateMutatorsFactoryConfig,
 } from 'ngrx-traits';
-import { PaginationKeyedConfig } from '../pagination';
+import { EntitiesPaginationKeyedConfig } from '../pagination';
 import { createLoadEntitiesTraitMutators } from './load-entities.mutators';
 import { createTraitFactory } from 'ngrx-traits';
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
@@ -69,11 +69,13 @@ export function addLoadEntities<Entity>(
       createLoadEntitiesTraitActions<Entity>(actionsGroupKey),
     selectors: ({ allConfigs }: TraitSelectorsFactoryConfig) =>
       createLoadEntitiesTraitSelectors<Entity>(
-        allConfigs as LoadEntitiesKeyedConfig<Entity> & PaginationKeyedConfig
+        allConfigs as LoadEntitiesKeyedConfig<Entity> &
+          EntitiesPaginationKeyedConfig
       ),
     mutators: ({ allConfigs }: TraitStateMutatorsFactoryConfig) =>
       createLoadEntitiesTraitMutators<Entity>(
-        allConfigs as LoadEntitiesKeyedConfig<Entity> & PaginationKeyedConfig
+        allConfigs as LoadEntitiesKeyedConfig<Entity> &
+          EntitiesPaginationKeyedConfig
       ),
     initialState: ({
       previousInitialState,
@@ -85,7 +87,8 @@ export function addLoadEntities<Entity>(
         initialState,
         allActions,
         allMutators,
-        allConfigs as LoadEntitiesKeyedConfig<Entity> & PaginationKeyedConfig
+        allConfigs as LoadEntitiesKeyedConfig<Entity> &
+          EntitiesPaginationKeyedConfig
       ),
   });
 }

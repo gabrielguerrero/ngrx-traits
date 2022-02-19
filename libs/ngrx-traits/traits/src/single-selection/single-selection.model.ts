@@ -2,14 +2,17 @@ import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from 'ngrx-traits';
 import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
-export interface SingleSelectionState {
+export interface SelectEntityState {
   selectedId?: number | string;
 }
-export interface EntityAndSingleSelectionState<T>
+/**
+ * @internal
+ */
+export interface ƟLoadEntitiesSelectEntiyState<T>
   extends LoadEntitiesState<T>,
-    SingleSelectionState {}
+    SelectEntityState {}
 
-export type SingleSelectionActions = {
+export type SelectEntityActions = {
   selectEntity: ActionCreator<
     string,
     (props: {
@@ -25,33 +28,33 @@ export type SingleSelectionActions = {
   >;
 };
 
-export type SingleSelectionSelectors<T> = {
+export type SelectEntitySelectors<T> = {
   selectEntityIdSelected: (
-    state: EntityAndSingleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntiyState<T>
   ) => string | number | undefined;
   selectEntitySelected: (
-    state: EntityAndSingleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntiyState<T>
   ) => T | undefined;
 };
 
-export type SingleSelectionMutators<T> = {
-  select<S extends EntityAndSingleSelectionState<T>>(
+export type SelectEntityMutators<T> = {
+  select<S extends ƟLoadEntitiesSelectEntiyState<T>>(
     id: string | number,
     state: S
   ): S;
-  deselect<S extends EntityAndSingleSelectionState<T>>(state: S): S;
-  toggleSelect<S extends EntityAndSingleSelectionState<T>>(
+  deselect<S extends ƟLoadEntitiesSelectEntiyState<T>>(state: S): S;
+  toggleSelect<S extends ƟLoadEntitiesSelectEntiyState<T>>(
     id: string | number,
     state: S
   ): S;
 };
 
-export interface SingleSelectionConfig {
+export interface SelectEntityConfig {
   selectedId?: string | number;
 }
 
-export const singleSelectionTraitKey = 'singleSelection';
-export type SingleSelectionKeyedConfig = KeyedConfig<
-  typeof singleSelectionTraitKey,
-  SingleSelectionConfig
+export const selectEntityTraitKey = 'singleSelection';
+export type SelectEntityKeyedConfig = KeyedConfig<
+  typeof selectEntityTraitKey,
+  SelectEntityConfig
 >;

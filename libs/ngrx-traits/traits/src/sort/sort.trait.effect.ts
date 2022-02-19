@@ -7,14 +7,14 @@ import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
 } from '../load-entities/load-entities.model';
-import { SortActions, SortKeyedConfig } from './sort.model';
-import { PaginationActions } from '../pagination/pagination.model';
+import { SortEntitiesActions, SortEntitiesKeyedConfig } from './sort.model';
+import { EntitiesPaginationActions } from '../pagination/pagination.model';
 
 export function createSortTraitEffect<Entity>(
   allActions: LoadEntitiesActions<Entity> &
-    SortActions<Entity> &
-    PaginationActions,
-  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortKeyedConfig<Entity>
+    SortEntitiesActions<Entity> &
+    EntitiesPaginationActions,
+  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>
 ): Type<TraitEffect>[] {
   const { remote } = allConfigs.sort!;
 

@@ -9,21 +9,25 @@ import {
   map,
 } from 'rxjs/operators';
 import { createEffect, ofType } from '@ngrx/effects';
-import { FilterKeyedConfig, FilterSelectors } from './filter.model';
+import {
+  FilterEntitiesKeyedConfig,
+  FilterEntitiesSelectors,
+} from './filter.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesSelectors,
 } from '../load-entities/load-entities.model';
 import { Type } from 'ngrx-traits';
-import { ƟFilterActions } from './filter.model.internal';
-import { PaginationActions } from '../pagination';
+import { ƟFilterEntitiesActions } from './filter.model.internal';
+import { EntitiesPaginationActions } from '../pagination';
 
 export function createFilterTraitEffects<Entity, F>(
-  allActions: ƟFilterActions<F> &
+  allActions: ƟFilterEntitiesActions<F> &
     LoadEntitiesActions<Entity> &
-    PaginationActions,
-  allSelectors: FilterSelectors<Entity, F> & LoadEntitiesSelectors<Entity>,
-  allConfigs: FilterKeyedConfig<Entity, F>
+    EntitiesPaginationActions,
+  allSelectors: FilterEntitiesSelectors<Entity, F> &
+    LoadEntitiesSelectors<Entity>,
+  allConfigs: FilterEntitiesKeyedConfig<Entity, F>
 ): Type<TraitEffect>[] {
   const traitConfig = allConfigs.filter;
   @Injectable()

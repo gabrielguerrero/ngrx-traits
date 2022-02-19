@@ -1,10 +1,10 @@
-import { CrudActions } from './crud.model';
+import { CrudEntitiesActions } from './crud.model';
 import { createAction } from '@ngrx/store';
 import { Predicate, Update } from '@ngrx/entity';
 
 export function createCrudTraitActions<Entity>(
   actionsGroupKey: string
-): CrudActions<Entity> {
+): CrudEntitiesActions<Entity> {
   return {
     addEntities: createAction(
       `${actionsGroupKey} Add`,

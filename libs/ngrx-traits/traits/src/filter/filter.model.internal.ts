@@ -1,10 +1,10 @@
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
-import { FilterActions } from './filter.model';
+import { FilterEntitiesActions } from './filter.model';
 
 /**
  * @internal
  */
-export type ƟFilterActions<F> = FilterActions<F> & {
+export type ƟFilterEntitiesActions<F> = FilterEntitiesActions<F> & {
   storeEntitiesFilter: ActionCreator<
     string,
     (props: {

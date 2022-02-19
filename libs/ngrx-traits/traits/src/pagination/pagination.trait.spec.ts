@@ -3,24 +3,26 @@ import { createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadEntities } from '../load-entities';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addFilter, FilterState } from '../filter';
+import { addFilterEntities, FilterEntitiesState } from '../filter';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { addPagination } from '../pagination/pagination.trait';
+import { addEntitiesPagination } from '../pagination/pagination.trait';
 import { TestState } from '../filter/filter.trait.spec';
 import { CacheType, PageInfoModel } from '../pagination/pagination.model';
 import { of } from 'rxjs';
 import { first, take, toArray } from 'rxjs/operators';
-import { addCrudEntities, CrudState } from '../crud';
+import { addCrudEntities, CrudEntitiesState } from '../crud';
 
 import { Dictionary } from '@ngrx/entity';
 import { ƟPaginationActions } from './pagination.model.internal';
 
 export interface PaginationTestState
   extends TestState,
-    FilterState<TodoFilter> {}
-export interface PaginationTestState2 extends TestState, CrudState<Todo> {}
+    FilterEntitiesState<TodoFilter> {}
+export interface PaginationTestState2
+  extends TestState,
+    CrudEntitiesState<Todo> {}
 
 describe('Pagination Test', () => {
   let actions$: Actions;
@@ -34,8 +36,8 @@ describe('Pagination Test', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addFilter<Todo, TodoFilter>(),
-      addPagination<Todo>({ cacheType })
+      addFilterEntities<Todo, TodoFilter>(),
+      addEntitiesPagination<Todo>({ cacheType })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -57,7 +59,7 @@ describe('Pagination Test', () => {
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addCrudEntities<Todo>(),
-      addPagination<Todo>({ cacheType })
+      addEntitiesPagination<Todo>({ cacheType })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,

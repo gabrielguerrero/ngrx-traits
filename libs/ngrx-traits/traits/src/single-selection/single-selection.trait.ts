@@ -16,18 +16,21 @@ import {
   LoadEntitiesKeyedConfig,
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
-import { SortActions, SortKeyedConfig } from '../sort/sort.model';
 import {
-  SingleSelectionActions,
-  SingleSelectionConfig,
-  SingleSelectionKeyedConfig,
+  SortEntitiesActions,
+  SortEntitiesKeyedConfig,
+} from '../sort/sort.model';
+import {
+  SelectEntityActions,
+  SelectEntityConfig,
+  SelectEntityKeyedConfig,
 } from './single-selection.model';
-import { CrudActions } from '../crud/crud.model';
+import { CrudEntitiesActions } from '../crud/crud.model';
 import {
-  PaginationActions,
-  PaginationKeyedConfig,
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
 } from '../pagination/pagination.model';
-import { FilterActions } from '../filter';
+import { FilterEntitiesActions } from '../filter';
 
 /**
  * Generates ngrx code to add single selection to a list
@@ -42,7 +45,7 @@ import { FilterActions } from '../filter';
  *
  *    const traits = createEntityFeatureFactory(
  *      addLoadEntities<Todo>(),
- *      addSingleSelection<Todo>()
+ *      addSelectEntity<Todo>()
  *    )({
  *      actionsGroupKey: '[Todos]',
  *      featureSelector: createFeatureSelector<TestState>>(
@@ -56,7 +59,7 @@ import { FilterActions } from '../filter';
  * traits.selectors.selectIdSelected()
  * traits.selectors.selectEntitySelected()
  */
-export function addSingleSelection<Entity>(config?: SingleSelectionConfig) {
+export function addSelectEntity<Entity>(config?: SelectEntityConfig) {
   return createTraitFactory({
     key: 'singleSelection',
     depends: [loadEntitiesTraitKey],
@@ -71,22 +74,22 @@ export function addSingleSelection<Entity>(config?: SingleSelectionConfig) {
     }: TraitInitialStateFactoryConfig) =>
       createSingleSelectionInitialState<Entity>(
         previousInitialState,
-        allConfigs as SingleSelectionKeyedConfig
+        allConfigs as SelectEntityKeyedConfig
       ),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
       createSingleSelectionTraitReducer(
         initialState,
-        allActions as SingleSelectionActions &
-          CrudActions<Entity> &
-          SortActions<Entity> &
-          PaginationActions &
-          FilterActions<any> &
+        allActions as SelectEntityActions &
+          CrudEntitiesActions<Entity> &
+          SortEntitiesActions<Entity> &
+          EntitiesPaginationActions &
+          FilterEntitiesActions<any> &
           LoadEntitiesActions<Entity>,
         allMutators,
-        allConfigs as SingleSelectionKeyedConfig &
+        allConfigs as SelectEntityKeyedConfig &
           LoadEntitiesKeyedConfig<Entity> &
-          PaginationKeyedConfig &
-          SortKeyedConfig<Entity>
+          EntitiesPaginationKeyedConfig &
+          SortEntitiesKeyedConfig<Entity>
       ),
   });
 }

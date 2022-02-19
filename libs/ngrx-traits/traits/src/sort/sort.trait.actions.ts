@@ -1,9 +1,9 @@
 import { createAction, props } from '@ngrx/store';
-import { Sort, SortActions } from './sort.model';
+import { Sort, SortEntitiesActions } from './sort.model';
 
 export function createSortTraitActions<Entity>(
   actionsGroupKey: string
-): SortActions<Entity> {
+): SortEntitiesActions<Entity> {
   return {
     sortEntities: createAction(
       `${actionsGroupKey} sort`,

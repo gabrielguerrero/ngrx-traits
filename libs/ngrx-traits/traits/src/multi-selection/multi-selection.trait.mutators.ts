@@ -1,7 +1,7 @@
 import {
-  EntityAndMultipleSelectionState,
-  MultipleSelectionMutators,
-  MultipleSelectionSelectors,
+  ƟLoadEntitiesSelectEntitiesState,
+  SelectEntitiesMutators,
+  SelectEntitiesSelectors,
 } from './multi-selection.model';
 import { toMap } from 'ngrx-traits';
 import {
@@ -13,8 +13,8 @@ import {
 
 export function createMultiSelectionTraitMutators<Entity>({
   isAllEntitiesSelected,
-}: MultipleSelectionSelectors<Entity>): MultipleSelectionMutators<Entity> {
-  function toggleSelectAll<S extends EntityAndMultipleSelectionState<Entity>>(
+}: SelectEntitiesSelectors<Entity>): SelectEntitiesMutators<Entity> {
+  function toggleSelectAll<S extends ƟLoadEntitiesSelectEntitiesState<Entity>>(
     state: S
   ): S {
     const allSelected = isAllEntitiesSelected(state);

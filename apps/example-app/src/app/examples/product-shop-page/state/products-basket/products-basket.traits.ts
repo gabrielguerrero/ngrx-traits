@@ -1,18 +1,18 @@
 import {
   addAsyncAction,
   addCrudEntities,
-  addFilter,
+  addFilterEntities,
   addLoadEntities,
-  addMultiSelection,
-  addSingleSelection,
-  addSort,
+  addSelectEntity,
+  addSelectEntity,
+  addSortEntities,
   AsyncActionState,
-  CrudState,
+  CrudEntitiesState,
   LoadEntitiesState,
-  FilterState,
-  MultipleSelectionState,
-  SingleSelectionState,
-  SortState,
+  FilterEntitiesState,
+  SelectEntitiesState,
+  SelectEntityState,
+  SortEntitiesState,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter, ProductOrder } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
@@ -21,22 +21,22 @@ import { addLoadProductDetail } from '../products/load-product.trait';
 
 export interface ProductsBasketState
   extends LoadEntitiesState<ProductOrder>,
-    SingleSelectionState,
-    MultipleSelectionState,
-    CrudState<ProductOrder>,
+    SelectEntityState,
+    SelectEntitiesState,
+    CrudEntitiesState<ProductOrder>,
     AsyncActionState<'checkout'>,
-    SortState<ProductOrder> {}
+    SortEntitiesState<ProductOrder> {}
 
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<ProductOrder>(),
-  addSingleSelection<ProductOrder>(),
-  addMultiSelection<ProductOrder>(),
+  addSelectEntities<ProductOrder>(),
+  addSelectEntities<ProductOrder>(),
   addCrudEntities<ProductOrder>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addSort<ProductOrder>({
+  addSortEntities<ProductOrder>({
     defaultSort: { direction: 'asc', active: 'name' },
   }),
   ...addLoadProductDetail()

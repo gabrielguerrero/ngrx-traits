@@ -1,19 +1,19 @@
 import { createSelector } from '@ngrx/store';
 import { selectTotalSelectedEntities } from './multi-selection.utils';
 import {
-  EntityAndMultipleSelectionState,
-  MultipleSelectionSelectors,
+  ƟLoadEntitiesSelectEntitiesState,
+  SelectEntitiesSelectors,
 } from './multi-selection.model';
 import { LoadEntitiesSelectors } from '../load-entities';
 import { Dictionary } from '@ngrx/entity/src/models';
 
 export function createMultiSelectionTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>
-): MultipleSelectionSelectors<Entity> {
+): SelectEntitiesSelectors<Entity> {
   const { selectEntitiesMap, selectEntitiesTotal } = previousSelectors;
 
   function selectEntitiesIdsSelectedMap(
-    state: EntityAndMultipleSelectionState<Entity>
+    state: ƟLoadEntitiesSelectEntitiesState<Entity>
   ) {
     return state.selectedIds;
   }
@@ -37,7 +37,7 @@ export function createMultiSelectionTraitSelectors<Entity>(
   );
 
   const isAllEntitiesSelected = createSelector(
-    (state: EntityAndMultipleSelectionState<Entity>) =>
+    (state: ƟLoadEntitiesSelectEntitiesState<Entity>) =>
       selectEntitiesTotal(state),
     selectTotalSelectedEntities,
     (total, totalSelected) =>

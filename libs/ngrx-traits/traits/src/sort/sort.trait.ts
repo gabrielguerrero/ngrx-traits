@@ -6,10 +6,10 @@ import {
 import { createSortTraitSelectors } from './sort.trait.selectors';
 import { createSortTraitEffect } from './sort.trait.effect';
 import {
-  SortActions,
-  SortConfig,
-  SortKeyedConfig,
-  SortSelectors,
+  SortEntitiesActions,
+  SortEntitiesConfig,
+  SortEntitiesKeyedConfig,
+  SortEntitiesSelectors,
   sortTraitKey,
 } from './sort.model';
 import {
@@ -19,8 +19,8 @@ import {
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
 import {
-  PaginationActions,
-  PaginationKeyedConfig,
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
 } from '../pagination/pagination.model';
 import { createTraitFactory } from 'ngrx-traits';
 import { createSortTraitActions } from './sort.trait.actions';
@@ -46,7 +46,7 @@ import {
  *
  *    const traits = createEntityFeatureFactory(
  *      addLoadEntities<Todo>(),
- *      addSort<Todo>({
+ *      addSortEntities<Todo>({
  *        defaultSort: {active:'id', direction:'asc'}
  *      })
  *    )({
@@ -61,20 +61,21 @@ import {
  *
  * traits.selectors.selectSort()
  */
-export function addSort<Entity>({
+export function addSortEntities<Entity>({
   remote = false,
   defaultSort,
-}: SortConfig<Entity>) {
+}: SortEntitiesConfig<Entity>) {
   return createTraitFactory({
     key: sortTraitKey,
     depends: [loadEntitiesTraitKey],
-    config: { remote, defaultSort } as SortConfig<Entity>,
+    config: { remote, defaultSort } as SortEntitiesConfig<Entity>,
     actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
       createSortTraitActions<Entity>(actionsGroupKey),
     selectors: () => createSortTraitSelectors<Entity>(),
     mutators: ({ allSelectors, allConfigs }: TraitStateMutatorsFactoryConfig) =>
       createSortTraitMutators<Entity>(
-        allSelectors as SortSelectors<Entity> & LoadEntitiesSelectors<Entity>,
+        allSelectors as SortEntitiesSelectors<Entity> &
+          LoadEntitiesSelectors<Entity>,
         allConfigs
       ),
     initialState: ({
@@ -85,18 +86,19 @@ export function addSort<Entity>({
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
       createSortTraitReducer<Entity>(
         initialState,
-        allActions as SortActions<Entity> & LoadEntitiesActions<Entity>,
+        allActions as SortEntitiesActions<Entity> & LoadEntitiesActions<Entity>,
         allMutators,
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
-          PaginationKeyedConfig &
-          SortKeyedConfig<Entity>
+          EntitiesPaginationKeyedConfig &
+          SortEntitiesKeyedConfig<Entity>
       ),
     effects: ({ allActions, allConfigs }) =>
       createSortTraitEffect(
         allActions as LoadEntitiesActions<Entity> &
-          SortActions<Entity> &
-          PaginationActions,
-        allConfigs as LoadEntitiesKeyedConfig<Entity> & SortKeyedConfig<Entity>
+          SortEntitiesActions<Entity> &
+          EntitiesPaginationActions,
+        allConfigs as LoadEntitiesKeyedConfig<Entity> &
+          SortEntitiesKeyedConfig<Entity>
       ),
   });
 }

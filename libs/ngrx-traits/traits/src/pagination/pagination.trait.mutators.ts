@@ -1,21 +1,19 @@
 import {
-  EntityAndPaginationState,
-  PaginationMutators,
-  PaginationSelectors,
+  ƟLoadEntitiesEntitiesPaginationState,
+  EntitiesPaginationMutators,
+  EntitiesPaginationSelectors,
 } from './pagination.model';
 import { LoadEntitiesKeyedConfig } from '../load-entities';
 
 export function createPaginationTraitMutators<Entity>(
-  allSelectors: PaginationSelectors<Entity>,
+  allSelectors: EntitiesPaginationSelectors<Entity>,
   allConfigs: LoadEntitiesKeyedConfig<Entity>
-): PaginationMutators<Entity> {
+): EntitiesPaginationMutators<Entity> {
   const adapter = allConfigs.loadEntities!.adapter;
 
-  function mergePaginatedEntities<S extends EntityAndPaginationState<Entity>>(
-    entities: Entity[],
-    total = undefined,
-    state: S
-  ): S {
+  function mergePaginatedEntities<
+    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+  >(entities: Entity[], total = undefined, state: S): S {
     const cacheType = state.pagination.cache.type;
 
     switch (cacheType) {

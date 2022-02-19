@@ -1,10 +1,13 @@
-import { EntityAndFilterState, FilterMutators } from './filter.model';
+import {
+  ƟLoadEntitiesFilterEntitiesState,
+  FilterEntitiesMutators,
+} from './filter.model';
 
-export function createFilterTraitMutators<Entity, F>(): FilterMutators<
+export function createFilterTraitMutators<Entity, F>(): FilterEntitiesMutators<
   Entity,
   F
 > {
-  function setFilters<S extends EntityAndFilterState<Entity, F>>(
+  function setFilters<S extends ƟLoadEntitiesFilterEntitiesState<Entity, F>>(
     filters: F,
     state: S
   ) {

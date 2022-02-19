@@ -2,25 +2,28 @@ import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
 } from '../load-entities/load-entities.model';
-import { SortActions, SortKeyedConfig } from '../sort/sort.model';
 import {
-  EntityAndMultipleSelectionState,
-  MultipleSelectionMutators,
-  MultiSelectActions,
+  SortEntitiesActions,
+  SortEntitiesKeyedConfig,
+} from '../sort/sort.model';
+import {
+  ƟLoadEntitiesSelectEntitiesState,
+  SelectEntitiesMutators,
+  SelectEntitiesActions,
 } from './multi-selection.model';
-import { CrudActions } from '../crud/crud.model';
+import { CrudEntitiesActions } from '../crud/crud.model';
 import { Update } from '@ngrx/entity/src/models';
 import { insertIf } from 'ngrx-traits';
 import { createReducer, on } from '@ngrx/store';
 import {
-  PaginationActions,
-  PaginationKeyedConfig,
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
 } from '../pagination/pagination.model';
-import { FilterActions } from '../filter';
+import { FilterEntitiesActions } from '../filter';
 
 export function createMultiSelectionInitialState<Entity>(
   previousInitialState: any
-): EntityAndMultipleSelectionState<Entity> {
+): ƟLoadEntitiesSelectEntitiesState<Entity> {
   return {
     ...previousInitialState,
     selectedIds: {},
@@ -29,26 +32,26 @@ export function createMultiSelectionInitialState<Entity>(
 
 export function createMultiSelectionTraitReducer<
   Entity,
-  S extends EntityAndMultipleSelectionState<Entity>
+  S extends ƟLoadEntitiesSelectEntitiesState<Entity>
 >(
   initialState: S,
-  allActions: MultiSelectActions &
-    CrudActions<Entity> &
-    SortActions<Entity> &
+  allActions: SelectEntitiesActions &
+    CrudEntitiesActions<Entity> &
+    SortEntitiesActions<Entity> &
     LoadEntitiesActions<Entity> &
-    FilterActions<any> &
-    PaginationActions,
-  allMutators: MultipleSelectionMutators<Entity>,
+    FilterEntitiesActions<any> &
+    EntitiesPaginationActions,
+  allMutators: SelectEntitiesMutators<Entity>,
   allConfigs: LoadEntitiesKeyedConfig<Entity> &
-    PaginationKeyedConfig &
-    SortKeyedConfig<Entity>
+    EntitiesPaginationKeyedConfig &
+    SortEntitiesKeyedConfig<Entity>
 ) {
   const { adapter } = allConfigs.loadEntities!;
   const sortRemote = allConfigs.sort?.remote;
   const paginationCacheType = allConfigs.pagination?.cacheType;
 
   function updateSelectedIdsChanged<
-    S extends EntityAndMultipleSelectionState<Entity>
+    S extends ƟLoadEntitiesSelectEntitiesState<Entity>
   >(state: S, updates: Update<Entity>[]) {
     const changedIds = updates.reduce((acc, updated) => {
       const id = adapter.selectId(updated.changes as Entity);

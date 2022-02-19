@@ -1,9 +1,9 @@
 import {
-  EntityAndMultipleSelectionState,
-  MultipleSelectionState,
+  ƟLoadEntitiesSelectEntitiesState,
+  SelectEntitiesState,
 } from './multi-selection.model';
 
-export function multiDeselect<S extends MultipleSelectionState>(
+export function multiDeselect<S extends SelectEntitiesState>(
   id: number | string,
   state: S
 ): S {
@@ -15,7 +15,7 @@ export function multiDeselect<S extends MultipleSelectionState>(
   };
 }
 
-export function multiSelect<S extends MultipleSelectionState>(
+export function multiSelect<S extends SelectEntitiesState>(
   id: number | string,
   state: S
 ): S {
@@ -25,7 +25,7 @@ export function multiSelect<S extends MultipleSelectionState>(
   };
 }
 
-export function multiToggleSelect<S extends MultipleSelectionState>(
+export function multiToggleSelect<S extends SelectEntitiesState>(
   id: number | string,
   state: S
 ): S {
@@ -36,7 +36,7 @@ export function multiToggleSelect<S extends MultipleSelectionState>(
     return multiSelect(id, state);
   }
 }
-export function multiClearSelection<S extends MultipleSelectionState>(
+export function multiClearSelection<S extends SelectEntitiesState>(
   state: S
 ): S {
   return { ...state, selectedIds: {} };
@@ -44,7 +44,7 @@ export function multiClearSelection<S extends MultipleSelectionState>(
 
 export function selectTotalSelectedEntities<
   T,
-  S extends EntityAndMultipleSelectionState<T>
+  S extends ƟLoadEntitiesSelectEntitiesState<T>
 >(state: S): number {
   return Object.keys(state.selectedIds).length;
 }

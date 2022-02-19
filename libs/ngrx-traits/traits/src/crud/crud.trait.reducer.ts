@@ -1,19 +1,25 @@
-import { FilterActions, FilterKeyedConfig } from '../filter/filter.model';
+import {
+  FilterEntitiesActions,
+  FilterEntitiesKeyedConfig,
+} from '../filter/filter.model';
 import { createReducer, on } from '@ngrx/store';
 import {
-  CrudActions,
-  CrudKeyedConfig,
-  CrudMutators,
-  EntityAndCrudState,
+  CrudEntitiesActions,
+  CrudEntitiesKeyedConfig,
+  CrudEntitiesMutators,
+  ƟLoadEntitiesCrudEntitiesState,
 } from './crud.model';
 import { LoadEntitiesActions, LoadEntitiesKeyedConfig } from '../load-entities';
-import { SortActions, SortKeyedConfig } from '../sort';
-import { PaginationActions, PaginationKeyedConfig } from '../pagination';
+import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort';
+import {
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../pagination';
 import { insertIf } from 'ngrx-traits';
 
 export function createCrudInitialState<Entity>(
   previousInitialState: any
-): EntityAndCrudState<Entity> {
+): ƟLoadEntitiesCrudEntitiesState<Entity> {
   return {
     ...previousInitialState,
     changes: [],
@@ -21,20 +27,20 @@ export function createCrudInitialState<Entity>(
 }
 export function createCrudTraitReducer<
   Entity,
-  S extends EntityAndCrudState<Entity>
+  S extends ƟLoadEntitiesCrudEntitiesState<Entity>
 >(
   initialState: S,
-  allActions: CrudActions<Entity> &
+  allActions: CrudEntitiesActions<Entity> &
     LoadEntitiesActions<Entity> &
-    SortActions<Entity> &
-    FilterActions<any> &
-    PaginationActions,
-  allMutators: CrudMutators<Entity>,
-  allConfigs: CrudKeyedConfig &
-    FilterKeyedConfig<Entity, unknown> &
+    SortEntitiesActions<Entity> &
+    FilterEntitiesActions<any> &
+    EntitiesPaginationActions,
+  allMutators: CrudEntitiesMutators<Entity>,
+  allConfigs: CrudEntitiesKeyedConfig &
+    FilterEntitiesKeyedConfig<Entity, unknown> &
     LoadEntitiesKeyedConfig<Entity> &
-    SortKeyedConfig<Entity> &
-    PaginationKeyedConfig
+    SortEntitiesKeyedConfig<Entity> &
+    EntitiesPaginationKeyedConfig
 ) {
   const sortRemote = allConfigs.sort?.remote;
   const filterRemote = allConfigs.filter && !allConfigs.filter?.filterFn;

@@ -17,14 +17,17 @@ export interface EntityChange<T> {
   entity: T;
   changeType: ChangeType;
 }
-export interface CrudState<T> {
+export interface CrudEntitiesState<T> {
   changes: Change<T>[];
 }
-export interface EntityAndCrudState<T>
+/**
+ * @internal
+ */
+export interface ƟLoadEntitiesCrudEntitiesState<T>
   extends LoadEntitiesState<T>,
-    CrudState<T> {}
+    CrudEntitiesState<T> {}
 
-export type CrudActions<T> = {
+export type CrudEntitiesActions<T> = {
   addEntities: ActionCreator<
     string,
     (...entities: T[]) => { entities: T[] } & TypedAction<string>
@@ -53,7 +56,7 @@ export type CrudActions<T> = {
   clearEntitiesChanges: ActionCreator<string, () => TypedAction<string>>;
 };
 
-export type CrudSelectors<T> = {
+export type CrudEntitiesSelectors<T> = {
   // /**
   //  * Return all changes made to the list
   //  * @param state
@@ -66,7 +69,7 @@ export type CrudSelectors<T> = {
    * @param props
    */
   selectEntitiesChangesList: (
-    state: EntityAndCrudState<T>,
+    state: ƟLoadEntitiesCrudEntitiesState<T>,
     props: { type: ChangeType }
   ) => EntityChange<T>[];
   // /**
@@ -86,30 +89,45 @@ export type CrudSelectors<T> = {
    * @param state
    */
   selectFilteredEntitiesChangesList: (
-    state: EntityAndCrudState<T>
+    state: ƟLoadEntitiesCrudEntitiesState<T>
   ) => EntityChange<T>[];
 };
 
-export type CrudMutators<T> = {
-  add<S extends EntityAndCrudState<T>>(entities: T[], state: S): S;
+export type CrudEntitiesMutators<T> = {
+  add<S extends ƟLoadEntitiesCrudEntitiesState<T>>(entities: T[], state: S): S;
 
-  remove<S extends EntityAndCrudState<T>>(keys: string[], state: S): S;
-  remove<S extends EntityAndCrudState<T>>(keys: number[], state: S): S;
-  remove<S extends EntityAndCrudState<T>>(predicate: Predicate<T>, state: S): S;
+  remove<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+    keys: string[],
+    state: S
+  ): S;
+  remove<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+    keys: number[],
+    state: S
+  ): S;
+  remove<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+    predicate: Predicate<T>,
+    state: S
+  ): S;
 
-  removeAll<S extends EntityAndCrudState<T>>(state: S): S;
+  removeAll<S extends ƟLoadEntitiesCrudEntitiesState<T>>(state: S): S;
 
-  clearChanges<S extends EntityAndCrudState<T>>(state: S): S;
+  clearChanges<S extends ƟLoadEntitiesCrudEntitiesState<T>>(state: S): S;
 
-  update<S extends EntityAndCrudState<T>>(updates: Update<T>[], state: S): S;
-  upsert<S extends EntityAndCrudState<T>>(entities: T[], state: S): S;
+  update<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+    updates: Update<T>[],
+    state: S
+  ): S;
+  upsert<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+    entities: T[],
+    state: S
+  ): S;
 };
 
-export interface CrudConfig {
+export interface CrudEntitiesConfig {
   storeChanges?: boolean;
 }
-export const crudTraitKey = 'crud';
+export const crudEntitiesTraitKey = 'crud';
 
-export interface CrudKeyedConfig {
-  crud?: CrudConfig;
+export interface CrudEntitiesKeyedConfig {
+  crud?: CrudEntitiesConfig;
 }

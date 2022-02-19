@@ -1,15 +1,15 @@
 import { TestBed } from '@angular/core/testing';
-import { PaginationState } from '../pagination';
+import { EntitiesPaginationState } from '../pagination';
 import { addLoadEntities } from './load-entities.trait';
 import { createAction, createFeatureSelector } from '@ngrx/store';
-import { addPagination } from '../pagination/pagination.trait';
+import { addEntitiesPagination } from '../pagination/pagination.trait';
 import { Actions } from '@ngrx/effects';
 import { LoadEntitiesState } from './load-entities.model';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addFilter } from '../filter/filter.trait';
+import { addFilterEntities } from '../filter/filter.trait';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { FilterState } from 'ngrx-traits/traits';
+import { FilterEntitiesState } from 'ngrx-traits/traits';
 
 export interface Todo {
   id: number;
@@ -23,10 +23,12 @@ export interface TodoFilter {
 
 export type TestState = LoadEntitiesState<Todo>;
 
-export interface TestState2 extends LoadEntitiesState<Todo>, PaginationState {}
+export interface TestState2
+  extends LoadEntitiesState<Todo>,
+    EntitiesPaginationState {}
 export interface TestState3
   extends LoadEntitiesState<Todo>,
-    FilterState<TodoFilter> {}
+    FilterEntitiesState<TodoFilter> {}
 
 describe('addLoadEntities Trait', () => {
   let actions$: Actions;
@@ -53,7 +55,7 @@ describe('addLoadEntities Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addPagination<Todo>()
+      addEntitiesPagination<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -74,7 +76,7 @@ describe('addLoadEntities Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addFilter<Todo, TodoFilter>({
+      addFilterEntities<Todo, TodoFilter>({
         defaultFilter: filter,
         filterFn: (filter: TodoFilter, todo: Todo) =>
           (filter?.content && todo.content?.includes(filter.content)) || false,

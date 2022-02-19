@@ -1,9 +1,9 @@
 import { createAction, props } from '@ngrx/store';
-import { SingleSelectionActions } from './single-selection.model';
+import { SelectEntityActions } from './single-selection.model';
 
 export function createSingleSelectionTraitActions(
   actionsGroupKey: string
-): SingleSelectionActions {
+): SelectEntityActions {
   return {
     selectEntity: createAction(
       `${actionsGroupKey} Select`,

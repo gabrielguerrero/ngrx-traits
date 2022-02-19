@@ -1,26 +1,28 @@
 import { createSelector } from '@ngrx/store';
 import {
-  EntityAndPaginationState,
-  PaginationSelectors,
-  PaginationState,
+  ƟLoadEntitiesEntitiesPaginationState,
+  EntitiesPaginationSelectors,
+  EntitiesPaginationState,
 } from './pagination.model';
 import { LoadEntitiesSelectors } from '../load-entities/load-entities.model';
-import { FilterKeyedConfig } from '../filter/filter.model';
+import { FilterEntitiesKeyedConfig } from '../filter/filter.model';
 
 export function createPaginationTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>,
-  allConfigs: FilterKeyedConfig<Entity, unknown>
-): PaginationSelectors<Entity> {
+  allConfigs: FilterEntitiesKeyedConfig<Entity, unknown>
+): EntitiesPaginationSelectors<Entity> {
   const { selectEntitiesList, isEntitiesLoading } = previousSelectors;
 
   const filterFunction = allConfigs?.filter?.filterFn;
 
-  function selectPagination(state: EntityAndPaginationState<Entity>) {
+  function selectPagination(
+    state: ƟLoadEntitiesEntitiesPaginationState<Entity>
+  ) {
     return state.pagination;
   }
   const selectPaginationFiltered: (
-    state: EntityAndPaginationState<Entity>
-  ) => PaginationState['pagination'] = filterFunction
+    state: ƟLoadEntitiesEntitiesPaginationState<Entity>
+  ) => EntitiesPaginationState['pagination'] = filterFunction
     ? createSelector(
         selectEntitiesList,
         selectPagination,

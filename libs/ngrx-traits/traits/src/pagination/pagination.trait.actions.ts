@@ -1,10 +1,10 @@
-import { PaginationActions } from './pagination.model';
+import { EntitiesPaginationActions } from './pagination.model';
 import { createAction, props } from '@ngrx/store';
 import { ƟPaginationActions } from './pagination.model.internal';
 
 export function createPaginationTraitActions(
   actionsGroupKey: string
-): PaginationActions {
+): EntitiesPaginationActions {
   const actions: ƟPaginationActions = {
     loadEntitiesPage: createAction(
       `${actionsGroupKey} load page`,

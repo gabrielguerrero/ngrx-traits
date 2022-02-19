@@ -1,6 +1,6 @@
 import {
-  PaginationActions,
-  paginationTraitKey,
+  EntitiesPaginationActions,
+  entitiesPaginationTraitKey,
 } from '../pagination/pagination.model';
 import { createFilterTraitEffects } from './filter.trait.effect';
 import {
@@ -8,10 +8,10 @@ import {
   createFilterTraitReducer,
 } from './filter.trait.reducer';
 import {
-  FilterConfig,
-  FilterKeyedConfig,
-  FilterSelectors,
-  filterTraitKey,
+  FilterEntitiesConfig,
+  FilterEntitiesKeyedConfig,
+  FilterEntitiesSelectors,
+  filterEntitiesTraitKey,
 } from './filter.model';
 import { createFilterTraitSelectors } from './filter.trait.selectors';
 import {
@@ -22,7 +22,7 @@ import {
 import { createFilterTraitMutators } from './filter.trait.mutators';
 import { createTraitFactory } from 'ngrx-traits';
 import { createFilterTraitActions } from './filter.trait.actions';
-import { ƟFilterActions } from './filter.model.internal';
+import { ƟFilterEntitiesActions } from './filter.model.internal';
 import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
@@ -63,18 +63,19 @@ import {
  * traits.actions.filterEntities()
  * traits.selectors.selectEntitiesFilter()
  */
-export function addFilter<Entity, F>({
+export function addFilterEntities<Entity, F>({
   defaultDebounceTime = 400,
   defaultFilter,
   filterFn,
-}: FilterConfig<Entity, F> = {}) {
+}: FilterEntitiesConfig<Entity, F> = {}) {
   return createTraitFactory({
-    key: filterTraitKey,
-    depends: [paginationTraitKey, loadEntitiesTraitKey],
-    config: { defaultDebounceTime, defaultFilter, filterFn } as FilterConfig<
-      Entity,
-      F
-    >,
+    key: filterEntitiesTraitKey,
+    depends: [entitiesPaginationTraitKey, loadEntitiesTraitKey],
+    config: {
+      defaultDebounceTime,
+      defaultFilter,
+      filterFn,
+    } as FilterEntitiesConfig<Entity, F>,
     actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
       createFilterTraitActions<F>(actionsGroupKey),
     selectors: () => createFilterTraitSelectors<Entity, F>(),
@@ -85,20 +86,20 @@ export function addFilter<Entity, F>({
     }: TraitInitialStateFactoryConfig) =>
       createFilterInitialState<Entity, F>(
         previousInitialState,
-        allConfigs as FilterKeyedConfig<Entity, F>
+        allConfigs as FilterEntitiesKeyedConfig<Entity, F>
       ),
     reducer: ({ initialState, allActions, allMutators }) =>
       createFilterTraitReducer(
         initialState,
-        allActions as ƟFilterActions<F> & LoadEntitiesActions<Entity>,
+        allActions as ƟFilterEntitiesActions<F> & LoadEntitiesActions<Entity>,
         allMutators
       ),
     effects: ({ allActions, allSelectors, allConfigs }) =>
       createFilterTraitEffects(
-        allActions as ƟFilterActions<F> &
+        allActions as ƟFilterEntitiesActions<F> &
           LoadEntitiesActions<Entity> &
-          PaginationActions,
-        allSelectors as FilterSelectors<Entity, F> &
+          EntitiesPaginationActions,
+        allSelectors as FilterEntitiesSelectors<Entity, F> &
           LoadEntitiesSelectors<Entity>,
         allConfigs
       ),

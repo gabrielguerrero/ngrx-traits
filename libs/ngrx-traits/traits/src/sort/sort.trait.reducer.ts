@@ -1,16 +1,16 @@
 import { createReducer, on } from '@ngrx/store';
 import { LoadEntitiesActions, LoadEntitiesKeyedConfig } from '../load-entities';
 import {
-  EntityAndSortState,
-  SortActions,
-  SortKeyedConfig,
-  SortMutators,
+  ƟLoadEntitiesSortEntitiesState,
+  SortEntitiesActions,
+  SortEntitiesKeyedConfig,
+  SortEntitiesMutators,
 } from './sort.model';
 
 export function createSortInitialState<Entity>(
   previousInitialState: any,
-  allConfigs: SortKeyedConfig<Entity>
-): EntityAndSortState<Entity> {
+  allConfigs: SortEntitiesKeyedConfig<Entity>
+): ƟLoadEntitiesSortEntitiesState<Entity> {
   const { defaultSort } = allConfigs.sort!;
 
   return {
@@ -24,12 +24,12 @@ export function createSortInitialState<Entity>(
 
 export function createSortTraitReducer<
   Entity,
-  S extends EntityAndSortState<Entity> = EntityAndSortState<Entity>
+  S extends ƟLoadEntitiesSortEntitiesState<Entity> = ƟLoadEntitiesSortEntitiesState<Entity>
 >(
   initialState: S,
-  allActions: SortActions<Entity> & LoadEntitiesActions<Entity>,
-  allMutators: SortMutators<Entity>,
-  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortKeyedConfig<Entity>
+  allActions: SortEntitiesActions<Entity> & LoadEntitiesActions<Entity>,
+  allMutators: SortEntitiesMutators<Entity>,
+  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>
 ) {
   const { remote } = allConfigs.sort!;
 

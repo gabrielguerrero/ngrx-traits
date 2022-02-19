@@ -187,7 +187,7 @@ To keep this intro brief it's not intended to show much of the internals of the 
 [Examples](apps/example-app/src/app/examples)
 
 In order for the selection to work:
-  * add the addSingleSelection trait
+  * add the addSelectEntity trait
   * add the SingleSelectionState to our ProductState
 
 Notice that, generally each trait has a [TraitName]State, (also has [TraitName]Actions and [TraitName]Selectors, but those are only needed for custom traits).
@@ -199,14 +199,14 @@ export interface ProductsState
     SingleSelectionState {}
 ```
 
-Following, add the addSingleSelection trait:
+Following, add the addSelectEntity trait:
 #### products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
   // new trait ↓
-  addSingleSelection<Product>()
+  addSelectEntity<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -271,7 +271,7 @@ And next the addAsyncTrait
 ```ts
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   // new trait ↓
   addAsyncAction({
     name: 'checkout',
@@ -394,7 +394,7 @@ Then add the addFilter trait:
 ```ts
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
@@ -498,7 +498,7 @@ Then, add to trait:
 ```ts
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
@@ -509,7 +509,7 @@ export const productTraits = createEntityFeatureFactory(
     },
   }),
   // ↓ new trait
-  addSort<Product>()
+  addSortEntities<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -590,14 +590,14 @@ To do remote filtering you first need to remove the filterFn in the traits like:
 ```ts
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
   // changed trait ↓
   addFilter<Product, ProductFilter>(),
-  addSort<Product>()
+  addSortEntities<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -648,7 +648,7 @@ export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
   addFilter<Product, ProductFilter>(),
   // changed trait ↓
-  addSort<Product>({ remote: true })
+  addSortEntities<Product>({ remote: true })
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -713,7 +713,7 @@ Then we add the addPagination to the traits like:
 ```ts
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
@@ -723,7 +723,7 @@ export const productTraits = createEntityFeatureFactory(
       return entity.name.includes(filter.search);
     },
   }),
-  addSort<Product>({ remote: true }),
+  addSortEntities<Product>({ remote: true }),
   // new trait ↓
   addPagination<Product>({ cacheType: 'partial' })
 )({
@@ -916,7 +916,7 @@ export const selectProductState =
 
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
@@ -926,7 +926,7 @@ export const productTraits = createEntityFeatureFactory(
       return entity.name.includes(filter.search);
     },
   }),
-  addSort<Product>({ remote: true }),
+  addSortEntities<Product>({ remote: true }),
   addPagination<Product>({ cacheType: 'partial' })
 )({
   actionsGroupKey: '[Products]',

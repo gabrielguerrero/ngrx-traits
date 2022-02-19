@@ -1,12 +1,12 @@
 import { createAction } from '@ngrx/store';
-import { FilterActionOverload, FilterActions } from './filter.model';
+import { FilterActionOverload, FilterEntitiesActions } from './filter.model';
 import { ActionCreator } from '@ngrx/store/src/models';
-import { ƟFilterActions } from './filter.model.internal';
+import { ƟFilterEntitiesActions } from './filter.model.internal';
 
 export function createFilterTraitActions<F>(
   actionsGroupKey: string
-): FilterActions<F> {
-  const actions: ƟFilterActions<F> = {
+): FilterEntitiesActions<F> {
+  const actions: ƟFilterEntitiesActions<F> = {
     filterEntities: createAction(
       `${actionsGroupKey} filter`,
       (props?: {

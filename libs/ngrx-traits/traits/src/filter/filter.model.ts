@@ -2,12 +2,15 @@ import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
-export interface FilterState<F> {
+export interface FilterEntitiesState<F> {
   filters?: F;
 }
-export interface EntityAndFilterState<T, F>
+/**
+ * @internal
+ */
+export interface ƟLoadEntitiesFilterEntitiesState<T, F>
   extends LoadEntitiesState<T>,
-    FilterState<F> {}
+    FilterEntitiesState<F> {}
 
 type FilterPatchConditionalType<F, P> = P extends true ? Partial<F> : F;
 
@@ -28,7 +31,7 @@ export interface FilterActionOverload<F> {
   } & TypedAction<string>;
 }
 
-export type FilterActions<F> = {
+export type FilterEntitiesActions<F> = {
   /**
    * Store the filters param (read using selectFilter) and fires the loadEntities action
    * if the filters param has changed, this call is also debounce by default, to disable this
@@ -39,29 +42,31 @@ export type FilterActions<F> = {
    */
   filterEntities: ActionCreator<string, FilterActionOverload<F>>;
 };
-export type FilterSelectors<T, F> = {
+export type FilterEntitiesSelectors<T, F> = {
   /**
    * Returns the stored filters set by the filter action
    * @param state
    */
-  selectEntitiesFilter: (state: EntityAndFilterState<T, F>) => F | undefined;
+  selectEntitiesFilter: (
+    state: ƟLoadEntitiesFilterEntitiesState<T, F>
+  ) => F | undefined;
 };
 
-export type FilterMutators<T, F> = {
-  setFilters<S extends EntityAndFilterState<T, F>>(
+export type FilterEntitiesMutators<T, F> = {
+  setFilters<S extends ƟLoadEntitiesFilterEntitiesState<T, F>>(
     filter: F | undefined,
     state: S
   ): S;
 };
 
-export const filterTraitKey = 'filter';
+export const filterEntitiesTraitKey = 'filter';
 
-export type FilterConfig<T, F> = {
+export type FilterEntitiesConfig<T, F> = {
   defaultFilter?: F;
   filterFn?: (filter: F, entity: T) => boolean;
   defaultDebounceTime?: number;
 };
 
-export type FilterKeyedConfig<T, F> = {
-  filter?: FilterConfig<T, F>;
+export type FilterEntitiesKeyedConfig<T, F> = {
+  filter?: FilterEntitiesConfig<T, F>;
 };
