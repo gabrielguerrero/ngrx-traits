@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ProductDetail } from '../../../models';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { addLoadEntity } from 'ngrx-traits/traits';
+import { addLoadEntityTraits } from 'ngrx-traits/traits';
 import {
   createTraitFactory,
   ExtractActionsType,
@@ -14,7 +14,7 @@ import { of } from 'rxjs';
 
 export function addLoadProductDetail() {
   // notice how we use a trait
-  const traits = addLoadEntity({
+  const traits = addLoadEntityTraits({
     entityName: 'productDetail',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ productDetail: ProductDetail }>(),

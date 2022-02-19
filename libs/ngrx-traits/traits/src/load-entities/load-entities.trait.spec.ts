@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { EntitiesPaginationState } from '../pagination';
-import { addLoadEntities } from './load-entities.trait';
+import { EntitiesPaginationState } from '../entities-pagination';
+import { addLoadEntitiesTrait } from './load-entities.trait';
 import { createAction, createFeatureSelector } from '@ngrx/store';
-import { addEntitiesPagination } from '../pagination/pagination.trait';
+import { addEntitiesPaginationTrait } from '../entities-pagination/entities-pagination.trait';
 import { Actions } from '@ngrx/effects';
 import { LoadEntitiesState } from './load-entities.model';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addFilterEntities } from '../filter-entities/filter-entities.trait';
+import { addFilterEntitiesTrait } from '../filter-entities/filter-entities.trait';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { FilterEntitiesState } from 'ngrx-traits/traits';
 
@@ -30,14 +30,14 @@ export interface TestState3
   extends LoadEntitiesState<Todo>,
     FilterEntitiesState<TodoFilter> {}
 
-describe('addLoadEntities Trait', () => {
+describe('addLoadEntitiesTrait Trait', () => {
   let actions$: Actions;
 
   function init() {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>()
+      addLoadEntitiesTrait<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -54,8 +54,8 @@ describe('addLoadEntities Trait', () => {
     const featureSelector = createFeatureSelector<TestState2>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addEntitiesPagination<Todo>()
+      addLoadEntitiesTrait<Todo>(),
+      addEntitiesPaginationTrait<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -75,8 +75,8 @@ describe('addLoadEntities Trait', () => {
     const featureSelector = createFeatureSelector<TestState3>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addFilterEntities<Todo, TodoFilter>({
+      addLoadEntitiesTrait<Todo>(),
+      addFilterEntitiesTrait<Todo, TodoFilter>({
         defaultFilter: filter,
         filterFn: (filter: TodoFilter, todo: Todo) =>
           (filter?.content && todo.content?.includes(filter.content)) || false,

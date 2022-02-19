@@ -2,7 +2,7 @@ import {
   ƟLoadEntitiesEntitiesPaginationState,
   EntitiesPaginationMutators,
   EntitiesPaginationSelectors,
-} from './pagination.model';
+} from './entities-pagination.model';
 import { LoadEntitiesKeyedConfig } from '../load-entities';
 
 export function createPaginationTraitMutators<Entity>(

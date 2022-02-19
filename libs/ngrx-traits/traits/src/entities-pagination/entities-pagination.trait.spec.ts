@@ -1,21 +1,24 @@
 import { Actions } from '@ngrx/effects';
 import { createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadEntities } from '../load-entities';
+import { addLoadEntitiesTrait } from '../load-entities';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addFilterEntities, FilterEntitiesState } from '../filter-entities';
+import {
+  addFilterEntitiesTrait,
+  FilterEntitiesState,
+} from '../filter-entities';
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { addEntitiesPagination } from '../pagination/pagination.trait';
+import { addEntitiesPaginationTrait } from './entities-pagination.trait';
 import { TestState } from '../filter-entities/filter-entities.trait.spec';
-import { CacheType, PageInfoModel } from '../pagination/pagination.model';
+import { CacheType, PageInfoModel } from './entities-pagination.model';
 import { of } from 'rxjs';
 import { first, take, toArray } from 'rxjs/operators';
-import { addCrudEntities, CrudEntitiesState } from '../crud-entities';
+import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
 
 import { Dictionary } from '@ngrx/entity';
-import { ƟPaginationActions } from './pagination.model.internal';
+import { ƟPaginationActions } from './entities-pagination.model.internal';
 
 export interface PaginationTestState
   extends TestState,
@@ -35,9 +38,9 @@ describe('Pagination Test', () => {
     const featureSelector = createFeatureSelector<PaginationTestState>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addFilterEntities<Todo, TodoFilter>(),
-      addEntitiesPagination<Todo>({ cacheType })
+      addLoadEntitiesTrait<Todo>(),
+      addFilterEntitiesTrait<Todo, TodoFilter>(),
+      addEntitiesPaginationTrait<Todo>({ cacheType })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -57,9 +60,9 @@ describe('Pagination Test', () => {
     const featureSelector = createFeatureSelector<PaginationTestState2>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addCrudEntities<Todo>(),
-      addEntitiesPagination<Todo>({ cacheType })
+      addLoadEntitiesTrait<Todo>(),
+      addCrudEntitiesTrait<Todo>(),
+      addEntitiesPaginationTrait<Todo>({ cacheType })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,

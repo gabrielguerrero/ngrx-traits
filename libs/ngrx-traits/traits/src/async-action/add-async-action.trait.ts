@@ -30,7 +30,7 @@ import {
  * @example
  * // The following trait config
  * const traits = createEntityFeatureFactory(
- * addAsyncAction({
+ * addAsyncActionTrait({
  *        name: 'createClient',
  *        actionProps: props<{ name: string }>(),
  *        actionSuccessProps: props<{ id: string }>(),
@@ -49,7 +49,7 @@ import {
  * traits.selectors.isSuccessCreateClient
  * traits.selectors.isFailCreateClient
  */
-export function addAsyncAction<
+export function addAsyncActionTrait<
   J extends string,
   Request extends object | undefined = undefined,
   Response extends object | undefined = undefined,

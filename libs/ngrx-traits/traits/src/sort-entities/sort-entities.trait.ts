@@ -21,7 +21,7 @@ import {
 import {
   EntitiesPaginationActions,
   EntitiesPaginationKeyedConfig,
-} from '../pagination/pagination.model';
+} from '../entities-pagination/entities-pagination.model';
 import { createTraitFactory } from 'ngrx-traits';
 import { createSortTraitActions } from './sort-entities.trait.actions';
 import {
@@ -45,8 +45,8 @@ import {
  * extends EntityAndStatusState<Todo>, SortState<Todo>{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
- *      addSortEntities<Todo>({
+ *      addLoadEntitiesTrait<Todo>(),
+ *      addSortEntitiesTrait<Todo>({
  *        defaultSort: {active:'id', direction:'asc'}
  *      })
  *    )({
@@ -61,7 +61,7 @@ import {
  *
  * traits.selectors.selectSort()
  */
-export function addSortEntities<Entity>({
+export function addSortEntitiesTrait<Entity>({
   remote = false,
   defaultSort,
 }: SortEntitiesConfig<Entity>) {

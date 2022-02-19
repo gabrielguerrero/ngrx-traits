@@ -4,17 +4,23 @@ import { of } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
 import { TestBed } from '@angular/core/testing';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
+import {
+  addEntitiesPaginationTrait,
+  EntitiesPaginationState,
+} from '../entities-pagination';
 import { SortEntitiesState } from './sort-entities.model';
-import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addFilterEntities, FilterEntitiesState } from '../filter-entities';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import {
+  addFilterEntitiesTrait,
+  FilterEntitiesState,
+} from '../filter-entities';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { SelectEntityState } from '../select-entity';
-import { addSortEntities } from './sort-entities.trait';
+import { addSortEntitiesTrait } from './sort-entities.trait';
 
-describe('addSortEntities trait', () => {
+describe('addSortEntitiesTrait trait', () => {
   let actions$: Actions;
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
@@ -50,8 +56,8 @@ describe('addSortEntities trait', () => {
   function init({ remoteSort = false } = {}) {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addSortEntities<Todo>({
+      addLoadEntitiesTrait<Todo>(),
+      addSortEntitiesTrait<Todo>({
         defaultSort: { active: 'id', direction: 'asc' },
         remote: remoteSort,
       })
@@ -82,13 +88,13 @@ describe('addSortEntities trait', () => {
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addEntitiesPagination({ cacheType: 'partial' }),
-      addFilterEntities<Todo, TodoFilter>(),
-      addSortEntities<Todo>({
+      addEntitiesPaginationTrait({ cacheType: 'partial' }),
+      addFilterEntitiesTrait<Todo, TodoFilter>(),
+      addSortEntitiesTrait<Todo>({
         defaultSort: { direction: 'asc', active: 'id' },
         remote: true,
       }),
-      addLoadEntities<Todo>()
+      addLoadEntitiesTrait<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector2,

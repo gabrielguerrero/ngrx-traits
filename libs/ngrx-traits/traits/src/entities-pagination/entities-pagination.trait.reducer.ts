@@ -14,9 +14,9 @@ import {
   ƟLoadEntitiesEntitiesPaginationState,
   EntitiesPaginationKeyedConfig,
   EntitiesPaginationMutators,
-} from './pagination.model';
+} from './entities-pagination.model';
 import { CrudEntitiesActions } from '../crud-entities';
-import { ƟPaginationActions } from './pagination.model.internal';
+import { ƟPaginationActions } from './entities-pagination.model.internal';
 import { insertIf } from 'ngrx-traits';
 
 export function createPaginationInitialState<Entity>(

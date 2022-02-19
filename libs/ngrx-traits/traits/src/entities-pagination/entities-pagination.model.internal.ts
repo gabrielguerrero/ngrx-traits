@@ -1,5 +1,5 @@
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
-import { EntitiesPaginationActions } from './pagination.model';
+import { EntitiesPaginationActions } from './entities-pagination.model';
 
 /**
  * @internal

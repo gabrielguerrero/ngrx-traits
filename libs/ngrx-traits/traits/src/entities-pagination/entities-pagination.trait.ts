@@ -4,9 +4,9 @@ import {
   EntitiesPaginationMutators,
   EntitiesPaginationSelectors,
   entitiesPaginationTraitKey,
-} from './pagination.model';
-import { createPaginationTraitSelectors } from './pagination.trait.selectors';
-import { createPaginationTraitActions } from './pagination.trait.actions';
+} from './entities-pagination.model';
+import { createPaginationTraitSelectors } from './entities-pagination.trait.selectors';
+import { createPaginationTraitActions } from './entities-pagination.trait.actions';
 import {
   FilterEntitiesActions,
   FilterEntitiesKeyedConfig,
@@ -21,12 +21,12 @@ import {
 import {
   createPaginationInitialState,
   createPaginationTraitReducer,
-} from './pagination.trait.reducer';
-import { createPaginationTraitEffects } from './pagination.trait.effects';
+} from './entities-pagination.trait.reducer';
+import { createPaginationTraitEffects } from './entities-pagination.trait.effects';
 import { createTraitFactory } from 'ngrx-traits';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
-import { createPaginationTraitMutators } from './pagination.trait.mutators';
-import { ƟPaginationActions } from './pagination.model.internal';
+import { createPaginationTraitMutators } from './entities-pagination.trait.mutators';
+import { ƟPaginationActions } from './entities-pagination.model.internal';
 import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
@@ -58,7 +58,7 @@ import {
  * extends EntityAndStatusState<Todo>,SingleSelectionState{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
+ *      addLoadEntitiesTrait<Todo>(),
  *      addPagination<Todo>()
  *    )({
  *      actionsGroupKey: '[Todos]',
@@ -86,7 +86,7 @@ import {
  * traits.selectors.selectPagedRequest()// use in effects to get paging parameter
  * traits.selectors.selectPageInfo()
  */
-export function addEntitiesPagination<Entity>({
+export function addEntitiesPaginationTrait<Entity>({
   cacheType = 'full',
   pageSize = 20,
   currentPage = 0,

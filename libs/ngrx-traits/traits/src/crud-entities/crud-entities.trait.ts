@@ -34,7 +34,7 @@ import {
 import {
   EntitiesPaginationActions,
   EntitiesPaginationKeyedConfig,
-} from '../pagination/pagination.model';
+} from '../entities-pagination/entities-pagination.model';
 import { createCrudTraitMutators } from './crud-entities.trait.mutators';
 
 /**
@@ -51,8 +51,8 @@ import { createCrudTraitMutators } from './crud-entities.trait.mutators';
  * extends EntityAndStatusState<Todo>, CrudState<Todo>{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
- *      addCrudEntities<Todo>()
+ *      addLoadEntitiesTrait<Todo>(),
+ *      addCrudEntitiesTrait<Todo>()
  *    )({
  *      actionsGroupKey: '[Todos]',
  *      featureSelector: createFeatureSelector<TestState>>(
@@ -72,7 +72,7 @@ import { createCrudTraitMutators } from './crud-entities.trait.mutators';
  * traits.selectors.selectFilteredChanges()
  * traits.selectors.selectAllFilteredChanges()
  */
-export function addCrudEntities<Entity>({
+export function addCrudEntitiesTrait<Entity>({
   storeChanges = false,
 }: CrudEntitiesConfig = {}) {
   return createTraitFactory({

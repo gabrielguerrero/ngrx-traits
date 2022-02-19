@@ -8,14 +8,14 @@ To use it first you need a trait factory like the following, (it can have any co
 
 ```typescript
 const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
   addFilter<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
-  addSortEntities<Product>({
+  addSortEntitiesTrait<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
 );

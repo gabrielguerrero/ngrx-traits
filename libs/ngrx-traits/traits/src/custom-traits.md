@@ -318,17 +318,17 @@ return createTraitFactory({
   }
 ```
 
-In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.select exist, that means that the addSelectEntity trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
+In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.select exist, that means that the addSelectEntityTrait trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
 
 #### Combining with other traits
 
 In the previous section we show how to interact with another trait that may or may not be present, but what happen if you need another trait always, to the point that you think that other trait should be added also if your custom trait is added.
-Let's again go to an example which should make this easier to understand, there is a bit of boilerplate in our addLoadProduct trait, like the actions we created are the typical 3 actions you do when you call a backend, there is a trait that does that for us the addAsyncAction, not only it creates the traits it also creates the selectors like isLoading to track the progress of the call, it will be better if we use that trait instead of writing again that code, then there is also the logic to store the result of action, and a selector to read that stored result in this case the selectProduct, well there is a trait that does all that as well called loadEntity, and in reality if we use loadEntity we only need to do the effect that loads the product because loadEntity, similarly to what we will do now, already adds addAsyncAction, lets see the example:
+Let's again go to an example which should make this easier to understand, there is a bit of boilerplate in our addLoadProduct trait, like the actions we created are the typical 3 actions you do when you call a backend, there is a trait that does that for us the addAsyncActionTrait, not only it creates the traits it also creates the selectors like isLoading to track the progress of the call, it will be better if we use that trait instead of writing again that code, then there is also the logic to store the result of action, and a selector to read that stored result in this case the selectProduct, well there is a trait that does all that as well called loadEntity, and in reality if we use loadEntity we only need to do the effect that loads the product because loadEntity, similarly to what we will do now, already adds addAsyncActionTrait, lets see the example:
 
 ```ts
 export function addLoadProduct() {
   // notice how we use a trait
-  const traits = addLoadEntity({
+  const traits = addLoadEntityTraits({
     entityName: 'product',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ product: ProductDetail }>(),
@@ -361,13 +361,13 @@ export function addLoadProduct() {
 }
 ```
 
-Notice addLoadEntity returns an array of traits, so it needs to be spread when used, and the same you will need to do when you use addLoadProduct trait, if you needed more traits, you could have join then in an array like:
+Notice addLoadEntityTraits returns an array of traits, so it needs to be spread when used, and the same you will need to do when you use addLoadProduct trait, if you needed more traits, you could have join then in an array like:
 
 ```ts
 const traits = [
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
-  ...addLoadEntity({
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  ...addLoadEntityTraits({
     entityName: 'product',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ product: ProductDetail }>(),

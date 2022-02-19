@@ -1,10 +1,10 @@
 import {
-  addAsyncAction,
-  addFilterEntities,
-  addLoadEntities,
-  addEntitiesPagination,
-  addSelectEntity,
-  addSortEntities,
+  addAsyncActionTrait,
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+  addEntitiesPaginationTrait,
+  addSelectEntityTrait,
+  addSortEntitiesTrait,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { props } from '@ngrx/store';
@@ -12,15 +12,15 @@ import { createEntityFeatureFactory } from 'ngrx-traits';
 import { selectProductState } from './products.state';
 
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
+  addLoadEntitiesTrait<Product>(),
   addSelectEntities<Product>(),
-  addAsyncAction({
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addEntitiesPagination<Product>(),
-  addFilterEntities<Product, ProductFilter>(),
-  addSortEntities<Product>({
+  addEntitiesPaginationTrait<Product>(),
+  addFilterEntitiesTrait<Product, ProductFilter>(),
+  addSortEntitiesTrait<Product>({
     remote: true,
     defaultSort: {
       direction: 'asc',

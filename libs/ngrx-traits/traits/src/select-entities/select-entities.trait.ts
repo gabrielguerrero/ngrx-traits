@@ -8,7 +8,7 @@ import {
 import {
   EntitiesPaginationActions,
   EntitiesPaginationKeyedConfig,
-} from '../pagination/pagination.model';
+} from '../entities-pagination/entities-pagination.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -40,7 +40,7 @@ import {
  * extends EntityAndStatusState<Todo>,MultipleSelectionState{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
+ *      addLoadEntitiesTrait<Todo>(),
  *      addMultiSelection<Todo>()
  *    )({
  *      actionsGroupKey: '[Todos]',
@@ -58,7 +58,7 @@ import {
  * traits.selectors.selectIdSelected()
  * traits.selectors.selectEntitySelected()
  */
-export function addSelectEntities<Entity>() {
+export function addSelectEntitiesTrait<Entity>() {
   return createTraitFactory({
     key: 'multiSelection',
     depends: [loadEntitiesTraitKey],

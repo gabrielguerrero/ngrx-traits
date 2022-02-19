@@ -19,7 +19,7 @@ import {
 } from '../load-entities/load-entities.model';
 import { Type } from 'ngrx-traits';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
-import { EntitiesPaginationActions } from '../pagination';
+import { EntitiesPaginationActions } from '../entities-pagination';
 
 export function createFilterTraitEffects<Entity, F>(
   allActions: ƟFilterEntitiesActions<F> &

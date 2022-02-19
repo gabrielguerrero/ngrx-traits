@@ -1,7 +1,7 @@
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { AsyncActionState } from './async-action.model';
-import { addAsyncAction } from './async-action.trait';
+import { addAsyncActionTrait } from './add-async-action.trait';
 
 describe('addApiCall trait', () => {
   const featureSelector =
@@ -13,7 +13,7 @@ describe('addApiCall trait', () => {
   function init() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addAsyncAction({
+      addAsyncActionTrait({
         name: 'createClient',
         actionProps: props<{ name: string }>(),
         actionSuccessProps: props<{ id: string }>(),
@@ -28,11 +28,11 @@ describe('addApiCall trait', () => {
   function initMultiple() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addAsyncAction({
+      addAsyncActionTrait({
         name: 'createClient',
         actionProps: props<{ name: string }>(),
       }),
-      addAsyncAction({
+      addAsyncActionTrait({
         name: 'createProduct',
         actionProps: props<{ name: string }>(),
         actionSuccessProps: props<{ id: string }>(),

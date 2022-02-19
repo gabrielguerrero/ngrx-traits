@@ -1,19 +1,25 @@
 import { TestBed } from '@angular/core/testing';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
-import { addSortEntities, SortEntitiesState } from '../sort-entities';
+import {
+  addEntitiesPaginationTrait,
+  EntitiesPaginationState,
+} from '../entities-pagination';
+import { addSortEntitiesTrait, SortEntitiesState } from '../sort-entities';
 import { createFeatureSelector } from '@ngrx/store';
 import { Actions } from '@ngrx/effects';
-import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addCrudEntities, CrudEntitiesState } from '../crud-entities';
-import { addFilterEntities, FilterEntitiesState } from '../filter-entities';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
+import {
+  addFilterEntitiesTrait,
+  FilterEntitiesState,
+} from '../filter-entities';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { provideMockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { SelectEntityState } from './select-entity.model';
-import { addSelectEntity } from './select-entity.trait';
+import { addSelectEntityTrait } from './select-entity.trait';
 
-describe('addSelectEntity trait', () => {
+describe('addSelectEntityTrait trait', () => {
   let actions$: Actions;
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
@@ -48,8 +54,8 @@ describe('addSelectEntity trait', () => {
   function init() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addSelectEntity<Todo>()
+      addLoadEntitiesTrait<Todo>(),
+      addSelectEntityTrait<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -72,15 +78,15 @@ describe('addSelectEntity trait', () => {
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addEntitiesPagination({ cacheType: 'partial' }),
-      addFilterEntities<Todo, TodoFilter>(),
-      addSortEntities<Todo>({
+      addEntitiesPaginationTrait({ cacheType: 'partial' }),
+      addFilterEntitiesTrait<Todo, TodoFilter>(),
+      addSortEntitiesTrait<Todo>({
         defaultSort: { direction: 'asc', active: 'id' },
         remote: true,
       }),
-      addLoadEntities<Todo>(),
-      addSelectEntity<Todo>(),
-      addCrudEntities<Todo>()
+      addLoadEntitiesTrait<Todo>(),
+      addSelectEntityTrait<Todo>(),
+      addCrudEntitiesTrait<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector2,

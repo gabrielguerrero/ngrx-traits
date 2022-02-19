@@ -5,9 +5,9 @@ import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { FilterEntitiesActions } from '../filter-entities/filter-entities.model';
 import { LoadEntitiesActions, LoadEntitiesSelectors } from '../load-entities';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
-import { EntitiesPaginationSelectors } from './pagination.model';
+import { EntitiesPaginationSelectors } from './entities-pagination.model';
 import { Type } from 'ngrx-traits';
-import { ƟPaginationActions } from './pagination.model.internal';
+import { ƟPaginationActions } from './entities-pagination.model.internal';
 
 export function createPaginationTraitEffects<Entity>(
   allActions: ƟPaginationActions &

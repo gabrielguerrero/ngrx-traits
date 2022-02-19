@@ -1,12 +1,15 @@
 import { createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addFilterEntities } from './filter-entities.trait';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import { addFilterEntitiesTrait } from './filter-entities.trait';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { first, take, toArray } from 'rxjs/operators';
-import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
+import {
+  addEntitiesPaginationTrait,
+  EntitiesPaginationState,
+} from '../entities-pagination';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -29,8 +32,8 @@ describe('addFilter Trait', () => {
     const featureSelector = createFeatureSelector<TestState2>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addFilterEntities<Todo, TodoFilter>()
+      addLoadEntitiesTrait<Todo>(),
+      addFilterEntitiesTrait<Todo, TodoFilter>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -50,9 +53,9 @@ describe('addFilter Trait', () => {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addLoadEntities<Todo>(),
-      addFilterEntities<Todo, TodoFilter>(),
-      addEntitiesPagination<Todo>()
+      addLoadEntitiesTrait<Todo>(),
+      addFilterEntitiesTrait<Todo, TodoFilter>(),
+      addEntitiesPaginationTrait<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,

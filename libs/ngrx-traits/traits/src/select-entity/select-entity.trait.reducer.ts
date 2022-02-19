@@ -18,7 +18,7 @@ import { insertIf } from 'ngrx-traits';
 import {
   EntitiesPaginationActions,
   EntitiesPaginationKeyedConfig,
-} from '../pagination/pagination.model';
+} from '../entities-pagination/entities-pagination.model';
 import { FilterEntitiesActions } from '../filter-entities';
 
 export function createSingleSelectionInitialState<Entity>(

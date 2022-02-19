@@ -2,7 +2,7 @@ import { ActionCreatorProps } from '@ngrx/store/src/models';
 import { createTraitFactory } from 'ngrx-traits';
 import { createReducer, on } from '@ngrx/store';
 
-import { addAsyncAction } from '../async-action/async-action.trait';
+import { addAsyncActionTrait } from '../async-action/add-async-action.trait';
 import { LoadEntitySelectors, LoadEntityState } from './load-entity.model';
 import { TraitInitialStateFactoryConfig } from 'ngrx-traits';
 
@@ -21,7 +21,7 @@ type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
  *
  * @example
  * const traits = createEntityFeatureFactory(
- * ...addLoadEntity({
+ * ...addLoadEntityTraits({
  *        entityName: 'client',
  *        requestProps: props<{ id: string }>(),
  *        responseProps: props<{ client: Client }>(),
@@ -42,7 +42,7 @@ type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
  * traits.selectors.isSuccessLoadClient
  * traits.selectors.isFailLoadClient
  */
-export function addLoadEntity<
+export function addLoadEntityTraits<
   J extends string,
   Request extends object | undefined = undefined,
   Response extends Record<J, any> | undefined = undefined,
@@ -66,7 +66,7 @@ export function addLoadEntity<
   type K = `load${Capitalize<J & string>}`;
 
   return [
-    addAsyncAction<K, Request, Response, Failure>({
+    addAsyncActionTrait<K, Request, Response, Failure>({
       name: ('load' + capitalizedName) as K,
       actionProps,
       actionSuccessProps,
