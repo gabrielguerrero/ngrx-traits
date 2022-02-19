@@ -3,10 +3,10 @@ import {
   LoadEntitiesKeyedConfig,
   LoadEntitiesSelectors,
 } from './load-entities.model';
-import { FilterEntitiesKeyedConfig } from '../filter';
+import { FilterEntitiesKeyedConfig } from '../filter-entities';
 import { isFail, isLoading, isSuccess } from './load-entities.utils';
 import { createSelector } from '@ngrx/store';
-import { selectEntitiesFilter } from '../filter/filter.trait.selectors';
+import { selectEntitiesFilter } from '../filter-entities/filter-entities.trait.selectors';
 
 export function createLoadEntitiesTraitSelectors<Entity>(
   allConfigs?: LoadEntitiesKeyedConfig<Entity> &

@@ -1,7 +1,7 @@
 import {
   FilterEntitiesActions,
   FilterEntitiesKeyedConfig,
-} from '../filter/filter.model';
+} from '../filter-entities/filter-entities.model';
 import { createReducer, on } from '@ngrx/store';
 
 import {
@@ -15,7 +15,7 @@ import {
   EntitiesPaginationKeyedConfig,
   EntitiesPaginationMutators,
 } from './pagination.model';
-import { CrudEntitiesActions } from '../crud';
+import { CrudEntitiesActions } from '../crud-entities';
 import { ƟPaginationActions } from './pagination.model.internal';
 import { insertIf } from 'ngrx-traits';
 
