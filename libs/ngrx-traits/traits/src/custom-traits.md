@@ -318,7 +318,7 @@ return createTraitFactory({
   }
 ```
 
-In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.select exist, that means that the addSingleSelection trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
+In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.select exist, that means that the addSelectEntity trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
 
 #### Combining with other traits
 
@@ -366,7 +366,7 @@ Notice addLoadEntity returns an array of traits, so it needs to be spread when u
 ```ts
 const traits = [
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   ...addLoadEntity({
     entityName: 'product',
     actionProps: props<{ id: string }>(),

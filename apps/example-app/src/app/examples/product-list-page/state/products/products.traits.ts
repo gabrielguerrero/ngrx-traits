@@ -1,14 +1,14 @@
 import {
   addAsyncAction,
-  addFilter,
+  addFilterEntities,
   addLoadEntities,
-  addSingleSelection,
-  addSort,
+  addSelectEntity,
+  addSortEntities,
   AsyncActionState,
   LoadEntitiesState,
-  FilterState,
-  SingleSelectionState,
-  SortState,
+  FilterEntitiesState,
+  SelectEntityState,
+  SortEntitiesState,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
@@ -22,59 +22,59 @@ import {
 
 export interface ProductsState
   extends LoadEntitiesState<Product>,
-    SingleSelectionState,
+    SelectEntityState,
     AsyncActionState<'checkout'>,
-    FilterState<ProductFilter>,
-    SortState<Product> {}
+    FilterEntitiesState<ProductFilter>,
+    SortEntitiesState<Product> {}
 
 const entityFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addFilter<Product, ProductFilter>({
+  addFilterEntities<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
-  addSort<Product>({
+  addSortEntities<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
 );
 const entityFeatureFactory2 = createEntityFeatureFactory(
   { entityName: 'order' },
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addFilter<Product, ProductFilter>({
+  addFilterEntities<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
-  addSort<Product>({
+  addSortEntities<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
 );
 const entityFeatureFactory3 = createEntityFeatureFactory(
   { entityName: 'practice' },
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntity<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addFilter<Product, ProductFilter>({
+  addFilterEntities<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
-  addSort<Product>({
+  addSortEntities<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
 );
@@ -86,7 +86,7 @@ export const productTraits = entityFeatureFactory({
 export const ProductActions = productTraits.actions;
 export const ProductSelectors = productTraits.selectors;
 
-// const c = [addLoadEntities<Product>(), addSingleSelection<Product>()] as const;
+// const c = [addLoadEntities<Product>(), addSelectEntity<Product>()] as const;
 // type G = ExtractActionsType<typeof c>;
 // const g: ReplaceEntityNames<G, 'product', 'products'> = null;
 // g.

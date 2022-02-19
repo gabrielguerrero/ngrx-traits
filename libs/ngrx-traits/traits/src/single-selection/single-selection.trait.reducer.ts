@@ -3,25 +3,28 @@ import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
 } from '../load-entities/load-entities.model';
-import { SortActions, SortKeyedConfig } from '../sort/sort.model';
 import {
-  EntityAndSingleSelectionState,
-  SingleSelectionActions,
-  SingleSelectionKeyedConfig,
-  SingleSelectionMutators,
+  SortEntitiesActions,
+  SortEntitiesKeyedConfig,
+} from '../sort/sort.model';
+import {
+  ƟLoadEntitiesSelectEntiyState,
+  SelectEntityActions,
+  SelectEntityKeyedConfig,
+  SelectEntityMutators,
 } from './single-selection.model';
-import { CrudActions } from '../crud/crud.model';
+import { CrudEntitiesActions } from '../crud/crud.model';
 import { insertIf } from 'ngrx-traits';
 import {
-  PaginationActions,
-  PaginationKeyedConfig,
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
 } from '../pagination/pagination.model';
-import { FilterActions } from '../filter';
+import { FilterEntitiesActions } from '../filter';
 
 export function createSingleSelectionInitialState<Entity>(
   previousInitialState: any,
-  allConfigs: SingleSelectionKeyedConfig
-): EntityAndSingleSelectionState<Entity> {
+  allConfigs: SelectEntityKeyedConfig
+): ƟLoadEntitiesSelectEntiyState<Entity> {
   const selectedId = allConfigs.singleSelection?.selectedId;
   return {
     ...previousInitialState,
@@ -30,20 +33,20 @@ export function createSingleSelectionInitialState<Entity>(
 }
 export function createSingleSelectionTraitReducer<
   Entity,
-  S extends EntityAndSingleSelectionState<Entity>
+  S extends ƟLoadEntitiesSelectEntiyState<Entity>
 >(
   initialState: S,
-  allActions: SingleSelectionActions &
-    CrudActions<Entity> &
-    SortActions<Entity> &
-    PaginationActions &
-    FilterActions<any> &
+  allActions: SelectEntityActions &
+    CrudEntitiesActions<Entity> &
+    SortEntitiesActions<Entity> &
+    EntitiesPaginationActions &
+    FilterEntitiesActions<any> &
     LoadEntitiesActions<Entity>,
-  allMutators: SingleSelectionMutators<Entity>,
-  allConfigs: SingleSelectionKeyedConfig &
+  allMutators: SelectEntityMutators<Entity>,
+  allConfigs: SelectEntityKeyedConfig &
     LoadEntitiesKeyedConfig<Entity> &
-    PaginationKeyedConfig &
-    SortKeyedConfig<Entity>
+    EntitiesPaginationKeyedConfig &
+    SortEntitiesKeyedConfig<Entity>
 ) {
   const { adapter } = allConfigs.loadEntities!;
 

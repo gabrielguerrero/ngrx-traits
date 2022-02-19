@@ -11,14 +11,20 @@ import {
   createCrudInitialState,
   createCrudTraitReducer,
 } from '../crud/crud.trait.reducer';
-import { SortActions, SortKeyedConfig } from '../sort/sort.model';
 import {
-  CrudActions,
-  CrudConfig,
-  CrudKeyedConfig,
-  crudTraitKey,
+  SortEntitiesActions,
+  SortEntitiesKeyedConfig,
+} from '../sort/sort.model';
+import {
+  CrudEntitiesActions,
+  CrudEntitiesConfig,
+  CrudEntitiesKeyedConfig,
+  crudEntitiesTraitKey,
 } from './crud.model';
-import { FilterActions, FilterKeyedConfig } from '../filter/filter.model';
+import {
+  FilterEntitiesActions,
+  FilterEntitiesKeyedConfig,
+} from '../filter/filter.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -26,8 +32,8 @@ import {
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
 import {
-  PaginationActions,
-  PaginationKeyedConfig,
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
 } from '../pagination/pagination.model';
 import { createCrudTraitMutators } from './crud.trait.mutators';
 
@@ -68,11 +74,11 @@ import { createCrudTraitMutators } from './crud.trait.mutators';
  */
 export function addCrudEntities<Entity>({
   storeChanges = false,
-}: CrudConfig = {}) {
+}: CrudEntitiesConfig = {}) {
   return createTraitFactory({
-    key: crudTraitKey,
+    key: crudEntitiesTraitKey,
     depends: [loadEntitiesTraitKey],
-    config: { storeChanges } as CrudConfig,
+    config: { storeChanges } as CrudEntitiesConfig,
     actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
       createCrudTraitActions<Entity>(actionsGroupKey),
     selectors: ({ previousSelectors }: TraitSelectorsFactoryConfig) =>
@@ -81,24 +87,24 @@ export function addCrudEntities<Entity>({
       ),
     mutators: ({ allConfigs }: TraitStateMutatorsFactoryConfig) =>
       createCrudTraitMutators<Entity>(
-        allConfigs as CrudKeyedConfig & LoadEntitiesKeyedConfig<Entity>
+        allConfigs as CrudEntitiesKeyedConfig & LoadEntitiesKeyedConfig<Entity>
       ),
     initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>
       createCrudInitialState<Entity>(previousInitialState),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
       createCrudTraitReducer(
         initialState,
-        allActions as CrudActions<Entity> &
+        allActions as CrudEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
-          SortActions<Entity> &
-          FilterActions<any> &
-          PaginationActions,
+          SortEntitiesActions<Entity> &
+          FilterEntitiesActions<any> &
+          EntitiesPaginationActions,
         allMutators,
-        allConfigs as CrudKeyedConfig &
-          FilterKeyedConfig<Entity, unknown> &
+        allConfigs as CrudEntitiesKeyedConfig &
+          FilterEntitiesKeyedConfig<Entity, unknown> &
           LoadEntitiesKeyedConfig<Entity> &
-          SortKeyedConfig<Entity> &
-          PaginationKeyedConfig
+          SortEntitiesKeyedConfig<Entity> &
+          EntitiesPaginationKeyedConfig
       ),
   });
 }

@@ -2,14 +2,17 @@ import { Dictionary } from '@ngrx/entity';
 import { LoadEntitiesState } from '../load-entities/load-entities.model';
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
-export interface MultipleSelectionState {
+export interface SelectEntitiesState {
   selectedIds: Dictionary<boolean>;
 }
-export interface EntityAndMultipleSelectionState<Entity>
+/**
+ * @internal
+ */
+export interface ƟLoadEntitiesSelectEntitiesState<Entity>
   extends LoadEntitiesState<Entity>,
-    MultipleSelectionState {}
+    SelectEntitiesState {}
 
-export type MultiSelectActions = {
+export type SelectEntitiesActions = {
   selectEntities: ActionCreator<
     string,
     (props: {
@@ -32,46 +35,46 @@ export type MultiSelectActions = {
   clearEntitiesSelection: ActionCreator<string, () => TypedAction<string>>;
 };
 
-export type MultipleSelectionSelectors<T> = {
+export type SelectEntitiesSelectors<T> = {
   isAllEntitiesSelected: (
-    state: EntityAndMultipleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntitiesState<T>
   ) => Selected;
   selectEntitiesIdsSelectedMap: (
-    state: EntityAndMultipleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntitiesState<T>
   ) => Dictionary<boolean>;
   selectEntitiesIdsSelectedList: (
-    state: EntityAndMultipleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntitiesState<T>
   ) => number[] | string[];
   selectEntitiesSelectedMap: (
-    state: EntityAndMultipleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntitiesState<T>
   ) => Dictionary<T>;
   selectEntitiesSelectedList: (
-    state: EntityAndMultipleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntitiesState<T>
   ) => T[];
   selectTotalSelectedEntities: (
-    state: EntityAndMultipleSelectionState<T>
+    state: ƟLoadEntitiesSelectEntitiesState<T>
   ) => number;
 };
 
-export type MultipleSelectionMutators<T> = {
-  multiSelect: <S extends EntityAndMultipleSelectionState<T>>(
+export type SelectEntitiesMutators<T> = {
+  multiSelect: <S extends ƟLoadEntitiesSelectEntitiesState<T>>(
     id: number | string,
     state: S
   ) => S;
 
-  multiDeselect<S extends EntityAndMultipleSelectionState<T>>(
+  multiDeselect<S extends ƟLoadEntitiesSelectEntitiesState<T>>(
     id: number | string,
     state: S
   ): S;
 
-  multiToggleSelect<S extends EntityAndMultipleSelectionState<T>>(
+  multiToggleSelect<S extends ƟLoadEntitiesSelectEntitiesState<T>>(
     id: number | string,
     state: S
   ): S;
 
-  toggleSelectAll<S extends EntityAndMultipleSelectionState<T>>(state: S): S;
+  toggleSelectAll<S extends ƟLoadEntitiesSelectEntitiesState<T>>(state: S): S;
 
-  multiClearSelection<S extends EntityAndMultipleSelectionState<T>>(
+  multiClearSelection<S extends ƟLoadEntitiesSelectEntitiesState<T>>(
     state: S
   ): S;
 };

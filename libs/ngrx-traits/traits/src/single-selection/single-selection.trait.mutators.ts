@@ -1,12 +1,12 @@
 import {
-  EntityAndSingleSelectionState,
-  SingleSelectionMutators,
+  ƟLoadEntitiesSelectEntiyState,
+  SelectEntityMutators,
 } from './single-selection.model';
 
 export function createSingleSelectionTraitMutators<
   Entity
->(): SingleSelectionMutators<Entity> {
-  function select<S extends EntityAndSingleSelectionState<Entity>>(
+>(): SelectEntityMutators<Entity> {
+  function select<S extends ƟLoadEntitiesSelectEntiyState<Entity>>(
     id: string | number,
     state: S
   ) {
@@ -15,13 +15,13 @@ export function createSingleSelectionTraitMutators<
       selectedId: id,
     };
   }
-  function deselect<S extends EntityAndSingleSelectionState<Entity>>(state: S) {
+  function deselect<S extends ƟLoadEntitiesSelectEntiyState<Entity>>(state: S) {
     return {
       ...state,
       selectedId: undefined,
     };
   }
-  function toggleSelect<S extends EntityAndSingleSelectionState<Entity>>(
+  function toggleSelect<S extends ƟLoadEntitiesSelectEntiyState<Entity>>(
     id: string | number,
     state: S
   ) {

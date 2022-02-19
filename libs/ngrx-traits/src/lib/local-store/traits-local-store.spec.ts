@@ -25,7 +25,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { createServiceFactory } from '@ngneat/spectator/jest';
 import { fakeAsync, tick } from '@angular/core/testing';
-import { addLoadEntities, addFilter } from 'ngrx-traits/traits';
+import { addLoadEntities, addFilterEntities } from 'ngrx-traits/traits';
 import {
   Todo,
   TodoFilter,
@@ -35,7 +35,7 @@ describe('trait-local-store', () => {
   const traitsFactory = createEntityFeatureFactory(
     { entityName: 'entity', entitiesName: 'entities' },
     addLoadEntities<Todo>(),
-    addFilter<Todo, TodoFilter>()
+    addFilterEntities<Todo, TodoFilter>()
   );
   type FF = typeof traitsFactory;
 

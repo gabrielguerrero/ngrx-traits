@@ -1,13 +1,13 @@
 import { createMultiSelectionTraitActions } from './multi-selection.trait.actions';
-import { SortActions, SortKeyedConfig } from '../sort';
+import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort';
 import { createMultiSelectionTraitSelectors } from './multi-selection.trait.selectors';
 import {
-  MultipleSelectionSelectors,
-  MultiSelectActions,
+  SelectEntitiesSelectors,
+  SelectEntitiesActions,
 } from './multi-selection.model';
 import {
-  PaginationActions,
-  PaginationKeyedConfig,
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
 } from '../pagination/pagination.model';
 import {
   LoadEntitiesActions,
@@ -16,13 +16,13 @@ import {
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
 import { createTraitFactory } from 'ngrx-traits';
-import { CrudActions } from '../crud/crud.model';
+import { CrudEntitiesActions } from '../crud/crud.model';
 import {
   createMultiSelectionInitialState,
   createMultiSelectionTraitReducer,
 } from './multi-selection.trait.reducer';
 import { createMultiSelectionTraitMutators } from './multi-selection.trait.mutators';
-import { FilterActions } from '../filter';
+import { FilterEntitiesActions } from '../filter';
 import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
@@ -58,7 +58,7 @@ import {
  * traits.selectors.selectIdSelected()
  * traits.selectors.selectEntitySelected()
  */
-export function addMultiSelection<Entity>() {
+export function addSelectEntities<Entity>() {
   return createTraitFactory({
     key: 'multiSelection',
     depends: [loadEntitiesTraitKey],
@@ -72,21 +72,21 @@ export function addMultiSelection<Entity>() {
       createMultiSelectionInitialState<Entity>(previousInitialState),
     mutators: ({ allSelectors }: TraitStateMutatorsFactoryConfig) =>
       createMultiSelectionTraitMutators<Entity>(
-        allSelectors as MultipleSelectionSelectors<Entity>
+        allSelectors as SelectEntitiesSelectors<Entity>
       ),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
       createMultiSelectionTraitReducer(
         initialState,
-        allActions as MultiSelectActions &
-          CrudActions<Entity> &
-          SortActions<Entity> &
+        allActions as SelectEntitiesActions &
+          CrudEntitiesActions<Entity> &
+          SortEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
-          FilterActions<any> &
-          PaginationActions,
+          FilterEntitiesActions<any> &
+          EntitiesPaginationActions,
         allMutators,
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
-          PaginationKeyedConfig &
-          SortKeyedConfig<Entity>
+          EntitiesPaginationKeyedConfig &
+          SortEntitiesKeyedConfig<Entity>
       ),
   });
 }

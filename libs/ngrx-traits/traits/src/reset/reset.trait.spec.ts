@@ -1,22 +1,22 @@
 import { createAction, createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addFilter } from '../filter/filter.trait';
+import { addFilterEntities } from '../filter/filter.trait';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { addPagination, PaginationState } from '../pagination';
+import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { FilterState } from '../filter';
+import { FilterEntitiesState } from '../filter';
 import { addResetEntitiesState } from './reset.trait';
 
 export interface TestState
   extends LoadEntitiesState<Todo>,
-    PaginationState,
-    FilterState<TodoFilter> {}
+    EntitiesPaginationState,
+    FilterEntitiesState<TodoFilter> {}
 
 describe('addReset Trait', () => {
   let actions$: Actions;
@@ -27,8 +27,8 @@ describe('addReset Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addFilter<Todo, TodoFilter>(),
-      addPagination<Todo>(),
+      addFilterEntities<Todo, TodoFilter>(),
+      addEntitiesPagination<Todo>(),
       addResetEntitiesState({
         resetOn: [globalReset],
       })

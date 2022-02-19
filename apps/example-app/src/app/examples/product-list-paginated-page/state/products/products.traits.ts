@@ -1,16 +1,16 @@
 import {
   addAsyncAction,
-  addFilter,
+  addFilterEntities,
   addLoadEntities,
-  addPagination,
-  addSingleSelection,
-  addSort,
+  addEntitiesPagination,
+  addSelectEntity,
+  addSortEntities,
   AsyncActionState,
   LoadEntitiesState,
-  FilterState,
-  PaginationState,
-  SingleSelectionState,
-  SortState,
+  FilterEntitiesState,
+  EntitiesPaginationState,
+  SelectEntityState,
+  SortEntitiesState,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
@@ -18,22 +18,22 @@ import { createEntityFeatureFactory } from 'ngrx-traits';
 
 export interface ProductsState
   extends LoadEntitiesState<Product>,
-    SingleSelectionState,
+    SelectEntityState,
     AsyncActionState<'checkout'>,
-    PaginationState,
-    FilterState<ProductFilter>,
-    SortState<Product> {}
+    EntitiesPaginationState,
+    FilterEntitiesState<ProductFilter>,
+    SortEntitiesState<Product> {}
 
 export const productTraits = createEntityFeatureFactory(
   addLoadEntities<Product>(),
-  addSingleSelection<Product>(),
+  addSelectEntities<Product>(),
   addAsyncAction({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addPagination<Product>(),
-  addFilter<Product, ProductFilter>(),
-  addSort<Product>({
+  addEntitiesPagination<Product>(),
+  addFilterEntities<Product, ProductFilter>(),
+  addSortEntities<Product>({
     remote: true,
     defaultSort: {
       direction: 'asc',

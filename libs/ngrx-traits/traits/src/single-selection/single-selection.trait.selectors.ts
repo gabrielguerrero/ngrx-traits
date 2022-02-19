@@ -1,17 +1,17 @@
 import {
-  EntityAndSingleSelectionState,
-  SingleSelectionSelectors,
-  SingleSelectionState,
+  ƟLoadEntitiesSelectEntiyState,
+  SelectEntitySelectors,
+  SelectEntityState,
 } from './single-selection.model';
 
 export function createSingleSelectionTraitSelectors<
   Entity
->(): SingleSelectionSelectors<Entity> {
-  function selectEntityIdSelected(state: SingleSelectionState) {
+>(): SelectEntitySelectors<Entity> {
+  function selectEntityIdSelected(state: SelectEntityState) {
     return state.selectedId;
   }
   function selectEntitySelected<Entity>(
-    state: EntityAndSingleSelectionState<Entity>
+    state: ƟLoadEntitiesSelectEntiyState<Entity>
   ) {
     return (state.selectedId && state.entities[state.selectedId]) || undefined;
   }

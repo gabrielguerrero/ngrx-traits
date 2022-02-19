@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { ChangeType, CrudState } from '../crud/crud.model';
+import { ChangeType, CrudEntitiesState } from '../crud/crud.model';
 import { addCrudEntities } from '../crud/crud.trait';
-import { addFilter, FilterState } from '../filter';
+import { addFilterEntities, FilterEntitiesState } from '../filter';
 import { addLoadEntities, LoadEntitiesState } from '../load-entities';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addPagination, PaginationState } from '../pagination';
-import { addSort, SortState } from '../sort';
+import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
+import { addSortEntities, SortEntitiesState } from '../sort';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { createFeatureSelector } from '@ngrx/store';
@@ -17,14 +17,16 @@ describe('addCrud trait', () => {
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');
 
-  interface TestState extends LoadEntitiesState<Todo>, CrudState<Todo> {}
+  interface TestState
+    extends LoadEntitiesState<Todo>,
+      CrudEntitiesState<Todo> {}
 
   interface TestState2
     extends LoadEntitiesState<Todo>,
-      CrudState<Todo>,
-      FilterState<TodoFilter>,
-      PaginationState,
-      SortState<Todo> {}
+      CrudEntitiesState<Todo>,
+      FilterEntitiesState<TodoFilter>,
+      EntitiesPaginationState,
+      SortEntitiesState<Todo> {}
 
   function init({ storeChanges = false } = {}) {
     const traits = createEntityFeatureFactory(
@@ -45,9 +47,9 @@ describe('addCrud trait', () => {
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      addPagination({ cacheType: 'partial' }),
-      addFilter<Todo, TodoFilter>(),
-      addSort<Todo>({
+      addEntitiesPagination({ cacheType: 'partial' }),
+      addFilterEntities<Todo, TodoFilter>(),
+      addSortEntities<Todo>({
         defaultSort: { direction: 'asc', active: 'id' },
         remote: true,
       }),

@@ -2,7 +2,6 @@ import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from 'ngrx-traits';
-import { addResetEntitiesState } from '../reset';
 
 export declare type SortDirection = 'asc' | 'desc' | '';
 
@@ -13,17 +12,20 @@ export interface Sort<T> {
   direction: SortDirection;
 }
 
-export interface SortState<T> {
+export interface SortEntitiesState<T> {
   sort: {
     current: Sort<T>;
     default: Sort<T>;
   };
 }
-export interface EntityAndSortState<T>
+/**
+ * @internal
+ */
+export interface ƟLoadEntitiesSortEntitiesState<T>
   extends LoadEntitiesState<T>,
-    SortState<T> {}
+    SortEntitiesState<T> {}
 
-export type SortActions<T> = {
+export type SortEntitiesActions<T> = {
   sortEntities: ActionCreator<
     string,
     (props: Sort<T>) => Sort<T> & TypedAction<string>
@@ -34,12 +36,12 @@ export type SortActions<T> = {
   resetEntitiesSort: ActionCreator<string, () => TypedAction<string>>;
 };
 
-export type SortSelectors<T> = {
-  selectEntitiesSort: (state: EntityAndSortState<T>) => Sort<T>;
+export type SortEntitiesSelectors<T> = {
+  selectEntitiesSort: (state: ƟLoadEntitiesSortEntitiesState<T>) => Sort<T>;
 };
 
-export type SortMutators<T> = {
-  sortEntities<S extends EntityAndSortState<T>>(
+export type SortEntitiesMutators<T> = {
+  sortEntities<S extends ƟLoadEntitiesSortEntitiesState<T>>(
     { active, direction }: Sort<T>,
     state: S
   ): S;
@@ -47,12 +49,12 @@ export type SortMutators<T> = {
 
 export const sortTraitKey = 'sort';
 
-export interface SortConfig<T> {
+export interface SortEntitiesConfig<T> {
   defaultSort: Sort<T>;
   remote?: boolean;
 }
 
-export type SortKeyedConfig<T> = KeyedConfig<
+export type SortEntitiesKeyedConfig<T> = KeyedConfig<
   typeof sortTraitKey,
-  SortConfig<T>
+  SortEntitiesConfig<T>
 >;

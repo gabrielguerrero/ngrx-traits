@@ -6,7 +6,7 @@ import {
   LoadEntitiesMutators,
 } from './load-entities.model';
 import { createReducer, on } from '@ngrx/store';
-import { PaginationKeyedConfig } from '../pagination';
+import { EntitiesPaginationKeyedConfig } from '../pagination';
 import { insertIf } from 'ngrx-traits';
 
 export function createLoadEntitiesInitialState<Entity>(
@@ -30,7 +30,7 @@ export function createLoadEntitiesTraitReducer<
   initialState: S,
   actions: LoadEntitiesActions<T>,
   allMutators: LoadEntitiesMutators<T>,
-  allConfigs: LoadEntitiesKeyedConfig<T> & PaginationKeyedConfig
+  allConfigs: LoadEntitiesKeyedConfig<T> & EntitiesPaginationKeyedConfig
 ) {
   const handleEntitiesMerge = !allConfigs?.pagination;
 

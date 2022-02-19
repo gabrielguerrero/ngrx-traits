@@ -1,4 +1,7 @@
-import { FilterActions, FilterKeyedConfig } from '../filter/filter.model';
+import {
+  FilterEntitiesActions,
+  FilterEntitiesKeyedConfig,
+} from '../filter/filter.model';
 import { createReducer, on } from '@ngrx/store';
 
 import {
@@ -8,18 +11,18 @@ import {
   LoadEntitiesSelectors,
 } from '../load-entities/load-entities.model';
 import {
-  EntityAndPaginationState,
-  PaginationKeyedConfig,
-  PaginationMutators,
+  ƟLoadEntitiesEntitiesPaginationState,
+  EntitiesPaginationKeyedConfig,
+  EntitiesPaginationMutators,
 } from './pagination.model';
-import { CrudActions } from '../crud';
+import { CrudEntitiesActions } from '../crud';
 import { ƟPaginationActions } from './pagination.model.internal';
 import { insertIf } from 'ngrx-traits';
 
 export function createPaginationInitialState<Entity>(
   previousInitialState: any,
-  allConfigs: PaginationKeyedConfig
-): EntityAndPaginationState<Entity> {
+  allConfigs: EntitiesPaginationKeyedConfig
+): ƟLoadEntitiesEntitiesPaginationState<Entity> {
   const { currentPage, pageSize, cacheType, pagesToCache } =
     allConfigs.pagination!;
 
@@ -41,23 +44,23 @@ export function createPaginationInitialState<Entity>(
 
 export function createPaginationTraitReducer<
   Entity,
-  S extends EntityAndPaginationState<Entity>
+  S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
 >(
   initialState: S,
   allActions: ƟPaginationActions &
-    FilterActions<Entity> &
+    FilterEntitiesActions<Entity> &
     LoadEntitiesActions<Entity> &
-    CrudActions<Entity>,
+    CrudEntitiesActions<Entity>,
   allSelectors: LoadEntitiesSelectors<Entity>,
-  allMutators: PaginationMutators<Entity> & LoadEntitiesMutators<Entity>,
-  allConfigs: FilterKeyedConfig<Entity, unknown> &
+  allMutators: EntitiesPaginationMutators<Entity> &
+    LoadEntitiesMutators<Entity>,
+  allConfigs: FilterEntitiesKeyedConfig<Entity, unknown> &
     LoadEntitiesKeyedConfig<Entity> &
-    PaginationKeyedConfig
+    EntitiesPaginationKeyedConfig
 ) {
-  function addToCacheTotal<S extends EntityAndPaginationState<Entity>>(
-    state: S,
-    add: number
-  ) {
+  function addToCacheTotal<
+    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+  >(state: S, add: number) {
     return {
       ...state,
       pagination: {
@@ -67,9 +70,9 @@ export function createPaginationTraitReducer<
     };
   }
 
-  function clearPagesCache<S extends EntityAndPaginationState<Entity>>(
-    state: S
-  ): S {
+  function clearPagesCache<
+    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+  >(state: S): S {
     return {
       ...state,
       entities: {},
@@ -83,9 +86,9 @@ export function createPaginationTraitReducer<
     };
   }
 
-  function recalculateTotal<S extends EntityAndPaginationState<Entity>>(
-    state: S
-  ): S {
+  function recalculateTotal<
+    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+  >(state: S): S {
     const total = allSelectors.selectEntitiesTotal(state);
     return {
       ...state,

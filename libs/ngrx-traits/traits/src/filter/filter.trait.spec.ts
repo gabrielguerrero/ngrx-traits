@@ -1,26 +1,26 @@
 import { createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadEntities, LoadEntitiesState } from '../load-entities';
-import { addFilter } from '../filter/filter.trait';
+import { addFilterEntities } from '../filter/filter.trait';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { first, take, toArray } from 'rxjs/operators';
-import { addPagination, PaginationState } from '../pagination';
+import { addEntitiesPagination, EntitiesPaginationState } from '../pagination';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { hot, Scheduler } from 'jest-marbles';
-import { ƟFilterActions } from './filter.model.internal';
-import { FilterState } from 'ngrx-traits/traits';
+import { ƟFilterEntitiesActions } from './filter.model.internal';
+import { FilterEntitiesState } from 'ngrx-traits/traits';
 
 export interface TestState
   extends LoadEntitiesState<Todo>,
-    PaginationState,
-    FilterState<TodoFilter> {}
+    EntitiesPaginationState,
+    FilterEntitiesState<TodoFilter> {}
 export interface TestState2
   extends LoadEntitiesState<Todo>,
-    FilterState<TodoFilter> {}
+    FilterEntitiesState<TodoFilter> {}
 
 describe('addFilter Trait', () => {
   let actions$: Actions;
@@ -30,7 +30,7 @@ describe('addFilter Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addFilter<Todo, TodoFilter>()
+      addFilterEntities<Todo, TodoFilter>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -51,8 +51,8 @@ describe('addFilter Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
-      addFilter<Todo, TodoFilter>(),
-      addPagination<Todo>()
+      addFilterEntities<Todo, TodoFilter>(),
+      addEntitiesPagination<Todo>()
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -74,7 +74,9 @@ describe('addFilter Trait', () => {
       const { reducer, actions, initialState } = initWithRemoteFilter();
       const state = reducer(
         initialState,
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
+        (
+          actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+        ).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -89,7 +91,9 @@ describe('addFilter Trait', () => {
       selectors.selectEntitiesFilter.projector;
       const state = reducer(
         initialState,
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
+        (
+          actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+        ).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -103,7 +107,9 @@ describe('addFilter Trait', () => {
     it('should fire loadEntities when storeFilter is fired and no pagination', async () => {
       const { effects, actions } = initWithRemoteFilter();
       actions$ = of(
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
+        (
+          actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+        ).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -114,7 +120,9 @@ describe('addFilter Trait', () => {
     it('should fire loadFirstPage when storeFilter is fired and has pagination', async () => {
       const { effects, actions } = initWithRemoteFilterWithPagination();
       actions$ = of(
-        (actions as unknown as ƟFilterActions<TodoFilter>).storeEntitiesFilter({
+        (
+          actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+        ).storeEntitiesFilter({
           filters: { content: 'x' },
         })
       );
@@ -143,7 +151,7 @@ describe('addFilter Trait', () => {
           .toPromise();
         expect(action).toEqual(
           (
-            actions as unknown as ƟFilterActions<TodoFilter>
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
           ).storeEntitiesFilter({
             filters: { content: 'x' },
           })
@@ -160,7 +168,7 @@ describe('addFilter Trait', () => {
         });
         const expected = hot('-----b', {
           b: (
-            actions as unknown as ƟFilterActions<TodoFilter>
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
           ).storeEntitiesFilter({
             filters: { content: 'y' },
           }),
@@ -182,7 +190,7 @@ describe('addFilter Trait', () => {
         });
         const expected = hot('---a', {
           a: (
-            actions as unknown as ƟFilterActions<TodoFilter>
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
           ).storeEntitiesFilter({
             filters: { content: 'x' },
           }),

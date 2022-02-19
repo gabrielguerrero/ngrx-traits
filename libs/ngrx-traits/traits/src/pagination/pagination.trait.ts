@@ -1,13 +1,16 @@
 import {
-  PaginationConfig,
-  PaginationKeyedConfig,
-  PaginationMutators,
-  PaginationSelectors,
-  paginationTraitKey,
+  EntitiesPaginationConfig,
+  EntitiesPaginationKeyedConfig,
+  EntitiesPaginationMutators,
+  EntitiesPaginationSelectors,
+  entitiesPaginationTraitKey,
 } from './pagination.model';
 import { createPaginationTraitSelectors } from './pagination.trait.selectors';
 import { createPaginationTraitActions } from './pagination.trait.actions';
-import { FilterActions, FilterKeyedConfig } from '../filter/filter.model';
+import {
+  FilterEntitiesActions,
+  FilterEntitiesKeyedConfig,
+} from '../filter/filter.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -21,7 +24,7 @@ import {
 } from './pagination.trait.reducer';
 import { createPaginationTraitEffects } from './pagination.trait.effects';
 import { createTraitFactory } from 'ngrx-traits';
-import { CrudActions } from '../crud/crud.model';
+import { CrudEntitiesActions } from '../crud/crud.model';
 import { createPaginationTraitMutators } from './pagination.trait.mutators';
 import { ƟPaginationActions } from './pagination.model.internal';
 import {
@@ -83,21 +86,21 @@ import {
  * traits.selectors.selectPagedRequest()// use in effects to get paging parameter
  * traits.selectors.selectPageInfo()
  */
-export function addPagination<Entity>({
+export function addEntitiesPagination<Entity>({
   cacheType = 'full',
   pageSize = 20,
   currentPage = 0,
   pagesToCache = 3,
-}: PaginationConfig = {}) {
+}: EntitiesPaginationConfig = {}) {
   return createTraitFactory({
-    key: paginationTraitKey,
+    key: entitiesPaginationTraitKey,
     depends: [loadEntitiesTraitKey],
     config: {
       cacheType,
       pageSize,
       currentPage,
       pagesToCache,
-    } as PaginationConfig,
+    } as EntitiesPaginationConfig,
     actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
       createPaginationTraitActions(actionsGroupKey),
     selectors: ({
@@ -106,13 +109,15 @@ export function addPagination<Entity>({
     }: TraitSelectorsFactoryConfig) =>
       createPaginationTraitSelectors<Entity>(
         previousSelectors as LoadEntitiesSelectors<Entity>,
-        allConfigs as PaginationKeyedConfig & FilterKeyedConfig<Entity, unknown>
+        allConfigs as EntitiesPaginationKeyedConfig &
+          FilterEntitiesKeyedConfig<Entity, unknown>
       ),
     mutators: ({ allSelectors, allConfigs }) =>
       createPaginationTraitMutators<Entity>(
-        allSelectors as PaginationSelectors<Entity> &
+        allSelectors as EntitiesPaginationSelectors<Entity> &
           LoadEntitiesSelectors<Entity>,
-        allConfigs as PaginationKeyedConfig & LoadEntitiesKeyedConfig<Entity>
+        allConfigs as EntitiesPaginationKeyedConfig &
+          LoadEntitiesKeyedConfig<Entity>
       ),
     initialState: ({
       previousInitialState,
@@ -120,7 +125,7 @@ export function addPagination<Entity>({
     }: TraitInitialStateFactoryConfig) =>
       createPaginationInitialState<Entity>(
         previousInitialState,
-        allConfigs as PaginationKeyedConfig
+        allConfigs as EntitiesPaginationKeyedConfig
       ),
     reducer: ({
       initialState,
@@ -132,24 +137,24 @@ export function addPagination<Entity>({
       createPaginationTraitReducer(
         initialState,
         allActions as ƟPaginationActions &
-          FilterActions<Entity> &
+          FilterEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
-          CrudActions<Entity>,
-        allSelectors as PaginationSelectors<Entity> &
+          CrudEntitiesActions<Entity>,
+        allSelectors as EntitiesPaginationSelectors<Entity> &
           LoadEntitiesSelectors<Entity>,
-        allMutators as PaginationMutators<Entity> &
+        allMutators as EntitiesPaginationMutators<Entity> &
           LoadEntitiesMutators<Entity>,
-        allConfigs as FilterKeyedConfig<Entity, unknown> &
+        allConfigs as FilterEntitiesKeyedConfig<Entity, unknown> &
           LoadEntitiesKeyedConfig<Entity> &
-          PaginationKeyedConfig
+          EntitiesPaginationKeyedConfig
       ),
     effects: ({ allActions, allSelectors }) =>
       createPaginationTraitEffects(
         allActions as ƟPaginationActions &
-          FilterActions<Entity> &
+          FilterEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
-          CrudActions<Entity>,
-        allSelectors as PaginationSelectors<Entity> &
+          CrudEntitiesActions<Entity>,
+        allSelectors as EntitiesPaginationSelectors<Entity> &
           LoadEntitiesSelectors<Entity>
       ),
   });
