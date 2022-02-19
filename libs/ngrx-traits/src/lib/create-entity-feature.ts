@@ -8,19 +8,26 @@ import {
   FeatureSelectors,
   KeyedConfig,
   TraitActions,
+  TraitActionsFactoryConfig,
   TraitFactory,
   TraitSelectors,
+  TraitSelectorsFactoryConfig,
   TraitStateMutators,
+  UnionToIntersection,
 } from './model';
 import {
   Action,
   ActionType,
+  createAction,
+  createFeatureSelector,
   createReducer,
   createSelector,
   MemoizedSelector,
+  on,
 } from '@ngrx/store';
 import { TraitEffect } from './trait-effect';
 import { Type } from './local-store';
+import { stringify } from 'ts-jest/dist/utils/json';
 
 export function createTraitFactory<
   State = {},
@@ -83,103 +90,46 @@ export function createEntityFeatureFactory<
   return ((config: Config<any, any>) => {
     const sortedTraits = sortTraits([...traits]);
 
-    const allConfigs = sortedTraits.reduce(
-      (acc: KeyedConfig<string, any>, factory) => {
-        acc[factory.key] = factory.config;
-        return acc;
-      },
-      {}
+    const allConfigs = buildAllConfigs(sortedTraits);
+
+    const allActions = buildAllActions(
+      sortedTraits,
+      config.actionsGroupKey,
+      allConfigs
     );
 
-    const allActions = sortedTraits.reduce(
-      (previousResult: TraitActions, factory) => {
-        let result =
-          factory?.actions?.({
-            actionsGroupKey: config.actionsGroupKey,
-            allConfigs,
-          }) ?? {};
-        result = previousResult ? { ...previousResult, ...result } : result;
-        return result;
-      },
-      {}
+    const allSelectors = buildAllSelectors(sortedTraits, allConfigs);
+
+    const allMutators = buildAllMutators(
+      sortedTraits,
+      allSelectors,
+      allConfigs
     );
 
-    const allSelectors = sortedTraits.reduce(
-      (previousResult: TraitSelectors<any>, factory) => {
-        let result =
-          factory?.selectors?.({
-            previousSelectors: previousResult,
-            allConfigs,
-          }) ?? {};
-        result = previousResult ? { ...previousResult, ...result } : result;
-        return result;
-      },
-      {}
+    const initialState = buildInitialState(sortedTraits, allConfigs);
+
+    const reducer = buildReducer(
+      sortedTraits,
+      initialState,
+      allActions,
+      allSelectors,
+      allMutators,
+      allConfigs
     );
 
-    const allMutators = sortedTraits.reduce(
-      (previousResult: TraitStateMutators<any> | undefined, factory) => {
-        let result =
-          factory?.mutators?.({
-            allSelectors: allSelectors,
-            previousMutators: previousResult,
-            allConfigs,
-          }) ?? {};
-        result = previousResult ? { ...previousResult, ...result } : result;
-        return result;
-      },
-      {}
-    );
-
-    const initialState = sortedTraits.reduce((previousResult: any, factory) => {
-      const result =
-        factory?.initialState?.({
-          previousInitialState: previousResult,
-          allConfigs,
-        }) ??
-        previousResult ??
-        {};
-      return result;
-    }, {});
-
-    const reducer = sortedTraits.reduce(
-      (
-        previousResult: ((state: any, action: Action) => any) | undefined,
-        factory
-      ) => {
-        const result = factory?.reducer?.({
-          initialState,
-          allActions,
-          allSelectors,
-          allMutators,
-          allConfigs,
-        });
-        return result && previousResult
-          ? (state = initialState, action) => {
-              const aState = previousResult(state, action);
-              return result(aState, action);
-            }
-          : result ?? previousResult;
-      },
-      undefined
-    );
+    const featureSelector =
+      typeof config.featureSelector === 'string'
+        ? createFeatureSelector<ExtractStateType<F>>(config.featureSelector)
+        : config.featureSelector;
 
     const allFeatureSelectors =
-      allSelectors &&
-      getSelectorsForFeature(config.featureSelector, allSelectors);
+      allSelectors && getSelectorsForFeature(featureSelector, allSelectors);
 
-    const allEffects = sortedTraits.reduce(
-      (previousResult: Type<TraitEffect>[] | undefined, factory) => {
-        let result =
-          factory?.effects?.({
-            allActions,
-            allSelectors: allFeatureSelectors,
-            allConfigs,
-          }) ?? [];
-        result = previousResult ? [...previousResult, ...result] : result;
-        return result;
-      },
-      []
+    const allEffects = buildAllEffects(
+      sortedTraits,
+      allActions,
+      allFeatureSelectors,
+      allConfigs
     );
 
     return {
@@ -232,6 +182,134 @@ function sortTraits(
     }
   }
   return sortedTraits;
+}
+
+function buildAllConfigs(sortedTraits: TraitFactory<any, any, any, any>[]) {
+  return sortedTraits.reduce((acc: KeyedConfig<string, any>, factory) => {
+    acc[factory.key] = factory.config;
+    return acc;
+  }, {});
+}
+
+function buildAllActions(
+  sortedTraits: TraitFactory<any, any, any, any>[],
+  actionsGroupKey: string,
+  allConfigs: Record<string, any> & { [p: string]: any }
+) {
+  return sortedTraits.reduce((previousResult: TraitActions, factory) => {
+    let result =
+      factory?.actions?.({
+        actionsGroupKey: actionsGroupKey,
+        allConfigs,
+      }) ?? {};
+    result = previousResult ? { ...previousResult, ...result } : result;
+    return result;
+  }, {});
+}
+
+function buildAllSelectors(
+  sortedTraits: TraitFactory<any, any, any, any>[],
+  allConfigs: Record<string, any> & { [p: string]: any }
+) {
+  return sortedTraits.reduce((previousResult: TraitSelectors<any>, factory) => {
+    let result =
+      factory?.selectors?.({
+        previousSelectors: previousResult,
+        allConfigs,
+      }) ?? {};
+    result = previousResult ? { ...previousResult, ...result } : result;
+    return result;
+  }, {});
+}
+
+function buildAllMutators(
+  sortedTraits: TraitFactory<any, any, any, any>[],
+  allSelectors: TraitSelectors<any>,
+  allConfigs: Record<string, any> & { [p: string]: any }
+) {
+  return (
+    sortedTraits.reduce(
+      (previousResult: TraitStateMutators<any> | undefined, factory) => {
+        let result =
+          factory?.mutators?.({
+            allSelectors: allSelectors,
+            previousMutators: previousResult,
+            allConfigs,
+          }) ?? {};
+        result = previousResult ? { ...previousResult, ...result } : result;
+        return result;
+      },
+      {}
+    ) || {}
+  );
+}
+
+function buildInitialState(
+  sortedTraits: TraitFactory<any, any, any, any>[],
+  allConfigs: Record<string, any> & { [p: string]: any }
+) {
+  return sortedTraits.reduce((previousResult: any, factory) => {
+    const result =
+      factory?.initialState?.({
+        previousInitialState: previousResult,
+        allConfigs,
+      }) ??
+      previousResult ??
+      {};
+    return result;
+  }, {});
+}
+
+function buildReducer(
+  sortedTraits: TraitFactory<any, any, any, any>[],
+  initialState: any,
+  allActions: TraitActions,
+  allSelectors: TraitSelectors<any>,
+  allMutators: TraitStateMutators<any>,
+  allConfigs: Record<string, any> & { [p: string]: any }
+) {
+  return sortedTraits.reduce(
+    (
+      previousResult: ((state: any, action: Action) => any) | undefined,
+      factory
+    ) => {
+      const result = factory?.reducer?.({
+        initialState,
+        allActions,
+        allSelectors,
+        allMutators,
+        allConfigs,
+      });
+      return result && previousResult
+        ? (state = initialState, action) => {
+            const aState = previousResult(state, action);
+            return result(aState, action);
+          }
+        : result ?? previousResult;
+    },
+    undefined
+  );
+}
+
+function buildAllEffects(
+  sortedTraits: TraitFactory<any, any, any, any>[],
+  allActions: TraitActions,
+  allFeatureSelectors: TraitSelectors<any>,
+  allConfigs: Record<string, any> & { [p: string]: any }
+) {
+  return sortedTraits.reduce(
+    (previousResult: Type<TraitEffect>[] | undefined, factory) => {
+      let result =
+        factory?.effects?.({
+          allActions,
+          allSelectors: allFeatureSelectors,
+          allConfigs,
+        }) ?? [];
+      result = previousResult ? [...previousResult, ...result] : result;
+      return result;
+    },
+    []
+  );
 }
 
 function getSelectorsForFeature<
@@ -287,3 +365,87 @@ export function joinReducers<State>(
     return secondReducer(sourceState, action);
   };
 }
+
+export function addProperty<
+  F extends readonly TraitFactory[],
+  EntityName extends string,
+  EntitiesName extends string = `${EntityName}s`
+>(
+  name: { entityName: EntityName; entitiesName?: EntitiesName },
+  ...traits: F
+): TraitFactory<
+  // EntityName,
+  // EntitiesName,
+  ExtractStateType<F>,
+  ExtractActionsType<F>,
+  ExtractSelectorsType<F>,
+  ExtractMutatorsType<F>
+> {
+  const sortedTraits = sortTraits([...traits]);
+
+  const allConfigs = sortedTraits.reduce(
+    (acc: KeyedConfig<string, any>, factory) => {
+      acc[factory.key] = factory.config;
+      return acc;
+    },
+    {}
+  );
+
+  let allActions: ExtractActionsType<F>;
+  let allSelectors: ExtractSelectorsType<F>;
+  return createTraitFactory({
+    key: 'property',
+    config: {},
+    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) => {
+      allActions = buildAllActions(
+        sortedTraits,
+        actionsGroupKey,
+        allConfigs
+      ) as ExtractActionsType<F>;
+      return allActions;
+    },
+    selectors: (options: TraitSelectorsFactoryConfig) => {
+      allSelectors = buildAllSelectors(
+        sortedTraits,
+        allConfigs
+      ) as ExtractSelectorsType<F>;
+      return allSelectors;
+    },
+    // reducer: ({ allActions, initialState }) =>
+    //   createReducer(
+    //     initialState,
+    //     on(allActions.reset, () => initialState)
+    //   ),
+  });
+}
+export function combineTraits<
+  T extends { [key: string]: FeatureFactory<any, any> },
+  K extends keyof T
+>(
+  p: T
+): (
+  config: Config<{ [P in K]: ExtractStateType<T[P]> }>
+) => { [P in K]: ReturnType<T[P]> } {
+  return null as any;
+}
+
+export function addPropertiesTraits<
+  F extends FeatureFactory<any, any>,
+  T extends { [key: string]: FeatureFactory<any, any> },
+  K extends keyof T
+>(
+  f: F,
+  p: T
+): (
+  config: Config<{ [P in K]: ExtractStateType<T[P]> }>
+) => ExtractActionsType<ReturnType<F>> &
+  UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>> {
+  return null as any;
+}
+
+// export
+
+/// products:{actions, selectors, }, orders: {actions,slectors}
+/// { actions: {ProductActions, OrderActions}, selectors: {ProductSelectors, OrderSelectors}
+// TODO finish implementing combineTrais and addPropertiesTraits
+// TODO finish renaming traits
