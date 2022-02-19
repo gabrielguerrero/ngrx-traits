@@ -1,6 +1,6 @@
-import { EntitiesPaginationActions } from './pagination.model';
+import { EntitiesPaginationActions } from './entities-pagination.model';
 import { createAction, props } from '@ngrx/store';
-import { ƟPaginationActions } from './pagination.model.internal';
+import { ƟPaginationActions } from './entities-pagination.model.internal';
 
 export function createPaginationTraitActions(
   actionsGroupKey: string

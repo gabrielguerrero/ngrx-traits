@@ -2,7 +2,7 @@ import {
   LoadEntitiesKeyedConfig,
   LoadEntitiesMutators,
 } from './load-entities.model';
-import { EntitiesPaginationKeyedConfig } from '../pagination';
+import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
 
 export function createLoadEntitiesTraitMutators<Entity>(
   allConfigs: LoadEntitiesKeyedConfig<Entity> & EntitiesPaginationKeyedConfig

@@ -14,7 +14,7 @@ import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort-entities';
 import {
   EntitiesPaginationActions,
   EntitiesPaginationKeyedConfig,
-} from '../pagination';
+} from '../entities-pagination';
 import { insertIf } from 'ngrx-traits';
 
 export function createCrudInitialState<Entity>(

@@ -61,7 +61,7 @@ Generally each trait has an interface that defines the state needed by it, so we
 export interface ProductsState extends EntityAndStatusState<Product> {}
 ```
 
-`EntityAndStatusState` is the most basic interface you need to create a state for a list of items, if you inspect it, it has the basic to store a list of entities using `EntityState` from @ngrx/entity, but it adds a status property used to track if it's loading, and a cache you can learn more in the `addLoadEntities` trait docs.
+`EntityAndStatusState` is the most basic interface you need to create a state for a list of items, if you inspect it, it has the basic to store a list of entities using `EntityState` from @ngrx/entity, but it adds a status property used to track if it's loading, and a cache you can learn more in the `addLoadEntitiesTrait` trait docs.
 
 The next step is to create our traits file. We have two ways to configure them, one which we call minimal setup, that is better suited for cases where you don't intend to mix the generated actions,selectors, reducers, effects of your traits with your own normal ngrx action, selectors, reducer,effects and is the chosen one for this guide because is more compact (the extensible setup is design to mix it with normal ngrx actions, reducers, etc, you can see more [here](#extensible-setup)). The traits config for both cases is best to be contained in its own file with a _.traits.ts_ extension with a content like:
 
@@ -70,10 +70,10 @@ The next step is to create our traits file. We have two ways to configure them, 
 ```ts
 import { createFeatureSelector } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadEntities } from 'ngrx-traits/traits';
+import { addLoadEntitiesTrait } from 'ngrx-traits/traits';
 
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>() //<-- trait
+  addLoadEntitiesTrait<Product>() //<-- trait
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -187,7 +187,7 @@ To keep this intro brief it's not intended to show much of the internals of the 
 [Examples](apps/example-app/src/app/examples)
 
 In order for the selection to work:
-  * add the addSelectEntity trait
+  * add the addSelectEntityTrait trait
   * add the SingleSelectionState to our ProductState
 
 Notice that, generally each trait has a [TraitName]State, (also has [TraitName]Actions and [TraitName]Selectors, but those are only needed for custom traits).
@@ -199,14 +199,14 @@ export interface ProductsState
     SingleSelectionState {}
 ```
 
-Following, add the addSelectEntity trait:
+Following, add the addSelectEntityTrait trait:
 #### products-basket.traits.ts
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
+  addLoadEntitiesTrait<Product>(),
   // new trait ↓
-  addSelectEntity<Product>()
+  addSelectEntityTrait<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -256,7 +256,7 @@ export class ProductPageContainerComponent implements OnInit {
 </ng-container>
 ```
 
-Next step will be to add a checkout button, for that we can use the addAsyncAction, which again can save some boilerplate. In order to configure it, start by adding AsyncActionState<'checkout'> to our ProductState, like:
+Next step will be to add a checkout button, for that we can use the addAsyncActionTrait, which again can save some boilerplate. In order to configure it, start by adding AsyncActionState<'checkout'> to our ProductState, like:
 
 ```ts
 export interface ProductsState
@@ -270,10 +270,10 @@ And next the addAsyncTrait
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
   // new trait ↓
-  addAsyncAction({
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   })
@@ -283,7 +283,7 @@ export const productTraits = createEntityFeatureFactory(
 });
 ```
 
-Checking the productTraits.actions, `checkout()`, `checkoutSuccess({orderId:string})` and `checkoutFail()` are now present, and in the selectors  `isLoadingCheckout()`, `isSuccessCheckout()` and `isFailCheckout()` can be found. These are the typical 3 actions and 3 selectors that are needed to do a backend call, for more details check the docs of the addAsyncAction trait. (<!-- Paste link to addAsyncTrait  -->)
+Checking the productTraits.actions, `checkout()`, `checkoutSuccess({orderId:string})` and `checkoutFail()` are now present, and in the selectors  `isLoadingCheckout()`, `isSuccessCheckout()` and `isFailCheckout()` can be found. These are the typical 3 actions and 3 selectors that are needed to do a backend call, for more details check the docs of the addAsyncActionTrait trait. (<!-- Paste link to addAsyncTrait  -->)
 
 Next, use them in an effect and in the container component:
 
@@ -393,9 +393,9 @@ Then add the addFilter trait:
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
-  addAsyncAction({
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
@@ -497,9 +497,9 @@ Then, add to trait:
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
-  addAsyncAction({
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
@@ -509,7 +509,7 @@ export const productTraits = createEntityFeatureFactory(
     },
   }),
   // ↓ new trait
-  addSortEntities<Product>()
+  addSortEntitiesTrait<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -589,15 +589,15 @@ To do remote filtering you first need to remove the filterFn in the traits like:
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
-  addAsyncAction({
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
   // changed trait ↓
   addFilter<Product, ProductFilter>(),
-  addSortEntities<Product>()
+  addSortEntitiesTrait<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -645,10 +645,10 @@ Now lets use remote sort, in our traits we add the remote param as true
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
+  addLoadEntitiesTrait<Product>(),
   addFilter<Product, ProductFilter>(),
   // changed trait ↓
-  addSortEntities<Product>({ remote: true })
+  addSortEntitiesTrait<Product>({ remote: true })
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -712,9 +712,9 @@ Then we add the addPagination to the traits like:
 
 ```ts
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
-  addAsyncAction({
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
@@ -723,7 +723,7 @@ export const productTraits = createEntityFeatureFactory(
       return entity.name.includes(filter.search);
     },
   }),
-  addSortEntities<Product>({ remote: true }),
+  addSortEntitiesTrait<Product>({ remote: true }),
   // new trait ↓
   addPagination<Product>({ cacheType: 'partial' })
 )({
@@ -915,9 +915,9 @@ export const selectProductState =
   createFeatureSelector<ProductsState>('products');
 
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
-  addSelectEntity<Product>(),
-  addAsyncAction({
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
@@ -926,7 +926,7 @@ export const productTraits = createEntityFeatureFactory(
       return entity.name.includes(filter.search);
     },
   }),
-  addSortEntities<Product>({ remote: true }),
+  addSortEntitiesTrait<Product>({ remote: true }),
   addPagination<Product>({ cacheType: 'partial' })
 )({
   actionsGroupKey: '[Products]',

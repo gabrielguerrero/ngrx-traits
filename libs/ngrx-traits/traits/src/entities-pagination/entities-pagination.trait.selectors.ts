@@ -3,7 +3,7 @@ import {
   ƟLoadEntitiesEntitiesPaginationState,
   EntitiesPaginationSelectors,
   EntitiesPaginationState,
-} from './pagination.model';
+} from './entities-pagination.model';
 import { LoadEntitiesSelectors } from '../load-entities/load-entities.model';
 import { FilterEntitiesKeyedConfig } from '../filter-entities/filter-entities.model';
 

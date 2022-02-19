@@ -1,2 +1,2 @@
 export * from './async-action.model';
-export * from './async-action.trait';
+export * from './add-async-action.trait';

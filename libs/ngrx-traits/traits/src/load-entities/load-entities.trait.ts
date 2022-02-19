@@ -14,7 +14,7 @@ import {
   TraitSelectorsFactoryConfig,
   TraitStateMutatorsFactoryConfig,
 } from 'ngrx-traits';
-import { EntitiesPaginationKeyedConfig } from '../pagination';
+import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
 import { createLoadEntitiesTraitMutators } from './load-entities.mutators';
 import { createTraitFactory } from 'ngrx-traits';
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
@@ -38,7 +38,7 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  * extends EntityAndStatusState<Todo>{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
+ *      addLoadEntitiesTrait<Todo>(),
  *    )({
  *      actionsGroupKey: '[Todos]',
  *      featureSelector: createFeatureSelector<TestState>>(
@@ -57,7 +57,7 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  * traits.selectors.isSuccess
  * traits.selectors.isFail
  */
-export function addLoadEntities<Entity>(
+export function addLoadEntitiesTrait<Entity>(
   traitConfig?: Omit<LoadEntitiesConfig<Entity>, 'adapter'>
 ) {
   const adapter: EntityAdapter<Entity> = createEntityAdapter(traitConfig);

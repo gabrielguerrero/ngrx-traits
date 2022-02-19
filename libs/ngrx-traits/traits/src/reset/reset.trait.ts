@@ -7,7 +7,7 @@ import { TraitEffect } from 'ngrx-traits';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { mapTo } from 'rxjs/operators';
 
-export function addResetEntitiesState(
+export function addResetEntitiesStateTrait(
   traitConfig: {
     resetOn?: GenericActionCreator[];
   } = {}

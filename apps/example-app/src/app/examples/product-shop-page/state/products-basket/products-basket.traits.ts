@@ -1,11 +1,11 @@
 import {
-  addAsyncAction,
-  addCrudEntities,
-  addFilterEntities,
-  addLoadEntities,
-  addSelectEntity,
-  addSelectEntity,
-  addSortEntities,
+  addAsyncActionTrait,
+  addCrudEntitiesTrait,
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+  addSelectEntityTrait,
+  addSelectEntityTrait,
+  addSortEntitiesTrait,
   AsyncActionState,
   CrudEntitiesState,
   LoadEntitiesState,
@@ -28,15 +28,15 @@ export interface ProductsBasketState
     SortEntitiesState<ProductOrder> {}
 
 export const productTraits = createEntityFeatureFactory(
-  addLoadEntities<ProductOrder>(),
+  addLoadEntitiesTrait<ProductOrder>(),
   addSelectEntities<ProductOrder>(),
   addSelectEntities<ProductOrder>(),
-  addCrudEntities<ProductOrder>(),
-  addAsyncAction({
+  addCrudEntitiesTrait<ProductOrder>(),
+  addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addSortEntities<ProductOrder>({
+  addSortEntitiesTrait<ProductOrder>({
     defaultSort: { direction: 'asc', active: 'name' },
   }),
   ...addLoadProductDetail()

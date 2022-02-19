@@ -1,9 +1,9 @@
 import {
-  addAsyncAction,
-  addFilterEntities,
-  addLoadEntities,
-  addSelectEntity,
-  addSortEntities,
+  addAsyncActionTrait,
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+  addSelectEntityTrait,
+  addSortEntitiesTrait,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { props, Store } from '@ngrx/store';
@@ -21,14 +21,14 @@ import { of } from 'rxjs';
 import { ProductService } from '../../../services/product.service';
 
 const productTraits = createEntityFeatureFactory(
-  addLoadEntities<Product>(),
+  addLoadEntitiesTrait<Product>(),
   addSelectEntities<Product>(),
-  addFilterEntities<Product, ProductFilter>({
+  addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
-  addSortEntities<Product>({
+  addSortEntitiesTrait<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
 );

@@ -1,6 +1,6 @@
 export * from './load-entities';
 export * from './filter-entities';
-export * from './pagination';
+export * from './entities-pagination';
 export * from './select-entities';
 export * from './select-entity';
 export * from './crud-entities';

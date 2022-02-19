@@ -11,7 +11,7 @@ import {
   SortEntitiesActions,
   SortEntitiesKeyedConfig,
 } from './sort-entities.model';
-import { EntitiesPaginationActions } from '../pagination/pagination.model';
+import { EntitiesPaginationActions } from '../entities-pagination/entities-pagination.model';
 
 export function createSortTraitEffect<Entity>(
   allActions: LoadEntitiesActions<Entity> &

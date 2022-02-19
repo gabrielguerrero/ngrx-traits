@@ -6,7 +6,7 @@ import {
   LoadEntitiesMutators,
 } from './load-entities.model';
 import { createReducer, on } from '@ngrx/store';
-import { EntitiesPaginationKeyedConfig } from '../pagination';
+import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
 import { insertIf } from 'ngrx-traits';
 
 export function createLoadEntitiesInitialState<Entity>(

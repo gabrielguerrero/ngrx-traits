@@ -2,7 +2,7 @@ import { Actions } from '@ngrx/effects';
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { LoadEntityState } from './load-entity.model';
-import { addLoadEntity } from './load-entity.trait';
+import { addLoadEntityTraits } from './load-entity.traits';
 
 interface Client {
   id: string;
@@ -11,7 +11,7 @@ interface Client {
 interface Product extends Client {
   price: number;
 }
-describe('addLoadEntity trait', () => {
+describe('addLoadEntityTraits trait', () => {
   let actions$: Actions;
   const featureSelector =
     createFeatureSelector<LoadEntityState<Client, 'client'>>('client');
@@ -21,7 +21,7 @@ describe('addLoadEntity trait', () => {
   function init() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      ...addLoadEntity({
+      ...addLoadEntityTraits({
         entityName: 'client',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ client: Client }>(),
@@ -37,12 +37,12 @@ describe('addLoadEntity trait', () => {
   function initMultiple() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      ...addLoadEntity({
+      ...addLoadEntityTraits({
         entityName: 'client',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ client: { id: string; name: string } }>(),
       }),
-      ...addLoadEntity({
+      ...addLoadEntityTraits({
         entityName: 'product',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ product: Product }>(),

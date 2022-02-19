@@ -29,7 +29,7 @@ import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import {
   EntitiesPaginationActions,
   EntitiesPaginationKeyedConfig,
-} from '../pagination/pagination.model';
+} from '../entities-pagination/entities-pagination.model';
 import { FilterEntitiesActions } from '../filter-entities';
 
 /**
@@ -44,8 +44,8 @@ import { FilterEntitiesActions } from '../filter-entities';
  * extends EntityAndStatusState<Todo>,SingleSelectionState{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
- *      addSelectEntity<Todo>()
+ *      addLoadEntitiesTrait<Todo>(),
+ *      addSelectEntityTrait<Todo>()
  *    )({
  *      actionsGroupKey: '[Todos]',
  *      featureSelector: createFeatureSelector<TestState>>(
@@ -59,7 +59,7 @@ import { FilterEntitiesActions } from '../filter-entities';
  * traits.selectors.selectIdSelected()
  * traits.selectors.selectEntitySelected()
  */
-export function addSelectEntity<Entity>(config?: SelectEntityConfig) {
+export function addSelectEntityTrait<Entity>(config?: SelectEntityConfig) {
   return createTraitFactory({
     key: 'singleSelection',
     depends: [loadEntitiesTraitKey],

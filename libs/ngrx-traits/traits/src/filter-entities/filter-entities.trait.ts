@@ -1,7 +1,7 @@
 import {
   EntitiesPaginationActions,
   entitiesPaginationTraitKey,
-} from '../pagination/pagination.model';
+} from '../entities-pagination/entities-pagination.model';
 import { createFilterTraitEffects } from './filter-entities.trait.effect';
 import {
   createFilterInitialState,
@@ -49,7 +49,7 @@ import {
  * extends EntityAndStatusState<Todo>,FilterState<TodoFilter>{}
  *
  *    const traits = createEntityFeatureFactory(
- *      addLoadEntities<Todo>(),
+ *      addLoadEntitiesTrait<Todo>(),
  *      //addFilter<Todo,TodoFilter>() //  remote filtering
  *      addFilter<Todo,TodoFilter>({filterFn: (filter, entity) => // local filtering
  *          filter?.content && entity.content?.includes(filter?.content) || false})// remote
@@ -63,7 +63,7 @@ import {
  * traits.actions.filterEntities()
  * traits.selectors.selectEntitiesFilter()
  */
-export function addFilterEntities<Entity, F>({
+export function addFilterEntitiesTrait<Entity, F>({
   defaultDebounceTime = 400,
   defaultFilter,
   filterFn,
