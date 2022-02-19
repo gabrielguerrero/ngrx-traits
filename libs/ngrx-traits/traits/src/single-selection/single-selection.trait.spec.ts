@@ -47,6 +47,7 @@ describe('addSingleSelection trait', () => {
 
   function init() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addSingleSelection<Todo>()
     )({
@@ -70,6 +71,7 @@ describe('addSingleSelection trait', () => {
 
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addPagination({ cacheType: 'partial' }),
       addFilter<Todo, TodoFilter>(),
       addSort<Todo>({
@@ -105,15 +107,15 @@ describe('addSingleSelection trait', () => {
   }
 
   describe('selectors', () => {
-    it('selectIdSelected should return selected id ', () => {
+    it('selectEntityIdSelected should return selected id ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectIdSelected.projector(state)).toBeFalsy();
+      expect(selectors.selectEntityIdSelected.projector(state)).toBeFalsy();
       expect(
-        selectors.selectIdSelected.projector({ ...state, selectedId: 3 })
+        selectors.selectEntityIdSelected.projector({ ...state, selectedId: 3 })
       ).toEqual(3);
     });
 
-    it('selectIdSelected should return selected id ', () => {
+    it('selectEntityIdSelected should return selected id ', () => {
       const { selectors, state } = init();
       expect(selectors.selectEntitySelected.projector(state)).toBeFalsy();
       expect(
@@ -125,28 +127,28 @@ describe('addSingleSelection trait', () => {
   describe('reducer', () => {
     it('select entity', () => {
       const { reducer, actions, state } = init();
-      const result = reducer(state, actions.select({ id: 3 }));
+      const result = reducer(state, actions.selectEntity({ id: 3 }));
       expect(result).toEqual({ ...state, selectedId: 3 });
     });
 
     it('deselect entity', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.select({ id: 3 }));
-      result = reducer(result, actions.deselect());
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
+      result = reducer(result, actions.deselectEntity());
       expect(result).toEqual({ ...state, selectedId: undefined });
     });
 
-    it('toggleSelect entity', () => {
+    it('toggleSelectEntity entity', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.toggleSelect({ id: 3 }));
+      let result = reducer(state, actions.toggleSelectEntity({ id: 3 }));
       expect(result).toEqual({ ...state, selectedId: 3 });
-      result = reducer(result, actions.toggleSelect({ id: 3 }));
+      result = reducer(result, actions.toggleSelectEntity({ id: 3 }));
       expect(result).toEqual({ ...state, selectedId: undefined });
     });
 
     it('loadEntitiesSuccess should deselect also', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.select({ id: 3 }));
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
       result = reducer(
         result,
         actions.loadEntitiesSuccess({ entities: [{ id: 3, content: '3' }] })
@@ -157,18 +159,21 @@ describe('addSingleSelection trait', () => {
     it('remote filter should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.select({ id: 3 }));
-      result = reducer(result, actions.filter({ filters: { content: '2' } }));
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
+      result = reducer(
+        result,
+        actions.filterEntities({ filters: { content: '2' } })
+      );
       expect(result.selectedId).toEqual(undefined);
     });
 
     it('remote sort should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.select({ id: 3 }));
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
       result = reducer(
         result,
-        actions.sort({ active: 'id', direction: 'asc' })
+        actions.sortEntities({ active: 'id', direction: 'asc' })
       );
       expect(result.selectedId).toEqual(undefined);
     });
@@ -176,36 +181,36 @@ describe('addSingleSelection trait', () => {
     it('pagination partial should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.select({ id: 3 }));
-      result = reducer(result, actions.loadPageSuccess());
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
+      result = reducer(result, actions.loadEntitiesPageSuccess());
       expect(result.selectedId).toEqual(undefined);
     });
 
     it('removeAll should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.select({ id: 3 }));
-      result = reducer(result, actions.removeAll());
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
+      result = reducer(result, actions.removeAllEntities());
       expect(result.selectedId).toEqual(undefined);
     });
 
     it('remove should deselect only if the selectedId was removed', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.select({ id: 3 }));
-      result = reducer(result, actions.remove(2));
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
+      result = reducer(result, actions.removeEntities(2));
       expect(result.selectedId).toEqual(3);
-      result = reducer(result, actions.remove(3));
+      result = reducer(result, actions.removeEntities(3));
       expect(result.selectedId).toEqual(undefined);
     });
 
     it('update that changes an id should change the selected id too', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.select({ id: 3 }));
+      let result = reducer(state, actions.selectEntity({ id: 3 }));
       result = reducer(
         result,
-        actions.update({ id: 3, changes: { id: 11, content: '11' } })
+        actions.updateEntities({ id: 3, changes: { id: 11, content: '11' } })
       );
       expect(result.selectedId).toEqual(11);
     });

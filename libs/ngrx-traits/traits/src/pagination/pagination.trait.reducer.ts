@@ -107,7 +107,7 @@ export function createPaginationTraitReducer<
 
   return createReducer(
     initialState,
-    on(allActions.loadPage, (state, { index }) => ({
+    on(allActions.loadEntitiesPage, (state, { index }) => ({
       ...state,
       pagination: {
         ...state.pagination,
@@ -124,36 +124,36 @@ export function createPaginationTraitReducer<
       },
       status: 'loading',
     })),
-    on(allActions.loadPageSuccess, (state) => ({
+    on(allActions.loadEntitiesPageSuccess, (state) => ({
       ...state,
       status: 'success',
     })),
-    on(allActions.loadPageFail, (state) => ({
+    on(allActions.loadEntitiesPageFail, (state) => ({
       ...state,
       status: 'fail',
     })),
-    on(allActions.clearPagesCache, (state) => clearPagesCache(state)),
+    on(allActions.clearEntitiesPagesCache, (state) => clearPagesCache(state)),
     on(allActions.loadEntitiesSuccess, (state, { entities, total }) =>
       allMutators.mergePaginatedEntities(entities, total, {
         ...state,
         status: 'success',
       })
     ),
-    ...insertIf<S>(allActions.add, () =>
-      on(allActions.add, (state, { entities }) =>
+    ...insertIf<S>(allActions.addEntities, () =>
+      on(allActions.addEntities, (state, { entities }) =>
         addToCacheTotal(state, entities.length)
       )
     ),
-    ...insertIf<S>(allActions.remove, () =>
-      on(allActions.remove, (state, { keys }) =>
+    ...insertIf<S>(allActions.removeEntities, () =>
+      on(allActions.removeEntities, (state, { keys }) =>
         addToCacheTotal(state, -keys.length)
       )
     ),
-    ...insertIf<S>(filterRemote && allActions.filter, () =>
-      on(allActions.filter, (state) => recalculateTotal(state))
+    ...insertIf<S>(filterRemote && allActions.filterEntities, () =>
+      on(allActions.filterEntities, (state) => recalculateTotal(state))
     ),
-    ...insertIf<S>(allActions.removeAll, () =>
-      on(allActions.removeAll, (state) => clearPagesCache(state))
+    ...insertIf<S>(allActions.removeAllEntities, () =>
+      on(allActions.removeAllEntities, (state) => clearPagesCache(state))
     )
   );
 }

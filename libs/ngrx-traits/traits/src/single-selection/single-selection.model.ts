@@ -10,14 +10,14 @@ export interface EntityAndSingleSelectionState<T>
     SingleSelectionState {}
 
 export type SingleSelectionActions = {
-  select: ActionCreator<
+  selectEntity: ActionCreator<
     string,
     (props: {
       id: number | string;
     }) => { id: number | string } & TypedAction<string>
   >;
-  deselect: ActionCreator<string, () => TypedAction<string>>;
-  toggleSelect: ActionCreator<
+  deselectEntity: ActionCreator<string, () => TypedAction<string>>;
+  toggleSelectEntity: ActionCreator<
     string,
     (props: {
       id: number | string;
@@ -26,7 +26,7 @@ export type SingleSelectionActions = {
 };
 
 export type SingleSelectionSelectors<T> = {
-  selectIdSelected: (
+  selectEntityIdSelected: (
     state: EntityAndSingleSelectionState<T>
   ) => string | number | undefined;
   selectEntitySelected: (

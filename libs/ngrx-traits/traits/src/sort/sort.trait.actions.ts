@@ -5,7 +5,10 @@ export function createSortTraitActions<Entity>(
   actionsGroupKey: string
 ): SortActions<Entity> {
   return {
-    sort: createAction(`${actionsGroupKey} sort`, props<Sort<Entity>>()),
-    resetSort: createAction(`${actionsGroupKey} default sort`),
+    sortEntities: createAction(
+      `${actionsGroupKey} sort`,
+      props<Sort<Entity>>()
+    ),
+    resetEntitiesSort: createAction(`${actionsGroupKey} default sort`),
   };
 }

@@ -12,7 +12,7 @@ function uniqueComponentId() {
 
 export function buildLocalTraits<
   State,
-  F extends FeatureFactory<State, any, any, any>
+  F extends FeatureFactory<any, any, State, any, any, any>
 >(
   injector: Injector,
   componentName: string,
@@ -88,21 +88,21 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
-export interface TraitLocalEffectsFactory<F extends FeatureFactory> {
+export interface TraitLocalEffectsFactory<F extends FeatureFactory<any, any>> {
   (
     allActions: ReturnType<F>['actions'],
     allSelectors: ReturnType<F>['selectors']
   ): Type<TraitEffect>;
 }
 
-export interface LocalTraitsConfig<F extends FeatureFactory> {
+export interface LocalTraitsConfig<F extends FeatureFactory<any, any>> {
   componentName: string;
   traitsFactory: F;
   effectFactory?: TraitLocalEffectsFactory<F>;
 }
 
 @Injectable()
-export abstract class TraitsLocalStore<F extends FeatureFactory>
+export abstract class TraitsLocalStore<F extends FeatureFactory<any, any>>
   implements OnDestroy
 {
   traits: ReturnType<F> & { destroy: () => void };

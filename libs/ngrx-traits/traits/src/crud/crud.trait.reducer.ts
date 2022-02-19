@@ -42,39 +42,41 @@ export function createCrudTraitReducer<
 
   return createReducer(
     initialState,
-    on(allActions.add, (state, { entities }) =>
+    on(allActions.addEntities, (state, { entities }) =>
       allMutators.add(entities, state)
     ),
-    on(allActions.update, (state, { updates }) =>
+    on(allActions.updateEntities, (state, { updates }) =>
       allMutators.update(updates, state)
     ),
-    on(allActions.upsert, (state, { entities }) =>
+    on(allActions.upsertEntities, (state, { entities }) =>
       allMutators.upsert(entities, state)
     ),
-    on(allActions.remove, (state, { keys }) =>
+    on(allActions.removeEntities, (state, { keys }) =>
       allMutators.remove(keys as any[], state)
     ),
-    on(allActions.removeAll, (state, { predicate }) =>
+    on(allActions.removeAllEntities, (state, { predicate }) =>
       predicate
         ? allMutators.remove(predicate, state)
         : allMutators.removeAll(state)
     ),
-    on(allActions.clearChanges, (state) => allMutators.clearChanges(state)),
+    on(allActions.clearEntitiesChanges, (state) =>
+      allMutators.clearChanges(state)
+    ),
     ...insertIf<S>(sortRemote, () =>
-      on(allActions.sort, (state) => allMutators.clearChanges(state))
+      on(allActions.sortEntities, (state) => allMutators.clearChanges(state))
     ),
     ...insertIf<S>(filterRemote, () =>
-      on(allActions.filter, (state) => allMutators.clearChanges(state))
+      on(allActions.filterEntities, (state) => allMutators.clearChanges(state))
     ),
-    ...insertIf<S>(!allActions.loadPageSuccess, () =>
+    ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) =>
         allMutators.clearChanges(state)
       )
     ),
     ...insertIf<S>(
-      !!allActions.loadPageSuccess && paginationCacheType === 'partial',
+      !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
-        on(allActions.loadPageSuccess, (state) =>
+        on(allActions.loadEntitiesPageSuccess, (state) =>
           allMutators.clearChanges(state)
         )
     )

@@ -48,6 +48,7 @@ describe('addMultiSelection trait', () => {
 
   function init() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addMultiSelection<Todo>()
     )({
@@ -72,6 +73,7 @@ describe('addMultiSelection trait', () => {
 
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addPagination({ cacheType: 'partial' }),
       addFilter<Todo, TodoFilter>(),
@@ -107,33 +109,37 @@ describe('addMultiSelection trait', () => {
   }
 
   describe('selectors', () => {
-    it('selectIdSelected should return selected ids in a dictionary by id ', () => {
+    it('selectEntitiesIdsSelectedMap should return selected ids in a dictionary by id ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectIdsSelected.projector(state)).toEqual({});
+      expect(selectors.selectEntitiesIdsSelectedMap.projector(state)).toEqual(
+        {}
+      );
       expect(
-        selectors.selectIdsSelected.projector({
+        selectors.selectEntitiesIdsSelectedMap.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
         })
       ).toEqual({ 3: true, 4: true, 7: true });
     });
 
-    it('selectAllIdsSelected should return selected ids in an array ', () => {
+    it('selectEntitiesIdsSelectedList should return selected ids in an array ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectAllIdsSelected.projector(state)).toEqual([]);
+      expect(selectors.selectEntitiesIdsSelectedList.projector(state)).toEqual(
+        []
+      );
       expect(
-        selectors.selectAllIdsSelected.projector({
+        selectors.selectEntitiesIdsSelectedList.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
         })
       ).toEqual(['3', '4', '7']);
     });
 
-    it('selectEntitiesSelected should return a dictionary of entities by id ', () => {
+    it('selectEntitiesSelectedMap should return a dictionary of entities by id ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectEntitiesSelected.projector(state)).toEqual({});
+      expect(selectors.selectEntitiesSelectedMap.projector(state)).toEqual({});
       expect(
-        selectors.selectEntitiesSelected.projector({
+        selectors.selectEntitiesSelectedMap.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
         })
@@ -144,11 +150,11 @@ describe('addMultiSelection trait', () => {
       });
     });
 
-    it('selectAllSelected should return all selected entities ', () => {
+    it('selectEntitiesSelectedList should return all selected entities ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectAllSelected.projector(state)).toEqual([]);
+      expect(selectors.selectEntitiesSelectedList.projector(state)).toEqual([]);
       expect(
-        selectors.selectAllSelected.projector({
+        selectors.selectEntitiesSelectedList.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
         })
@@ -159,32 +165,32 @@ describe('addMultiSelection trait', () => {
       ]);
     });
 
-    it('selectTotalSelected should return count of selected ids ', () => {
+    it('selectTotalSelectedEntities should return count of selected ids ', () => {
       const { selectors, state } = init();
       expect(
-        selectors.selectTotalSelected.projector({
+        selectors.selectTotalSelectedEntities.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
         })
       ).toEqual(3);
     });
 
-    it('selectTotalSelected should return all, none, some accordingly ', () => {
+    it('isAllEntitiesSelected should return all, none, some accordingly ', () => {
       const { selectors, state } = init();
       expect(
-        selectors.isAllSelected.projector({
+        selectors.isAllEntitiesSelected.projector({
           ...state,
         })
       ).toEqual('none');
       expect(
-        selectors.isAllSelected.projector({
+        selectors.isAllEntitiesSelected.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
         })
       ).toEqual('some');
 
       expect(
-        selectors.isAllSelected.projector({
+        selectors.isAllEntitiesSelected.projector({
           ...state,
           selectedIds: toMap(state.ids),
         })
@@ -193,47 +199,47 @@ describe('addMultiSelection trait', () => {
   });
 
   describe('reducer', () => {
-    it('select entity', () => {
+    it('selectEntities', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.multiSelect({ id: 7 }));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(result, actions.selectEntities({ id: 7 }));
       expect(result.selectedIds).toEqual({ 3: true, 7: true });
     });
 
-    it('deselect entity', () => {
+    it('deselectEntities', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.multiSelect({ id: 7 }));
-      result = reducer(result, actions.multiDeselect({ id: 3 }));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(result, actions.selectEntities({ id: 7 }));
+      result = reducer(result, actions.deselectEntities({ id: 3 }));
       expect(result.selectedIds).toEqual({ 7: true });
     });
 
     it('toggleSelect entity', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.multiToggleSelect({ id: 3 }));
-      result = reducer(result, actions.multiToggleSelect({ id: 7 }));
-      result = reducer(result, actions.multiToggleSelect({ id: 3 }));
+      let result = reducer(state, actions.toggleSelectEntities({ id: 3 }));
+      result = reducer(result, actions.toggleSelectEntities({ id: 7 }));
+      result = reducer(result, actions.toggleSelectEntities({ id: 3 }));
       expect(result.selectedIds).toEqual({ 7: true });
     });
 
-    it('toggleSelectAll', () => {
+    it('toggleSelectAllEntities', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.toggleSelectAll());
+      let result = reducer(state, actions.toggleSelectAllEntities());
       expect(result.selectedIds).toEqual(toMap(state.ids));
-      result = reducer(result, actions.toggleSelectAll());
+      result = reducer(result, actions.toggleSelectAllEntities());
       expect(result.selectedIds).toEqual({});
     });
 
-    it('clearSelection should deselect all', () => {
+    it('clearEntitiesSelection should deselect all', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.multiClearSelection());
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(result, actions.clearEntitiesSelection());
       expect(result.selectedIds).toEqual({});
     });
 
     it('loadEntitiesSuccess should deselect also', () => {
       const { reducer, actions, state } = init();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
         actions.loadEntitiesSuccess({ entities: [{ id: 3, content: '3' }] })
@@ -244,18 +250,21 @@ describe('addMultiSelection trait', () => {
     it('remote filter should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.filter({ filters: { content: '2' } }));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(
+        result,
+        actions.filterEntities({ filters: { content: '2' } })
+      );
       expect(result.selectedIds).toEqual({});
     });
 
     it('remote sort should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
-        actions.sort({ active: 'id', direction: 'asc' })
+        actions.sortEntities({ active: 'id', direction: 'asc' })
       );
       expect(result.selectedIds).toEqual({});
     });
@@ -263,36 +272,36 @@ describe('addMultiSelection trait', () => {
     it('pagination partial should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.loadPageSuccess());
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(result, actions.loadEntitiesPageSuccess());
       expect(result.selectedIds).toEqual({});
     });
 
     it('removeAll should deselect also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.removeAll());
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(result, actions.removeAllEntities());
       expect(result.selectedIds).toEqual({});
     });
 
     it('remove should deselect only if the selectedId was removed', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
-      result = reducer(result, actions.remove(2));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
+      result = reducer(result, actions.removeEntities(2));
       expect(result.selectedIds).toEqual({ 3: true });
-      result = reducer(result, actions.remove(3));
+      result = reducer(result, actions.removeEntities(3));
       expect(result.selectedIds).toEqual({});
     });
 
     it('update that changes an id should change the selected id too', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
-      let result = reducer(state, actions.multiSelect({ id: 3 }));
+      let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
-        actions.update({ id: 3, changes: { id: 11, content: '11' } })
+        actions.updateEntities({ id: 3, changes: { id: 11, content: '11' } })
       );
       expect(result.selectedIds).toEqual({ 11: true });
     });

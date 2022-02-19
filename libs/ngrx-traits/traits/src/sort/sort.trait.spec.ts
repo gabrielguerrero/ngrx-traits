@@ -49,6 +49,7 @@ describe('addSort trait', () => {
 
   function init({ remoteSort = false } = {}) {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addSort<Todo>({
         defaultSort: { active: 'id', direction: 'asc' },
@@ -80,6 +81,7 @@ describe('addSort trait', () => {
 
   function initPaginatedWithFilteringAndSorting() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addPagination({ cacheType: 'partial' }),
       addFilter<Todo, TodoFilter>(),
       addSort<Todo>({
@@ -115,12 +117,12 @@ describe('addSort trait', () => {
   describe('selectors', () => {
     it('selectSort should return selected sort ', () => {
       const { selectors, state } = init();
-      expect(selectors.selectSort.projector(state)).toEqual({
+      expect(selectors.selectEntitiesSort.projector(state)).toEqual({
         active: 'id',
         direction: 'asc',
       });
       expect(
-        selectors.selectSort.projector({
+        selectors.selectEntitiesSort.projector({
           ...state,
           sort: {
             current: { active: 'id', direction: 'asc' },
@@ -136,30 +138,30 @@ describe('addSort trait', () => {
       const { reducer, actions, state } = init();
       let result = reducer(
         state,
-        actions.sort({ direction: 'asc', active: 'id' })
+        actions.sortEntities({ direction: 'asc', active: 'id' })
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7]);
 
       result = reducer(
         state,
-        actions.sort({ direction: 'desc', active: 'id' })
+        actions.sortEntities({ direction: 'desc', active: 'id' })
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7].reverse());
 
       result = reducer(
         state,
-        actions.sort({ direction: 'asc', active: 'content' })
+        actions.sortEntities({ direction: 'asc', active: 'content' })
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7]);
 
       result = reducer(
         state,
-        actions.sort({ direction: 'desc', active: 'content' })
+        actions.sortEntities({ direction: 'desc', active: 'content' })
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7].reverse());
     });
 
-    it('resetSort entities', () => {
+    it('resetEntitiesSort entities', () => {
       const { reducer, actions, state } = init();
       let result = reducer(
         {
@@ -169,48 +171,48 @@ describe('addSort trait', () => {
             current: { active: 'content', direction: 'asc' },
           },
         },
-        actions.sort({ direction: 'asc', active: 'id' })
+        actions.sortEntities({ direction: 'asc', active: 'id' })
       );
 
-      result = reducer(result, actions.resetSort());
+      result = reducer(result, actions.resetEntitiesSort());
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7].reverse());
     });
 
     describe('effects', () => {
-      it('when paginated should fire loadFirstPage if sort was fired ', async () => {
+      it('when paginated should fire loadEntitiesFirstPage if sort was fired ', async () => {
         const { effects, actions } = initPaginatedWithFilteringAndSorting();
-        actions$ = of(actions.sort({ active: 'id', direction: 'asc' }));
+        actions$ = of(actions.sortEntities({ active: 'id', direction: 'asc' }));
         const action = await effects.remoteSort$
           .pipe(take(2), toArray())
           .toPromise();
         expect(action).toEqual([
-          actions.clearPagesCache(),
-          actions.loadFirstPage(),
+          actions.clearEntitiesPagesCache(),
+          actions.loadEntitiesFirstPage(),
         ]);
       });
 
-      it('when paginated should fire loadFirstPage if resetSort was fired ', async () => {
+      it('when paginated should fire loadEntitiesFirstPage if resetEntitiesSort was fired ', async () => {
         const { effects, actions } = initPaginatedWithFilteringAndSorting();
-        actions$ = of(actions.resetSort());
+        actions$ = of(actions.resetEntitiesSort());
         const action = await effects.remoteSort$
           .pipe(take(2), toArray())
           .toPromise();
         expect(action).toEqual([
-          actions.clearPagesCache(),
-          actions.loadFirstPage(),
+          actions.clearEntitiesPagesCache(),
+          actions.loadEntitiesFirstPage(),
         ]);
       });
 
-      it('should fire loadFirstPage if sort was fired ', async () => {
+      it('should fire loadEntitiesFirstPage if sort was fired ', async () => {
         const { effects, actions } = init({ remoteSort: true });
-        actions$ = of(actions.sort({ active: 'id', direction: 'asc' }));
+        actions$ = of(actions.sortEntities({ active: 'id', direction: 'asc' }));
         const action = await effects.remoteSort$.pipe(take(1)).toPromise();
         expect(action).toEqual(actions.loadEntities());
       });
 
-      it('should fire loadFirstPage if resetSort was fired ', async () => {
+      it('should fire loadEntitiesFirstPage if resetEntitiesSort was fired ', async () => {
         const { effects, actions } = init({ remoteSort: true });
-        actions$ = of(actions.resetSort());
+        actions$ = of(actions.resetEntitiesSort());
         const action = await effects.remoteSort$.pipe(take(1)).toPromise();
         expect(action).toEqual(actions.loadEntities());
       });

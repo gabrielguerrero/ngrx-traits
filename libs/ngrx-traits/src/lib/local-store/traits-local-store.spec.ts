@@ -33,13 +33,14 @@ import {
 
 describe('trait-local-store', () => {
   const traitsFactory = createEntityFeatureFactory(
+    { entityName: 'entity', entitiesName: 'entities' },
     addLoadEntities<Todo>(),
     addFilter<Todo, TodoFilter>()
   );
   type FF = typeof traitsFactory;
 
   describe('buildLocalTraits', () => {
-    function buildLocalTraitsMock<State, F extends FeatureFactory>(
+    function buildLocalTraitsMock<State, F extends FeatureFactory<any, any>>(
       componentName: string,
       traitFactory: F,
       loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>
@@ -83,9 +84,9 @@ describe('trait-local-store', () => {
       verify(
         reducerManagerMock.addReducer(match(/test_.+/), anything())
       ).once();
-      expect(traits.actions.filter).toBeTruthy();
+      expect(traits.actions.filterEntities).toBeTruthy();
       expect(traits.reducer).toBeTruthy();
-      expect(traits.selectors.selectFilter).toBeTruthy();
+      expect(traits.selectors.selectEntitiesFilter).toBeTruthy();
     });
 
     it('should register reducers and effects and build traits, and extra custom effect', () => {
@@ -100,9 +101,9 @@ describe('trait-local-store', () => {
       verify(
         reducerManagerMock.addReducer(match(/test_.+/), anything())
       ).once();
-      expect(traits.actions.filter).toBeTruthy();
+      expect(traits.actions.filterEntities).toBeTruthy();
       expect(traits.reducer).toBeTruthy();
-      expect(traits.selectors.selectFilter).toBeTruthy();
+      expect(traits.selectors.selectEntitiesFilter).toBeTruthy();
     });
 
     it('check when destroy is called reducer is remove and destroy action fired', fakeAsync(() => {
@@ -152,9 +153,11 @@ describe('trait-local-store', () => {
 
     it('should create TraitsLocalStore instance with  traits', () => {
       const localStore = createService();
-      expect(localStore.service.actions.filter).toBeTruthy();
+      expect(localStore.service.actions.filterEntities).toBeTruthy();
       expect(localStore.service.traits.reducer).toBeTruthy();
-      expect(localStore.service.traits.selectors.selectFilter).toBeTruthy();
+      expect(
+        localStore.service.traits.selectors.selectEntitiesFilter
+      ).toBeTruthy();
     });
   });
 });

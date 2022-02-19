@@ -12,12 +12,12 @@ import {
 } from './multi-selection.utils';
 
 export function createMultiSelectionTraitMutators<Entity>({
-  isAllSelected,
+  isAllEntitiesSelected,
 }: MultipleSelectionSelectors<Entity>): MultipleSelectionMutators<Entity> {
   function toggleSelectAll<S extends EntityAndMultipleSelectionState<Entity>>(
     state: S
   ): S {
-    const allSelected = isAllSelected(state);
+    const allSelected = isAllEntitiesSelected(state);
     if (allSelected === 'all') {
       return {
         ...state,

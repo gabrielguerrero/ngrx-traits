@@ -11,7 +11,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { FilterState } from '../filter';
-import { addReset } from './reset.trait';
+import { addResetEntitiesState } from './reset.trait';
 
 export interface TestState
   extends LoadEntitiesState<Todo>,
@@ -25,10 +25,11 @@ describe('addReset Trait', () => {
 
   function initWithRemoteFilterWithPagination() {
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addFilter<Todo, TodoFilter>(),
       addPagination<Todo>(),
-      addReset({
+      addResetEntitiesState({
         resetOn: [globalReset],
       })
     )({
@@ -53,7 +54,7 @@ describe('addReset Trait', () => {
         initialState,
         actions.loadEntitiesSuccess({ entities: [] })
       );
-      result = reducer(result, actions.reset());
+      result = reducer(result, actions.resetEntitiesState());
       expect(result).toEqual(initialState);
     });
   });
@@ -64,7 +65,7 @@ describe('addReset Trait', () => {
         const { effects, actions } = initWithRemoteFilterWithPagination();
         actions$ = of(globalReset());
         const action = await effects.externalReset$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.reset());
+        expect(action).toEqual(actions.resetEntitiesState());
       });
     });
   });

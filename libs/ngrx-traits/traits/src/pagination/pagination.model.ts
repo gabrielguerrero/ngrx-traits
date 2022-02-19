@@ -24,41 +24,43 @@ export interface EntityAndPaginationState<T>
     PaginationState {}
 
 export type PaginationActions = {
-  loadPage: ActionCreator<
+  loadEntitiesPage: ActionCreator<
     string,
     (props: {
       index: number;
       forceLoad?: boolean;
     }) => { index: number; forceLoad?: boolean } & TypedAction<string>
   >;
-  loadPageSuccess: ActionCreator<string, () => TypedAction<string>>;
-  loadPageFail: ActionCreator<string, () => TypedAction<string>>;
-  loadNextPage: ActionCreator<string, () => TypedAction<string>>;
-  loadPreviousPage: ActionCreator<string, () => TypedAction<string>>;
-  loadFirstPage: ActionCreator<
+  loadEntitiesPageSuccess: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesPageFail: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesNextPage: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesPreviousPage: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesFirstPage: ActionCreator<
     string,
     (forceLoad?: boolean) => { forceLoad?: boolean } & TypedAction<string>
   >;
-  loadLastPage: ActionCreator<string, () => TypedAction<string>>;
-  clearPagesCache: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesLastPage: ActionCreator<string, () => TypedAction<string>>;
+  clearEntitiesPagesCache: ActionCreator<string, () => TypedAction<string>>;
 };
 
 export type PaginationSelectors<T> = {
-  isPageInCache: (
+  isEntitiesPageInCache: (
     state: EntityAndPaginationState<T>,
     props?: { page?: number }
   ) => boolean;
-  selectPageEntities: (
+  selectPageEntitiesList: (
     state: EntityAndPaginationState<T>,
     props?: { page?: number }
   ) => T[];
-  selectPage: (
+  selectEntitiesPage: (
     state: EntityAndPaginationState<T>,
     props?: { page?: number }
   ) => PageModel<T>;
-  selectPagedRequest: (state: EntityAndPaginationState<T>) => PagedRequest;
-  selectPageInfo: (state: EntityAndPaginationState<T>) => PageInfoModel;
-  isLoadingPage: (state: EntityAndPaginationState<T>) => boolean;
+  selectEntitiesPagedRequest: (
+    state: EntityAndPaginationState<T>
+  ) => PagedRequest;
+  selectEntitiesPageInfo: (state: EntityAndPaginationState<T>) => PageInfoModel;
+  isLoadingEntitiesPage: (state: EntityAndPaginationState<T>) => boolean;
 };
 
 export type PaginationMutators<T> = {

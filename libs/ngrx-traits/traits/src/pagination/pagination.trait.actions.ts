@@ -6,26 +6,28 @@ export function createPaginationTraitActions(
   actionsGroupKey: string
 ): PaginationActions {
   const actions: ƟPaginationActions = {
-    loadPage: createAction(
+    loadEntitiesPage: createAction(
       `${actionsGroupKey} load page`,
       ({ index, forceLoad }: { index: number; forceLoad?: boolean }) => ({
         index,
         forceLoad,
       })
     ),
-    loadPageSuccess: createAction(
+    loadEntitiesPageSuccess: createAction(
       `${actionsGroupKey} load
           page success`
     ),
-    loadPageFail: createAction(`${actionsGroupKey} load page fail`),
-    loadPreviousPage: createAction(`${actionsGroupKey} load previous page`),
-    loadNextPage: createAction(`${actionsGroupKey} load next page`),
-    loadFirstPage: createAction(
+    loadEntitiesPageFail: createAction(`${actionsGroupKey} load page fail`),
+    loadEntitiesPreviousPage: createAction(
+      `${actionsGroupKey} load previous page`
+    ),
+    loadEntitiesNextPage: createAction(`${actionsGroupKey} load next page`),
+    loadEntitiesFirstPage: createAction(
       `${actionsGroupKey} load first page`,
       (forceLoad?: boolean) => ({ forceLoad })
     ),
-    loadLastPage: createAction(`${actionsGroupKey} load last page`),
-    clearPagesCache: createAction(`${actionsGroupKey} clear cache`),
+    loadEntitiesLastPage: createAction(`${actionsGroupKey} load last page`),
+    clearEntitiesPagesCache: createAction(`${actionsGroupKey} clear cache`),
     setRequestPage: createAction(
       `${actionsGroupKey} set request page`,
       props<{ index: number }>()

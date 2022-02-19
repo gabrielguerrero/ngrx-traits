@@ -1,5 +1,5 @@
 import { createSelector } from '@ngrx/store';
-import { selectTotalSelected } from './multi-selection.utils';
+import { selectTotalSelectedEntities } from './multi-selection.utils';
 import {
   EntityAndMultipleSelectionState,
   MultipleSelectionSelectors,
@@ -12,15 +12,17 @@ export function createMultiSelectionTraitSelectors<Entity>(
 ): MultipleSelectionSelectors<Entity> {
   const { selectEntitiesMap, selectEntitiesTotal } = previousSelectors;
 
-  function selectIdsSelected(state: EntityAndMultipleSelectionState<Entity>) {
+  function selectEntitiesIdsSelectedMap(
+    state: EntityAndMultipleSelectionState<Entity>
+  ) {
     return state.selectedIds;
   }
-  const selectAllIdsSelected = createSelector(
-    selectIdsSelected,
+  const selectEntitiesIdsSelectedList = createSelector(
+    selectEntitiesIdsSelectedMap,
     (ids: Dictionary<boolean>) => Object.keys(ids)
   );
-  const selectEntitiesSelected = createSelector(
-    selectAllIdsSelected,
+  const selectEntitiesSelectedMap = createSelector(
+    selectEntitiesIdsSelectedList,
     selectEntitiesMap,
     (selectedIds, entities) =>
       selectedIds.reduce((acum: { [id: string]: Entity | undefined }, id) => {
@@ -28,16 +30,16 @@ export function createMultiSelectionTraitSelectors<Entity>(
         return acum;
       }, {})
   );
-  const selectAllSelected = createSelector(
-    selectAllIdsSelected,
+  const selectEntitiesSelectedList = createSelector(
+    selectEntitiesIdsSelectedList,
     selectEntitiesMap,
     (selectedIds, entities) => selectedIds.map((id) => entities[id]!)
   );
 
-  const isAllSelected = createSelector(
+  const isAllEntitiesSelected = createSelector(
     (state: EntityAndMultipleSelectionState<Entity>) =>
       selectEntitiesTotal(state),
-    selectTotalSelected,
+    selectTotalSelectedEntities,
     (total, totalSelected) =>
       totalSelected > 0 && totalSelected === total
         ? 'all'
@@ -47,11 +49,11 @@ export function createMultiSelectionTraitSelectors<Entity>(
   );
 
   return {
-    selectIdsSelected,
-    selectAllIdsSelected,
-    selectEntitiesSelected,
-    selectAllSelected,
-    selectTotalSelected,
-    isAllSelected,
+    selectEntitiesIdsSelectedMap,
+    selectEntitiesIdsSelectedList,
+    selectEntitiesSelectedMap,
+    selectEntitiesSelectedList,
+    selectTotalSelectedEntities,
+    isAllEntitiesSelected,
   };
 }

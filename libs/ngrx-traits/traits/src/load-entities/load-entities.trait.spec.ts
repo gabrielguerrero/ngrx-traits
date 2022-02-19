@@ -21,7 +21,7 @@ export interface TodoFilter {
   extra?: string;
 }
 
-export interface TestState extends LoadEntitiesState<Todo> {}
+export type TestState = LoadEntitiesState<Todo>;
 
 export interface TestState2 extends LoadEntitiesState<Todo>, PaginationState {}
 export interface TestState3
@@ -33,7 +33,10 @@ describe('addLoadEntities Trait', () => {
 
   function init() {
     const featureSelector = createFeatureSelector<TestState>('test');
-    const traits = createEntityFeatureFactory(addLoadEntities<Todo>())({
+    const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
+      addLoadEntities<Todo>()
+    )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
     });
@@ -48,6 +51,7 @@ describe('addLoadEntities Trait', () => {
   function initWithPagination() {
     const featureSelector = createFeatureSelector<TestState2>('test');
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addPagination<Todo>()
     )({
@@ -68,6 +72,7 @@ describe('addLoadEntities Trait', () => {
   function initWithLocalFilter(data: Todo[], filter: TodoFilter) {
     const featureSelector = createFeatureSelector<TestState3>('test');
     const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntities<Todo>(),
       addFilter<Todo, TodoFilter>({
         defaultFilter: filter,

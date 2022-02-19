@@ -2,6 +2,7 @@ import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from 'ngrx-traits';
+import { addResetEntitiesState } from '../reset';
 
 export declare type SortDirection = 'asc' | 'desc' | '';
 
@@ -23,18 +24,18 @@ export interface EntityAndSortState<T>
     SortState<T> {}
 
 export type SortActions<T> = {
-  sort: ActionCreator<
+  sortEntities: ActionCreator<
     string,
     (props: Sort<T>) => Sort<T> & TypedAction<string>
   >;
   /**
    * Sets the default sort back
    */
-  resetSort: ActionCreator<string, () => TypedAction<string>>;
+  resetEntitiesSort: ActionCreator<string, () => TypedAction<string>>;
 };
 
 export type SortSelectors<T> = {
-  selectSort: (state: EntityAndSortState<T>) => Sort<T>;
+  selectEntitiesSort: (state: EntityAndSortState<T>) => Sort<T>;
 };
 
 export type SortMutators<T> = {

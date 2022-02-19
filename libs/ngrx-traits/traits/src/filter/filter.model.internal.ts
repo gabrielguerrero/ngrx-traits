@@ -5,7 +5,7 @@ import { FilterActions } from './filter.model';
  * @internal
  */
 export type ƟFilterActions<F> = FilterActions<F> & {
-  storeFilter: ActionCreator<
+  storeEntitiesFilter: ActionCreator<
     string,
     (props: {
       filters?: F;

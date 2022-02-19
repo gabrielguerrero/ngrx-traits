@@ -35,13 +35,13 @@ export function createFilterTraitEffects<Entity, F>(
           scheduler = asyncScheduler,
         } = {}) =>
           this.actions$.pipe(
-            ofType(allActions.filter),
+            ofType(allActions.filterEntities),
             debounce((value) =>
               value?.forceLoad ? EMPTY : timer(debounceTime, scheduler)
             ),
             concatMap((payload) =>
               payload.patch
-                ? this.store.select(allSelectors.selectFilter).pipe(
+                ? this.store.select(allSelectors.selectEntitiesFilter).pipe(
                     first(),
                     map((storedFilters) => ({
                       ...payload,
@@ -57,7 +57,7 @@ export function createFilterTraitEffects<Entity, F>(
                   JSON.stringify(current?.filters)
             ),
             map((action) =>
-              allActions.storeFilter({
+              allActions.storeEntitiesFilter({
                 filters: action?.filters,
                 patch: action?.patch,
               })
@@ -69,10 +69,13 @@ export function createFilterTraitEffects<Entity, F>(
       !traitConfig?.filterFn &&
       createEffect(() => {
         return this.actions$.pipe(
-          ofType(allActions['storeFilter']),
+          ofType(allActions['storeEntitiesFilter']),
           concatMap(() =>
-            allActions?.loadFirstPage
-              ? [allActions.clearPagesCache(), allActions.loadFirstPage()]
+            allActions?.loadEntitiesFirstPage
+              ? [
+                  allActions.clearEntitiesPagesCache(),
+                  allActions.loadEntitiesFirstPage(),
+                ]
               : [allActions.loadEntities()]
           )
         );
