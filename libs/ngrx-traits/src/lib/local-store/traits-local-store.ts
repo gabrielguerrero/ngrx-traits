@@ -12,7 +12,7 @@ function uniqueComponentId() {
 
 export function buildLocalTraits<
   State,
-  F extends FeatureFactory<any, any, State, any, any, any>
+  F extends FeatureFactory<any, any, State, any, any>
 >(
   injector: Injector,
   componentName: string,
