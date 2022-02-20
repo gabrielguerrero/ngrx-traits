@@ -36,7 +36,7 @@ describe('addLoadEntitiesTrait Trait', () => {
   function init() {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
-      { entityName: 'entity', entitiesName: 'entities' },
+      { entityName: 'todo' },
       addLoadEntitiesTrait<Todo>()
     )({
       actionsGroupKey: 'test',
@@ -101,14 +101,14 @@ describe('addLoadEntitiesTrait Trait', () => {
       const { actions, reducer, initialState } = init();
       const result = reducer(
         initialState,
-        actions.loadEntitiesFail({ error: '' })
+        actions.loadTodosFail({ error: '' })
       );
       expect(result).toEqual({ ...initialState, status: 'fail' });
     });
 
     it('loadEntities should set status to loading', async () => {
       const { actions, reducer, initialState } = init();
-      const result = reducer(initialState, actions.loadEntities());
+      const result = reducer(initialState, actions.loadTodos());
       expect(result).toEqual({ ...initialState, status: 'loading' });
     });
 
@@ -116,7 +116,7 @@ describe('addLoadEntitiesTrait Trait', () => {
       const { actions, reducer, initialState } = init();
       const result = reducer(
         initialState,
-        actions.loadEntitiesSuccess({
+        actions.loadTodosSuccess({
           entities: [{ id: 0 }, { id: 1 }],
           total: 2,
         })
@@ -154,19 +154,19 @@ describe('addLoadEntitiesTrait Trait', () => {
     it('check isLoading ', () => {
       const { selectors, initialState } = init();
       expect(
-        selectors.isEntitiesLoading.projector({
+        selectors.isTodosLoading.projector({
           ...initialState,
           status: 'loading',
         })
       ).toBe(true);
       expect(
-        selectors.isEntitiesLoading.projector({
+        selectors.isTodosLoading.projector({
           ...initialState,
           status: 'fail',
         })
       ).toBe(false);
       expect(
-        selectors.isEntitiesLoading.projector({
+        selectors.isTodosLoading.projector({
           ...initialState,
           status: 'success',
         })
@@ -176,19 +176,19 @@ describe('addLoadEntitiesTrait Trait', () => {
     it('check isFail ', async () => {
       const { selectors, initialState } = init();
       expect(
-        selectors.isEntitiesLoadingFail.projector({
+        selectors.isTodosLoadingFail.projector({
           ...initialState,
           status: 'loading',
         })
       ).toBe(false);
       expect(
-        selectors.isEntitiesLoadingFail.projector({
+        selectors.isTodosLoadingFail.projector({
           ...initialState,
           status: 'fail',
         })
       ).toBe(true);
       expect(
-        selectors.isEntitiesLoadingFail.projector({
+        selectors.isTodosLoadingFail.projector({
           ...initialState,
           status: 'success',
         })
@@ -198,19 +198,19 @@ describe('addLoadEntitiesTrait Trait', () => {
     it('check isSuccess ', async () => {
       const { selectors, initialState } = init();
       expect(
-        selectors.isEntitiesLoadingSuccess.projector({
+        selectors.isTodosLoadingSuccess.projector({
           ...initialState,
           status: 'loading',
         })
       ).toBe(false);
       expect(
-        selectors.isEntitiesLoadingSuccess.projector({
+        selectors.isTodosLoadingSuccess.projector({
           ...initialState,
           status: 'fail',
         })
       ).toBe(false);
       expect(
-        selectors.isEntitiesLoadingSuccess.projector({
+        selectors.isTodosLoadingSuccess.projector({
           ...initialState,
           status: 'success',
         })

@@ -1,4 +1,8 @@
-import { createTraitFactory, TraitActionsFactoryConfig } from 'ngrx-traits';
+import {
+  capitalize,
+  createTraitFactory,
+  TraitActionsFactoryConfig,
+} from 'ngrx-traits';
 import { createAction, createReducer, on } from '@ngrx/store';
 
 import {
@@ -47,8 +51,7 @@ export function addSetEntityTrait<
   entityName: J;
   actionProps?: ActionCreatorProps<Payload>;
 }) {
-  const capitalizedName =
-    entityName.charAt(0).toUpperCase() + entityName.slice(1);
+  const capitalizedName = capitalize(entityName);
 
   return createTraitFactory({
     key: `load${capitalizedName}`,

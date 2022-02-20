@@ -1,7 +1,7 @@
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { AsyncActionState } from './async-action.model';
-import { addAsyncActionTrait } from './add-async-action.trait';
+import { addAsyncActionTrait } from './async-action.trait';
 
 describe('addApiCall trait', () => {
   const featureSelector =

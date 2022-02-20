@@ -1,6 +1,6 @@
 import { createAction, createReducer, on } from '@ngrx/store';
 import { ActionCreatorProps } from '@ngrx/store/src/models';
-import { createTraitFactory } from 'ngrx-traits';
+import { camelCaseToSentence, createTraitFactory } from 'ngrx-traits';
 import {
   ActionCreatorWithOptionalProps,
   AsyncActionActions,
@@ -173,9 +173,4 @@ export function addAsyncActionTrait<
       );
     },
   });
-}
-
-function camelCaseToSentence(text: string) {
-  const result = text.replace(/([A-Z])/g, ' $1');
-  return result.charAt(0).toUpperCase() + result.slice(1);
 }

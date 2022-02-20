@@ -8,8 +8,17 @@ export function insertIf<State>(
   return condition ? [getElement()] : [];
 }
 export function toMap(a: Array<string | number>) {
-  return a.reduce((acum: {[key: string ]: boolean}, value) => {
+  return a.reduce((acum: { [key: string]: boolean }, value) => {
     acum[value] = true;
     return acum;
   }, {});
+}
+
+export function capitalize(name: string) {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+export function camelCaseToSentence(text: string) {
+  const result = text.replace(/([A-Z])/g, ' $1');
+  return result.charAt(0).toUpperCase() + result.slice(1);
 }
