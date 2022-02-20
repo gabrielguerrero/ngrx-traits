@@ -27,12 +27,10 @@ export type TraitStateMutators<State> = {
 export interface FeatureTraits<
   State,
   A extends TraitActions = TraitActions,
-  S extends TraitSelectors<State> = TraitSelectors<State>,
-  M extends TraitStateMutators<State> = TraitStateMutators<State>
+  S extends TraitSelectors<State> = TraitSelectors<State>
 > {
   actions: A;
   selectors: FeatureSelectors<State, S>;
-  mutators: M;
   reducer: (state: State, action: ActionType<any>) => State;
   effects: Type<any>[];
   initialState: State;
@@ -43,8 +41,7 @@ export type FeatureFactory<
   EntitiesName extends string, // TODO default to `${EntityName}s`
   State = any,
   A extends TraitActions = TraitActions,
-  S extends TraitSelectors<State> = TraitSelectors<State>,
-  M extends TraitStateMutators<State> = TraitStateMutators<State>
+  S extends TraitSelectors<State> = TraitSelectors<State>
 > = (
   config: Config<State>
 ) => FeatureTraits<
@@ -54,8 +51,7 @@ export type FeatureFactory<
     : A,
   EntityName extends string
     ? ReplaceEntityNames<S, EntityName, EntitiesName>
-    : S,
-  M
+    : S
 >;
 
 export interface Config<

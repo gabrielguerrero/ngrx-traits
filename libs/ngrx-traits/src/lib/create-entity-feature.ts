@@ -18,16 +18,13 @@ import {
 import {
   Action,
   ActionType,
-  createAction,
   createFeatureSelector,
   createReducer,
   createSelector,
   MemoizedSelector,
-  on,
 } from '@ngrx/store';
 import { TraitEffect } from './trait-effect';
 import { Type } from './local-store';
-import { stringify } from 'ts-jest/dist/utils/json';
 
 export function createTraitFactory<
   State = {},
@@ -40,37 +37,6 @@ export function createTraitFactory<
 >(f: TraitFactory<State, A, S, M, KEY, C, KC>) {
   return f;
 }
-// export function createEntityFeatureFactory<
-//   F extends readonly TraitFactory[]
-//   // EntityName extends string,
-//   // EntitiesName extends string = `${EntityName}s`
-// >(
-//   // entityName: EntityName,
-//   // entitiesName: EntitiesName,
-//   ...traits: F
-// ): FeatureFactory<
-//   undefined,
-//   '',
-//   ExtractStateType<F>,
-//   ExtractActionsType<F>,
-//   ExtractSelectorsType<F>,
-//   ExtractMutatorsType<F>
-// >;
-// export function createEntityFeatureFactory<
-//   F extends readonly TraitFactory[],
-//   EntityName extends string,
-//   EntitiesName extends string = `${EntityName}s`
-// >(
-//   name: { entityName: EntityName; entitiesName?: EntitiesName },
-//   ...traits: F
-// ): FeatureFactory<
-//   EntityName,
-//   EntitiesName,
-//   ExtractStateType<F>,
-//   ExtractActionsType<F>,
-//   ExtractSelectorsType<F>,
-//   ExtractMutatorsType<F>
-// >;
 
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
@@ -84,8 +50,7 @@ export function createEntityFeatureFactory<
   EntitiesName,
   ExtractStateType<F>,
   ExtractActionsType<F>,
-  ExtractSelectorsType<F>,
-  ExtractMutatorsType<F>
+  ExtractSelectorsType<F>
 > {
   return ((config: Config<any, any>) => {
     const sortedTraits = sortTraits([...traits]);
@@ -135,9 +100,6 @@ export function createEntityFeatureFactory<
     return {
       actions: allActions,
       selectors: allFeatureSelectors,
-      // TODO remove mutators from result, they are not used after built
-      // and simplifies the api
-      mutators: allMutators,
       initialState,
       reducer: reducer ?? createReducer(initialState),
       effects: allEffects,
@@ -147,8 +109,7 @@ export function createEntityFeatureFactory<
     EntitiesName,
     ExtractStateType<F>,
     ExtractActionsType<F>,
-    ExtractSelectorsType<F>,
-    ExtractMutatorsType<F>
+    ExtractSelectorsType<F>
   >;
 }
 
