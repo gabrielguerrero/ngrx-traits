@@ -1,8 +1,8 @@
 import { ActionCreatorProps } from '@ngrx/store/src/models';
-import { createTraitFactory } from 'ngrx-traits';
+import { capitalize, createTraitFactory } from 'ngrx-traits';
 import { createReducer, on } from '@ngrx/store';
 
-import { addAsyncActionTrait } from '../async-action/add-async-action.trait';
+import { addAsyncActionTrait } from '../async-action/async-action.trait';
 import { LoadEntitySelectors, LoadEntityState } from './load-entity.model';
 import { TraitInitialStateFactoryConfig } from 'ngrx-traits';
 
@@ -60,8 +60,7 @@ export function addLoadEntityTraits<
   actionSuccessProps?: ActionCreatorProps<Response>;
   actionFailProps?: ActionCreatorProps<Failure>;
 }) {
-  const capitalizedName =
-    entityName.charAt(0).toUpperCase() + entityName.slice(1);
+  const capitalizedName = capitalize(entityName);
 
   type K = `load${Capitalize<J & string>}`;
 

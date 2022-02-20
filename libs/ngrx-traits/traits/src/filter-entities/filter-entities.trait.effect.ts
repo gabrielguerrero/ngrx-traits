@@ -7,6 +7,7 @@ import {
   distinctUntilChanged,
   first,
   map,
+  tap,
 } from 'rxjs/operators';
 import { createEffect, ofType } from '@ngrx/effects';
 import {
@@ -47,6 +48,7 @@ export function createFilterTraitEffects<Entity, F>(
               payload.patch
                 ? this.store.select(allSelectors.selectEntitiesFilter).pipe(
                     first(),
+                    tap(console.log),
                     map((storedFilters) => ({
                       ...payload,
                       filters: { ...storedFilters, ...payload?.filters },

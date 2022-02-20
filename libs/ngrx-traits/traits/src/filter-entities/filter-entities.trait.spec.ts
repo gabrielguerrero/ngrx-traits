@@ -28,7 +28,7 @@ export interface TestState2
 describe('addFilter Trait', () => {
   let actions$: Actions;
 
-  function initWithRemoteFilter() {
+  function initWithRemoteFilter(initialState?: any) {
     const featureSelector = createFeatureSelector<TestState2>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
@@ -42,7 +42,9 @@ describe('addFilter Trait', () => {
       providers: [
         traits.effects[0],
         provideMockActions(() => actions$),
-        provideMockStore(),
+        provideMockStore({
+          initialState,
+        }),
       ],
     });
     const mockStore = TestBed.inject(MockStore);
@@ -206,9 +208,34 @@ describe('addFilter Trait', () => {
         ).toBeObservable(expected);
       });
 
-      it.todo(
-        'should merge current filters with passed filters when patch is true'
-      );
+      it('should merge current filters with passed filters when patch is true', () => {
+        const { effects, actions, mockStore, selectors } = initWithRemoteFilter(
+          { test: { filters: { content: 'x' } } }
+        );
+        // following mocking doesnt work not sure why so I had to pass initialState
+        // mockStore.overrideSelector(selectors.selectEntitiesFilter, {
+        //   content: 'x',
+        // });
+        mockStore.refreshState();
+        console.log('before subscribe');
+        actions$ = hot('a----a', {
+          a: actions.filterEntities({ filters: { extra: 'y' }, patch: true }),
+        });
+        const expected = hot('---a', {
+          a: (
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+          ).storeEntitiesFilter({
+            filters: { content: 'x', extra: 'y' },
+            patch: true,
+          }),
+        });
+        expect(
+          effects.storeFilter$({
+            debounce: 30,
+            scheduler: Scheduler.get(),
+          })
+        ).toBeObservable(expected);
+      });
     });
   });
 });

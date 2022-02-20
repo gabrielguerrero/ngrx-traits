@@ -1,4 +1,8 @@
-import { FeatureFactory, TraitsLocalStore, DISABLE_LOCAL_TRAIT_EFFECTS } from 'ngrx-traits';
+import {
+  FeatureFactory,
+  TraitsLocalStore,
+  DISABLE_LOCAL_TRAIT_EFFECTS,
+} from 'ngrx-traits';
 import { Injector, Provider, Type } from '@angular/core';
 import { EffectSources } from '@ngrx/effects';
 import { MockStore } from '@ngrx/store/testing';
@@ -10,7 +14,7 @@ import { MockStore } from '@ngrx/store/testing';
  * You still need to provideMockStore and provideMockActions
  * */
 export function provideMockLocalTraits<
-  T extends TraitsLocalStore<FeatureFactory>
+  T extends TraitsLocalStore<FeatureFactory<any, any>>
 >({
   traitFactory,
   selectors,

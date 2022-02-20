@@ -28,7 +28,7 @@ describe('addReset Trait', () => {
 
   function initWithRemoteFilterWithPagination() {
     const traits = createEntityFeatureFactory(
-      { entityName: 'entity', entitiesName: 'entities' },
+      { entityName: 'product', entitiesName: 'products' },
       addLoadEntitiesTrait<Todo>(),
       addFilterEntitiesTrait<Todo, TodoFilter>(),
       addEntitiesPaginationTrait<Todo>(),
@@ -55,9 +55,9 @@ describe('addReset Trait', () => {
         initWithRemoteFilterWithPagination();
       let result = reducer(
         initialState,
-        actions.loadEntitiesSuccess({ entities: [] })
+        actions.loadProductsSuccess({ entities: [] })
       );
-      result = reducer(result, actions.resetEntitiesState());
+      result = reducer(result, actions.resetProductsState());
       expect(result).toEqual(initialState);
     });
   });
@@ -68,7 +68,7 @@ describe('addReset Trait', () => {
         const { effects, actions } = initWithRemoteFilterWithPagination();
         actions$ = of(globalReset());
         const action = await effects.externalReset$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.resetEntitiesState());
+        expect(action).toEqual(actions.resetProductsState());
       });
     });
   });

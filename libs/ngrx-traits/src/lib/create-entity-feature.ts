@@ -25,6 +25,7 @@ import {
 } from '@ngrx/store';
 import { TraitEffect } from './trait-effect';
 import { Type } from './local-store';
+import { capitalize } from './util';
 
 export function createTraitFactory<
   State = {},
@@ -43,7 +44,10 @@ export function createEntityFeatureFactory<
   EntityName extends string,
   EntitiesName extends string = `${EntityName}s`
 >(
-  name: { entityName: EntityName; entitiesName?: EntitiesName } | undefined,
+  {
+    entityName,
+    entitiesName,
+  }: { entityName: EntityName; entitiesName?: EntitiesName },
   ...traits: F
 ): FeatureFactory<
   EntityName,
@@ -53,6 +57,11 @@ export function createEntityFeatureFactory<
   ExtractSelectorsType<F>
 > {
   return ((config: Config<any, any>) => {
+    const singular = capitalize(entityName);
+    const plural = entitiesName
+      ? capitalize(entitiesName)
+      : capitalize(entityName + 's');
+
     const sortedTraits = sortTraits([...traits]);
 
     const allConfigs = buildAllConfigs(sortedTraits);
@@ -96,10 +105,10 @@ export function createEntityFeatureFactory<
       allFeatureSelectors,
       allConfigs
     );
-    // TODO we need to create a function that renames all actions selectors and maybe mutators? using the probided entityName
+
     return {
-      actions: allActions,
-      selectors: allFeatureSelectors,
+      actions: renameProps(allActions, singular, plural),
+      selectors: renameProps(allFeatureSelectors, singular, plural),
       initialState,
       reducer: reducer ?? createReducer(initialState),
       effects: allEffects,
@@ -113,6 +122,16 @@ export function createEntityFeatureFactory<
   >;
 }
 
+function renameProps(target: any, entityName: string, entitiesName: string) {
+  const result = {} as any;
+  for (const [key, value] of Object.entries(target)) {
+    const newKey = key
+      .replace('Entities', entitiesName)
+      .replace('Entity', entityName);
+    result[newKey] = value;
+  }
+  return result;
+}
 function sortTraits(
   traits: TraitFactory<any, any, any, any>[]
 ): TraitFactory<any, any, any, any>[] {
