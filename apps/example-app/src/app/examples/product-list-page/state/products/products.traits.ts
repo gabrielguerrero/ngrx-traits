@@ -19,6 +19,7 @@ import {
   ReplaceEntityNames,
   addPropertiesTraits,
 } from 'ngrx-traits';
+import { addSetEntityTrait } from '../../../../../../../../libs/ngrx-traits/traits/src/set-entity';
 
 export interface ProductsState
   extends LoadEntitiesState<Product>,
@@ -74,6 +75,10 @@ const entityFeatureFactory3 = createEntityFeatureFactory(
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
+  // addSetEntityTrait({
+  //   entityName: 'practice',
+  //   actionProps: props<{ practice: { id: number; name: string } }>(),
+  // }),
   addSortEntitiesTrait<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   })
@@ -100,7 +105,7 @@ export const ProductSelectors = productTraits.selectors;
 //   products: entityFeatureFactory,
 //   orders: entityFeatureFactory2,
 //   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).practices.actions.load;
+// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).practices.actions.setPractice({practice: {id:}});
 //
 // addPropertiesTraits(entityFeatureFactory, {
 //   orders: entityFeatureFactory2,
