@@ -13,7 +13,7 @@ import {
 import { Product, ProductFilter } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadProductDetail } from './load-product.trait';
+import { addLoadProductDetailTraits } from './load-product.trait';
 
 export interface ProductsState
   extends LoadEntitiesState<Product>,
@@ -32,7 +32,7 @@ export const productTraits = createEntityFeatureFactory(
   addSortEntitiesTrait<Product>({
     defaultSort: { direction: 'asc', active: 'name' },
   }),
-  ...addLoadProductDetail()
+  ...addLoadProductDetailTraits()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),

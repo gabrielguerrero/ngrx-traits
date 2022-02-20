@@ -1,8 +1,8 @@
 import { Actions } from '@ngrx/effects';
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { LoadEntityState } from './load-entity.model';
-import { addLoadEntityTraits } from './load-entity.traits';
+import { SetEntityState } from './set-entity.model';
+import { addSetEntityTrait } from './set-entity.trait';
 
 interface Client {
   id: string;
@@ -11,20 +11,20 @@ interface Client {
 interface Product extends Client {
   price: number;
 }
-describe('addLoadEntityTraits trait', () => {
+describe('addSetEntityTrait trait', () => {
   let actions$: Actions;
   const featureSelector =
-    createFeatureSelector<LoadEntityState<Client, 'client'>>('client');
-  const featureSelector2 =
-    createFeatureSelector<LoadEntityState<Product, 'product'>>('client');
+    createFeatureSelector<SetEntityState<Client, 'client'>>('client');
+  const featureSelector2 = createFeatureSelector<
+    SetEntityState<Product, 'product'> & SetEntityState<Client, 'client'>
+  >('clientProduct');
 
   function init() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      ...addLoadEntityTraits({
+      addSetEntityTrait({
         entityName: 'client',
-        actionProps: props<{ id: string }>(),
-        actionSuccessProps: props<{ client: Client }>(),
+        actionProps: props<{ client: Client }>(),
       })
     )({
       actionsGroupKey: 'Client',
@@ -37,15 +37,13 @@ describe('addLoadEntityTraits trait', () => {
   function initMultiple() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      ...addLoadEntityTraits({
+      addSetEntityTrait({
         entityName: 'client',
-        actionProps: props<{ id: string }>(),
-        actionSuccessProps: props<{ client: { id: string; name: string } }>(),
+        actionProps: props<{ client: Client }>(),
       }),
-      ...addLoadEntityTraits({
+      addSetEntityTrait({
         entityName: 'product',
-        actionProps: props<{ id: string }>(),
-        actionSuccessProps: props<{ product: Product }>(),
+        actionProps: props<{ product: Product }>(),
       })
     )({
       actionsGroupKey: 'Client',
@@ -66,16 +64,15 @@ describe('addLoadEntityTraits trait', () => {
   });
 
   describe('reducer', () => {
-    it('loadClientSuccess should set status to success and store the client', () => {
+    it('setEntity should store the client', () => {
       const { reducer, actions, initialState } = init();
       const state = reducer(
-        { loadClientStatus: 'loading' },
-        actions.loadClientSuccess({
+        {},
+        actions.setClient({
           client: { name: 'gabs', id: '1' },
         })
       );
       expect(state).toEqual({
-        loadClientStatus: 'success',
         client: { name: 'gabs', id: '1' },
       });
     });
@@ -83,30 +80,32 @@ describe('addLoadEntityTraits trait', () => {
 
   describe('Smoke test with multiple loadEntity to ensure they dont conflict', () => {
     it('check actions are of different loadEntity are not conflicting', () => {
-      const { reducer, actions, selectors } = initMultiple();
+      const { reducer, actions, selectors, initialState } = initMultiple();
       let state = reducer(
         {},
-        actions.loadProduct({
-          id: 'A',
+        actions.setProduct({
+          product: {
+            id: 'A',
+            price: 123,
+            name: 'a',
+          },
         })
       );
       state = reducer(
         state,
-        actions.loadClient({
-          id: '1',
+        actions.setClient({
+          client: { name: 'gabs', id: '1' },
         })
       );
-      expect(selectors.isLoadingLoadClient.projector(state)).toEqual(true);
-      expect(selectors.isLoadingLoadProduct.projector(state)).toEqual(true);
-      state = reducer(
-        state,
-        actions.loadClientSuccess({
-          client: { id: '1', name: 'uno' },
-        })
-      );
-      state = reducer(state, actions.loadProductFail());
-      expect(selectors.isSuccessLoadClient.projector(state)).toEqual(true);
-      expect(selectors.isFailLoadProduct.projector(state)).toEqual(true);
+      expect(selectors.selectClient.projector(state)).toEqual({
+        name: 'gabs',
+        id: '1',
+      });
+      expect(selectors.selectProduct.projector(state)).toEqual({
+        id: 'A',
+        price: 123,
+        name: 'a',
+      });
     });
   });
 });

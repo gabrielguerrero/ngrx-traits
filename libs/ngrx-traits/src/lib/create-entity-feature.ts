@@ -56,21 +56,21 @@ export function createTraitFactory<
 //   ExtractSelectorsType<F>,
 //   ExtractMutatorsType<F>
 // >;
-export function createEntityFeatureFactory<
-  F extends readonly TraitFactory[],
-  EntityName extends string,
-  EntitiesName extends string = `${EntityName}s`
->(
-  name: { entityName: EntityName; entitiesName?: EntitiesName },
-  ...traits: F
-): FeatureFactory<
-  EntityName,
-  EntitiesName,
-  ExtractStateType<F>,
-  ExtractActionsType<F>,
-  ExtractSelectorsType<F>,
-  ExtractMutatorsType<F>
->;
+// export function createEntityFeatureFactory<
+//   F extends readonly TraitFactory[],
+//   EntityName extends string,
+//   EntitiesName extends string = `${EntityName}s`
+// >(
+//   name: { entityName: EntityName; entitiesName?: EntitiesName },
+//   ...traits: F
+// ): FeatureFactory<
+//   EntityName,
+//   EntitiesName,
+//   ExtractStateType<F>,
+//   ExtractActionsType<F>,
+//   ExtractSelectorsType<F>,
+//   ExtractMutatorsType<F>
+// >;
 
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],

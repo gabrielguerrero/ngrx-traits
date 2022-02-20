@@ -4,7 +4,6 @@ import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
   addSelectEntityTrait,
-  addSelectEntityTrait,
   addSortEntitiesTrait,
   AsyncActionState,
   CrudEntitiesState,
@@ -13,11 +12,12 @@ import {
   SelectEntitiesState,
   SelectEntityState,
   SortEntitiesState,
+  addSelectEntitiesTrait,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter, ProductOrder } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadProductDetail } from '../products/load-product.trait';
+import { addLoadProductDetailTraits } from '../products/load-product.trait';
 
 export interface ProductsBasketState
   extends LoadEntitiesState<ProductOrder>,
@@ -28,9 +28,10 @@ export interface ProductsBasketState
     SortEntitiesState<ProductOrder> {}
 
 export const productTraits = createEntityFeatureFactory(
+  { entityName: 'productOrder' },
   addLoadEntitiesTrait<ProductOrder>(),
-  addSelectEntities<ProductOrder>(),
-  addSelectEntities<ProductOrder>(),
+  addSelectEntitiesTrait<ProductOrder>(),
+  addSelectEntityTrait<ProductOrder>(),
   addCrudEntitiesTrait<ProductOrder>(),
   addAsyncActionTrait({
     name: 'checkout',
@@ -39,12 +40,12 @@ export const productTraits = createEntityFeatureFactory(
   addSortEntitiesTrait<ProductOrder>({
     defaultSort: { direction: 'asc', active: 'name' },
   }),
-  ...addLoadProductDetail()
+  ...addLoadProductDetailTraits()
 )({
   actionsGroupKey: '[Products Basket]',
   featureSelector:
     createFeatureSelector<ProductsBasketState>('products-basket'),
 });
 
-export const ProductBasketActions = productTraits.actions;
+export const ProductBasketActions = productTraits.actions.c;
 export const ProductBasketSelectors = productTraits.selectors;

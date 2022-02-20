@@ -12,7 +12,7 @@ import { props, Store } from '@ngrx/store';
 import { ProductService } from '../../../services/product.service';
 import { of } from 'rxjs';
 
-export function addLoadProductDetail() {
+export function addLoadProductDetailTraits() {
   // notice how we use a trait
   const traits = addLoadEntityTraits({
     entityName: 'productDetail',
