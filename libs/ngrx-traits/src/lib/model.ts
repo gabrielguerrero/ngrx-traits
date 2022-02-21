@@ -37,8 +37,8 @@ export interface FeatureTraits<
 }
 
 export type FeatureFactory<
-  EntityName extends string | undefined, // TODO make required
-  EntitiesName extends string, // TODO default to `${EntityName}s`
+  EntityName extends string | undefined,
+  EntitiesName extends string = `${EntityName}s`,
   State = any,
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>

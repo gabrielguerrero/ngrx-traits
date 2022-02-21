@@ -110,8 +110,12 @@ export function createEntityFeatureFactory<
     );
 
     return {
-      actions: renameProps(allActions, singular, plural),
-      selectors: renameProps(allFeatureSelectors, singular, plural),
+      actions: entityName
+        ? renameProps(allActions, singular, plural)
+        : allActions,
+      selectors: entityName
+        ? renameProps(allFeatureSelectors, singular, plural)
+        : allSelectors,
       initialState,
       reducer: reducer ?? createReducer(initialState),
       effects: allEffects,
@@ -465,8 +469,7 @@ export function mixTraits<
 // ExtractActionsType<F>,
 // ExtractSelectorsType<F>
 // >
-// TODO make addPropertiesTraits return FeatureFactory and make FeatureFactory have optional entityNames and createEntityFeatureFactory
-// TODO make actions use entityName and entitiesName
+// TODO make addPropertiesTraits return FeatureFactory
 // TODO try to make actions and selectors support grouping in the interface
 export function addPropertiesTraits<
   F extends FeatureFactory<any, any>,
@@ -480,13 +483,7 @@ export function addPropertiesTraits<
     UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
   S extends ExtractSelectorsType<ReturnType<F>> &
     UnionToIntersection<ExtractSelectorsType<ReturnType<T[K]>>>,
-  R extends (config: Config<State>) => {
-    actions: A;
-    selectors: S;
-    reducer: (state: State, action: ActionType<any>) => State;
-    effects: Type<any>[];
-    initialState: State;
-  }
+  R extends FeatureFactory<any, any, State, A, S>
 >(targetTraitFactory: F, traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =
