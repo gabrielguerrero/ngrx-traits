@@ -21,7 +21,7 @@ import {
 } from '../entities-pagination/entities-pagination.model';
 import { FilterEntitiesActions } from '../filter-entities';
 
-export function createMultiSelectionInitialState<Entity>(
+export function createSelectEntitiesInitialState<Entity>(
   previousInitialState: any
 ): ƟLoadEntitiesSelectEntitiesState<Entity> {
   return {
@@ -30,7 +30,7 @@ export function createMultiSelectionInitialState<Entity>(
   };
 }
 
-export function createMultiSelectionTraitReducer<
+export function createSelectEntitiesTraitReducer<
   Entity,
   S extends ƟLoadEntitiesSelectEntitiesState<Entity>
 >(

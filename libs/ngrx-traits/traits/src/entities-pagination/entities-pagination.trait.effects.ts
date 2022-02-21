@@ -57,7 +57,7 @@ export function createPaginationTraitEffects<Entity>(
         ),
         filter((pageInfo) => !!pageInfo),
         concatMap((pageInfo) => [
-          allActions.setRequestPage({ index: pageInfo!.pageIndex + 1 }),
+          allActions.setEntitiesRequestPage({ index: pageInfo!.pageIndex + 1 }),
           allActions.loadEntities(),
         ])
       );

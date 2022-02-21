@@ -15,8 +15,13 @@ export function addResetEntitiesStateTrait(
   return createTraitFactory({
     key: 'reset',
     config: traitConfig,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
-      resetEntitiesState: createAction(`${actionsGroupKey} Reset State`),
+    actions: ({
+      actionsGroupKey,
+      entitiesName,
+    }: TraitActionsFactoryConfig) => ({
+      resetEntitiesState: createAction(
+        `${actionsGroupKey} Reset ${entitiesName} State`
+      ),
     }),
     reducer: ({ allActions, initialState }) =>
       createReducer(

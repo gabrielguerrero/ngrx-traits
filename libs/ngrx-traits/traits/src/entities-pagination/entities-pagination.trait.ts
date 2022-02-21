@@ -101,8 +101,8 @@ export function addEntitiesPaginationTrait<Entity>({
       currentPage,
       pagesToCache,
     } as EntitiesPaginationConfig,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createPaginationTraitActions(actionsGroupKey),
+    actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
+      createPaginationTraitActions(actionsGroupKey, entitiesName),
     selectors: ({
       previousSelectors,
       allConfigs,

@@ -217,7 +217,6 @@ describe('addFilter Trait', () => {
         //   content: 'x',
         // });
         mockStore.refreshState();
-        console.log('before subscribe');
         actions$ = hot('a----a', {
           a: actions.filterEntities({ filters: { extra: 'y' }, patch: true }),
         });

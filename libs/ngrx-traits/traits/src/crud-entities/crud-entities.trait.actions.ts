@@ -3,37 +3,40 @@ import { createAction } from '@ngrx/store';
 import { Predicate, Update } from '@ngrx/entity';
 
 export function createCrudTraitActions<Entity>(
-  actionsGroupKey: string
+  actionsGroupKey: string,
+  entitiesName: string
 ): CrudEntitiesActions<Entity> {
   return {
     addEntities: createAction(
-      `${actionsGroupKey} Add`,
+      `${actionsGroupKey} Add ${entitiesName}`,
       (...entities: Entity[]) => ({
         entities,
       })
     ),
     removeEntities: createAction(
-      `${actionsGroupKey} Remove`,
+      `${actionsGroupKey} Remove ${entitiesName}`,
       (...keys: string[] | number[]) => ({
         keys,
       })
     ),
     updateEntities: createAction(
-      `${actionsGroupKey} Update`,
+      `${actionsGroupKey} Update ${entitiesName}`,
       (...updates: Update<Entity>[]) => ({
         updates,
       })
     ),
     upsertEntities: createAction(
-      `${actionsGroupKey} Upsert`,
+      `${actionsGroupKey} Upsert ${entitiesName}`,
       (...entities: Entity[]) => ({
         entities,
       })
     ),
     removeAllEntities: createAction(
-      `${actionsGroupKey} Remove All`,
+      `${actionsGroupKey} Remove All ${entitiesName}`,
       (predicate?: Predicate<Entity>) => ({ predicate })
     ),
-    clearEntitiesChanges: createAction(`${actionsGroupKey} Clear Changes`),
+    clearEntitiesChanges: createAction(
+      `${actionsGroupKey} Clear  ${entitiesName} Changes`
+    ),
   };
 }

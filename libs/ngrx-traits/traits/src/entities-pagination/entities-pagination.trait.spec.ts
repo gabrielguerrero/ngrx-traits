@@ -127,7 +127,10 @@ describe('Pagination Test', () => {
       const { initialState, reducer, actions } =
         initWithRemoteFilterWithPagination();
       const a = actions as unknown as ƟPaginationActions;
-      const state = reducer(initialState, a.setRequestPage({ index: 2 }));
+      const state = reducer(
+        initialState,
+        a.setEntitiesRequestPage({ index: 2 })
+      );
 
       expect(state).toEqual({
         ...initialState,
@@ -812,7 +815,7 @@ describe('Pagination Test', () => {
       it('call loadEntities with nextPage if currentPage is the last cached page and cacheType is partial', async () => {
         const { actions, action } = await init('partial');
         expect(action).toEqual([
-          (actions as unknown as ƟPaginationActions).setRequestPage({
+          (actions as unknown as ƟPaginationActions).setEntitiesRequestPage({
             index: 4,
           }),
           actions.loadEntities(),
@@ -822,7 +825,7 @@ describe('Pagination Test', () => {
       it('call loadEntities with nextPage if currentPage is the last cached page and cacheType is grow ', async () => {
         const { actions, action } = await init('partial');
         expect(action).toEqual([
-          (actions as unknown as ƟPaginationActions).setRequestPage({
+          (actions as unknown as ƟPaginationActions).setEntitiesRequestPage({
             index: 4,
           }),
           actions.loadEntities(),

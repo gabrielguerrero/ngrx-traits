@@ -70,6 +70,8 @@ export function createEntityFeatureFactory<
     const allActions = buildAllActions(
       sortedTraits,
       config.actionsGroupKey,
+      singular,
+      plural,
       allConfigs
     );
 
@@ -177,12 +179,16 @@ function buildAllConfigs(sortedTraits: TraitFactory<any, any, any, any>[]) {
 function buildAllActions(
   sortedTraits: TraitFactory<any, any, any, any>[],
   actionsGroupKey: string,
+  entityName: string,
+  entitiesName: string,
   allConfigs: Record<string, any> & { [p: string]: any }
 ) {
   return sortedTraits.reduce((previousResult: TraitActions, factory) => {
     let result =
       factory?.actions?.({
         actionsGroupKey: actionsGroupKey,
+        entityName,
+        entitiesName,
         allConfigs,
       }) ?? {};
     result = previousResult ? { ...previousResult, ...result } : result;
@@ -460,6 +466,8 @@ export function mixTraits<
 // ExtractSelectorsType<F>
 // >
 // TODO make addPropertiesTraits return FeatureFactory and make FeatureFactory have optional entityNames and createEntityFeatureFactory
+// TODO make actions use entityName and entitiesName
+// TODO try to make actions and selectors support grouping in the interface
 export function addPropertiesTraits<
   F extends FeatureFactory<any, any>,
   T extends { [key: string]: FeatureFactory<any, any> },

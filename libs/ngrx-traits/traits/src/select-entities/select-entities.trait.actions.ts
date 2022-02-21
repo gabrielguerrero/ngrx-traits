@@ -1,25 +1,28 @@
 import { createAction, props } from '@ngrx/store';
 import { SelectEntitiesActions } from './select-entities.model';
 
-export function createMultiSelectionTraitActions(
-  actionsGroupKey: string
+export function createSelectEntitiesTraitActions(
+  actionsGroupKey: string,
+  entitiesName: string
 ): SelectEntitiesActions {
   return {
     selectEntities: createAction(
-      `${actionsGroupKey} Multi Select`,
+      `${actionsGroupKey} Select ${entitiesName}`,
       props<{ id: number | string }>()
     ),
     deselectEntities: createAction(
-      `${actionsGroupKey} Multi Deselect`,
+      `${actionsGroupKey} Deselect ${entitiesName}`,
       props<{ id: number | string }>()
     ),
     toggleSelectEntities: createAction(
-      `${actionsGroupKey} Multi Toggle Select`,
+      `${actionsGroupKey} Toggle Select ${entitiesName}`,
       props<{ id: number | string }>()
     ),
     toggleSelectAllEntities: createAction(
-      `${actionsGroupKey} Toggle Select All`
+      `${actionsGroupKey} Toggle Select All ${entitiesName}`
     ),
-    clearEntitiesSelection: createAction(`${actionsGroupKey} Clear Selection`),
+    clearEntitiesSelection: createAction(
+      `${actionsGroupKey} Clear ${entitiesName} Selection`
+    ),
   };
 }

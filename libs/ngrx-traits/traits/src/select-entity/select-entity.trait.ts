@@ -4,13 +4,13 @@ import {
   TraitInitialStateFactoryConfig,
 } from 'ngrx-traits';
 
-import { createSingleSelectionTraitActions } from './select-entity.trait.actions';
-import { createSingleSelectionTraitSelectors } from './select-entity.trait.selectors';
+import { createSelectEntityTraitActions } from './select-entity.trait.actions';
+import { createSelectEntityTraitSelectors } from './select-entity.trait.selectors';
 import {
-  createSingleSelectionInitialState,
-  createSingleSelectionTraitReducer,
+  createSelectEntityInitialState,
+  createSelectEntityTraitReducer,
 } from './select-entity.trait.reducer';
-import { createSingleSelectionTraitMutators } from './select-entity.trait.mutators';
+import { createSelectEntityTraitMutators } from './select-entity.trait.mutators';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -41,7 +41,7 @@ import { FilterEntitiesActions } from '../filter-entities';
  * // The following trait config
  *
  * export interface TestState
- * extends EntityAndStatusState<Todo>,SingleSelectionState{}
+ * extends EntityAndStatusState<Todo>,SelectEntityState{}
  *
  *    const traits = createEntityFeatureFactory(
  *      addLoadEntitiesTrait<Todo>(),
@@ -64,20 +64,20 @@ export function addSelectEntityTrait<Entity>(config?: SelectEntityConfig) {
     key: 'singleSelection',
     depends: [loadEntitiesTraitKey],
     config,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createSingleSelectionTraitActions(actionsGroupKey),
-    selectors: () => createSingleSelectionTraitSelectors<Entity>(),
-    mutators: () => createSingleSelectionTraitMutators(),
+    actions: ({ actionsGroupKey, entityName }: TraitActionsFactoryConfig) =>
+      createSelectEntityTraitActions(actionsGroupKey, entityName),
+    selectors: () => createSelectEntityTraitSelectors<Entity>(),
+    mutators: () => createSelectEntityTraitMutators(),
     initialState: ({
       previousInitialState,
       allConfigs,
     }: TraitInitialStateFactoryConfig) =>
-      createSingleSelectionInitialState<Entity>(
+      createSelectEntityInitialState<Entity>(
         previousInitialState,
         allConfigs as SelectEntityKeyedConfig
       ),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
-      createSingleSelectionTraitReducer(
+      createSelectEntityTraitReducer(
         initialState,
         allActions as SelectEntityActions &
           CrudEntitiesActions<Entity> &

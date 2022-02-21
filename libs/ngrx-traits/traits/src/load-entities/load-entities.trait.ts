@@ -65,8 +65,8 @@ export function addLoadEntitiesTrait<Entity>(
   return createTraitFactory({
     key: loadEntitiesTraitKey,
     config: { ...traitConfig, adapter } as LoadEntitiesConfig<Entity>,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createLoadEntitiesTraitActions<Entity>(actionsGroupKey),
+    actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
+      createLoadEntitiesTraitActions<Entity>(actionsGroupKey, entitiesName),
     selectors: ({ allConfigs }: TraitSelectorsFactoryConfig) =>
       createLoadEntitiesTraitSelectors<Entity>(
         allConfigs as LoadEntitiesKeyedConfig<Entity> &

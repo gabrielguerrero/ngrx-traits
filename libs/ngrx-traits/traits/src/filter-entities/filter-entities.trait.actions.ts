@@ -7,11 +7,12 @@ import { ActionCreator } from '@ngrx/store/src/models';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
 
 export function createFilterTraitActions<F>(
-  actionsGroupKey: string
+  actionsGroupKey: string,
+  entitiesName: string
 ): FilterEntitiesActions<F> {
   const actions: ƟFilterEntitiesActions<F> = {
     filterEntities: createAction(
-      `${actionsGroupKey} filter`,
+      `${actionsGroupKey} Filter ${entitiesName}`,
       (props?: {
         filters: F | Partial<F>;
         forceLoad?: boolean;
@@ -23,7 +24,7 @@ export function createFilterTraitActions<F>(
       })
     ) as ActionCreator<string, FilterActionOverload<F>>,
     storeEntitiesFilter: createAction(
-      `${actionsGroupKey} store filter`,
+      `${actionsGroupKey} Store ${entitiesName} Filter`,
       (props: { filters?: F; patch?: boolean }) => ({
         filters: props?.filters,
         patch: props?.patch,

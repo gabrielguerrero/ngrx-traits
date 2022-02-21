@@ -7,7 +7,7 @@ import {
 import { LoadEntitiesSelectors } from '../load-entities';
 import { Dictionary } from '@ngrx/entity/src/models';
 
-export function createMultiSelectionTraitSelectors<Entity>(
+export function createSelectEntitiesTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>
 ): SelectEntitiesSelectors<Entity> {
   const { selectEntitiesMap, selectEntitiesTotal } = previousSelectors;

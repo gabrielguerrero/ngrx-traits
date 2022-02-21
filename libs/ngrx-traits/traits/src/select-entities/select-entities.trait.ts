@@ -1,6 +1,6 @@
-import { createMultiSelectionTraitActions } from './select-entities.trait.actions';
+import { createSelectEntitiesTraitActions } from './select-entities.trait.actions';
 import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort-entities';
-import { createMultiSelectionTraitSelectors } from './select-entities.trait.selectors';
+import { createSelectEntitiesTraitSelectors } from './select-entities.trait.selectors';
 import {
   SelectEntitiesSelectors,
   SelectEntitiesActions,
@@ -18,10 +18,10 @@ import {
 import { createTraitFactory } from 'ngrx-traits';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import {
-  createMultiSelectionInitialState,
-  createMultiSelectionTraitReducer,
+  createSelectEntitiesInitialState,
+  createSelectEntitiesTraitReducer,
 } from './select-entities.trait.reducer';
-import { createMultiSelectionTraitMutators } from './select-entities.trait.mutators';
+import { createSelectEntitiesTraitMutators } from './select-entities.trait.mutators';
 import { FilterEntitiesActions } from '../filter-entities';
 import {
   TraitActionsFactoryConfig,
@@ -41,7 +41,7 @@ import {
  *
  *    const traits = createEntityFeatureFactory(
  *      addLoadEntitiesTrait<Todo>(),
- *      addMultiSelection<Todo>()
+ *      addSelectEntities<Todo>()
  *    )({
  *      actionsGroupKey: '[Todos]',
  *      featureSelector: createFeatureSelector<TestState>>(
@@ -60,22 +60,22 @@ import {
  */
 export function addSelectEntitiesTrait<Entity>() {
   return createTraitFactory({
-    key: 'multiSelection',
+    key: 'SelectEntities',
     depends: [loadEntitiesTraitKey],
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createMultiSelectionTraitActions(actionsGroupKey),
+    actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
+      createSelectEntitiesTraitActions(actionsGroupKey, entitiesName),
     selectors: ({ previousSelectors }: TraitSelectorsFactoryConfig) =>
-      createMultiSelectionTraitSelectors<Entity>(
+      createSelectEntitiesTraitSelectors<Entity>(
         previousSelectors as LoadEntitiesSelectors<Entity>
       ),
     initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>
-      createMultiSelectionInitialState<Entity>(previousInitialState),
+      createSelectEntitiesInitialState<Entity>(previousInitialState),
     mutators: ({ allSelectors }: TraitStateMutatorsFactoryConfig) =>
-      createMultiSelectionTraitMutators<Entity>(
+      createSelectEntitiesTraitMutators<Entity>(
         allSelectors as SelectEntitiesSelectors<Entity>
       ),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
-      createMultiSelectionTraitReducer(
+      createSelectEntitiesTraitReducer(
         initialState,
         allActions as SelectEntitiesActions &
           CrudEntitiesActions<Entity> &

@@ -3,33 +3,42 @@ import { createAction, props } from '@ngrx/store';
 import { ƟPaginationActions } from './entities-pagination.model.internal';
 
 export function createPaginationTraitActions(
-  actionsGroupKey: string
+  actionsGroupKey: string,
+  entitiesName: string
 ): EntitiesPaginationActions {
   const actions: ƟPaginationActions = {
     loadEntitiesPage: createAction(
-      `${actionsGroupKey} load page`,
+      `${actionsGroupKey} Load ${entitiesName} Page`,
       ({ index, forceLoad }: { index: number; forceLoad?: boolean }) => ({
         index,
         forceLoad,
       })
     ),
     loadEntitiesPageSuccess: createAction(
-      `${actionsGroupKey} load
-          page success`
+      `${actionsGroupKey} Load  ${entitiesName}
+          Page Success`
     ),
-    loadEntitiesPageFail: createAction(`${actionsGroupKey} load page fail`),
+    loadEntitiesPageFail: createAction(
+      `${actionsGroupKey} Load ${entitiesName} Page Fail`
+    ),
     loadEntitiesPreviousPage: createAction(
-      `${actionsGroupKey} load previous page`
+      `${actionsGroupKey} Load Previous ${entitiesName} Page`
     ),
-    loadEntitiesNextPage: createAction(`${actionsGroupKey} load next page`),
+    loadEntitiesNextPage: createAction(
+      `${actionsGroupKey} Load Next ${entitiesName} Page`
+    ),
     loadEntitiesFirstPage: createAction(
-      `${actionsGroupKey} load first page`,
+      `${actionsGroupKey} Load First ${entitiesName} Page`,
       (forceLoad?: boolean) => ({ forceLoad })
     ),
-    loadEntitiesLastPage: createAction(`${actionsGroupKey} load last page`),
-    clearEntitiesPagesCache: createAction(`${actionsGroupKey} clear cache`),
-    setRequestPage: createAction(
-      `${actionsGroupKey} set request page`,
+    loadEntitiesLastPage: createAction(
+      `${actionsGroupKey} Load Last ${entitiesName} Page`
+    ),
+    clearEntitiesPagesCache: createAction(
+      `${actionsGroupKey} Clear ${entitiesName} Cache`
+    ),
+    setEntitiesRequestPage: createAction(
+      `${actionsGroupKey} Set ${entitiesName} Request Page`,
       props<{ index: number }>()
     ),
   };

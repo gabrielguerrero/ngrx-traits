@@ -11,7 +11,7 @@ import {
   multiToggleSelect,
 } from './select-entities.utils';
 
-export function createMultiSelectionTraitMutators<Entity>({
+export function createSelectEntitiesTraitMutators<Entity>({
   isAllEntitiesSelected,
 }: SelectEntitiesSelectors<Entity>): SelectEntitiesMutators<Entity> {
   function toggleSelectAll<S extends ƟLoadEntitiesSelectEntitiesState<Entity>>(

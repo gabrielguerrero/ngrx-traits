@@ -5,7 +5,7 @@ import { EntitiesPaginationActions } from './entities-pagination.model';
  * @internal
  */
 export type ƟPaginationActions = EntitiesPaginationActions & {
-  setRequestPage: ActionCreator<
+  setEntitiesRequestPage: ActionCreator<
     string,
     (props: { index: number }) => { index: number } & TypedAction<string>
   >;
