@@ -54,13 +54,13 @@ export type FeatureFactory<
     : S
 >;
 
-export interface Config<
+export type Config<
   State,
   F extends MemoizedSelector<object, State> = MemoizedSelector<object, State>
-> {
+> = {
   actionsGroupKey: string;
   featureSelector: F | string;
-}
+};
 
 export type FeatureSelectors<State, S extends TraitSelectors<State>> = {
   [key in keyof S]: MemoizedSelector<object, ReturnType<S[key]>, S[key]>;

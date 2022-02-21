@@ -18,6 +18,7 @@ import {
   ExtractActionsType,
   ReplaceEntityNames,
   addPropertiesTraits,
+  mixTraits,
 } from 'ngrx-traits';
 import { addSetEntityTrait } from '../../../../../../../../libs/ngrx-traits/traits/src/set-entity';
 
@@ -105,9 +106,16 @@ export const ProductSelectors = productTraits.selectors;
 //   products: entityFeatureFactory,
 //   orders: entityFeatureFactory2,
 //   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).practices.actions.setPractice({practice: {id:}});
+// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).actions.practices.loadPractices({practice: {id:}});
 //
+
+// mixTraits({
+//   products: entityFeatureFactory,
+//   orders: entityFeatureFactory2,
+//   practices: entityFeatureFactory3,
+// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).actions.loadPractices({practice: {id:}});
+
 // addPropertiesTraits(entityFeatureFactory, {
 //   orders: entityFeatureFactory2,
 //   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any }).lo;
+// })({ actionsGroupKey: 'sdasda', featureSelector: null as any }).selectors.;
