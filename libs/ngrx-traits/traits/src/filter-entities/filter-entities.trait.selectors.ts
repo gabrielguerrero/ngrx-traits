@@ -5,7 +5,6 @@ import {
 export function selectEntitiesFilter<Entity, F>(
   state: ƟLoadEntitiesFilterEntitiesState<Entity, F>
 ) {
-  console.log({ state });
   return state.filters;
 }
 
