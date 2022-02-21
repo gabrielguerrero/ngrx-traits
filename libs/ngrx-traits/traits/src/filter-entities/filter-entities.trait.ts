@@ -76,8 +76,8 @@ export function addFilterEntitiesTrait<Entity, F>({
       defaultFilter,
       filterFn,
     } as FilterEntitiesConfig<Entity, F>,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createFilterTraitActions<F>(actionsGroupKey),
+    actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
+      createFilterTraitActions<F>(actionsGroupKey, entitiesName),
     selectors: () => createFilterTraitSelectors<Entity, F>(),
     mutators: () => createFilterTraitMutators<Entity, F>(),
     initialState: ({

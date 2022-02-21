@@ -20,8 +20,9 @@ import {
   EntitiesPaginationKeyedConfig,
 } from '../entities-pagination/entities-pagination.model';
 import { FilterEntitiesActions } from '../filter-entities';
+import { createSelectEntityTraitActions } from './select-entity.trait.actions';
 
-export function createSingleSelectionInitialState<Entity>(
+export function createSelectEntityInitialState<Entity>(
   previousInitialState: any,
   allConfigs: SelectEntityKeyedConfig
 ): ƟLoadEntitiesSelectEntiyState<Entity> {
@@ -31,7 +32,7 @@ export function createSingleSelectionInitialState<Entity>(
     selectedId,
   };
 }
-export function createSingleSelectionTraitReducer<
+export function createSelectEntityTraitReducer<
   Entity,
   S extends ƟLoadEntitiesSelectEntiyState<Entity>
 >(

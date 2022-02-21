@@ -86,7 +86,7 @@ const entityFeatureFactory3 = createEntityFeatureFactory(
 );
 export const productTraits = entityFeatureFactory({
   actionsGroupKey: '[Products]',
-  featureSelector: createFeatureSelector<ProductsState>('products'),
+  featureSelector: 'products', //createFeatureSelector<ProductsState>('products'),
 });
 // productTraits.actions.;
 export const ProductActions = productTraits.actions;
@@ -106,14 +106,14 @@ export const ProductSelectors = productTraits.selectors;
 //   products: entityFeatureFactory,
 //   orders: entityFeatureFactory2,
 //   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).actions.practices.loadPractices({practice: {id:}});
+// })({ actionsGroupKey: 'sdasda', featureSelector: 'sdasda'}).actions.practices.;
 //
 
 // mixTraits({
 //   products: entityFeatureFactory,
 //   orders: entityFeatureFactory2,
 //   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).actions.loadPractices({practice: {id:}});
+// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).actions.);
 
 // addPropertiesTraits(entityFeatureFactory, {
 //   orders: entityFeatureFactory2,

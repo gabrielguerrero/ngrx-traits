@@ -3,7 +3,7 @@ import {
   SelectEntityMutators,
 } from './select-entity.model';
 
-export function createSingleSelectionTraitMutators<
+export function createSelectEntityTraitMutators<
   Entity
 >(): SelectEntityMutators<Entity> {
   function select<S extends ƟLoadEntitiesSelectEntiyState<Entity>>(

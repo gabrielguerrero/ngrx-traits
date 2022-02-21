@@ -20,7 +20,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { toMap } from 'ngrx-traits';
 import { addSelectEntitiesTrait } from './select-entities.trait';
 
-describe('addMultiSelection trait', () => {
+describe('addSelectEntities trait', () => {
   let actions$: Actions;
   const featureSelector = createFeatureSelector<TestState>('test');
   const featureSelector2 = createFeatureSelector<TestState2>('test');

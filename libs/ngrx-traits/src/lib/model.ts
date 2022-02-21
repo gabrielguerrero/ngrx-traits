@@ -78,7 +78,12 @@ export type TraitActionsFactory<
 
 export type TraitActionsFactoryConfig<
   C extends AllTraitConfigs = AllTraitConfigs
-> = { actionsGroupKey: string; allConfigs: C };
+> = {
+  actionsGroupKey: string;
+  entityName: string;
+  entitiesName: string;
+  allConfigs: C;
+};
 export type TraitSelectorsFactory<
   State = unknown,
   S extends TraitSelectors<State> = TraitSelectors<State>,

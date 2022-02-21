@@ -79,8 +79,8 @@ export function addCrudEntitiesTrait<Entity>({
     key: crudEntitiesTraitKey,
     depends: [loadEntitiesTraitKey],
     config: { storeChanges } as CrudEntitiesConfig,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createCrudTraitActions<Entity>(actionsGroupKey),
+    actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
+      createCrudTraitActions<Entity>(actionsGroupKey, entitiesName),
     selectors: ({ previousSelectors }: TraitSelectorsFactoryConfig) =>
       createCrudTraitSelectors<Entity>(
         previousSelectors as LoadEntitiesSelectors<Entity>

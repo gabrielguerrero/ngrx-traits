@@ -4,7 +4,7 @@ import {
   SelectEntityState,
 } from './select-entity.model';
 
-export function createSingleSelectionTraitSelectors<
+export function createSelectEntityTraitSelectors<
   Entity
 >(): SelectEntitySelectors<Entity> {
   function selectEntityIdSelected(state: SelectEntityState) {

@@ -119,7 +119,7 @@ export function createPaginationTraitReducer<
       },
       status: 'loading',
     })),
-    on(allActions.setRequestPage, (state, { index }) => ({
+    on(allActions.setEntitiesRequestPage, (state, { index }) => ({
       ...state,
       pagination: {
         ...state.pagination,

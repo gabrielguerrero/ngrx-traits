@@ -69,8 +69,8 @@ export function addSortEntitiesTrait<Entity>({
     key: sortTraitKey,
     depends: [loadEntitiesTraitKey],
     config: { remote, defaultSort } as SortEntitiesConfig<Entity>,
-    actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) =>
-      createSortTraitActions<Entity>(actionsGroupKey),
+    actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
+      createSortTraitActions<Entity>(actionsGroupKey, entitiesName),
     selectors: () => createSortTraitSelectors<Entity>(),
     mutators: ({ allSelectors, allConfigs }: TraitStateMutatorsFactoryConfig) =>
       createSortTraitMutators<Entity>(
