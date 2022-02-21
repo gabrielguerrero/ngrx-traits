@@ -362,10 +362,12 @@ export function joinReducers<State>(
 export function combineTraits<
   T extends { [key: string]: FeatureFactory<any, any> },
   K extends keyof T,
-  State extends { [P in K]: ExtractStateType<T[P]> },
+  State extends { [P in K]: ExtractStateType<ReturnType<T[P]>> },
+  A extends { [P in K]: ExtractActionsType<ReturnType<T[P]>> },
+  S extends { [P in K]: ExtractSelectorsType<ReturnType<T[P]>> },
   R extends (config: Config<State>) => {
-    actions: { [P in K]: ExtractActionsType<ReturnType<T[P]>> };
-    selectors: { [P in K]: ExtractSelectorsType<ReturnType<T[P]>> };
+    actions: A;
+    selectors: S;
     reducer: (state: State, action: ActionType<any>) => State;
     effects: Type<any>[];
     initialState: State;
@@ -408,7 +410,7 @@ export function combineTraits<
 export function mixTraits<
   T extends { [key: string]: FeatureFactory<any, any> },
   K extends keyof T,
-  State extends { [P in K]: ExtractStateType<T[P]> },
+  State extends { [P in K]: ExtractStateType<ReturnType<T[P]>> },
   A extends TraitActions &
     UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
   S extends TraitSelectors<any> &
@@ -475,9 +477,9 @@ export function addPropertiesTraits<
   F extends FeatureFactory<any, any>,
   T extends { [key: string]: FeatureFactory<any, any> },
   K extends keyof T,
-  State extends ExtractStateType<F> &
+  State extends ExtractStateType<ReturnType<F>> &
     {
-      [P in K]: ExtractStateType<T[P]>;
+      [P in K]: ExtractStateType<ReturnType<T[P]>>;
     },
   A extends ExtractActionsType<ReturnType<F>> &
     UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
