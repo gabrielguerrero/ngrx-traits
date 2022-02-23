@@ -4,7 +4,7 @@ import {
   ExtractMutatorsType,
   ExtractSelectorsType,
   ExtractStateType,
-  FeatureFactory,
+  EntityFeatureFactory,
   FeatureSelectors,
   KeyedConfig,
   TraitActions,
@@ -50,7 +50,7 @@ export function createEntityFeatureFactory<
     entitiesName,
   }: { entityName: EntityName; entitiesName?: EntitiesName },
   ...traits: F
-): FeatureFactory<
+): EntityFeatureFactory<
   EntityName,
   EntitiesName,
   ExtractStateType<F>,
@@ -120,7 +120,7 @@ export function createEntityFeatureFactory<
       reducer: reducer ?? createReducer(initialState),
       effects: allEffects,
     };
-  }) as FeatureFactory<
+  }) as EntityFeatureFactory<
     EntityName,
     EntitiesName,
     ExtractStateType<F>,
@@ -359,8 +359,8 @@ export function joinReducers<State>(
   };
 }
 
-export function combineTraits<
-  T extends { [key: string]: FeatureFactory<any, any> },
+export function combineEntityFeatures<
+  T extends { [key: string]: EntityFeatureFactory<any, any> },
   K extends keyof T,
   State extends { [P in K]: ExtractStateType<ReturnType<T[P]>> },
   A extends { [P in K]: ExtractActionsType<ReturnType<T[P]>> },
@@ -407,15 +407,15 @@ export function combineTraits<
   }) as R;
 }
 
-export function mixTraits<
-  T extends { [key: string]: FeatureFactory<any, any> },
+export function mixEntityFeatures<
+  T extends { [key: string]: EntityFeatureFactory<any, any> },
   K extends keyof T,
   State extends { [P in K]: ExtractStateType<ReturnType<T[P]>> },
   A extends TraitActions &
     UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
   S extends TraitSelectors<any> &
     UnionToIntersection<ExtractSelectorsType<ReturnType<T[K]>>>,
-  R extends FeatureFactory<any, any, State, A, S>
+  R extends EntityFeatureFactory<any, any, State, A, S>
 >(traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =
@@ -451,31 +451,9 @@ export function mixTraits<
   }) as R;
 }
 
-// export function addPropertiesTraits<
-//   F extends FeatureFactory<any, any>,
-//   T extends { [key: string]: FeatureFactory<any, any> },
-//   K extends keyof T
-// >(
-//   f: F,
-//   p: T
-// ): (
-//   config: Config<ExtractStateType<F> & { [P in K]: ExtractStateType<T[P]> }>
-// ) => ExtractActionsType<ReturnType<F>> &
-//   UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>> {
-//   return null as any;
-// }
-// FeatureFactory<
-// EntityName,
-//   EntitiesName,
-// ExtractStateType<F>,
-// ExtractActionsType<F>,
-// ExtractSelectorsType<F>
-// >
-// TODO make addPropertiesTraits return FeatureFactory
-// TODO try to make actions and selectors support grouping in the interface
-export function addPropertiesTraits<
-  F extends FeatureFactory<any, any>,
-  T extends { [key: string]: FeatureFactory<any, any> },
+export function addEntityFeaturesProperties<
+  F extends EntityFeatureFactory<any, any>,
+  T extends { [key: string]: EntityFeatureFactory<any, any, any, any, any> },
   K extends keyof T,
   State extends ExtractStateType<ReturnType<F>> &
     {
@@ -485,7 +463,7 @@ export function addPropertiesTraits<
     UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
   S extends ExtractSelectorsType<ReturnType<F>> &
     UnionToIntersection<ExtractSelectorsType<ReturnType<T[K]>>>,
-  R extends FeatureFactory<any, any, State, A, S>
+  R extends EntityFeatureFactory<any, any, State, A, S>
 >(targetTraitFactory: F, traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =

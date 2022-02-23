@@ -7,9 +7,13 @@ import {
   CrudEntitiesActions,
   CrudEntitiesKeyedConfig,
   CrudEntitiesMutators,
-  ƟLoadEntitiesCrudEntitiesState,
+  CrudEntitiesState,
 } from './crud-entities.model';
-import { LoadEntitiesActions, LoadEntitiesKeyedConfig } from '../load-entities';
+import {
+  LoadEntitiesActions,
+  LoadEntitiesKeyedConfig,
+  LoadEntitiesState,
+} from '../load-entities';
 import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort-entities';
 import {
   EntitiesPaginationActions,
@@ -19,7 +23,7 @@ import { insertIf } from 'ngrx-traits';
 
 export function createCrudInitialState<Entity>(
   previousInitialState: any
-): ƟLoadEntitiesCrudEntitiesState<Entity> {
+): LoadEntitiesState<Entity> & CrudEntitiesState<Entity> {
   return {
     ...previousInitialState,
     changes: [],
@@ -27,7 +31,7 @@ export function createCrudInitialState<Entity>(
 }
 export function createCrudTraitReducer<
   Entity,
-  S extends ƟLoadEntitiesCrudEntitiesState<Entity>
+  S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
 >(
   initialState: S,
   allActions: CrudEntitiesActions<Entity> &

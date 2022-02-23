@@ -36,7 +36,7 @@ export interface FeatureTraits<
   initialState: State;
 }
 
-export type FeatureFactory<
+export type EntityFeatureFactory<
   EntityName extends string | undefined,
   EntitiesName extends string = `${EntityName}s`,
   State = any,
@@ -261,8 +261,6 @@ type Replace<
 > = Target extends `${infer Prefix}${FindKey}${infer Postfix}`
   ? `${Prefix}${Capitalize<ReplaceKey>}${Postfix}`
   : Target;
-
-type t = Replace<'loadEntitiesSuccess', 'Entities', 'Products'>;
 
 export type ReplaceProps<
   Target,

@@ -1,10 +1,10 @@
 import { createSelector } from '@ngrx/store';
 import { selectTotalSelectedEntities } from './select-entities.utils';
 import {
-  ƟLoadEntitiesSelectEntitiesState,
   SelectEntitiesSelectors,
+  SelectEntitiesState,
 } from './select-entities.model';
-import { LoadEntitiesSelectors } from '../load-entities';
+import { LoadEntitiesSelectors, LoadEntitiesState } from '../load-entities';
 import { Dictionary } from '@ngrx/entity/src/models';
 
 export function createSelectEntitiesTraitSelectors<Entity>(
@@ -13,7 +13,7 @@ export function createSelectEntitiesTraitSelectors<Entity>(
   const { selectEntitiesMap, selectEntitiesTotal } = previousSelectors;
 
   function selectEntitiesIdsSelectedMap(
-    state: ƟLoadEntitiesSelectEntitiesState<Entity>
+    state: LoadEntitiesState<Entity> & SelectEntitiesState
   ) {
     return state.selectedIds;
   }
@@ -37,7 +37,7 @@ export function createSelectEntitiesTraitSelectors<Entity>(
   );
 
   const isAllEntitiesSelected = createSelector(
-    (state: ƟLoadEntitiesSelectEntitiesState<Entity>) =>
+    (state: LoadEntitiesState<Entity> & SelectEntitiesState) =>
       selectEntitiesTotal(state),
     selectTotalSelectedEntities,
     (total, totalSelected) =>

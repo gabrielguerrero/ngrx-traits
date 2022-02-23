@@ -9,6 +9,7 @@ import {
   FilterEntitiesState,
   SelectEntityState,
   SortEntitiesState,
+  addSelectEntitiesTrait,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
@@ -22,8 +23,9 @@ export interface ProductsState
     SortEntitiesState<Product> {}
 
 export const productTraits = createEntityFeatureFactory(
+  { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
-  addSelectEntities<Product>(),
+  addSelectEntitiesTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());

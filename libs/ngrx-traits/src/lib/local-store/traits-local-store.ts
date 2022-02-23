@@ -1,5 +1,5 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
-import { FeatureFactory } from '../model';
+import { EntityFeatureFactory } from '../model';
 import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
 import { EffectSources } from '@ngrx/effects';
 import { getDestroyActionName, TraitEffect } from '../trait-effect';
@@ -12,7 +12,7 @@ function uniqueComponentId() {
 
 export function buildLocalTraits<
   State,
-  F extends FeatureFactory<any, any, State, any, any>
+  F extends EntityFeatureFactory<any, any, State, any, any>
 >(
   injector: Injector,
   componentName: string,
@@ -88,21 +88,23 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
-export interface TraitLocalEffectsFactory<F extends FeatureFactory<any, any>> {
+export interface TraitLocalEffectsFactory<
+  F extends EntityFeatureFactory<any, any>
+> {
   (
     allActions: ReturnType<F>['actions'],
     allSelectors: ReturnType<F>['selectors']
   ): Type<TraitEffect>;
 }
 
-export interface LocalTraitsConfig<F extends FeatureFactory<any, any>> {
+export interface LocalTraitsConfig<F extends EntityFeatureFactory<any, any>> {
   componentName: string;
   traitsFactory: F;
   effectFactory?: TraitLocalEffectsFactory<F>;
 }
 
 @Injectable()
-export abstract class TraitsLocalStore<F extends FeatureFactory<any, any>>
+export abstract class TraitsLocalStore<F extends EntityFeatureFactory<any, any>>
   implements OnDestroy
 {
   traits: ReturnType<F> & { destroy: () => void };

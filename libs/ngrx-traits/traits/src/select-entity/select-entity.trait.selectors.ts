@@ -1,8 +1,8 @@
 import {
-  ƟLoadEntitiesSelectEntiyState,
   SelectEntitySelectors,
   SelectEntityState,
 } from './select-entity.model';
+import { LoadEntitiesState } from 'ngrx-traits/traits';
 
 export function createSelectEntityTraitSelectors<
   Entity
@@ -11,7 +11,7 @@ export function createSelectEntityTraitSelectors<
     return state.selectedId;
   }
   function selectEntitySelected<Entity>(
-    state: ƟLoadEntitiesSelectEntiyState<Entity>
+    state: LoadEntitiesState<Entity> & SelectEntityState
   ) {
     return (state.selectedId && state.entities[state.selectedId]) || undefined;
   }

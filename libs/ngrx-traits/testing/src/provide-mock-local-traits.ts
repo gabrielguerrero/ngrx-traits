@@ -1,5 +1,5 @@
 import {
-  FeatureFactory,
+  EntityFeatureFactory,
   TraitsLocalStore,
   DISABLE_LOCAL_TRAIT_EFFECTS,
 } from 'ngrx-traits';
@@ -14,7 +14,7 @@ import { MockStore } from '@ngrx/store/testing';
  * You still need to provideMockStore and provideMockActions
  * */
 export function provideMockLocalTraits<
-  T extends TraitsLocalStore<FeatureFactory<any, any>>
+  T extends TraitsLocalStore<EntityFeatureFactory<any, any>>
 >({
   traitFactory,
   selectors,

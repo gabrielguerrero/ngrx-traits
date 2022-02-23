@@ -20,12 +20,6 @@ export interface EntityChange<T> {
 export interface CrudEntitiesState<T> {
   changes: Change<T>[];
 }
-/**
- * @internal
- */
-export interface ƟLoadEntitiesCrudEntitiesState<T>
-  extends LoadEntitiesState<T>,
-    CrudEntitiesState<T> {}
 
 export type CrudEntitiesActions<T> = {
   addEntities: ActionCreator<
@@ -56,7 +50,7 @@ export type CrudEntitiesActions<T> = {
   clearEntitiesChanges: ActionCreator<string, () => TypedAction<string>>;
 };
 
-export type CrudEntitiesSelectors<T> = {
+export type CrudEntitiesSelectors<Entity> = {
   // /**
   //  * Return all changes made to the list
   //  * @param state
@@ -69,9 +63,9 @@ export type CrudEntitiesSelectors<T> = {
    * @param props
    */
   selectEntitiesChangesList: (
-    state: ƟLoadEntitiesCrudEntitiesState<T>,
+    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
     props: { type: ChangeType }
-  ) => EntityChange<T>[];
+  ) => EntityChange<Entity>[];
   // /**
   //  * filters redundant changes ideal for a batch update
   //  * if you add and remove the same and items this changes are remove from the list
@@ -89,36 +83,43 @@ export type CrudEntitiesSelectors<T> = {
    * @param state
    */
   selectFilteredEntitiesChangesList: (
-    state: ƟLoadEntitiesCrudEntitiesState<T>
-  ) => EntityChange<T>[];
+    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  ) => EntityChange<Entity>[];
 };
 
-export type CrudEntitiesMutators<T> = {
-  add<S extends ƟLoadEntitiesCrudEntitiesState<T>>(entities: T[], state: S): S;
+export type CrudEntitiesMutators<Entity> = {
+  add<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+    entities: Entity[],
+    state: S
+  ): S;
 
-  remove<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+  remove<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
     keys: string[],
     state: S
   ): S;
-  remove<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
+  remove<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
     keys: number[],
     state: S
   ): S;
-  remove<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
-    predicate: Predicate<T>,
+  remove<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+    predicate: Predicate<Entity>,
     state: S
   ): S;
 
-  removeAll<S extends ƟLoadEntitiesCrudEntitiesState<T>>(state: S): S;
-
-  clearChanges<S extends ƟLoadEntitiesCrudEntitiesState<T>>(state: S): S;
-
-  update<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
-    updates: Update<T>[],
+  removeAll<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
     state: S
   ): S;
-  upsert<S extends ƟLoadEntitiesCrudEntitiesState<T>>(
-    entities: T[],
+
+  clearChanges<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+    state: S
+  ): S;
+
+  update<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+    updates: Update<Entity>[],
+    state: S
+  ): S;
+  upsert<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+    entities: Entity[],
     state: S
   ): S;
 };

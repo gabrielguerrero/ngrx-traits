@@ -1,15 +1,16 @@
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
+  LoadEntitiesState,
 } from '../load-entities/load-entities.model';
 import {
   SortEntitiesActions,
   SortEntitiesKeyedConfig,
 } from '../sort-entities/sort-entities.model';
 import {
-  ƟLoadEntitiesSelectEntitiesState,
   SelectEntitiesMutators,
   SelectEntitiesActions,
+  SelectEntitiesState,
 } from './select-entities.model';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import { Update } from '@ngrx/entity/src/models';
@@ -23,7 +24,7 @@ import { FilterEntitiesActions } from '../filter-entities';
 
 export function createSelectEntitiesInitialState<Entity>(
   previousInitialState: any
-): ƟLoadEntitiesSelectEntitiesState<Entity> {
+): LoadEntitiesState<Entity> & SelectEntitiesState {
   return {
     ...previousInitialState,
     selectedIds: {},
@@ -32,7 +33,7 @@ export function createSelectEntitiesInitialState<Entity>(
 
 export function createSelectEntitiesTraitReducer<
   Entity,
-  S extends ƟLoadEntitiesSelectEntitiesState<Entity>
+  S extends LoadEntitiesState<Entity> & SelectEntitiesState
 >(
   initialState: S,
   allActions: SelectEntitiesActions &
@@ -51,7 +52,7 @@ export function createSelectEntitiesTraitReducer<
   const paginationCacheType = allConfigs.pagination?.cacheType;
 
   function updateSelectedIdsChanged<
-    S extends ƟLoadEntitiesSelectEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & SelectEntitiesState
   >(state: S, updates: Update<Entity>[]) {
     const changedIds = updates.reduce((acc, updated) => {
       const id = adapter.selectId(updated.changes as Entity);

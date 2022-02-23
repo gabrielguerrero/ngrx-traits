@@ -9,11 +9,12 @@ import {
   LoadEntitiesKeyedConfig,
   LoadEntitiesMutators,
   LoadEntitiesSelectors,
+  LoadEntitiesState,
 } from '../load-entities/load-entities.model';
 import {
-  ƟLoadEntitiesEntitiesPaginationState,
   EntitiesPaginationKeyedConfig,
   EntitiesPaginationMutators,
+  EntitiesPaginationState,
 } from './entities-pagination.model';
 import { CrudEntitiesActions } from '../crud-entities';
 import { ƟPaginationActions } from './entities-pagination.model.internal';
@@ -22,7 +23,7 @@ import { insertIf } from 'ngrx-traits';
 export function createPaginationInitialState<Entity>(
   previousInitialState: any,
   allConfigs: EntitiesPaginationKeyedConfig
-): ƟLoadEntitiesEntitiesPaginationState<Entity> {
+): LoadEntitiesState<Entity> & EntitiesPaginationState {
   const { currentPage, pageSize, cacheType, pagesToCache } =
     allConfigs.pagination!;
 
@@ -44,7 +45,7 @@ export function createPaginationInitialState<Entity>(
 
 export function createPaginationTraitReducer<
   Entity,
-  S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+  S extends LoadEntitiesState<Entity> & EntitiesPaginationState
 >(
   initialState: S,
   allActions: ƟPaginationActions &
@@ -59,7 +60,7 @@ export function createPaginationTraitReducer<
     EntitiesPaginationKeyedConfig
 ) {
   function addToCacheTotal<
-    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
   >(state: S, add: number) {
     return {
       ...state,
@@ -71,7 +72,7 @@ export function createPaginationTraitReducer<
   }
 
   function clearPagesCache<
-    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
   >(state: S): S {
     return {
       ...state,
@@ -87,7 +88,7 @@ export function createPaginationTraitReducer<
   }
 
   function recalculateTotal<
-    S extends ƟLoadEntitiesEntitiesPaginationState<Entity>
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
   >(state: S): S {
     const total = allSelectors.selectEntitiesTotal(state);
     return {
