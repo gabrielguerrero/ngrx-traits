@@ -13,14 +13,13 @@ import {
 import { Product, ProductFilter } from '../../../models';
 import { createFeatureSelector, props } from '@ngrx/store';
 import {
-  combineTraits,
+  combineEntityFeatures,
   createEntityFeatureFactory,
   ExtractActionsType,
   ReplaceEntityNames,
-  addPropertiesTraits,
-  mixTraits,
+  addEntityFeaturesProperties,
+  mixEntityFeatures,
 } from 'ngrx-traits';
-import { addSetEntityTrait } from '../../../../../../../../libs/ngrx-traits/traits/src/set-entity';
 
 export interface ProductsState
   extends LoadEntitiesState<Product>,
@@ -97,25 +96,26 @@ export const ProductSelectors = productTraits.selectors;
 // const g: ReplaceEntityNames<G, 'product', 'products'> = null;
 // g.
 
-// combineTraits({
-//   products: entityFeatureFactory,
-//   orders: entityFeatureFactory2,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).orders.actions.load;
+const f = combineEntityFeatures({
+  products: entityFeatureFactory,
+  orders: entityFeatureFactory2,
+})({actionsGroupKey: '', featureSelector:''}).selectors.orders.;
 //
-// combineTraits({
+// combineEntityFeatures({
+//   products: f,
+//   orders: f,
+//   practices: entityFeatureFactory3,
+// })({ actionsGroupKey: 'sdasda', featureSelector: 'sdasda' }).selectors.practices.
+  // .orders;
+
+
+// mixEntityFeatures({
 //   products: entityFeatureFactory,
 //   orders: entityFeatureFactory2,
 //   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: 'sdasda'}).actions.practices.;
+// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).selectors.
 //
-
-// mixTraits({
-//   products: entityFeatureFactory,
-//   orders: entityFeatureFactory2,
-//   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any}).actions.);
-
-// addPropertiesTraits(entityFeatureFactory, {
-//   orders: entityFeatureFactory2,
-//   practices: entityFeatureFactory3,
-// })({ actionsGroupKey: 'sdasda', featureSelector: null as any }).selectors.;
+addEntityFeaturesProperties(entityFeatureFactory, {
+  orders: f,
+  practices: entityFeatureFactory3,
+})({ actionsGroupKey: 'sdasda', featureSelector: null as any }).selectors.;

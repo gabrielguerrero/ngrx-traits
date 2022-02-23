@@ -15,7 +15,7 @@ import {
   buildLocalTraits,
   TraitLocalEffectsFactory,
   TraitsLocalStore,
-  FeatureFactory,
+  EntityFeatureFactory,
   createEntityFeatureFactory,
   TraitEffect,
 } from 'ngrx-traits';
@@ -43,7 +43,10 @@ describe('trait-local-store', () => {
   type FF = typeof traitsFactory;
 
   describe('buildLocalTraits', () => {
-    function buildLocalTraitsMock<State, F extends FeatureFactory<any, any>>(
+    function buildLocalTraitsMock<
+      State,
+      F extends EntityFeatureFactory<any, any>
+    >(
       componentName: string,
       traitFactory: F,
       loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>

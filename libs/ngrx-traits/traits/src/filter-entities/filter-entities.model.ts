@@ -5,12 +5,6 @@ import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 export interface FilterEntitiesState<F> {
   filters?: F;
 }
-/**
- * @internal
- */
-export interface ƟLoadEntitiesFilterEntitiesState<T, F>
-  extends LoadEntitiesState<T>,
-    FilterEntitiesState<F> {}
 
 type FilterPatchConditionalType<F, P> = P extends true ? Partial<F> : F;
 
@@ -48,12 +42,12 @@ export type FilterEntitiesSelectors<T, F> = {
    * @param state
    */
   selectEntitiesFilter: (
-    state: ƟLoadEntitiesFilterEntitiesState<T, F>
+    state: LoadEntitiesState<T> & FilterEntitiesState<F>
   ) => F | undefined;
 };
 
 export type FilterEntitiesMutators<T, F> = {
-  setFilters<S extends ƟLoadEntitiesFilterEntitiesState<T, F>>(
+  setFilters<S extends LoadEntitiesState<T> & FilterEntitiesState<F>>(
     filter: F | undefined,
     state: S
   ): S;

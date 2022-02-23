@@ -5,12 +5,6 @@ import { LoadEntitiesState } from '../load-entities/load-entities.model';
 export interface SelectEntityState {
   selectedId?: number | string;
 }
-/**
- * @internal
- */
-export interface ƟLoadEntitiesSelectEntiyState<T>
-  extends LoadEntitiesState<T>,
-    SelectEntityState {}
 
 export type SelectEntityActions = {
   selectEntity: ActionCreator<
@@ -30,20 +24,20 @@ export type SelectEntityActions = {
 
 export type SelectEntitySelectors<T> = {
   selectEntityIdSelected: (
-    state: ƟLoadEntitiesSelectEntiyState<T>
+    state: LoadEntitiesState<T> & SelectEntityState
   ) => string | number | undefined;
   selectEntitySelected: (
-    state: ƟLoadEntitiesSelectEntiyState<T>
+    state: LoadEntitiesState<T> & SelectEntityState
   ) => T | undefined;
 };
 
 export type SelectEntityMutators<T> = {
-  select<S extends ƟLoadEntitiesSelectEntiyState<T>>(
+  select<S extends LoadEntitiesState<T> & SelectEntityState>(
     id: string | number,
     state: S
   ): S;
-  deselect<S extends ƟLoadEntitiesSelectEntiyState<T>>(state: S): S;
-  toggleSelect<S extends ƟLoadEntitiesSelectEntiyState<T>>(
+  deselect<S extends LoadEntitiesState<T> & SelectEntityState>(state: S): S;
+  toggleSelect<S extends LoadEntitiesState<T> & SelectEntityState>(
     id: string | number,
     state: S
   ): S;

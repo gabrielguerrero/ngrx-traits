@@ -2,16 +2,17 @@ import { createReducer, on } from '@ngrx/store';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
+  LoadEntitiesState,
 } from '../load-entities/load-entities.model';
 import {
   SortEntitiesActions,
   SortEntitiesKeyedConfig,
 } from '../sort-entities/sort-entities.model';
 import {
-  ƟLoadEntitiesSelectEntiyState,
   SelectEntityActions,
   SelectEntityKeyedConfig,
   SelectEntityMutators,
+  SelectEntityState,
 } from './select-entity.model';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import { insertIf } from 'ngrx-traits';
@@ -25,7 +26,7 @@ import { createSelectEntityTraitActions } from './select-entity.trait.actions';
 export function createSelectEntityInitialState<Entity>(
   previousInitialState: any,
   allConfigs: SelectEntityKeyedConfig
-): ƟLoadEntitiesSelectEntiyState<Entity> {
+): LoadEntitiesState<Entity> & SelectEntityState {
   const selectedId = allConfigs.singleSelection?.selectedId;
   return {
     ...previousInitialState,
@@ -34,7 +35,7 @@ export function createSelectEntityInitialState<Entity>(
 }
 export function createSelectEntityTraitReducer<
   Entity,
-  S extends ƟLoadEntitiesSelectEntiyState<Entity>
+  S extends LoadEntitiesState<Entity> & SelectEntityState
 >(
   initialState: S,
   allActions: SelectEntityActions &

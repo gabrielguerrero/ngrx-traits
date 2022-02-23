@@ -18,12 +18,6 @@ export interface EntitiesPaginationState {
     };
   };
 }
-/**
- * @internal
- */
-export interface ƟLoadEntitiesEntitiesPaginationState<T>
-  extends LoadEntitiesState<T>,
-    EntitiesPaginationState {}
 
 export type EntitiesPaginationActions = {
   loadEntitiesPage: ActionCreator<
@@ -47,30 +41,32 @@ export type EntitiesPaginationActions = {
 
 export type EntitiesPaginationSelectors<T> = {
   isEntitiesPageInCache: (
-    state: ƟLoadEntitiesEntitiesPaginationState<T>,
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
     props?: { page?: number }
   ) => boolean;
   selectPageEntitiesList: (
-    state: ƟLoadEntitiesEntitiesPaginationState<T>,
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
     props?: { page?: number }
   ) => T[];
   selectEntitiesPage: (
-    state: ƟLoadEntitiesEntitiesPaginationState<T>,
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
     props?: { page?: number }
   ) => PageModel<T>;
   selectEntitiesPagedRequest: (
-    state: ƟLoadEntitiesEntitiesPaginationState<T>
+    state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => PagedRequest;
   selectEntitiesPageInfo: (
-    state: ƟLoadEntitiesEntitiesPaginationState<T>
+    state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => PageInfoModel;
   isLoadingEntitiesPage: (
-    state: ƟLoadEntitiesEntitiesPaginationState<T>
+    state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => boolean;
 };
 
 export type EntitiesPaginationMutators<T> = {
-  mergePaginatedEntities<S extends ƟLoadEntitiesEntitiesPaginationState<T>>(
+  mergePaginatedEntities<
+    S extends LoadEntitiesState<T> & EntitiesPaginationState
+  >(
     entities: T[],
     total: number | undefined,
     state: S

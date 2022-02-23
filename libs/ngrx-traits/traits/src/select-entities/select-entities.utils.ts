@@ -1,7 +1,5 @@
-import {
-  ƟLoadEntitiesSelectEntitiesState,
-  SelectEntitiesState,
-} from './select-entities.model';
+import { SelectEntitiesState } from './select-entities.model';
+import { LoadEntitiesState } from '../load-entities';
 
 export function multiDeselect<S extends SelectEntitiesState>(
   id: number | string,
@@ -43,8 +41,8 @@ export function multiClearSelection<S extends SelectEntitiesState>(
 }
 
 export function selectTotalSelectedEntities<
-  T,
-  S extends ƟLoadEntitiesSelectEntitiesState<T>
+  Entity,
+  S extends LoadEntitiesState<Entity> & SelectEntitiesState
 >(state: S): number {
   return Object.keys(state.selectedIds).length;
 }

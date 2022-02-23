@@ -18,12 +18,6 @@ export interface SortEntitiesState<T> {
     default: Sort<T>;
   };
 }
-/**
- * @internal
- */
-export interface ƟLoadEntitiesSortEntitiesState<T>
-  extends LoadEntitiesState<T>,
-    SortEntitiesState<T> {}
 
 export type SortEntitiesActions<T> = {
   sortEntities: ActionCreator<
@@ -37,11 +31,13 @@ export type SortEntitiesActions<T> = {
 };
 
 export type SortEntitiesSelectors<T> = {
-  selectEntitiesSort: (state: ƟLoadEntitiesSortEntitiesState<T>) => Sort<T>;
+  selectEntitiesSort: (
+    state: LoadEntitiesState<T> & SortEntitiesState<T>
+  ) => Sort<T>;
 };
 
 export type SortEntitiesMutators<T> = {
-  sortEntities<S extends ƟLoadEntitiesSortEntitiesState<T>>(
+  sortEntities<S extends LoadEntitiesState<T> & SortEntitiesState<T>>(
     { active, direction }: Sort<T>,
     state: S
   ): S;
