@@ -364,7 +364,9 @@ export function combineEntityFeatures<
   K extends keyof T,
   State extends { [P in K]: ExtractStateType<ReturnType<T[P]>> },
   A extends { [P in K]: ExtractActionsType<ReturnType<T[P]>> },
-  S extends { [P in K]: ExtractSelectorsType<ReturnType<T[P]>> },
+  S extends {
+    [P in K]: FeatureSelectors<State, ExtractSelectorsType<ReturnType<T[P]>>>;
+  },
   R extends (config: Config<State>) => {
     actions: A;
     selectors: S;
@@ -414,7 +416,9 @@ export function mixEntityFeatures<
   A extends TraitActions &
     UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
   S extends TraitSelectors<any> &
-    UnionToIntersection<ExtractSelectorsType<ReturnType<T[K]>>>,
+    UnionToIntersection<
+      FeatureSelectors<State, ExtractSelectorsType<ReturnType<T[K]>>>
+    >,
   R extends EntityFeatureFactory<any, any, State, A, S>
 >(traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
@@ -460,10 +464,18 @@ export function addEntityFeaturesProperties<
       [P in K]: ExtractStateType<ReturnType<T[P]>>;
     },
   A extends ExtractActionsType<ReturnType<F>> &
-    UnionToIntersection<ExtractActionsType<ReturnType<T[K]>>>,
-  S extends ExtractSelectorsType<ReturnType<F>> &
-    UnionToIntersection<ExtractSelectorsType<ReturnType<T[K]>>>,
-  R extends EntityFeatureFactory<any, any, State, A, S>
+    { [P in K]: ExtractActionsType<ReturnType<T[P]>> },
+  S extends FeatureSelectors<State, ExtractSelectorsType<ReturnType<F>>> &
+    {
+      [P in K]: FeatureSelectors<State, ExtractSelectorsType<ReturnType<T[P]>>>;
+    },
+  R extends (config: Config<State>) => {
+    actions: A;
+    selectors: S;
+    reducer: (state: State, action: ActionType<any>) => State;
+    effects: Type<any>[];
+    initialState: State;
+  }
 >(targetTraitFactory: F, traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =
@@ -474,8 +486,8 @@ export function addEntityFeaturesProperties<
       actionsGroupKey: config.actionsGroupKey,
       featureSelector: featureSelector,
     });
-    let actions: any = { ...targetFeatureTraits.actions };
-    let selectors: any = { ...targetFeatureTraits.selectors };
+    const actions: any = { ...targetFeatureTraits.actions };
+    const selectors: any = { ...targetFeatureTraits.selectors };
     const reducers: any = {};
     let effects: Type<any>[] = [...targetFeatureTraits.effects];
     for (const [key, entityFeatureFactory] of Object.entries(
@@ -489,8 +501,8 @@ export function addEntityFeaturesProperties<
         actionsGroupKey: config.actionsGroupKey,
         featureSelector: selector,
       });
-      actions = { ...actions, ...featureTraits.actions };
-      selectors = { ...selectors, ...featureTraits.selectors };
+      actions[key] = featureTraits.actions;
+      selectors[key] = featureTraits.selectors;
       reducers[key] = featureTraits.reducer;
       effects = [...effects, ...featureTraits.effects];
     }
