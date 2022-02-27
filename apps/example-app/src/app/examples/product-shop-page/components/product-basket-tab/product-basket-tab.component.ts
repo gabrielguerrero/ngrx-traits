@@ -117,11 +117,7 @@ export class ProductBasketTabComponent {
   }
 
   sortBasket(sort: Sort<Product>) {
-    this.store.dispatch(
-      // TODO fix here no errors on worng name
-      // ProductBasketActions.FIXTTHISNOTREDsortProductOrders(sort)
-      ProductBasketActions.sortProductOrders(sort)
-    );
+    this.store.dispatch(ProductBasketActions.sortProductOrders(sort));
   }
 
   remove() {
