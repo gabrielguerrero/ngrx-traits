@@ -11,9 +11,14 @@ import {
   TraitActionsFactoryConfig,
   TraitFactory,
   TraitSelectors,
-  TraitSelectorsFactoryConfig,
   TraitStateMutators,
   UnionToIntersection,
+  TraitActionsFactory,
+  TraitSelectorsFactory,
+  TraitInitialStateFactory,
+  TraitStateMutatorsFactory,
+  TraitReducerFactory,
+  TraitEffectsFactory,
 } from './model';
 import {
   Action,
@@ -30,14 +35,24 @@ import { capitalize } from './util';
 
 export function createTraitFactory<
   State = {},
-  A extends TraitActions = TraitActions,
-  S extends TraitSelectors<State> = TraitSelectors<State>,
-  M extends TraitStateMutators<State> = TraitStateMutators<State>,
+  A extends TraitActions = {},
+  S extends TraitSelectors<State> = {},
+  M extends TraitStateMutators<State> = {},
   KEY extends string = string,
   C = unknown,
   KC = KeyedConfig<KEY, C>
->(f: TraitFactory<State, A, S, M, KEY, C, KC>) {
-  return f;
+>(f: {
+  key: KEY;
+  config?: C;
+  depends?: string[];
+  actions?: TraitActionsFactory<A, KC>;
+  selectors?: TraitSelectorsFactory<State, S, KC>;
+  initialState?: TraitInitialStateFactory<State, KC>;
+  mutators?: TraitStateMutatorsFactory<State, M, KC>;
+  reducer?: TraitReducerFactory<State, A, S, M, KC>;
+  effects?: TraitEffectsFactory<State, A, S, KC>;
+}): TraitFactory<State, A, S, M, KEY, C, KC> {
+  return f as TraitFactory<State, A, S, M, KEY, C, KC>;
 }
 
 export function createEntityFeatureFactory<

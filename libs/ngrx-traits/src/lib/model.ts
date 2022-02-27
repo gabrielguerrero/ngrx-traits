@@ -181,10 +181,10 @@ export interface TraitFactory<
   key: KEY;
   config?: C;
   depends?: string[];
-  actions?: TraitActionsFactory<A, KC>;
-  selectors?: TraitSelectorsFactory<State, S, KC>;
-  initialState?: TraitInitialStateFactory<State, KC>;
-  mutators?: TraitStateMutatorsFactory<State, M, KC>;
+  actions: TraitActionsFactory<A, KC>;
+  selectors: TraitSelectorsFactory<State, S, KC>;
+  initialState: TraitInitialStateFactory<State, KC>;
+  mutators: TraitStateMutatorsFactory<State, M, KC>;
   reducer?: TraitReducerFactory<State, A, S, M, KC>;
   effects?: TraitEffectsFactory<State, A, S, KC>;
 }

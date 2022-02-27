@@ -96,10 +96,6 @@ export class ProductShopTabComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProductDetail({ id }));
   }
 
-  checkout() {
-    this.store.dispatch(ProductActions.checkout());
-  }
-
   filter(filters: ProductFilter) {
     this.store.dispatch(ProductActions.filterProducts({ filters }));
   }
