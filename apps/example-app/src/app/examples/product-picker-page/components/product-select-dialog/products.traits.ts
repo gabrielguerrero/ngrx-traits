@@ -2,6 +2,7 @@ import {
   addAsyncActionTrait,
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
+  addSelectEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
 } from 'ngrx-traits/traits';
@@ -21,8 +22,9 @@ import { of } from 'rxjs';
 import { ProductService } from '../../../services/product.service';
 
 const productTraits = createEntityFeatureFactory(
+  { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
-  addSelectEntities<Product>(),
+  addSelectEntityTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
@@ -40,14 +42,14 @@ const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
   class ProductsEffects extends TraitEffect {
     loadProducts$ = createEffect(() =>
       this.actions$.pipe(
-        ofType(allActions.loadEntities),
+        ofType(allActions.loadProducts),
         switchMap(() =>
           //call your service to get the products data
           this.productService.getProducts().pipe(
             map((products) =>
-              allActions.loadEntitiesSuccess({ entities: products })
+              allActions.loadProductsSuccess({ entities: products })
             ),
-            catchError(() => of(allActions.loadEntitiesFail()))
+            catchError(() => of(allActions.loadProductsFail()))
           )
         )
       )

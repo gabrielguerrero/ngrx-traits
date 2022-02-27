@@ -5,6 +5,7 @@ import {
   addEntitiesPaginationTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
+  addSelectEntitiesTrait,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 import { props } from '@ngrx/store';
@@ -12,8 +13,9 @@ import { createEntityFeatureFactory } from 'ngrx-traits';
 import { selectProductState } from './products.state';
 
 export const productTraits = createEntityFeatureFactory(
+  { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
-  addSelectEntities<Product>(),
+  addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),

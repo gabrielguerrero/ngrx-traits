@@ -1,9 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { combineLatest } from 'rxjs';
-import { Product, ProductFilter } from '../models';
-import { Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
-import { Sort } from 'ngrx-traits/traits';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',

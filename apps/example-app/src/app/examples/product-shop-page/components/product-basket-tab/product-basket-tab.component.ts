@@ -79,11 +79,11 @@ import { Sort } from 'ngrx-traits/traits';
 })
 export class ProductBasketTabComponent {
   basket$ = combineLatest([
-    this.store.select(ProductBasketSelectors.selectAll),
-    this.store.select(ProductBasketSelectors.isLoading),
-    this.store.select(ProductBasketSelectors.selectIdsSelected),
+    this.store.select(ProductBasketSelectors.selectProductOrdersList),
+    this.store.select(ProductBasketSelectors.isProductOrdersLoading),
+    this.store.select(ProductBasketSelectors.selectProductOrdersIdsSelectedMap),
     this.store.select(ProductBasketSelectors.selectProductDetail),
-    this.store.select(ProductBasketSelectors.isAllSelected),
+    this.store.select(ProductBasketSelectors.isAllProductOrdersSelected),
     this.store.select(ProductBasketSelectors.isLoadingCheckout),
   ]).pipe(
     map(
@@ -108,7 +108,7 @@ export class ProductBasketTabComponent {
   constructor(private store: Store) {}
 
   selectBasket({ id }: Product) {
-    this.store.dispatch(ProductBasketActions.select({ id }));
+    this.store.dispatch(ProductBasketActions.selectProductOrder({ id }));
     this.store.dispatch(ProductBasketActions.loadProductDetail({ id }));
   }
 
@@ -117,31 +117,37 @@ export class ProductBasketTabComponent {
   }
 
   sortBasket(sort: Sort<Product>) {
-    this.store.dispatch(ProductBasketActions.sort(sort));
+    this.store.dispatch(
+      // TODO fix here no errors on worng name
+      // ProductBasketActions.FIXTTHISNOTREDsortProductOrders(sort)
+      ProductBasketActions.sortProductOrders(sort)
+    );
   }
 
   remove() {
     this.store
-      .select(ProductBasketSelectors.selectAllIdsSelected)
+      .select(ProductBasketSelectors.selectProductOrdersIdsSelectedList)
       .pipe(first())
       .subscribe(
         (productsToRemove) =>
           productsToRemove &&
-          this.store.dispatch(ProductBasketActions.remove(...productsToRemove))
+          this.store.dispatch(
+            ProductBasketActions.removeProductOrders(...productsToRemove)
+          )
       );
   }
 
   removeToggleSelect({ id }: Product) {
-    this.store.dispatch(ProductBasketActions.multiToggleSelect({ id }));
+    this.store.dispatch(ProductBasketActions.toggleSelectProductOrders({ id }));
   }
 
   removeToggleAll() {
-    this.store.dispatch(ProductBasketActions.toggleSelectAll());
+    this.store.dispatch(ProductBasketActions.toggleSelectAllProductOrders());
   }
 
   updateProduct({ id, quantity }: ProductOrder) {
     this.store.dispatch(
-      ProductBasketActions.update({ id, changes: { quantity } })
+      ProductBasketActions.updateProductOrders({ id, changes: { quantity } })
     );
   }
 }

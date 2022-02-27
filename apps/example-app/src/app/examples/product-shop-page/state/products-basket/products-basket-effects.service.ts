@@ -5,7 +5,7 @@ import {
 } from './products-basket.traits';
 import { Injectable } from '@angular/core';
 import { Actions, concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
-import { map, switchMap, catchError, exhaustMap, filter } from 'rxjs/operators';
+import { catchError, exhaustMap, filter, map } from 'rxjs/operators';
 import { ProductService } from '../../../services/product.service';
 import { of } from 'rxjs';
 import { OrderService } from '../../../services/order.service';
@@ -17,7 +17,7 @@ export class ProductsBasketEffects {
     this.actions$.pipe(
       ofType(ProductBasketActions.checkout),
       concatLatestFrom(() =>
-        this.store.select(ProductBasketSelectors.selectEntitySelected)
+        this.store.select(ProductBasketSelectors.selectProductOrderSelected)
       ),
       filter(([_, product]) => !!product),
       exhaustMap(([_, product]) =>

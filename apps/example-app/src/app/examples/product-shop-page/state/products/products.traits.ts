@@ -1,31 +1,18 @@
 import {
-  addAsyncActionTrait,
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
+  addSelectEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
-  AsyncActionState,
-  LoadEntitiesState,
-  FilterEntitiesState,
-  SelectEntityState,
-  SortEntitiesState,
-  addSelectEntitiesTrait,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
-import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadProductDetailTraits } from './load-product.trait';
-
-export interface ProductsState
-  extends LoadEntitiesState<Product>,
-    SelectEntityState,
-    FilterEntitiesState<ProductFilter>,
-    SortEntitiesState<Product> {}
 
 export const productTraits = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
-  addSelectEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
@@ -37,7 +24,7 @@ export const productTraits = createEntityFeatureFactory(
   ...addLoadProductDetailTraits()
 )({
   actionsGroupKey: '[Products]',
-  featureSelector: createFeatureSelector<ProductsState>('products'),
+  featureSelector: 'products',
 });
 
 export const ProductActions = productTraits.actions;
