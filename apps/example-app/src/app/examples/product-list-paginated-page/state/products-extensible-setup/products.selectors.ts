@@ -1,4 +1,4 @@
-import { productTraits } from './products.traits';
+import { productFeature } from './products.traits';
 import { createSelector } from '@ngrx/store';
 import { selectProductState } from './products.state';
 
@@ -12,7 +12,7 @@ export const {
   selectProductsFilter,
   selectProductsSort,
   selectProductsPagedRequest,
-} = productTraits.selectors;
+} = productFeature.selectors;
 
 export const selectMyProp = createSelector(selectProductState, (state) => {
   // join to the base state

@@ -11,7 +11,7 @@ import { props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addLoadProductDetailTraits } from '../products/load-product.trait';
 
-export const productTraits = createEntityFeatureFactory(
+export const productOrdersFeature = createEntityFeatureFactory(
   { entityName: 'productOrder' },
   addLoadEntitiesTrait<ProductOrder>(),
   addSelectEntitiesTrait<ProductOrder>(),
@@ -30,5 +30,5 @@ export const productTraits = createEntityFeatureFactory(
   featureSelector: 'products-basket',
 });
 
-export const ProductBasketActions = productTraits.actions;
-export const ProductBasketSelectors = productTraits.selectors;
+export const ProductBasketActions = productOrdersFeature.actions;
+export const ProductBasketSelectors = productOrdersFeature.selectors;

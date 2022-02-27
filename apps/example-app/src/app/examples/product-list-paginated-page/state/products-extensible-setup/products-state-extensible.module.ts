@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
-import { productTraits } from './products.traits';
+import { productFeature } from './products.traits';
 import { EffectsModule } from '@ngrx/effects';
 import { ProductsEffects } from './products.effects';
 import { productsReducer } from './products.reducer';
@@ -9,7 +9,7 @@ import { productsReducer } from './products.reducer';
   declarations: [],
   imports: [
     StoreModule.forFeature('products-paginated', productsReducer),
-    EffectsModule.forFeature([ProductsEffects, ...productTraits.effects]),
+    EffectsModule.forFeature([ProductsEffects, ...productFeature.effects]),
   ],
 })
 export class ProductsStateExtensibleModule {}

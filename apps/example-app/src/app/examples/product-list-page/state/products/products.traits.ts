@@ -9,7 +9,7 @@ import { Product, ProductFilter } from '../../../models';
 import { props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 
-const entityFeatureFactory = createEntityFeatureFactory(
+const productFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
@@ -27,10 +27,10 @@ const entityFeatureFactory = createEntityFeatureFactory(
   })
 );
 
-export const productTraits = entityFeatureFactory({
+export const productFeature = productFeatureFactory({
   actionsGroupKey: '[Products]',
   featureSelector: 'products',
 });
 
-export const ProductActions = productTraits.actions;
-export const ProductSelectors = productTraits.selectors;
+export const ProductActions = productFeature.actions;
+export const ProductSelectors = productFeature.selectors;

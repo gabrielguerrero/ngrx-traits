@@ -7,7 +7,7 @@ meaning the effects, reducers and state are created and later destroyed when a c
 To use it first you need a trait factory like the following, (it can have any combination of traits)
 
 ```typescript
-const productTraits = createEntityFeatureFactory(
+const productFeature = createEntityFeatureFactory(
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addFilter<Product, ProductFilter>({
@@ -24,7 +24,7 @@ const productTraits = createEntityFeatureFactory(
 The next step is optional, if the state of your component needs to be instantiated from a backend call or needs any sort of side effects you can add an extra effect a follows:
 
 ```typescript
-const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
+const productsEffect: TraitLocalEffectsFactory<typeof productFeature> = (
   allActions
 ) => {
   @Injectable()
@@ -64,12 +64,12 @@ The next step is to create a service that will be use in your component, it need
 ```typescript
 @Injectable()
 export class ProductsLocalTraits extends TraitsLocalStore<
-  typeof productTraits
+  typeof productFeature
   > {
-  setup(): LocalTraitsConfig<typeof productTraits> {
+  setup(): LocalTraitsConfig<typeof productFeature> {
     return {
       componentName: 'ProductsPickerComponent',
-      traitsFactory: productTraits,
+      traitsFactory: productFeature,
       effectFactory: productsEffect,
     };
   }
