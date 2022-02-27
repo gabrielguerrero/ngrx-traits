@@ -1,32 +1,20 @@
 import {
   addAsyncActionTrait,
+  addEntitiesPaginationTrait,
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
-  addEntitiesPaginationTrait,
+  addSelectEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
-  AsyncActionState,
-  LoadEntitiesState,
-  FilterEntitiesState,
-  EntitiesPaginationState,
-  SelectEntityState,
-  SortEntitiesState,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
-import { createFeatureSelector, props } from '@ngrx/store';
+import { props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 
-export interface ProductsState
-  extends LoadEntitiesState<Product>,
-    SelectEntityState,
-    AsyncActionState<'checkout'>,
-    EntitiesPaginationState,
-    FilterEntitiesState<ProductFilter>,
-    SortEntitiesState<Product> {}
-
 export const productTraits = createEntityFeatureFactory(
+  { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
-  addSelectEntities<Product>(),
+  addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
@@ -42,7 +30,7 @@ export const productTraits = createEntityFeatureFactory(
   })
 )({
   actionsGroupKey: '[Products Paginated]',
-  featureSelector: 'products-paginated', //createFeatureSelector<ProductsState>('products-paginated'),
+  featureSelector: 'products-paginated',
 });
 
 export const ProductActions = productTraits.actions;

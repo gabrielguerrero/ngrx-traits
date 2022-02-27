@@ -65,11 +65,11 @@ import { PageEvent } from '@angular/material/paginator';
 })
 export class ProductListPaginatedPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(ProductSelectors.selectPage),
-    this.store.select(ProductSelectors.isLoading),
-    this.store.select(ProductSelectors.selectEntitySelected),
+    this.store.select(ProductSelectors.selectProductsPage),
+    this.store.select(ProductSelectors.isLoadingProductsPage),
+    this.store.select(ProductSelectors.selectProductSelected),
     this.store.select(ProductSelectors.isLoadingCheckout),
-    this.store.select(ProductSelectors.selectSort),
+    this.store.select(ProductSelectors.selectProductsSort),
   ]).pipe(
     map(
       ([
@@ -91,11 +91,11 @@ export class ProductListPaginatedPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.loadEntities());
+    this.store.dispatch(ProductActions.loadProducts());
   }
 
   select({ id }: Product) {
-    this.store.dispatch(ProductActions.select({ id }));
+    this.store.dispatch(ProductActions.selectProduct({ id }));
   }
 
   checkout() {
@@ -103,14 +103,16 @@ export class ProductListPaginatedPageContainerComponent implements OnInit {
   }
 
   filter(filters: ProductFilter) {
-    this.store.dispatch(ProductActions.filter({ filters }));
+    this.store.dispatch(ProductActions.filterProducts({ filters }));
   }
   // new event handler ↓
   sort(sort: Sort<Product>) {
-    this.store.dispatch(ProductActions.sort(sort));
+    this.store.dispatch(ProductActions.sortProducts(sort));
   }
 
   loadPage($event: PageEvent) {
-    this.store.dispatch(ProductActions.loadPage({ index: $event.pageIndex }));
+    this.store.dispatch(
+      ProductActions.loadProductsPage({ index: $event.pageIndex })
+    );
   }
 }

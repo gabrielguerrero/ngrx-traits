@@ -66,8 +66,8 @@ import { Sort } from 'ngrx-traits/traits';
 })
 export class ProductShopTabComponent implements OnInit {
   products$ = combineLatest([
-    this.store.select(ProductSelectors.selectAll),
-    this.store.select(ProductSelectors.isLoading),
+    this.store.select(ProductSelectors.selectProductsList),
+    this.store.select(ProductSelectors.isProductsLoading),
     this.store.select(ProductSelectors.selectProductDetail),
     this.store.select(ProductSelectors.isLoadingLoadProductDetail),
   ]).pipe(
@@ -83,21 +83,17 @@ export class ProductShopTabComponent implements OnInit {
 
   ngOnInit() {
     this.store
-      .select(ProductSelectors.isSuccess)
+      .select(ProductSelectors.isProductsLoadingSuccess)
       .pipe(first())
       .subscribe(
         (loaded) =>
-          !loaded && this.store.dispatch(ProductActions.loadEntities())
+          !loaded && this.store.dispatch(ProductActions.loadProducts())
       );
   }
 
   select({ id }: Product) {
-    this.store.dispatch(ProductActions.select({ id }));
+    this.store.dispatch(ProductActions.selectProduct({ id }));
     this.store.dispatch(ProductActions.loadProductDetail({ id }));
-  }
-
-  selectBasket({ id }: Product) {
-    this.store.dispatch(ProductBasketActions.select({ id }));
   }
 
   checkout() {
@@ -105,11 +101,11 @@ export class ProductShopTabComponent implements OnInit {
   }
 
   filter(filters: ProductFilter) {
-    this.store.dispatch(ProductActions.filter({ filters }));
+    this.store.dispatch(ProductActions.filterProducts({ filters }));
   }
 
   sort(sort: Sort<Product>) {
-    this.store.dispatch(ProductActions.sort(sort));
+    this.store.dispatch(ProductActions.sortProducts(sort));
   }
 
   addToBasket() {
@@ -121,7 +117,9 @@ export class ProductShopTabComponent implements OnInit {
       .subscribe(
         (selectedProduct) =>
           selectedProduct &&
-          this.store.dispatch(ProductBasketActions.add(selectedProduct))
+          this.store.dispatch(
+            ProductBasketActions.addProductOrders(selectedProduct)
+          )
       );
   }
 }

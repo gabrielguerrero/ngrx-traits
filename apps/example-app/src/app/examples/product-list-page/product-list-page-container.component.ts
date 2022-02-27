@@ -78,7 +78,7 @@ export class ProductListPageContainerComponent implements OnInit {
   }
 
   select({ id }: Product) {
-    this.store.dispatch(ProductActions.select({ id }));
+    this.store.dispatch(ProductActions.selectProduct({ id }));
   }
 
   checkout() {
@@ -86,10 +86,10 @@ export class ProductListPageContainerComponent implements OnInit {
   }
 
   filter(filters: ProductFilter) {
-    this.store.dispatch(ProductActions.filter({ filters }));
+    this.store.dispatch(ProductActions.filterProducts({ filters }));
   }
   // new event handler ↓
   sort(sort: Sort<Product>) {
-    this.store.dispatch(ProductActions.sort(sort));
+    this.store.dispatch(ProductActions.sortProducts(sort));
   }
 }

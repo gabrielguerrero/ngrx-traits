@@ -4,8 +4,8 @@ import {
   LoadEntitiesState,
   FilterEntitiesState,
   EntitiesPaginationState,
-  SelectEntityState,
   SortEntitiesState,
+  SelectEntityState,
 } from 'ngrx-traits/traits';
 import { Product, ProductFilter } from '../../../models';
 export interface ProductsState

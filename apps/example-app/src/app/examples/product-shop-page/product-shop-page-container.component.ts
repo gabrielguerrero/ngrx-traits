@@ -1,10 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { first, map } from 'rxjs/operators';
-import {
-  ProductBasketActions,
-  ProductBasketSelectors,
-} from './state/products-basket/products-basket.traits';
+import { map } from 'rxjs/operators';
+import { ProductBasketSelectors } from './state/products-basket/products-basket.traits';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -53,7 +50,7 @@ import {
 })
 export class ProductShopPageContainerComponent {
   basket$ = this.store
-    .select(ProductBasketSelectors.selectTotal)
+    .select(ProductBasketSelectors.selectProductOrdersTotal)
     .pipe(map((total) => ({ total })));
 
   constructor(private store: Store) {}

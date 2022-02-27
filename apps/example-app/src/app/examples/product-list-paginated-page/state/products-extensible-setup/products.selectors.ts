@@ -4,14 +4,14 @@ import { selectProductState } from './products.state';
 
 // rename selector, export only a subset, and add your own
 export const {
-  selectAll: selectProducts,
-  selectTotal,
-  isLoading,
+  selectProductsList: selectProducts,
+  selectProductsTotal,
+  isProductsLoading,
   isLoadingCheckout,
-  selectEntitySelected: selectProductSelected,
-  selectFilter,
-  selectSort,
-  selectPagedRequest,
+  selectProductSelected,
+  selectProductsFilter,
+  selectProductsSort,
+  selectProductsPagedRequest,
 } = productTraits.selectors;
 
 export const selectMyProp = createSelector(selectProductState, (state) => {

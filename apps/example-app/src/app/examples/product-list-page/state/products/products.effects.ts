@@ -12,14 +12,14 @@ import { Store } from '@ngrx/store';
 export class ProductsEffects {
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(ProductActions.loadEntities),
+      ofType(ProductActions.loadProducts),
       switchMap(() =>
         //call your service to get the products data
         this.productService.getProducts().pipe(
           map((products) =>
-            ProductActions.loadEntitiesSuccess({ entities: products })
+            ProductActions.loadProductsSuccess({ entities: products })
           ),
-          catchError(() => of(ProductActions.loadEntitiesFail()))
+          catchError(() => of(ProductActions.loadProductsFail()))
         )
       )
     )
@@ -29,7 +29,7 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.checkout),
       concatLatestFrom(() =>
-        this.store.select(ProductSelectors.selectEntitySelected)
+        this.store.select(ProductSelectors.selectProductSelected)
       ),
       filter(([_, product]) => !!product),
       exhaustMap(([_, product]) =>
