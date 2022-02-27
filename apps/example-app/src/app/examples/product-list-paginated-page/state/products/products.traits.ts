@@ -3,7 +3,6 @@ import {
   addEntitiesPaginationTrait,
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
-  addSelectEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
 } from 'ngrx-traits/traits';
@@ -11,7 +10,7 @@ import { Product, ProductFilter } from '../../../models';
 import { props } from '@ngrx/store';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 
-export const productTraits = createEntityFeatureFactory(
+export const productFeature = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
@@ -33,5 +32,5 @@ export const productTraits = createEntityFeatureFactory(
   featureSelector: 'products-paginated',
 });
 
-export const ProductActions = productTraits.actions;
-export const ProductSelectors = productTraits.selectors;
+export const ProductActions = productFeature.actions;
+export const ProductSelectors = productFeature.selectors;

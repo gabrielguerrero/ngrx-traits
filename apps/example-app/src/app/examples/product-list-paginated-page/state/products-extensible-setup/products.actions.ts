@@ -1,4 +1,4 @@
-import { productTraits } from './products.traits';
+import { productFeature } from './products.traits';
 import { createAction } from '@ngrx/store';
 
 // you can rename the actions, only export a few , and add your own
@@ -11,6 +11,6 @@ export const {
   checkout,
   checkoutFail,
   checkoutSuccess,
-} = productTraits.actions;
+} = productFeature.actions;
 
 export const myCustomAction = createAction('[Products] My Custom Action');

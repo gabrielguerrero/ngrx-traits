@@ -21,7 +21,7 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ProductService } from '../../../services/product.service';
 
-const productTraits = createEntityFeatureFactory(
+const productFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
@@ -35,7 +35,7 @@ const productTraits = createEntityFeatureFactory(
   })
 );
 
-const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
+const productsEffect: TraitLocalEffectsFactory<typeof productFeatureFactory> = (
   allActions
 ) => {
   @Injectable()
@@ -68,12 +68,12 @@ const productsEffect: TraitLocalEffectsFactory<typeof productTraits> = (
 
 @Injectable()
 export class ProductsLocalTraits extends TraitsLocalStore<
-  typeof productTraits
+  typeof productFeatureFactory
 > {
-  setup(): LocalTraitsConfig<typeof productTraits> {
+  setup(): LocalTraitsConfig<typeof productFeatureFactory> {
     return {
       componentName: 'ProductsPickerComponent',
-      traitsFactory: productTraits,
+      traitsFactory: productFeatureFactory,
       effectFactory: productsEffect,
     };
   }

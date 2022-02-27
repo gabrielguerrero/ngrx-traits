@@ -1,5 +1,5 @@
 import { Action, createReducer, on } from '@ngrx/store';
-import { productTraits } from './products.traits';
+import { productFeature } from './products.traits';
 import { ProductsState } from './products.state';
 
 // inside the state folder dont import from actions and selectors from
@@ -7,7 +7,7 @@ import { ProductsState } from './products.state';
 import * as ProductActions from './products.actions';
 
 const initialState: ProductsState = {
-  ...productTraits.initialState,
+  ...productFeature.initialState,
   myProp: 'hello',
 };
 const myReducer = createReducer(
@@ -20,10 +20,10 @@ const myReducer = createReducer(
 
 // join your reducer with the traits reducer
 
-// mixing our productTraits reducers with myReducer
+// mixing our productFeature reducers with myReducer
 export function productsReducer(state = initialState, action: Action) {
   const s = myReducer(state, action);
-  return productTraits.reducer(s, action);
+  return productFeature.reducer(s, action);
 }
 // the previous function is the same as using the helper function
-// export const productsReducer = joinReducers(myReducer,productTraits.reducer);
+// export const productsReducer = joinReducers(myReducer,productFeature.reducer);
