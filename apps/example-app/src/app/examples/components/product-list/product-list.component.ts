@@ -61,7 +61,7 @@ import { PageEvent } from '@angular/material/paginator';
         overflow: auto;
       }
       .selected {
-        background-color: lightblue;
+        background-color: #009688;
       }
     `,
   ],
