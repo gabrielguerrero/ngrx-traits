@@ -109,7 +109,7 @@ import { takeUntil } from 'rxjs/operators';
         overflow: auto;
       }
       .selected {
-        background-color: lightblue;
+        background-color: #009688;
       }
       mat-form-field {
         width: 40px;
