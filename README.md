@@ -400,7 +400,7 @@ export const productFeature = createEntityFeatureFactory(
     actionSuccessProps: props<{ orderId: string }>(),
   }),
   // new trait ↓
-  addFilter<Product, ProductFilter>({
+  addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       // filter function for local filtering
       return (
@@ -503,7 +503,7 @@ export const productFeature = createEntityFeatureFactory(
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addFilter<Product, ProductFilter>({
+  addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.includes(filter.search);
     },
@@ -596,7 +596,7 @@ export const productFeature = createEntityFeatureFactory(
     actionSuccessProps: props<{ orderId: string }>(),
   }),
   // changed trait ↓
-  addFilter<Product, ProductFilter>(),
+  addFilterEntitiesTrait<Product, ProductFilter>(),
   addSortEntitiesTrait<Product>()
 )({
   actionsGroupKey: '[Products]',
@@ -646,7 +646,7 @@ Now lets use remote sort, in our traits we add the remote param as true
 ```ts
 export const productFeature = createEntityFeatureFactory(
   addLoadEntitiesTrait<Product>(),
-  addFilter<Product, ProductFilter>(),
+  addFilterEntitiesTrait<Product, ProductFilter>(),
   // changed trait ↓
   addSortEntitiesTrait<Product>({ remote: true })
 )({
@@ -707,7 +707,7 @@ export interface ProductsState
     PaginationState {}
 ```
 
-Then we add the addPagination to the traits like:
+Then we add the addEntitiesPaginationTrait to the traits like:
 #### products-basket.traits.ts
 
 ```ts
@@ -718,14 +718,14 @@ export const productFeature = createEntityFeatureFactory(
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addFilter<Product, ProductFilter>({
+  addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.includes(filter.search);
     },
   }),
   addSortEntitiesTrait<Product>({ remote: true }),
   // new trait ↓
-  addPagination<Product>({ cacheType: 'partial' })
+  addEntitiesPaginationTrait<Product>({ cacheType: 'partial' })
 )({
   actionsGroupKey: '[Products]',
   featureSelector: createFeatureSelector<ProductsState>('products'),
@@ -921,13 +921,13 @@ export const productFeature = createEntityFeatureFactory(
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addFilter<Product, ProductFilter>({
+  addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.includes(filter.search);
     },
   }),
   addSortEntitiesTrait<Product>({ remote: true }),
-  addPagination<Product>({ cacheType: 'partial' })
+  addEntitiesPaginationTrait<Product>({ cacheType: 'partial' })
 )({
   actionsGroupKey: '[Products]',
   featureSelector: selectProductState,

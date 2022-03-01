@@ -23,9 +23,9 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
 
 /**
  * Generates the ngrx code needed to load a list of entities from the backend
- * with a loadEntities, loadEntitiesSuccess, loadEntitiesFail actions, and selectors to query the
- * entities like selectAll, selectIds, selectEntities, and its progress loading
- * with isLoading,isSuccess, isFail. This trait is the base for all other traits related
+ * with a load[EntitiesName], load[EntitiesName]Success, load[EntitiesName]Fail actions, and selectors to query the
+ * entities like select[EntitiesName]List, select[EntitiesName]Ids, select[EntitiesName]Map, and its progress loading
+ * with isLoading[EntitiesName],isLoading[EntitiesName]Success, isLoading[EntitiesName]Fail. This trait is the base for all other traits related
  * to a list of entities, the other will call loadEntities when needing data.
  * @param traitConfig - Config object fot the trait factory
  * @param traitConfig.selectId - Function that returns the id of an entity
@@ -35,9 +35,10 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  * // The following trait config
  *
  * export interface TestState
- * extends EntityAndStatusState<Todo>{}
+ * extends LoadEntitiesState<Todo>{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *    )({
  *      actionsGroupKey: '[Todos]',
@@ -46,16 +47,16 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  *      ),
  *    });
  * // will generate the actions and selectors
- * traits.actions.loadEntities()
- * traits.actions.loadEntitiesSuccess({entities: todos})
- * traits.actions.loadEntitiesFail();
- * traits.selectors.selectAll
- * traits.selectors.selectEntities
- * traits.selectors.selectIds
- * traits.selectors.selectTotal
- * traits.selectors.isLoading
- * traits.selectors.isSuccess
- * traits.selectors.isFail
+ * traits.actions.loadTodos()
+ * traits.actions.loadTodosSuccess({entities: todos})
+ * traits.actions.loadTodosFail();
+ * traits.selectors.selectTodosList
+ * traits.selectors.selectTodosMap
+ * traits.selectors.selectTodosIds
+ * traits.selectors.selectTodosTotal
+ * traits.selectors.isLoadingTodos
+ * traits.selectors.isSuccessTodosSuccess
+ * traits.selectors.isFailTodosFail
  */
 export function addLoadEntitiesTrait<Entity>(
   traitConfig?: Omit<LoadEntitiesConfig<Entity>, 'adapter'>
