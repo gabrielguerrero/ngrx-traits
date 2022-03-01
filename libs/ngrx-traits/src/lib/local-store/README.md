@@ -10,7 +10,7 @@ To use it first you need a trait factory like the following, (it can have any co
 const productFeature = createEntityFeatureFactory(
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
-  addFilter<Product, ProductFilter>({
+  addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
       return entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },

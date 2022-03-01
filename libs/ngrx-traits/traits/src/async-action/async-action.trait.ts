@@ -30,6 +30,7 @@ import {
  * @example
  * // The following trait config
  * const traits = createEntityFeatureFactory(
+ * {entityName: 'Todo'},
  * addAsyncActionTrait({
  *        name: 'createClient',
  *        actionProps: props<{ name: string }>(),
