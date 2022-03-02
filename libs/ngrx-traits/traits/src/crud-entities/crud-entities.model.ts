@@ -88,37 +88,51 @@ export type CrudEntitiesSelectors<Entity> = {
 };
 
 export type CrudEntitiesMutators<Entity> = {
-  add<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  addEntities<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
     entities: Entity[],
     state: S
   ): S;
 
-  remove<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  removeEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     keys: string[],
     state: S
   ): S;
-  remove<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  removeEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     keys: number[],
     state: S
   ): S;
-  remove<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  removeEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     predicate: Predicate<Entity>,
     state: S
   ): S;
 
-  removeAll<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  removeAllEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     state: S
   ): S;
 
-  clearChanges<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  clearEntitiesChanges<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     state: S
   ): S;
 
-  update<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  updateEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     updates: Update<Entity>[],
     state: S
   ): S;
-  upsert<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
+  upsertEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(
     entities: Entity[],
     state: S
   ): S;

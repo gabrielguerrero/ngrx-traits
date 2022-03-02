@@ -47,7 +47,7 @@ export type FilterEntitiesSelectors<T, F> = {
 };
 
 export type FilterEntitiesMutators<T, F> = {
-  setFilters<S extends LoadEntitiesState<T> & FilterEntitiesState<F>>(
+  setEntitiesFilters<S extends LoadEntitiesState<T> & FilterEntitiesState<F>>(
     filter: F | undefined,
     state: S
   ): S;

@@ -10,6 +10,6 @@ export function createLoadEntitiesTraitMutators<Entity>(
   const adapter = allConfigs?.loadEntities?.adapter;
 
   return {
-    setAll: adapter?.setAll,
+    setEntitiesList: adapter?.setAll,
   } as LoadEntitiesMutators<Entity>;
 }

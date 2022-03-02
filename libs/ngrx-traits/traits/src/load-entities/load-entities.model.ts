@@ -80,7 +80,7 @@ export type LoadEntitiesMutators<T> = {
    * @param entities
    * @param state
    */
-  setAll<S extends LoadEntitiesState<T>>(entities: T[], state: S): S;
+  setEntitiesList<S extends LoadEntitiesState<T>>(entities: T[], state: S): S;
 };
 
 export type GenericActionCreator = ActionCreator<

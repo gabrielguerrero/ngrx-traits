@@ -24,7 +24,7 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
 /**
  * Generates the ngrx code needed to load a list of entities from the backend
  * with a load[EntitiesName], load[EntitiesName]Success, load[EntitiesName]Fail actions, and selectors to query the
- * entities like select[EntitiesName]List, select[EntitiesName]Ids, select[EntitiesName]Map, and its progress loading
+ * entities like selectEntity[EntitiesName]List, selectEntity[EntitiesName]Ids, selectEntity[EntitiesName]Map, and its progress loading
  * with isLoading[EntitiesName],isLoading[EntitiesName]Success, isLoading[EntitiesName]Fail. This trait is the base for all other traits related
  * to a list of entities, the other will call loadEntities when needing data.
  * @param traitConfig - Config object fot the trait factory

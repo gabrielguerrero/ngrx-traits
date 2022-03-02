@@ -1,7 +1,7 @@
 import { SelectEntitiesState } from './select-entities.model';
 import { LoadEntitiesState } from '../load-entities';
 
-export function multiDeselect<S extends SelectEntitiesState>(
+export function deselectEntities<S extends SelectEntitiesState>(
   id: number | string,
   state: S
 ): S {
@@ -13,7 +13,7 @@ export function multiDeselect<S extends SelectEntitiesState>(
   };
 }
 
-export function multiSelect<S extends SelectEntitiesState>(
+export function selectEntities<S extends SelectEntitiesState>(
   id: number | string,
   state: S
 ): S {
@@ -23,18 +23,18 @@ export function multiSelect<S extends SelectEntitiesState>(
   };
 }
 
-export function multiToggleSelect<S extends SelectEntitiesState>(
+export function toggleSelectEntities<S extends SelectEntitiesState>(
   id: number | string,
   state: S
 ): S {
   const selected = state.selectedIds[id];
   if (selected) {
-    return multiDeselect(id, state);
+    return deselectEntities(id, state);
   } else {
-    return multiSelect(id, state);
+    return selectEntities(id, state);
   }
 }
-export function multiClearSelection<S extends SelectEntitiesState>(
+export function clearEntitiesSelection<S extends SelectEntitiesState>(
   state: S
 ): S {
   return { ...state, selectedIds: {} };

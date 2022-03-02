@@ -180,11 +180,11 @@ selectors: ({ previousSelectors, allConfigs }: TraitSelectorsFactoryConfig) => (
 
 Another optional parameter, its just to create the ngrx selectors, it comes with two params previousSelectors and allConfig. This params you will only need them if you interact with other traits, in the example above they can be removed.
 
-I already explain what is the allConfig param, previousSelectors are the selectors of the traits that have been built before, you can see an example in select-entities.trait.selectors.ts. After the trait actions are build all the trait selector are built and merged into an object called allSelectors which you will receive in some factories, but while each selector is build is pass as a parameter the merge of the previous traits selectors in previousSelectors param, this is needed because some selectors need to be merged with selectors of other traits.
+I already explain what is the allConfig param, previousSelectors are the selectors of the traits that have been built before, you can see an example in selectEntity-entities.trait.selectors.ts. After the trait actions are build all the trait selector are built and merged into an object called allSelectors which you will receive in some factories, but while each selector is build is pass as a parameter the merge of the previous traits selectors in previousSelectors param, this is needed because some selectors need to be merged with selectors of other traits.
 
 ####Mutators
 ```mutators: ({ previousMutators, allConfigs }: TraitActionsFactoryConfig) => {```
-The mutators are just a set of functions that change the state, they are use inside the reducer to implement the changes of the state when an action occurs, this is another optional parameter, its use is to expose the mutators to the devs of other traits, in case he/she might need to use them in their own trait, you can see examples of them in the core traits like in [select-entities.trait.mutators.ts](traits/multi-selection/multi-selection.trait.mutators.ts). The important param here is the previousMutators as with selectors this is the merge of the previous traits mutators. After the selectors are build all the mutators are merge in an object called allMutators, which you will receive as a param in your reducer.
+The mutators are just a set of functions that change the state, they are use inside the reducer to implement the changes of the state when an action occurs, this is another optional parameter, its use is to expose the mutators to the devs of other traits, in case he/she might need to use them in their own trait, you can see examples of them in the core traits like in [selectEntity-entities.trait.mutators.ts](traits/multi-selection/multi-selection.trait.mutators.ts). The important param here is the previousMutators as with selectors this is the merge of the previous traits mutators. After the selectors are build all the mutators are merge in an object called allMutators, which you will receive as a param in your reducer.
 
 ####initialState
 
@@ -208,7 +208,7 @@ The initialState factory, also optional (only needed if you are implementing a r
     ),
 ```
 
-The reducer is normal ngrx reducer code, and the params should make sense if you read the previous sections, initialState is the merge of all traits initialState, allActions is the merge of all the traits actions and same goes with allSelectors, allMutators and allConfigs. If you correctly typed the params of actions, selectors,mutators and the initial state, the type of this params should be auto inferred, so you won't need to type them as long as you are only using the actions, selectors etc that you created in this trait, if you need to use action, select , etc of other traits , then you will need to get types or interfaces for your trait,action, selectors etc , here is a way to do it
+The reducer is normal ngrx reducer code, and the params should make sense if you read the previous sections, initialState is the merge of all traits initialState, allActions is the merge of all the traits actions and same goes with allSelectors, allMutators and allConfigs. If you correctly typed the params of actions, selectors,mutators and the initial state, the type of this params should be auto inferred, so you won't need to type them as long as you are only using the actions, selectors etc that you created in this trait, if you need to use action, selectEntity , etc of other traits , then you will need to get types or interfaces for your trait,action, selectors etc , here is a way to do it
 
 ```typescript
  const actions = ({ actionsGroupKey }: TraitActionsFactoryConfig) => ({
@@ -266,7 +266,7 @@ As before effects of each trait get merged , then that is mixed with the rest of
 
 #### Interact with other traits
 
-In the previous case we have shown that you can use actions and selectors of other traits in your custom trait, for example to continue with addLoadProduct trait, which adds the basic logic to load a product, but let's say we wanted that if this trait is added to a list of products where there is a single selection trait, we will like that when you select a product it automatically loads the details, to do that we will do:
+In the previous case we have shown that you can use actions and selectors of other traits in your custom trait, for example to continue with addLoadProduct trait, which adds the basic logic to load a product, but let's say we wanted that if this trait is added to a list of products where there is a single selection trait, we will like that when you selectEntity a product it automatically loads the details, to do that we will do:
 
 ```typescript
 //... inside addLoadProduct
@@ -302,10 +302,10 @@ return createTraitFactory({
           ),
         );
       });
-      // if select action exist map to loadProduct when a select action happens
-      loadProductOnSelect$ = allActions.select && createEffect(() => {
+      // if selectEntity action exist map to loadProduct when a selectEntity action happens
+      loadProductOnSelect$ = allActions.selectEntity && createEffect(() => {
           return this.actions$.pipe(
-            ofType(allActions.select),
+            ofType(allActions.selectEntity),
             // map to loadProduct...
             map(({id}) =>
               allActions.loadProduct({ id}),
@@ -318,7 +318,7 @@ return createTraitFactory({
   }
 ```
 
-In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.select exist, that means that the addSelectEntityTrait trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
+In this case we added `SingleSelectionActions` and the effect loadProductOnSelect$ is only created if in allActions.selectEntity exist, that means that the addSelectEntityTrait trait was added in the same trait config where our addLoadProduct was added, so if present it will also load the product details if one is selected on the list, but if its not present then the dev has to manually call loadProduct action to use it wherever he needs.
 
 #### Combining with other traits
 

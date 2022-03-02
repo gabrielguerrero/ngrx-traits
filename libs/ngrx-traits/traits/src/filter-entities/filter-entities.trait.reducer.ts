@@ -32,7 +32,7 @@ export function createFilterTraitReducer<
   return createReducer(
     initialState,
     on(allActions.storeEntitiesFilter, (state, { filters }) =>
-      allMutators.setFilters(filters, state)
+      allMutators.setEntitiesFilters(filters, state)
     )
   );
 }

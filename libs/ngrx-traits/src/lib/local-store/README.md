@@ -90,11 +90,11 @@ Now we are ready to use the service in our component, basically just need to add
 export class ProductSelectDialogComponent implements OnInit {
   data$ = combineLatest([
     //using local traits selectors
-    this.store.select(this.localTraits.selectors.selectAll),
-    this.store.select(this.localTraits.selectors.isLoading),
-    this.store.select(this.localTraits.selectors.selectEntitySelected),
+    this.store.selectEntity(this.localTraits.selectors.selectAll),
+    this.store.selectEntity(this.localTraits.selectors.isLoading),
+    this.store.selectEntity(this.localTraits.selectors.selectEntitySelected),
     // you could mix it with normal selectors
-    // this.store.select(UserSelectors.selectCurrentUser),
+    // this.store.selectEntity(UserSelectors.selectCurrentUser),
   ]).pipe(
     map(([products, isLoading, selectedProduct]) => ({
       products,
@@ -112,8 +112,8 @@ export class ProductSelectDialogComponent implements OnInit {
     this.store.dispatch(this.localTraits.actions.loadEntities());
   }
 
-  select(id: string) {
-    this.store.dispatch(this.localTraits.actions.select({ id }));
+  selectEntity(id: string) {
+    this.store.dispatch(this.localTraits.actions.selectEntity({ id }));
   }
 
   filter(filters: ProductFilter) {

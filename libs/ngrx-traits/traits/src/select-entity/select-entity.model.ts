@@ -32,12 +32,14 @@ export type SelectEntitySelectors<T> = {
 };
 
 export type SelectEntityMutators<T> = {
-  select<S extends LoadEntitiesState<T> & SelectEntityState>(
+  selectEntity<S extends LoadEntitiesState<T> & SelectEntityState>(
     id: string | number,
     state: S
   ): S;
-  deselect<S extends LoadEntitiesState<T> & SelectEntityState>(state: S): S;
-  toggleSelect<S extends LoadEntitiesState<T> & SelectEntityState>(
+  deselectEntity<S extends LoadEntitiesState<T> & SelectEntityState>(
+    state: S
+  ): S;
+  toggleSelectEntity<S extends LoadEntitiesState<T> & SelectEntityState>(
     id: string | number,
     state: S
   ): S;

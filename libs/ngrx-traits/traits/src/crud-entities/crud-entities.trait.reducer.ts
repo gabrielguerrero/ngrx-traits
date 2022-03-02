@@ -53,41 +53,45 @@ export function createCrudTraitReducer<
   return createReducer(
     initialState,
     on(allActions.addEntities, (state, { entities }) =>
-      allMutators.add(entities, state)
+      allMutators.addEntities(entities, state)
     ),
     on(allActions.updateEntities, (state, { updates }) =>
-      allMutators.update(updates, state)
+      allMutators.updateEntities(updates, state)
     ),
     on(allActions.upsertEntities, (state, { entities }) =>
-      allMutators.upsert(entities, state)
+      allMutators.upsertEntities(entities, state)
     ),
     on(allActions.removeEntities, (state, { keys }) =>
-      allMutators.remove(keys as any[], state)
+      allMutators.removeEntities(keys as any[], state)
     ),
     on(allActions.removeAllEntities, (state, { predicate }) =>
       predicate
-        ? allMutators.remove(predicate, state)
-        : allMutators.removeAll(state)
+        ? allMutators.removeEntities(predicate, state)
+        : allMutators.removeAllEntities(state)
     ),
     on(allActions.clearEntitiesChanges, (state) =>
-      allMutators.clearChanges(state)
+      allMutators.clearEntitiesChanges(state)
     ),
     ...insertIf<S>(sortRemote, () =>
-      on(allActions.sortEntities, (state) => allMutators.clearChanges(state))
+      on(allActions.sortEntities, (state) =>
+        allMutators.clearEntitiesChanges(state)
+      )
     ),
     ...insertIf<S>(filterRemote, () =>
-      on(allActions.filterEntities, (state) => allMutators.clearChanges(state))
+      on(allActions.filterEntities, (state) =>
+        allMutators.clearEntitiesChanges(state)
+      )
     ),
     ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) =>
-        allMutators.clearChanges(state)
+        allMutators.clearEntitiesChanges(state)
       )
     ),
     ...insertIf<S>(
       !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
         on(allActions.loadEntitiesPageSuccess, (state) =>
-          allMutators.clearChanges(state)
+          allMutators.clearEntitiesChanges(state)
         )
     )
   );

@@ -29,11 +29,9 @@ export function createCrudTraitMutators<Entity>(
     };
   }
 
-  function add<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
-    entities: Entity[],
-    state: S,
-    addFirst = false
-  ) {
+  function addEntities<
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+  >(entities: Entity[], state: S, addFirst = false) {
     const changes = [
       ...state.changes,
       ...entities.map((entity) =>
@@ -60,7 +58,7 @@ export function createCrudTraitMutators<Entity>(
     };
   }
 
-  function upsert<
+  function upsertEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(entities: Entity[], state: S) {
     const oldChanges = [...state.changes];
@@ -89,16 +87,16 @@ export function createCrudTraitMutators<Entity>(
     });
   }
 
-  function remove<
+  function removeEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(keys: number[], state: S): S;
-  function remove<
+  function removeEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(keys: string[], state: S): S;
-  function remove<
+  function removeEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(predicate: Predicate<Entity>, state: S): S;
-  function remove<
+  function removeEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(keysOrPredicate: Predicate<Entity> | string[] | number[], state: S): S {
     if (typeof keysOrPredicate === 'function') {
@@ -125,7 +123,7 @@ export function createCrudTraitMutators<Entity>(
       ],
     });
   }
-  function removeAll<
+  function removeAllEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(state: S): S {
     return adapter.removeAll({
@@ -139,13 +137,13 @@ export function createCrudTraitMutators<Entity>(
       ],
     });
   }
-  function clearChanges<
+  function clearEntitiesChanges<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(state: S) {
     return { ...state, changes: [] };
   }
 
-  function update<
+  function updateEntities<
     S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   >(updates: Update<Entity>[], state: S) {
     const oldChanges = [...state.changes];
@@ -175,11 +173,11 @@ export function createCrudTraitMutators<Entity>(
   }
 
   return {
-    add,
-    remove,
-    update,
-    removeAll,
-    clearChanges,
-    upsert,
+    addEntities,
+    removeEntities,
+    updateEntities,
+    removeAllEntities,
+    clearEntitiesChanges,
+    upsertEntities,
   };
 }
