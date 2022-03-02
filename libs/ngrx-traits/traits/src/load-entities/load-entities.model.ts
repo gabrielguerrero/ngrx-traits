@@ -41,7 +41,7 @@ export type LoadEntitiesSelectors<T> = {
    * returns all ids of the entities in an array
    * @param state
    */
-  selectEntitiesIds: (state: LoadEntitiesState<T>) => string[] | number[];
+  selectEntitiesIdsList: (state: LoadEntitiesState<T>) => string[] | number[];
   /**
    * returns all entities in a map with the id as key of the map
    * @param state
