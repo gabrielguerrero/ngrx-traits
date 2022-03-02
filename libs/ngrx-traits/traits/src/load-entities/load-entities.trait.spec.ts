@@ -227,19 +227,25 @@ describe('addLoadEntitiesTrait Trait', () => {
       { content: 'e2e' }
     );
 
-    it('check selectAll returns filtered data ', () => {
+    it('check selectEntitiesList returns filtered data ', () => {
+      expect(selectors.selectEntitiesIdsList.projector(initialState)).toEqual([
+        1,
+      ]);
+    });
+
+    it('check selectEntitiesList returns filtered data ', () => {
       expect(selectors.selectEntitiesList.projector(initialState)).toEqual([
         { id: 1, content: 'e2e' },
       ]);
     });
 
-    it('check selectEntities returns filtered data ', () => {
+    it('check selectEntitiesMap returns filtered data ', () => {
       expect(selectors.selectEntitiesMap.projector(initialState)).toEqual({
         1: { id: 1, content: 'e2e' },
       });
     });
 
-    it('check selectTotal returns filtered data count ', () => {
+    it('check selectEntitiesTotal returns filtered data count ', () => {
       expect(selectors.selectEntitiesTotal.projector(initialState)).toEqual(1);
     });
   });

@@ -19,7 +19,7 @@ export function createLoadEntitiesTraitSelectors<Entity>(
   let selectors: LoadEntitiesSelectors<Entity> = {
     selectEntitiesList: entitySelectors.selectAll,
     selectEntitiesMap: entitySelectors.selectEntities,
-    selectEntitiesIds: entitySelectors.selectIds,
+    selectEntitiesIdsList: entitySelectors.selectIds,
     selectEntitiesTotal: entitySelectors.selectTotal,
     isEntitiesLoadingFail: isFail,
     isEntitiesLoading: isLoading,
@@ -54,7 +54,7 @@ export function createLoadEntitiesTraitSelectors<Entity>(
         selectEntitiesList,
         (entities) => entities.length
       ),
-      selectEntitiesIds: createSelector(
+      selectEntitiesIdsList: createSelector(
         selectEntitiesList,
         (entities) =>
           entities.map((e) => adapter?.selectId(e)) as string[] | number[]

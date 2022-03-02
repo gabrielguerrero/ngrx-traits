@@ -82,7 +82,7 @@ async function basicProductTest(
     .toPromise();
   expect(result).toEqual([{ id: 1, name: 'X', description: 'Y', price: 10 }]);
   const result2 = await store
-    .select(selectors.selectProductsIds)
+    .select(selectors.selectProductsIdsList)
     .pipe(first())
     .toPromise();
   expect(result2).toEqual([1]);
@@ -106,7 +106,7 @@ async function basicProductOrdersTest(
     .toPromise();
   expect(result).toEqual([{ id: 2, name: 'X', description: 'Y', price: 10 }]);
   const result2 = await store
-    .select(selectors.selectProductOrdersIds)
+    .select(selectors.selectProductOrdersIdsList)
     .pipe(first())
     .toPromise();
   expect(result2).toEqual([2]);
