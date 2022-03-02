@@ -19,7 +19,7 @@ interface SelectedProductState {
   selectedProduct: ProductDetail;
 }
 
-export function addLoadProduct() {
+export function addLoadProductTrait() {
   const initialState: SelectedProductState = { selectedProduct: null };
 
   return createTraitFactory({
@@ -234,7 +234,7 @@ return createTraitFactory({
    const allActions = actions as LoadProductActions & LoadEntitiesActions<Product>; 
    createReducer(
       initialState,
-      on(allActions.loadProductSuccess, (state, { product }) => ({
+      on(allActions.loadEntitiesSuccess, (state, { product }) => ({
    // ...
 ```
 
@@ -252,7 +252,7 @@ effects: ({ allActions, allSelectors, allConfigs }) => {
         ofType(allActions.loadProduct),
         // call backend...
         map(({ id }) =>
-          allActions.loadProductSuccess({ product: { id, name: 'sss' } })
+          allActions.loadEntitiesSuccess({ product: { id, name: 'sss' } })
         )
       );
     });
