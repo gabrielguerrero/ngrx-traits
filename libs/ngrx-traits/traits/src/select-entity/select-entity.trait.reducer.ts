@@ -58,29 +58,35 @@ export function createSelectEntityTraitReducer<
   return createReducer(
     initialState,
     on(allActions.selectEntity, (state, { id }) =>
-      allMutators.select(id, state)
+      allMutators.selectEntity(id, state)
     ),
-    on(allActions.deselectEntity, (state) => allMutators.deselect(state)),
+    on(allActions.deselectEntity, (state) => allMutators.deselectEntity(state)),
     on(allActions.toggleSelectEntity, (state, { id }) =>
-      allMutators.toggleSelect(id, state)
+      allMutators.toggleSelectEntity(id, state)
     ),
     ...insertIf<S>(allActions.removeAllEntities, () =>
-      on(allActions.removeAllEntities, (state) => allMutators.deselect(state))
+      on(allActions.removeAllEntities, (state) =>
+        allMutators.deselectEntity(state)
+      )
     ),
     ...insertIf<S>(sortRemote, () =>
-      on(allActions.sortEntities, (state) => allMutators.deselect(state))
+      on(allActions.sortEntities, (state) => allMutators.deselectEntity(state))
     ),
     ...insertIf<S>(allActions.filterEntities, () =>
-      on(allActions.filterEntities, (state) => allMutators.deselect(state))
+      on(allActions.filterEntities, (state) =>
+        allMutators.deselectEntity(state)
+      )
     ),
     ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
-      on(allActions.loadEntitiesSuccess, (state) => allMutators.deselect(state))
+      on(allActions.loadEntitiesSuccess, (state) =>
+        allMutators.deselectEntity(state)
+      )
     ),
     ...insertIf<S>(
       !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
         on(allActions.loadEntitiesPageSuccess, (state) =>
-          allMutators.deselect(state)
+          allMutators.deselectEntity(state)
         )
     ),
     ...insertIf<S>(allActions.removeEntities, () =>

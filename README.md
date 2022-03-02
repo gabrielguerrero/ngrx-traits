@@ -45,7 +45,7 @@ npm i ngrx-traits --save
 
 ## Getting Started
 
-The best way to understand how to use the traits is to see an example. Let's imagine that you need to implement a page that shows a list of products which you can select and purchase. Start by creating the interface for a Product Entity:
+The best way to understand how to use the traits is to see an example. Let's imagine that you need to implement a page that shows a list of products which you can selectEntity and purchase. Start by creating the interface for a Product Entity:
 
 ```ts
 export interface Product {
@@ -159,8 +159,8 @@ Next, just install the ProductsStateModule and use the actions and selectors in 
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsList),
-    this.store.select(ProductSelectors.isLoadingProducts),
+    this.store.selectEntity(ProductSelectors.selectProductsList),
+    this.store.selectEntity(ProductSelectors.isLoadingProducts),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
   constructor(private store: Store) {}
 
@@ -189,7 +189,7 @@ In order for the selection to work:
   * add the addSelectEntityTrait trait
   
 
-Now we want to logic select a product in the list , for that add the addSelectEntityTrait trait:
+Now we want to logic selectEntity a product in the list , for that add the addSelectEntityTrait trait:
 #### products-basket.traits.ts
 
 ```ts
@@ -202,10 +202,10 @@ export const productFeature = createEntityFeatureFactory(
   featureSelector: 'products',
 });
 ```
-The result is a new `select` action and a `selectEntitySelected` selector. Notice how this new actions and selectors are mixed with the others, the more traits you add, more actions, selectors, ...etc are mixed, this composability is very porweful, you can go from a local filtered list to a remotely paginated and remotely filtered one with small changes, and it will work the same way with your own custom traits.
+The result is a new `selectEntity` action and a `selectEntitySelected` selector. Notice how this new actions and selectors are mixed with the others, the more traits you add, more actions, selectors, ...etc are mixed, this composability is very porweful, you can go from a local filtered list to a remotely paginated and remotely filtered one with small changes, and it will work the same way with your own custom traits.
 
-Next step is to change the container component to use the new select action,
-for this example, it is assumed that a select output was added as a prop of the list component called on the click of the row, the container will now look like:
+Next step is to change the container component to use the new selectEntity action,
+for this example, it is assumed that a selectEntity output was added as a prop of the list component called on the click of the row, the container will now look like:
 #### product-page.component.ts
 
 ```ts
@@ -215,8 +215,8 @@ for this example, it is assumed that a select output was added as a prop of the 
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsList),
-    this.store.select(ProductSelectors.isLoadingProduct),
+    this.store.selectEntity(ProductSelectors.selectProductsList),
+    this.store.selectEntity(ProductSelectors.isLoadingProduct),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -225,8 +225,8 @@ export class ProductPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProducts());
   }
   // new event handler ↓
-  select(id: string) {
-    this.store.dispatch(ProductActions.select({ id }));
+  selectEntity(id: string) {
+    this.store.dispatch(ProductActions.selectEntity({ id }));
   }
 }
 ```
@@ -237,10 +237,10 @@ export class ProductPageContainerComponent implements OnInit {
 <ng-container *ngIf="data$ | async as data">
   <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
   <ng-template #listProducts>
-    <!-- new select event ↓ -->
+    <!-- new selectEntity event ↓ -->
     <product-list
       [data]="data.products"
-      (select)="select($event)"
+      (selectEntity)="selectEntity($event)"
     ></product-list>
   </ng-template>
 </ng-container>
@@ -277,7 +277,7 @@ checkout$ = createEffect(() =>
   this.actions$.pipe(
     ofType(ProductActions.checkout),
     concatLatestFrom(() =>
-      this.store.select(ProductSelectors.selectProductSelected)
+      this.store.selectEntity(ProductSelectors.selectProductSelected)
     ),
     exhaustMap((product) =>
       this.productService.checkout({ productId: product.id }).pipe(
@@ -299,11 +299,11 @@ And add the button to the component:
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsList),
-    this.store.select(ProductSelectors.isLoadingProducts),
+    this.store.selectEntity(ProductSelectors.selectProductsList),
+    this.store.selectEntity(ProductSelectors.isLoadingProducts),
     // new selectors ↓
-    this.store.select(ProductSelectors.selectProductSelected),
-    this.store.select(ProductSelectors.isLoadingCheckout),
+    this.store.selectEntity(ProductSelectors.selectProductSelected),
+    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
   ]).pipe(
     map(([products, isLoading, selectedProduct, isLoadingCheckout]) => ({
       products,
@@ -319,7 +319,7 @@ export class ProductPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProducts());
   }
 
-  select(id: string) {
+  selectEntity(id: string) {
     this.store.dispatch(ProductActions.selectProduct({ id }));
   }
   // new event handler ↓
@@ -337,7 +337,7 @@ export class ProductPageContainerComponent implements OnInit {
   <ng-template #listProducts>
     <product-list
       [data]="data.products"
-      (select)="select($event)"
+      (selectEntity)="selectEntity($event)"
     ></product-list>
   </ng-template>
   <!-- new checkout button ↓ -->
@@ -401,10 +401,10 @@ Implement a presentational component for the filter section that has and input b
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsList),
-    this.store.select(ProductSelectors.isLoadingProduct),
-    this.store.select(ProductSelectors.selectProductSelected),
-    this.store.select(ProductSelectors.isLoadingCheckout),
+    this.store.selectEntity(ProductSelectors.selectProductsList),
+    this.store.selectEntity(ProductSelectors.isLoadingProduct),
+    this.store.selectEntity(ProductSelectors.selectProductSelected),
+    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -413,7 +413,7 @@ export class ProductPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProducts());
   }
 
-  select(id: string) {
+  selectEntity(id: string) {
     this.store.dispatch(ProductActions.selectProduct({ id }));
   }
 
@@ -437,7 +437,7 @@ export class ProductPageContainerComponent implements OnInit {
     <products-search-form (search)="filter($event)"></products-search-form>
     <product-list
       [list]="data.products"
-      (selectProduct)="select($event)"
+      (selectProduct)="selectEntity($event)"
     ></product-list>
   </ng-template>
   <button
@@ -489,10 +489,10 @@ Next, add it to the component
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsList),
-    this.store.select(ProductSelectors.isLoadingProduct),
-    this.store.select(ProductSelectors.selectProductSelected),
-    this.store.select(ProductSelectors.isLoadingCheckout),
+    this.store.selectEntity(ProductSelectors.selectProductsList),
+    this.store.selectEntity(ProductSelectors.isLoadingProduct),
+    this.store.selectEntity(ProductSelectors.selectProductSelected),
+    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -501,8 +501,8 @@ export class ProductPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProducts());
   }
 
-  select(id: string) {
-    this.store.dispatch(ProductActions.select({ id }));
+  selectEntity(id: string) {
+    this.store.dispatch(ProductActions.selectEntity({ id }));
   }
 
   checkout() {
@@ -529,7 +529,7 @@ export class ProductPageContainerComponent implements OnInit {
     <!-- new sort event ↓ -->
     <product-list
       [list]="data.products"
-      (select)="select($event)"
+      (selectEntity)="selectEntity($event)"
       (sort)="sort($event)"
     ></product-list>
   </ng-template>
@@ -576,7 +576,7 @@ export class ProductsEffects {
       ofType(ProductActions.loadProducts),
       concatLatestFrom(() =>
         // get filters ↓
-        this.store.select(ProductSelectors.selectFilters)
+        this.store.selectEntity(ProductSelectors.selectFilters)
       ),
       switchMap(([_, filters]) =>
         //call your service to get the products data
@@ -626,9 +626,9 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts), // on loadEntities
       concatLatestFrom(() => [
-        this.store.select(ProductSelectors.selectFilters),
+        this.store.selectEntity(ProductSelectors.selectFilters),
         // get sorting ↓
-        this.store.select(ProductSelectors.selectSort),
+        this.store.selectEntity(ProductSelectors.selectSort),
       ]),
       switchMap(([_, filters, sort]) =>
         //call your service to get the products data
@@ -692,10 +692,10 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts), // on loadEntities
       concatLatestFrom(() => [
-        this.store.select(ProductSelectors.selectFilter),
-        this.store.select(ProductSelectors.selectSort),
+        this.store.selectEntity(ProductSelectors.selectFilter),
+        this.store.selectEntity(ProductSelectors.selectSort),
         // get pagination details for the request ↓
-        this.store.select(ProductSelectors.selectPagedRequest),
+        this.store.selectEntity(ProductSelectors.selectPagedRequest),
       ]),
       switchMap(([_, filters, sort, pagination]) =>
         //call your service to get the products data
@@ -736,10 +736,10 @@ Now that we have our effect ready , lets change our container component to use t
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
     // changed selectAll for selectPage ↓
-    this.store.select(ProductSelectors.selectProductsPage),
-    this.store.select(ProductSelectors.isLoadingProduct),
-    this.store.select(ProductSelectors.selectProductSelected),
-    this.store.select(ProductSelectors.isLoadingCheckout),
+    this.store.selectEntity(ProductSelectors.selectProductsPage),
+    this.store.selectEntity(ProductSelectors.isLoadingProduct),
+    this.store.selectEntity(ProductSelectors.selectProductSelected),
+    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -748,7 +748,7 @@ export class ProductPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProducts());
   }
 
-  select(id: string) {
+  selectEntity(id: string) {
     this.store.dispatch(ProductActions.selectProduct({ id }));
   }
 
@@ -780,7 +780,7 @@ export class ProductPageContainerComponent implements OnInit {
     <!-- new page event ↓ -->
     <product-list
       [data]="data.products"
-      (select)="select($event)"
+      (selectEntity)="selectEntity($event)"
       (sort)="sort($event)"
       (page)="loadPage($event)"
     ></product-list>

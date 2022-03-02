@@ -50,7 +50,7 @@ export function createLoadEntitiesTraitReducer<
     })),
     ...insertIf<S>(handleEntitiesMerge, () =>
       on(actions.loadEntitiesSuccess, (state, { entities }) =>
-        allMutators.setAll(entities, {
+        allMutators.setEntitiesList(entities, {
           ...state,
         })
       )

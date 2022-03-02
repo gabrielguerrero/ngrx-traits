@@ -8,7 +8,7 @@ export function createFilterTraitMutators<Entity, F>(): FilterEntitiesMutators<
   Entity,
   F
 > {
-  function setFilters<
+  function setEntitiesFilters<
     S extends LoadEntitiesState<Entity> & FilterEntitiesState<F>
   >(filters: F, state: S) {
     return {
@@ -16,5 +16,5 @@ export function createFilterTraitMutators<Entity, F>(): FilterEntitiesMutators<
       filters,
     };
   }
-  return { setFilters };
+  return { setEntitiesFilters };
 }

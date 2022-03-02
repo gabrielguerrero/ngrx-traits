@@ -220,7 +220,7 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({ 7: true });
     });
 
-    it('toggleSelect entity', () => {
+    it('toggleSelectEntity entity', () => {
       const { reducer, actions, state } = init();
       let result = reducer(state, actions.toggleSelectEntities({ id: 3 }));
       result = reducer(result, actions.toggleSelectEntities({ id: 7 }));
@@ -236,14 +236,14 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('clearEntitiesSelection should deselect all', () => {
+    it('clearEntitiesSelection should deselectEntity all', () => {
       const { reducer, actions, state } = init();
       let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(result, actions.clearEntitiesSelection());
       expect(result.selectedIds).toEqual({});
     });
 
-    it('loadEntitiesSuccess should deselect also', () => {
+    it('loadEntitiesSuccess should deselectEntity also', () => {
       const { reducer, actions, state } = init();
       let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
@@ -253,7 +253,7 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('remote filter should deselect also', () => {
+    it('remote filter should deselectEntity also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
       let result = reducer(state, actions.selectEntities({ id: 3 }));
@@ -264,7 +264,7 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('remote sort should deselect also', () => {
+    it('remote sort should deselectEntity also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
       let result = reducer(state, actions.selectEntities({ id: 3 }));
@@ -275,7 +275,7 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('pagination partial should deselect also', () => {
+    it('pagination partial should deselectEntity also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
       let result = reducer(state, actions.selectEntities({ id: 3 }));
@@ -283,7 +283,7 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('removeAll should deselect also', () => {
+    it('removeAll should deselectEntity also', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
       let result = reducer(state, actions.selectEntities({ id: 3 }));
@@ -291,7 +291,7 @@ describe('addSelectEntities trait', () => {
       expect(result.selectedIds).toEqual({});
     });
 
-    it('remove should deselect only if the selectedId was removed', () => {
+    it('remove should deselectEntity only if the selectedId was removed', () => {
       const { reducer, actions, state } =
         initPaginatedWithFilteringAndSorting();
       let result = reducer(state, actions.selectEntities({ id: 3 }));

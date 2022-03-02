@@ -79,16 +79,16 @@ export function createSelectEntitiesTraitReducer<
   return createReducer(
     initialState,
     on(allActions.selectEntities, (state, { id }) =>
-      allMutators.multiSelect(id, state)
+      allMutators.selectEntities(id, state)
     ),
     on(allActions.deselectEntities, (state, { id }) =>
-      allMutators.multiDeselect(id, state)
+      allMutators.deselectEntities(id, state)
     ),
     on(allActions.toggleSelectEntities, (state, { id }) =>
-      allMutators.multiToggleSelect(id, state)
+      allMutators.toggleSelectEntities(id, state)
     ),
     on(allActions.toggleSelectAllEntities, (state) =>
-      allMutators.toggleSelectAll(state)
+      allMutators.toggleSelectAllEntities(state)
     ),
     ...insertIf<S>(allActions.removeEntities, () =>
       on(allActions.removeEntities, (state, { keys }) => {
@@ -105,33 +105,33 @@ export function createSelectEntitiesTraitReducer<
       )
     ),
     on(allActions.clearEntitiesSelection, (state) =>
-      allMutators.multiClearSelection(state)
+      allMutators.clearEntitiesSelection(state)
     ),
     ...insertIf<S>(allActions.removeAllEntities, () =>
       on(allActions.removeAllEntities, (state) =>
-        allMutators.multiClearSelection(state)
+        allMutators.clearEntitiesSelection(state)
       )
     ),
     ...insertIf<S>(sortRemote, () =>
       on(allActions.sortEntities, (state) =>
-        allMutators.multiClearSelection(state)
+        allMutators.clearEntitiesSelection(state)
       )
     ),
     ...insertIf<S>(allActions.filterEntities, () =>
       on(allActions.filterEntities, (state) =>
-        allMutators.multiClearSelection(state)
+        allMutators.clearEntitiesSelection(state)
       )
     ),
     ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) =>
-        allMutators.multiClearSelection(state)
+        allMutators.clearEntitiesSelection(state)
       )
     ),
     ...insertIf<S>(
       !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
         on(allActions.loadEntitiesPageSuccess, (state) =>
-          allMutators.multiClearSelection(state)
+          allMutators.clearEntitiesSelection(state)
         )
     )
   );

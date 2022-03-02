@@ -5,17 +5,17 @@ import {
 } from './select-entities.model';
 import { toMap } from 'ngrx-traits';
 import {
-  multiClearSelection,
-  multiDeselect,
-  multiSelect,
-  multiToggleSelect,
+  clearEntitiesSelection,
+  deselectEntities,
+  selectEntities,
+  toggleSelectEntities,
 } from './select-entities.utils';
 import { LoadEntitiesState } from 'ngrx-traits/traits';
 
 export function createSelectEntitiesTraitMutators<Entity>({
   isAllEntitiesSelected,
 }: SelectEntitiesSelectors<Entity>): SelectEntitiesMutators<Entity> {
-  function toggleSelectAll<
+  function toggleSelectAllEntities<
     S extends LoadEntitiesState<Entity> & SelectEntitiesState
   >(state: S): S {
     const allSelected = isAllEntitiesSelected(state);
@@ -33,10 +33,10 @@ export function createSelectEntitiesTraitMutators<Entity>({
   }
 
   return {
-    multiDeselect,
-    multiSelect,
-    multiToggleSelect,
-    toggleSelectAll,
-    multiClearSelection,
+    selectEntities,
+    deselectEntities,
+    toggleSelectEntities,
+    toggleSelectAllEntities,
+    clearEntitiesSelection,
   };
 }

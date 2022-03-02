@@ -51,26 +51,30 @@ export type SelectEntitiesSelectors<Entity> = {
 };
 
 export type SelectEntitiesMutators<Entity> = {
-  multiSelect: <S extends LoadEntitiesState<Entity> & SelectEntitiesState>(
+  selectEntities: <S extends LoadEntitiesState<Entity> & SelectEntitiesState>(
     id: number | string,
     state: S
   ) => S;
 
-  multiDeselect<S extends LoadEntitiesState<Entity> & SelectEntitiesState>(
+  deselectEntities<S extends LoadEntitiesState<Entity> & SelectEntitiesState>(
     id: number | string,
     state: S
   ): S;
 
-  multiToggleSelect<S extends LoadEntitiesState<Entity> & SelectEntitiesState>(
+  toggleSelectEntities<
+    S extends LoadEntitiesState<Entity> & SelectEntitiesState
+  >(
     id: number | string,
     state: S
   ): S;
 
-  toggleSelectAll<S extends LoadEntitiesState<Entity> & SelectEntitiesState>(
+  toggleSelectAllEntities<
+    S extends LoadEntitiesState<Entity> & SelectEntitiesState
+  >(
     state: S
   ): S;
 
-  multiClearSelection<
+  clearEntitiesSelection<
     S extends LoadEntitiesState<Entity> & SelectEntitiesState
   >(
     state: S
