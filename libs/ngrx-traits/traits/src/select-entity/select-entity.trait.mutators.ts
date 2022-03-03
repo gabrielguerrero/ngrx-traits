@@ -1,5 +1,5 @@
 import { SelectEntityMutators, SelectEntityState } from './select-entity.model';
-import { LoadEntitiesState } from 'ngrx-traits/traits';
+import { LoadEntitiesState } from '../load-entities';
 
 export function createSelectEntityTraitMutators<
   Entity

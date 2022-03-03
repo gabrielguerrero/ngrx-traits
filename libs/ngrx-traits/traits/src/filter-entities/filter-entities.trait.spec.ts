@@ -15,7 +15,7 @@ import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { hot, Scheduler } from 'jest-marbles';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
-import { FilterEntitiesState } from 'ngrx-traits/traits';
+import { FilterEntitiesState } from '../filter-entities';
 
 export interface TestState
   extends LoadEntitiesState<Todo>,

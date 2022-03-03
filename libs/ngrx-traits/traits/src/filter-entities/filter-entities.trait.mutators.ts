@@ -2,7 +2,7 @@ import {
   FilterEntitiesMutators,
   FilterEntitiesState,
 } from './filter-entities.model';
-import { LoadEntitiesState } from 'ngrx-traits/traits';
+import { LoadEntitiesState } from '../load-entities';
 
 export function createFilterTraitMutators<Entity, F>(): FilterEntitiesMutators<
   Entity,

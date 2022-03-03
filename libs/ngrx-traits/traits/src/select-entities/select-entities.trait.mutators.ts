@@ -10,7 +10,7 @@ import {
   selectEntities,
   toggleSelectEntities,
 } from './select-entities.utils';
-import { LoadEntitiesState } from 'ngrx-traits/traits';
+import { LoadEntitiesState } from '../load-entities';
 
 export function createSelectEntitiesTraitMutators<Entity>({
   isAllEntitiesSelected,

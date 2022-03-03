@@ -2,7 +2,7 @@ import {
   FilterEntitiesSelectors,
   FilterEntitiesState,
 } from './filter-entities.model';
-import { LoadEntitiesState } from 'ngrx-traits/traits';
+import { LoadEntitiesState } from '../load-entities';
 export function selectEntitiesFilter<Entity, F>(
   state: LoadEntitiesState<Entity> & FilterEntitiesState<F>
 ) {

@@ -2,7 +2,7 @@ import {
   SelectEntitySelectors,
   SelectEntityState,
 } from './select-entity.model';
-import { LoadEntitiesState } from 'ngrx-traits/traits';
+import { LoadEntitiesState } from '../load-entities';
 
 export function createSelectEntityTraitSelectors<
   Entity

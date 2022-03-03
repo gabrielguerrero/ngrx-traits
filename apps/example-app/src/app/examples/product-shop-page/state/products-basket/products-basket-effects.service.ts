@@ -17,12 +17,17 @@ export class ProductsBasketEffects {
     this.actions$.pipe(
       ofType(ProductBasketActions.checkout),
       concatLatestFrom(() =>
-        this.store.select(ProductBasketSelectors.selectProductOrderSelected)
+        this.store.select(ProductBasketSelectors.selectProductOrdersList)
       ),
-      filter(([_, product]) => !!product),
-      exhaustMap(([_, product]) =>
+      filter(([_, products]) => !!products.length),
+      exhaustMap(([_, products]) =>
         this.orderService
-          .checkout({ productId: product!.id, quantity: 1 })
+          .checkout(
+            ...products.map((p) => ({
+              productId: p.id,
+              quantity: p.quantity || 1,
+            }))
+          )
           .pipe(
             map((orderId) => ProductBasketActions.checkoutSuccess({ orderId })),
             catchError(() => of(ProductBasketActions.checkoutFail()))
