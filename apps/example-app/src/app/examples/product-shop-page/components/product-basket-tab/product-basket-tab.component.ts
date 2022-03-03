@@ -51,7 +51,7 @@ import { Sort } from 'ngrx-traits/traits';
             mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="!data.products.length"
+            [disabled]="!data.products.length || data.isLoadingCheckout"
             (click)="checkout()"
           >
             <mat-spinner

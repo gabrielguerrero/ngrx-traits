@@ -9,7 +9,7 @@ import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { createEntityFeatureFactory } from 'ngrx-traits';
 import { addFilterEntitiesTrait } from '../filter-entities/filter-entities.trait';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { FilterEntitiesState } from 'ngrx-traits/traits';
+import { FilterEntitiesState } from '../filter-entities';
 
 export interface Todo {
   id: number;

@@ -1,15 +1,9 @@
 import {
-  addAsyncActionTrait,
   addCrudEntitiesTrait,
-  addEntitiesPaginationTrait,
-  addFilterEntitiesTrait,
   addLoadEntitiesTrait,
   addSelectEntitiesTrait,
-  addSelectEntityTrait,
-  addSortEntitiesTrait,
-  CacheType,
 } from 'ngrx-traits/traits';
-import { createFeatureSelector, props, Store, StoreModule } from '@ngrx/store';
+import { Store, StoreModule } from '@ngrx/store';
 import {
   addEntityFeaturesProperties,
   combineEntityFeatures,
