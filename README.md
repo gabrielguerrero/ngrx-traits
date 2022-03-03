@@ -22,7 +22,7 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Getting Started](#getting-started)
 
-### [Playground](https://stackblitz.com/edit/github-m3f3h1?file=src/app/product-list-page/state/products/products.traits.ts)
+### [Playground](https://stackblitz.com/edit/ngrx-traits-playground?file=src%2Fapp%2Fproduct-list-page%2Fstate%2Fproducts%2Fproducts.traits.ts)
 
 ### [Extensible Setup](#extensible-setup-1)
 
