@@ -29,8 +29,11 @@ export class ProductsEffects {
             take: pagination.size,
           })
           .pipe(
-            map((products) =>
-              ProductActions.loadProductsSuccess({ entities: products })
+            map((res) =>
+              ProductActions.loadProductsSuccess({
+                entities: res.resultList,
+                total: res.total,
+              })
             ),
             catchError(() => of(ProductActions.loadProductsFail()))
           )

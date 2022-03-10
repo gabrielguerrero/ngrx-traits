@@ -46,8 +46,8 @@ const productsEffect: TraitLocalEffectsFactory<typeof productFeatureFactory> = (
         switchMap(() =>
           //call your service to get the products data
           this.productService.getProducts().pipe(
-            map((products) =>
-              allActions.loadProductsSuccess({ entities: products })
+            map((res) =>
+              allActions.loadProductsSuccess({ entities: res.resultList })
             ),
             catchError(() => of(allActions.loadProductsFail()))
           )

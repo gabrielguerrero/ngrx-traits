@@ -20,8 +20,8 @@ export class ProductsBasketEffects {
       switchMap(() =>
         //call your service to get the products data
         this.productService.getProducts().pipe(
-          map((products) =>
-            ProductActions.loadProductsSuccess({ entities: products })
+          map((res) =>
+            ProductActions.loadProductsSuccess({ entities: res.resultList })
           ),
           catchError(() => of(ProductActions.loadProductsFail()))
         )

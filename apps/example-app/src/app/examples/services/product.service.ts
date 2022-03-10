@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { of } from 'rxjs';
 import { Product, ProductDetail } from '../models';
-import { delay } from 'rxjs/operators';
+import { delay, tap } from 'rxjs/operators';
 import { sortData } from 'ngrx-traits/traits';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
   getProducts(options?: {
-    search: string | undefined;
-    sortColumn: keyof Product | undefined;
-    sortAscending: boolean;
-    skip: number | undefined;
-    take: number | undefined;
+    search?: string | undefined;
+    sortColumn?: keyof Product | undefined;
+    sortAscending?: boolean | undefined;
+    skip?: number | undefined;
+    take?: number | undefined;
   }) {
     let result = [...mockProducts];
     if (options?.search)
@@ -31,7 +31,10 @@ export class ProductService {
         direction: options.sortAscending ? 'asc' : 'desc',
       });
     }
-    return of(result).pipe(delay(500));
+    return of({ resultList: result, total: mockProducts.length }).pipe(
+      delay(500),
+      tap((value) => console.log('/products', options, value))
+    );
   }
 
   getProductDetail(id: string) {
@@ -45,7 +48,10 @@ export class ProductService {
         maker: 'Nintendo',
         releaseDate: '' + getRandomInteger(1990, 2000),
       } as ProductDetail);
-    return of(productDetail).pipe(delay(300));
+    return of(productDetail).pipe(
+      delay(300),
+      tap((value) => console.log('/products/' + id, value))
+    );
   }
 }
 

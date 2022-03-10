@@ -118,8 +118,8 @@ export class ProductsEffects {
       switchMap(() =>
         //call your service to get the products data
         this.productService.getProducts().pipe(
-          map((products) =>
-            ProductActions.loadProductsSuccess({ entities: products })
+          map((res) =>
+            ProductActions.loadProductsSuccess({ entities: res.resultList })
           ),
           catchError(() => of(ProductActions.loadProductsFail()))
         )
@@ -585,8 +585,8 @@ export class ProductsEffects {
             search: filters.search,
           })
           .pipe(
-            map((products) =>
-              ProductActions.loadProductsSuccess({ entities: products })
+            map((res) =>
+              ProductActions.loadProductsSuccess({ entities: res.resultList })
             ),
             catchError(() => of(ProductActions.loadProductsFail()))
           )
@@ -639,8 +639,8 @@ export class ProductsEffects {
             sortAcsending: sort.direction === 'asc',
           })
           .pipe(
-            map((products) =>
-              ProductActions.loadProductsSuccess({ entities: products })
+            map((res) =>
+              ProductActions.loadProductsSuccess({ entities: res.resultList })
             ),
             catchError(() => of(ProductActions.loadProductsFail()))
           )
@@ -708,8 +708,8 @@ export class ProductsEffects {
             take: pagination.size,
           })
           .pipe(
-            map((products) =>
-              ProductActions.loadProductsSuccess({ entities: products })
+            map((res) =>
+              ProductActions.loadProductsSuccess({ entities: res.resultList, total: res.total })
             ),
             catchError(() => of(ProductActions.loadProductsFail()))
           )

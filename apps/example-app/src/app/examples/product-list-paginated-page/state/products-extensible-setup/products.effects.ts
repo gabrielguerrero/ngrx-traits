@@ -19,9 +19,9 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts),
       concatLatestFrom(() => [
-        this.store.select(ProductSelectors.selectFilter),
-        this.store.select(ProductSelectors.selectSort),
-        this.store.select(ProductSelectors.selectPagedRequest),
+        this.store.select(ProductSelectors.selectProductsFilter),
+        this.store.select(ProductSelectors.selectProductsSort),
+        this.store.select(ProductSelectors.selectProductsPagedRequest),
       ]),
       switchMap(([_, filters, sort, pagination]) =>
         //call your service to get the products data
@@ -34,8 +34,11 @@ export class ProductsEffects {
             take: pagination.size,
           })
           .pipe(
-            map((products) =>
-              ProductActions.loadProductsSuccess({ entities: products })
+            map((res) =>
+              ProductActions.loadProductsSuccess({
+                entities: res.resultList,
+                total: res.total,
+              })
             ),
             catchError(() => of(ProductActions.loadProductsFail()))
           )
