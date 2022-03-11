@@ -20,6 +20,7 @@ export class ProductService {
           ? entity.name.toLowerCase().includes(options?.search.toLowerCase())
           : false;
       });
+    const total = result.length;
     if (options?.skip || options?.take) {
       const skip = options.skip ?? 0;
       const take = options.take ?? 0;
@@ -31,7 +32,7 @@ export class ProductService {
         direction: options.sortAscending ? 'asc' : 'desc',
       });
     }
-    return of({ resultList: result, total: mockProducts.length }).pipe(
+    return of({ resultList: result, total }).pipe(
       delay(500),
       tap((value) => console.log('/products', options, value))
     );
