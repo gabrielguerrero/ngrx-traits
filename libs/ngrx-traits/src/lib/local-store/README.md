@@ -8,6 +8,7 @@ To use it first you need a trait factory like the following, (it can have any co
 
 ```typescript
 const productFeatureFactory = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>({
@@ -57,12 +58,12 @@ export class ProductsLocalTraits extends TraitsLocalStore<typeof productFeatureF
   // }
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(this.localActions.loadEntities),
+      ofType(this.localActions.loadProducts),
       switchMap(() =>
         //call your service to get the products data
         this.productService.getProducts().pipe(
-          map((products) => this.localActions.loadEntitiesSuccess({ entities: products })),
-          catchError(() => of(this.localActions.loadEntitiesFail()))
+          map((products) => this.localActions.loadProductsSuccess({ entities: products })),
+          catchError(() => of(this.localActions.loadProductsFail()))
         )
       )
     )
@@ -86,21 +87,19 @@ You can also add custom actions, selectors, reducers, and effects to your LocalT
 We are ready to use the service in our component, basically we just need to add the service we just created in the providers property of the _@Component_ like `providers: [ProductsLocalTraits],` and declare the service in the constructor of your component, after that you use like you will use normal actions and selectors for example:
 
 ```typescript
-.
-.
-.
-providers: [ProductsLocalTraits], //<- Our local store service
-  changeDetection
-:
-ChangeDetectionStrategy.OnPush,
+@Component({
+  selector: 'product-select-dialog',
+  templateUrl: './product-select-dialog.component.html', 
+  providers: [ProductsLocalTraits], //<- Our local store service
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class ProductSelectDialogComponent implements OnInit {
   data$ = combineLatest([
     //using local traits selectors
-    this.store.selectEntity(this.traits.localSelectors.selectAll),
-    this.store.selectEntity(this.traits.localSelectors.isLoading),
-    this.store.selectEntity(this.traits.localSelectors.selectEntitySelected),
+    this.store.select(this.localTraits.localSelectors.selectProductsList),
+    this.store.select(this.localTraits.localSelectors.isProductsLoading),
+    this.store.select(this.localTraits.localSelectors.selectProductSelected),    
     // you could mix it with normal selectors
     // this.store.selectEntity(UserSelectors.selectCurrentUser),
   ]).pipe(
@@ -112,29 +111,29 @@ export class ProductSelectDialogComponent implements OnInit {
   );
 
   constructor(private store: Store,
-              private traits: ProductsLocalTraits // inject our service
-  ) {
-  }
+              private traits: ProductsLocalTraits //<-- inject our service
+  ) {}
 
   ngOnInit() {
     // firing a local trait action like a normal action
-    this.store.dispatch(this.traits.localActions.loadEntities());
+    this.store.dispatch(this.localTraits.localActions.loadProducts());
   }
 
-  selectEntity(id: string) {
-    this.store.dispatch(this.traits.localActions.selectEntity({ id }));
+  select({ id }: Product) {
+    this.store.dispatch(this.localTraits.localActions.selectProduct({ id }));
   }
 
   filter(filters: ProductFilter) {
-    this.store.dispatch(this.traits.localActions.filter({ filters }));
+    this.store.dispatch(
+      this.localTraits.localActions.filterProducts({ filters })
+    );
   }
-
   sort(sort: Sort<Product>) {
-    this.store.dispatch(this.traits.localActions.sort(sort));
+    this.store.dispatch(this.localTraits.localActions.sortProducts(sort));
   }
 }
 ```
-And thats it :)
+And that's it :)
 
 [//]: # (Extending **TraitsLocalStore** allows you to only get one set of traits this normally should be enough, but it could happen that you need more than one traitFactory, if so you need to create a service like the following:)
 
