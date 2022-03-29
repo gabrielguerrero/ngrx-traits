@@ -7,7 +7,7 @@ meaning the effects, reducers and state are created and later destroyed when a c
 To use it first you need a trait factory like the following, (it can have any combination of traits)
 
 ```typescript
-const productFeature = createEntityFeatureFactory(
+const productFeatureFactory = createEntityFeatureFactory(
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>({
@@ -21,78 +21,86 @@ const productFeature = createEntityFeatureFactory(
 );
 ```
 
-The next step is optional, if the state of your component needs to be instantiated from a backend call or needs any sort of side effects you can add an extra effect a follows:
-
-```typescript
-const productsEffect: TraitLocalEffectsFactory<typeof productFeature> = (
-  allActions
-) => {
-  @Injectable()
-  class ProductsEffects extends TraitEffect {
-    loadProducts$ = createEffect(() =>
-      this.actions$.pipe(
-        ofType(allActions.loadEntities),
-        switchMap(() =>
-          //call your service to get the products data
-          this.productService.getProducts().pipe(
-            map((products) => allActions.loadEntitiesSuccess({ entities: products })),
-            catchError(() => of(allActions.loadEntitiesFail()))
-          )
-        )
-      )
-    );
-
-    constructor(
-      actions$: Actions,
-      store: Store,
-      private productService: ProductService
-    ) {
-      super(actions$, store);
-    }
-  }
-  return ProductsEffects;
-};
-```
-
-Notice this is a normal effect wrap in a function, an important bit is `practiceEffect: TraitLocalEffectsFactory<typeof traitsFactory>`
-the _typeof traitsFactory_ gives the types for the allActions and allSelectors params from the traitsFactory, you could also simply add your own types to the allActions and allSelectors params by using the traits actions in and selectors interfaces like `allActions:LoadEntitiesActions<MyEntity> & FilterActions<MyEntities>`.
-
-In the future you will be able to add custom actions, selectors, reducers, and effects but for now is just an extra effect which should help with most of the cases, but this means the logic inside the effect is currently is limited to only use traits actions or global action no custom actions, if you need custom logic you can mix it with ngrx component store
-
-The next step is to create a service that will be use in your component, it needs to extend `TraitsLocalStore< typeof traitsFactory>` again notice the use of **typeof** to get the types of the traits factory you created.
+The next step is to create a service that will be use in your component, it needs to extend `TraitsLocalStore< typeof traitsFactory>` notice the use of **typeof** to get the types of the traits factory you created.
 
 ```typescript
 @Injectable()
 export class ProductsLocalTraits extends TraitsLocalStore<
-  typeof productFeature
+  typeof productFeatureFactory
   > {
   setup(): LocalTraitsConfig<typeof productFeature> {
     return {
       componentName: 'ProductsPickerComponent',
       traitsFactory: productFeature,
-      effectFactory: productsEffect,
     };
   }
 }
 ```
 
-The **effectFactory** param in the setup method is optional. By extending **TraitsLocalStore** you get an _actions_ and _selectors_ properties in the service with all the actions and selectors you set up in your trait factory.
+By extending **TraitsLocalStore** you get an _localActions_ and _localSelectors_ properties in the service with all the actions and selectors you set up in your trait factory.
 
-Now we are ready to use the service in our component, basically just need to add the service we just created in the providers property of the _@Component_ like `providers: [ProductsLocalTraits],` and declare the service in the constructor of your component, after that you use like you will use normal actions and selectors for example:
+The next step is optional, if the state of your component needs to be instantiated from a backend call or needs any sort of side effects you can add an extra effect a follows:
+
+```typescript
+import { ProductService } from './product.service';
+
+@Injectable()
+export class ProductsLocalTraits extends TraitsLocalStore<typeof productFeatureFactory> {
+  // TraitsLocalStore adds a reference to the injector so to get a service reference you can
+  productService = this.injector.get(ProductService);
+  //Alternativally you could override the constructor to get a reference to your service 
+  // constructor(
+  //   injector: Injector,
+  //   private productService: ProductService
+  // ) {
+  //   super(injector);
+  // }
+  loadProducts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(this.localActions.loadEntities),
+      switchMap(() =>
+        //call your service to get the products data
+        this.productService.getProducts().pipe(
+          map((products) => this.localActions.loadEntitiesSuccess({ entities: products })),
+          catchError(() => of(this.localActions.loadEntitiesFail()))
+        )
+      )
+    )
+  );
+
+  setup(): LocalTraitsConfig<typeof productFeature> {
+    return {
+      componentName: 'ProductsPickerComponent',
+      traitsFactory: productFeature,
+    };
+  }
+}
+```
+
+An important bit is `extends TraitLocalEffectsFactory<typeof traitsFactory>`
+the _typeof traitsFactory_ gives the types for the localActions and localSelectors properties in the class.
+
+You can also add custom actions, selectors, reducers, and effects to your LocalTrait by creating a [Custom Traits](../../../traits/src/custom-traits.md), for this is just an extra effect we need and this should help with most of the cases.
+
+
+We are ready to use the service in our component, basically we just need to add the service we just created in the providers property of the _@Component_ like `providers: [ProductsLocalTraits],` and declare the service in the constructor of your component, after that you use like you will use normal actions and selectors for example:
 
 ```typescript
 .
 .
 .
-  providers: [ProductsLocalTraits], //<- Our local store service
-  changeDetection: ChangeDetectionStrategy.OnPush,
+providers: [ProductsLocalTraits], //<- Our local store service
+  changeDetection
+:
+ChangeDetectionStrategy.OnPush,
 })
+
 export class ProductSelectDialogComponent implements OnInit {
   data$ = combineLatest([
     //using local traits selectors
-    this.store.selectEntity(this.localTraits.selectors.selectAll),
-    this.store.selectEntity(this.localTraits.selectors.isLoading),
-    this.store.selectEntity(this.localTraits.selectors.selectEntitySelected),
+    this.store.selectEntity(this.traits.localSelectors.selectAll),
+    this.store.selectEntity(this.traits.localSelectors.isLoading),
+    this.store.selectEntity(this.traits.localSelectors.selectEntitySelected),
     // you could mix it with normal selectors
     // this.store.selectEntity(UserSelectors.selectCurrentUser),
   ]).pipe(
@@ -104,59 +112,90 @@ export class ProductSelectDialogComponent implements OnInit {
   );
 
   constructor(private store: Store,
-              private localTraits: ProductsLocalTraits // inject our service
-  ) {}
+              private traits: ProductsLocalTraits // inject our service
+  ) {
+  }
 
   ngOnInit() {
     // firing a local trait action like a normal action
-    this.store.dispatch(this.localTraits.actions.loadEntities());
+    this.store.dispatch(this.traits.localActions.loadEntities());
   }
 
   selectEntity(id: string) {
-    this.store.dispatch(this.localTraits.actions.selectEntity({ id }));
+    this.store.dispatch(this.traits.localActions.selectEntity({ id }));
   }
 
   filter(filters: ProductFilter) {
-    this.store.dispatch(this.localTraits.actions.filter({ filters }));
+    this.store.dispatch(this.traits.localActions.filter({ filters }));
   }
+
   sort(sort: Sort<Product>) {
-    this.store.dispatch(this.localTraits.actions.sort(sort));
+    this.store.dispatch(this.traits.localActions.sort(sort));
   }
 }
 ```
+And thats it :)
 
-Extending **TraitsLocalStore** allows you to only get one set of traits this normally should be enough, but it could happen that you need more than one traitFactory, if so you need to create a service like the following:
+[//]: # (Extending **TraitsLocalStore** allows you to only get one set of traits this normally should be enough, but it could happen that you need more than one traitFactory, if so you need to create a service like the following:)
 
-```typescript
-@Injectable()
-export class ProductsLocalTraits implements OnDestroy {
-  traits1 = buildLocalTraits(
-    this.injector,
-    'ProductsDropdownComponent',
-    traitsFactory1,
-    practiceEffect1
-  );
-  traits2 = buildLocalTraits(
-    this.injector,
-    'ProductsDropdownComponent',
-    traitsFactory2,
-    practiceEffect2
-  );
+[//]: # ()
+[//]: # (```typescript)
 
-  actions1 = this.traits1.actions;
-  selectors1 = this.traits1.selectors;
+[//]: # (@Injectable&#40;&#41;)
 
-  actions2 = this.traits2.actions;
-  selectors2 = this.traits2.selectors;
+[//]: # (export class ProductsLocalTraits implements OnDestroy {)
 
-  constructor(private injector: Injector) {}
+[//]: # (  traits1 = buildLocalTraits&#40;)
 
-  ngOnDestroy() {
-    // Very important be sure to call the traits destroy here
-    this.traits1.destroy();
-    this.traits2.destroy();
-  }
-}
-```
+[//]: # (    this.injector,)
 
-Essentially you just need to use **buildLocalTraits** to create the traits and then use your preferred way to store the actions and selectors, but be sure to implement a **ngOnDestroy** and call the destroy method in the resulting traits, which ensures the effects and reducers are clean when the component is destroyed
+[//]: # (    'ProductsDropdownComponent',)
+
+[//]: # (    traitsFactory1,)
+
+[//]: # (    practiceEffect1)
+
+[//]: # (  &#41;;)
+
+[//]: # (  traits2 = buildLocalTraits&#40;)
+
+[//]: # (    this.injector,)
+
+[//]: # (    'ProductsDropdownComponent',)
+
+[//]: # (    traitsFactory2,)
+
+[//]: # (    practiceEffect2)
+
+[//]: # (  &#41;;)
+
+[//]: # ()
+[//]: # (  actions1 = this.traits1.actions;)
+
+[//]: # (  selectors1 = this.traits1.selectors;)
+
+[//]: # ()
+[//]: # (  actions2 = this.traits2.actions;)
+
+[//]: # (  selectors2 = this.traits2.selectors;)
+
+[//]: # ()
+[//]: # (  constructor&#40;private injector: Injector&#41; {})
+
+[//]: # ()
+[//]: # (  ngOnDestroy&#40;&#41; {)
+
+[//]: # (    // Very important be sure to call the traits destroy here)
+
+[//]: # (    this.traits1.destroy&#40;&#41;;)
+
+[//]: # (    this.traits2.destroy&#40;&#41;;)
+
+[//]: # (  })
+
+[//]: # (})
+
+[//]: # (```)
+
+[//]: # ()
+[//]: # (Essentially you just need to use **buildLocalTraits** to create the traits and then use your preferred way to store the actions and selectors, but be sure to implement a **ngOnDestroy** and call the destroy method in the resulting traits, which ensures the effects and reducers are clean when the component is destroyed)

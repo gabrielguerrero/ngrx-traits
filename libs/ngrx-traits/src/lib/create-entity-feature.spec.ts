@@ -11,8 +11,10 @@ import {
   mixEntityFeatures,
 } from './create-entity-feature';
 import { TestBed } from '@angular/core/testing';
-import { EffectsModule } from '@ngrx/effects';
-import { first } from 'rxjs/operators';
+import { createEffect, EffectsModule, ofType } from '@ngrx/effects';
+import { first, mapTo } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { LocalTraitsConfig, TraitsLocalStore } from './local-store';
 
 export interface TodoFilter {
   content?: string;
@@ -59,6 +61,57 @@ const productFeatureFactory = createEntityFeatureFactory(
 
 type ProductFeature = ReturnType<typeof productFeatureFactory>;
 
+@Injectable()
+class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
+  loadEntities$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(this.localActions.loadProducts),
+      mapTo(
+        this.localActions.loadProductsSuccess({
+          entities: [
+            { id: 1, name: 'name', description: 'description', price: 123 },
+          ],
+        })
+      )
+    );
+  });
+
+  setup(): LocalTraitsConfig<typeof productFeatureFactory> {
+    return {
+      componentName: 'ProductTestComponent',
+      traitsFactory: productFeatureFactory,
+    };
+  }
+}
+
+const productCombinedFactory = combineEntityFeatures({
+  products: productFeatureFactory,
+  productOrders: productOrderFeatureFactory,
+  clients: clientsFeatureFactory,
+});
+// TODO make combinedFactory compatible with TraitLocal
+// @Injectable()
+// class ProductCombinedTraitLocal extends TraitsLocalStore<typeof productCombinedFactory> {
+//   loadEntities$ = createEffect(() => {
+//     return this.actions$.pipe(
+//       ofType(this.localActions.products.loadProducts),
+//       mapTo(
+//         this.localActions.products.loadProductsSuccess({
+//           entities: [
+//             { id: 1, name: 'name', description: 'description', price: 123 },
+//           ],
+//         })
+//       )
+//     );
+//   });
+//
+//   setup(): LocalTraitsConfig<typeof productCombinedFactory> {
+//     return {
+//       componentName: 'ProductCombinedTestComponent',
+//       traitsFactory: productCombinedFactory,
+//     };
+//   }
+// }
 async function basicProductTest(
   actions: ProductFeature['actions'],
   selectors: ProductFeature['selectors'],
@@ -127,12 +180,6 @@ async function basicClientsTest(
   ]);
 }
 function initIndividualEntityFeatureInit() {
-  const combinedFactory = combineEntityFeatures({
-    products: productFeatureFactory,
-    productOrders: productOrderFeatureFactory,
-    clients: clientsFeatureFactory,
-  });
-
   const products = productFeatureFactory({
     actionsGroupKey: '[products]',
     featureSelector: 'products',
@@ -231,6 +278,15 @@ function addEntityFeaturesPropertiesInit() {
   return { ...combinedFeature, store };
 }
 
+function initTraitLocal() {
+  TestBed.configureTestingModule({
+    imports: [StoreModule.forRoot({}), EffectsModule.forRoot()],
+    providers: [ProductTraitLocal],
+  });
+  const store = TestBed.inject(Store);
+  return { localTrait: TestBed.inject(ProductTraitLocal), store };
+}
+
 describe('Ngrx-Traits Integration Test', () => {
   describe('individual entity features test', () => {
     it('test some action and selectors in products ', async () => {
@@ -309,6 +365,21 @@ describe('Ngrx-Traits Integration Test', () => {
     it('test some action and selectors in clients ', async () => {
       const { actions, selectors, store } = addEntityFeaturesPropertiesInit();
       await basicClientsTest(actions.clients, selectors.clients, store);
+    });
+  });
+
+  describe('Ngrx-Traits Local Traits', () => {
+    describe('single feature trait local', () => {
+      it('test some action and selectors in products ', async () => {
+        const { localTrait, store } = initTraitLocal();
+        await basicProductTest(
+          localTrait.localActions,
+          localTrait.localSelectors,
+          store
+        );
+      });
+
+      it.todo('test combined trait local');
     });
   });
 });
