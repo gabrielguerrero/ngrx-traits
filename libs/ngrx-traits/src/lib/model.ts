@@ -24,17 +24,23 @@ export type TraitStateMutators<State> = {
   [key: string]: <S extends State>(...arg: any[]) => S;
 };
 
-export interface FeatureTraits<
-  State,
-  A extends TraitActions = TraitActions,
-  S extends TraitSelectors<State> = TraitSelectors<State>
-> {
+export interface BaseFeatureTraits<State = any, A = any, S = any> {
   actions: A;
-  selectors: FeatureSelectors<State, S>;
+  selectors: S;
   reducer: (state: State, action: ActionType<any>) => State;
   effects: Type<any>[];
   initialState: State;
 }
+
+export type FeatureTraits<
+  State,
+  A extends TraitActions = TraitActions,
+  S extends TraitSelectors<State> = TraitSelectors<State>
+> = BaseFeatureTraits<State, A, FeatureSelectors<State, S>>;
+
+export type BaseEntityFeatureFactory<State, A, S> = (
+  config: Config<State>
+) => BaseFeatureTraits<State, A, S>;
 
 export type EntityFeatureFactory<
   EntityName extends string | undefined,
@@ -200,7 +206,7 @@ export type ExtractStateType<T> = T extends TraitFactory<infer State>
   ? State
   : T extends ReadonlyArray<TraitFactory>
   ? UnionToIntersection<ExtractStateType<ExtractArrayElementTypes<T>>>
-  : T extends FeatureTraits<infer State>
+  : T extends BaseFeatureTraits<infer State>
   ? State
   : never;
 
@@ -208,7 +214,7 @@ export type ExtractActionsType<T> = T extends TraitFactory<any, infer A>
   ? A
   : T extends ReadonlyArray<TraitFactory>
   ? UnionToIntersection<ExtractActionsType<ExtractArrayElementTypes<T>>>
-  : T extends FeatureTraits<any, infer A>
+  : T extends BaseFeatureTraits<any, infer A>
   ? A
   : never;
 
@@ -216,7 +222,7 @@ export type ExtractSelectorsType<T> = T extends TraitFactory<any, any, infer S>
   ? S
   : T extends ReadonlyArray<TraitFactory>
   ? UnionToIntersection<ExtractSelectorsType<ExtractArrayElementTypes<T>>>
-  : T extends FeatureTraits<any, any, infer S>
+  : T extends BaseFeatureTraits<any, any, infer S>
   ? S
   : never;
 
