@@ -1,7 +1,7 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
 import { EntityFeatureFactory } from '../model';
 import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
-import { EffectSources } from '@ngrx/effects';
+import { Actions, EffectSources } from '@ngrx/effects';
 import { getDestroyActionName, TraitEffect } from '../trait-effect';
 import { DISABLE_LOCAL_TRAIT_EFFECTS } from './disable-local-trait-effects.token';
 
@@ -17,7 +17,7 @@ export function buildLocalTraits<
   injector: Injector,
   componentName: string,
   traitFactory: F,
-  loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>
+  localEffect?: TraitEffect
 ) {
   const reducers = injector.get(ReducerManager);
   const effects = injector.get(EffectSources);
@@ -31,16 +31,8 @@ export function buildLocalTraits<
 
   traits.reducer && reducers.addReducer(componentId, traits.reducer);
 
-  const loadEntitiesEffect = loadEntitiesEffectFactory?.(
-    traits.actions,
-    traits.selectors
-  );
-
   const providers =
     (traits.effects && [...traits.effects.map((e) => ({ provide: e }))]) || [];
-  if (loadEntitiesEffect) {
-    providers.push({ provide: loadEntitiesEffect });
-  }
 
   const disableLocalTraitsEffects = injector.get(
     DISABLE_LOCAL_TRAIT_EFFECTS,
@@ -58,10 +50,12 @@ export function buildLocalTraits<
       effects.addEffects(effect);
     });
 
-    if (loadEntitiesEffectFactory) {
-      const effect = i.get(loadEntitiesEffect) as TraitEffect;
-      effect.componentId = componentId;
-      effects.addEffects(effect);
+    if (localEffect) {
+      localEffect.componentId = componentId;
+      queueMicrotask(() => {
+        // needs to run on a microtask to give time to localEffect effects to correctly be initialized
+        effects.addEffects(localEffect);
+      });
     }
   }
 
@@ -88,40 +82,32 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
-export interface TraitLocalEffectsFactory<
-  F extends EntityFeatureFactory<any, any>
-> {
-  (
-    allActions: ReturnType<F>['actions'],
-    allSelectors: ReturnType<F>['selectors']
-  ): Type<TraitEffect>;
-}
-
 export interface LocalTraitsConfig<F extends EntityFeatureFactory<any, any>> {
   componentName: string;
   traitsFactory: F;
-  effectFactory?: TraitLocalEffectsFactory<F>;
 }
 
 @Injectable()
 export abstract class TraitsLocalStore<F extends EntityFeatureFactory<any, any>>
+  extends TraitEffect
   implements OnDestroy
 {
   traits: ReturnType<F> & { destroy: () => void };
 
-  actions: ReturnType<F>['actions'];
-  selectors: ReturnType<F>['selectors'];
+  localActions: ReturnType<F>['actions'];
+  localSelectors: ReturnType<F>['selectors'];
 
   public constructor(public injector: Injector) {
+    super(injector.get(Actions), injector.get(Store));
     const config = this.setup();
     this.traits = buildLocalTraits(
       this.injector,
       config.componentName,
       config.traitsFactory,
-      config.effectFactory
+      this
     );
-    this.actions = this.traits.actions;
-    this.selectors = this.traits.selectors;
+    this.localActions = this.traits.actions;
+    this.localSelectors = this.traits.selectors;
   }
 
   abstract setup(): LocalTraitsConfig<F>;
