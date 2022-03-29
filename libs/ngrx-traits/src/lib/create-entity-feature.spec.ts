@@ -38,12 +38,6 @@ export interface ProductFilter {
   search: string;
 }
 
-export interface ProductDetail extends Product {
-  maker: string;
-  releaseDate: string;
-  image: string;
-}
-
 const clientsFeatureFactory = createEntityFeatureFactory(
   { entityName: 'client', entitiesName: 'clients' },
   addLoadEntitiesTrait<Client>(),

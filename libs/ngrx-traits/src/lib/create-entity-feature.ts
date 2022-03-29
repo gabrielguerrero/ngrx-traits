@@ -54,7 +54,15 @@ export function createTraitFactory<
 }): TraitFactory<State, A, S, M, KEY, C, KC> {
   return f as TraitFactory<State, A, S, M, KEY, C, KC>;
 }
-
+export function createEntityFeatureFactory<F extends readonly TraitFactory[]>(
+  ...traits: F
+): EntityFeatureFactory<
+  'Entity',
+  'Entities',
+  ExtractStateType<F>,
+  ExtractActionsType<F>,
+  ExtractSelectorsType<F>
+>;
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
   EntityName extends string,
@@ -71,14 +79,40 @@ export function createEntityFeatureFactory<
   ExtractStateType<F>,
   ExtractActionsType<F>,
   ExtractSelectorsType<F>
+>;
+export function createEntityFeatureFactory<
+  F extends readonly TraitFactory[],
+  EntityName extends string,
+  EntitiesName extends string = `${EntityName}s`
+>(
+  namesOrFactory:
+    | { entityName: EntityName; entitiesName?: EntitiesName }
+    | TraitFactory,
+  ...traits: F
+): EntityFeatureFactory<
+  EntityName,
+  EntitiesName,
+  ExtractStateType<F>,
+  ExtractActionsType<F>,
+  ExtractSelectorsType<F>
 > {
   return ((config: Config<any, any>) => {
+    const { entityName, entitiesName } =
+      'entityName' in namesOrFactory
+        ? (namesOrFactory as {
+            entityName: EntityName;
+            entitiesName?: EntitiesName;
+          })
+        : { entityName: 'Entity', entitiesName: 'Entities' };
+
     const singular = capitalize(entityName);
     const plural = entitiesName
       ? capitalize(entitiesName)
       : capitalize(entityName + 's');
 
-    const sortedTraits = sortTraits([...traits]);
+    const sortedTraits = sortTraits(
+      'entityName' in namesOrFactory ? [...traits] : [namesOrFactory, ...traits]
+    );
 
     const allConfigs = buildAllConfigs(sortedTraits);
 
