@@ -43,23 +43,44 @@ export interface ProductDetail extends Product {
   releaseDate: string;
   image: string;
 }
+
 const clientsFeatureFactory = createEntityFeatureFactory(
   { entityName: 'client', entitiesName: 'clients' },
   addLoadEntitiesTrait<Client>(),
   addCrudEntitiesTrait<Client>()
 );
+
 const productOrderFeatureFactory = createEntityFeatureFactory(
   { entityName: 'productOrder' },
   addLoadEntitiesTrait<ProductOrder>(),
   addSelectEntitiesTrait<ProductOrder>()
 );
+
 const productFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
   addSelectEntitiesTrait<Product>()
 );
 
-type ProductFeature = ReturnType<typeof productFeatureFactory>;
+const productCombinedFactory = combineEntityFeatures({
+  products: productFeatureFactory,
+  productOrders: productOrderFeatureFactory,
+  clients: clientsFeatureFactory,
+});
+
+const productAddEntityPropertiesFactory = addEntityFeaturesProperties(
+  productFeatureFactory,
+  {
+    productOrders: productOrderFeatureFactory,
+    clients: clientsFeatureFactory,
+  }
+);
+
+const productMixedFactory = mixEntityFeatures({
+  products: productFeatureFactory,
+  productOrders: productOrderFeatureFactory,
+  clients: clientsFeatureFactory,
+});
 
 @Injectable()
 class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
@@ -84,34 +105,82 @@ class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
   }
 }
 
-const productCombinedFactory = combineEntityFeatures({
-  products: productFeatureFactory,
-  productOrders: productOrderFeatureFactory,
-  clients: clientsFeatureFactory,
-});
-// TODO make combinedFactory compatible with TraitLocal
-// @Injectable()
-// class ProductCombinedTraitLocal extends TraitsLocalStore<typeof productCombinedFactory> {
-//   loadEntities$ = createEffect(() => {
-//     return this.actions$.pipe(
-//       ofType(this.localActions.products.loadProducts),
-//       mapTo(
-//         this.localActions.products.loadProductsSuccess({
-//           entities: [
-//             { id: 1, name: 'name', description: 'description', price: 123 },
-//           ],
-//         })
-//       )
-//     );
-//   });
-//
-//   setup(): LocalTraitsConfig<typeof productCombinedFactory> {
-//     return {
-//       componentName: 'ProductCombinedTestComponent',
-//       traitsFactory: productCombinedFactory,
-//     };
-//   }
-// }
+@Injectable()
+class ProductCombinedTraitLocal extends TraitsLocalStore<
+  typeof productCombinedFactory
+> {
+  loadEntities$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(this.localActions.products.loadProducts),
+      mapTo(
+        this.localActions.products.loadProductsSuccess({
+          entities: [
+            { id: 1, name: 'name', description: 'description', price: 123 },
+          ],
+        })
+      )
+    );
+  });
+
+  setup(): LocalTraitsConfig<typeof productCombinedFactory> {
+    return {
+      componentName: 'ProductCombinedTestComponent',
+      traitsFactory: productCombinedFactory,
+    };
+  }
+}
+
+@Injectable()
+class ProductMixedTraitLocal extends TraitsLocalStore<
+  typeof productMixedFactory
+> {
+  loadEntities$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(this.localActions.loadProducts),
+      mapTo(
+        this.localActions.loadProductsSuccess({
+          entities: [
+            { id: 1, name: 'name', description: 'description', price: 123 },
+          ],
+        })
+      )
+    );
+  });
+
+  setup(): LocalTraitsConfig<typeof productMixedFactory> {
+    return {
+      componentName: 'ProductMixedTestComponent',
+      traitsFactory: productMixedFactory,
+    };
+  }
+}
+
+@Injectable()
+class ProductAddEntityPropertiesTraitLocal extends TraitsLocalStore<
+  typeof productAddEntityPropertiesFactory
+> {
+  loadEntities$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(this.localActions.loadProducts),
+      mapTo(
+        this.localActions.loadProductsSuccess({
+          entities: [
+            { id: 1, name: 'name', description: 'description', price: 123 },
+          ],
+        })
+      )
+    );
+  });
+
+  setup(): LocalTraitsConfig<typeof productAddEntityPropertiesFactory> {
+    return {
+      componentName: 'ProductAddEntityPropertiesTestComponent',
+      traitsFactory: productAddEntityPropertiesFactory,
+    };
+  }
+}
+
+type ProductFeature = ReturnType<typeof productFeatureFactory>;
 async function basicProductTest(
   actions: ProductFeature['actions'],
   selectors: ProductFeature['selectors'],
@@ -211,13 +280,7 @@ function initIndividualEntityFeatureInit() {
 }
 
 function initCombineEntityFeatureInit() {
-  const combinedFactory = combineEntityFeatures({
-    products: productFeatureFactory,
-    productOrders: productOrderFeatureFactory,
-    clients: clientsFeatureFactory,
-  });
-
-  const combinedFeature = combinedFactory({
+  const combinedFeature = productCombinedFactory({
     actionsGroupKey: '[Combined]',
     featureSelector: 'combined',
   });
@@ -234,13 +297,7 @@ function initCombineEntityFeatureInit() {
 }
 
 function mixedEntityFeatureInit() {
-  const mixedFactory = mixEntityFeatures({
-    products: productFeatureFactory,
-    productOrders: productOrderFeatureFactory,
-    clients: clientsFeatureFactory,
-  });
-
-  const combinedFeature = mixedFactory({
+  const combinedFeature = productMixedFactory({
     actionsGroupKey: '[Mixed]',
     featureSelector: 'mixed',
   });
@@ -257,12 +314,7 @@ function mixedEntityFeatureInit() {
 }
 
 function addEntityFeaturesPropertiesInit() {
-  const mixedFactory = addEntityFeaturesProperties(productFeatureFactory, {
-    productOrders: productOrderFeatureFactory,
-    clients: clientsFeatureFactory,
-  });
-
-  const combinedFeature = mixedFactory({
+  const combinedFeature = productAddEntityPropertiesFactory({
     actionsGroupKey: '[addEntityFeatures]',
     featureSelector: 'addEntityFeatures',
   });
@@ -285,6 +337,35 @@ function initTraitLocal() {
   });
   const store = TestBed.inject(Store);
   return { localTrait: TestBed.inject(ProductTraitLocal), store };
+}
+function initCombinedTraitLocal() {
+  TestBed.configureTestingModule({
+    imports: [StoreModule.forRoot({}), EffectsModule.forRoot()],
+    providers: [ProductCombinedTraitLocal],
+  });
+  const store = TestBed.inject(Store);
+  return { localTrait: TestBed.inject(ProductCombinedTraitLocal), store };
+}
+
+function initMixedTraitLocal() {
+  TestBed.configureTestingModule({
+    imports: [StoreModule.forRoot({}), EffectsModule.forRoot()],
+    providers: [ProductMixedTraitLocal],
+  });
+  const store = TestBed.inject(Store);
+  return { localTrait: TestBed.inject(ProductMixedTraitLocal), store };
+}
+
+function initAddEntityProperties() {
+  TestBed.configureTestingModule({
+    imports: [StoreModule.forRoot({}), EffectsModule.forRoot()],
+    providers: [ProductAddEntityPropertiesTraitLocal],
+  });
+  const store = TestBed.inject(Store);
+  return {
+    localTrait: TestBed.inject(ProductAddEntityPropertiesTraitLocal),
+    store,
+  };
 }
 
 describe('Ngrx-Traits Integration Test', () => {
@@ -379,7 +460,92 @@ describe('Ngrx-Traits Integration Test', () => {
         );
       });
 
-      it.todo('test combined trait local');
+      describe('test combined trait local', () => {
+        it('test some action and selectors in products ', async () => {
+          const { localTrait, store } = initCombinedTraitLocal();
+          await basicProductTest(
+            localTrait.localActions.products,
+            localTrait.localSelectors.products,
+            store
+          );
+        });
+
+        it('test some action and selectors in productOrders ', async () => {
+          const { localTrait, store } = initCombinedTraitLocal();
+          await basicProductOrdersTest(
+            localTrait.localActions.productOrders,
+            localTrait.localSelectors.productOrders,
+            store
+          );
+        });
+
+        it('test some action and selectors in clients ', async () => {
+          const { localTrait, store } = initCombinedTraitLocal();
+          await basicClientsTest(
+            localTrait.localActions.clients,
+            localTrait.localSelectors.clients,
+            store
+          );
+        });
+      });
+
+      describe('mixEntityFeatures', () => {
+        it('test some action and selectors in products ', async () => {
+          const { localTrait, store } = initMixedTraitLocal();
+          await basicProductTest(
+            localTrait.localActions,
+            localTrait.localSelectors,
+            store
+          );
+        });
+
+        it('test some action and selectors in productOrders ', async () => {
+          const { localTrait, store } = initMixedTraitLocal();
+          await basicProductOrdersTest(
+            localTrait.localActions,
+            localTrait.localSelectors,
+            store
+          );
+        });
+
+        it('test some action and selectors in clients ', async () => {
+          const { localTrait, store } = initMixedTraitLocal();
+          await basicClientsTest(
+            localTrait.localActions,
+            localTrait.localSelectors,
+            store
+          );
+        });
+      });
+
+      describe('addEntityFeaturesProperties', () => {
+        it('test some action and selectors in products ', async () => {
+          const { localTrait, store } = initAddEntityProperties();
+          await basicProductTest(
+            localTrait.localActions,
+            localTrait.localSelectors,
+            store
+          );
+        });
+
+        it('test some action and selectors in productOrders ', async () => {
+          const { localTrait, store } = initAddEntityProperties();
+          await basicProductOrdersTest(
+            localTrait.localActions.productOrders,
+            localTrait.localSelectors.productOrders,
+            store
+          );
+        });
+
+        it('test some action and selectors in clients ', async () => {
+          const { localTrait, store } = initAddEntityProperties();
+          await basicClientsTest(
+            localTrait.localActions.clients,
+            localTrait.localSelectors.clients,
+            store
+          );
+        });
+      });
     });
   });
 });

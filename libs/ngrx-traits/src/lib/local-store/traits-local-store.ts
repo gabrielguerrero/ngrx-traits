@@ -1,5 +1,5 @@
 import { Injectable, Injector, OnDestroy } from '@angular/core';
-import { EntityFeatureFactory } from '../model';
+import { BaseEntityFeatureFactory, EntityFeatureFactory } from '../model';
 import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
 import { Actions, EffectSources } from '@ngrx/effects';
 import { getDestroyActionName, TraitEffect } from '../trait-effect';
@@ -82,13 +82,17 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
-export interface LocalTraitsConfig<F extends EntityFeatureFactory<any, any>> {
+export interface LocalTraitsConfig<
+  F extends BaseEntityFeatureFactory<any, any, any>
+> {
   componentName: string;
   traitsFactory: F;
 }
 
 @Injectable()
-export abstract class TraitsLocalStore<F extends EntityFeatureFactory<any, any>>
+export abstract class TraitsLocalStore<
+    F extends BaseEntityFeatureFactory<any, any, any>
+  >
   extends TraitEffect
   implements OnDestroy
 {
