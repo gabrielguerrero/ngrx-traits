@@ -47,9 +47,9 @@ import { ProductsLocalTraits } from './products.traits';
 })
 export class ProductSelectDialogComponent implements OnInit {
   data$ = combineLatest([
-    this.store.select(this.localTraits.localSelectors.selectProductsList),
-    this.store.select(this.localTraits.localSelectors.isProductsLoading),
-    this.store.select(this.localTraits.localSelectors.selectProductSelected),
+    this.store.select(this.localTraits.selectors.selectProductsList),
+    this.store.select(this.localTraits.selectors.isProductsLoading),
+    this.store.select(this.localTraits.selectors.selectProductSelected),
   ]).pipe(
     map(([products, isLoading, selectedProduct]) => ({
       products,
@@ -61,19 +61,17 @@ export class ProductSelectDialogComponent implements OnInit {
   constructor(private store: Store, private localTraits: ProductsLocalTraits) {}
 
   ngOnInit() {
-    this.store.dispatch(this.localTraits.localActions.loadProducts());
+    this.store.dispatch(this.localTraits.actions.loadProducts());
   }
 
   select({ id }: Product) {
-    this.store.dispatch(this.localTraits.localActions.selectProduct({ id }));
+    this.store.dispatch(this.localTraits.actions.selectProduct({ id }));
   }
 
   filter(filters: ProductFilter) {
-    this.store.dispatch(
-      this.localTraits.localActions.filterProducts({ filters })
-    );
+    this.store.dispatch(this.localTraits.actions.filterProducts({ filters }));
   }
   sort(sort: Sort<Product>) {
-    this.store.dispatch(this.localTraits.localActions.sortProducts(sort));
+    this.store.dispatch(this.localTraits.actions.sortProducts(sort));
   }
 }
