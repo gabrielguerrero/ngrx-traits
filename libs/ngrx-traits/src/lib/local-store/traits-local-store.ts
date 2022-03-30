@@ -17,7 +17,7 @@ export function buildLocalTraits<
   injector: Injector,
   componentName: string,
   traitFactory: F,
-  localEffect?: TraitEffect
+  loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>
 ) {
   const reducers = injector.get(ReducerManager);
   const effects = injector.get(EffectSources);
@@ -31,8 +31,16 @@ export function buildLocalTraits<
 
   traits.reducer && reducers.addReducer(componentId, traits.reducer);
 
+  const loadEntitiesEffect = loadEntitiesEffectFactory?.(
+    traits.actions,
+    traits.selectors
+  );
+
   const providers =
     (traits.effects && [...traits.effects.map((e) => ({ provide: e }))]) || [];
+  if (loadEntitiesEffect) {
+    providers.push({ provide: loadEntitiesEffect });
+  }
 
   const disableLocalTraitsEffects = injector.get(
     DISABLE_LOCAL_TRAIT_EFFECTS,
@@ -50,12 +58,10 @@ export function buildLocalTraits<
       effects.addEffects(effect);
     });
 
-    if (localEffect) {
-      localEffect.componentId = componentId;
-      queueMicrotask(() => {
-        // needs to run on a microtask to give time to localEffect effects to correctly be initialized
-        effects.addEffects(localEffect);
-      });
+    if (loadEntitiesEffectFactory) {
+      const effect = i.get(loadEntitiesEffect) as TraitEffect;
+      effect.componentId = componentId;
+      effects.addEffects(effect);
     }
   }
 
@@ -82,11 +88,21 @@ export interface Type<T> extends Function {
   new (...args: any[]): T;
 }
 
+export interface TraitLocalEffectsFactory<
+  F extends BaseEntityFeatureFactory<any, any, any>
+> {
+  (
+    allActions: ReturnType<F>['actions'],
+    allSelectors: ReturnType<F>['selectors']
+  ): Type<TraitEffect>;
+}
+
 export interface LocalTraitsConfig<
   F extends BaseEntityFeatureFactory<any, any, any>
 > {
   componentName: string;
   traitsFactory: F;
+  effectFactory?: TraitLocalEffectsFactory<F>;
 }
 
 @Injectable()
@@ -98,8 +114,8 @@ export abstract class TraitsLocalStore<
 {
   traits: ReturnType<F> & { destroy: () => void };
 
-  localActions: ReturnType<F>['actions'];
-  localSelectors: ReturnType<F>['selectors'];
+  actions: ReturnType<F>['actions'];
+  selectors: ReturnType<F>['selectors'];
 
   public constructor(public injector: Injector) {
     super(injector.get(Actions), injector.get(Store));
@@ -108,10 +124,10 @@ export abstract class TraitsLocalStore<
       this.injector,
       config.componentName,
       config.traitsFactory,
-      this
+      config.effectFactory
     );
-    this.localActions = this.traits.actions;
-    this.localSelectors = this.traits.selectors;
+    this.actions = this.traits.actions;
+    this.selectors = this.traits.selectors;
   }
 
   abstract setup(): LocalTraitsConfig<F>;

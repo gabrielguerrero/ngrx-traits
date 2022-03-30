@@ -10,20 +10,14 @@ import {
 } from 'ts-mockito';
 import { Injectable, Injector } from '@angular/core';
 import { ReducerManager } from '@ngrx/store';
-import {
-  Actions,
-  createEffect,
-  EffectsModule,
-  EffectSources,
-  ofType,
-} from '@ngrx/effects';
+import { Actions, EffectsModule, EffectSources } from '@ngrx/effects';
 import {
   buildLocalTraits,
-  createEntityFeatureFactory,
-  EntityFeatureFactory,
-  LocalTraitsConfig,
-  TraitEffect,
+  TraitLocalEffectsFactory,
   TraitsLocalStore,
+  EntityFeatureFactory,
+  createEntityFeatureFactory,
+  TraitEffect,
 } from 'ngrx-traits';
 
 import { of } from 'rxjs/internal/observable/of';
@@ -48,32 +42,15 @@ describe('trait-local-store', () => {
     addFilterEntitiesTrait<Todo, TodoFilter>()
   );
 
-  @Injectable()
-  class TodoTraitLocal extends TraitsLocalStore<typeof traitsFactory> {
-    loadEntities$ = createEffect(() => {
-      return this.actions$.pipe(
-        ofType(this.localActions.loadEntities),
-        mapTo(
-          this.localActions.loadEntitiesSuccess({
-            entities: [{ id: 1, content: 'Test' }],
-          })
-        )
-      );
-    });
-
-    setup(): LocalTraitsConfig<typeof traitsFactory> {
-      return {
-        componentName: 'Test',
-        traitsFactory,
-      };
-    }
-  }
-  const todoTraitLocalMock = mock(TodoTraitLocal);
   describe('buildLocalTraits', () => {
     function buildLocalTraitsMock<
       State,
       F extends EntityFeatureFactory<any, any>
-    >(componentName: string, traitFactory: F, localEffect: TraitEffect) {
+    >(
+      componentName: string,
+      traitFactory: F,
+      loadEntitiesEffectFactory?: TraitLocalEffectsFactory<F>
+    ) {
       const reducerManagerMock = mock(ReducerManager);
       const effectSourcesMock = mock(EffectSources);
       const actions$ = of();
@@ -94,7 +71,7 @@ describe('trait-local-store', () => {
         instance(injectorMock),
         componentName,
         traitFactory,
-        localEffect
+        loadEntitiesEffectFactory
       );
       return {
         traits,
@@ -107,7 +84,7 @@ describe('trait-local-store', () => {
 
     it('should register reducers and effects and build traits', () => {
       const { traits, effectSourcesMock, reducerManagerMock } =
-        buildLocalTraitsMock('test', traitsFactory, todoTraitLocalMock);
+        buildLocalTraitsMock('test', traitsFactory);
 
       verify(effectSourcesMock.addEffects(anything())).once();
       verify(
@@ -120,9 +97,13 @@ describe('trait-local-store', () => {
 
     it('should register reducers and effects and build traits, and extra custom effect', () => {
       const { traits, effectSourcesMock, reducerManagerMock } =
-        buildLocalTraitsMock('test', traitsFactory, todoTraitLocalMock);
+        buildLocalTraitsMock('test', traitsFactory, () => {
+          @Injectable()
+          class MyEffect extends TraitEffect {}
+          return MyEffect;
+        });
 
-      verify(effectSourcesMock.addEffects(anything())).once();
+      verify(effectSourcesMock.addEffects(anything())).twice();
       verify(
         reducerManagerMock.addReducer(match(/test_.+/), anything())
       ).once();
@@ -135,7 +116,11 @@ describe('trait-local-store', () => {
       const { traits, storeMock, reducerManagerMock } = buildLocalTraitsMock(
         'test',
         traitsFactory,
-        todoTraitLocalMock
+        () => {
+          @Injectable()
+          class MyEffect extends TraitEffect {}
+          return MyEffect;
+        }
       );
       traits.destroy();
       verify(
@@ -174,12 +159,11 @@ describe('trait-local-store', () => {
 
     it('should create TraitsLocalStore instance with  traits', () => {
       const localStore = createService();
-      expect(localStore.service.localActions.filterEntities).toBeTruthy();
+      expect(localStore.service.actions.filterEntities).toBeTruthy();
       expect(localStore.service.traits.reducer).toBeTruthy();
       expect(
         localStore.service.traits.selectors.selectEntitiesFilter
       ).toBeTruthy();
     });
-    it.todo('test lwith localstoretrais instance');
   });
 });

@@ -78,19 +78,6 @@ const productMixedFactory = mixEntityFeatures({
 
 @Injectable()
 class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
-  loadEntities$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(this.localActions.loadProducts),
-      mapTo(
-        this.localActions.loadProductsSuccess({
-          entities: [
-            { id: 1, name: 'name', description: 'description', price: 123 },
-          ],
-        })
-      )
-    );
-  });
-
   setup(): LocalTraitsConfig<typeof productFeatureFactory> {
     return {
       componentName: 'ProductTestComponent',
@@ -103,19 +90,6 @@ class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
 class ProductCombinedTraitLocal extends TraitsLocalStore<
   typeof productCombinedFactory
 > {
-  loadEntities$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(this.localActions.products.loadProducts),
-      mapTo(
-        this.localActions.products.loadProductsSuccess({
-          entities: [
-            { id: 1, name: 'name', description: 'description', price: 123 },
-          ],
-        })
-      )
-    );
-  });
-
   setup(): LocalTraitsConfig<typeof productCombinedFactory> {
     return {
       componentName: 'ProductCombinedTestComponent',
@@ -128,19 +102,6 @@ class ProductCombinedTraitLocal extends TraitsLocalStore<
 class ProductMixedTraitLocal extends TraitsLocalStore<
   typeof productMixedFactory
 > {
-  loadEntities$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(this.localActions.loadProducts),
-      mapTo(
-        this.localActions.loadProductsSuccess({
-          entities: [
-            { id: 1, name: 'name', description: 'description', price: 123 },
-          ],
-        })
-      )
-    );
-  });
-
   setup(): LocalTraitsConfig<typeof productMixedFactory> {
     return {
       componentName: 'ProductMixedTestComponent',
@@ -153,19 +114,6 @@ class ProductMixedTraitLocal extends TraitsLocalStore<
 class ProductAddEntityPropertiesTraitLocal extends TraitsLocalStore<
   typeof productAddEntityPropertiesFactory
 > {
-  loadEntities$ = createEffect(() => {
-    return this.actions$.pipe(
-      ofType(this.localActions.loadProducts),
-      mapTo(
-        this.localActions.loadProductsSuccess({
-          entities: [
-            { id: 1, name: 'name', description: 'description', price: 123 },
-          ],
-        })
-      )
-    );
-  });
-
   setup(): LocalTraitsConfig<typeof productAddEntityPropertiesFactory> {
     return {
       componentName: 'ProductAddEntityPropertiesTestComponent',
@@ -447,19 +395,15 @@ describe('Ngrx-Traits Integration Test', () => {
     describe('single feature trait local', () => {
       it('test some action and selectors in products ', async () => {
         const { localTrait, store } = initTraitLocal();
-        await basicProductTest(
-          localTrait.localActions,
-          localTrait.localSelectors,
-          store
-        );
+        await basicProductTest(localTrait.actions, localTrait.selectors, store);
       });
 
       describe('test combined trait local', () => {
         it('test some action and selectors in products ', async () => {
           const { localTrait, store } = initCombinedTraitLocal();
           await basicProductTest(
-            localTrait.localActions.products,
-            localTrait.localSelectors.products,
+            localTrait.actions.products,
+            localTrait.selectors.products,
             store
           );
         });
@@ -467,8 +411,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in productOrders ', async () => {
           const { localTrait, store } = initCombinedTraitLocal();
           await basicProductOrdersTest(
-            localTrait.localActions.productOrders,
-            localTrait.localSelectors.productOrders,
+            localTrait.actions.productOrders,
+            localTrait.selectors.productOrders,
             store
           );
         });
@@ -476,8 +420,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in clients ', async () => {
           const { localTrait, store } = initCombinedTraitLocal();
           await basicClientsTest(
-            localTrait.localActions.clients,
-            localTrait.localSelectors.clients,
+            localTrait.actions.clients,
+            localTrait.selectors.clients,
             store
           );
         });
@@ -487,8 +431,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in products ', async () => {
           const { localTrait, store } = initMixedTraitLocal();
           await basicProductTest(
-            localTrait.localActions,
-            localTrait.localSelectors,
+            localTrait.actions,
+            localTrait.selectors,
             store
           );
         });
@@ -496,8 +440,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in productOrders ', async () => {
           const { localTrait, store } = initMixedTraitLocal();
           await basicProductOrdersTest(
-            localTrait.localActions,
-            localTrait.localSelectors,
+            localTrait.actions,
+            localTrait.selectors,
             store
           );
         });
@@ -505,8 +449,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in clients ', async () => {
           const { localTrait, store } = initMixedTraitLocal();
           await basicClientsTest(
-            localTrait.localActions,
-            localTrait.localSelectors,
+            localTrait.actions,
+            localTrait.selectors,
             store
           );
         });
@@ -516,8 +460,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in products ', async () => {
           const { localTrait, store } = initAddEntityProperties();
           await basicProductTest(
-            localTrait.localActions,
-            localTrait.localSelectors,
+            localTrait.actions,
+            localTrait.selectors,
             store
           );
         });
@@ -525,8 +469,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in productOrders ', async () => {
           const { localTrait, store } = initAddEntityProperties();
           await basicProductOrdersTest(
-            localTrait.localActions.productOrders,
-            localTrait.localSelectors.productOrders,
+            localTrait.actions.productOrders,
+            localTrait.selectors.productOrders,
             store
           );
         });
@@ -534,8 +478,8 @@ describe('Ngrx-Traits Integration Test', () => {
         it('test some action and selectors in clients ', async () => {
           const { localTrait, store } = initAddEntityProperties();
           await basicClientsTest(
-            localTrait.localActions.clients,
-            localTrait.localSelectors.clients,
+            localTrait.actions.clients,
+            localTrait.selectors.clients,
             store
           );
         });

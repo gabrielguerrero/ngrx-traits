@@ -8,13 +8,16 @@ import { Product, ProductFilter } from '../../../models';
 import {
   createEntityFeatureFactory,
   LocalTraitsConfig,
+  TraitEffect,
+  TraitLocalEffectsFactory,
   TraitsLocalStore,
 } from 'ngrx-traits';
 import { Injectable } from '@angular/core';
-import { createEffect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ProductService } from '../../../services/product.service';
+import { Store } from '@ngrx/store';
 
 const productFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },
@@ -30,31 +33,46 @@ const productFeatureFactory = createEntityFeatureFactory(
   })
 );
 
+const productsEffect: TraitLocalEffectsFactory<typeof productFeatureFactory> = (
+  allActions
+) => {
+  @Injectable()
+  class ProductsEffects extends TraitEffect {
+    loadProducts$ = createEffect(() =>
+      this.actions$.pipe(
+        ofType(allActions.loadProducts),
+        switchMap(() =>
+          //call your service to get the products data
+          this.productService.getProducts().pipe(
+            map((res) =>
+              allActions.loadProductsSuccess({ entities: res.resultList })
+            ),
+            catchError(() => of(allActions.loadProductsFail()))
+          )
+        )
+      )
+    );
+
+    constructor(
+      actions$: Actions,
+      store: Store,
+      private productService: ProductService
+    ) {
+      super(actions$, store);
+    }
+  }
+  return ProductsEffects;
+};
+
 @Injectable()
 export class ProductsLocalTraits extends TraitsLocalStore<
   typeof productFeatureFactory
 > {
-  productService = this.injector.get(ProductService);
-
-  loadProducts$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(this.localActions.loadProducts),
-      switchMap(() =>
-        //call your service to get the products data
-        this.productService.getProducts().pipe(
-          map((res) =>
-            this.localActions.loadProductsSuccess({ entities: res.resultList })
-          ),
-          catchError(() => of(this.localActions.loadProductsFail()))
-        )
-      )
-    )
-  );
-
   setup(): LocalTraitsConfig<typeof productFeatureFactory> {
     return {
       componentName: 'ProductsPickerComponent',
       traitsFactory: productFeatureFactory,
+      effectFactory: productsEffect,
     };
   }
 }
