@@ -21,7 +21,7 @@ export function provideMockLocalTraits<
 }: {
   traitFactory: Type<T>;
   selectors?: {
-    [key in keyof T['localSelectors']]?: ReturnType<T['localSelectors'][key]>;
+    [key in keyof T['selectors']]?: ReturnType<T['selectors'][key]>;
   };
 }): Provider[] {
   return [
@@ -42,11 +42,8 @@ export function provideMockLocalTraits<
         if (selectors) {
           Object.keys(selectors).forEach(
             (key) =>
-              trait.localSelectors?.[key] &&
-              mockStore.overrideSelector(
-                trait.localSelectors[key],
-                selectors?.[key]
-              )
+              trait.selectors?.[key] &&
+              mockStore.overrideSelector(trait.selectors[key], selectors?.[key])
           );
         }
         return trait;
