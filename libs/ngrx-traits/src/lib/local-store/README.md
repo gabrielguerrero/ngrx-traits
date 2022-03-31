@@ -47,15 +47,7 @@ import { ProductService } from './product.service';
 
 @Injectable()
 export class ProductsLocalTraits extends TraitsLocalStore<typeof productFeatureFactory> {
-  // TraitsLocalStore adds a reference to the injector so to get a service reference you can
-  productService = this.injector.get(ProductService);
-  //Alternativally you could override the constructor to get a reference to your service 
-  // constructor(
-  //   injector: Injector,
-  //   private productService: ProductService
-  // ) {
-  //   super(injector);
-  // }
+
   loadProducts$ = createEffect(() =>
     this.actions$.pipe(
       ofType(this.localActions.loadProducts),
@@ -69,6 +61,14 @@ export class ProductsLocalTraits extends TraitsLocalStore<typeof productFeatureF
     )
   );
 
+  constructor(
+    injector: Injector,
+    private productService: ProductService
+  ) {
+    super(injector);
+    // IMPORTANT, if next line is not added the effects in this class dont get resgitered
+    this.traits.addEffects(this);
+  }
   setup(): LocalTraitsConfig<typeof productFeature> {
     return {
       componentName: 'ProductsPickerComponent',
@@ -79,7 +79,7 @@ export class ProductsLocalTraits extends TraitsLocalStore<typeof productFeatureF
 ```
 
 An important bit is `extends TraitLocalEffectsFactory<typeof traitsFactory>`
-the _typeof traitsFactory_ gives the types for the localActions and localSelectors properties in the class.
+the _typeof traitsFactory_ gives the types for the localActions and localSelectors properties in the class. Also you must override the constructor, one to inject either the service you want to call, and to add ` this.traits.addEffects(this)` that registers the effects in the current class otherwise the wont run
 
 You can also add custom actions, selectors, reducers, and effects to your LocalTrait by creating a [Custom Traits](../../../traits/src/custom-traits.md), for this is just an extra effect we need and this should help with most of the cases.
 
