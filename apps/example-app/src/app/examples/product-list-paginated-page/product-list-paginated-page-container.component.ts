@@ -30,6 +30,7 @@ import { PageEvent } from '@angular/material/paginator';
           <mat-paginator
             [length]="data.products.total"
             [pageSize]="data.products.pageSize"
+            [pageIndex]="data.products.pageIndex"
             (page)="loadPage($event)"
           ></mat-paginator>
         </ng-template>
