@@ -44,6 +44,20 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
               loadProduct to help with the preview of the product
             </div>
           </mat-list-item>
+          <mat-divider></mat-divider>
+          <mat-list-item
+            [routerLink]="'cache-and-dropdowns'"
+            style="height: 110px;"
+          >
+            <div mat-line>
+              <b>Example using local traits in dropdowns with cacheib</b>
+            </div>
+            <div mat-line style="white-space: normal">
+              Here you can see how to use local store in two dropdowns where
+              selecting one trigger a load in the second, plus how you can use
+              cache to reduce the number of calls they do
+            </div>
+          </mat-list-item>
         </mat-list>
       </mat-card-content>
     </mat-card>
