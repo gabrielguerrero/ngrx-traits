@@ -3,3 +3,4 @@ export * from './model';
 export * from './local-store';
 export * from './trait-effect';
 export * from './util';
+export * from './cache';
