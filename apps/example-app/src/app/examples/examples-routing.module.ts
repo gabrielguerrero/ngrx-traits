@@ -30,6 +30,13 @@ const routes: Routes = [
     loadChildren: () =>
       import('./product-shop-page').then((m) => m.ProductShopPageModule),
   },
+  {
+    path: 'cache-and-dropdowns',
+    loadChildren: () =>
+      import('./cache-and-dropdowns-page').then(
+        (m) => m.CacheAndDropdownsPageModule
+      ),
+  },
   { path: '**', redirectTo: '/not-found' },
 ];
 

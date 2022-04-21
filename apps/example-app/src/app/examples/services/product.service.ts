@@ -3,6 +3,7 @@ import { of } from 'rxjs';
 import { Product, ProductDetail } from '../models';
 import { delay, tap } from 'rxjs/operators';
 import { sortData } from 'ngrx-traits/traits';
+import { getRandomInteger } from '../utils/form-utils';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -206,7 +207,3 @@ const mockProducts: Product[] = [
     price: getRandomInteger(20, 40),
   })),
 ];
-
-function getRandomInteger(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min)) + min;
-}

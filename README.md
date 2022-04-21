@@ -17,6 +17,7 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 - ✅ Trait to load single entities
 - ✅ Trait to reduce boilerplate needed when calling backend apis
 - ✅ Trait to set a value in the store 
+- ✅ Caching
 
 ## Table of Contents
 
@@ -32,6 +33,7 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Examples](apps/example-app/src/app/examples)
 
+### [Caching](libs/ngrx-traits/src/lib/cache/README.md)
 ## Installation
 
 Besides angular, you will need to have ngrx installed with this lib you can do so with: 

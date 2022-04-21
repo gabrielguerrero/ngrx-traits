@@ -16,3 +16,37 @@ export interface ProductDetail extends Product {
   releaseDate: string;
   image: string;
 }
+
+export interface ProductsStore {
+  id: number;
+  name: string;
+  address: string;
+}
+
+export interface ProductsStoreDetail {
+  id: number;
+  name: string;
+  phone: string;
+  address: {
+    line1: string;
+    postCode: string;
+    town: string;
+    country: string;
+  };
+  manager: string;
+  departments: Department[];
+}
+
+export interface ProductsStoreFilter {
+  search?: string;
+}
+
+export interface Department {
+  id: number;
+  name: string;
+}
+
+export interface DepartmentFilter {
+  storeId: number;
+  search?: string;
+}
