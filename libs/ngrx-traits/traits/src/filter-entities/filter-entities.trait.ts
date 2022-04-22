@@ -39,8 +39,10 @@ import {
  * @param traitConfig - Config object fot the trait factory
  * @param traitConfig.defaultFilter - Initial value for the filter
  * @param traitConfig.filterFn - Function to filter entities in memory, if not present then its expected
- * is filtered by the backend
+ * is filtered by the backend unless isRemoteFilter is defned
  * @param traitConfig.defaultDebounceTime - Value in milliseconds. Default to 400ms
+ * @param traitConfig.isRemoteFilter - Function to when it returns true it fires loadEntities so a remote
+ * backend filtering can run, otherwise it uses filterFn to do a local filtering
  *
  * @example
  * // The following trait config
@@ -50,9 +52,12 @@ import {
  *
  *    const traits = createEntityFeatureFactory(
  *      addLoadEntitiesTrait<Todo>(),
- *      //addFilterEntitiesTrait<Todo,TodoFilter>() //  remote filtering
+ *      //addFilterEntitiesTrait<Todo,TodoFilter>() // no params uses remote filtering
  *      addFilterEntitiesTrait<Todo,TodoFilter>({filterFn: (filter, entity) => // local filtering
- *          filter?.content && entity.content?.includes(filter?.content) || false})// remote
+ *          filter?.content && entity.content?.includes(filter?.content) || false})
+ *          // or use the following function to switch between remote search and local
+ *          // depending on which properties have changed in the filter
+ *          // isRemoteFilter: (previous, current) => previous?.someRemoteParam !== current?.someRemoteParam,
  *    )({
  *      actionsGroupKey: '[Todos]',
  *      featureSelector: createFeatureSelector<TestState>>(
@@ -67,6 +72,7 @@ export function addFilterEntitiesTrait<Entity, F>({
   defaultDebounceTime = 400,
   defaultFilter,
   filterFn,
+  isRemoteFilter,
 }: FilterEntitiesConfig<Entity, F> = {}) {
   return createTraitFactory({
     key: filterEntitiesTraitKey,
@@ -75,6 +81,7 @@ export function addFilterEntitiesTrait<Entity, F>({
       defaultDebounceTime,
       defaultFilter,
       filterFn,
+      isRemoteFilter,
     } as FilterEntitiesConfig<Entity, F>,
     actions: ({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) =>
       createFilterTraitActions<F>(actionsGroupKey, entitiesName),

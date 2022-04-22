@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
-import { TraitEffect } from 'ngrx-traits';
-import { asyncScheduler, EMPTY, of, timer } from 'rxjs';
+import { TraitEffect, Type } from 'ngrx-traits';
+import { asyncScheduler, EMPTY, of, pipe, timer } from 'rxjs';
 import {
   concatMap,
   debounce,
   distinctUntilChanged,
   first,
   map,
+  pairwise,
+  startWith,
 } from 'rxjs/operators';
 import { createEffect, ofType } from '@ngrx/effects';
 import {
@@ -17,7 +19,6 @@ import {
   LoadEntitiesActions,
   LoadEntitiesSelectors,
 } from '../load-entities/load-entities.model';
-import { Type } from 'ngrx-traits';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
 import { EntitiesPaginationActions } from '../entities-pagination';
 
@@ -60,17 +61,44 @@ export function createFilterTraitEffects<Entity, F>(
                 JSON.stringify(previous?.filters) ===
                   JSON.stringify(current?.filters)
             ),
-            map((action) =>
-              allActions.storeEntitiesFilter({
-                filters: action?.filters,
-                patch: action?.patch,
-              })
-            )
+            traitConfig?.isRemoteFilter
+              ? pipe(
+                  startWith({
+                    filters: traitConfig.defaultFilter as F,
+                    patch: false,
+                  }),
+                  pairwise(),
+                  concatMap(([previous, current]) =>
+                    traitConfig?.isRemoteFilter!(
+                      previous?.filters,
+                      current?.filters
+                    )
+                      ? [
+                          allActions.storeEntitiesFilter({
+                            filters: current?.filters,
+                            patch: current?.patch,
+                          }),
+                          allActions.loadEntities(),
+                        ]
+                      : [
+                          allActions.storeEntitiesFilter({
+                            filters: current?.filters,
+                            patch: current?.patch,
+                          }),
+                        ]
+                  )
+                )
+              : map((action) =>
+                  allActions.storeEntitiesFilter({
+                    filters: action?.filters,
+                    patch: action?.patch,
+                  })
+                )
           )
     );
 
     loadEntities$ =
-      !traitConfig?.filterFn &&
+      (!traitConfig?.filterFn || traitConfig?.isRemoteFilter) &&
       createEffect(() => {
         return this.actions$.pipe(
           ofType(allActions['storeEntitiesFilter']),

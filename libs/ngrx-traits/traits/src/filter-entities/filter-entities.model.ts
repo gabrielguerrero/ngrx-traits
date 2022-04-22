@@ -59,6 +59,7 @@ export type FilterEntitiesConfig<T, F> = {
   defaultFilter?: F;
   filterFn?: (filter: F, entity: T) => boolean;
   defaultDebounceTime?: number;
+  isRemoteFilter?: (previous: F | undefined, current: F | undefined) => boolean;
 };
 
 export type FilterEntitiesKeyedConfig<T, F> = {
