@@ -51,6 +51,38 @@ describe('addFilter Trait', () => {
     return { ...traits, effects: TestBed.inject(traits.effects[0]), mockStore };
   }
 
+  function initWithIsLocalOrRemoteFilter(
+    initialState?: any,
+    filter?: TodoFilter
+  ) {
+    const featureSelector = createFeatureSelector<TestState2>('test');
+    const traits = createEntityFeatureFactory(
+      { entityName: 'entity', entitiesName: 'entities' },
+      addLoadEntitiesTrait<Todo>(),
+      addFilterEntitiesTrait<Todo, TodoFilter>({
+        defaultFilter: filter,
+        filterFn: (filter: TodoFilter, todo: Todo) =>
+          (filter?.content && todo.content?.includes(filter.content)) || false,
+        isRemoteFilter: (previous, current) =>
+          previous?.extra !== current?.extra,
+      })
+    )({
+      actionsGroupKey: 'test',
+      featureSelector: featureSelector,
+    });
+    TestBed.configureTestingModule({
+      providers: [
+        traits.effects[0],
+        provideMockActions(() => actions$),
+        provideMockStore({
+          initialState,
+        }),
+      ],
+    });
+    const mockStore = TestBed.inject(MockStore);
+    return { ...traits, effects: TestBed.inject(traits.effects[0]), mockStore };
+  }
+
   function initWithRemoteFilterWithPagination() {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
@@ -72,7 +104,7 @@ describe('addFilter Trait', () => {
     return { ...traits, effects: TestBed.inject(traits.effects[1]) };
   }
 
-  // note: local filtering test are in load-entities and pagination traits because most logic belongs there
+  // NOTE: local filtering test are in load-entities and pagination traits because most logic belongs there
 
   describe('reducer', () => {
     it('should storeFilter action should store filters', () => {
@@ -139,6 +171,7 @@ describe('addFilter Trait', () => {
         actions.loadEntitiesFirstPage(),
       ]);
     });
+
     describe('storeFilter$', () => {
       it('should fire immediately  storeFilter action after filter if forceLoad is true', async () => {
         const { effects, actions, mockStore, selectors } =
@@ -176,6 +209,66 @@ describe('addFilter Trait', () => {
             actions as unknown as ƟFilterEntitiesActions<TodoFilter>
           ).storeEntitiesFilter({
             filters: { content: 'y' },
+          }),
+        });
+        expect(
+          effects.storeFilter$({
+            debounce: 30,
+            scheduler: Scheduler.get(),
+          })
+        ).toBeObservable(expected);
+      });
+
+      it('should fire storeFilter and loadEntities if isRemote is defined and returns true', () => {
+        const { effects, actions, mockStore, selectors } =
+          initWithIsLocalOrRemoteFilter();
+        mockStore.overrideSelector(selectors.selectEntitiesFilter, {});
+        actions$ = hot('a', {
+          a: actions.filterEntities({
+            filters: { content: 'x', extra: 'new' },
+          }),
+        });
+        const expected = hot('---(ab)', {
+          a: (
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+          ).storeEntitiesFilter({
+            filters: { content: 'x', extra: 'new' },
+          }),
+          b: actions.loadEntities(),
+        });
+        expect(
+          effects.storeFilter$({
+            debounce: 30,
+            scheduler: Scheduler.get(),
+          })
+        ).toBeObservable(expected);
+      });
+      it('should fire storeFilter and not loadEntities if isRemote is defined and returns false', () => {
+        const { effects, actions, mockStore, selectors } =
+          initWithIsLocalOrRemoteFilter();
+        // mockStore.overrideSelector(selectors.selectEntitiesFilter, {
+        //   content: 'y',
+        //   extra: 'new',
+        // });
+        actions$ = hot('a-----b', {
+          a: actions.filterEntities({
+            filters: { content: 'x', extra: 'new' },
+          }),
+          b: actions.filterEntities({
+            filters: { content: 'y', extra: 'new' },
+          }),
+        });
+        const expected = hot('---(ab)--c', {
+          a: (
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+          ).storeEntitiesFilter({
+            filters: { content: 'x', extra: 'new' },
+          }),
+          b: actions.loadEntities(),
+          c: (
+            actions as unknown as ƟFilterEntitiesActions<TodoFilter>
+          ).storeEntitiesFilter({
+            filters: { content: 'y', extra: 'new' },
           }),
         });
         expect(
