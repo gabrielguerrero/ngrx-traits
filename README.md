@@ -159,8 +159,8 @@ Next, just install the ProductsStateModule and use the actions and selectors in 
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.selectEntity(ProductSelectors.selectProductsList),
-    this.store.selectEntity(ProductSelectors.isLoadingProducts),
+    this.store.select(ProductSelectors.selectProductsList),
+    this.store.select(ProductSelectors.isLoadingProducts),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
   constructor(private store: Store) {}
 
@@ -215,8 +215,8 @@ for this example, it is assumed that a selectEntity output was added as a prop o
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.selectEntity(ProductSelectors.selectProductsList),
-    this.store.selectEntity(ProductSelectors.isLoadingProduct),
+    this.store.select(ProductSelectors.selectProductsList),
+    this.store.select(ProductSelectors.isLoadingProduct),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -277,7 +277,7 @@ checkout$ = createEffect(() =>
   this.actions$.pipe(
     ofType(ProductActions.checkout),
     concatLatestFrom(() =>
-      this.store.selectEntity(ProductSelectors.selectProductSelected)
+      this.store.select(ProductSelectors.selectProductSelected)
     ),
     exhaustMap((product) =>
       this.productService.checkout({ productId: product.id }).pipe(
@@ -299,11 +299,11 @@ And add the button to the component:
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.selectEntity(ProductSelectors.selectProductsList),
-    this.store.selectEntity(ProductSelectors.isLoadingProducts),
+    this.store.select(ProductSelectors.selectProductsList),
+    this.store.select(ProductSelectors.isLoadingProducts),
     // new selectors ↓
-    this.store.selectEntity(ProductSelectors.selectProductSelected),
-    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
+    this.store.select(ProductSelectors.selectProductSelected),
+    this.store.select(ProductSelectors.isLoadingCheckout),
   ]).pipe(
     map(([products, isLoading, selectedProduct, isLoadingCheckout]) => ({
       products,
@@ -401,10 +401,10 @@ Implement a presentational component for the filter section that has and input b
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.selectEntity(ProductSelectors.selectProductsList),
-    this.store.selectEntity(ProductSelectors.isLoadingProduct),
-    this.store.selectEntity(ProductSelectors.selectProductSelected),
-    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
+    this.store.select(ProductSelectors.selectProductsList),
+    this.store.select(ProductSelectors.isLoadingProduct),
+    this.store.select(ProductSelectors.selectProductSelected),
+    this.store.select(ProductSelectors.isLoadingCheckout),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -489,10 +489,10 @@ Next, add it to the component
 })
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
-    this.store.selectEntity(ProductSelectors.selectProductsList),
-    this.store.selectEntity(ProductSelectors.isLoadingProduct),
-    this.store.selectEntity(ProductSelectors.selectProductSelected),
-    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
+    this.store.select(ProductSelectors.selectProductsList),
+    this.store.select(ProductSelectors.isLoadingProduct),
+    this.store.select(ProductSelectors.selectProductSelected),
+    this.store.select(ProductSelectors.isLoadingCheckout),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
@@ -576,7 +576,7 @@ export class ProductsEffects {
       ofType(ProductActions.loadProducts),
       concatLatestFrom(() =>
         // get filters ↓
-        this.store.selectEntity(ProductSelectors.selectFilters)
+        this.store.select(ProductSelectors.selectFilters)
       ),
       switchMap(([_, filters]) =>
         //call your service to get the products data
@@ -626,9 +626,9 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts), // on loadEntities
       concatLatestFrom(() => [
-        this.store.selectEntity(ProductSelectors.selectFilters),
+        this.store.select(ProductSelectors.selectFilters),
         // get sorting ↓
-        this.store.selectEntity(ProductSelectors.selectSort),
+        this.store.select(ProductSelectors.selectSort),
       ]),
       switchMap(([_, filters, sort]) =>
         //call your service to get the products data
@@ -692,10 +692,10 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts), // on loadEntities
       concatLatestFrom(() => [
-        this.store.selectEntity(ProductSelectors.selectFilter),
-        this.store.selectEntity(ProductSelectors.selectSort),
+        this.store.select(ProductSelectors.selectFilter),
+        this.store.select(ProductSelectors.selectSort),
         // get pagination details for the request ↓
-        this.store.selectEntity(ProductSelectors.selectPagedRequest),
+        this.store.select(ProductSelectors.selectPagedRequest),
       ]),
       switchMap(([_, filters, sort, pagination]) =>
         //call your service to get the products data
@@ -736,10 +736,10 @@ Now that we have our effect ready , lets change our container component to use t
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
     // changed selectAll for selectPage ↓
-    this.store.selectEntity(ProductSelectors.selectProductsPage),
-    this.store.selectEntity(ProductSelectors.isLoadingProduct),
-    this.store.selectEntity(ProductSelectors.selectProductSelected),
-    this.store.selectEntity(ProductSelectors.isLoadingCheckout),
+    this.store.select(ProductSelectors.selectProductsPage),
+    this.store.select(ProductSelectors.isLoadingProduct),
+    this.store.select(ProductSelectors.selectProductSelected),
+    this.store.select(ProductSelectors.isLoadingCheckout),
   ]).pipe(map(([products, isLoading]) => ({ products, isLoading })));
 
   constructor(private store: Store) {}
