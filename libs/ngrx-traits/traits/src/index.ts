@@ -8,3 +8,4 @@ export * from './sort-entities';
 export * from './reset';
 export * from './load-entity';
 export * from './async-action';
+export * from './set-entity';
