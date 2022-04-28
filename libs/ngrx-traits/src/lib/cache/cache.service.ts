@@ -11,11 +11,13 @@ export function cache<T>({
   key,
   source,
   expires,
+  maxCacheSize,
 }: {
   store: Store;
   key: CacheKey;
   source: Observable<T>;
   expires?: number;
+  maxCacheSize?: number;
 }) {
   const exp = expires ?? Infinity;
   return store.select(selectCache(key)).pipe(
@@ -28,7 +30,12 @@ export function cache<T>({
         : source.pipe(
             tap((value) =>
               store.dispatch(
-                CacheActions.cache({ key, date: Date.now(), value })
+                CacheActions.cache({
+                  key,
+                  date: Date.now(),
+                  value,
+                  maxCacheSize,
+                })
               )
             )
           )
