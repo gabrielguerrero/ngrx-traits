@@ -21,7 +21,10 @@
               "apps/example-app/src/favicon.ico",
               "apps/example-app/src/assets"
             ],
-            "styles": ["./node_modules/@angular/material/prebuilt-themes/indigo-pink.css", "apps/example-app/src/styles.scss"],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+              "apps/example-app/src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -120,33 +123,33 @@
         }
       }
     },
-    "ngrx-traits": {
+    "ngrx-traits-common": {
       "projectType": "library",
-      "root": "libs/ngrx-traits",
-      "sourceRoot": "libs/ngrx-traits/src",
+      "root": "libs/ngrx-traits/common",
+      "sourceRoot": "libs/ngrx-traits/common/src",
       "prefix": "ngrx-traits",
       "architect": {
         "build": {
           "builder": "@nrwl/angular:package",
-          "outputs": ["dist/libs/ngrx-traits"],
+          "outputs": ["dist/libs/ngrx-traits/common"],
           "options": {
-            "project": "libs/ngrx-traits/ng-package.json"
+            "project": "libs/ngrx-traits/common/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "libs/ngrx-traits/tsconfig.lib.prod.json"
+              "tsConfig": "libs/ngrx-traits/common/tsconfig.lib.prod.json"
             },
             "development": {
-              "tsConfig": "libs/ngrx-traits/tsconfig.lib.json"
+              "tsConfig": "libs/ngrx-traits/common/tsconfig.lib.json"
             }
           },
           "defaultConfiguration": "production"
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/ngrx-traits"],
+          "outputs": ["coverage/libs/ngrx-traits/common"],
           "options": {
-            "jestConfig": "libs/ngrx-traits/jest.config.js",
+            "jestConfig": "libs/ngrx-traits/common/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -154,9 +157,76 @@
           "builder": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": [
-              "libs/ngrx-traits/src/**/*.ts",
-              "libs/ngrx-traits/src/**/*.html"
+              "libs/ngrx-traits/common/src/**/*.ts",
+              "libs/ngrx-traits/common/src/**/*.html"
             ]
+          }
+        },
+        "release": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "cd dist/libs/ngrx-traits/common && npm version {args.version} && npm publish",
+                "forwardAllArgs": false
+              }
+            ],
+            "cwd": "./",
+            "parallel": false
+          }
+        }
+      }
+    },
+    "ngrx-traits-core": {
+      "projectType": "library",
+      "root": "libs/ngrx-traits/core",
+      "sourceRoot": "libs/ngrx-traits/core/src",
+      "prefix": "ngrx-traits",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/angular:package",
+          "outputs": ["dist/libs/ngrx-traits/core"],
+          "options": {
+            "project": "libs/ngrx-traits/core/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/ngrx-traits/core/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/ngrx-traits/core/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/ngrx-traits/core"],
+          "options": {
+            "jestConfig": "libs/ngrx-traits/core/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/ngrx-traits/core/src/**/*.ts",
+              "libs/ngrx-traits/core/src/**/*.html"
+            ]
+          }
+        },
+        "release": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "cd dist/libs/ngrx-traits/core && npm version {args.version} && npm publish",
+                "forwardAllArgs": false
+              }
+            ],
+            "cwd": "./",
+            "parallel": false
           }
         }
       }

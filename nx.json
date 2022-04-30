@@ -34,7 +34,10 @@
       "tags": [],
       "implicitDependencies": ["example-app"]
     },
-    "ngrx-traits": {
+    "ngrx-traits-common": {
+      "tags": []
+    },
+    "ngrx-traits-core": {
       "tags": []
     }
   }

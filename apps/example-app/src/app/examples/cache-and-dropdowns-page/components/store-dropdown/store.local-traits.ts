@@ -3,11 +3,11 @@ import {
   createEntityFeatureFactory,
   LocalTraitsConfig,
   TraitsLocalStore,
-} from 'ngrx-traits';
+} from '@ngrx-traits/core';
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
-} from 'ngrx-traits/traits';
+} from '@ngrx-traits/common';
 import { ProductsStore, ProductsStoreFilter } from '../../../models';
 import { Injectable, Injector } from '@angular/core';
 import { ProductsStoreService } from '../../../services/products-store.service';
