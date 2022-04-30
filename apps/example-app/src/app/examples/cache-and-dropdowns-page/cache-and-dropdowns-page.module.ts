@@ -6,7 +6,7 @@ import { StoreDropdownModule } from './components/store-dropdown/store-dropdown.
 import { ReactiveFormsModule } from '@angular/forms';
 import { CacheAndDropdownsRoutingModule } from './cache-and-dropdowns-routing.module';
 import { MatCardModule } from '@angular/material/card';
-import { CacheModule } from 'ngrx-traits';
+import { CacheModule } from '@ngrx-traits/core';
 
 @NgModule({
   declarations: [CacheAndDropdownsPageComponent],

@@ -3,14 +3,14 @@ import {
   addLoadEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
-} from 'ngrx-traits/traits';
+} from '@ngrx-traits/common';
 import { Product, ProductFilter } from '../../../models';
 import {
   buildLocalTraits,
   createEntityFeatureFactory,
   LocalTraitsConfig,
   TraitsLocalStore,
-} from 'ngrx-traits';
+} from '@ngrx-traits/core';
 import { Injectable, Injector } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';

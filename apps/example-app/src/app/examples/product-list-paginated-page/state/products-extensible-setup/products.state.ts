@@ -6,7 +6,7 @@ import {
   EntitiesPaginationState,
   SortEntitiesState,
   SelectEntityState,
-} from 'ngrx-traits/traits';
+} from '@ngrx-traits/common';
 import { Product, ProductFilter } from '../../../models';
 export interface ProductsState
   extends LoadEntitiesState<Product>,

@@ -4,7 +4,7 @@ import { combineLatest } from 'rxjs';
 import { Product, ProductFilter } from '../models';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import { Sort } from 'ngrx-traits/traits';
+import { Sort } from '@ngrx-traits/common';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({

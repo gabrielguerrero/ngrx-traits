@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../../dist/libs/ngrx-traits/common",
+  "lib": {
+    "entryFile": "src/lib/public_api.ts"
+  }
+}

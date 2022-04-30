@@ -4,11 +4,8 @@
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
       ["@semantic-release/exec", {
-         "prepareCmd": "cd dist/libs/ngrx-traits/ && npm version ${nextRelease.version}",
+        "publishCmd": ["nx run affected --target=release --args=\"--version=${nextRelease.version}\"", ]
        }],
-      ["@semantic-release/npm",{
-        "pkgRoot": "dist/libs/ngrx-traits"
-        }],
       "@semantic-release/github"
     ]
 }
