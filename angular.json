@@ -167,11 +167,11 @@
           "options": {
             "commands": [
               {
-                "command": "cd dist/libs/ngrx-traits/common && npm version {args.version} && npm publish",
+                "command": "cp ../../../../.npmrc . && npm version {args.versionNumber} && jq --arg version \"{args.versionNumber}\" '.peerDependencies.\"@ngrx-traits/core\"=$version' package.json > tmp && mv tmp package.json && npm publish --access public --verbose",
                 "forwardAllArgs": false
               }
             ],
-            "cwd": "./",
+            "cwd": "dist/libs/ngrx-traits/core",
             "parallel": false
           }
         }
@@ -221,11 +221,11 @@
           "options": {
             "commands": [
               {
-                "command": "cd dist/libs/ngrx-traits/core && npm version {args.version} && npm publish",
+                "command": "cp ../../../../.npmrc . &&  npm version {args.versionNumber} && npm publish --access public --verbose",
                 "forwardAllArgs": false
               }
             ],
-            "cwd": "./",
+            "cwd": "dist/libs/ngrx-traits/core",
             "parallel": false
           }
         }

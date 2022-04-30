@@ -4,8 +4,9 @@
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
       ["@semantic-release/exec", {
-        "publishCmd": ["nx run affected --target=release --args=\"--version=${nextRelease.version}\"", ]
+        "publishCmd": "nx run-many --all --target=release --versionNumber=${nextRelease.version}"
        }],
       "@semantic-release/github"
     ]
 }
+

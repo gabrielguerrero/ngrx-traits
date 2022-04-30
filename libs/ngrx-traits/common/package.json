@@ -1,6 +1,6 @@
 {
   "name": "@ngrx-traits/common",
-  "version": "0.0.1",
+  "version": "0.0.0-development",
   "scripts": {
     "build": "ng-packagr -p package.json",
     "postinstall": "ngcc"
