@@ -21,4 +21,4 @@ NGRX Traits is a set of factory functions that dynamically generate actions, eff
 
 `npm install ngrx-traits-core`
 
-For more documentation go to our [github page](https://github.com/gabrielguerrero/ngrx-traits-core)
+For more documentation go to our [github page](https://github.com/gabrielguerrero/ngrx-traits)
