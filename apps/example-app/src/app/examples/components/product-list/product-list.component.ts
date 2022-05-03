@@ -7,7 +7,7 @@ import {
   Input,
 } from '@angular/core';
 import { Product } from '../../models';
-import { Sort } from 'ngrx-traits/traits';
+import { Sort } from '@ngrx-traits/common';
 import { PageEvent } from '@angular/material/paginator';
 
 @Component({

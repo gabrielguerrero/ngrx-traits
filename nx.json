@@ -1,7 +1,7 @@
 {
   "npmScope": "ngrx-traits",
   "affected": {
-    "defaultBase": "master"
+    "defaultBase": "main"
   },
   "implicitDependencies": {
     "package.json": {
@@ -34,7 +34,10 @@
       "tags": [],
       "implicitDependencies": ["example-app"]
     },
-    "ngrx-traits": {
+    "ngrx-traits-common": {
+      "tags": []
+    },
+    "ngrx-traits-core": {
       "tags": []
     }
   }

@@ -1,0 +1,20 @@
+{
+  "name": "@ngrx-traits/common",
+  "version": "0.0.0-development",
+  "scripts": {
+    "build": "ng-packagr -p package.json",
+    "postinstall": "ngcc"
+  },
+  "peerDependencies": {
+    "@angular/common": "^12.0.0",
+    "@angular/compiler": "^12.0.0",
+    "@angular/core": "^12.0.0",
+    "@ngrx/effects": "^12.2.0",
+    "@ngrx/entity": "^12.2.0",
+    "@ngrx/store": "^12.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gabrielguerrero/ngrx-traits.git"
+  }
+}

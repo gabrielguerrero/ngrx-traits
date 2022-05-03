@@ -4,10 +4,10 @@ import {
   addLoadEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
-} from 'ngrx-traits/traits';
+} from '@ngrx-traits/common';
 import { Product, ProductFilter } from '../../../models';
 import { props } from '@ngrx/store';
-import { createEntityFeatureFactory } from 'ngrx-traits';
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
 
 const productFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },

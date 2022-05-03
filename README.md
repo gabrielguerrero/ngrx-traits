@@ -27,13 +27,13 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Extensible Setup](#extensible-setup-1)
 
-### [Local store traits](libs/ngrx-traits/src/lib/local-store/README.md)
+### [Local store traits](libs/ngrx-traits/core/src/lib/local-store/README.md)
 
-### [Custom Traits](libs/ngrx-traits/traits/src/custom-traits.md)
+### [Custom Traits](libs/ngrx-traits/common/src/lib/custom-traits.md)
 
 ### [Examples](apps/example-app/src/app/examples)
 
-### [Caching](libs/ngrx-traits/src/lib/cache/README.md)
+### [Caching](libs/ngrx-traits/core/src/lib/cache/README.md)
 ## Installation
 
 Besides angular, you will need to have ngrx installed with this lib you can do so with: 
@@ -42,7 +42,7 @@ npm i @ngrx/{store,effects,entity} --save
 ```
 Now install ngrx-traits like:
 ```
-npm i ngrx-traits --save
+npm i @ngrx-traits/{core,common} --save
 ```
 
 ## Getting Started
@@ -64,8 +64,8 @@ The next step is to create our traits file. We have two ways to configure them, 
 
 ```ts
 import { createFeatureSelector } from '@ngrx/store';
-import { createEntityFeatureFactory } from 'ngrx-traits';
-import { addLoadEntitiesTrait } from 'ngrx-traits/traits';
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
+import { addLoadEntitiesTrait } from '@ngrx-traits/common';
 
 export const productFeature = createEntityFeatureFactory(
   {entityName: 'product'},
