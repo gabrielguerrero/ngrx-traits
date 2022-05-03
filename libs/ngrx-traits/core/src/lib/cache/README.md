@@ -1,9 +1,9 @@
 # Caching
 
-This is a very simple cache implementation inspired in  some bits of react query like cache keys that are arrays of string or objects,
-is not compulsory to use this library with the traits, and this lib can be used without ngrx-traits but it depends on ngrx for now.
+This is a very simple cache implementation inspired in some bits of react query like cache keys that are arrays of string or objects,
+is not compulsory to use this library with the traits you could use any other cache library.
 
-With this lib you can cache anything that returns an Observable, so it should be use to cache from simple rest calls, grapql or grpc.
+With this lib you can cache anything that returns an Observable, so it could be used to cache rest calls, grapql or grpc.
 
 Examples 
 
@@ -89,7 +89,7 @@ loadDepartments$ = createEffect(() => {
 this.store.dispatch(CacheActions.invalidateCache({key:['stores']}));
 ```
 You can invalidate any queries regardless of the time left to expire and will get re-executed next time gets called,
-If you invalidate using a key like ['stores'], all queries that begin with that key also get invalidated, e.g. a cache with a ket like ['stores','departments', {storedId: 1}]
+If you invalidate using a key like ['stores'], all queries that begin with that key also get invalidated, e.g. a cache with a key like ['stores','departments', {storedId: 1}] will also be invalidated.
 
 #### Delete queries
 
@@ -97,4 +97,4 @@ If you invalidate using a key like ['stores'], all queries that begin with that 
 this.store.dispatch(CacheActions.deleteCache({key:['stores']}));
 ```
 You can delete any queries regardless of the time left to expire and will get re-executed next time gets called,
-If you delete using a key like ['stores'], all queries that begin with that key also get deleted, e.g. a cache with a ket like ['stores','departments', {storedId: 1}].
+If you delete using a key like ['stores'], all queries that begin with that key also get deleted, e.g. a cache with a key like ['stores','departments', {storedId: 1}] will also be deleted.
