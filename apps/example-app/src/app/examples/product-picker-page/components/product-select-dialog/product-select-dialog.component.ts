@@ -3,7 +3,7 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { Product, ProductFilter } from '../../../models';
-import { Sort } from 'ngrx-traits/traits';
+import { Sort } from '@ngrx-traits/common';
 import { ProductsLocalTraits } from './products.local-traits';
 
 @Component({

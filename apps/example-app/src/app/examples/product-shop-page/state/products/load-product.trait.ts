@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { ProductDetail } from '../../../models';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { addLoadEntityTraits } from 'ngrx-traits/traits';
+import { addLoadEntityTraits } from '@ngrx-traits/common';
 import {
   createTraitFactory,
   ExtractActionsType,
   TraitEffect,
-} from 'ngrx-traits';
+} from '@ngrx-traits/core';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 import { props, Store } from '@ngrx/store';
 import { ProductService } from '../../../services/product.service';

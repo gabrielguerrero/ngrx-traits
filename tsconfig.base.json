@@ -15,10 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "ngrx-traits": ["libs/ngrx-traits/src/lib/index.ts"],
-      "ngrx-traits/traits": ["libs/ngrx-traits/traits/src/index.ts"],
-      "@ngrx-traits/ngrx-traits": ["libs/ngrx-traits/src/index.ts"],
-      "ngrx-traits/testing": ["libs/ngrx-traits/testing/src/index.ts"]
+      "@ngrx-traits/core": ["libs/ngrx-traits/core/src/lib/index.ts"],
+      "@ngrx-traits/core/testing": ["libs/ngrx-traits/core/src/lib/index.ts"],
+      "@ngrx-traits/common": [
+        "libs/ngrx-traits/common/src/lib/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]

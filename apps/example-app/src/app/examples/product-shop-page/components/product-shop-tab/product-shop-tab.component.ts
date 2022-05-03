@@ -5,7 +5,7 @@ import { first, map } from 'rxjs/operators';
 import { ProductBasketActions } from '../../state/products-basket/products-basket.traits';
 import { Store } from '@ngrx/store';
 import { Product, ProductFilter, ProductOrder } from '../../../models';
-import { Sort } from 'ngrx-traits/traits';
+import { Sort } from '@ngrx-traits/common';
 
 @Component({
   selector: 'product-shop-tab',

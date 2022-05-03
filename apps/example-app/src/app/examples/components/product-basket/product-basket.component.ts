@@ -8,7 +8,7 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { Product, ProductOrder } from '../../models';
-import { Selected, Sort } from 'ngrx-traits/traits';
+import { Selected, Sort } from '@ngrx-traits/common';
 import { PageEvent } from '@angular/material/paginator';
 import { Dictionary } from '@ngrx/entity';
 import { FormArray, FormBuilder } from '@angular/forms';
