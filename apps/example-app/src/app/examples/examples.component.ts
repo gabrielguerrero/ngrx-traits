@@ -50,7 +50,7 @@ import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
             style="height: 110px;"
           >
             <div mat-line>
-              <b>Example using local traits in dropdowns with cacheib</b>
+              <b>Example using local traits in dropdowns with cache</b>
             </div>
             <div mat-line style="white-space: normal">
               Here you can see how to use local store in two dropdowns where

@@ -101,5 +101,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "msw": {
+    "workerDirectory": "apps/example-app/src"
   }
 }

@@ -9,6 +9,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ExamplesModule } from './examples/examples.module';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { environment } from '../environments/environment';
+import { HttpClientModule } from '@angular/common/http';
+import './examples/services/mock-backend';
 
 @NgModule({
   declarations: [AppComponent],
@@ -17,6 +19,7 @@ import { environment } from '../environments/environment';
     BrowserAnimationsModule,
     ExamplesModule,
     StoreModule.forRoot({}),
+    HttpClientModule,
     StoreDevtoolsModule.instrument({
       maxAge: 25, // Retains last 25 states
       logOnly: environment.production, // Restrict extension to log-only mode

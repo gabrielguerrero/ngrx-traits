@@ -19,7 +19,8 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "apps/example-app/src/favicon.ico",
-              "apps/example-app/src/assets"
+              "apps/example-app/src/assets",
+              "apps/example-app/src/mockServiceWorker.js"
             ],
             "styles": [
               "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",

@@ -11,11 +11,11 @@ import { ProductsLocalTraits } from './products.local-traits';
   template: ` <h2 mat-dialog-title>Install Angular</h2>
     <ng-container *ngIf="data$ | async as data">
       <mat-dialog-content class="mat-typography">
+        <product-search-form
+          (searchProduct)="filter($event)"
+        ></product-search-form>
         <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
         <ng-template #listProducts>
-          <product-search-form
-            (searchProduct)="filter($event)"
-          ></product-search-form>
           <product-list
             [list]="data.products"
             [selectedProduct]="data.selectedProduct"

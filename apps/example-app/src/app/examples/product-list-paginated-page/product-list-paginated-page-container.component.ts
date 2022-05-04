@@ -15,11 +15,11 @@ import { PageEvent } from '@angular/material/paginator';
         <mat-card-title>Product List</mat-card-title>
       </mat-card-header>
       <mat-card-content>
+        <product-search-form
+          (searchProduct)="filter($event)"
+        ></product-search-form>
         <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
         <ng-template #listProducts>
-          <product-search-form
-            (searchProduct)="filter($event)"
-          ></product-search-form>
           <product-list
             [list]="data.products.entities"
             [selectedProduct]="data.selectedProduct"
