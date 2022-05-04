@@ -27,7 +27,7 @@ export const productHandlers = [
     }
   ),
   rest.get<never, ProductsQuery, ProductsResponse>(
-    'http://localhost:4200/products',
+    '/products',
     (req, res, ctx) => {
       let result = [...mockProducts];
       const options = {
