@@ -45,7 +45,7 @@ import {
  * To make the pagination experience smoother the loadEntities to get new pages is done when the current page is change to
  * the last cached page.
  * @param config
- * @param config.cacheType - Default to 'full', change the cache mode
+ * @param config.cacheType - Default to 'partial', change the cache mode
  * @param config.pageSize - Default to 20, number of entities on  each page
  * @param config.currentPage - Default to 0, starting page
  * @param config.pagesToCache - Default to 3, used in partial and grow cache mode, is the number of
@@ -87,7 +87,7 @@ import {
  * traits.selectors.selectTodosPageInfo()
  */
 export function addEntitiesPaginationTrait<Entity>({
-  cacheType = 'full',
+  cacheType = 'partial',
   pageSize = 20,
   currentPage = 0,
   pagesToCache = 3,

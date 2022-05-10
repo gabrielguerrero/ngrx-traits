@@ -18,7 +18,7 @@ export const productFeature = createEntityFeatureFactory(
     name: 'checkout',
     actionSuccessProps: props<{ orderId: string }>(),
   }),
-  addEntitiesPaginationTrait<Product>({ cacheType: 'partial' }),
+  addEntitiesPaginationTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>(),
   addSortEntitiesTrait<Product>({
     remote: true,

@@ -677,7 +677,7 @@ export const productFeature = createEntityFeatureFactory(
   }),
   addSortEntitiesTrait<Product>({ remote: true }),
   // new trait ↓
-  addEntitiesPaginationTrait<Product>({ cacheType: 'partial' })
+  addEntitiesPaginationTrait<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: 'products',
@@ -881,7 +881,7 @@ export const productFeature = createEntityFeatureFactory(
     },
   }),
   addSortEntitiesTrait<Product>({ remote: true }),
-  addEntitiesPaginationTrait<Product>({ cacheType: 'partial' })
+  addEntitiesPaginationTrait<Product>()
 )({
   actionsGroupKey: '[Products]',
   featureSelector: selectProductState,
