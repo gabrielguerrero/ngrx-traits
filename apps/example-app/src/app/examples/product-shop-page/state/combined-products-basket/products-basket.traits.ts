@@ -21,7 +21,10 @@ export const productFeatureFactory = createEntityFeatureFactory(
   addSelectEntityTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
-      return entity.name.toLowerCase().includes(filter.search.toLowerCase());
+      return (
+        !filter.search ||
+        entity.name.toLowerCase().includes(filter.search.toLowerCase())
+      );
     },
   }),
   addSortEntitiesTrait<Product>({

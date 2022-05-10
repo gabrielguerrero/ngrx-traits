@@ -23,7 +23,8 @@ const departmentFeatureFactory = createEntityFeatureFactory(
   addFilterEntitiesTrait<Department, DepartmentFilter>({
     filterFn: (filter, entity) => {
       return (
-        !filter?.search || entity.name.toLowerCase?.().includes(filter?.search)
+        !filter?.search ||
+        !!entity.name.toLowerCase?.().includes(filter?.search.toLowerCase())
       );
     },
     isRemoteFilter: (previous, current) =>

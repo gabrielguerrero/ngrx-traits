@@ -26,10 +26,11 @@ const storeFeatureFactory = createEntityFeatureFactory(
   addLoadEntitiesTrait<ProductsStore>(),
   addFilterEntitiesTrait<ProductsStore, ProductsStoreFilter>({
     filterFn: (filter, entity) => {
+      const searchString = filter?.search?.toLowerCase?.();
       return (
-        !filter?.search ||
-        entity.name.toLowerCase().includes(filter.search) ||
-        entity.address.toLowerCase().includes(filter.search)
+        !searchString ||
+        entity.name.toLowerCase().includes(searchString) ||
+        entity.address.toLowerCase().includes(searchString)
       );
     },
   })

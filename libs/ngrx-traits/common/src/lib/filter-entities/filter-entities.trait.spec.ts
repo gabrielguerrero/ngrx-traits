@@ -62,7 +62,8 @@ describe('addFilter Trait', () => {
       addFilterEntitiesTrait<Todo, TodoFilter>({
         defaultFilter: filter,
         filterFn: (filter: TodoFilter, todo: Todo) =>
-          (filter?.content && todo.content?.includes(filter.content)) || false,
+          !filter.content ||
+          !!todo.content?.toLowerCase().includes(filter.content.toLowerCase()),
         isRemoteFilter: (previous, current) =>
           previous?.extra !== current?.extra,
       })

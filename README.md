@@ -672,7 +672,7 @@ export const productFeature = createEntityFeatureFactory(
   }),
   addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
-      return entity.name.includes(filter.search);
+      return !filter.search  || entity.name.toLowerCase().includes(filter.search.toLowerCase());
     },
   }),
   addSortEntitiesTrait<Product>({ remote: true }),
@@ -877,7 +877,7 @@ export const productFeature = createEntityFeatureFactory(
   }),
   addFilterEntitiesTrait<Product, ProductFilter>({
     filterFn: (filter, entity) => {
-      return entity.name.includes(filter.search);
+      return !filter.search  || entity.name.includes(filter.search.toLowerCase());
     },
   }),
   addSortEntitiesTrait<Product>({ remote: true }),

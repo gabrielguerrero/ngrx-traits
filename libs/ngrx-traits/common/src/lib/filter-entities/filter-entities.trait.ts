@@ -54,7 +54,7 @@ import {
  *      addLoadEntitiesTrait<Todo>(),
  *      //addFilterEntitiesTrait<Todo,TodoFilter>() // no params uses remote filtering
  *      addFilterEntitiesTrait<Todo,TodoFilter>({filterFn: (filter, entity) => // local filtering
- *          filter?.content && entity.content?.includes(filter?.content) || false})
+ *          !filter.content || !!entity.content?.includes(filter.content.toLowerCase())
  *          // or use the following function to switch between remote search and local
  *          // depending on which properties have changed in the filter
  *          // isRemoteFilter: (previous, current) => previous?.someRemoteParam !== current?.someRemoteParam,
