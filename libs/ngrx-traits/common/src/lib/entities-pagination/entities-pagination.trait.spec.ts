@@ -40,7 +40,7 @@ describe('Pagination Test', () => {
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
       addFilterEntitiesTrait<Todo, TodoFilter>(),
-      addEntitiesPaginationTrait<Todo>({ cacheType })
+      addEntitiesPaginationTrait<Todo>({ cacheType, pageSize: 20 })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -62,7 +62,7 @@ describe('Pagination Test', () => {
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
       addCrudEntitiesTrait<Todo>(),
-      addEntitiesPaginationTrait<Todo>({ cacheType })
+      addEntitiesPaginationTrait<Todo>({ cacheType, pageSize: 20 })
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,

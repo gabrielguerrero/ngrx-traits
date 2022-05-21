@@ -30,6 +30,7 @@ const productFeatureFactory = createEntityFeatureFactory(
     },
   }),
   addSortEntitiesTrait<Product>({
+    remote: false,
     defaultSort: { direction: 'asc', active: 'name' },
   })
 );

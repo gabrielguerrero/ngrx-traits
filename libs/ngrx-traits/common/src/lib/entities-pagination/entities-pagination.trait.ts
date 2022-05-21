@@ -46,7 +46,7 @@ import {
  * the last cached page.
  * @param config
  * @param config.cacheType - Default to 'partial', change the cache mode
- * @param config.pageSize - Default to 20, number of entities on  each page
+ * @param config.pageSize - Default to 10, number of entities on  each page
  * @param config.currentPage - Default to 0, starting page
  * @param config.pagesToCache - Default to 3, used in partial and grow cache mode, is the number of
  * extra pages kept in cache to avoid calling the backend on each page
@@ -88,7 +88,7 @@ import {
  */
 export function addEntitiesPaginationTrait<Entity>({
   cacheType = 'partial',
-  pageSize = 20,
+  pageSize = 10,
   currentPage = 0,
   pagesToCache = 3,
 }: EntitiesPaginationConfig = {}) {

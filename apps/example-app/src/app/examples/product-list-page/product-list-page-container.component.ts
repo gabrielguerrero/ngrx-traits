@@ -14,9 +14,9 @@ import { Sort } from '@ngrx-traits/common';
         <mat-card-title>Product List</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <product-search-form
-          (searchProduct)="filter($event)"
-        ></product-search-form>
+        <!--        <product-search-form-->
+        <!--          (searchProduct)="filter($event)"-->
+        <!--        ></product-search-form>-->
         <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
         <ng-template #listProducts>
           <product-list

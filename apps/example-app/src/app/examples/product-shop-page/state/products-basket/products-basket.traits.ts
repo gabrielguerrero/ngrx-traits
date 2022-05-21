@@ -22,6 +22,7 @@ export const productOrdersFeature = createEntityFeatureFactory(
     actionSuccessProps: props<{ orderId: string }>(),
   }),
   addSortEntitiesTrait<ProductOrder>({
+    remote: false,
     defaultSort: { direction: 'asc', active: 'name' },
   }),
   ...addLoadProductDetailTraits()

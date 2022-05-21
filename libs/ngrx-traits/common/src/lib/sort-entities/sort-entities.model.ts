@@ -47,7 +47,7 @@ export const sortTraitKey = 'sort';
 
 export interface SortEntitiesConfig<T> {
   defaultSort: Sort<T>;
-  remote?: boolean;
+  remote: boolean;
 }
 
 export type SortEntitiesKeyedConfig<T> = KeyedConfig<

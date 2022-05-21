@@ -18,6 +18,7 @@ export const productFeature = createEntityFeatureFactory(
     },
   }),
   addSortEntitiesTrait<Product>({
+    remote: false,
     defaultSort: { direction: 'asc', active: 'name' },
   }),
   ...addLoadProductDetailTraits()

@@ -33,8 +33,8 @@ import {
 /**
  * Generates ngrx code to sort locally or remotely a list of entities
  * @param config
- * @param config.defaultSort - Required, Default entity prop for the sort
- * @param config.remote - Optional field, default to false, when true disables local
+ * @param config.defaultSort - Required field, Default entity prop for the sort
+ * @param config.remote - Required field, default to false, when true disables local
  * sorting and every sort action call will now trigger a loadEntities action and the backend
  * should sort the data, use selectSort in the effect that call backend to get the requested sort,
  * when false all sorting is done in memory when the sort action is fired
@@ -62,7 +62,7 @@ import {
  * traits.selectors.selectTodosSort()
  */
 export function addSortEntitiesTrait<Entity>({
-  remote = false,
+  remote,
   defaultSort,
 }: SortEntitiesConfig<Entity>) {
   return createTraitFactory({
