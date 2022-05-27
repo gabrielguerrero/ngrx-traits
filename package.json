@@ -29,7 +29,8 @@
     "help": "nx help",
     "semantic-release": "semantic-release --debug",
     "commit": "git-cz",
-    "acp": "git add . && npm run commit && git push"
+    "acp": "git add . && npm run commit && git push",
+    "api-docs": "nx run-many --all --target=api-docs"
   },
   "private": true,
   "dependencies": {
@@ -62,6 +63,12 @@
     "@angular/cli": "^12.0.0",
     "@angular/compiler-cli": "^12.0.0",
     "@angular/language-service": "^12.0.0",
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.0",
+    "@babel/plugin-proposal-class-properties": "^7.17.12",
+    "@babel/plugin-proposal-decorators": "^7.17.12",
+    "@babel/preset-env": "^7.18.0",
+    "@babel/preset-typescript": "^7.17.12",
     "@ngneat/spectator": "^8.0.1",
     "@nrwl/cli": "12.5.8",
     "@nrwl/cypress": "12.5.8",
@@ -85,6 +92,8 @@
     "jest": "27.0.3",
     "jest-marbles": "^2.5.1",
     "jest-preset-angular": "^9.0.4",
+    "jsdoc-babel": "^0.5.0",
+    "jsdoc-to-markdown": "^7.1.1",
     "ng-packagr": "^12.1.0",
     "prettier": "^2.3.1",
     "semantic-release": "^17.4.4",

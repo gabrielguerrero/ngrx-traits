@@ -175,6 +175,19 @@
             "cwd": "dist/libs/ngrx-traits/common",
             "parallel": false
           }
+        },
+        "api-docs": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "jsdoc2md --files ./src/lib/**/*.ts --configure ../../../jsdoc2md.json --no-cache > ./api-docs.md",
+                "forwardAllArgs": false
+              }
+            ],
+            "cwd": "libs/ngrx-traits/common",
+            "parallel": false
+          }
         }
       }
     },
@@ -226,8 +239,19 @@
                 "forwardAllArgs": false
               }
             ],
-            "cwd": "dist/libs/ngrx-traits/core",
-            "parallel": false
+            "cwd": "dist/libs/ngrx-traits/core"
+          }
+        },
+        "api-docs": {
+          "builder": "@nrwl/workspace:run-commands",
+          "options": {
+            "commands": [
+              {
+                "command": "jsdoc2md --files ./src/lib/*.ts --files ./src/lib/**/*.ts --configure ../../../jsdoc2md.json --no-cache > ./api-docs.md",
+                "forwardAllArgs": false
+              }
+            ],
+            "cwd": "libs/ngrx-traits/core"
           }
         }
       }

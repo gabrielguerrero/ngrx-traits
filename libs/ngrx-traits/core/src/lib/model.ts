@@ -288,29 +288,3 @@ export type ReplaceEntityNames<
   'Entity',
   EntityName
 >;
-// type G = ReplaceProps<
-//   ReplaceProps<
-//     {
-//       loadEntities: 1;
-//       loadEntitiesSuccess: 2;
-//       selectEntities: 3;
-//       selectEntity: 4;
-//     },
-//     'Entities',
-//     'products'
-//   >,
-//   'Entity',
-//   'product'
-// >;
-//
-// const g: G = {};
-// // g.
-//   type F= ReplaceEntityNames<{
-//   loadEntities: 1;
-//   loadEntitiesSuccess: 2;
-//   selectEntities: 3;
-//   selectEntity: 4;
-// }, 'product','products'>;
-// const f: F = {};
-// f.
-// TODO clean up file
