@@ -22,12 +22,10 @@ import { createLoadEntitiesTraitActions } from './load-entities.trait.actions';
 import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selectors';
 
 /**
- * Generates the ngrx code needed to load a list of entities from the backend
- * with a load[EntitiesName], load[EntitiesName]Success, load[EntitiesName]Fail actions, and selectors to query the
- * entities like selectEntity[EntitiesName]List, selectEntity[EntitiesName]Ids, selectEntity[EntitiesName]Map, and its progress loading
- * with isLoading[EntitiesName],isLoading[EntitiesName]Success, isLoading[EntitiesName]Fail. This trait is the base for all other traits related
- * to a list of entities, the other will call loadEntities when needing data.
- * @param traitConfig - Config object fot the trait factory
+ * Generates the ngrx code needed to load a list of entities from the backend. This trait is the base for all other traits related
+ * to a list of entities, the other will call loadEntities when needing data. See the example for the list of actions and selectors this generates
+ *
+ * @param traitConfig - Config object for the trait factory
  * @param traitConfig.selectId - Function that returns the id of an entity
  * @param traitConfig.sortComparer - Default sort function for to @ngrx/entity EntityAdapter
  *
@@ -46,10 +44,17 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  *        'todos',
  *      ),
  *    });
- * // will generate the actions and selectors
+ *
+ * //   adds following props to the state:
+ * //    ids: string[] | number[];
+ * //    entities: Dictionary<Todo>;
+ * //    status?: 'loading' | 'success' | 'fail';
+ *
+ * // generated actions
  * traits.actions.loadTodos()
  * traits.actions.loadTodosSuccess({entities: todos})
  * traits.actions.loadTodosFail();
+ * // generated selectors
  * traits.selectors.selectTodosList
  * traits.selectors.selectTodosMap
  * traits.selectors.selectTodosIds

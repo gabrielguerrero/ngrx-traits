@@ -34,6 +34,10 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 ### [Examples](apps/example-app/src/app/examples)
 
 ### [Caching](libs/ngrx-traits/core/src/lib/cache/README.md)
+
+### [Core API](libs/ngrx-traits/core/api-docs.md)
+
+### [Common Traits API](libs/ngrx-traits/common/api-docs.md)
 ## Installation
 
 Besides angular, you will need to have ngrx installed with this lib you can do so with: 

@@ -9,7 +9,8 @@ import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
 type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
 
 /**
- * Generates ngrx code needed to load and entity and store it in a state
+ * Generates ngrx code needed to load and entity and store it in a state. This action can be added
+ * more than once as long as the entityName para is different
  * @param entityName - Entity name, should be in camel case
  * @param options.actionProps - Optional param for the main request action,
  * use the props() function for its value, if not present action will have no params,
@@ -33,14 +34,19 @@ type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
  *        >('client'),
  *    });
  *
- * // will generate
+ * //   adds following props to the state:
+ * //    loadClientStatus?: 'loading' | 'success' | 'fail';
+ * //    client?: Client;
+ *
+ * // generated actions
  * traits.actions.loadClient({id:123});
  * traits.actions.loadClientSuccess({client: {id: '123', name: 'gabs'}});
  * traits.actions.loadClientFail();
- * traits.selectors.selectClient
- * traits.selectors.isLoadingLoadClient
- * traits.selectors.isSuccessLoadClient
- * traits.selectors.isFailLoadClient
+ * // generated selectors
+ * traits.selectors.selectClient()
+ * traits.selectors.isLoadingLoadClient()
+ * traits.selectors.isSuccessLoadClient()
+ * traits.selectors.isFailLoadClient()
  */
 export function addLoadEntityTraits<
   J extends string,

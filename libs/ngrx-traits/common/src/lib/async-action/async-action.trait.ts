@@ -15,7 +15,8 @@ import {
 /**
  * Generates the typical ngrx code need to make a async action with
  * a request, success and failure actions, plus a status property to track its progress
- * and selectors to query the status.
+ * and selectors to query the status. This trait can be added more thant once as long
+ * as the name prop is different.
  *
  * @param options - Config object for the trait factory
  * @param options.name - Name of the main request action, should be in camel case
@@ -42,10 +43,14 @@ import {
  *        'client',
  *      ),
  *    });
- * // will generate the actions and selectors
+ * //   adds following props to the state:
+ * //    createClientStatus?: 'loading' | 'success' | 'fail';
+ *
+ * // generated actions
  * traits.actions.createClient({name:'Pedro'})
  * traits.actions.createClientSuccess({id:'123'})
  * traits.actions.createClientFail();
+ * //generated selectors
  * traits.selectors.isLoadingCreateClient
  * traits.selectors.isSuccessCreateClient
  * traits.selectors.isFailCreateClient

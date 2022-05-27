@@ -26,7 +26,7 @@ type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
  * const traits = createEntityFeatureFactory(
  * addSetEntityTraits({
  *        entityName: 'client',
- *        actionProps: props<{ client: { id: number; name: string } }
+ *        actionProps: props<{ client: Client }
  *      }),
  * )({
  *      actionsGroupKey: 'Client',
@@ -34,10 +34,13 @@ type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
  *        SetEntityState<Client, 'client'>
  *        >('client'),
  *    });
+ * //   adds following props to the state:
+ * //    client?: Client;
  *
- * // will generate
+ * // generated actions
  * traits.actions.setClient({client: {id:123, name: 'gabs'}});
- * traits.selectors.selectClient
+ * //generated selectors
+ * traits.selectors.selectClient()
  */
 export function addSetEntityTrait<
   J extends string,

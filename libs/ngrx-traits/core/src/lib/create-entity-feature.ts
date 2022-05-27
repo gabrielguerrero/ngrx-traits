@@ -1,14 +1,12 @@
 import {
   Config,
   ExtractActionsType,
-  ExtractMutatorsType,
   ExtractSelectorsType,
   ExtractStateType,
   EntityFeatureFactory,
   FeatureSelectors,
   KeyedConfig,
   TraitActions,
-  TraitActionsFactoryConfig,
   TraitFactory,
   TraitSelectors,
   TraitStateMutators,
@@ -31,38 +29,35 @@ import {
 } from '@ngrx/store';
 import { TraitEffect } from './trait-effect';
 import { Type } from './local-store';
-import { capitalize } from './util';
+import { capitalize, setPropertiesReducer } from './util';
 
-export function createTraitFactory<
-  State = {},
-  A extends TraitActions = {},
-  S extends TraitSelectors<State> = {},
-  M extends TraitStateMutators<State> = {},
-  KEY extends string = string,
-  C = unknown,
-  KC = KeyedConfig<KEY, C>
->(f: {
-  key: KEY;
-  config?: C;
-  depends?: string[];
-  actions?: TraitActionsFactory<A, KC>;
-  selectors?: TraitSelectorsFactory<State, S, KC>;
-  initialState?: TraitInitialStateFactory<State, KC>;
-  mutators?: TraitStateMutatorsFactory<State, M, KC>;
-  reducer?: TraitReducerFactory<State, A, S, M, KC>;
-  effects?: TraitEffectsFactory<State, A, S, KC>;
-}): TraitFactory<State, A, S, M, KEY, C, KC> {
-  return f as TraitFactory<State, A, S, M, KEY, C, KC>;
-}
-export function createEntityFeatureFactory<F extends readonly TraitFactory[]>(
-  ...traits: F
-): EntityFeatureFactory<
-  'Entity',
-  'Entities',
-  ExtractStateType<F>,
-  ExtractActionsType<F>,
-  ExtractSelectorsType<F>
->;
+/**
+ * Creates a function that when execute will combine all the traits, and return a EntityFeatureFactory
+ * which combines all the traits actions, selectors , reducers and effects,
+ * the names param will replace any action and selector with the word Entity or Entities,
+ * with the corresponding entityName and  entitiesName param (entityName+'s' if entitiesName is omitted).
+ * @param namesConfig - Optional Names for entities
+ * @param namesConfig.entityName - singular name for entity
+ * @param [namesConfig.entitiesName] - plural name for entities, defaults to entityName + 's'
+ * @param traits set of traits to be combined
+ *
+ * @example
+ *
+ * const featureFactory = createEntityFeatureFactory(
+ *   { entityName: 'product' },
+ *   addLoadEntitiesTrait<Product>(),
+ *   addSelectEntityTrait<Product>(),
+ *   addAsyncActionTrait({
+ *     name: 'checkout',
+ *     actionSuccessProps: props<{ orderId: string }>(),
+ *   })
+ * );
+ *
+ * export const productsFeature = featureFactory({
+ *   actionsGroupKey: '[Products]',
+ *   featureSelector: 'products',
+ * });
+ */
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
   EntityName extends string,
@@ -80,6 +75,68 @@ export function createEntityFeatureFactory<
   ExtractActionsType<F>,
   ExtractSelectorsType<F>
 >;
+
+/**
+ * Creates a function that when execute will combine all the traits, and return a EntityFeatureFactory
+ * which combines all the traits actions, selectors , reducers and effects.
+ * @param traits set of traits to be combined
+ *
+ * @example
+ *
+ * const featureFactory = createEntityFeatureFactory(
+ *   { entityName: 'product' },
+ *   addLoadEntitiesTrait<Product>(),
+ *   addSelectEntityTrait<Product>(),
+ *   addAsyncActionTrait({
+ *     name: 'checkout',
+ *     actionSuccessProps: props<{ orderId: string }>(),
+ *   })
+ * );
+ *
+ * export const productsFeature = featureFactory({
+ *   actionsGroupKey: '[Products]',
+ *   featureSelector: 'products',
+ * });
+ *
+ * productsFeature.actions.loadProducts();
+ */
+export function createEntityFeatureFactory<F extends readonly TraitFactory[]>(
+  ...traits: F
+): EntityFeatureFactory<
+  'Entity',
+  'Entities',
+  ExtractStateType<F>,
+  ExtractActionsType<F>,
+  ExtractSelectorsType<F>
+>;
+
+/**
+ * Creates a function that when execute will combine all the traits, and return a EntityFeatureFactory
+ * which combines all the traits actions, selectors , reducers and effects,
+ * the names param will replace any action and selector with the word Entity or Entities,
+ * with the corresponding entityName and  entitiesName param (entityName+'s' if entitiesName is omitted).
+ * @param namesConfig - Optional Names for entities
+ * @param namesConfig.entityName - singular name for entity
+ * @param [namesConfig.entitiesName] - plural name for entities, defaults to entityName + 's'
+ * @param traits set of traits to be combined
+ *
+ * @example
+ *
+ * const featureFactory = createEntityFeatureFactory(
+ *   { entityName: 'product' },
+ *   addLoadEntitiesTrait<Product>(),
+ *   addSelectEntityTrait<Product>(),
+ *   addAsyncActionTrait({
+ *     name: 'checkout',
+ *     actionSuccessProps: props<{ orderId: string }>(),
+ *   })
+ * );
+ *
+ * export const productsFeature = featureFactory({
+ *   actionsGroupKey: '[Products]',
+ *   featureSelector: 'products',
+ * });
+ */
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
   EntityName extends string,
@@ -188,6 +245,7 @@ function renameProps(target: any, entityName: string, entitiesName: string) {
   }
   return result;
 }
+
 function sortTraits(
   traits: TraitFactory<any, any, any, any>[]
 ): TraitFactory<any, any, any, any>[] {
@@ -367,47 +425,45 @@ function getSelectorsForFeature<
   return ss as FeatureSelectors<State, S>;
 }
 
-export function setPropertyReducer<State, P extends keyof State>(
-  sourceReducer: (state: State, action: ActionType<any>) => State,
-  property: P,
-  propertyReducer: (state: State[P], action: ActionType<any>) => State[P]
-): (state: State, action: ActionType<any>) => State {
-  return function reducer(state: State, action: ActionType<any>): State {
-    const sourceState = sourceReducer(state, action);
-    return {
-      ...sourceState,
-      [property]: propertyReducer(sourceState[property], action),
-    };
-  };
-}
-export function setPropertiesReducer<State, P extends keyof State>(
-  sourceReducer: (state: State, action: ActionType<any>) => State,
-  propertiesReducers: {
-    [key in P]: (state: State[P], action: ActionType<any>) => State[P];
-  }
-): (state: State, action: ActionType<any>) => State {
-  return function reducer(state: State, action: ActionType<any>): State {
-    const newState = { ...sourceReducer(state, action) };
-    for (const property in propertiesReducers) {
-      newState[property as P] = propertiesReducers[property](
-        newState[property],
-        action
-      );
-    }
-    return newState;
-  };
-}
-
-export function joinReducers<State>(
-  firstReducer: (state: State, action: ActionType<any>) => State,
-  secondReducer: (state: any, action: ActionType<any>) => any
-): (state: State, action: ActionType<any>) => State {
-  return function reducer(state: State, action: ActionType<any>): State {
-    const sourceState = firstReducer(state, action);
-    return secondReducer(sourceState, action);
-  };
-}
-
+/**
+ * Combine a map entityFeatureFactories into one,
+ * grouping the actions and selectors by the key of the respective entityFeatureFactory
+ * @param traitFactoriesMap
+ *
+ * @example
+ *
+ * const clientsFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'client', entitiesName: 'clients' },
+ *   addLoadEntitiesTrait<Client>(),
+ *   addCrudEntitiesTrait<Client>()
+ * );
+ *
+ * const productOrderFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'productOrder' },
+ *   addLoadEntitiesTrait<ProductOrder>(),
+ *   addSelectEntitiesTrait<ProductOrder>()
+ * );
+ *
+ * const productFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'product' },
+ *   addLoadEntitiesTrait<Product>(),
+ *   addSelectEntitiesTrait<Product>()
+ * );
+ *
+ * const productCombinedFactory = combineEntityFeatures({
+ *   products: productFeatureFactory,
+ *   productOrders: productOrderFeatureFactory,
+ *   clients: clientsFeatureFactory,
+ * });
+ *
+ * const combinedFeature = productCombinedFactory({
+ *     actionsGroupKey: '[Combined]',
+ *     featureSelector: 'combined',
+ *   });
+ *
+ *   combinedFeature.actions.client.loadClients();
+ *   combinedFeature.actions.product.loadProducts();
+ */
 export function combineEntityFeatures<
   T extends { [key: string]: EntityFeatureFactory<any, any> },
   K extends keyof T,
@@ -458,6 +514,45 @@ export function combineEntityFeatures<
   }) as R;
 }
 
+/**
+ * Mix a map entityFeatureFactories into one, different from combine the actions and selectors a mix, not group by key like in combine, the keys are still use
+ * internal in the reducers and selector to separate the state
+ * @param traitFactoriesMap
+ *
+ * @example
+ *
+ * const clientsFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'client', entitiesName: 'clients' },
+ *   addLoadEntitiesTrait<Client>(),
+ *   addCrudEntitiesTrait<Client>()
+ * );
+ *
+ * const productOrderFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'productOrder' },
+ *   addLoadEntitiesTrait<ProductOrder>(),
+ *   addSelectEntitiesTrait<ProductOrder>()
+ * );
+ *
+ * const productFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'product' },
+ *   addLoadEntitiesTrait<Product>(),
+ *   addSelectEntitiesTrait<Product>()
+ * );
+ *
+ * const productMixedFactory = mixEntityFeatures({
+ *   products: productFeatureFactory,
+ *   productOrders: productOrderFeatureFactory,
+ *   clients: clientsFeatureFactory,
+ * });
+ *
+ * const mixedFeature = productMixedFactory({
+ *     actionsGroupKey: '[Mixed]',
+ *     featureSelector: 'mixed',
+ *   });
+ * mixedFeature.actions.loadClients();
+ * mixedFeature.actions.loadProducts();
+ *
+ */
 export function mixEntityFeatures<
   T extends { [key: string]: EntityFeatureFactory<any, any> },
   K extends keyof T,
@@ -504,6 +599,49 @@ export function mixEntityFeatures<
   }) as R;
 }
 
+/**
+ * Combines targetTraitFactory with the traitFactoriesMap using the keys as props for the targetTraitFactory state,
+ * and grouping the combined actions by key
+ * @param targetTraitFactory
+ * @param traitFactoriesMap
+ *
+ * @example
+ *
+ * const clientsFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'client', entitiesName: 'clients' },
+ *   addLoadEntitiesTrait<Client>(),
+ *   addCrudEntitiesTrait<Client>()
+ * );
+ *
+ * const productOrderFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'productOrder' },
+ *   addLoadEntitiesTrait<ProductOrder>(),
+ *   addSelectEntitiesTrait<ProductOrder>()
+ * );
+ *
+ * const productFeatureFactory = createEntityFeatureFactory(
+ *   { entityName: 'product' },
+ *   addLoadEntitiesTrait<Product>(),
+ *   addSelectEntitiesTrait<Product>()
+ * );
+ *
+ * const productAddEntityPropertiesFactory = addEntityFeaturesProperties(
+ *   productFeatureFactory,
+ *   {
+ *     productOrders: productOrderFeatureFactory,
+ *     clients: clientsFeatureFactory,
+ *   }
+ * );
+ *
+ * const combinedFeature = productAddEntityPropertiesFactory({
+ *     actionsGroupKey: '[addEntityFeatures]',
+ *     featureSelector: 'addEntityFeatures',
+ *   });
+ *
+ *   combinedFeature.actions.loadProducts();
+ *   combinedFeature.actions.clients.loadClients();
+ *   combinedFeature.actions.productOrders.loadProductOrders();
+ */
 export function addEntityFeaturesProperties<
   F extends EntityFeatureFactory<any, any>,
   T extends { [key: string]: EntityFeatureFactory<any, any, any, any, any> },
@@ -564,9 +702,28 @@ export function addEntityFeaturesProperties<
   }) as R;
 }
 
-// export
-
-/// products:{actions, selectors, }, orders: {actions,slectors}
-/// { actions: {ProductActions, OrderActions}, selectors: {ProductSelectors, OrderSelectors}
-// TODO finish implementing combineTrais and addPropertiesTraits
-// TODO finish renaming traits
+/**
+ * Helper function to create an implementation  a TraitFactory
+ * @param f TraitFactory implementation
+ */
+export function createTraitFactory<
+  State = {},
+  A extends TraitActions = {},
+  S extends TraitSelectors<State> = {},
+  M extends TraitStateMutators<State> = {},
+  KEY extends string = string,
+  C = unknown,
+  KC = KeyedConfig<KEY, C>
+>(f: {
+  key: KEY;
+  config?: C;
+  depends?: string[];
+  actions?: TraitActionsFactory<A, KC>;
+  selectors?: TraitSelectorsFactory<State, S, KC>;
+  initialState?: TraitInitialStateFactory<State, KC>;
+  mutators?: TraitStateMutatorsFactory<State, M, KC>;
+  reducer?: TraitReducerFactory<State, A, S, M, KC>;
+  effects?: TraitEffectsFactory<State, A, S, KC>;
+}): TraitFactory<State, A, S, M, KEY, C, KC> {
+  return f as TraitFactory<State, A, S, M, KEY, C, KC>;
+}
