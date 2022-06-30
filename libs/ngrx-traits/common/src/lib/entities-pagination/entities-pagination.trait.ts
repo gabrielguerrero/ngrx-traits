@@ -32,6 +32,7 @@ import {
   TraitInitialStateFactoryConfig,
   TraitSelectorsFactoryConfig,
 } from '@ngrx-traits/core';
+import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 
 /**
  * Generates ngrx code to paginate an list of entities, this has 3 cache `cacheType`
@@ -151,7 +152,7 @@ export function addEntitiesPaginationTrait<Entity>({
       createPaginationTraitReducer(
         initialState,
         allActions as ƟPaginationActions &
-          FilterEntitiesActions<Entity> &
+          ƟFilterEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
           CrudEntitiesActions<Entity>,
         allSelectors as EntitiesPaginationSelectors<Entity> &

@@ -59,9 +59,9 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  * traits.selectors.selectTodosMap
  * traits.selectors.selectTodosIds
  * traits.selectors.selectTodosTotal
- * traits.selectors.isLoadingTodos
- * traits.selectors.isSuccessTodosSuccess
- * traits.selectors.isFailTodosFail
+ * traits.selectors.isTodosLoading
+ * traits.selectors.isTodosLoadingSuccess
+ * traits.selectors.isTodosLoadingFail
  */
 export function addLoadEntitiesTrait<Entity>(
   traitConfig?: Omit<LoadEntitiesConfig<Entity>, 'adapter'>

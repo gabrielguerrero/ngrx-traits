@@ -19,6 +19,7 @@ import {
 import { CrudEntitiesActions } from '../crud-entities';
 import { ƟPaginationActions } from './entities-pagination.model.internal';
 import { insertIf } from '@ngrx-traits/core';
+import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 
 export function createPaginationInitialState<Entity>(
   previousInitialState: any,
@@ -49,7 +50,7 @@ export function createPaginationTraitReducer<
 >(
   initialState: S,
   allActions: ƟPaginationActions &
-    FilterEntitiesActions<Entity> &
+    ƟFilterEntitiesActions<Entity> &
     LoadEntitiesActions<Entity> &
     CrudEntitiesActions<Entity>,
   allSelectors: LoadEntitiesSelectors<Entity>,
@@ -153,8 +154,8 @@ export function createPaginationTraitReducer<
         addToCacheTotal(state, -keys.length)
       )
     ),
-    ...insertIf<S>(filterRemote && allActions.filterEntities, () =>
-      on(allActions.filterEntities, (state) => recalculateTotal(state))
+    ...insertIf<S>(allActions.storeEntitiesFilter, () =>
+      on(allActions.storeEntitiesFilter, (state) => recalculateTotal(state))
     ),
     ...insertIf<S>(allActions.removeAllEntities, () =>
       on(allActions.removeAllEntities, (state) => clearPagesCache(state))
