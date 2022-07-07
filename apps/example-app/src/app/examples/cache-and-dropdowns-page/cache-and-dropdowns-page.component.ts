@@ -11,6 +11,7 @@ import { FormControl, FormGroup } from '@angular/forms';
             style="width: 300px"
             formControlName="store"
           ></store-dropdown>
+
           <div></div>
           <department-dropdown
             style="width: 300px"

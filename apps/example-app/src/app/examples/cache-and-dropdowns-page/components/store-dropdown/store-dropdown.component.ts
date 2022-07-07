@@ -108,8 +108,8 @@ export class StoreDropdownComponent
   }
 
   ngOnDestroy(): void {
+    this.destroy.next();
     this.destroy.complete();
-    this.destroy.unsubscribe();
   }
   compareById(value: ProductsStore, option: ProductsStore) {
     return value && option && value.id == option.id;

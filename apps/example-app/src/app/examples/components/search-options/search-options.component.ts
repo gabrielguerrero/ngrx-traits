@@ -57,7 +57,6 @@ import { takeUntil, delay } from 'rxjs/operators';
         position: sticky;
         top: 0;
         display: block;
-        background-color: white;
         z-index: 1;
       }
     `,
@@ -76,6 +75,7 @@ export class SearchOptionsComponent implements OnInit, OnDestroy {
   get value() {
     return this.control.value;
   }
+  @Input()
   set value(v: string) {
     this.control.setValue(v);
   }

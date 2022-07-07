@@ -67,18 +67,20 @@ export function cache<T>({
   source,
   expires,
   maxCacheSize,
+  skip,
 }: {
   store: Store;
   key: CacheKey;
   source: Observable<T>;
   expires?: number;
   maxCacheSize?: number;
+  skip?: boolean;
 }) {
   const exp = expires ?? Infinity;
   return store.select(selectCache(key)).pipe(
     first(),
     concatMap((cache) =>
-      cache && isCacheValid(cache, exp)
+      cache && !skip && isCacheValid(cache, exp)
         ? of(cache.value).pipe(
             tap(() => store.dispatch(CacheActions.hitCache({ key })))
           )
