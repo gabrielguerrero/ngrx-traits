@@ -25,6 +25,8 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 ### [Playground](https://stackblitz.com/edit/ngrx-traits-playground?file=src%2Fapp%2Fproduct-list-page%2Fstate%2Fproducts%2Fproducts.traits.ts)
 
+### [Videos](https://youtube.com/playlist?list=PL2tNsdEpssGcxOct3kNA7p84TLzI4gYo0)
+
 ### [Extensible Setup](#extensible-setup-1)
 
 ### [Local store traits](libs/ngrx-traits/core/src/lib/local-store/README.md)
