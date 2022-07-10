@@ -1,4 +1,4 @@
-import { createTraitFactory } from '@ngrx-traits/core';
+import { createTraitFactory, insertIf } from '@ngrx-traits/core';
 import { GenericActionCreator } from '../load-entities';
 import { TraitActionsFactoryConfig } from '@ngrx-traits/core';
 import { createAction, createReducer, on, Store } from '@ngrx/store';
@@ -34,7 +34,7 @@ import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
  */
 export function addResetEntitiesStateTrait(
   traitConfig: {
-    resetOn?: GenericActionCreator[];
+    resetOn?: readonly ActionCreator[];
   } = {}
 ) {
   return createTraitFactory({
@@ -51,39 +51,11 @@ export function addResetEntitiesStateTrait(
     reducer: ({ allActions, initialState }) =>
       createReducer(
         initialState,
-        on(allActions.resetEntitiesState, () => initialState)
+        on(allActions.resetEntitiesState, () => initialState),
+        ...insertIf<typeof initialState>(traitConfig.resetOn, () =>
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          on(...traitConfig.resetOn!, () => initialState)
+        )
       ),
-    effects: ({ allActions }) => {
-      return createResetTraitEffect(allActions, traitConfig);
-    },
   });
-}
-
-function createResetTraitEffect(
-  allActions: {
-    resetEntitiesState: ActionCreator<string, () => TypedAction<string>>;
-  },
-  traitConfig: {
-    resetOn?: GenericActionCreator[];
-  }
-) {
-  @Injectable()
-  class ResetEffect extends TraitEffect {
-    externalReset$ =
-      traitConfig?.resetOn?.length &&
-      createEffect(() => {
-        return this.actions$.pipe(
-          ofType(...traitConfig?.resetOn),
-          mapTo(allActions.resetEntitiesState())
-        );
-      });
-
-    //TODO: not sure why Im forced to override this constructor
-    // or test wont pass, strangely doesnt happen in other files
-    // with similar case like pagination.effects.ts
-    constructor(actions$: Actions, store: Store<any>) {
-      super(actions$, store);
-    }
-  }
-  return traitConfig?.resetOn?.length ? [ResetEffect] : [];
 }

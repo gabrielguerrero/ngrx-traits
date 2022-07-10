@@ -60,16 +60,15 @@ describe('addReset Trait', () => {
       result = reducer(result, actions.resetProductsState());
       expect(result).toEqual(initialState);
     });
-  });
-
-  describe('effects', () => {
-    describe('externalReset$', () => {
-      it('should fire reset if globalReset was fired', async () => {
-        const { effects, actions } = initWithRemoteFilterWithPagination();
-        actions$ = of(globalReset());
-        const action = await effects.externalReset$.pipe(first()).toPromise();
-        expect(action).toEqual(actions.resetProductsState());
-      });
+    it('reset with globalReset should return initialState', async () => {
+      const { actions, reducer, initialState } =
+        initWithRemoteFilterWithPagination();
+      let result = reducer(
+        initialState,
+        actions.loadProductsSuccess({ entities: [] })
+      );
+      result = reducer(result, globalReset());
+      expect(result).toEqual(initialState);
     });
   });
 });
