@@ -51,11 +51,6 @@ export type CrudEntitiesActions<T> = {
 };
 
 export type CrudEntitiesSelectors<Entity> = {
-  // /**
-  //  * Return all changes made to the list
-  //  * @param state
-  //  */
-  // selectChanges: (state: EntityAndCrudState<T>) => Change<T>[];
   /**
    * Return all changes made to the list plus entities, and can be filtered
    * by change type
@@ -63,17 +58,9 @@ export type CrudEntitiesSelectors<Entity> = {
    * @param props
    */
   selectEntitiesChangesList: (
-    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
-    props: { type: ChangeType }
+    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
   ) => EntityChange<Entity>[];
-  // /**
-  //  * filters redundant changes ideal for a batch update
-  //  * if you add and remove the same and items this changes are remove from the list
-  //  * if you add and then update one or more times, the updates are discarded
-  //  * if you update one or more times and then remove, the updates are discarded
-  //  * @param state
-  //  */
-  // selectFilteredChanges: (state: EntityAndCrudState<T>) => Change<T>[];
+
   /**
    * Returns the entities plus the kind of change,
    * filters redundant changes ideal for a batch update

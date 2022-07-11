@@ -26,7 +26,10 @@ import { createPaginationTraitEffects } from './entities-pagination.trait.effect
 import { createTraitFactory } from '@ngrx-traits/core';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import { createPaginationTraitMutators } from './entities-pagination.trait.mutators';
-import { ƟPaginationActions } from './entities-pagination.model.internal';
+import {
+  ƟEntitiesPaginationSelectors,
+  ƟPaginationActions,
+} from './entities-pagination.model.internal';
 import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
@@ -155,7 +158,7 @@ export function addEntitiesPaginationTrait<Entity>({
           ƟFilterEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
           CrudEntitiesActions<Entity>,
-        allSelectors as EntitiesPaginationSelectors<Entity> &
+        allSelectors as ƟEntitiesPaginationSelectors<Entity> &
           LoadEntitiesSelectors<Entity>,
         allMutators as EntitiesPaginationMutators<Entity> &
           LoadEntitiesMutators<Entity>,
@@ -169,7 +172,7 @@ export function addEntitiesPaginationTrait<Entity>({
           FilterEntitiesActions<Entity> &
           LoadEntitiesActions<Entity> &
           CrudEntitiesActions<Entity>,
-        allSelectors as EntitiesPaginationSelectors<Entity> &
+        allSelectors as ƟEntitiesPaginationSelectors<Entity> &
           LoadEntitiesSelectors<Entity>
       ),
   });
