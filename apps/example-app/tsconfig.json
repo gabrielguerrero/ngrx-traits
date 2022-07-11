@@ -18,7 +18,6 @@
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "fullTemplateTypeCheck": true
   },
   "angularCompilerOptions": {
     "strictInjectionParameters": true,

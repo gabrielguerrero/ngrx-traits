@@ -12,9 +12,10 @@
   },
   "tasksRunnerOptions": {
     "default": {
-      "runner": "@nrwl/workspace/tasks-runners/default",
+      "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "cacheableOperations": ["build", "lint", "test", "e2e"],
+        "parallel": 1
       }
     }
   },
@@ -26,19 +27,47 @@
       }
     ]
   },
-  "projects": {
-    "example-app": {
-      "tags": []
+  "cli": {
+    "defaultCollection": "@nrwl/angular"
+  },
+  "defaultProject": "example-app",
+  "generators": {
+    "@nrwl/angular": {
+      "application": {
+        "linter": "eslint"
+      },
+      "library": {
+        "linter": "eslint"
+      },
+      "storybook-configuration": {
+        "linter": "eslint"
+      }
     },
-    "example-app-e2e": {
-      "tags": [],
-      "implicitDependencies": ["example-app"]
+    "@nrwl/angular:application": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "cypress"
     },
-    "ngrx-traits-common": {
-      "tags": []
+    "@nrwl/angular:library": {
+      "linter": "eslint",
+      "unitTestRunner": "jest"
     },
-    "ngrx-traits-core": {
-      "tags": []
+    "@nrwl/angular:component": {
+      "style": "scss"
+    },
+    "@schematics/angular": {
+      "component": {
+        "inlineStyle": true,
+        "inlineTemplate": true,
+        "changeDetection": "OnPush"
+      }
+    },
+    "@ngneat/spectator:spectator-component": {
+      "jest": true,
+      "inlineStyle": true,
+      "inlineTemplate": true,
+      "changeDetection": "OnPush"
     }
   }
 }
