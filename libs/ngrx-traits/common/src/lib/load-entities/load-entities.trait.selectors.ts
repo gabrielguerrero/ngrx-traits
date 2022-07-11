@@ -59,7 +59,7 @@ export function createLoadEntitiesTraitSelectors<Entity>(
         (entities) =>
           entities.map((e) => adapter?.selectId(e)) as string[] | number[]
       ),
-    };
+    } as unknown as LoadEntitiesSelectors<Entity>;
   }
   return selectors;
 }
