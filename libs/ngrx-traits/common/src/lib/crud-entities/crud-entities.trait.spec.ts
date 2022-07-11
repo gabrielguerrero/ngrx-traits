@@ -150,42 +150,20 @@ describe('addCrud trait', () => {
       ]);
     });
 
-    // it('selectChanges should return changes ', () => {
-    //   const { selectors, state } = initWithTestState();
-    //   expect(selectors.selectChanges.projector(state)).toEqual(state.changes);
-    // });
-
     it('selectEntitiesChangesList should show all changes ', () => {
       const { selectors, state } = initWithTestState();
-      expect(
-        selectors.selectEntitiesChangesList.projector(state, {
-          type: ChangeType.CREATED,
-        })
-      ).toEqual([
-        { entity: state.entities[1], changeType: ChangeType.CREATED },
-        { entity: state.entities[2], changeType: ChangeType.CREATED },
-        { entity: state.entities[4], changeType: ChangeType.CREATED },
-      ]);
 
-      expect(
-        selectors.selectEntitiesChangesList.projector(state, {
-          type: ChangeType.UPDATED,
-        })
-      ).toEqual([
+      expect(selectors.selectEntitiesChangesList.projector(state)).toEqual([
+        { entity: state.entities[1], changeType: ChangeType.CREATED },
         { entity: state.entities[1], changeType: ChangeType.UPDATED },
+        { entity: state.entities[1], changeType: ChangeType.DELETED },
+        { entity: state.entities[2], changeType: ChangeType.CREATED },
+        { entity: state.entities[3], changeType: ChangeType.DELETED },
+        { entity: state.entities[4], changeType: ChangeType.CREATED },
         { entity: state.entities[4], changeType: ChangeType.UPDATED },
         { entity: state.entities[5], changeType: ChangeType.UPDATED },
-        { entity: state.entities[7], changeType: ChangeType.UPDATED },
-      ]);
-
-      expect(
-        selectors.selectEntitiesChangesList.projector(state, {
-          type: ChangeType.DELETED,
-        })
-      ).toEqual([
-        { entity: state.entities[1], changeType: ChangeType.DELETED },
-        { entity: state.entities[3], changeType: ChangeType.DELETED },
         { entity: state.entities[5], changeType: ChangeType.DELETED },
+        { entity: state.entities[7], changeType: ChangeType.UPDATED },
       ]);
     });
   });

@@ -40,25 +40,19 @@ export type EntitiesPaginationActions = {
 };
 
 export type EntitiesPaginationSelectors<T> = {
-  isEntitiesPageInCache: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState,
-    props?: { page?: number }
-  ) => boolean;
-  selectPageEntitiesList: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState,
-    props?: { page?: number }
+  selectEntitiesCurrentPageList: (
+    state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => T[];
-  selectEntitiesPage: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState,
-    props?: { page?: number }
+  selectEntitiesCurrentPage: (
+    state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => PageModel<T>;
   selectEntitiesPagedRequest: (
     state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => PagedRequest;
-  selectEntitiesPageInfo: (
+  selectEntitiesCurrentPageInfo: (
     state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => PageInfoModel;
-  isLoadingEntitiesPage: (
+  isLoadingEntitiesCurrentPage: (
     state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => boolean;
 };
@@ -78,6 +72,10 @@ export interface PageModel<T> {
   pageIndex: number;
   total: number | undefined;
   pageSize: number;
+  pagesCount: number | undefined;
+  hasPrevious: boolean;
+  hasNext: boolean;
+  cacheType: CacheType;
 }
 
 export interface PageInfoModel {

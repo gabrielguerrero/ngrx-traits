@@ -59,24 +59,7 @@ export function createCrudTraitSelectors<Entity>(
     (state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>) =>
       selectEntitiesMap(state),
     selectChanges,
-    (
-      entities: Dictionary<Entity>,
-      changed: Change<Entity>[],
-      { type }: { type: ChangeType }
-    ) => {
-      if (type)
-        return changed
-          .filter((c) => c.changeType === type)
-          .map(
-            (change) =>
-              ({
-                changeType: change.changeType,
-                entity: entities[change.id] ?? {
-                  id: change.id,
-                },
-              } as EntityChange<Entity>)
-          );
-
+    (entities: Dictionary<Entity>, changed: Change<Entity>[]) => {
       const map = changed.map(
         (change) =>
           ({

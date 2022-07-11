@@ -1,7 +1,9 @@
 import { createSelector } from '@ngrx/store';
 import {
+  CacheType,
   EntitiesPaginationSelectors,
   EntitiesPaginationState,
+  PageModel,
 } from './entities-pagination.model';
 import {
   LoadEntitiesSelectors,
@@ -42,14 +44,11 @@ export function createPaginationTraitSelectors<Entity>(
       )
     : selectPagination;
 
-  const selectPageEntitiesList = createSelector(
+  const selectEntitiesCurrentPageList = createSelector(
     selectEntitiesList,
     selectPaginationFiltered,
-    (
-      entities: Entity[],
-      pagination,
-      { page } = { page: pagination.currentPage }
-    ) => {
+    (entities: Entity[], pagination) => {
+      const page = pagination.currentPage;
       const startIndex = page * pagination.pageSize - pagination.cache.start;
       let endIndex = startIndex + pagination.pageSize;
       endIndex =
@@ -58,7 +57,7 @@ export function createPaginationTraitSelectors<Entity>(
     }
   );
 
-  const selectEntitiesPageInfo = createSelector(
+  const selectEntitiesCurrentPageInfo = createSelector(
     selectPaginationFiltered,
     (pagination) => {
       const pagesCount =
@@ -72,38 +71,67 @@ export function createPaginationTraitSelectors<Entity>(
         pagesCount,
         hasPrevious: pagination.currentPage - 1 >= 0,
         hasNext:
-          pagination.total && pagination.total > 0
-            ? pagination.currentPage + 1 < pagesCount!
+          pagesCount && pagination.total && pagination.total > 0
+            ? pagination.currentPage + 1 < pagesCount
             : true,
         cacheType: pagination.cache.type,
       };
     }
   );
 
-  const isEntitiesPageInCache = createSelector(
+  function isEntitiesPageInCache(
+    page: number,
+    pagination: {
+      currentPage: number;
+      requestPage: number;
+      pageSize: number;
+      total?: number;
+      pagesToCache: number;
+      cache: { type: CacheType; start: number; end: number };
+    }
+  ) {
+    const startIndex = page * pagination.pageSize;
+    let endIndex = startIndex + pagination.pageSize - 1;
+    endIndex =
+      pagination.total && endIndex > pagination.total
+        ? pagination.total - 1
+        : endIndex;
+    return (
+      startIndex >= pagination.cache.start && endIndex <= pagination.cache.end
+    );
+  }
+
+  const isEntitiesCurrentPageInCache = createSelector(
     selectPaginationFiltered,
-    (pagination, { page } = { page: pagination.currentPage }) => {
-      const startIndex = page * pagination.pageSize;
-      let endIndex = startIndex + pagination.pageSize - 1;
-      endIndex =
-        pagination.total && endIndex > pagination.total
-          ? pagination.total - 1
-          : endIndex;
-      return (
-        startIndex >= pagination.cache.start && endIndex <= pagination.cache.end
-      );
+    (pagination) => {
+      const page = pagination.currentPage;
+      return isEntitiesPageInCache(page, pagination);
     }
   );
+  const isEntitiesNextPageInCache = createSelector(
+    selectPaginationFiltered,
+    (pagination) => {
+      const page = pagination.currentPage + 1;
+      return isEntitiesPageInCache(page, pagination);
+    }
+  );
+  const isLoadingEntitiesCurrentPage = createSelector(
+    isEntitiesLoading,
+    selectPagination,
+    (isLoading, pagination) =>
+      isLoading && pagination.requestPage === pagination.currentPage
+  );
 
-  const selectEntitiesPage = createSelector(
-    selectPageEntitiesList,
-    selectEntitiesPageInfo,
-    // props look unsued but they are pass to the selectPageEntities
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    (entities, pageInfo, props = { page: pageInfo.pageIndex }) => ({
-      entities,
-      ...pageInfo,
-    })
+  const selectEntitiesCurrentPage = createSelector(
+    selectEntitiesCurrentPageList,
+    selectEntitiesCurrentPageInfo,
+    isLoadingEntitiesCurrentPage,
+    (entities, pageInfo, isLoading) =>
+      ({
+        entities,
+        isLoading,
+        ...pageInfo,
+      } as PageModel<Entity>)
   );
 
   const selectEntitiesPagedRequest = createSelector(
@@ -115,19 +143,14 @@ export function createPaginationTraitSelectors<Entity>(
     })
   );
 
-  const isLoadingEntitiesPage = createSelector(
-    isEntitiesLoading,
-    selectPagination,
-    (isLoading, pagination) =>
-      isLoading && pagination.requestPage === pagination.currentPage
-  );
-
-  return {
-    selectPageEntitiesList,
-    isEntitiesPageInCache,
-    selectEntitiesPage,
+  const selectors = {
+    selectEntitiesCurrentPageList,
+    isEntitiesNextPageInCache,
+    isEntitiesCurrentPageInCache,
+    selectEntitiesCurrentPage,
     selectEntitiesPagedRequest,
-    selectEntitiesPageInfo,
-    isLoadingEntitiesPage,
+    selectEntitiesCurrentPageInfo,
+    isLoadingEntitiesCurrentPage,
   };
+  return selectors;
 }

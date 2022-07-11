@@ -1,13 +1,23 @@
 import { Injectable } from '@angular/core';
 import { TraitEffect } from '@ngrx-traits/core';
-import { concatMap, concatMapTo, filter, first, map } from 'rxjs/operators';
+import {
+  concatMap,
+  concatMapTo,
+  filter,
+  first,
+  map,
+  tap,
+} from 'rxjs/operators';
 import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { FilterEntitiesActions } from '../filter-entities/filter-entities.model';
 import { LoadEntitiesActions, LoadEntitiesSelectors } from '../load-entities';
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import { EntitiesPaginationSelectors } from './entities-pagination.model';
 import { Type } from '@ngrx-traits/core';
-import { ƟPaginationActions } from './entities-pagination.model.internal';
+import {
+  ƟEntitiesPaginationSelectors,
+  ƟPaginationActions,
+} from './entities-pagination.model.internal';
 
 export function createPaginationTraitEffects<Entity>(
   allActions: ƟPaginationActions &
@@ -23,7 +33,10 @@ export function createPaginationTraitEffects<Entity>(
       return this.actions$.pipe(
         ofType(allActions.loadEntitiesPage),
         concatLatestFrom(() =>
-          this.store.select(allSelectors.isEntitiesPageInCache)
+          this.store.select(
+            (allSelectors as unknown as ƟEntitiesPaginationSelectors<Entity>)
+              .isEntitiesCurrentPageInCache
+          )
         ),
         map(([{ forceLoad }, isInCache]) =>
           !forceLoad && isInCache
@@ -37,8 +50,11 @@ export function createPaginationTraitEffects<Entity>(
       return this.actions$.pipe(
         ofType(allActions.loadEntitiesPageSuccess),
         concatMapTo(
-          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
+          this.store
+            .select(allSelectors.selectEntitiesCurrentPageInfo)
+            .pipe(first())
         ),
+        tap(console.log),
         filter(
           (pageInfo) =>
             !!pageInfo.total &&
@@ -47,14 +63,16 @@ export function createPaginationTraitEffects<Entity>(
         ),
         concatMap((pageInfo) =>
           this.store
-            .select(allSelectors.isEntitiesPageInCache, {
-              page: pageInfo.pageIndex + 1,
-            })
+            .select(
+              (allSelectors as unknown as ƟEntitiesPaginationSelectors<Entity>)
+                .isEntitiesNextPageInCache
+            )
             .pipe(
               first(),
               map((isInCache) => (!isInCache && pageInfo) || undefined)
             )
         ),
+        tap(console.log),
         filter((pageInfo) => !!pageInfo),
         concatMap((pageInfo) => [
           allActions.setEntitiesRequestPage({ index: pageInfo!.pageIndex + 1 }),
@@ -74,7 +92,9 @@ export function createPaginationTraitEffects<Entity>(
       return this.actions$.pipe(
         ofType(allActions.loadEntitiesPreviousPage),
         concatMapTo(
-          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
+          this.store
+            .select(allSelectors.selectEntitiesCurrentPageInfo)
+            .pipe(first())
         ),
         map((page) =>
           page.hasPrevious
@@ -88,7 +108,9 @@ export function createPaginationTraitEffects<Entity>(
       return this.actions$.pipe(
         ofType(allActions.loadEntitiesNextPage),
         concatMapTo(
-          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
+          this.store
+            .select(allSelectors.selectEntitiesCurrentPageInfo)
+            .pipe(first())
         ),
         map((page) =>
           page.hasNext
@@ -102,7 +124,9 @@ export function createPaginationTraitEffects<Entity>(
       return this.actions$.pipe(
         ofType(allActions.loadEntitiesLastPage),
         concatMapTo(
-          this.store.select(allSelectors.selectEntitiesPageInfo).pipe(first())
+          this.store
+            .select(allSelectors.selectEntitiesCurrentPageInfo)
+            .pipe(first())
         ),
         map((page) =>
           page.hasNext && page.pagesCount

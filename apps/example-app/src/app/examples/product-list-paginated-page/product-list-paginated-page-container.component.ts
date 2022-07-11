@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { ProductActions, ProductSelectors } from './state/products';
 import { combineLatest } from 'rxjs';
 import { Product, ProductFilter } from '../models';
-import { Store } from '@ngrx/store';
+import { createSelector, Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
-import { Sort } from '@ngrx-traits/common';
+import { PageModel, Sort } from '@ngrx-traits/common';
 import { PageEvent } from '@angular/material/paginator';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -65,29 +66,27 @@ import { PageEvent } from '@angular/material/paginator';
   ],
 })
 export class ProductListPaginatedPageContainerComponent implements OnInit {
-  data$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsPage),
-    this.store.select(ProductSelectors.isLoadingProductsPage),
-    this.store.select(ProductSelectors.selectProductSelected),
-    this.store.select(ProductSelectors.isLoadingCheckout),
-    this.store.select(ProductSelectors.selectProductsSort),
-  ]).pipe(
-    map(
-      ([
-        products,
-        isLoading,
-        selectedProduct,
-        isLoadingCheckout,
-        selectedSort,
-      ]) => ({
-        products,
-        isLoading,
-        selectedProduct,
-        isLoadingCheckout,
-        selectedSort,
-      })
-    )
+  componentData = createSelector(
+    ProductSelectors.selectProductsCurrentPage,
+    ProductSelectors.isLoadingProductsCurrentPage,
+    ProductSelectors.selectProductSelected,
+    ProductSelectors.isLoadingCheckout,
+    ProductSelectors.selectProductsSort,
+    (
+      products,
+      isLoading,
+      selectedProduct,
+      isLoadingCheckout,
+      selectedSort
+    ) => ({
+      products,
+      isLoading,
+      selectedProduct,
+      isLoadingCheckout,
+      selectedSort,
+    })
   );
+  data$ = this.store.select(this.componentData);
 
   constructor(private store: Store) {}
 
