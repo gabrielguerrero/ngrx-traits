@@ -1,7 +1,3 @@
-module.exports = {
-  projects: [
-    '<rootDir>/apps/example-app',
-    '<rootDir>/libs/ngrx-traits/core',
-    '<rootDir>/libs/ngrx-traits/common',
-  ],
-};
+const { getJestProjects } = require('@nrwl/jest');
+
+module.exports = { projects: getJestProjects() };
