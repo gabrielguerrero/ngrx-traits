@@ -69,13 +69,13 @@ export type EntitiesPaginationMutators<T> = {
 
 export interface PageModel<T> {
   entities: T[];
+  isLoading: boolean;
   pageIndex: number;
   total: number | undefined;
   pageSize: number;
   pagesCount: number | undefined;
   hasPrevious: boolean;
   hasNext: boolean;
-  cacheType: CacheType;
 }
 
 export interface PageInfoModel {
