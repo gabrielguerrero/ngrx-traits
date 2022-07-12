@@ -2,6 +2,7 @@
   "version": 1,
   "projects": {
     "example-app": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "projectType": "application",
       "root": "apps/example-app",
       "sourceRoot": "apps/example-app/src",
@@ -93,7 +94,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/apps/example-app"],
           "options": {
-            "jestConfig": "apps/example-app/jest.config.js",
+            "jestConfig": "apps/example-app/jest.config.ts",
             "passWithNoTests": true
           }
         }
@@ -101,6 +102,7 @@
       "tags": []
     },
     "example-app-e2e": {
+      "$schema": "../../node_modules/nx/schemas/project-schema.json",
       "root": "apps/example-app-e2e",
       "sourceRoot": "apps/example-app-e2e/src",
       "projectType": "application",
@@ -130,6 +132,7 @@
       "implicitDependencies": ["example-app"]
     },
     "ngrx-traits-common": {
+      "$schema": "../../../node_modules/nx/schemas/project-schema.json",
       "projectType": "library",
       "root": "libs/ngrx-traits/common",
       "sourceRoot": "libs/ngrx-traits/common/src",
@@ -155,7 +158,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/ngrx-traits/common"],
           "options": {
-            "jestConfig": "libs/ngrx-traits/common/jest.config.js",
+            "jestConfig": "libs/ngrx-traits/common/jest.config.ts",
             "passWithNoTests": true
           }
         },
@@ -199,6 +202,7 @@
       "tags": []
     },
     "ngrx-traits-core": {
+      "$schema": "../../../node_modules/nx/schemas/project-schema.json",
       "projectType": "library",
       "root": "libs/ngrx-traits/core",
       "sourceRoot": "libs/ngrx-traits/core/src",
@@ -224,7 +228,7 @@
           "builder": "@nrwl/jest:jest",
           "outputs": ["coverage/libs/ngrx-traits/core"],
           "options": {
-            "jestConfig": "libs/ngrx-traits/core/jest.config.js",
+            "jestConfig": "libs/ngrx-traits/core/jest.config.ts",
             "passWithNoTests": true
           }
         },

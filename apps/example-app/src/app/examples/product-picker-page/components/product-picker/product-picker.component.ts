@@ -6,7 +6,7 @@ import {
   ElementRef,
   EventEmitter,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Product } from '../../../models';
 import { MatDialog } from '@angular/material/dialog';
 import { ProductSelectDialogComponent } from '../product-select-dialog/product-select-dialog.component';
@@ -55,7 +55,7 @@ export class ProductPickerComponent {
    * NOTE: I will normally implement ControlValueAccessor for this kind of component,
    * to make more useful, but is omitted keep the example simple.
    */
-  control = new FormControl();
+  control = new UntypedFormControl();
   selectedProduct: Product | undefined;
   selectProduct = new EventEmitter();
 

@@ -1,5 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'ngrx-traits-cache-and-dropdowns-page',
@@ -26,8 +26,8 @@ import { FormControl, FormGroup } from '@angular/forms';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CacheAndDropdownsPageComponent {
-  form = new FormGroup({
-    store: new FormControl(),
-    department: new FormControl(),
+  form = new UntypedFormGroup({
+    store: new UntypedFormControl(),
+    department: new UntypedFormControl(),
   });
 }
