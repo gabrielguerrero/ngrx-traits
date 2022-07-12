@@ -95,14 +95,13 @@ import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.mode
  * traits.actions.loadTodosLastPage()
  * traits.actions.clearTodosPagesCache()
  * // generated selectors
- * traits.selectors.isTodosPageInCache()
- * traits.selectors.selectPageTodosList()
- * traits.selectors.isLoadingTodosPage()
+ * traits.selectors.selectTodosCurrentPageList()
+ * traits.selectors.isLoadingTodosCurrentPage()
  * // use isLoadingTodosPage over isLoadingTodos (which will return true even
  * // if the page loading is not the current one)
- * traits.selectors.selectTodosPage()
+ * traits.selectors.selectTodosCurrentPage()
  * traits.selectors.selectTodosPagedRequest()// use in effects to get paging parameter
- * traits.selectors.selectTodosPageInfo()
+ * traits.selectors.selectTodosCurrentPageInfo()
  */
 export function addEntitiesPaginationTrait<Entity>({
   cacheType = 'partial',
