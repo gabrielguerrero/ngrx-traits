@@ -40,8 +40,8 @@ const storeFeatureFactory = createEntityFeatureFactory(
 export class ProductsStoreLocalTraits extends TraitsLocalStore<
   typeof storeFeatureFactory
 > {
-  constructor(injector: Injector, private storeService: ProductsStoreService) {
-    super(injector);
+  constructor(private storeService: ProductsStoreService) {
+    super();
     this.traits.addEffects(this);
   }
 

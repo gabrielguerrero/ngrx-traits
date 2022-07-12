@@ -13,7 +13,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { createEffect, EffectsModule, ofType } from '@ngrx/effects';
 import { first, mapTo } from 'rxjs/operators';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   LocalTraitsConfig,
   TraitsLocalStore,
@@ -94,8 +94,8 @@ class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
     );
   });
 
-  constructor(injector: Injector) {
-    super(injector);
+  constructor() {
+    super();
     this.traits.addEffects(this);
   }
 
@@ -124,8 +124,8 @@ class ProductCombinedTraitLocal extends TraitsLocalStore<
     );
   });
 
-  constructor(injector: Injector) {
-    super(injector);
+  constructor() {
+    super();
     this.traits.addEffects(this);
   }
 
@@ -154,8 +154,8 @@ class ProductMixedTraitLocal extends TraitsLocalStore<
     );
   });
 
-  constructor(injector: Injector) {
-    super(injector);
+  constructor() {
+    super();
     this.traits.addEffects(this);
   }
 
@@ -184,8 +184,8 @@ class ProductAddEntityPropertiesTraitLocal extends TraitsLocalStore<
     );
   });
 
-  constructor(injector: Injector) {
-    super(injector);
+  constructor() {
+    super();
     this.traits.addEffects(this);
   }
 

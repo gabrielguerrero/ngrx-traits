@@ -47,12 +47,8 @@ export function addLoadProductDetailTraits() {
             );
           });
 
-          constructor(
-            actions$: Actions,
-            store: Store,
-            private productService: ProductService
-          ) {
-            super(actions$, store);
+          constructor(private productService: ProductService) {
+            super();
           }
         }
         return [LoadProductEffect];
