@@ -51,6 +51,10 @@ Now install ngrx-traits like:
 npm i @ngrx-traits/{core,common} --save
 ```
 
+> **ngrx-traits versions** 
+>
+> Although we use semantic versioning to do releases,  the mayor number on the version is link to the angular and ngrx versions this project depends on, e.g.  ngrx-traits 13.x will depend on ngrx 13.x and angular 13.x, this is so you can easily choose the right version for your current setup, but also facilitates doing patches to older versions 
+
 ## Getting Started
 
 The best way to understand how to use the traits is to see an example. Let's imagine that you need to implement a page that shows a list of products which you can selectEntity and purchase. Start by creating the interface for a Product Entity:
@@ -202,6 +206,7 @@ Now we want to logic selectEntity a product in the list , for that add the addSe
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   // new trait ↓
   addSelectEntityTrait<Product>()
@@ -210,7 +215,7 @@ export const productFeature = createEntityFeatureFactory(
   featureSelector: 'products',
 });
 ```
-The result is a new `selectEntity` action and a `selectEntitySelected` selector. Notice how this new actions and selectors are mixed with the others, the more traits you add, more actions, selectors, ...etc are mixed, this composability is very porweful, you can go from a local filtered list to a remotely paginated and remotely filtered one with small changes, and it will work the same way with your own custom traits.
+The result is a new `selectProduct` action and a `selectProductSelected` selector. Notice how this new actions and selectors are mixed with the others, the more traits you add, more actions, selectors, ...etc are mixed, this composability is very porweful, you can go from a local filtered list to a remotely paginated and remotely filtered one with small changes, and it will work the same way with your own custom traits.
 
 Next step is to change the container component to use the new selectEntity action,
 for this example, it is assumed that a selectEntity output was added as a prop of the list component called on the click of the row, the container will now look like:
@@ -260,6 +265,7 @@ Next step will be to add a checkout button, for that we can use the addAsyncActi
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   // new trait ↓
@@ -373,6 +379,7 @@ Then add the addFilter trait:
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
@@ -466,6 +473,7 @@ Next stop, sorting. Let's first add addSortEntitiesTrait :
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
@@ -558,6 +566,7 @@ To do remote filtering you first need to remove the filterFn in the traits like:
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
@@ -573,7 +582,7 @@ export const productFeature = createEntityFeatureFactory(
 });
 ```
 
-And to change our effect, it needs to use the selectFilter selector to get the filter params of the search:
+And to change our effect, it needs to use the selectProductsFilter selector to get the filter params of the search:
 #### products.effects.ts
 
 ```ts
@@ -584,7 +593,7 @@ export class ProductsEffects {
       ofType(ProductActions.loadProducts),
       concatLatestFrom(() =>
         // get filters ↓
-        this.store.select(ProductSelectors.selectFilters)
+        this.store.select(ProductSelectors.selectProductsFilter)
       ),
       switchMap(([_, filters]) =>
         //call your service to get the products data
@@ -614,6 +623,7 @@ Now lets use remote sort, in our traits we add the remote param as true
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addFilterEntitiesTrait<Product, ProductFilter>(),
   // changed trait ↓
@@ -624,7 +634,7 @@ export const productFeature = createEntityFeatureFactory(
 });
 ```
 
-Now we use our selectSort in the effect , like we did with selectFilter:
+Now we use our selectProductsSort in the effect , like we did with selectProductsFilter:
 #### products.effects.ts
 
 ```ts
@@ -634,9 +644,9 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts), // on loadEntities
       concatLatestFrom(() => [
-        this.store.select(ProductSelectors.selectFilters),
+        this.store.select(ProductSelectors.selectProductsFilter),
         // get sorting ↓
-        this.store.select(ProductSelectors.selectSort),
+        this.store.select(ProductSelectors.selectProductsSort),
       ]),
       switchMap(([_, filters, sort]) =>
         //call your service to get the products data
@@ -670,6 +680,7 @@ Now last thing is pagination, we add the addEntitiesPaginationTrait to the trait
 
 ```ts
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
@@ -690,7 +701,7 @@ export const productFeature = createEntityFeatureFactory(
 });
 ```
 
-This gives a bunch of extra actions and selectors, for this guide we will only use `loadProductsPage({index: number})` action and the `selectProductsPage` and `selectProductsPageRequest` selectors , lets start with `selectProductsPageRequest`, this is used in the effect to get pagination details for a backend request:
+This gives a bunch of extra actions and selectors, for this guide we will only use `loadProductsPage({index: number})` action and the `selectProductsCurrentPage` and `selectProductsPageRequest` selectors , lets start with `selectProductsPageRequest`, this is used in the effect to get pagination details for a backend request:
 #### products.effects.ts
 
 ```ts
@@ -700,10 +711,10 @@ export class ProductsEffects {
     this.actions$.pipe(
       ofType(ProductActions.loadProducts), // on loadEntities
       concatLatestFrom(() => [
-        this.store.select(ProductSelectors.selectFilter),
-        this.store.select(ProductSelectors.selectSort),
+        this.store.select(ProductSelectors.selectProductsFilter),
+        this.store.select(ProductSelectors.selectProductsSort),
         // get pagination details for the request ↓
-        this.store.select(ProductSelectors.selectPagedRequest),
+        this.store.select(ProductSelectors.selectProductsPageRequest),
       ]),
       switchMap(([_, filters, sort, pagination]) =>
         //call your service to get the products data
@@ -744,7 +755,7 @@ Now that we have our effect ready , lets change our container component to use t
 export class ProductPageContainerComponent implements OnInit {
   data$ = combineLatest([
     // changed selectAll for selectPage ↓
-    this.store.select(ProductSelectors.selectProductsPage),
+    this.store.select(ProductSelectors.selectProductsCurrentPage),
     this.store.select(ProductSelectors.isLoadingProduct),
     this.store.select(ProductSelectors.selectProductSelected),
     this.store.select(ProductSelectors.isLoadingCheckout),
@@ -804,14 +815,17 @@ export class ProductPageContainerComponent implements OnInit {
 </ng-container>
 ```
 
-The selectPage returns an object with following interface
+The selectProductsCurrentPage returns an object with following interface
 
 ```ts
 export interface PageModel<T> {
   entities: T[];
   pageIndex: number;
-  total: number;
+  total: number | undefined;
   pageSize: number;
+  pagesCount: number | undefined;
+  hasPrevious: boolean;
+  hasNext: boolean;
 }
 ```
 
@@ -875,6 +889,7 @@ export const selectProductState =
   createFeatureSelector<ProductsState>('products');
 
 export const productFeature = createEntityFeatureFactory(
+  {entityName: 'product'},
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
   addAsyncActionTrait({
@@ -1020,3 +1035,4 @@ import * as ProductActions from './products.actions.ts';
 import * as ProductSelectors from './products.selectors.ts';
 export { ProductActions, ProductSelectors };
 ```
+npm
