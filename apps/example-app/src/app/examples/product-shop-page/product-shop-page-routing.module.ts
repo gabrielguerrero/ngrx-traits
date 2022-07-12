@@ -11,7 +11,7 @@ const routes: Routes = [
     path: '',
     component: ProductShopPageContainerComponent,
     children: [
-      { path: '', redirectTo: 'shop' },
+      { path: '', redirectTo: 'shop', pathMatch: 'prefix' },
       { path: 'shop', component: ProductShopTabComponent },
       {
         path: 'basket',

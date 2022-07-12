@@ -11,7 +11,7 @@ import { ProductsStoreLocalTraits } from './store.local-traits';
 import { createSelector, Store } from '@ngrx/store';
 import {
   ControlValueAccessor,
-  FormControl,
+  UntypedFormControl,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { Observable, Subject, Subscription } from 'rxjs';
@@ -70,7 +70,7 @@ import { takeUntil } from 'rxjs/operators';
 export class StoreDropdownComponent
   implements OnInit, ControlValueAccessor, OnDestroy
 {
-  control = new FormControl();
+  control = new UntypedFormControl();
   data$ = this.store.select(
     createSelector(
       this.traits.localSelectors.isStoresLoading,

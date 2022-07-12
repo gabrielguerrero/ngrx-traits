@@ -53,10 +53,10 @@ export type EntityFeatureFactory<
 ) => FeatureTraits<
   State,
   EntityName extends string
-    ? ReplaceEntityNames<A, EntityName, EntitiesName>
+    ? ReplaceEntityNames<A, EntityName, EntitiesName> & TraitActions
     : A,
   EntityName extends string
-    ? ReplaceEntityNames<S, EntityName, EntitiesName>
+    ? ReplaceEntityNames<S, EntityName, EntitiesName> & TraitSelectors<State>
     : S
 >;
 
@@ -170,10 +170,9 @@ export type TraitEffectsFactoryConfig<
   allConfigs: C;
 };
 
-export type KeyedConfig<KEY extends string, C> = Record<string, any> &
-  {
-    [K in KEY]?: C;
-  };
+export type KeyedConfig<KEY extends string, C> = Record<string, any> & {
+  [K in KEY]?: C;
+};
 
 export interface TraitFactory<
   State = any,

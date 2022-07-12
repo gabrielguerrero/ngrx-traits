@@ -11,7 +11,7 @@ import { Product, ProductOrder } from '../../models';
 import { Selected, Sort } from '@ngrx-traits/common';
 import { PageEvent } from '@angular/material/paginator';
 import { Dictionary } from '@ngrx/entity';
-import { FormArray, FormBuilder } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder } from '@angular/forms';
 import { rebuildFormArray } from '../../utils/form-utils';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -119,7 +119,7 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductBasketComponent implements OnDestroy {
-  controls = new FormArray([]);
+  controls = new UntypedFormArray([]);
   _list: ProductOrder[] = [];
   destroy$ = new Subject();
   displayedColumns: (keyof ProductOrder | 'select' | 'total')[] = [
@@ -172,7 +172,7 @@ export class ProductBasketComponent implements OnDestroy {
   @Output() toggleSelectForRemove = new EventEmitter<ProductOrder>();
   @Output() updateProduct = new EventEmitter<ProductOrder>();
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: UntypedFormBuilder) {}
 
   ngOnDestroy() {
     this.destroy$.next();

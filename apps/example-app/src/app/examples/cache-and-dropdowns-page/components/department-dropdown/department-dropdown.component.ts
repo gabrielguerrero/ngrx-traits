@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import {
   ControlValueAccessor,
-  FormControl,
+  UntypedFormControl,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
 import { createSelector, Store } from '@ngrx/store';
@@ -73,7 +73,7 @@ export class DepartmentDropdownComponent
    *  Note: For this kind of component I will normally implement ControlValueAccessor
    *  but is not needed for the example so omitted it for simplicity
    */
-  control = new FormControl();
+  control = new UntypedFormControl();
   data$ = this.store.select(
     createSelector(
       this.traits.localSelectors.isDepartmentsLoading,

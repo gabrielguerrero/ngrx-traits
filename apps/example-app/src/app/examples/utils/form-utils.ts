@@ -12,7 +12,7 @@
  * @param options.selectId function that return the identifier of each row, the id prop in the row controls should match
  * the id prop in the elements of the values array.
  */
-import { AbstractControl, FormArray } from '@angular/forms';
+import { AbstractControl, UntypedFormArray } from '@angular/forms';
 
 export function rebuildFormArray<T>({
   form,
@@ -20,7 +20,7 @@ export function rebuildFormArray<T>({
   values,
   selectId,
 }: {
-  form: FormArray;
+  form: UntypedFormArray;
   buildRow: (value: T, index: number) => AbstractControl;
   values: T[];
   selectId: (value: T) => string;
