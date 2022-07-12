@@ -1,6 +1,7 @@
-module.exports = {
-  displayName: 'ngrx-traits-common',
-  preset: '../../../jest.preset.js',
+/* eslint-disable */
+export default {
+  displayName: 'example-app',
+  preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -8,7 +9,7 @@ module.exports = {
       stringifyContentPathRegex: '\\.(html|svg)$',
     },
   },
-  coverageDirectory: '../../../coverage/libs/ngrx-traits/common',
+  coverageDirectory: '../../coverage/apps/example-app',
   transform: {
     '^.+.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

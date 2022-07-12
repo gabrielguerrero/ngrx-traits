@@ -4,7 +4,7 @@ import {
   ChangeDetectionStrategy,
   Output,
 } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ProductFilter } from '../../models';
 
@@ -27,5 +27,5 @@ export class ProductSearchFormComponent {
   @Output() searchProduct = this.searchForm
     .valueChanges as Observable<ProductFilter>;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: UntypedFormBuilder) {}
 }

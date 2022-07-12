@@ -7,7 +7,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { MatSelect } from '@angular/material/select';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, delay } from 'rxjs/operators';
@@ -65,7 +65,7 @@ import { takeUntil, delay } from 'rxjs/operators';
 export class SearchOptionsComponent implements OnInit, OnDestroy {
   @Input() placeholder = 'Search...';
 
-  control = new FormControl();
+  control = new UntypedFormControl();
   destroy = new Subject();
 
   @Output() valueChanges = this.control.valueChanges as Observable<string>;
