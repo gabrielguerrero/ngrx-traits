@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { takeUntil } from 'rxjs/operators';
 import {
   Actions,
@@ -13,10 +13,8 @@ import { Observable } from 'rxjs';
 export class TraitEffect implements OnIdentifyEffects, OnRunEffects {
   private name = this.constructor.name;
   public componentId = '';
-  public constructor(
-    protected actions$: Actions,
-    protected store: Store<any>
-  ) {}
+  protected actions$ = inject(Actions);
+  protected store = inject(Store<any>);
 
   ngrxOnIdentifyEffects() {
     return this.componentId ? this.name + this.componentId : '';

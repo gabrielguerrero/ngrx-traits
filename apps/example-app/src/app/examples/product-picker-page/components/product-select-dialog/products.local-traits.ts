@@ -54,8 +54,8 @@ export class ProductsLocalTraits extends TraitsLocalStore<
     )
   );
 
-  constructor(injector: Injector, private productService: ProductService) {
-    super(injector);
+  constructor(private productService: ProductService) {
+    super();
     this.traits.addEffects(this);
   }
 

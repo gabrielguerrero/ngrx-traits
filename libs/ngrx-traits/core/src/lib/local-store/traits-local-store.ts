@@ -1,4 +1,4 @@
-import { Injectable, Injector, OnDestroy } from '@angular/core';
+import { inject, Injectable, Injector, OnDestroy } from '@angular/core';
 import { BaseEntityFeatureFactory, EntityFeatureFactory } from '../model';
 import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
 import { Actions, EffectSources } from '@ngrx/effects';
@@ -170,9 +170,10 @@ export abstract class TraitsLocalStore<
 
   localActions: ReturnType<F>['actions'];
   localSelectors: ReturnType<F>['selectors'];
+  private injector = inject(Injector);
 
-  public constructor(public injector: Injector) {
-    super(injector.get(Actions), injector.get(Store));
+  public constructor() {
+    super();
     const config = this.setup();
     this.traits = buildLocalTraits(
       this.injector,
