@@ -64,9 +64,8 @@ export class ProductsLocalTraits extends TraitsLocalStore<
     )
   );
 
-  constructor(injector: Injector, private productService: ProductService) {
-    super(injector);
-    // IMPORTANT, if next line is not added the effects in this class dont get resgitered
+  constructor(private productService: ProductService) {
+    super();
     this.traits.addEffects(this);
   }
   setup(): LocalTraitsConfig<typeof productFeature> {
