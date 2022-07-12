@@ -2,6 +2,6 @@
   "$schema": "../../../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../../../dist/libs/ngrx-traits/core",
   "lib": {
-    "entryFile": "src/lib/public_api.ts"
+    "entryFile": "src/lib/index.ts"
   }
 }
