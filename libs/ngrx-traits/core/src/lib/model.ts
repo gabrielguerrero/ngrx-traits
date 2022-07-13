@@ -53,10 +53,10 @@ export type EntityFeatureFactory<
 ) => FeatureTraits<
   State,
   EntityName extends string
-    ? ReplaceEntityNames<A, EntityName, EntitiesName> & TraitActions
+    ? TraitActions & ReplaceEntityNames<A, EntityName, EntitiesName>
     : A,
   EntityName extends string
-    ? ReplaceEntityNames<S, EntityName, EntitiesName> & TraitSelectors<State>
+    ? TraitSelectors<State> & ReplaceEntityNames<S, EntityName, EntitiesName>
     : S
 >;
 
