@@ -53,10 +53,10 @@ export type EntityFeatureFactory<
 ) => FeatureTraits<
   State,
   EntityName extends string
-    ? TraitActions & ReplaceEntityNames<A, EntityName, EntitiesName>
+    ? ReplaceEntityNames<A, EntityName, EntitiesName>
     : A,
   EntityName extends string
-    ? TraitSelectors<State> & ReplaceEntityNames<S, EntityName, EntitiesName>
+    ? ReplaceEntityNames<S, EntityName, EntitiesName>
     : S
 >;
 
@@ -262,28 +262,32 @@ export type PostfixProps<T, P extends string> = {
 type Replace<
   Target extends string,
   FindKey extends string,
-  ReplaceKey extends string
+  FindKey2 extends string,
+  ReplaceKey extends string,
+  ReplaceKey2 extends string
 > = Target extends `${infer Prefix}${FindKey}${infer Postfix}`
   ? `${Prefix}${Capitalize<ReplaceKey>}${Postfix}`
+  : Target extends `${infer Prefix}${FindKey2}${infer Postfix}`
+  ? `${Prefix}${Capitalize<ReplaceKey2>}${Postfix}`
   : Target;
 
 export type ReplaceProps<
   Target,
   FindKey extends string,
-  ReplaceKey extends string
+  FindKey2 extends string,
+  ReplaceKey extends string,
+  ReplaceKey2 extends string
 > = {
   [Prop in keyof Target as Replace<
     string & Prop,
     FindKey,
-    ReplaceKey
+    FindKey2,
+    ReplaceKey,
+    ReplaceKey2
   >]: Target[Prop];
 };
 export type ReplaceEntityNames<
   T,
   EntityName extends string,
   EntitiesName extends string
-> = ReplaceProps<
-  ReplaceProps<T, 'Entities', EntitiesName>,
-  'Entity',
-  EntityName
->;
+> = ReplaceProps<T, 'Entities', 'Entity', EntitiesName, EntityName>;
