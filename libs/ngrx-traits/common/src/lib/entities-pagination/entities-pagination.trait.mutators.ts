@@ -67,5 +67,19 @@ export function createPaginationTraitMutators<Entity>(
 
     return state;
   }
-  return { mergePaginatedEntities };
+  function setEntitiesPage<
+    Entity,
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+  >(state: S, index: number) {
+    return {
+      ...state,
+      pagination: {
+        ...state.pagination,
+        currentPage: index,
+        requestPage: index,
+      },
+      status: 'loading',
+    };
+  }
+  return { mergePaginatedEntities, setEntitiesPage };
 }

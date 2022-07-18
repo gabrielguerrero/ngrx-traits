@@ -5,6 +5,7 @@ import {
   addLoadEntitiesTrait,
   addSelectEntityTrait,
   addSortEntitiesTrait,
+  addEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/common';
 import { Product, ProductFilter } from '../../../models';
 import { props } from '@ngrx/store';
@@ -26,7 +27,12 @@ export const productFeature = createEntityFeatureFactory(
       direction: 'asc',
       active: 'name',
     },
-  })
+  }),
+  addSortEntitiesTrait<Product>({
+    remote: true,
+    defaultSort: { active: 'id', direction: 'asc' },
+  }),
+  addEntitiesSyncToRouteQueryParams()
 )({
   actionsGroupKey: '[Products Paginated]',
   featureSelector: 'products-paginated',

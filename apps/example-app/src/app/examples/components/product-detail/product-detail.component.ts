@@ -1,10 +1,5 @@
-import {
-  Component,
-  OnInit,
-  ChangeDetectionStrategy,
-  Input,
-} from '@angular/core';
-import { Product, ProductDetail } from '../../models';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ProductDetail } from '../../models';
 
 @Component({
   selector: 'product-detail',

@@ -9,7 +9,7 @@ import {
   addLoadEntitiesTrait,
 } from '@ngrx-traits/common';
 import { ProductsStore, ProductsStoreFilter } from '../../../models';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ProductsStoreService } from '../../../services/products-store.service';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 import { createEffect, ofType } from '@ngrx/effects';

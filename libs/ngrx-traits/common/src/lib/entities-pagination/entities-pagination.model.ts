@@ -57,13 +57,20 @@ export type EntitiesPaginationSelectors<T> = {
   ) => boolean;
 };
 
-export type EntitiesPaginationMutators<T> = {
+export type EntitiesPaginationMutators<Entity> = {
   mergePaginatedEntities<
-    S extends LoadEntitiesState<T> & EntitiesPaginationState
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
   >(
-    entities: T[],
+    entities: Entity[],
     total: number | undefined,
     state: S
+  ): S;
+  setEntitiesPage<
+    Entity,
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+  >(
+    state: S,
+    index: number
   ): S;
 };
 

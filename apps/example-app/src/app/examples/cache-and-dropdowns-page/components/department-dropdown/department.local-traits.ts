@@ -10,7 +10,7 @@ import {
   addLoadEntitiesTrait,
 } from '@ngrx-traits/common';
 import { Department, DepartmentFilter } from '../../../models';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { ProductsStoreService } from '../../../services/products-store.service';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
@@ -47,7 +47,7 @@ export class DepartmentLocalTraits extends TraitsLocalStore<
       concatLatestFrom(() =>
         this.store.select(this.localSelectors.selectDepartmentsFilter)
       ),
-      exhaustMap(([_, filters]) =>
+      exhaustMap(([, filters]) =>
         cache({
           key: storeCacheKeys.departments(filters!.storeId),
           store: this.store,

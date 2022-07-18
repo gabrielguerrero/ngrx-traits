@@ -40,6 +40,7 @@ import {
  * extends EntityAndStatusState<Todo>,MultipleSelectionState{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      addSelectEntitiesTrait<Todo>()
  *    )({

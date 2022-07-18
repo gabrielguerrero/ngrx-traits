@@ -1,10 +1,10 @@
 import {
-  Component,
-  OnInit,
   ChangeDetectionStrategy,
+  Component,
+  Input,
   Output,
 } from '@angular/core';
-import { UntypedFormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ProductFilter } from '../../models';
 
@@ -24,6 +24,9 @@ export class ProductSearchFormComponent {
   searchForm = this.fb.group({
     search: [],
   });
+  @Input() set value(value: ProductFilter | undefined) {
+    value && this.searchForm.patchValue(value, { emitEvent: false });
+  }
   @Output() searchProduct = this.searchForm
     .valueChanges as Observable<ProductFilter>;
 

@@ -6,14 +6,13 @@ import {
 } from '@ngrx-traits/common';
 import { Product, ProductFilter } from '../../../models';
 import {
-  buildLocalTraits,
   createEntityFeatureFactory,
   LocalTraitsConfig,
   TraitsLocalStore,
 } from '@ngrx-traits/core';
-import { Injectable, Injector } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ProductService } from '../../../services/product.service';
 

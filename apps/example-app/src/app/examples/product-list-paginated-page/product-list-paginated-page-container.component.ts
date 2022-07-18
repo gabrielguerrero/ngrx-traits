@@ -1,12 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductActions, ProductSelectors } from './state/products';
-import { combineLatest } from 'rxjs';
 import { Product, ProductFilter } from '../models';
 import { createSelector, Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
-import { PageModel, Sort } from '@ngrx-traits/common';
+import { Sort } from '@ngrx-traits/common';
 import { PageEvent } from '@angular/material/paginator';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -17,6 +14,7 @@ import { Observable } from 'rxjs';
       </mat-card-header>
       <mat-card-content>
         <product-search-form
+          [value]="data.filters"
           (searchProduct)="filter($event)"
         ></product-search-form>
         <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
@@ -72,18 +70,21 @@ export class ProductListPaginatedPageContainerComponent implements OnInit {
     ProductSelectors.selectProductSelected,
     ProductSelectors.isLoadingCheckout,
     ProductSelectors.selectProductsSort,
+    ProductSelectors.selectProductsFilter,
     (
       products,
       isLoading,
       selectedProduct,
       isLoadingCheckout,
-      selectedSort
+      selectedSort,
+      filters
     ) => ({
       products,
       isLoading,
       selectedProduct,
       isLoadingCheckout,
       selectedSort,
+      filters,
     })
   );
   data$ = this.store.select(this.componentData);
@@ -91,7 +92,7 @@ export class ProductListPaginatedPageContainerComponent implements OnInit {
   constructor(private store: Store) {}
 
   ngOnInit() {
-    this.store.dispatch(ProductActions.loadProducts());
+    this.store.dispatch(ProductActions.loadProductsUsingRouteQueryParams());
   }
 
   select({ id }: Product) {

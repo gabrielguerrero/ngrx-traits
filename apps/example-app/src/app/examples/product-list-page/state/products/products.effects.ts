@@ -31,8 +31,8 @@ export class ProductsEffects {
       concatLatestFrom(() =>
         this.store.select(ProductSelectors.selectProductSelected)
       ),
-      filter(([_, product]) => !!product),
-      exhaustMap(([_, product]) =>
+      filter(([, product]) => !!product),
+      exhaustMap(([, product]) =>
         this.orderService
           .checkout({ productId: product!.id, quantity: 1 })
           .pipe(

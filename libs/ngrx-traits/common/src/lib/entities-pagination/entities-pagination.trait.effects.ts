@@ -54,7 +54,6 @@ export function createPaginationTraitEffects<Entity>(
             .select(allSelectors.selectEntitiesCurrentPageInfo)
             .pipe(first())
         ),
-        tap(console.log),
         filter(
           (pageInfo) =>
             !!pageInfo.total &&
@@ -72,7 +71,6 @@ export function createPaginationTraitEffects<Entity>(
               map((isInCache) => (!isInCache && pageInfo) || undefined)
             )
         ),
-        tap(console.log),
         filter((pageInfo) => !!pageInfo),
         concatMap((pageInfo) => [
           allActions.setEntitiesRequestPage({ index: pageInfo!.pageIndex + 1 }),

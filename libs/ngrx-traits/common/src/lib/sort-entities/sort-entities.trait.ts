@@ -45,8 +45,10 @@ import {
  * extends EntityAndStatusState<Todo>, SortState<Todo>{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      addSortEntitiesTrait<Todo>({
+ *        remote: true,
  *        defaultSort: {active:'id', direction:'asc'}
  *      })
  *    )({

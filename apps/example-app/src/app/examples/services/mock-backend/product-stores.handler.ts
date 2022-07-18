@@ -1,4 +1,4 @@
-import { Department, ProductsStore, ProductsStoreDetail } from '../../models';
+import { ProductsStore, ProductsStoreDetail } from '../../models';
 import { getRandomInteger } from '../../utils/form-utils';
 import { rest } from 'msw';
 
@@ -116,10 +116,3 @@ const mockStores: ProductsStore[] = mockStoresDetails.map(
     address: address.line1 + ', ' + address.town + ', ' + address.postCode,
   })
 );
-
-const mockDepartaments: Department[] = new Array(200)
-  .fill(null)
-  .map((value, index) => ({
-    id: index,
-    name: 'Departament ' + index,
-  }));
