@@ -37,27 +37,13 @@ export function createSortTraitReducer<
   allMutators: SortEntitiesMutators<Entity>,
   allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>
 ) {
-  const { remote } = allConfigs.sort!;
-
   return createReducer(
     initialState,
     on(allActions.sortEntities, (state, { active, direction }) =>
-      !remote
-        ? allMutators.sortEntities({ active, direction }, state)
-        : {
-            ...state,
-            sort: { ...state.sort, current: { active, direction } },
-          }
+      allMutators.sortEntities({ active, direction }, state)
     ),
     on(allActions.resetEntitiesSort, (state) =>
-      state.sort?.default
-        ? !remote
-          ? allMutators.sortEntities(state.sort?.default, state)
-          : {
-              ...state,
-              sort: { ...state.sort, current: state.sort?.default },
-            }
-        : state
+      allMutators.sortEntities(state.sort?.default, state)
     )
   );
 }

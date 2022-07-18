@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
 import {
@@ -6,7 +6,7 @@ import {
   ProductBasketSelectors,
 } from '../../state/products-basket/products-basket.traits';
 import { Store } from '@ngrx/store';
-import { Product, ProductFilter, ProductOrder } from '../../../models';
+import { Product, ProductOrder } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
 
 @Component({

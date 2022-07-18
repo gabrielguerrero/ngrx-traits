@@ -1,10 +1,10 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { combineLatest } from 'rxjs';
 import { ProductActions, ProductSelectors } from '../../state/products';
 import { first, map } from 'rxjs/operators';
 import { ProductBasketActions } from '../../state/products-basket/products-basket.traits';
 import { Store } from '@ngrx/store';
-import { Product, ProductFilter, ProductOrder } from '../../../models';
+import { Product, ProductFilter } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
 
 @Component({

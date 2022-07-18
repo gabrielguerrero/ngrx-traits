@@ -9,3 +9,4 @@ export * from './reset';
 export * from './load-entity';
 export * from './async-action';
 export * from './set-entity';
+export * from './entities-sync-to-route-query-params';

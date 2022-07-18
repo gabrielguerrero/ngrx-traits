@@ -19,8 +19,8 @@ export class ProductsBasketEffects {
       concatLatestFrom(() =>
         this.store.select(ProductBasketSelectors.selectProductOrdersList)
       ),
-      filter(([_, products]) => !!products.length),
-      exhaustMap(([_, products]) =>
+      filter(([, products]) => !!products.length),
+      exhaustMap(([, products]) =>
         this.orderService
           .checkout(
             ...products.map((p) => ({
