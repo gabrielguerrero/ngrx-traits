@@ -38,7 +38,7 @@ import {
 import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 
 /**
- * Generates ngrx code to paginate an list of entities, this has 3 cache `cacheType`
+ * Generates ngrx code to paginate a list of entities, this has 3 cache `cacheType`
  * - 'full': The full result is cache in memory and split in pages to render, useful
  * for small result but not so small that requires been render in pages
  * - 'partial': Backend returns partial results because is are to big, this has a cache a few pages forward
@@ -59,9 +59,10 @@ import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.mode
  * // The following trait config
  *
  * export interface TestState
- * extends EntityAndStatusState<Todo>,SingleSelectionState{}
+ * extends EntityAndStatusState<Todo>,EntitiesPaginationState{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      addEntitiesPaginationTrait<Todo>()
  *    )({

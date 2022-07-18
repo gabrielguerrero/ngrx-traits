@@ -51,6 +51,7 @@ import {
  * extends LoadEntitiesState<Todo>, FilterEntitiesState<TodoFilter>{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      //addFilterEntitiesTrait<Todo,TodoFilter>() // no params uses remote filtering
  *      addFilterEntitiesTrait<Todo,TodoFilter>({filterFn: (filter, entity) => // local filtering

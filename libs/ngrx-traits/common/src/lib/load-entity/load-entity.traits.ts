@@ -21,6 +21,10 @@ type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
  * @returns the trait factory
  *
  * @example
+ *
+ * export interface TestState
+ * extends LoadEntityState<Client,'client'>{}
+ *
  * const traits = createEntityFeatureFactory(
  * ...addLoadEntityTraits({
  *        entityName: 'client',

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 import { ProductBasketSelectors } from './state/products-basket/products-basket.traits';

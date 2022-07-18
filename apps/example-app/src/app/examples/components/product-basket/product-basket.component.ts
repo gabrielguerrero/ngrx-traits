@@ -1,15 +1,13 @@
 import {
-  Component,
-  OnInit,
   ChangeDetectionStrategy,
-  Input,
-  Output,
+  Component,
   EventEmitter,
+  Input,
   OnDestroy,
+  Output,
 } from '@angular/core';
 import { Product, ProductOrder } from '../../models';
 import { Selected, Sort } from '@ngrx-traits/common';
-import { PageEvent } from '@angular/material/paginator';
 import { Dictionary } from '@ngrx/entity';
 import { UntypedFormArray, UntypedFormBuilder } from '@angular/forms';
 import { rebuildFormArray } from '../../utils/form-utils';

@@ -51,6 +51,7 @@ import { createCrudTraitMutators } from './crud-entities.trait.mutators';
  * extends EntityAndStatusState<Todo>, CrudState<Todo>{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      addCrudEntitiesTrait<Todo>()
  *    )({

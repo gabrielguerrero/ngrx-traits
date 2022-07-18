@@ -52,7 +52,7 @@ export const productHandlers = [
       if (options?.sortColumn) {
         result = sortData(result, {
           active: options.sortColumn as any,
-          direction: options.sortAscending ? 'asc' : 'desc',
+          direction: options.sortAscending === 'true' ? 'asc' : 'desc',
         });
       }
       return res(ctx.status(200), ctx.json({ resultList: result, total }));

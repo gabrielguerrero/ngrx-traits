@@ -23,7 +23,7 @@ export class ProductsEffects {
         this.store.select(ProductSelectors.selectProductsSort),
         this.store.select(ProductSelectors.selectProductsPagedRequest),
       ]),
-      switchMap(([_, filters, sort, pagination]) =>
+      switchMap(([, filters, sort, pagination]) =>
         //call your service to get the products data
         this.productService
           .getProducts({
@@ -52,8 +52,8 @@ export class ProductsEffects {
       concatLatestFrom(() =>
         this.store.select(ProductSelectors.selectProductSelected)
       ),
-      filter(([_, product]) => !!product),
-      exhaustMap(([_, product]) =>
+      filter(([, product]) => !!product),
+      exhaustMap(([, product]) =>
         this.orderService
           .checkout({ productId: product!.id, quantity: 1 })
           .pipe(

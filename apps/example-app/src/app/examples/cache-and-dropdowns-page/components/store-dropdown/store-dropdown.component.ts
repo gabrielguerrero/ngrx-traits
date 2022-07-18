@@ -14,7 +14,7 @@ import {
   UntypedFormControl,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
-import { Observable, Subject, Subscription } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({

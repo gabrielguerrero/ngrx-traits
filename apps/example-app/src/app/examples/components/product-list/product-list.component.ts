@@ -1,14 +1,12 @@
 import {
-  Component,
-  OnInit,
-  EventEmitter,
   ChangeDetectionStrategy,
-  Output,
+  Component,
+  EventEmitter,
   Input,
+  Output,
 } from '@angular/core';
 import { Product } from '../../models';
 import { Sort } from '@ngrx-traits/common';
-import { PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'product-list',

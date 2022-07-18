@@ -17,10 +17,8 @@ import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
  * @example
  * // The following trait config
  *
- * export interface TestState
- * extends EntityAndStatusState<Todo>,FilterState<TodoFilter>{}
- *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      addResetEntitiesStateTrait()
  *    )({

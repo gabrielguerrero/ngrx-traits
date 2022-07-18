@@ -29,10 +29,14 @@ import {
  * @returns the trait factory
  *
  * @example
+ *
+ * export interface TestState
+ * extends AsyncActionState<'createClient'>{}
+ *
  * // The following trait config
  * const traits = createEntityFeatureFactory(
- * {entityName: 'Todo'},
- * addAsyncActionTrait({
+ *      {entityName: 'Todo'},
+ *      addAsyncActionTrait({
  *        name: 'createClient',
  *        actionProps: props<{ name: string }>(),
  *        actionSuccessProps: props<{ id: string }>(),

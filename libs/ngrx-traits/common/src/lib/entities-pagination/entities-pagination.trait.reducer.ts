@@ -112,15 +112,9 @@ export function createPaginationTraitReducer<
 
   return createReducer(
     initialState,
-    on(allActions.loadEntitiesPage, (state, { index }) => ({
-      ...state,
-      pagination: {
-        ...state.pagination,
-        currentPage: index,
-        requestPage: index,
-      },
-      status: 'loading',
-    })),
+    on(allActions.loadEntitiesPage, (state, { index }) =>
+      allMutators.setEntitiesPage(state, index)
+    ),
     on(allActions.setEntitiesRequestPage, (state, { index }) => ({
       ...state,
       pagination: {

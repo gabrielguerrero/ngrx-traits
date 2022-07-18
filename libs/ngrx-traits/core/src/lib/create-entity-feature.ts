@@ -646,16 +646,15 @@ export function addEntityFeaturesProperties<
   F extends EntityFeatureFactory<any, any>,
   T extends { [key: string]: EntityFeatureFactory<any, any, any, any, any> },
   K extends keyof T,
-  State extends ExtractStateType<ReturnType<F>> &
-    {
-      [P in K]: ExtractStateType<ReturnType<T[P]>>;
-    },
-  A extends ExtractActionsType<ReturnType<F>> &
-    { [P in K]: ExtractActionsType<ReturnType<T[P]>> },
-  S extends FeatureSelectors<State, ExtractSelectorsType<ReturnType<F>>> &
-    {
-      [P in K]: FeatureSelectors<State, ExtractSelectorsType<ReturnType<T[P]>>>;
-    },
+  State extends ExtractStateType<ReturnType<F>> & {
+    [P in K]: ExtractStateType<ReturnType<T[P]>>;
+  },
+  A extends ExtractActionsType<ReturnType<F>> & {
+    [P in K]: ExtractActionsType<ReturnType<T[P]>>;
+  },
+  S extends FeatureSelectors<State, ExtractSelectorsType<ReturnType<F>>> & {
+    [P in K]: FeatureSelectors<State, ExtractSelectorsType<ReturnType<T[P]>>>;
+  },
   R extends (config: Config<State>) => {
     actions: A;
     selectors: S;
@@ -726,4 +725,32 @@ export function createTraitFactory<
   effects?: TraitEffectsFactory<State, A, S, KC>;
 }): TraitFactory<State, A, S, M, KEY, C, KC> {
   return f as TraitFactory<State, A, S, M, KEY, C, KC>;
+}
+
+/**
+ * Helper function to combine selectors in components as map
+ *
+ * @example
+ *
+ * view = combineSelectors({
+ *     products: ProductSelectors.selectProductsCurrentPage,
+ *     isLoading: ProductSelectors.isLoadingProductsCurrentPage,
+ *     selectedProduct: ProductSelectors.selectProductSelected,
+ *     isLoadingCheckout: ProductSelectors.isLoadingCheckout,
+ *     selectedSort: ProductSelectors.selectProductsSort,
+ *     filters: ProductSelectors.selectProductsFilter,
+ *   });
+ * @param t
+ */
+export function combineSelectors<
+  T extends { [k: string]: MemoizedSelector<any, any> }
+>(t: T): MemoizedSelector<any, { [j in keyof T]: ReturnType<T[j]> }> {
+  const selectors = Object.values(t);
+  const keys = Object.keys(t);
+  const projector = (...args: any[]) =>
+    keys.reduce((acc, key, index) => {
+      acc[key] = args[index];
+      return acc;
+    }, {} as any);
+  return (createSelector as any).apply(null, [...selectors, projector]);
 }

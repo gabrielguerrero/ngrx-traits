@@ -44,6 +44,7 @@ import { FilterEntitiesActions } from '../filter-entities';
  * extends EntityAndStatusState<Todo>,SelectEntityState{}
  *
  *    const traits = createEntityFeatureFactory(
+ *      {entityName: 'Todo'},
  *      addLoadEntitiesTrait<Todo>(),
  *      addSelectEntityTrait<Todo>()
  *    )({
