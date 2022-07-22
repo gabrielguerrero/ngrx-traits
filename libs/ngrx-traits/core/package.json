@@ -8,12 +8,11 @@
     "postinstall": "ngcc"
   },
   "peerDependencies": {
-    "@angular/common": "^14.0.0",
-    "@angular/compiler": "^14.0.0",
     "@angular/core": "^14.0.0",
     "@ngrx/effects": "^14.0.0",
     "@ngrx/entity": "^14.0.0",
-    "@ngrx/store": "^14.0.0"
+    "@ngrx/store": "^14.0.0",
+    "rxjs": "^6.5.3 || ^7.5.0"
   },
   "repository": {
     "type": "git",
