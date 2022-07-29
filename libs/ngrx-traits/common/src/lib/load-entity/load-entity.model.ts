@@ -12,10 +12,7 @@ export type LoadEntityActions<
 > = PrefixProps<AsyncActionActions<Request, Response, Failure, J>, 'load'> &
   TraitActions;
 
-export type LoadEntityState<
-  T,
-  J extends string
-> = AsyncActionState<`load${Capitalize<J & string>}`> &
+export type LoadEntityState<T, J extends string> = AsyncActionState<J> &
   PrefixProps<{ ''?: T }, J>;
 
 export type LoadEntitySelectors<T, J extends string> = PostfixProps<

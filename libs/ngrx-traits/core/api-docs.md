@@ -27,6 +27,8 @@ internal in the reducers and selector to separate the state</p></dd>
 and grouping the combined actions by key</p></dd>
 <dt><a href="#createTraitFactory">createTraitFactory(f)</a></dt>
 <dd><p>Helper function to create an implementation  a TraitFactory</p></dd>
+<dt><a href="#combineSelectors">combineSelectors(t)</a></dt>
+<dd><p>Helper function to combine selectors in components as map</p></dd>
 <dt><a href="#setPropertyReducer">setPropertyReducer(sourceReducer, property, propertyReducer)</a></dt>
 <dd><p>Set propertyReducer in sourceReducer in a property of the source state,</p></dd>
 <dt><a href="#setPropertiesReducer">setPropertiesReducer(sourceReducer, property, propertyReducer)</a></dt>
@@ -297,6 +299,28 @@ const combinedFeature = productAddEntityPropertiesFactory({
 | --- | --- |
 | f | <p>TraitFactory implementation</p> |
 
+<a name="combineSelectors"></a>
+
+## combineSelectors(t)
+<p>Helper function to combine selectors in components as map</p>
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| t | 
+
+**Example**  
+```js
+view = combineSelectors({
+    products: ProductSelectors.selectProductsCurrentPage,
+    isLoading: ProductSelectors.isLoadingProductsCurrentPage,
+    selectedProduct: ProductSelectors.selectProductSelected,
+    isLoadingCheckout: ProductSelectors.isLoadingCheckout,
+    selectedSort: ProductSelectors.selectProductsSort,
+    filters: ProductSelectors.selectProductsFilter,
+  });
+```
 <a name="setPropertyReducer"></a>
 
 ## setPropertyReducer(sourceReducer, property, propertyReducer)

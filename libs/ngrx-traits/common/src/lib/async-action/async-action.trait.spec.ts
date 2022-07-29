@@ -128,11 +128,11 @@ describe('addApiCall trait', () => {
         })
       );
       expect(selectors.isCreateClientLoading.projector(state)).toEqual(true);
-      expect(selectors.isCreateClientLoading.projector(state)).toEqual(true);
+      expect(selectors.isCreateProductLoading.projector(state)).toEqual(true);
       state = reducer(state, actions.createClientSuccess());
       state = reducer(state, actions.createProductFail());
       expect(selectors.isCreateClientSuccess.projector(state)).toEqual(true);
-      expect(selectors.isCreateClientFail.projector(state)).toEqual(true);
+      expect(selectors.isCreateProductFail.projector(state)).toEqual(true);
     });
   });
 });
