@@ -262,6 +262,14 @@ export type PostfixProps<T, P extends string> = {
 type Replace<
   Target extends string,
   FindKey extends string,
+  ReplaceKey extends string
+> = Target extends `${infer Prefix}${FindKey}${infer Postfix}`
+  ? `${Prefix}${Capitalize<ReplaceKey>}${Postfix}`
+  : Target;
+
+type Replace2<
+  Target extends string,
+  FindKey extends string,
   FindKey2 extends string,
   ReplaceKey extends string,
   ReplaceKey2 extends string
@@ -274,11 +282,23 @@ type Replace<
 export type ReplaceProps<
   Target,
   FindKey extends string,
+  ReplaceKey extends string
+> = {
+  [Prop in keyof Target as Replace<
+    string & Prop,
+    FindKey,
+    ReplaceKey
+  >]: Target[Prop];
+};
+
+export type ReplaceProps2<
+  Target,
+  FindKey extends string,
   FindKey2 extends string,
   ReplaceKey extends string,
   ReplaceKey2 extends string
 > = {
-  [Prop in keyof Target as Replace<
+  [Prop in keyof Target as Replace2<
     string & Prop,
     FindKey,
     FindKey2,
@@ -290,4 +310,4 @@ export type ReplaceEntityNames<
   T,
   EntityName extends string,
   EntitiesName extends string
-> = ReplaceProps<T, 'Entities', 'Entity', EntitiesName, EntityName>;
+> = ReplaceProps2<T, 'Entities', 'Entity', EntitiesName, EntityName>;

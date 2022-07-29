@@ -49,12 +49,12 @@ describe('addApiCall trait', () => {
     it('isLoadingClientDetailsSelected should right value ', () => {
       const { selectors } = init();
       expect(
-        selectors.isLoadingCreateClient.projector({
+        selectors.isCreateClientLoading.projector({
           createClientStatus: 'loading',
         })
       ).toEqual(true);
       expect(
-        selectors.isLoadingCreateClient.projector({
+        selectors.isCreateClientLoading.projector({
           createClientStatus: 'success',
         })
       ).toEqual(false);
@@ -62,12 +62,12 @@ describe('addApiCall trait', () => {
     it('isSuccessClientDetailsSelected should return right value ', () => {
       const { selectors } = init();
       expect(
-        selectors.isSuccessCreateClient.projector({
+        selectors.isCreateClientSuccess.projector({
           createClientStatus: 'success',
         })
       ).toEqual(true);
       expect(
-        selectors.isSuccessCreateClient.projector({
+        selectors.isCreateClientSuccess.projector({
           createClientStatus: 'loading',
         })
       ).toEqual(false);
@@ -75,12 +75,12 @@ describe('addApiCall trait', () => {
     it('isFailClientDetailsSelected should return right value ', () => {
       const { selectors } = init();
       expect(
-        selectors.isFailCreateClient.projector({
+        selectors.isCreateClientFail.projector({
           createClientStatus: 'fail',
         })
       ).toEqual(true);
       expect(
-        selectors.isFailCreateClient.projector({
+        selectors.isCreateClientFail.projector({
           createClientStatus: 'loading',
         })
       ).toEqual(false);
@@ -127,12 +127,12 @@ describe('addApiCall trait', () => {
           name: 'Something',
         })
       );
-      expect(selectors.isLoadingCreateClient.projector(state)).toEqual(true);
-      expect(selectors.isLoadingCreateProduct.projector(state)).toEqual(true);
+      expect(selectors.isCreateClientLoading.projector(state)).toEqual(true);
+      expect(selectors.isCreateClientLoading.projector(state)).toEqual(true);
       state = reducer(state, actions.createClientSuccess());
       state = reducer(state, actions.createProductFail());
-      expect(selectors.isSuccessCreateClient.projector(state)).toEqual(true);
-      expect(selectors.isFailCreateProduct.projector(state)).toEqual(true);
+      expect(selectors.isCreateClientSuccess.projector(state)).toEqual(true);
+      expect(selectors.isCreateClientFail.projector(state)).toEqual(true);
     });
   });
 });

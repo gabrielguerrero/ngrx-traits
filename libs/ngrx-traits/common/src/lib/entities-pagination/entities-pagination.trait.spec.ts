@@ -821,7 +821,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.isLoadingEntitiesCurrentPage.projector({
+        selectors.isEntitiesCurrentPageLoading.projector({
           ...testState,
           status: 'loading',
           pagination: { ...testState.pagination, requestPage: 3 },
@@ -841,7 +841,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.isLoadingEntitiesCurrentPage.projector({
+        selectors.isEntitiesCurrentPageLoading.projector({
           ...testState,
           status: 'loading',
           pagination: { ...testState.pagination, requestPage: 3 },
@@ -861,7 +861,7 @@ describe('Pagination Test', () => {
         75
       );
       expect(
-        selectors.isLoadingEntitiesCurrentPage.projector({
+        selectors.isEntitiesCurrentPageLoading.projector({
           ...testState,
           status: 'success',
           pagination: { ...testState.pagination, requestPage: 3 },

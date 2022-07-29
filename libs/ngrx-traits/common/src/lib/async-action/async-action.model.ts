@@ -1,4 +1,4 @@
-import { PostfixProps, PrefixProps } from '@ngrx-traits/core';
+import { PostfixProps, PrefixProps, ReplaceProps } from '@ngrx-traits/core';
 import { ActionCreator, NotAllowedCheck } from '@ngrx/store';
 import { TypedAction } from '@ngrx/store/src/models';
 import { StatusState } from '../load-entities';
@@ -17,15 +17,16 @@ type AsyncActions<Request, Response, Failure> = {
 };
 
 type StatusSelectors<S extends StatusState> = {
-  isLoading: (state: S) => boolean;
-  isSuccess: (state: S) => boolean;
-  isFail: (state: S) => boolean;
+  isActionNameLoading: (state: S) => boolean;
+  isActionNameSuccess: (state: S) => boolean;
+  isActionNameFail: (state: S) => boolean;
 };
 
 export type AsyncActionState<J extends string> = PrefixProps<StatusState, J>;
 
-export type AsyncActionSelectors<J extends string, S> = PostfixProps<
+export type AsyncActionSelectors<J extends string, S> = ReplaceProps<
   StatusSelectors<S>,
+  'ActionName',
   J
 >;
 

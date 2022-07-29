@@ -69,7 +69,7 @@ export class ProductShopTabComponent implements OnInit {
     this.store.select(ProductSelectors.selectProductsList),
     this.store.select(ProductSelectors.isProductsLoading),
     this.store.select(ProductSelectors.selectProductDetail),
-    this.store.select(ProductSelectors.isLoadingLoadProductDetail),
+    this.store.select(ProductSelectors.isLoadProductDetailLoading),
   ]).pipe(
     map(([products, isLoading, selectedProduct, isLoadProductDetail]) => ({
       products,

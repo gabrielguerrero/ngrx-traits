@@ -14,9 +14,9 @@ import { Sort } from '@ngrx-traits/common';
         <mat-card-title>Product List</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <!--        <product-search-form-->
-        <!--          (searchProduct)="filter($event)"-->
-        <!--        ></product-search-form>-->
+        <product-search-form
+          (searchProduct)="filter($event)"
+        ></product-search-form>
         <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
         <ng-template #listProducts>
           <product-list
@@ -61,7 +61,7 @@ export class ProductListPageContainerComponent implements OnInit {
     this.store.select(ProductSelectors.selectProductsList),
     this.store.select(ProductSelectors.isProductsLoading),
     this.store.select(ProductSelectors.selectProductSelected),
-    this.store.select(ProductSelectors.isLoadingCheckout),
+    this.store.select(ProductSelectors.isCheckoutLoading),
   ]).pipe(
     map(([products, isLoading, selectedProduct, isLoadingCheckout]) => ({
       products,
