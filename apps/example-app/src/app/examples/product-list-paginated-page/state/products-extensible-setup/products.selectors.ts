@@ -7,7 +7,7 @@ export const {
   selectProductsList: selectProducts,
   selectProductsTotal,
   isProductsLoading,
-  isLoadingCheckout,
+  isCheckoutLoading,
   selectProductSelected,
   selectProductsFilter,
   selectProductsSort,

@@ -66,9 +66,9 @@ import { PageEvent } from '@angular/material/paginator';
 export class ProductListPaginatedPageContainerComponent implements OnInit {
   componentData = createSelector(
     ProductSelectors.selectProductsCurrentPage,
-    ProductSelectors.isLoadingProductsCurrentPage,
+    ProductSelectors.isProductsCurrentPageLoading,
     ProductSelectors.selectProductSelected,
-    ProductSelectors.isLoadingCheckout,
+    ProductSelectors.isCheckoutLoading,
     ProductSelectors.selectProductsSort,
     ProductSelectors.selectProductsFilter,
     (

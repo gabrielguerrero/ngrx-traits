@@ -146,9 +146,9 @@ export function addAsyncActionTrait<
       }
       const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
       return {
-        [`isLoading${capitalizedName}`]: isLoadingEntity,
-        [`isSuccess${capitalizedName}`]: isSuccessEntity,
-        [`isFail${capitalizedName}`]: isFailEntity,
+        [`is${capitalizedName}Loading`]: isLoadingEntity,
+        [`is${capitalizedName}Success`]: isSuccessEntity,
+        [`is${capitalizedName}Fail`]: isFailEntity,
       } as AsyncActionSelectors<J, AsyncActionState<J>>;
     },
     initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>

@@ -115,7 +115,7 @@ export function createPaginationTraitSelectors<Entity>(
       return isEntitiesPageInCache(page, pagination);
     }
   );
-  const isLoadingEntitiesCurrentPage = createSelector(
+  const isEntitiesCurrentPageLoading = createSelector(
     isEntitiesLoading,
     selectPagination,
     (isLoading, pagination) =>
@@ -125,7 +125,7 @@ export function createPaginationTraitSelectors<Entity>(
   const selectEntitiesCurrentPage = createSelector(
     selectEntitiesCurrentPageList,
     selectEntitiesCurrentPageInfo,
-    isLoadingEntitiesCurrentPage,
+    isEntitiesCurrentPageLoading,
     (entities, pageInfo, isLoading) =>
       ({
         entities,
@@ -150,7 +150,7 @@ export function createPaginationTraitSelectors<Entity>(
     selectEntitiesCurrentPage,
     selectEntitiesPagedRequest,
     selectEntitiesCurrentPageInfo,
-    isLoadingEntitiesCurrentPage,
+    isEntitiesCurrentPageLoading,
   };
   return selectors;
 }

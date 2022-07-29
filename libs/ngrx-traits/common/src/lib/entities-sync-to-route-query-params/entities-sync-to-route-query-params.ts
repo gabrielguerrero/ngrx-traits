@@ -81,10 +81,10 @@ export function addEntitiesSyncToRouteQueryParams() {
         on(setEntitiesRouteQueryParams, (state, { params: p }) => {
           const params = { ...p };
           let newState = state;
-          if (params.page) {
+          if (allMutators.setEntitiesPage) {
             newState = allMutators.setEntitiesPage(
               newState as any,
-              +params.page
+              +(params.page ?? 0)
             );
             delete params.page;
           }

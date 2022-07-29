@@ -52,7 +52,7 @@ export type EntitiesPaginationSelectors<T> = {
   selectEntitiesCurrentPageInfo: (
     state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => PageInfoModel;
-  isLoadingEntitiesCurrentPage: (
+  isEntitiesCurrentPageLoading: (
     state: LoadEntitiesState<T> & EntitiesPaginationState
   ) => boolean;
 };

@@ -84,7 +84,7 @@ export class ProductBasketTabComponent {
     this.store.select(ProductBasketSelectors.selectProductOrdersIdsSelectedMap),
     this.store.select(ProductBasketSelectors.selectProductDetail),
     this.store.select(ProductBasketSelectors.isAllProductOrdersSelected),
-    this.store.select(ProductBasketSelectors.isLoadingCheckout),
+    this.store.select(ProductBasketSelectors.isCheckoutLoading),
   ]).pipe(
     map(
       ([
