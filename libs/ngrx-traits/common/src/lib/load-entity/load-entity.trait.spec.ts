@@ -2,7 +2,7 @@ import { Actions } from '@ngrx/effects';
 import { createFeatureSelector, props } from '@ngrx/store';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
 import { LoadEntityState } from './load-entity.model';
-import { addLoadEntityTraits } from './load-entity.traits';
+import { addLoadEntityTrait } from './load-entity.trait';
 
 interface Client {
   id: string;
@@ -11,8 +11,7 @@ interface Client {
 interface Product extends Client {
   price: number;
 }
-describe('addLoadEntityTraits trait', () => {
-  let actions$: Actions;
+describe('addLoadEntityTrait trait', () => {
   const featureSelector =
     createFeatureSelector<LoadEntityState<Client, 'client'>>('client');
   const featureSelector2 =
@@ -21,7 +20,7 @@ describe('addLoadEntityTraits trait', () => {
   function init() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      ...addLoadEntityTraits({
+      addLoadEntityTrait({
         entityName: 'client',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ client: Client }>(),
@@ -37,12 +36,12 @@ describe('addLoadEntityTraits trait', () => {
   function initMultiple() {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
-      ...addLoadEntityTraits({
+      addLoadEntityTrait({
         entityName: 'client',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ client: { id: string; name: string } }>(),
       }),
-      ...addLoadEntityTraits({
+      addLoadEntityTrait({
         entityName: 'product',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ product: Product }>(),
@@ -63,21 +62,70 @@ describe('addLoadEntityTraits trait', () => {
         })
       ).toEqual({ name: 'gabs', id: '1' });
     });
+    it('isLoadingClientDetailsSelected should right value ', () => {
+      const { selectors } = init();
+      expect(
+        selectors.isClientLoading.projector({
+          clientStatus: 'loading',
+        })
+      ).toEqual(true);
+      expect(
+        selectors.isClientLoading.projector({
+          clientStatus: 'success',
+        })
+      ).toEqual(false);
+    });
+    it('isSuccessClientDetailsSelected should return right value ', () => {
+      const { selectors } = init();
+      expect(
+        selectors.isClientSuccess.projector({
+          clientStatus: 'success',
+        })
+      ).toEqual(true);
+      expect(
+        selectors.isClientSuccess.projector({
+          clientStatus: 'loading',
+        })
+      ).toEqual(false);
+    });
+    it('isFailClientDetailsSelected should return right value ', () => {
+      const { selectors } = init();
+      expect(
+        selectors.isClientFail.projector({
+          clientStatus: 'fail',
+        })
+      ).toEqual(true);
+      expect(
+        selectors.isClientFail.projector({
+          clientStatus: 'loading',
+        })
+      ).toEqual(false);
+    });
   });
 
   describe('reducer', () => {
     it('loadClientSuccess should set status to success and store the client', () => {
-      const { reducer, actions, initialState } = init();
+      const { reducer, actions } = init();
       const state = reducer(
-        { loadClientStatus: 'loading' },
+        { clientStatus: 'loading' },
         actions.loadClientSuccess({
           client: { name: 'gabs', id: '1' },
         })
       );
       expect(state).toEqual({
-        loadClientStatus: 'success',
+        clientStatus: 'success',
         client: { name: 'gabs', id: '1' },
       });
+    });
+    it('loadClient should set status to loading ', () => {
+      const { reducer, actions } = init();
+      const state = reducer({}, actions.loadClient({ id: '1' }));
+      expect(state).toEqual({ clientStatus: 'loading' });
+    });
+    it('loadClientFailure should set status to fail ', () => {
+      const { reducer, actions } = init();
+      const state = reducer({}, actions.loadClientFail());
+      expect(state).toEqual({ clientStatus: 'fail' });
     });
   });
 
@@ -96,8 +144,8 @@ describe('addLoadEntityTraits trait', () => {
           id: '1',
         })
       );
-      expect(selectors.isLoadingLoadClient.projector(state)).toEqual(true);
-      expect(selectors.isLoadingLoadProduct.projector(state)).toEqual(true);
+      expect(selectors.isClientLoading.projector(state)).toEqual(true);
+      expect(selectors.isProductLoading.projector(state)).toEqual(true);
       state = reducer(
         state,
         actions.loadClientSuccess({
@@ -105,8 +153,8 @@ describe('addLoadEntityTraits trait', () => {
         })
       );
       state = reducer(state, actions.loadProductFail());
-      expect(selectors.isSuccessLoadClient.projector(state)).toEqual(true);
-      expect(selectors.isFailLoadProduct.projector(state)).toEqual(true);
+      expect(selectors.isClientSuccess.projector(state)).toEqual(true);
+      expect(selectors.isProductFail.projector(state)).toEqual(true);
     });
   });
 });

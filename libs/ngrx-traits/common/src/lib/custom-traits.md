@@ -334,11 +334,11 @@ Let's again go to an example which should make this easier to understand, there 
 ```ts
 export function addLoadProduct() {
   // notice how we use a trait
-  const traits = addLoadEntityTraits({
+  const traits = [addLoadEntityTrait({
     entityName: 'product',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ product: ProductDetail }>(),
-  });
+  })] as const;
 
   type LoadProductActions = ExtractActionsType<typeof traits>;
 
@@ -367,13 +367,13 @@ export function addLoadProduct() {
 }
 ```
 
-Notice addLoadEntityTraits returns an array of traits, so it needs to be spread when used, and the same you will need to do when you use addLoadProduct trait, if you needed more traits, you could have join then in an array like:
+Notice addLoadEntityTrait returns an array of traits, so it needs to be spread when used, and the same you will need to do when you use addLoadProduct trait, if you needed more traits, you could have join then in an array like:
 
 ```ts
 const traits = [
   addLoadEntitiesTrait<Product>(),
   addSelectEntityTrait<Product>(),
-  ...addLoadEntityTraits({
+  ...addLoadEntityTrait({
     entityName: 'product',
     actionProps: props<{ id: string }>(),
     actionSuccessProps: props<{ product: ProductDetail }>(),
