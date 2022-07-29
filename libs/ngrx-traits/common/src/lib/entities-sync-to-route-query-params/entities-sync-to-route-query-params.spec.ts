@@ -122,6 +122,60 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       );
       expect(state.pagination.currentPage).toEqual(2);
     });
+
+    it('should set page param to 0 if  setEntitiesRouteQueryParams is has no page param', () => {
+      const { reducer, initialState, actions } = initWithFilterAndPagination();
+      let state = reducer(
+        initialState,
+        actions.loadEntitiesSuccess({ entities: todos })
+      );
+      state = reducer(state, actions.loadEntitiesPage({ index: 3 }));
+      state = reducer(
+        state,
+        (actions as any)['setEntitiesRouteQueryParams']({
+          params: {},
+        })
+      );
+      expect(state.pagination.currentPage).toEqual(0);
+    });
+
+    it('should set sort param to the default sort if  setEntitiesRouteQueryParams is has no sort params', () => {
+      const { reducer, initialState, actions } = initWithFilterAndPagination();
+      let state = reducer(
+        initialState,
+        actions.loadEntitiesSuccess({ entities: todos })
+      );
+      state = reducer(
+        state,
+        actions.sortEntities({ active: 'content', direction: 'desc' })
+      );
+      state = reducer(
+        state,
+        (actions as any)['setEntitiesRouteQueryParams']({
+          params: {},
+        })
+      );
+      expect(state.sort.current).toEqual({ active: 'id', direction: 'asc' });
+    });
+
+    it('should set filters param to the empty  if  setEntitiesRouteQueryParams is has no filters', () => {
+      const { reducer, initialState, actions } = initWithFilterAndPagination();
+      let state = reducer(
+        initialState,
+        actions.loadEntitiesSuccess({ entities: todos })
+      );
+      state = reducer(
+        state,
+        actions.filterEntities({ filters: { extra: 'content' } })
+      );
+      state = reducer(
+        state,
+        (actions as any)['setEntitiesRouteQueryParams']({
+          params: {},
+        })
+      );
+      expect(state.filters).toEqual({});
+    });
   });
 
   describe('effects', () => {
