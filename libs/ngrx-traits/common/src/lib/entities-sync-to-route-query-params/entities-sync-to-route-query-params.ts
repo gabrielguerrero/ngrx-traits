@@ -16,6 +16,7 @@ import {
 import {
   SortEntitiesActions,
   SortEntitiesMutators,
+  SortEntitiesState,
   sortTraitKey,
 } from '../sort-entities';
 import { LoadEntitiesActions } from '../load-entities';
@@ -86,20 +87,27 @@ export function addEntitiesSyncToRouteQueryParams() {
               newState as any,
               +(params.page ?? 0)
             );
-            delete params.page;
           }
-          if (params.sortActive) {
-            newState = allMutators.sortEntities(
-              {
-                active: params.sortActive,
-                direction: params.sortDirection,
-              },
-              newState as any
-            );
-            delete params.sortActive;
-            delete params.sortDirection;
+          delete params.page;
+          if (allMutators.sortEntities) {
+            if (params.sortActive) {
+              newState = allMutators.sortEntities(
+                {
+                  active: params.sortActive,
+                  direction: params.sortDirection,
+                },
+                newState as any
+              );
+            } else {
+              newState = allMutators.sortEntities(
+                (state as SortEntitiesState<any>).sort.default,
+                newState as any
+              );
+            }
           }
-          if (Object.keys(params).length) {
+          delete params.sortDirection;
+          delete params.sortActive;
+          if (allMutators.setEntitiesFilters) {
             newState = allMutators.setEntitiesFilters(params, newState as any);
           }
 
