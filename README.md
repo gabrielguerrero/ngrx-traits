@@ -971,7 +971,7 @@ Notice if we had created selectProductState here instead of in the traits file ,
 
 Here you just need to notice how we mix the reducers, and the initialStates
 
-#### products.selectors.ts
+#### products.reducer.ts
 
 ```ts
 import { productFeature, selectProductState } from './products-basket.traits.ts';
