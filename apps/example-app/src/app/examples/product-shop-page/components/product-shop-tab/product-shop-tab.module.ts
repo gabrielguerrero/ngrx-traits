@@ -7,7 +7,7 @@ import { ProductSearchFormModule } from '../../../components/product-search-form
 import { ProductListModule } from '../../../components/product-list/product-list.module';
 import { ProductDetailModule } from '../../../components/product-detail/product-detail.module';
 import { ProductBasketModule } from '../../../components/product-basket/product-basket.module';
-import { GridModule } from '@angular/flex-layout';
+
 import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
@@ -21,7 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
     ProductListModule,
     ProductDetailModule,
     ProductBasketModule,
-    GridModule,
+
     MatButtonModule,
   ],
 })

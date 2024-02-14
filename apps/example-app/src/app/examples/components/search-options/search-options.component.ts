@@ -39,7 +39,7 @@ import { takeUntil, delay } from 'rxjs/operators';
         mat-icon-button
         matSuffix
         (click)="clear()"
-        [fxShow]="!!input.value"
+
       >
         <mat-icon>close</mat-icon>
       </button>
