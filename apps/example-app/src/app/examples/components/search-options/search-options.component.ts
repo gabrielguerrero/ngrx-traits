@@ -8,7 +8,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
-import { MatSelect } from '@angular/material/select';
+import { MatLegacySelect as MatSelect } from '@angular/material/legacy-select';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, delay } from 'rxjs/operators';
 

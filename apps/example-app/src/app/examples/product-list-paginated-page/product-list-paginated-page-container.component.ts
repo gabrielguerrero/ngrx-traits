@@ -3,7 +3,7 @@ import { ProductActions, ProductSelectors } from './state/products';
 import { Product, ProductFilter } from '../models';
 import { createSelector, Store } from '@ngrx/store';
 import { Sort } from '@ngrx-traits/common';
-import { PageEvent } from '@angular/material/paginator';
+import { LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',

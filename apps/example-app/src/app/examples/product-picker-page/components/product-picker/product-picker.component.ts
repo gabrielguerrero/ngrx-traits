@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 import { Product } from '../../../models';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { ProductSelectDialogComponent } from '../product-select-dialog/product-select-dialog.component';
 import { first } from 'rxjs/operators';
 
