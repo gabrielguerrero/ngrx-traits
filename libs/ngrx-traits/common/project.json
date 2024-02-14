@@ -1,0 +1,70 @@
+{
+  "name": "ngrx-traits-common",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ngrx-traits/common/src",
+  "prefix": "ngrx-traits",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["{workspaceRoot}/dist/libs/ngrx-traits/common"],
+      "options": {
+        "project": "libs/ngrx-traits/common/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ngrx-traits/common/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/ngrx-traits/common/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/ngrx-traits/common"],
+      "options": {
+        "jestConfig": "libs/ngrx-traits/common/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/ngrx-traits/common/src/**/*.ts",
+          "libs/ngrx-traits/common/src/**/*.html"
+        ]
+      },
+      "outputs": ["{options.outputFile}"]
+    },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cp ../../../../.npmrc . && npm version {args.versionNumber} && jq --arg version \"{args.versionNumber}\" '.peerDependencies.\"@ngrx-traits/core\"=$version' package.json > tmp && mv tmp package.json && npm publish --access public --verbose",
+            "forwardAllArgs": false
+          }
+        ],
+        "cwd": "dist/libs/ngrx-traits/common",
+        "parallel": false
+      }
+    },
+    "api-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "jsdoc2md --files ./src/lib/**/*.ts --configure ../../../jsdoc2md.json --no-cache > ./api-docs.md",
+            "forwardAllArgs": false
+          }
+        ],
+        "cwd": "libs/ngrx-traits/common",
+        "parallel": false
+      }
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,30 @@
+{
+  "name": "example-app-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/example-app-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "@nrwl/cypress:cypress",
+      "options": {
+        "cypressConfig": "apps/example-app-e2e/cypress.json",
+        "tsConfig": "apps/example-app-e2e/tsconfig.e2e.json",
+        "devServerTarget": "example-app:serve:development"
+      },
+      "configurations": {
+        "production": {
+          "devServerTarget": "example-app:serve:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["apps/example-app-e2e/**/*.{js,ts}"]
+      },
+      "outputs": ["{options.outputFile}"]
+    }
+  },
+  "tags": [],
+  "implicitDependencies": ["example-app"]
+}

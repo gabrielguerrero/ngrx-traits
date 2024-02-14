@@ -1,0 +1,68 @@
+{
+  "name": "ngrx-traits-core",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/ngrx-traits/core/src",
+  "prefix": "ngrx-traits",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["{workspaceRoot}/dist/libs/ngrx-traits/core"],
+      "options": {
+        "project": "libs/ngrx-traits/core/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ngrx-traits/core/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/ngrx-traits/core/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/libs/ngrx-traits/core"],
+      "options": {
+        "jestConfig": "libs/ngrx-traits/core/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/ngrx-traits/core/src/**/*.ts",
+          "libs/ngrx-traits/core/src/**/*.html"
+        ]
+      },
+      "outputs": ["{options.outputFile}"]
+    },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cp ../../../../.npmrc . &&  npm version {args.versionNumber} && npm publish --access public --verbose",
+            "forwardAllArgs": false
+          }
+        ],
+        "cwd": "dist/libs/ngrx-traits/core"
+      }
+    },
+    "api-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "jsdoc2md --files ./src/lib/*.ts --files ./src/lib/**/*.ts --configure ../../../jsdoc2md.json --no-cache > ./api-docs.md",
+            "forwardAllArgs": false
+          }
+        ],
+        "cwd": "libs/ngrx-traits/core"
+      }
+    }
+  },
+  "tags": []
+}
