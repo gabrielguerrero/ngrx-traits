@@ -66,7 +66,7 @@ export class SearchOptionsComponent implements OnInit, OnDestroy {
   @Input() placeholder = 'Search...';
 
   control = new UntypedFormControl();
-  destroy = new Subject();
+  destroy = new Subject<void>();
 
   @Output() valueChanges = this.control.valueChanges as Observable<string>;
 

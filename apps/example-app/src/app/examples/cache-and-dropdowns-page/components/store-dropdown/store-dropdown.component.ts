@@ -79,7 +79,7 @@ export class StoreDropdownComponent
     )
   );
   private onTouch: any;
-  destroy = new Subject();
+  destroy = new Subject<void>();
 
   @Input() set value(value: ProductsStore) {
     this.control.setValue(value);
