@@ -5,7 +5,7 @@ import { DepartmentDropdownModule } from './components/department-dropdown/depar
 import { StoreDropdownModule } from './components/store-dropdown/store-dropdown.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CacheAndDropdownsRoutingModule } from './cache-and-dropdowns-routing.module';
-import { MatCardModule } from '@angular/material/card';
+import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
 import { CacheModule } from '@ngrx-traits/core';
 
 @NgModule({

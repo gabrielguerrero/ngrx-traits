@@ -181,7 +181,7 @@ export interface TraitFactory<
   M extends TraitStateMutators<State> = any,
   KEY extends string = string,
   C = any,
-  KC = KeyedConfig<KEY, C>
+  KC extends AllTraitConfigs = KeyedConfig<KEY, C>
 > {
   key: KEY;
   config?: C;

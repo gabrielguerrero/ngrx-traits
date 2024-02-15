@@ -2,11 +2,12 @@ import { Injectable } from '@angular/core';
 import { TraitEffect } from '@ngrx-traits/core';
 import { createAction } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { first, mapTo } from 'rxjs/operators';
+import { first, map } from 'rxjs/operators';
 import { createServiceFactory } from '@ngneat/spectator/jest';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { fromArray } from 'rxjs/internal/observable/fromArray';
+import { from } from 'rxjs';
+
 
 describe('TraitEffect', () => {
   const test = createAction('Test');
@@ -14,7 +15,7 @@ describe('TraitEffect', () => {
   @Injectable()
   class TestEffect extends TraitEffect {
     test$ = createEffect(() => {
-      return this.actions$.pipe(ofType(test), mapTo(testSuccess()));
+      return this.actions$.pipe(ofType(test), map(()=>testSuccess()));
     });
   }
 
@@ -42,7 +43,9 @@ describe('TraitEffect', () => {
     const spectator = createService();
 
     const effect$ = spectator.service.ngrxOnRunEffects(spectator.service.test$);
-    actions$ = fromArray([destroyedAction(), test()]);
+    actions$ = from([destroyedAction(), test()]);
+    //This line is causing an error when refactoring the deprecated 'toPromise' method
+    //to use 'firstValueFrom' method.
     const result = await effect$.pipe(first()).toPromise();
     expect(result).toEqual(testSuccess());
   });
@@ -52,7 +55,9 @@ describe('TraitEffect', () => {
 
     spectator.service.componentId = 'Component1';
     const effect$ = spectator.service.ngrxOnRunEffects(spectator.service.test$);
-    actions$ = fromArray([destroyedAction(), test()]);
+    actions$ = from([destroyedAction(), test()]);
+    //This line is causing an error when refactoring the deprecated 'toPromise' method
+    //to use 'firstValueFrom' method.
     const result = await effect$.toPromise();
     expect(result).toBeUndefined();
   });

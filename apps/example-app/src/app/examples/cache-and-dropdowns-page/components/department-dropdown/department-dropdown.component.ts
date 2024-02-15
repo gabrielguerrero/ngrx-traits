@@ -82,7 +82,7 @@ export class DepartmentDropdownComponent
     )
   );
   private onTouch: any;
-  destroy = new Subject();
+  destroy = new Subject<void>();
 
   @Input() set value(value: ProductsStore) {
     this.writeValue(value);
