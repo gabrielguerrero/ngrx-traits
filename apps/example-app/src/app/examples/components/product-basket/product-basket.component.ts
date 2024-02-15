@@ -119,7 +119,7 @@ import { takeUntil } from 'rxjs/operators';
 export class ProductBasketComponent implements OnDestroy {
   controls = new UntypedFormArray([]);
   _list: ProductOrder[] = [];
-  destroy$ = new Subject();
+  destroy$ = new Subject<void>();
   displayedColumns: (keyof ProductOrder | 'select' | 'total')[] = [
     'select',
     'id',
