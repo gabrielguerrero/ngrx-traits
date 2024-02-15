@@ -50,7 +50,7 @@ export function addSetEntityTrait<
   J extends string,
   Payload extends Record<J, any> | undefined = undefined,
   Entity = RecordEntity<Payload>,
-  State = SetEntityState<Entity, J>
+  State extends SetEntityState<Entity, J>= SetEntityState<Entity, J>
 >({
   entityName,
   actionProps,

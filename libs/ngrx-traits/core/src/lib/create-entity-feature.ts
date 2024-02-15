@@ -17,6 +17,7 @@ import {
   TraitStateMutatorsFactory,
   TraitReducerFactory,
   TraitEffectsFactory,
+  AllTraitConfigs,
 } from './model';
 import {
   Action,
@@ -712,7 +713,7 @@ export function createTraitFactory<
   M extends TraitStateMutators<State> = {},
   KEY extends string = string,
   C = unknown,
-  KC = KeyedConfig<KEY, C>
+  KC extends AllTraitConfigs = KeyedConfig<KEY, C>
 >(f: {
   key: KEY;
   config?: C;

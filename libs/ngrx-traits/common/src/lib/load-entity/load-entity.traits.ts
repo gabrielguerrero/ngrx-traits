@@ -58,7 +58,7 @@ export function addLoadEntityTraits<
   Response extends Record<J, any> | undefined = undefined,
   Failure extends object | undefined = undefined,
   Entity = RecordEntity<Response>,
-  State = LoadEntityState<Entity, J>
+  State extends LoadEntityState<any,string> = LoadEntityState<Entity, J>
 >({
   entityName,
   actionProps,

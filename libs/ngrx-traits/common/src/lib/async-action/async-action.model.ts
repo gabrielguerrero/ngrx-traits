@@ -24,7 +24,7 @@ type StatusSelectors<S extends StatusState> = {
 
 export type AsyncActionState<J extends string> = PrefixProps<StatusState, J>;
 
-export type AsyncActionSelectors<J extends string, S> = PostfixProps<
+export type AsyncActionSelectors<J extends string, S extends StatusState> = PostfixProps<
   StatusSelectors<S>,
   J
 >;
