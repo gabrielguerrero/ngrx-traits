@@ -15,21 +15,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'search-options',
+
   template: `
     <div
-      class="mat-form-field"
-      gdColumns="1fr auto"
-      gdAlignColumns="center center"
-      matAutocompleteOrigin
       (mousedown)="$event.stopPropagation()"
-      class="mv-search-options"
+      class="mv-search-options flex items-center"
     >
       <input
         type="text"
-        [placeholder]="placeholder"
+        class="flex-1 "
+        [placeholder]="placeholder()"
         matInput
         [formControl]="control"
         autocomplete="off"
@@ -38,8 +37,8 @@ import { MatInputModule } from '@angular/material/input';
         (click)="$event.stopPropagation()"
         #input
       />
-      <button mat-button mat-icon-button matSuffix (click)="clear()">
-        <mat-icon>close</mat-icon>
+      <button mat-icon-button matSuffix class="flex-initial" (click)="clear()">
+        <mat-icon class="!flex items-center">close</mat-icon>
       </button>
     </div>
   `,
@@ -69,7 +68,7 @@ import { MatInputModule } from '@angular/material/input';
   ],
 })
 export class SearchOptionsComponent implements OnInit, OnDestroy {
-  @Input() placeholder = 'Search...';
+  placeholder = input('Search...');
 
   control = new UntypedFormControl();
   destroy = new Subject<void>();

@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   EventEmitter,
   Input,
   OnDestroy,
+  output,
   Output,
 } from '@angular/core';
 import { Product, ProductOrder } from '../../models';
@@ -23,18 +25,20 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { input } from '@angular/core';
 
 @Component({
   selector: 'product-basket',
+
   template: `
     <div class="container">
       <table
         mat-table
         style="width: 100%"
-        [dataSource]="list"
+        [dataSource]="listControls()"
         matSort
-        [matSortActive]="selectedSort.active"
-        [matSortDirection]="selectedSort.direction"
+        [matSortActive]="selectedSort().active"
+        [matSortDirection]="selectedSort().direction"
         matSortDisableClear
         (matSortChange)="sort.emit($any($event))"
       >
@@ -42,8 +46,8 @@ import { MatTableModule } from '@angular/material/table';
           <th mat-header-cell *matHeaderCellDef>
             <mat-checkbox
               (change)="$event ? toggleAllSelectForRemove.emit() : null"
-              [checked]="isAllSelectedForRemove === 'all'"
-              [indeterminate]="isAllSelectedForRemove === 'some'"
+              [checked]="isAllSelectedForRemove() === 'all'"
+              [indeterminate]="isAllSelectedForRemove() === 'some'"
             >
             </mat-checkbox>
           </th>
@@ -51,7 +55,7 @@ import { MatTableModule } from '@angular/material/table';
             <mat-checkbox
               (click)="$event.stopPropagation()"
               (change)="$event ? toggleSelectForRemove.emit(row) : null"
-              [checked]="!!selectedForRemoveIds[row.id]"
+              [checked]="!!selectedForRemoveIds()[row.id]"
             >
             </mat-checkbox>
           </td>
@@ -77,7 +81,7 @@ import { MatTableModule } from '@angular/material/table';
           <td
             mat-cell
             *matCellDef="let row; let index = index"
-            [formGroup]="$any(controls?.at(index))"
+            [formGroup]="$any(controls.at(index))"
           >
             <mat-form-field>
               <input
@@ -104,7 +108,7 @@ import { MatTableModule } from '@angular/material/table';
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
-          [class.selected]="selectedProduct?.id === row.id"
+          [class.selected]="selectedProduct()?.id === row.id"
           (click)="selectProduct.emit(row)"
         ></tr>
       </table>
@@ -149,10 +153,10 @@ export class ProductBasketComponent implements OnDestroy {
     'quantity',
     'total',
   ];
+  list = input.required<ProductOrder[]>();
 
-  @Input()
-  set list(values: ProductOrder[]) {
-    this._list = values;
+  protected listControls = computed(() => {
+    const values = this.list();
     rebuildFormArray({
       form: this.controls,
       buildRow: (value: ProductOrder, index) => {
@@ -170,25 +174,22 @@ export class ProductBasketComponent implements OnDestroy {
       values,
       selectId: (value) => value.id,
     });
-  }
+    return values;
+  });
 
-  get list() {
-    return this._list;
-  }
-
-  @Input() selectedSort: Sort<ProductOrder> = {
+  selectedSort = input<Sort<ProductOrder>>({
     active: 'name',
     direction: 'asc',
-  };
-  @Input() selectedProduct: ProductOrder | undefined;
-  @Input() selectedForRemoveIds: Dictionary<boolean> = {};
-  @Input() isAllSelectedForRemove: Selected = 'none';
+  });
+  selectedProduct = input<ProductOrder>();
+  selectedForRemoveIds = input<Dictionary<boolean>>({});
+  isAllSelectedForRemove = input<Selected>('none');
 
-  @Output() sort = new EventEmitter<Sort<Product>>();
-  @Output() selectProduct = new EventEmitter<ProductOrder>();
-  @Output() toggleAllSelectForRemove = new EventEmitter<void>();
-  @Output() toggleSelectForRemove = new EventEmitter<ProductOrder>();
-  @Output() updateProduct = new EventEmitter<ProductOrder>();
+  sort = output<Sort<Product>>();
+  selectProduct = output<ProductOrder>();
+  toggleAllSelectForRemove = output<void>();
+  toggleSelectForRemove = output<ProductOrder>();
+  updateProduct = output<ProductOrder>();
 
   constructor(private fb: UntypedFormBuilder) {}
 

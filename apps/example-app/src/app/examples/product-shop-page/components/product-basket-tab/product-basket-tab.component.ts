@@ -5,7 +5,7 @@ import {
   ProductBasketActions,
   ProductBasketSelectors,
 } from '../../state/products-basket/products-basket.traits';
-import { Store } from '@ngrx/store';
+import { createSelector, Store } from '@ngrx/store';
 import { Product, ProductOrder } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
 import { ProductDetailComponent } from '../../../components/product-detail/product-detail.component';
@@ -13,35 +13,33 @@ import { MatButtonModule } from '@angular/material/button';
 import { ProductBasketComponent } from '../../../components/product-basket/product-basket.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'product-basket-tab',
   template: `
-    <div
-      gdColumns="700px 500px"
-      style="gap: 10px"
-      *ngIf="basket$ | async as data"
-    >
+    @if (basket$ | async; as data) {
+    <div gdColumns="700px 500px" style="gap: 10px">
       <mat-card>
         <mat-card-header>
           <mat-card-title>Product Basket</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
-          <ng-template #listProducts>
-            <product-basket
-              [list]="data.products"
-              [isAllSelectedForRemove]="data.isAllSelected"
-              [selectedForRemoveIds]="data.selectedProductsIdsToRemove"
-              [selectedProduct]="data.selectedProduct"
-              (selectProduct)="selectBasket($event)"
-              (updateProduct)="updateProduct($event)"
-              (toggleSelectForRemove)="removeToggleSelect($event)"
-              (toggleAllSelectForRemove)="removeToggleAll()"
-              (sort)="sortBasket($event)"
-            ></product-basket>
-          </ng-template>
+          @if (data.isLoading) {
+          <mat-spinner></mat-spinner>
+          } @else {
+          <product-basket
+            [list]="data.products"
+            [isAllSelectedForRemove]="data.isAllSelected"
+            [selectedForRemoveIds]="data.selectedProductsIdsToRemove"
+            [selectedProduct]="data.selectedProduct"
+            (selectProduct)="selectBasket($event)"
+            (updateProduct)="updateProduct($event)"
+            (toggleSelectForRemove)="removeToggleSelect($event)"
+            (toggleAllSelectForRemove)="removeToggleAll()"
+            (sort)="sortBasket($event)"
+          ></product-basket>
+          }
         </mat-card-content>
         <mat-card-actions [align]="'end'">
           <button
@@ -60,16 +58,16 @@ import { NgIf, AsyncPipe } from '@angular/common';
             [disabled]="!data.products.length || data.isLoadingCheckout"
             (click)="checkout()"
           >
-            <mat-spinner
-              [diameter]="20"
-              *ngIf="data.isLoadingCheckout"
-            ></mat-spinner>
+            @if (data.isLoadingCheckout) {
+            <mat-spinner [diameter]="20"></mat-spinner>
+            }
             <span>CHECKOUT</span>
           </button>
         </mat-card-actions>
       </mat-card>
       <product-detail [product]="data.selectedProduct"></product-detail>
     </div>
+    }
   `,
   styles: [
     `
@@ -84,7 +82,6 @@ import { NgIf, AsyncPipe } from '@angular/common';
   ],
   standalone: true,
   imports: [
-    NgIf,
     MatCardModule,
     MatProgressSpinnerModule,
     ProductBasketComponent,
@@ -94,31 +91,16 @@ import { NgIf, AsyncPipe } from '@angular/common';
   ],
 })
 export class ProductBasketTabComponent {
-  basket$ = combineLatest([
-    this.store.select(ProductBasketSelectors.selectProductOrdersList),
-    this.store.select(ProductBasketSelectors.isProductOrdersLoading),
-    this.store.select(ProductBasketSelectors.selectProductOrdersIdsSelectedMap),
-    this.store.select(ProductBasketSelectors.selectProductDetail),
-    this.store.select(ProductBasketSelectors.isAllProductOrdersSelected),
-    this.store.select(ProductBasketSelectors.isLoadingCheckout),
-  ]).pipe(
-    map(
-      ([
-        products,
-        isLoading,
-        selectedProductsIdsToRemove,
-        selectedProduct,
-        isAllSelected,
-        isLoadingCheckout,
-      ]) => ({
-        products,
-        isLoading,
-        selectedProductsIdsToRemove,
-        selectedProduct,
-        isAllSelected,
-        isLoadingCheckout,
-      })
-    )
+  basket$ = this.store.select(
+    createSelector({
+      products: ProductBasketSelectors.selectProductOrdersList,
+      isLoading: ProductBasketSelectors.isProductOrdersLoading,
+      selectedProductsIdsToRemove:
+        ProductBasketSelectors.selectProductOrdersIdsSelectedMap,
+      selectedProduct: ProductBasketSelectors.selectProductDetail,
+      isAllSelected: ProductBasketSelectors.isAllProductOrdersSelected,
+      isLoadingCheckout: ProductBasketSelectors.isLoadingCheckout,
+    })
   );
 
   constructor(private store: Store) {}
