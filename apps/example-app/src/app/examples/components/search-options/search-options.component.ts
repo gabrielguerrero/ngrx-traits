@@ -7,10 +7,14 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { UntypedFormControl } from '@angular/forms';
-import { MatLegacySelect as MatSelect } from '@angular/material/legacy-select';
+import { UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatSelect as MatSelect } from '@angular/material/select';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil, delay } from 'rxjs/operators';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'search-options',
@@ -34,13 +38,7 @@ import { takeUntil, delay } from 'rxjs/operators';
         (click)="$event.stopPropagation()"
         #input
       />
-      <button
-        mat-button
-        mat-icon-button
-        matSuffix
-        (click)="clear()"
-
-      >
+      <button mat-button mat-icon-button matSuffix (click)="clear()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
@@ -60,6 +58,14 @@ import { takeUntil, delay } from 'rxjs/operators';
         z-index: 1;
       }
     `,
+  ],
+  standalone: true,
+  imports: [
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
   ],
 })
 export class SearchOptionsComponent implements OnInit, OnDestroy {

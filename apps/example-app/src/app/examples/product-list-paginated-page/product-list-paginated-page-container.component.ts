@@ -3,7 +3,13 @@ import { ProductActions, ProductSelectors } from './state/products';
 import { Product, ProductFilter } from '../models';
 import { createSelector, Store } from '@ngrx/store';
 import { Sort } from '@ngrx-traits/common';
-import { LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator';
+import { PageEvent, MatPaginatorModule } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { ProductListComponent } from '../components/product-list/product-list.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProductSearchFormComponent } from '../components/product-search-form/product-search-form.component';
+import { MatCardModule } from '@angular/material/card';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -61,6 +67,17 @@ import { LegacyPageEvent as PageEvent } from '@angular/material/legacy-paginator
         margin-right: 5px;
       }
     `,
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatCardModule,
+    ProductSearchFormComponent,
+    MatProgressSpinnerModule,
+    ProductListComponent,
+    MatPaginatorModule,
+    MatButtonModule,
+    AsyncPipe,
   ],
 })
 export class ProductListPaginatedPageContainerComponent implements OnInit {

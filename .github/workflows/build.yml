@@ -25,7 +25,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: npm ci --legacy-peer-deps
+    - run: npm ci --peer-deps
     - run: npm run build
     - run: npm test
 
@@ -41,7 +41,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: npm ci --legacy-peer-deps
+      - run: npm ci --peer-deps
       - run: npm run build
       - run: npm run semantic-release
         env:

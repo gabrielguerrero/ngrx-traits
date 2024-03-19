@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { ProductDetail } from '../../models';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { NgIf, CurrencyPipe } from '@angular/common';
 
 @Component({
   selector: 'product-detail',
@@ -31,6 +34,8 @@ import { ProductDetail } from '../../models';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [NgIf, MatCardModule, MatProgressSpinnerModule, CurrencyPipe],
 })
 export class ProductDetailComponent {
   @Input() product: ProductDetail | undefined;

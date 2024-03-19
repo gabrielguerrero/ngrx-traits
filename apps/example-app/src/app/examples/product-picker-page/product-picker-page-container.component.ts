@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { ProductPickerComponent } from './components/product-picker/product-picker.component';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -23,5 +25,7 @@ import { Component } from '@angular/core';
       }
     `,
   ],
+  standalone: true,
+  imports: [MatCardModule, ProductPickerComponent],
 })
 export class ProductPickerPageContainerComponent {}

@@ -5,6 +5,12 @@ import { Store } from '@ngrx/store';
 import { Product, ProductFilter } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
 import { ProductsLocalTraits } from './products.local-traits';
+import { MatButtonModule } from '@angular/material/button';
+import { ProductListComponent } from '../../../components/product-list/product-list.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProductSearchFormComponent } from '../../../components/product-search-form/product-search-form.component';
+import { NgIf, AsyncPipe } from '@angular/common';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @Component({
   selector: 'product-select-dialog',
@@ -44,6 +50,16 @@ import { ProductsLocalTraits } from './products.local-traits';
   ],
   providers: [ProductsLocalTraits],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatDialogModule,
+    NgIf,
+    ProductSearchFormComponent,
+    MatProgressSpinnerModule,
+    ProductListComponent,
+    MatButtonModule,
+    AsyncPipe,
+  ],
 })
 export class ProductSelectDialogComponent implements OnInit {
   data$ = combineLatest([

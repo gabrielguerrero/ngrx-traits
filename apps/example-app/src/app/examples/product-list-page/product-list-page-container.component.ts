@@ -5,6 +5,11 @@ import { Product, ProductFilter } from '../models';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 import { Sort } from '@ngrx-traits/common';
+import { MatButtonModule } from '@angular/material/button';
+import { ProductListComponent } from '../components/product-list/product-list.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -54,6 +59,15 @@ import { Sort } from '@ngrx-traits/common';
         margin-right: 5px;
       }
     `,
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    ProductListComponent,
+    MatButtonModule,
+    AsyncPipe,
   ],
 })
 export class ProductListPageContainerComponent implements OnInit {
