@@ -29,7 +29,6 @@ import { MatBadgeModule } from '@angular/material/badge';
     MatCardModule,
     MatButtonModule,
     ProductBasketModule,
-
     ProductDetailModule,
     MatTabsModule,
     MatIconModule,

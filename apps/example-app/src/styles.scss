@@ -1,35 +1,39 @@
 
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
+// Plus imports for other components in your app.
 
-@import "@angular/material/theming";
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
 
-// TODO(v15): As of v15 mat.legacy-core no longer includes default typography styles.
-//  The following line adds:
-//    1. Default typography styles for all components
-//    2. Styles for typography hierarchy classes (e.g. .mat-headline-1)
-//  If you specify typography styles for the components you use elsewhere, you should delete this line.
-//  If you don't need the default component typographies but still want the hierarchy styles,
-//  you can delete this line and instead use:
-//    `@include mat.legacy-typography-hierarchy(mat.define-legacy-typography-config());`
-@include mat.all-legacy-component-typographies();
-@include mat.legacy-core();
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$angular-client-primary: mat.define-palette(mat.$indigo-palette);
+$angular-client-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
 
-$angular-primary: mat.define-palette(mat.$teal-palette, 500);
-$angular-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+// The warn palette is optional (defaults to red).
+$angular-client-warn: mat.define-palette(mat.$red-palette);
 
-$angular-warn: mat.define-palette(mat.$red-palette);
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$angular-client-theme: mat.define-dark-theme((
+  color: (
+    primary: $angular-client-primary,
+    accent: $angular-client-accent,
+    warn: $angular-client-warn,
+  )
+));
 
-$angular-default-theme: mat.define-dark-theme(
-    (
-      color: (
-        primary: $angular-primary,
-        accent: $angular-accent,
-        warn: $angular-warn,
-      ),
-    )
-);
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($angular-client-theme);
 
-@include mat.all-legacy-component-themes($angular-default-theme);
+
 
 /* You can add global styles to this file, and also import other style files */
 
