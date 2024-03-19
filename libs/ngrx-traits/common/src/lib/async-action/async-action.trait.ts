@@ -125,16 +125,11 @@ export function addAsyncActionTrait<
               `${actionsGroupKey} ${nameAsSentence} Failure`
             )) as ActionCreatorWithOptionalProps<Failure>,
       };
-      //TypeScript error after migration to 4.9.5
-      //Removed because 'name' is not optional
-      //if (name) {
-        return {
-          [`${name}`]: internalActions.request,
-          [`${name}Success`]: internalActions.requestSuccess,
-          [`${name}Fail`]: internalActions.requestFail,
-        } as AsyncActionActions<Request, Response, Failure, J>;
-      //}
-      //return internalActions;
+      return {
+        [`${name}`]: internalActions.request,
+        [`${name}Success`]: internalActions.requestSuccess,
+        [`${name}Fail`]: internalActions.requestFail,
+      } as AsyncActionActions<Request, Response, Failure, J>;
     },
     selectors: () => {
       function isLoadingEntity<S extends AsyncActionState<J>>(state: S) {
@@ -160,32 +155,21 @@ export function addAsyncActionTrait<
       // Added 'any' to 'state' and removed 'as AsyncActionState<J>'
       // because OnReducer have a weird type for the state.
       // TODO: Investigate if possible to remove the 'any' type and have better type safety
+      // tried remove the any seems to be a problex with ngrx on making the state unknown
       return createReducer(
         initialState,
-        on(
-          internalActions.request,
-          (state:any) =>
-            ({
-              ...state,
-              [`${name}Status`]: 'loading',
-            } )// as AsyncActionState<J>)
-        ),
-        on(
-          internalActions.requestFail,
-          (state:any) =>
-            ({
-              ...state,
-              [`${name}Status`]: 'fail',
-            })// as AsyncActionState<J>)
-        ),
-        on(
-          internalActions.requestSuccess,
-          (state:any) =>
-            ({
-              ...state,
-              [`${name}Status`]: 'success',
-            }) //as AsyncActionState<J>)
-        )
+        on(internalActions.request, (state: any) => ({
+          ...state,
+          [`${name}Status`]: 'loading',
+        })),
+        on(internalActions.requestFail, (state: any) => ({
+          ...state,
+          [`${name}Status`]: 'fail',
+        })),
+        on(internalActions.requestSuccess, (state: any) => ({
+          ...state,
+          [`${name}Status`]: 'success',
+        }))
       );
     },
   });
