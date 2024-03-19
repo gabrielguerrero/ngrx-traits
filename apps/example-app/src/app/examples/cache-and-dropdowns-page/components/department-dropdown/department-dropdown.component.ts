@@ -9,12 +9,19 @@ import {
   ControlValueAccessor,
   UntypedFormControl,
   NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { createSelector, Store } from '@ngrx/store';
 import { ProductsStore } from '../../../models';
 import { Observable, Subject } from 'rxjs';
 import { DepartmentLocalTraits } from './department.local-traits';
 import { takeUntil } from 'rxjs/operators';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatOptionModule } from '@angular/material/core';
+import { SearchOptionsComponent } from '../../../components/search-options/search-options.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'department-dropdown',
@@ -64,6 +71,18 @@ import { takeUntil } from 'rxjs/operators';
       useExisting: DepartmentDropdownComponent,
       multi: true,
     },
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    SearchOptionsComponent,
+    NgFor,
+    MatOptionModule,
+    MatProgressSpinnerModule,
+    AsyncPipe,
   ],
 })
 export class DepartmentDropdownComponent

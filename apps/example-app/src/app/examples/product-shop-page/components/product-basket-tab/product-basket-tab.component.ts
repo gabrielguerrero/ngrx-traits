@@ -8,6 +8,12 @@ import {
 import { Store } from '@ngrx/store';
 import { Product, ProductOrder } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
+import { ProductDetailComponent } from '../../../components/product-detail/product-detail.component';
+import { MatButtonModule } from '@angular/material/button';
+import { ProductBasketComponent } from '../../../components/product-basket/product-basket.component';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'product-basket-tab',
@@ -75,6 +81,16 @@ import { Sort } from '@ngrx-traits/common';
         margin-right: 5px;
       }
     `,
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    ProductBasketComponent,
+    MatButtonModule,
+    ProductDetailComponent,
+    AsyncPipe,
   ],
 })
 export class ProductBasketTabComponent {

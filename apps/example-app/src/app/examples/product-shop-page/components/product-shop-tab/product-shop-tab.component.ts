@@ -6,6 +6,13 @@ import { ProductBasketActions } from '../../state/products-basket/products-baske
 import { Store } from '@ngrx/store';
 import { Product, ProductFilter } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
+import { ProductDetailComponent } from '../../../components/product-detail/product-detail.component';
+import { ProductListComponent } from '../../../components/product-list/product-list.component';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ProductSearchFormComponent } from '../../../components/product-search-form/product-search-form.component';
+import { MatCardModule } from '@angular/material/card';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'product-shop-tab',
@@ -62,6 +69,17 @@ import { Sort } from '@ngrx-traits/common';
         margin-right: 5px;
       }
     `,
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatCardModule,
+    ProductSearchFormComponent,
+    MatProgressSpinnerModule,
+    MatButtonModule,
+    ProductListComponent,
+    ProductDetailComponent,
+    AsyncPipe,
   ],
 })
 export class ProductShopTabComponent implements OnInit {

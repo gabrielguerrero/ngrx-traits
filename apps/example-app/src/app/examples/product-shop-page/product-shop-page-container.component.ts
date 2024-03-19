@@ -2,6 +2,11 @@ import { Component } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { map } from 'rxjs/operators';
 import { ProductBasketSelectors } from './state/products-basket/products-basket.traits';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatIconModule } from '@angular/material/icon';
+import { RouterLinkActive, RouterLink, RouterOutlet } from '@angular/router';
+import { MatTabsModule } from '@angular/material/tabs';
+import { NgIf, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -46,6 +51,17 @@ import { ProductBasketSelectors } from './state/products-basket/products-basket.
         margin-right: 5px;
       }
     `,
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatTabsModule,
+    RouterLinkActive,
+    RouterLink,
+    MatIconModule,
+    MatBadgeModule,
+    RouterOutlet,
+    AsyncPipe,
   ],
 })
 export class ProductShopPageContainerComponent {

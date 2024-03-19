@@ -1,4 +1,9 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatLineModule } from '@angular/material/core';
+import { RouterLink } from '@angular/router';
+import { MatListModule } from '@angular/material/list';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'ngrx-traits-examples',
@@ -64,5 +69,13 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatCardModule,
+    MatListModule,
+    RouterLink,
+    MatLineModule,
+    MatDividerModule,
+  ],
 })
 export class ExamplesComponent {}

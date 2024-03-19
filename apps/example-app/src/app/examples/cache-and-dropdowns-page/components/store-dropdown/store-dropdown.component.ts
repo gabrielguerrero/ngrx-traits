@@ -13,9 +13,16 @@ import {
   ControlValueAccessor,
   UntypedFormControl,
   NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatOptionModule } from '@angular/material/core';
+import { SearchOptionsComponent } from '../../../components/search-options/search-options.component';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { NgIf, NgFor, AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'store-dropdown',
@@ -65,6 +72,18 @@ import { takeUntil } from 'rxjs/operators';
       useExisting: StoreDropdownComponent,
       multi: true,
     },
+  ],
+  standalone: true,
+  imports: [
+    NgIf,
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    SearchOptionsComponent,
+    NgFor,
+    MatOptionModule,
+    MatProgressSpinnerModule,
+    AsyncPipe,
   ],
 })
 export class StoreDropdownComponent

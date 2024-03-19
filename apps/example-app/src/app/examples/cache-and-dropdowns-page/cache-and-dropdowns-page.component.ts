@@ -1,5 +1,12 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+  UntypedFormControl,
+  UntypedFormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
+import { DepartmentDropdownComponent } from './components/department-dropdown/department-dropdown.component';
+import { StoreDropdownComponent } from './components/store-dropdown/store-dropdown.component';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'ngrx-traits-cache-and-dropdowns-page',
@@ -24,6 +31,13 @@ import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatCardModule,
+    ReactiveFormsModule,
+    StoreDropdownComponent,
+    DepartmentDropdownComponent,
+  ],
 })
 export class CacheAndDropdownsPageComponent {
   form = new UntypedFormGroup({

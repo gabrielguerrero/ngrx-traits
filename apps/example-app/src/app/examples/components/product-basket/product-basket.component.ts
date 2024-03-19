@@ -9,10 +9,20 @@ import {
 import { Product, ProductOrder } from '../../models';
 import { Selected, Sort } from '@ngrx-traits/common';
 import { Dictionary } from '@ngrx/entity';
-import { UntypedFormArray, UntypedFormBuilder } from '@angular/forms';
+import {
+  UntypedFormArray,
+  UntypedFormBuilder,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { rebuildFormArray } from '../../utils/form-utils';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { CurrencyPipe } from '@angular/common';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'product-basket',
@@ -115,6 +125,16 @@ import { takeUntil } from 'rxjs/operators';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    MatTableModule,
+    MatSortModule,
+    MatCheckboxModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    CurrencyPipe,
+  ],
 })
 export class ProductBasketComponent implements OnDestroy {
   controls = new UntypedFormArray([]);

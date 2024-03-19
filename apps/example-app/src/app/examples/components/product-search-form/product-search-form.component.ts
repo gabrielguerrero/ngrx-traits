@@ -4,9 +4,11 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { UntypedFormBuilder } from '@angular/forms';
+import { UntypedFormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { ProductFilter } from '../../models';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
 @Component({
   selector: 'product-search-form',
@@ -19,6 +21,8 @@ import { ProductFilter } from '../../models';
     </form>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [ReactiveFormsModule, MatFormFieldModule, MatInputModule],
 })
 export class ProductSearchFormComponent {
   searchForm = this.fb.group({

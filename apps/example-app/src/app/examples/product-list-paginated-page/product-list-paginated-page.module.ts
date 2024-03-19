@@ -1,27 +1,25 @@
 import { NgModule } from '@angular/core';
 import { ProductListPaginatedPageContainerComponent } from './product-list-paginated-page-container.component';
 import { ProductsStateModule } from './state/products/products-state.module';
-import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner';
-import { ProductListModule } from '../components/product-list/product-list.module';
+import { MatProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { CommonModule } from '@angular/common';
-import { ProductSearchFormModule } from '../components/product-search-form/product-search-form.module';
+
 import { ProductListPaginatedPageRoutingModule } from './product-list-paginated-page-routing.module';
-import { MatLegacyCardModule as MatCardModule } from '@angular/material/legacy-card';
-import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
-import { MatLegacyPaginatorModule as MatPaginatorModule } from '@angular/material/legacy-paginator';
+import { MatCardModule as MatCardModule } from '@angular/material/card';
+import { MatButtonModule as MatButtonModule } from '@angular/material/button';
+import { MatPaginatorModule as MatPaginatorModule } from '@angular/material/paginator';
 
 @NgModule({
-  declarations: [ProductListPaginatedPageContainerComponent],
   imports: [
     ProductsStateModule,
     MatProgressSpinnerModule,
-    ProductListModule,
-    ProductSearchFormModule,
     CommonModule,
     ProductListPaginatedPageRoutingModule,
     MatCardModule,
     MatButtonModule,
     MatPaginatorModule,
+    ProductListPaginatedPageContainerComponent,
   ],
 })
 export class ProductListPaginatedPageModule {}

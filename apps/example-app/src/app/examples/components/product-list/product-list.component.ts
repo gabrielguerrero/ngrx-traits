@@ -7,6 +7,9 @@ import {
 } from '@angular/core';
 import { Product } from '../../models';
 import { Sort } from '@ngrx-traits/common';
+import { CurrencyPipe } from '@angular/common';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'product-list',
@@ -64,6 +67,8 @@ import { Sort } from '@ngrx-traits/common';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [MatTableModule, MatSortModule, CurrencyPipe],
 })
 export class ProductListComponent {
   @Input() list: Product[] = [];
