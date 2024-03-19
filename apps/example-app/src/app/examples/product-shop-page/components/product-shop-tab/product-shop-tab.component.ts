@@ -3,7 +3,7 @@ import { combineLatest } from 'rxjs';
 import { ProductActions, ProductSelectors } from '../../state/products';
 import { first, map } from 'rxjs/operators';
 import { ProductBasketActions } from '../../state/products-basket/products-basket.traits';
-import { Store } from '@ngrx/store';
+import { createSelector, Store } from '@ngrx/store';
 import { Product, ProductFilter } from '../../../models';
 import { Sort } from '@ngrx-traits/common';
 import { ProductDetailComponent } from '../../../components/product-detail/product-detail.component';
@@ -12,34 +12,32 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductSearchFormComponent } from '../../../components/product-search-form/product-search-form.component';
 import { MatCardModule } from '@angular/material/card';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'product-shop-tab',
   template: `
-    <div
-      gdColumns="500px 500px"
-      style="gap: 10px"
-      *ngIf="products$ | async as data"
-    >
+    @if (products$ | async; as data) {
+    <div class="m-8 grid sm:grid-cols-2" style="gap: 10px">
       <mat-card>
         <mat-card-header>
           <mat-card-title>Product List</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <product-search-form
-            (searchProduct)="filter($event)"
+            [searchProduct]="data.filters"
+            (searchProductChange)="filter($event)"
           ></product-search-form>
-          <mat-spinner *ngIf="data.isLoading; else listProducts"></mat-spinner>
-          <ng-template #listProducts>
-            <button mat-raised-button (click)="addToBasket()"></button>
-            <product-list
-              [list]="data.products"
-              [selectedProduct]="data.selectedProduct"
-              (selectProduct)="select($event)"
-              (sort)="sort($event)"
-            ></product-list>
-          </ng-template>
+          @if (data.isLoading) {
+          <mat-spinner></mat-spinner>
+          } @else {
+          <product-list
+            [list]="data.products"
+            [selectedProduct]="data.selectedProduct"
+            (selectProduct)="select($event)"
+            (sort)="sort($event)"
+          ></product-list>
+          }
         </mat-card-content>
         <mat-card-actions [align]="'end'">
           <button
@@ -58,6 +56,7 @@ import { NgIf, AsyncPipe } from '@angular/common';
         [productLoading]="data.isLoadProductDetail"
       ></product-detail>
     </div>
+    }
   `,
   styles: [
     `
@@ -72,7 +71,6 @@ import { NgIf, AsyncPipe } from '@angular/common';
   ],
   standalone: true,
   imports: [
-    NgIf,
     MatCardModule,
     ProductSearchFormComponent,
     MatProgressSpinnerModule,
@@ -83,18 +81,14 @@ import { NgIf, AsyncPipe } from '@angular/common';
   ],
 })
 export class ProductShopTabComponent implements OnInit {
-  products$ = combineLatest([
-    this.store.select(ProductSelectors.selectProductsList),
-    this.store.select(ProductSelectors.isProductsLoading),
-    this.store.select(ProductSelectors.selectProductDetail),
-    this.store.select(ProductSelectors.isLoadingLoadProductDetail),
-  ]).pipe(
-    map(([products, isLoading, selectedProduct, isLoadProductDetail]) => ({
-      products,
-      isLoading,
-      selectedProduct,
-      isLoadProductDetail,
-    }))
+  products$ = this.store.select(
+    createSelector({
+      filters: ProductSelectors.selectProductsFilter,
+      products: ProductSelectors.selectProductsList,
+      isLoading: ProductSelectors.isProductsLoading,
+      selectedProduct: ProductSelectors.selectProductDetail,
+      isLoadProductDetail: ProductSelectors.isLoadingLoadProductDetail,
+    })
   );
 
   constructor(private store: Store) {}
@@ -114,8 +108,8 @@ export class ProductShopTabComponent implements OnInit {
     this.store.dispatch(ProductActions.loadProductDetail({ id }));
   }
 
-  filter(filters: ProductFilter) {
-    this.store.dispatch(ProductActions.filterProducts({ filters }));
+  filter(filters: ProductFilter | undefined) {
+    filters && this.store.dispatch(ProductActions.filterProducts({ filters }));
   }
 
   sort(sort: Sort<Product>) {

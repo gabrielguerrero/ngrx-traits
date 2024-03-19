@@ -1,9 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  input,
+  output,
 } from '@angular/core';
 import { Product } from '../../models';
 import { Sort } from '@ngrx-traits/common';
@@ -13,15 +12,16 @@ import { MatTableModule } from '@angular/material/table';
 
 @Component({
   selector: 'product-list',
+
   template: `
     <div class="container">
       <table
         mat-table
         style="width: 100%"
-        [dataSource]="list"
+        [dataSource]="list()"
         matSort
-        [matSortActive]="selectedSort.active"
-        [matSortDirection]="selectedSort.direction"
+        [matSortActive]="selectedSort().active"
+        [matSortDirection]="selectedSort().direction"
         matSortDisableClear
         (matSortChange)="sort.emit($any($event))"
       >
@@ -49,7 +49,7 @@ import { MatTableModule } from '@angular/material/table';
         <tr
           mat-row
           *matRowDef="let row; columns: displayedColumns"
-          [class.selected]="selectedProduct?.id === row.id"
+          [class.selected]="selectedProduct()?.id === row.id"
           (click)="selectProduct.emit(row)"
         ></tr>
       </table>
@@ -71,12 +71,12 @@ import { MatTableModule } from '@angular/material/table';
   imports: [MatTableModule, MatSortModule, CurrencyPipe],
 })
 export class ProductListComponent {
-  @Input() list: Product[] = [];
-  @Input() selectedSort: Sort<Product> = { active: 'name', direction: 'asc' };
-  @Input() selectedProduct: Product | undefined;
+  list = input.required<Product[]>();
+  selectedSort = input<Sort<Product>>({ active: 'name', direction: 'asc' });
+  selectedProduct = input<Product>();
 
-  @Output() sort = new EventEmitter<Sort<Product>>();
-  @Output() selectProduct = new EventEmitter<Product>();
+  sort = output<Sort<Product>>();
+  selectProduct = output<Product>();
 
   displayedColumns: (keyof Product)[] = ['id', 'name', 'description', 'price'];
 }

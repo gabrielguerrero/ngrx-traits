@@ -15,34 +15,36 @@ import { MatCardModule } from '@angular/material/card';
       <mat-card-content>
         <mat-list>
           <mat-list-item [routerLink]="'product-list'">
-            <div mat-line><b>Simple List</b></div>
-            <div mat-line>
+            <div matListItemTitle><b>Simple List</b></div>
+            <div matListItemLine>
               Example using trait to load a product list with filtering and
               sorting in memory
             </div>
           </mat-list-item>
           <mat-divider></mat-divider>
           <mat-list-item [routerLink]="'product-list-paginated'">
-            <div mat-line><b>Paginated List</b></div>
-            <div mat-line>
+            <div matListItemTitle><b>Paginated List</b></div>
+            <div matListItemLine>
               Example using trait to load a product list with remote filtering
               and sorting and pagination
             </div>
           </mat-list-item>
           <mat-divider></mat-divider>
           <mat-list-item [routerLink]="'product-picker'">
-            <div mat-line><b>Local store example with a product picker</b></div>
-            <div mat-line>
+            <div matListItemTitle>
+              <b>Local store example with a product picker</b>
+            </div>
+            <div matListItemLine>
               Example using local traits to load a product list with filtering
               and sorting in memory
             </div>
           </mat-list-item>
           <mat-divider></mat-divider>
-          <mat-list-item [routerLink]="'product-shop'" style="height: 110px;">
-            <div mat-line>
+          <mat-list-item [routerLink]="'product-shop'" style="height: 90px;">
+            <div matListItemTitle>
               <b>Using addCrudEntities and creating loadProduct custom trait</b>
             </div>
-            <div mat-line style="white-space: normal">
+            <div matListItemLine style="white-space: normal">
               This is a more complex example were we add a product basket, so
               you can buy more than one product at a time. Here you will see how
               to use the addCrudEntities and we create a custom trait called
@@ -54,10 +56,10 @@ import { MatCardModule } from '@angular/material/card';
             [routerLink]="'cache-and-dropdowns'"
             style="height: 110px;"
           >
-            <div mat-line>
+            <div matListItemTitle>
               <b>Example using local traits in dropdowns with cache</b>
             </div>
-            <div mat-line style="white-space: normal">
+            <div matListItemLine style="white-space: normal">
               Here you can see how to use local store in two dropdowns where
               selecting one trigger a load in the second, plus how you can use
               cache to reduce the number of calls they do
