@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
-
 import { RouterModule, Routes } from '@angular/router';
+
 import { ExamplesComponent } from './examples.component';
 
 const routes: Routes = [
@@ -9,10 +9,29 @@ const routes: Routes = [
     component: ExamplesComponent,
   },
   {
+    path: 'signals',
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./signals/signal-examples.component').then(
+            (m) => m.SignalExamplesComponent,
+          ),
+      },
+      {
+        path: 'product-list-paginated',
+        loadComponent: () =>
+          import(
+            './signals/product-list-paginated-page/signal-product-list-paginated-page-container.component'
+          ).then((m) => m.SignalProductListPaginatedPageContainerComponent),
+      },
+    ],
+  },
+  {
     path: 'product-list',
     loadComponent: () =>
       import('./product-list-page/product-list-page-container.component').then(
-        (m) => m.ProductListPageContainerComponent
+        (m) => m.ProductListPageContainerComponent,
       ),
   },
   {
@@ -33,7 +52,7 @@ const routes: Routes = [
     path: 'product-shop',
     loadChildren: () =>
       import('./product-shop-page/product-shop-page-routing.module').then(
-        (m) => m.ProductShopPageRoutingModule
+        (m) => m.ProductShopPageRoutingModule,
       ),
   },
   {

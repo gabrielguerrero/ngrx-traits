@@ -1,9 +1,9 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatLineModule } from '@angular/material/core';
-import { RouterLink } from '@angular/router';
-import { MatListModule } from '@angular/material/list';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
+import { MatLineModule } from '@angular/material/core';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatListModule } from '@angular/material/list';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'ngrx-traits-examples',
@@ -14,6 +14,12 @@ import { MatCardModule } from '@angular/material/card';
       </mat-card-header>
       <mat-card-content>
         <mat-list>
+          <mat-list-item [routerLink]="'signals'">
+            <div matListItemTitle><b>Signal examples</b></div>
+            <div matListItemLine>
+              Examples using ngrx-signals and ngrx-traits/signals
+            </div>
+          </mat-list-item>
           <mat-list-item [routerLink]="'product-list'">
             <div matListItemTitle><b>Simple List</b></div>
             <div matListItemLine>

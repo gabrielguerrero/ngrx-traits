@@ -1,17 +1,13 @@
 {
-  "$schema": "./node_modules/ng-packagr/package.schema.json",
-  "name": "@ngrx-traits/core",
+  "name": "@ngrx-traits/signals",
   "version": "0.0.0-development",
   "license": "MIT",
   "scripts": {
-    "build": "ng-packagr -p package.json",
-    "postinstall": "ngcc"
+    "build": "ng-packagr -p package.json"
   },
   "peerDependencies": {
     "@angular/core": "^17.1.0",
-    "@ngrx/effects": "^17.1.1",
-    "@ngrx/entity": "^17.1.1",
-    "@ngrx/store": "^17.1.1",
+    "@ngrx/signals": "^17.1.1",
     "rxjs": "^7.8.1"
   },
   "sideEffects": false,
