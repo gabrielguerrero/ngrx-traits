@@ -1,21 +1,24 @@
 import {
   Component,
+  effect,
   ElementRef,
+  inject,
   Input,
   OnDestroy,
   OnInit,
   Output,
-  ViewChild,
+  viewChild,
 } from '@angular/core';
-import { UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatSelect as MatSelect } from '@angular/material/select';
-import { Observable, Subject } from 'rxjs';
-import { takeUntil, delay } from 'rxjs/operators';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatButtonModule } from '@angular/material/button';
-import { MatInputModule } from '@angular/material/input';
 import { input } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { Observable, Subject } from 'rxjs';
+import { delay, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'search-options',
@@ -67,15 +70,24 @@ import { input } from '@angular/core';
     MatIconModule,
   ],
 })
-export class SearchOptionsComponent implements OnInit, OnDestroy {
+export class SearchOptionsComponent {
   placeholder = input('Search...');
 
   control = new UntypedFormControl();
-  destroy = new Subject<void>();
 
   @Output() valueChanges = this.control.valueChanges as Observable<string>;
 
-  @ViewChild('input', { static: true }) input: ElementRef | undefined;
+  matSelect = inject(MatSelect);
+  input = viewChild.required<ElementRef>('input');
+
+  matOpenedChange = toSignal(this.matSelect.openedChange.pipe(delay(1)));
+  onMatOpenedChange = effect(() => {
+    if (this.matOpenedChange()) {
+      this.focus();
+    } else {
+      this.control.reset(null, { emitEvent: false });
+    }
+  });
 
   get value() {
     return this.control.value;
@@ -85,20 +97,6 @@ export class SearchOptionsComponent implements OnInit, OnDestroy {
     this.control.setValue(v);
   }
 
-  constructor(private matSelect: MatSelect) {}
-
-  ngOnInit(): void {
-    this.matSelect.openedChange
-      .pipe(takeUntil(this.destroy), delay(1))
-      .subscribe((opened) => {
-        if (opened) {
-          this.focus();
-        } else {
-          this.control.reset(null, { emitEvent: false });
-        }
-      });
-  }
-
   focus() {
     // save and restore scrollTop of panel, since it will be reset by focus()
     // note: this is hacky
@@ -106,14 +104,11 @@ export class SearchOptionsComponent implements OnInit, OnDestroy {
     const scrollTop = panel.scrollTop;
 
     // focus
-    this.input?.nativeElement?.focus();
+    this.input().nativeElement.focus();
 
     panel.scrollTop = scrollTop;
   }
 
-  ngOnDestroy(): void {
-    this.destroy.next();
-  }
   clear() {
     this.control.reset();
   }
