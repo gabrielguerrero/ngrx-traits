@@ -10,57 +10,56 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ProductSearchFormComponent } from '../components/product-search-form/product-search-form.component';
 import { MatCardModule } from '@angular/material/card';
 import { AsyncPipe } from '@angular/common';
+import { ProductsStateModule } from './state/products/products-state.module';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
   template: `
     @if (data$ | async; as data) {
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Product List</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <product-search-form
-            [searchProduct]="data.filters"
-            (searchProductChange)="filter($event)"
-          ></product-search-form>
-          @if (data.isLoading) {
-            <mat-spinner></mat-spinner>
-          } @else {
-            <product-list
-              [list]="data.products.entities"
-              [selectedProduct]="data.selectedProduct"
-              [selectedSort]="data.selectedSort"
-              (selectProduct)="select($event)"
-              (sort)="sort($event)"
-            ></product-list>
-            <mat-paginator
-              [length]="data.products.total"
-              [pageSize]="data.products.pageSize"
-              [pageIndex]="data.products.pageIndex"
-              (page)="loadPage($event)"
-            ></mat-paginator>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Product List</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <product-search-form
+          [searchProduct]="data.filters"
+          (searchProductChange)="filter($event)"
+        ></product-search-form>
+        @if (data.isLoading) {
+        <mat-spinner></mat-spinner>
+        } @else {
+        <product-list
+          [list]="data.products.entities"
+          [selectedProduct]="data.selectedProduct"
+          [selectedSort]="data.selectedSort"
+          (selectProduct)="select($event)"
+          (sort)="sort($event)"
+        ></product-list>
+        <mat-paginator
+          [length]="data.products.total"
+          [pageSize]="data.products.pageSize"
+          [pageIndex]="data.products.pageIndex"
+          (page)="loadPage($event)"
+        ></mat-paginator>
+        }
+      </mat-card-content>
+      <mat-card-actions [align]="'end'">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!data.selectedProduct || data.isLoadingCheckout"
+          (click)="checkout()"
+        >
+          @if (data.isLoadingCheckout) {
+          <mat-spinner [diameter]="20"></mat-spinner>
           }
-        </mat-card-content>
-        <mat-card-actions [align]="'end'">
-          <button
-            mat-raised-button
-            color="primary"
-            type="submit"
-            [disabled]="!data.selectedProduct || data.isLoadingCheckout"
-            (click)="checkout()"
-            >
-            @if (data.isLoadingCheckout) {
-              <mat-spinner
-                [diameter]="20"
-              ></mat-spinner>
-            }
-            <span>CHECKOUT</span>
-          </button>
-        </mat-card-actions>
-      </mat-card>
+          <span>CHECKOUT</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
     }
-    `,
+  `,
   styles: [
     `
       mat-card-content > mat-spinner {
@@ -75,13 +74,14 @@ import { AsyncPipe } from '@angular/common';
   standalone: true,
   imports: [
     MatCardModule,
+    ProductsStateModule,
     ProductSearchFormComponent,
     MatProgressSpinnerModule,
     ProductListComponent,
     MatPaginatorModule,
     MatButtonModule,
-    AsyncPipe
-],
+    AsyncPipe,
+  ],
 })
 export class ProductListPaginatedPageContainerComponent implements OnInit {
   componentData = createSelector({
