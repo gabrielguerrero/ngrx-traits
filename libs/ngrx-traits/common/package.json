@@ -15,6 +15,7 @@
   "optionalDependencies": {
     "@angular/router": "^17.1.0"
   },
+  "sideEffects": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/gabrielguerrero/ngrx-traits.git"
