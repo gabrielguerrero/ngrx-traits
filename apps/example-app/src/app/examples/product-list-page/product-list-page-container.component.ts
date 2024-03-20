@@ -1,15 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductActions, ProductSelectors } from './state/products';
-import { combineLatest } from 'rxjs';
 import { Product, ProductFilter } from '../models';
 import { createSelector, Store } from '@ngrx/store';
-import { map } from 'rxjs/operators';
 import { Sort } from '@ngrx-traits/common';
 import { MatButtonModule } from '@angular/material/button';
 import { ProductListComponent } from '../components/product-list/product-list.component';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { AsyncPipe } from '@angular/common';
+import { ProductSearchFormComponent } from '../components/product-search-form/product-search-form.component';
+import { ProductsStateModule } from './state/products/products-state.module';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
@@ -20,9 +20,9 @@ import { AsyncPipe } from '@angular/common';
         <mat-card-title>Product List</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <!--        <product-search-form-->
-        <!--          (searchProduct)="filter($event)"-->
-        <!--        ></product-search-form>-->
+        <product-search-form
+          (searchProductChange)="filter($event)"
+        ></product-search-form>
         @if (data.isLoading) {
         <mat-spinner></mat-spinner>
         } @else {
@@ -65,10 +65,12 @@ import { AsyncPipe } from '@angular/common';
   standalone: true,
   imports: [
     MatCardModule,
+    ProductsStateModule,
     MatProgressSpinnerModule,
     ProductListComponent,
     MatButtonModule,
     AsyncPipe,
+    ProductSearchFormComponent,
   ],
 })
 export class ProductListPageContainerComponent implements OnInit {
@@ -95,8 +97,8 @@ export class ProductListPageContainerComponent implements OnInit {
     this.store.dispatch(ProductActions.checkout());
   }
 
-  filter(filters: ProductFilter) {
-    this.store.dispatch(ProductActions.filterProducts({ filters }));
+  filter(filters: ProductFilter | undefined) {
+    filters && this.store.dispatch(ProductActions.filterProducts({ filters }));
   }
   // new event handler ↓
   sort(sort: Sort<Product>) {

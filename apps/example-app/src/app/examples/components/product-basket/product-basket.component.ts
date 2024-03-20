@@ -124,7 +124,12 @@ import { input } from '@angular/core';
         background-color: #009688;
       }
       mat-form-field {
-        width: 40px;
+        width: 50px;
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
       }
     `,
   ],

@@ -10,32 +10,38 @@ const routes: Routes = [
   },
   {
     path: 'product-list',
-    loadChildren: () =>
-      import('./product-list-page').then((m) => m.ProductListPageModule),
-  },
-  {
-    path: 'product-list-paginated',
-    loadChildren: () =>
-      import('./product-list-paginated-page').then(
-        (m) => m.ProductListPaginatedPageModule
+    loadComponent: () =>
+      import('./product-list-page/product-list-page-container.component').then(
+        (m) => m.ProductListPageContainerComponent
       ),
   },
   {
+    path: 'product-list-paginated',
+    loadComponent: () =>
+      import(
+        './product-list-paginated-page/product-list-paginated-page-container.component'
+      ).then((m) => m.ProductListPaginatedPageContainerComponent),
+  },
+  {
     path: 'product-picker',
-    loadChildren: () =>
-      import('./product-picker-page').then((m) => m.ProductPickerPageModule),
+    loadComponent: () =>
+      import(
+        './product-picker-page/product-picker-page-container.component'
+      ).then((m) => m.ProductPickerPageContainerComponent),
   },
   {
     path: 'product-shop',
     loadChildren: () =>
-      import('./product-shop-page').then((m) => m.ProductShopPageModule),
+      import('./product-shop-page/product-shop-page-routing.module').then(
+        (m) => m.ProductShopPageRoutingModule
+      ),
   },
   {
     path: 'cache-and-dropdowns',
-    loadChildren: () =>
-      import('./cache-and-dropdowns-page').then(
-        (m) => m.CacheAndDropdownsPageModule
-      ),
+    loadComponent: () =>
+      import(
+        './cache-and-dropdowns-page/cache-and-dropdowns-page.component'
+      ).then((m) => m.CacheAndDropdownsPageComponent),
   },
   { path: '**', redirectTo: '/not-found' },
 ];
@@ -43,9 +49,9 @@ const routes: Routes = [
 @NgModule({
   imports: [
     RouterModule.forRoot(routes, {
-    scrollPositionRestoration: 'enabled',
-    paramsInheritanceStrategy: 'always'
-}),
+      scrollPositionRestoration: 'enabled',
+      paramsInheritanceStrategy: 'always',
+    }),
   ],
   exports: [RouterModule],
 })

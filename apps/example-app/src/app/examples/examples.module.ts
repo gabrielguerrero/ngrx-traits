@@ -6,12 +6,6 @@ import { MatCardModule as MatCardModule } from '@angular/material/card';
 import { MatListModule as MatListModule } from '@angular/material/list';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    ExamplesRoutingModule,
-    MatCardModule,
-    MatListModule,
-    ExamplesComponent,
-  ],
+  imports: [ExamplesRoutingModule, ExamplesComponent],
 })
 export class ExamplesModule {}
