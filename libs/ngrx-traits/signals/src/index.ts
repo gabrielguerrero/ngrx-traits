@@ -1,1 +1,1 @@
-export * from './lib/signals/signals.component';
+export * from './lib/index';

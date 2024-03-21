@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
-import { Product, ProductDetail } from '../models';
-import { delay } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { delay } from 'rxjs/operators';
+
+import { Product, ProductDetail } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ProductService {
@@ -9,7 +10,7 @@ export class ProductService {
 
   getProducts(options?: {
     search?: string | undefined;
-    sortColumn?: keyof Product | undefined;
+    sortColumn?: keyof Product | string | undefined;
     sortAscending?: boolean | undefined;
     skip?: number | undefined;
     take?: number | undefined;
@@ -17,7 +18,7 @@ export class ProductService {
     return this.httpClient
       .get<{
         resultList: Product[];
-        total?: number;
+        total: number;
       }>('/products', {
         params: { ...options, search: options?.search ?? '' },
       })
