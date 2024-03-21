@@ -8,10 +8,10 @@
     "postinstall": "ngcc"
   },
   "peerDependencies": {
-    "@angular/core": "^15.2.10",
-    "@ngrx/effects": "^15.3.0",
-    "@ngrx/entity": "^15.3.0",
-    "@ngrx/store": "^15.3.0",
+    "@angular/core": "^16.0.0",
+    "@ngrx/effects": "^16.0.0",
+    "@ngrx/entity": "^16.0.0",
+    "@ngrx/store": "^16.0.0",
     "rxjs": "^7.8.1"
   },
   "repository": {
