@@ -31,6 +31,30 @@
     },
     "lint": {
       "executor": "@nx/eslint:lint"
+    },
+    "release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "cp ../../../../.npmrc . &&  npm version {args.versionNumber} && npm publish --access public --verbose",
+            "forwardAllArgs": false
+          }
+        ],
+        "cwd": "dist/libs/ngrx-traits/core"
+      }
+    },
+    "api-docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          {
+            "command": "jsdoc2md --files ./src/lib/*.ts --files ./src/lib/**/*.ts --configure ../../../jsdoc2md.json --no-cache > ./api-docs.md",
+            "forwardAllArgs": false
+          }
+        ],
+        "cwd": "libs/ngrx-traits/core"
+      }
     }
   }
 }
