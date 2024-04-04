@@ -1,5 +1,5 @@
 {
-  "name": "signals",
+  "name": "ngrx-traits-signals",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/ngrx-traits/signals/src",
   "prefix": "lib",
@@ -41,7 +41,7 @@
             "forwardAllArgs": false
           }
         ],
-        "cwd": "dist/libs/ngrx-traits/core"
+        "cwd": "dist/libs/ngrx-traits/signals"
       }
     },
     "api-docs": {
@@ -53,7 +53,7 @@
             "forwardAllArgs": false
           }
         ],
-        "cwd": "libs/ngrx-traits/core"
+        "cwd": "libs/ngrx-traits/signals"
       }
     }
   }
