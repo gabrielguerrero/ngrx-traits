@@ -15,7 +15,7 @@ import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
-import { StateSignal } from '@ngrx/signals/src/state-signal';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { capitalize, getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';

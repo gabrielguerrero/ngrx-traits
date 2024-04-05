@@ -15,10 +15,13 @@ import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
-import { StateSignal } from '@ngrx/signals/src/state-signal';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { getWithEntitiesKeys } from '../util';
-import { NamedCallStateMethods } from '../with-call-status/with-call-status';
+import {
+  CallStateMethods,
+  NamedCallStateMethods,
+} from '../with-call-status/with-call-status';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 import { Sort, sortData, SortDirection } from './with-entities-sort.utils';
@@ -127,7 +130,7 @@ export function withEntitiesRemoteSort<
   {
     state: EntityState<Entity>;
     signals: EntitySignals<Entity>;
-    methods: {};
+    methods: CallStateMethods;
   },
   {
     state: EntitiesSortState<Entity>;

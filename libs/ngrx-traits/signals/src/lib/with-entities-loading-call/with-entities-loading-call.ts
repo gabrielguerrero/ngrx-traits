@@ -20,7 +20,7 @@ import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
-import {
+import type {
   EmptyFeatureResult,
   SignalStoreFeatureResult,
   SignalStoreSlices,

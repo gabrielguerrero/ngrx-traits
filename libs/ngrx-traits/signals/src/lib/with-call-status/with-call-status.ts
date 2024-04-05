@@ -47,14 +47,6 @@ export type NamedCallStateMethods<Prop extends string> = {
   [K in Prop as `set${Capitalize<string & K>}Error`]: () => void;
 };
 
-export function setLoading(): { callState: 'loading' } {
-  return { callState: 'loading' };
-}
-
-export function setLoaded(): { callState: 'loaded' } {
-  return { callState: 'loaded' };
-}
-
 export function withCallStatus(config?: {
   initialValue?: CallStatus;
 }): SignalStoreFeature<
@@ -100,12 +92,10 @@ export function withCallStatus<Prop extends string>({
 
       return {
         [loadingKey]: computed(() => {
-          console.log('callState()', callState());
           return callState() === 'loading';
         }),
         [loadedKey]: computed(() => callState() === 'loaded'),
         [errorKey]: computed(() => {
-          // TODO should we handle storing the error
           const v = callState();
           return typeof v === 'object' ? v.error : null;
         }),
