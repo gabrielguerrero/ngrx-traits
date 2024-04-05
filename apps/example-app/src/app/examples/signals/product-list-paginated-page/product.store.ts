@@ -121,9 +121,11 @@ export const ProductsLocalStore = signalStore(
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
+      mapPipe: 'switchMap',
     },
     checkout: () => inject(OrderService).checkout(),
   })),
+  withLogger('sdsd'),
 );
 
 export const ProductsLocalStore2 = signalStore(

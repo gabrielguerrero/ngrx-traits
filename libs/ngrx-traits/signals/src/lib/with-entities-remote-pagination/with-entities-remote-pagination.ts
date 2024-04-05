@@ -13,21 +13,28 @@ import {
   NamedEntityState,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import {
+import type {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { StateSignal } from '@ngrx/signals/src/state-signal';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
+import {
+  CallStateComputed,
+  CallStateMethods,
+  NamedCallStateComputed,
+  NamedCallStateMethods,
+} from '../with-call-status/with-call-status';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
 import type {
   EntitiesPaginationLocalMethods,
   NamedEntitiesPaginationLocalMethods,
 } from '../with-entities-local-pagination/with-entities-local-pagination';
+import { gotoFirstPageIfFilterOrSortChanges } from '../with-entities-local-pagination/with-entities-local-pagination.util';
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 import { getWithEntitiesRemotePaginationKeys } from './with-entities-remote-pagination.util';
 
@@ -123,8 +130,8 @@ export function withEntitiesRemotePagination<
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
-    methods: {};
+    signals: EntitySignals<Entity> & CallStateComputed;
+    methods: CallStateMethods;
   },
   {
     state: EntitiesPaginationRemoteState;
@@ -144,8 +151,9 @@ export function withEntitiesRemotePagination<
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: {};
+    signals: NamedEntitySignals<Entity, Collection> &
+      NamedCallStateComputed<Collection>;
+    methods: NamedCallStateMethods<Collection>;
   },
   {
     state: NamedEntitiesPaginationRemoteState<Collection>;
@@ -318,30 +326,13 @@ export function withEntitiesRemotePagination<
     }),
     withHooks({
       onInit: (input) => {
-        // we need reset the currentPage to 0 when the filter or sorting changes
-        if (filterKey in input || sortKey in input) {
-          const filter = input[filterKey] as Signal<any>;
-          const sort = input[sortKey] as Signal<any>;
-          const entitiesCurrentPage = input[
-            entitiesCurrentPageKey
-          ] as Signal<any>;
-          const loadEntitiesPage = input[
-            loadEntitiesPageKey
-          ] as EntitiesPaginationRemoteMethods<Entity>['loadEntitiesPage'];
-          effect(
-            () => {
-              // we need to call filter or sort signals if available so
-              // this effect gets call when they change
-              filter?.();
-              sort?.();
-              if (entitiesCurrentPage().pageIndex > 0) {
-                console.log('local filter or sort changed, reseting page to 0');
-                loadEntitiesPage({ pageIndex: 0 });
-              }
-            },
-            { allowSignalWrites: true },
-          );
-        }
+        gotoFirstPageIfFilterOrSortChanges(
+          input,
+          filterKey,
+          sortKey,
+          entitiesCurrentPageKey,
+          loadEntitiesPageKey,
+        );
       },
     }),
   );

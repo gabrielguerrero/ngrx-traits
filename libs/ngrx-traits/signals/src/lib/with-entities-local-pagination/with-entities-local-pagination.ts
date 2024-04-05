@@ -17,7 +17,10 @@ import {
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
-import { getWithEntitiesLocalPaginationKeys } from './with-entities-local-pagination.util';
+import {
+  getWithEntitiesLocalPaginationKeys,
+  gotoFirstPageIfFilterOrSortChanges,
+} from './with-entities-local-pagination.util';
 
 export type EntitiesPaginationLocalState = {
   pagination: {
@@ -119,7 +122,6 @@ export function withEntitiesLocalPagination<
   entity?: Entity;
   collection?: Collection;
 } = {}): SignalStoreFeature<any, any> {
-  // TODO fix the any type here
   const { entitiesKey } = getWithEntitiesKeys(config);
   const { filterKey } = getWithEntitiesFilterKeys(config);
   const { sortKey } = getWithEntitiesSortKeys(config);
@@ -186,30 +188,13 @@ export function withEntitiesLocalPagination<
     }),
     withHooks({
       onInit: (input) => {
-        // we need reset the currentPage to 0 when the filter or sorting changes
-        if (filterKey in input || sortKey in input) {
-          const filter = input[filterKey] as Signal<any>;
-          const sort = input[sortKey] as Signal<any>;
-          const entitiesCurrentPage = input[
-            entitiesCurrentPageKey
-          ] as Signal<any>;
-          const loadEntitiesPage = input[loadEntitiesPageKey] as (options: {
-            pageIndex: number;
-          }) => void;
-          effect(
-            () => {
-              // we need to call filter or sort signals if available so
-              // this effect gets call when they change
-              filter?.();
-              sort?.();
-              if (entitiesCurrentPage().pageIndex > 0) {
-                console.log('local filter or sort changed, reseting page to 0');
-                loadEntitiesPage({ pageIndex: 0 });
-              }
-            },
-            { allowSignalWrites: true },
-          );
-        }
+        gotoFirstPageIfFilterOrSortChanges(
+          input,
+          filterKey,
+          sortKey,
+          entitiesCurrentPageKey,
+          loadEntitiesPageKey,
+        );
       },
     }),
   );
