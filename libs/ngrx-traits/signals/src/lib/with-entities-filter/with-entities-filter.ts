@@ -3,17 +3,17 @@ import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
-  withComputed,
   withMethods,
   withState,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import type {
+import {
+  EntityMap,
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { StateSignal } from '@ngrx/signals/src/state-signal';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import {
   concatMap,
   debounce,
@@ -111,29 +111,18 @@ export function withEntitiesLocalFilter<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  // TODO throw error if pagination trait is present before this one or find a way to make it not matter
-  const { entitiesKey } = getWithEntitiesKeys(config);
+  const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
   const { filterEntitiesKey, filterKey } = getWithEntitiesFilterKeys(config);
   return signalStoreFeature(
     withState({ [filterKey]: defaultFilter }),
-    withComputed((state: Record<string, Signal<unknown>>) => {
-      const entities = state[entitiesKey] as Signal<Entity[]>;
-      const filter = state[filterKey] as Signal<Filter>;
-      return {
-        // TODO:  there is a problem with this implementation
-        // I dont like to much it overrides the entities computed, which could cause a bug if someone
-        // puts this trait after pagination, I possible fix is to make the local filter set the id of the filtered entities
-        // the original ids array of the state via the pathState method, and cache the previous ids in another prop so they
-        // can be used to restore the original entities when the filter changes or is cleared
-        [entitiesKey]: computed(() => {
-          return entities().filter((entity) => {
-            return filterFn(entity, filter());
-          });
-        }),
-      };
-    }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const filter = state[filterKey] as Signal<Filter>;
+      const entitiesMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
+      // we create a computed entities that relies on the entitiesMap instead of
+      // using the computed state.entities from the withEntities , because this local filter is going to replace
+      // the ids array of the state with the filtered ids array, and the state.entities depends on it,
+      // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
+      const entities = computed(() => Object.values(entitiesMap()));
       return {
         [filterEntitiesKey]: rxMethod<{
           filter: Filter;
@@ -141,10 +130,22 @@ export function withEntitiesLocalFilter<
           patch?: boolean;
           forceLoad?: boolean;
         }>(
-          debounceFilterPipe(
-            filter,
-            filterKey,
-            state as StateSignal<EntitiesFilterState<Filter>>,
+          pipe(
+            debounceFilterPipe(filter),
+            tap((value) => {
+              const newEntities = entities().filter((entity) => {
+                return filterFn(entity, value.filter);
+              });
+              patchState(
+                state as StateSignal<EntitiesFilterState<Filter>>,
+                {
+                  [filterKey]: value.filter,
+                },
+                {
+                  [idsKey]: newEntities.map((entity) => entity.id),
+                },
+              );
+            }),
           ),
         ),
       };
@@ -218,12 +219,13 @@ export function withEntitiesRemoteFilter<
           forceLoad?: boolean;
         }>(
           pipe(
-            debounceFilterPipe(
-              filter,
-              filterKey,
-              state as StateSignal<EntitiesFilterState<Filter>>,
-            ),
-            tap(() => setLoading()),
+            debounceFilterPipe(filter),
+            tap((value) => {
+              setLoading();
+              patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
+                [filterKey]: value.filter,
+              });
+            }),
           ),
         ),
       };
@@ -231,11 +233,7 @@ export function withEntitiesRemoteFilter<
   );
 }
 
-function debounceFilterPipe<Filter>(
-  filter: Signal<Filter>,
-  filterKey: string,
-  store: StateSignal<EntitiesFilterState<Filter>>,
-) {
+function debounceFilterPipe<Filter, Entity>(filter: Signal<Filter>) {
   return pipe(
     debounce(
       (value: {
@@ -249,7 +247,7 @@ function debounceFilterPipe<Filter>(
       payload.patch
         ? of({
             ...payload,
-            filter: { ...filter?.() },
+            filter: { ...filter?.(), ...payload?.filter },
           })
         : of(payload),
     ),
@@ -258,8 +256,5 @@ function debounceFilterPipe<Filter>(
         !current?.forceLoad &&
         JSON.stringify(previous?.filter) === JSON.stringify(current?.filter),
     ),
-    tap((value) => {
-      patchState(store, { [filterKey]: value.filter });
-    }),
   );
 }

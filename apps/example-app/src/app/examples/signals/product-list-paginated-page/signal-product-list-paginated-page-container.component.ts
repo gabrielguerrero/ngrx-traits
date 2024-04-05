@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+import { AsyncPipe, JsonPipe } from '@angular/common';
 import { Component, inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -6,6 +6,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Sort } from '@ngrx-traits/common';
 
+import { ProductDetailComponent } from '../../components/product-detail/product-detail.component';
 import { ProductListComponent } from '../../components/product-list/product-list.component';
 import { ProductSearchFormComponent } from '../../components/product-search-form/product-search-form.component';
 import { Product, ProductFilter } from '../../models';
@@ -26,23 +27,32 @@ import { ProductsLocalStore } from './product.store';
         @if (store.productsLoading()) {
           <mat-spinner></mat-spinner>
         } @else {
-          <product-list
-            [list]="store.productsCurrentPage().entities"
-            [selectedProduct]="store.productsSelectedEntity()"
-            [selectedSort]="{
-              active: $any(store.productsSort().field),
-              direction: store.productsSort().direction
-            }"
-            (selectProduct)="select($event)"
-            (sort)="sort($event)"
-          ></product-list>
-          <!-- [selectedSort]="store.productsSort()" -->
-          <mat-paginator
-            [length]="store.productsCurrentPage().total"
-            [pageSize]="store.productsCurrentPage().pageSize"
-            [pageIndex]="store.productsCurrentPage().pageIndex"
-            (page)="loadPage($event)"
-          ></mat-paginator>
+          <div class="m-8 grid sm:grid-cols-2 gap-8">
+            <div>
+              <product-list
+                [list]="store.productsCurrentPage().entities"
+                [selectedProduct]="store.productsSelectedEntity()"
+                [selectedSort]="{
+                  active: $any(store.productsSort().field),
+                  direction: store.productsSort().direction
+                }"
+                (selectProduct)="select($event)"
+                (sort)="sort($event)"
+              ></product-list>
+              <!-- [selectedSort]="store.productsSort()" -->
+              <mat-paginator
+                [length]="store.productsCurrentPage().total"
+                [pageSize]="store.productsCurrentPage().pageSize"
+                [pageIndex]="store.productsCurrentPage().pageIndex"
+                (page)="loadPage($event)"
+              ></mat-paginator>
+            </div>
+
+            <product-detail
+              [product]="store.productDetail?.()"
+              [productLoading]="store.loadProductDetailLoading()"
+            />
+          </div>
         }
       </mat-card-content>
       <mat-card-actions [align]="'end'">
@@ -83,6 +93,8 @@ import { ProductsLocalStore } from './product.store';
     MatPaginatorModule,
     MatButtonModule,
     AsyncPipe,
+    ProductDetailComponent,
+    JsonPipe,
   ],
 })
 export class SignalProductListPaginatedPageContainerComponent
@@ -91,13 +103,13 @@ export class SignalProductListPaginatedPageContainerComponent
   store = inject(ProductsLocalStore);
 
   ngOnInit() {
-    this.store.productsFilter;
+    // this.store.productDetail;
     this.store.loadProductDetail({ id: '12' });
-    // this.store.dispatch(ProductActions.loadProductsUsingRouteQueryParams());
   }
 
   select({ id }: Product) {
     this.store.selectProductsEntity({ id });
+    this.store.loadProductDetail({ id });
   }
 
   checkout() {

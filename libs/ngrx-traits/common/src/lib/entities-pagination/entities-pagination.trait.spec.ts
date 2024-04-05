@@ -1,31 +1,31 @@
-import { Actions } from '@ngrx/effects';
-import { createAction, createFeatureSelector } from '@ngrx/store';
+import { TestBed } from '@angular/core/testing';
 import {
   createEntityFeatureFactory,
   FeatureSelectors,
 } from '@ngrx-traits/core';
-import { addLoadEntitiesTrait } from '../load-entities';
-import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
+import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { Dictionary } from '@ngrx/entity';
+import { createAction, createFeatureSelector } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { of } from 'rxjs';
+import { first, take, toArray } from 'rxjs/operators';
+
+import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
 import {
   addFilterEntitiesTrait,
   FilterEntitiesState,
 } from '../filter-entities';
-import { TestBed } from '@angular/core/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { addEntitiesPaginationTrait } from './entities-pagination.trait';
+import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 import { TestState } from '../filter-entities/filter-entities.trait.spec';
+import { addLoadEntitiesTrait } from '../load-entities';
+import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { CacheType, PageInfoModel } from './entities-pagination.model';
-import { of } from 'rxjs';
-import { first, take, toArray } from 'rxjs/operators';
-import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
-
-import { Dictionary } from '@ngrx/entity';
 import {
   ƟEntitiesPaginationSelectors,
   ƟPaginationActions,
 } from './entities-pagination.model.internal';
-import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
+import { addEntitiesPaginationTrait } from './entities-pagination.trait';
 
 export interface PaginationTestState
   extends TestState,
@@ -43,7 +43,7 @@ describe('Pagination Test', () => {
 
   function initWithFilterAndPagination(
     cacheType: CacheType = 'full',
-    remoteFilter = true
+    remoteFilter = true,
   ) {
     const featureSelector = createFeatureSelector<PaginationTestState>('test');
     const traits = createEntityFeatureFactory(
@@ -58,7 +58,7 @@ describe('Pagination Test', () => {
                 ?.toLowerCase()
                 .includes(filter.content.toLowerCase()),
           }),
-      addEntitiesPaginationTrait<Todo>({ cacheType, pageSize: 20 })
+      addEntitiesPaginationTrait<Todo>({ cacheType, pageSize: 20 }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -80,7 +80,7 @@ describe('Pagination Test', () => {
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
       addCrudEntitiesTrait<Todo>(),
-      addEntitiesPaginationTrait<Todo>({ cacheType, pageSize: 20 })
+      addEntitiesPaginationTrait<Todo>({ cacheType, pageSize: 20 }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -101,7 +101,7 @@ describe('Pagination Test', () => {
     currentPage: number,
     start: number,
     end: number,
-    total = todos.length
+    total = todos.length,
   ): TestState {
     return {
       ...state,
@@ -126,7 +126,7 @@ describe('Pagination Test', () => {
 
       const state = reducer(
         initialState,
-        actions.loadEntitiesPage({ index: 3 })
+        actions.loadEntitiesPage({ index: 3 }),
       );
 
       expect(state).toEqual({
@@ -145,7 +145,7 @@ describe('Pagination Test', () => {
       const a = actions as unknown as ƟPaginationActions;
       const state = reducer(
         initialState,
-        a.setEntitiesRequestPage({ index: 2 })
+        a.setEntitiesRequestPage({ index: 2 }),
       );
 
       expect(state).toEqual({
@@ -214,7 +214,7 @@ describe('Pagination Test', () => {
         actions.loadEntitiesSuccess({
           entities: todos,
           total: todos.length,
-        })
+        }),
       );
       // reset(getTimeSpy);
       expect(state).toEqual(pageState(state, todos, 0, 0, 135));
@@ -231,14 +231,14 @@ describe('Pagination Test', () => {
         initialState,
         actions.loadEntitiesPage({
           index: 0,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: first3pages,
           total: todos.length,
-        })
+        }),
       );
 
       expect(state).toEqual(pageState(state, first3pages, 0, 0, 60));
@@ -249,14 +249,14 @@ describe('Pagination Test', () => {
         state,
         actions.loadEntitiesPage({
           index: 3,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: next3pages,
           total: todos.length,
-        })
+        }),
       );
       expect(state).toEqual(pageState(state, next3pages, 3, 60, 120));
 
@@ -266,14 +266,14 @@ describe('Pagination Test', () => {
         state,
         actions.loadEntitiesPage({
           index: 6,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: last3pages,
           total: todos.length,
-        })
+        }),
       );
       expect(state).toEqual(pageState(state, last3pages, 6, 120, 135));
 
@@ -283,14 +283,14 @@ describe('Pagination Test', () => {
         state,
         actions.loadEntitiesPage({
           index: 1,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: page2To4,
           total: todos.length,
-        })
+        }),
       );
       expect(state).toEqual(pageState(state, page2To4, 1, 20, 80));
     });
@@ -306,14 +306,14 @@ describe('Pagination Test', () => {
         initialState,
         actions.loadEntitiesPage({
           index: 0,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: first3pages,
           total: todos.length,
-        })
+        }),
       );
 
       expect(state).toEqual(pageState(state, first3pages, 0, 0, 60));
@@ -324,17 +324,17 @@ describe('Pagination Test', () => {
         state,
         actions.loadEntitiesPage({
           index: 3,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: next3pages,
           total: todos.length,
-        })
+        }),
       );
       expect(state).toEqual(
-        pageState(state, [...first3pages, ...next3pages], 3, 0, 120)
+        pageState(state, [...first3pages, ...next3pages], 3, 0, 120),
       );
 
       // check last 3 pages
@@ -343,14 +343,14 @@ describe('Pagination Test', () => {
         state,
         actions.loadEntitiesPage({
           index: 6,
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadEntitiesSuccess({
           entities: last3pages,
           total: todos.length,
-        })
+        }),
       );
       expect(state).toEqual(
         pageState(
@@ -358,8 +358,8 @@ describe('Pagination Test', () => {
           [...first3pages, ...next3pages, ...last3pages],
           6,
           0,
-          135
-        )
+          135,
+        ),
       );
     });
 
@@ -374,30 +374,30 @@ describe('Pagination Test', () => {
           initialState,
           actions.loadEntitiesPage({
             index: 0,
-          })
+          }),
         );
         state = reducer(
           state,
           actions.loadEntitiesSuccess({
             entities: first3pages,
             total: 60,
-          })
+          }),
         );
         state = reducer(
           state,
           actions.loadEntitiesPage({
             index: 2,
-          })
+          }),
         );
 
         state = reducer(
           state,
           (
             actions as unknown as ƟFilterEntitiesActions<TodoFilter>
-          ).storeEntitiesFilter({ filters: { content: '10' } })
+          ).storeEntitiesFilter({ filters: { content: '10' } }),
         );
         expect(
-          selectors.selectEntitiesCurrentPageInfo.projector(state)
+          selectors.selectEntitiesCurrentPageInfo.projector(state),
         ).toEqual({
           pageIndex: 0,
           total: 1,
@@ -418,34 +418,34 @@ describe('Pagination Test', () => {
           initialState,
           actions.loadEntitiesPage({
             index: 0,
-          })
+          }),
         );
         state = reducer(
           state,
           actions.loadEntitiesSuccess({
             entities: first3pages,
             total: todos.length,
-          })
+          }),
         );
         state = reducer(
           state,
           actions.loadEntitiesPage({
             index: 2,
-          })
+          }),
         );
 
         state = reducer(
           state,
           (
             actions as unknown as ƟFilterEntitiesActions<TodoFilter>
-          ).storeEntitiesFilter({ filters: { content: 'something' } })
+          ).storeEntitiesFilter({ filters: { content: 'something' } }),
         );
         state = reducer(
           state,
           actions.loadEntitiesSuccess({
             entities: todos.slice(40, 60),
             total: 20,
-          })
+          }),
         );
         expect(state).toEqual({
           ...state,
@@ -490,22 +490,22 @@ describe('Pagination Test', () => {
           initialState,
           actions.loadEntitiesPage({
             index: 0,
-          })
+          }),
         );
         state = reducer(
           state,
           actions.loadEntitiesSuccess({
             entities: todos,
             total: todos.length,
-          })
+          }),
         );
 
         const resultState = reducer(
           state,
           actions.addEntities(
             { id: 123123, content: 'some' },
-            { id: 324324, content: 'some2' }
-          )
+            { id: 324324, content: 'some2' },
+          ),
         );
 
         expect(resultState.pagination).toEqual({
@@ -521,14 +521,14 @@ describe('Pagination Test', () => {
           initialState,
           actions.loadEntitiesPage({
             index: 0,
-          })
+          }),
         );
         state = reducer(
           state,
           actions.loadEntitiesSuccess({
             entities: todos,
             total: todos.length,
-          })
+          }),
         );
 
         const resultState = reducer(state, actions.removeEntities(1, 2));
@@ -549,43 +549,43 @@ describe('Pagination Test', () => {
       let state = pageState(initialState, todos, 2, 0, 75);
       // if no page return currentPage
       expect(selectors.selectEntitiesCurrentPageList.projector(state)).toEqual(
-        todos.slice(40, 60)
+        todos.slice(40, 60),
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 0,
-        })
+        }),
       );
       expect(selectors.selectEntitiesCurrentPageList.projector(state)).toEqual(
-        todos.slice(0, 20)
+        todos.slice(0, 20),
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 1,
-        })
+        }),
       );
       expect(selectors.selectEntitiesCurrentPageList.projector(state)).toEqual(
-        todos.slice(20, 40)
+        todos.slice(20, 40),
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 2,
-        })
+        }),
       );
       expect(selectors.selectEntitiesCurrentPageList.projector(state)).toEqual(
-        todos.slice(40, 60)
+        todos.slice(40, 60),
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 3,
-        })
+        }),
       );
       expect(selectors.selectEntitiesCurrentPageList.projector(state)).toEqual(
-        todos.slice(60, 75)
+        todos.slice(60, 75),
       );
     });
 
@@ -604,83 +604,83 @@ describe('Pagination Test', () => {
       let state = pageState(initialState, todos, 2, 0, 60);
       // using currentPage
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        true
+        true,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 0,
-        })
+        }),
       );
       // using explicit page
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        true
+        true,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        true
+        true,
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 1,
-        })
+        }),
       );
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        true
+        true,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        true
+        true,
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 2,
-        })
+        }),
       );
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        true
+        true,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 3,
-        })
+        }),
       );
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 4,
-        })
+        }),
       );
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       state = reducer(
         state,
         actions.loadEntitiesPage({
           index: 5,
-        })
+        }),
       );
       expect(selectors.isEntitiesCurrentPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
       expect(selectors.isEntitiesNextPageInCache.projector(state)).toEqual(
-        false
+        false,
       );
     });
 
@@ -704,12 +704,12 @@ describe('Pagination Test', () => {
         state,
         actions.loadEntitiesPage({
           index: 0,
-        })
+        }),
       );
       expect(
         selectors.selectEntitiesCurrentPage.projector(
-          pageState(initialState, todos.slice(0, 75), 1, 0, 75, 75)
-        )
+          pageState(initialState, todos.slice(0, 75), 1, 0, 75, 75),
+        ),
       ).toEqual({
         entities: todos.slice(20, 40),
         isLoading: false,
@@ -727,8 +727,8 @@ describe('Pagination Test', () => {
       const { selectors, initialState } = initWithFilterAndPagination();
       expect(
         selectors.selectEntitiesCurrentPageInfo.projector(
-          pageState(initialState, todos.slice(0, 75), 0, 0, 75, 75)
-        )
+          pageState(initialState, todos.slice(0, 75), 0, 0, 75, 75),
+        ),
       ).toEqual({
         pageIndex: 0,
         total: 75,
@@ -740,8 +740,8 @@ describe('Pagination Test', () => {
       });
       expect(
         selectors.selectEntitiesCurrentPageInfo.projector(
-          pageState(initialState, todos.slice(0, 75), 1, 0, 75, 75)
-        )
+          pageState(initialState, todos.slice(0, 75), 1, 0, 75, 75),
+        ),
       ).toEqual({
         pageIndex: 1,
         total: 75,
@@ -753,8 +753,8 @@ describe('Pagination Test', () => {
       });
       expect(
         selectors.selectEntitiesCurrentPageInfo.projector(
-          pageState(initialState, todos.slice(0, 75), 2, 0, 75, 75)
-        )
+          pageState(initialState, todos.slice(0, 75), 2, 0, 75, 75),
+        ),
       ).toEqual({
         pageIndex: 2,
         total: 75,
@@ -766,8 +766,8 @@ describe('Pagination Test', () => {
       });
       expect(
         selectors.selectEntitiesCurrentPageInfo.projector(
-          pageState(initialState, todos.slice(0, 75), 3, 0, 75, 75)
-        )
+          pageState(initialState, todos.slice(0, 75), 3, 0, 75, 75),
+        ),
       ).toEqual({
         pageIndex: 3,
         total: 75,
@@ -782,7 +782,7 @@ describe('Pagination Test', () => {
     it('selectEntitiesPagedRequest ', () => {
       const { selectors, initialState } = initWithFilterAndPagination();
       expect(
-        selectors.selectEntitiesPagedRequest.projector(initialState)
+        selectors.selectEntitiesPagedRequest.projector(initialState),
       ).toEqual({
         page: 0,
         size: 60,
@@ -795,13 +795,13 @@ describe('Pagination Test', () => {
         3,
         0,
         75,
-        75
+        75,
       );
       expect(
         selectors.selectEntitiesPagedRequest.projector({
           ...testState,
           pagination: { ...testState.pagination, requestPage: 3 },
-        })
+        }),
       ).toEqual({
         page: 3,
         size: 60,
@@ -818,14 +818,14 @@ describe('Pagination Test', () => {
         2,
         0,
         75,
-        75
+        75,
       );
       expect(
         selectors.isLoadingEntitiesCurrentPage.projector({
           ...testState,
           status: 'loading',
           pagination: { ...testState.pagination, requestPage: 3 },
-        })
+        }),
       ).toEqual(false);
     });
 
@@ -838,14 +838,14 @@ describe('Pagination Test', () => {
         3,
         0,
         75,
-        75
+        75,
       );
       expect(
         selectors.isLoadingEntitiesCurrentPage.projector({
           ...testState,
           status: 'loading',
           pagination: { ...testState.pagination, requestPage: 3 },
-        })
+        }),
       ).toEqual(true);
     });
 
@@ -858,14 +858,14 @@ describe('Pagination Test', () => {
         3,
         0,
         75,
-        75
+        75,
       );
       expect(
         selectors.isLoadingEntitiesCurrentPage.projector({
           ...testState,
           status: 'success',
           pagination: { ...testState.pagination, requestPage: 3 },
-        })
+        }),
       ).toEqual(false);
     });
   });
@@ -976,7 +976,7 @@ describe('Pagination Test', () => {
         actions$ = of(actions.loadEntitiesPage({ index: 1 }));
         mockStore.overrideSelector(
           selectors.isEntitiesCurrentPageInCache,
-          true
+          true,
         );
         const action = await effects.loadPage$.pipe(first()).toPromise();
         expect(action).toEqual(actions.loadEntitiesPageSuccess());
@@ -996,7 +996,7 @@ describe('Pagination Test', () => {
         actions$ = of(actions.loadEntitiesPage({ index: 1 }));
         mockStore.overrideSelector(
           selectors.isEntitiesCurrentPageInCache,
-          false
+          false,
         );
         const action = await effects.loadPage$.pipe(first()).toPromise();
         expect(action).toEqual(actions.loadEntities());
@@ -1016,7 +1016,7 @@ describe('Pagination Test', () => {
         actions$ = of(actions.loadEntitiesPage({ index: 1, forceLoad: true }));
         mockStore.overrideSelector(
           selectors.isEntitiesCurrentPageInCache,
-          true
+          true,
         );
         const action = await effects.loadPage$.pipe(first()).toPromise();
         expect(action).toEqual(actions.loadEntities());
@@ -1028,7 +1028,7 @@ describe('Pagination Test', () => {
         cacheType: CacheType,
         total: number | null = 10 * 20,
         hasNext = true,
-        isEntitiesPageInCache = false
+        isEntitiesPageInCache = false,
       ) {
         const {
           effects,
@@ -1040,11 +1040,10 @@ describe('Pagination Test', () => {
           TestState,
           ƟEntitiesPaginationSelectors<Todo>
         >;
-        console.log(s);
         actions$ = of(actions.loadEntitiesPageSuccess());
         mockStore.overrideSelector(
           selectors.isEntitiesNextPageInCache,
-          isEntitiesPageInCache
+          isEntitiesPageInCache,
         );
         mockStore.overrideSelector(selectors.selectEntitiesCurrentPageInfo, {
           hasNext,

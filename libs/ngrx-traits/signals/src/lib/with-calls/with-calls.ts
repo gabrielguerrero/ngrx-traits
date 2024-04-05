@@ -14,13 +14,14 @@ import {
   withState,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import {
+import type {
   SignalStoreFeatureResult,
   SignalStoreSlices,
 } from '@ngrx/signals/src/signal-store-models';
-import { StateSignal } from '@ngrx/signals/src/state-signal';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import {
   catchError,
+  concatMap,
   exhaustMap,
   first,
   from,
@@ -28,13 +29,13 @@ import {
   Observable,
   of,
   pipe,
+  switchMap,
 } from 'rxjs';
 
 import {
   CallStatus,
   NamedCallState,
   NamedCallStateComputed,
-  NamedCallStateMethods,
 } from '../with-call-status/with-call-status';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithCallKeys } from './with-calls.util';
@@ -48,7 +49,8 @@ type CallConfig<
   PropName extends string = string,
 > = {
   call: Call<Params, Result>;
-  resultProp: PropName;
+  resultProp?: PropName;
+  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 };
 
 export type ExtractCallResultType<T extends Call | CallConfig> =
@@ -74,8 +76,10 @@ export function withCalls<
   Input & {
     state: NamedCallState<keyof Calls & string> & {
       [K in keyof Calls as Calls[K] extends CallConfig
-        ? Calls[K]['resultProp'] & string
-        : `${K & string}Data`]?: ExtractCallResultType<Calls[K]>;
+        ? Calls[K]['resultProp'] extends string
+          ? Calls[K]['resultProp']
+          : `${K & string}Result`
+        : `${K & string}Result`]?: ExtractCallResultType<Calls[K]>;
     };
     signals: NamedCallStateComputed<keyof Calls & string>;
     methods: {
@@ -91,10 +95,17 @@ export function withCalls<
     } as SignalStoreSlices<Input['state']> &
       Input['signals'] &
       Input['methods']);
-    const callsState = Object.keys(calls).reduce(
-      (acc, callName) => {
+    const callsState = Object.entries(calls).reduce(
+      (acc, [callName, call]) => {
         const { callStatusKey } = getWithCallStatusKeys({ prop: callName });
         acc[callStatusKey] = 'init';
+        const { resultPropKey } = getWithCallKeys({
+          callName,
+          resultProp: isCallConfig(call)
+            ? call.resultProp
+            : `${callName}Result`,
+        });
+        acc[resultPropKey] = undefined;
         return acc;
       },
       {} as Record<string, any>,
@@ -135,8 +146,13 @@ export function withCalls<
                 callName,
                 resultProp: isCallConfig(call)
                   ? call.resultProp
-                  : `${callName}Data`,
+                  : `${callName}Result`,
               });
+
+              const mapPipe =
+                isCallConfig(call) && call.mapPipe
+                  ? mapPipes[call.mapPipe]
+                  : exhaustMap;
               const setLoading = () =>
                 patchState(store, {
                   [callStatusKey]: 'loading',
@@ -157,13 +173,13 @@ export function withCalls<
                 patchState(store, {
                   [callStatusKey]: 'loaded',
                 } as StateSignal<object>);
-              acc[setErrorKey] = () =>
+              acc[setErrorKey] = (error?: unknown) =>
                 patchState(store, {
-                  [callStatusKey]: 'fail',
+                  [callStatusKey]: { error },
                 } as StateSignal<object>);
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
-                  exhaustMap((params) => {
+                  mapPipe((params) => {
                     setLoading();
                     return runInInjectionContext(environmentInjector, () => {
                       return from(
@@ -199,3 +215,8 @@ export function withCalls<
 function isCallConfig(call: Call | CallConfig): call is CallConfig {
   return typeof call === 'object';
 }
+const mapPipes = {
+  switchMap: switchMap,
+  concatMap: concatMap,
+  exhaustMap: exhaustMap,
+};

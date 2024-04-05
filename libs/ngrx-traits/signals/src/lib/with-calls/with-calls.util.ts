@@ -1,6 +1,6 @@
 export function getWithCallKeys({
   callName,
-  resultProp = `${callName}Data`,
+  resultProp = `${callName}Result`,
 }: {
   callName: string;
   resultProp?: string;
