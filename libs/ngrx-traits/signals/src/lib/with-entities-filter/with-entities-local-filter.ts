@@ -7,31 +7,20 @@ import {
   withState,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import {
+import type {
   EntityMap,
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import {
-  concatMap,
-  debounce,
-  distinctUntilChanged,
-  EMPTY,
-  of,
-  pipe,
-  tap,
-  timer,
-} from 'rxjs';
+import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import {
-  CallStateMethods,
-  NamedCallStateMethods,
-} from '../with-call-status/with-call-status';
-import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { getWithEntitiesFilterKeys } from './with-entities-filter.util';
+  debounceFilterPipe,
+  getWithEntitiesFilterKeys,
+} from './with-entities-filter.util';
 
 export type EntitiesFilterState<Filter> = { entitiesFilter: Filter };
 export type NamedEntitiesFilterState<Collection extends string, Filter> = {
@@ -55,6 +44,40 @@ export type NamedEntitiesFilterMethods<Collection extends string, Filter> = {
   }) => void;
 };
 
+/**
+ * Generates necessary state, computed and methods for locally filtering entities in the store,
+ * the generated filter[collenction]Entities method will filter the entities based on the filter function
+ * and is debounced by default. Requires withEntities to be used.
+ *
+ * @param config
+ * @param config.filterFn - The function that will be used to filter the entities
+ * @param config.defaultFilter - The default filter to be used
+ * @param config.entity - The entity tye to be used
+ * @param config.collection - The optional collection name to be used
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * const store = signalStore(
+ *   { providedIn: 'root' },
+ *   // requires withEntities to be used
+ *   withEntities({ entity, collection }),
+ *
+ *   withEntitiesLocalFilter({
+ *     entity,
+ *     collection,
+ *     defaultFilter: { search: '' },
+ *     filterFn: (entity, filter) =>
+ *       !filter?.search || // if there is no search term return all entities
+ *       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+ *   }),
+ *  );
+ *
+ *  // generates the following signals
+ *  store.productsFilter // { search: string }
+ *  // generates the following methods signals
+ * store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ */
 export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
   Filter extends Record<string, unknown>,
@@ -74,6 +97,40 @@ export function withEntitiesLocalFilter<
     methods: EntitiesFilterMethods<Filter>;
   }
 >;
+/**
+ * Generates necessary state, computed and methods for locally filtering entities in the store,
+ * the generated filter[collenction]Entities method will filter the entities based on the filter function
+ * and is debounced by default. Requires withEntities to be used.
+ *
+ * @param config
+ * @param config.filterFn - The function that will be used to filter the entities
+ * @param config.defaultFilter - The default filter to be used
+ * @param config.entity - The entity tye to be used
+ * @param config.collection - The optional collection name to be used
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * const store = signalStore(
+ *   { providedIn: 'root' },
+ *   // requires withEntities to be used
+ *   withEntities({ entity, collection }),
+ *
+ *   withEntitiesLocalFilter({
+ *     entity,
+ *     collection,
+ *     defaultFilter: { search: '' },
+ *     filterFn: (entity, filter) =>
+ *       !filter?.search || // if there is no search term return all entities
+ *       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+ *   }),
+ *  );
+ *
+ *  // generates the following signals
+ *  store.productsFilter // { search: string }
+ *  // generates the following methods signals
+ * store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ */
 export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
   Collection extends string,
@@ -150,111 +207,5 @@ export function withEntitiesLocalFilter<
         ),
       };
     }),
-  );
-}
-
-export function withEntitiesRemoteFilter<
-  Entity extends { id: string | number },
-  Filter extends Record<string, unknown>,
->(options: {
-  defaultFilter: Filter;
-  entity?: Entity;
-}): SignalStoreFeature<
-  {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
-    methods: CallStateMethods;
-  },
-  {
-    state: EntitiesFilterState<Filter>;
-    signals: {};
-    methods: EntitiesFilterMethods<Filter>;
-  }
->;
-export function withEntitiesRemoteFilter<
-  Entity extends { id: string | number },
-  Collection extends string,
-  Filter extends Record<string, unknown>,
->(options: {
-  defaultFilter: Filter;
-  entity?: Entity;
-  collection?: Collection;
-}): SignalStoreFeature<
-  {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: NamedCallStateMethods<Collection>;
-  },
-  {
-    state: NamedEntitiesFilterState<Collection, Filter>;
-    signals: {};
-    methods: NamedEntitiesFilterMethods<Collection, Filter>;
-  }
->;
-export function withEntitiesRemoteFilter<
-  Entity extends { id: string | number },
-  Collection extends string,
-  Filter extends Record<string, unknown>,
->({
-  defaultFilter,
-  ...config
-}: {
-  entity?: Entity;
-  collection?: Collection;
-  defaultFilter: Filter;
-}): SignalStoreFeature<any, any> {
-  const { setLoadingKey } = getWithCallStatusKeys({ prop: config.collection });
-  const { filterKey, filterEntitiesKey } = getWithEntitiesFilterKeys(config);
-  return signalStoreFeature(
-    withState({ [filterKey]: defaultFilter }),
-    withMethods((state: Record<string, Signal<unknown>>) => {
-      const setLoading = state[setLoadingKey] as () => void;
-      const filter = state[filterKey] as Signal<Filter>;
-
-      return {
-        [filterEntitiesKey]: rxMethod<{
-          filter: Filter;
-          debounce?: number;
-          patch?: boolean;
-          forceLoad?: boolean;
-        }>(
-          pipe(
-            debounceFilterPipe(filter),
-            tap((value) => {
-              setLoading();
-              patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
-                [filterKey]: value.filter,
-              });
-            }),
-          ),
-        ),
-      };
-    }),
-  );
-}
-
-function debounceFilterPipe<Filter, Entity>(filter: Signal<Filter>) {
-  return pipe(
-    debounce(
-      (value: {
-        filter: Filter;
-        debounce?: number;
-        patch?: boolean;
-        forceLoad?: boolean;
-      }) => (value?.forceLoad ? EMPTY : timer(value.debounce || 300)),
-    ),
-    concatMap((payload) =>
-      payload.patch
-        ? of({
-            ...payload,
-            filter: { ...filter?.(), ...payload?.filter },
-          })
-        : of(payload),
-    ),
-    distinctUntilChanged(
-      (previous, current) =>
-        !current?.forceLoad &&
-        JSON.stringify(previous?.filter) === JSON.stringify(current?.filter),
-    ),
   );
 }

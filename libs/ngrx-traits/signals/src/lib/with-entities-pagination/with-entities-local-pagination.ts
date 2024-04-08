@@ -70,6 +70,35 @@ export type NamedEntitiesPaginationLocalMethods<Collection extends string> = {
   }) => void;
 };
 
+/**
+ * Generates necessary state, computed and methods for local pagination of entities in the store.
+ * Requires withEntities to be present in the store.
+ * @param config
+ * @param config.pageSize - The number of entities to show per page
+ * @param config.currentPage - The current page to show
+ * @param config.entity - The entity type
+ * @param config.collection - The name of the collection
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const ProductsLocalStore = signalStore(
+ *   { providedIn: 'root' },
+ *   // required withEntities
+ *   withEntities({ entity, collection }),
+ *   withEntitiesLocalPagination({
+ *     entity,
+ *     collection,
+ *     pageSize: 5,
+ *   }));
+ *
+ *   // generates the following signals
+ *   store.productsPagination // { currentPage: 0, pageSize: 5 }
+ *   // generates the following computed signals
+ *   store.productsCurrentPage // { entities: Product[], pageIndex: 0, total: 10, pageSize: 5, pagesCount: 2, hasPrevious: false, hasNext: true }
+ *   // generates the following methods
+ *   store.loadProductsPage // ({ pageIndex: number }) => void
+ */
 export function withEntitiesLocalPagination<
   Entity extends { id: string | number },
 >(config: {
@@ -88,6 +117,35 @@ export function withEntitiesLocalPagination<
     methods: EntitiesPaginationLocalMethods;
   }
 >;
+/**
+ * Generates necessary state, computed and methods for local pagination of entities in the store.
+ * Requires withEntities to be present in the store.
+ * @param config
+ * @param config.pageSize - The number of entities to show per page
+ * @param config.currentPage - The current page to show
+ * @param config.entity - The entity type
+ * @param config.collection - The name of the collection
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const ProductsLocalStore = signalStore(
+ *   { providedIn: 'root' },
+ *   // required withEntities
+ *   withEntities({ entity, collection }),
+ *   withEntitiesLocalPagination({
+ *     entity,
+ *     collection,
+ *     pageSize: 5,
+ *   }),
+ *
+ *   // generates the following signals
+ *   store.productsPagination // { currentPage: 0, pageSize: 5 }
+ *   // generates the following computed signals
+ *   store.productsCurrentPage // { entities: Product[], pageIndex: 0, total: 10, pageSize: 5, pagesCount: 2, hasPrevious: false, hasNext: true }
+ *   // generates the following methods
+ *   store.loadProductsPage // ({ pageIndex: number }) => void
+ */
 export function withEntitiesLocalPagination<
   Entity extends { id: string | number },
   Collection extends string,

@@ -40,9 +40,69 @@ import {
   EntitiesPaginationRemoteMethods,
   NamedEntitiesPaginationRemoteMethods,
   NamedEntitiesPaginationSetResultMethods,
-} from '../with-entities-remote-pagination/with-entities-remote-pagination';
-import { getWithEntitiesRemotePaginationKeys } from '../with-entities-remote-pagination/with-entities-remote-pagination.util';
+} from '../with-entities-pagination/with-entities-remote-pagination';
+import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
 
+/**
+ * Generates a onInit hook that fetches entities from a remote source
+ * when the [collection]Loading is true, by calling the fetchEntities function
+ * and if successful, it will call set[Collection]Loaded and also set the entities
+ * to the store using the setAllEntities method or the setEntitiesLoadResult method
+ * if it exists (comes from withEntitiesRemotePagination),
+ * if an error occurs it will set the error to the store using set[Collection]Error with the error.
+ * Requires withEntities and withCallStatus to be present in the store.
+ * @param config - Configuration object
+ * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
+ * @param config.collection - The collection name
+ * can be an array of entities or an object with entities and total
+ *
+ * @example
+ * export const ProductsRemoteStore = signalStore(
+ *   { providedIn: 'root' },
+ *   // requires at least withEntities and withCallStatus
+ *   withEntities({ entity, collection }),
+ *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   // other features
+ *   withEntitiesRemoteFilter({
+ *     entity,
+ *     collection,
+ *     defaultFilter: { name: '' },
+ *   }),
+ *   withEntitiesRemotePagination({
+ *     entity,
+ *     collection,
+ *     pageSize: 5,
+ *     pagesToCache: 2,
+ *   }),
+ *   withEntitiesRemoteSort({
+ *     entity,
+ *     collection,
+ *     defaultSort: { field: 'name', direction: 'asc' },
+ *   }),
+ *   // now we add the withEntitiesLoadingCall, in this case any time the filter,
+ *   // pagination or sort changes they call set[Collection]Loading() which then
+ *   // triggers the onInit effect that checks if [collection]Loading(), if true
+ *   // then calls fetchEntities function
+ *   withEntitiesLoadingCall({
+ *     collection,
+ *     fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+ *       return inject(ProductService)
+ *         .getProducts({
+ *           search: productsFilter().name,
+ *           take: productsPagedRequest().size,
+ *           skip: productsPagedRequest().startIndex,
+ *           sortColumn: productsSort().field,
+ *           sortAscending: productsSort().direction === 'asc',
+ *         })
+ *         .pipe(
+ *           map((d) => ({
+ *             entities: d.resultList,
+ *             total: d.total,
+ *           })),
+ *         );
+ *     },
+ *   }),
+ */
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
@@ -72,6 +132,67 @@ export function withEntitiesLoadingCall<
   },
   EmptyFeatureResult
 >;
+
+/**
+ * Generates a onInit hook that fetches entities from a remote source
+ * when the [collection]Loading is true, by calling the fetchEntities function
+ * and if successful, it will call set[Collection]Loaded and also set the entities
+ * to the store using the setAllEntities method or the setEntitiesLoadResult method
+ * if it exists (comes from withEntitiesRemotePagination),
+ * if an error occurs it will set the error to the store using set[Collection]Error with the error.
+ * Requires withEntities and withCallStatus to be present in the store.
+ * @param config - Configuration object
+ * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
+ * @param config.collection - The collection name
+ * can be an array of entities or an object with entities and total
+ *
+ * @example
+ * export const ProductsRemoteStore = signalStore(
+ *   { providedIn: 'root' },
+ *   // requires at least withEntities and withCallStatus
+ *   withEntities({ entity, collection }),
+ *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   // other features
+ *   withEntitiesRemoteFilter({
+ *     entity,
+ *     collection,
+ *     defaultFilter: { name: '' },
+ *   }),
+ *   withEntitiesRemotePagination({
+ *     entity,
+ *     collection,
+ *     pageSize: 5,
+ *     pagesToCache: 2,
+ *   }),
+ *   withEntitiesRemoteSort({
+ *     entity,
+ *     collection,
+ *     defaultSort: { field: 'name', direction: 'asc' },
+ *   }),
+ *   // now we add the withEntitiesLoadingCall, in this case any time the filter,
+ *   // pagination or sort changes they call set[Collection]Loading() which then
+ *   // triggers the onInit effect that checks if [collection]Loading(), if true
+ *   // then calls fetchEntities function
+ *   withEntitiesLoadingCall({
+ *     collection,
+ *     fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+ *       return inject(ProductService)
+ *         .getProducts({
+ *           search: productsFilter().name,
+ *           take: productsPagedRequest().size,
+ *           skip: productsPagedRequest().startIndex,
+ *           sortColumn: productsSort().field,
+ *           sortAscending: productsSort().direction === 'asc',
+ *         })
+ *         .pipe(
+ *           map((d) => ({
+ *             entities: d.resultList,
+ *             total: d.total,
+ *           })),
+ *         );
+ *     },
+ *   }),
+ */
 
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,

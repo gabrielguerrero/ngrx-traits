@@ -19,7 +19,7 @@ import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { capitalize, getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
-import { getWithEntitiesLocalPaginationKeys } from '../with-entities-local-pagination/with-entities-local-pagination.util';
+import { getWithEntitiesLocalPaginationKeys } from '../with-entities-pagination/with-entities-local-pagination.util';
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 
 export type EntitiesMultiSelectionState = {
@@ -105,6 +105,52 @@ function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
   };
 }
 
+/**
+ * Generates state, signals and methods for multi selection of entities
+ * @param config
+ * @param config.entity - the entity type
+ * @param config.collection - the collection name
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   withEntities({ entity, collection }),
+ *   withEntitiesMultiSelection({ entity, collection }),
+ *   );
+ *
+ * // generates the following signals
+ * store.productsSelectedIdsMap // Record<string | number, boolean>;
+ * // generates the following computed signals
+ * store.productsSelectedEntities // Entity[];
+ * store.isAllProductsSelected // 'all' | 'none' | 'some';
+ * // generates the following methods
+ * store.selectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.deselectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectAllProducts // () => void;
+ */
+export function withEntitiesMultiSelection<
+  Entity extends { id: string | number },
+  Collection extends string,
+>(options: {
+  entity?: Entity;
+  collection?: Collection;
+}): SignalStoreFeature<
+  // TODO: the problem seems be with the state pro, when set to empty
+  //  it works but is it has a namedstate it doesnt
+  {
+    state: NamedEntityState<Entity, any>;
+    signals: NamedEntitySignals<Entity, Collection>;
+    methods: {};
+  },
+  {
+    state: NamedEntitiesMultiSelectionState<Collection>;
+    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+    methods: NamedEntitiesMultiSelectionMethods<Collection>;
+  }
+>;
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
 >(options: {
@@ -121,6 +167,32 @@ export function withEntitiesMultiSelection<
     methods: EntitiesMultiSelectionMethods;
   }
 >;
+/**
+ * Generates state, signals and methods for multi selection of entities
+ * @param config
+ * @param config.entity - the entity type
+ * @param config.collection - the collection name
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   withEntities({ entity, collection }),
+ *   withEntitiesMultiSelection({ entity, collection }),
+ *   );
+ *
+ * // generates the following signals
+ * store.productsSelectedIdsMap // Record<string | number, boolean>;
+ * // generates the following computed signals
+ * store.productsSelectedEntities // Entity[];
+ * store.isAllProductsSelected // 'all' | 'none' | 'some';
+ * // generates the following methods
+ * store.selectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.deselectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectAllProducts // () => void;
+ */
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
@@ -273,23 +345,27 @@ export function withEntitiesMultiSelection<
       };
     }),
     withHooks({
-      onInit: (input) => {
-        // we need reset the selections if to 0 when the filter or sorting changes
-        if (filterKey in input || sortKey in input) {
-          const filter = input[filterKey] as Signal<any>;
-          const sort = input[sortKey] as Signal<any>;
-          const clearEntitiesSelection = input[
+      onInit: (store) => {
+        // we need reset the selections if to 0 when the filter changes or sorting changes and is paginated
+        if (filterKey in store || sortKey in store) {
+          const filter = store[filterKey] as Signal<unknown>;
+          const sort = store[sortKey] as Signal<unknown>;
+          const clearEntitiesSelection = store[
             clearEntitiesSelectionKey
           ] as EntitiesMultiSelectionMethods['clearEntitiesSelection'];
-          const previousFilter = filter?.();
+          let lastFilter = filter?.();
+          let lastSort = sort?.();
+          /** TODO: there is a small problem here when used together with withSyncToWebStorage an filter or sorting
+           the stored selection will get cleared because this logic detects the sorting and the filtering changing
+           from the default value to the stored value and resets the selection */
           effect(
             () => {
-              // we need to call filter or sort signals if available so
-              // this effect gets call when they change
-              sort?.();
-              const newFilter = filter?.();
-              // reset the selection if the filter changed or there is pagination
-              if (input[paginationKey] || newFilter !== previousFilter) {
+              if (
+                (store[paginationKey] && lastSort !== sort?.()) ||
+                filter?.() !== lastFilter
+              ) {
+                lastFilter = filter?.();
+                lastSort = sort?.();
                 clearEntitiesSelection();
               }
             },
