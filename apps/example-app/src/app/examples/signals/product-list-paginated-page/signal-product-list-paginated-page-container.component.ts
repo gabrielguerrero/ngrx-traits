@@ -96,6 +96,7 @@ import { ProductsLocalStore } from './product.store';
     ProductDetailComponent,
     JsonPipe,
   ],
+  providers: [ProductsLocalStore],
 })
 export class SignalProductListPaginatedPageContainerComponent
   implements OnInit
@@ -104,7 +105,7 @@ export class SignalProductListPaginatedPageContainerComponent
 
   ngOnInit() {
     // this.store.productDetail;
-    this.store.loadProductDetail({ id: '12' });
+    // this.store.loadProductDetail({ id: '12' });
   }
 
   select({ id }: Product) {

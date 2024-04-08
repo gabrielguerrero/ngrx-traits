@@ -62,6 +62,42 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
 export type ExtractCallParams<T extends Call | CallConfig> =
   T extends Call<infer P> ? P : T extends CallConfig<infer P> ? P : never;
 
+/**
+ * Generates necessary state, computed and methods to track the progress of the call
+ * and store the result of the call
+ * @param callsFactory
+ *
+ * @example
+ *  withCalls(({ productsSelectedEntity }) => ({
+ *     loadProductDetail: {
+ *       call: ({ id }: { id: string }) =>
+ *         inject(ProductService).getProductDetail(id),
+ *       resultProp: 'productDetail',
+ *     },
+ *     checkout: () =>
+ *       inject(OrderService).checkout({
+ *         productId: productsSelectedEntity()!.id,
+ *         quantity: 1,
+ *       }),
+ *   })),
+ *
+ *   // generates the following signals
+ *   store.loadProductDetailCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
+ *   store.productDetail // the result of the call
+ *   store.checkoutCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
+ *   store.checkoutResult // the result of the call
+ *   // generates the following computed signals
+ *   store.loadProductDetailLoading // boolean
+ *   store.loadProductDetailLoaded // boolean
+ *   store.loadProductDetailError // string | null
+ *   store.checkoutLoading // boolean
+ *   store.checkoutLoaded // boolean
+ *   store.checkoutError // string | null
+ *   // generates the following methods
+ *   store.loadProductDetail // ({id: string}) => void
+ *   store.checkout // () => void
+ *
+ */
 export function withCalls<
   Input extends SignalStoreFeatureResult,
   const Calls extends Record<string, Call | CallConfig>,

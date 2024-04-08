@@ -11,7 +11,7 @@ as the name prop is different.</p></dd>
 tracks the changes made, helpful for implementing batch updates. The <code>storeChanges</code> (false by default),
 will store for add and update the changed entity props in the property <code>entityChanges</code> of the <code>Change</code> object.</p></dd>
 <dt><a href="#addEntitiesPaginationTrait">addEntitiesPaginationTrait(config)</a></dt>
-<dd><p>Generates ngrx code to paginate an list of entities, this has 3 cache <code>cacheType</code></p>
+<dd><p>Generates ngrx code to paginate a list of entities, this has 3 cache <code>cacheType</code></p>
 <ul>
 <li>'full': The full result is cache in memory and split in pages to render, useful
 for small result but not so small that requires been render in pages</li>
@@ -23,6 +23,8 @@ where you will only call loadNextPage.
 To make the pagination experience smoother the loadEntities action is fired when the current page is equal
 to the last cached page, so while the user is reading the page more pages are being loading in the background.</li>
 </ul></dd>
+<dt><a href="#addEntitiesSyncToRouteQueryParams">addEntitiesSyncToRouteQueryParams()</a></dt>
+<dd><p>Generates ngrx code necessary to load and set to the current route query params for the filter, sort and paging traits</p></dd>
 <dt><a href="#addFilterEntitiesTrait">addFilterEntitiesTrait(traitConfig)</a></dt>
 <dd><p>Generates the ngrx code needed to filter a list of entities locally or remotely, adds a filter
 action and a selectFilter selector, the filter action is debounced and the filter will only
@@ -70,10 +72,13 @@ as the name prop is different.</p>
 
 **Example**  
 ```js
+export interface TestState
+extends AsyncActionState<'createClient'>{}
+
 // The following trait config
 const traits = createEntityFeatureFactory(
-{entityName: 'Todo'},
-addAsyncActionTrait({
+     {entityName: 'Todo'},
+     addAsyncActionTrait({
        name: 'createClient',
        actionProps: props<{ name: string }>(),
        actionSuccessProps: props<{ id: string }>(),
@@ -118,6 +123,7 @@ export interface TestState
 extends EntityAndStatusState<Todo>, CrudState<Todo>{}
 
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      addCrudEntitiesTrait<Todo>()
    )({
@@ -144,7 +150,7 @@ traits.selectors.selectAllFilteredChanges()
 <a name="addEntitiesPaginationTrait"></a>
 
 ## addEntitiesPaginationTrait(config)
-<p>Generates ngrx code to paginate an list of entities, this has 3 cache <code>cacheType</code></p>
+<p>Generates ngrx code to paginate a list of entities, this has 3 cache <code>cacheType</code></p>
 <ul>
 <li>'full': The full result is cache in memory and split in pages to render, useful
 for small result but not so small that requires been render in pages</li>
@@ -172,9 +178,10 @@ to the last cached page, so while the user is reading the page more pages are be
 // The following trait config
 
 export interface TestState
-extends EntityAndStatusState<Todo>,SingleSelectionState{}
+extends EntityAndStatusState<Todo>,EntitiesPaginationState{}
 
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      addEntitiesPaginationTrait<Todo>()
    )({
@@ -208,14 +215,42 @@ traits.actions.loadTodosFirstPage()
 traits.actions.loadTodosLastPage()
 traits.actions.clearTodosPagesCache()
 // generated selectors
-traits.selectors.isTodosPageInCache()
-traits.selectors.selectPageTodosList()
-traits.selectors.isLoadingTodosPage()
+traits.selectors.selectTodosCurrentPageList()
+traits.selectors.isLoadingTodosCurrentPage()
 // use isLoadingTodosPage over isLoadingTodos (which will return true even
 // if the page loading is not the current one)
-traits.selectors.selectTodosPage()
+traits.selectors.selectTodosCurrentPage()
 traits.selectors.selectTodosPagedRequest()// use in effects to get paging parameter
-traits.selectors.selectTodosPageInfo()
+traits.selectors.selectTodosCurrentPageInfo()
+```
+<a name="addEntitiesSyncToRouteQueryParams"></a>
+
+## addEntitiesSyncToRouteQueryParams()
+<p>Generates ngrx code necessary to load and set to the current route query params for the filter, sort and paging traits</p>
+
+**Kind**: global function  
+**Example**  
+```js
+const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
+     addLoadEntitiesTrait<Todo>(),
+     addFilterEntitiesTrait(),
+     addSortEntitiesTrait<Todo>({
+       remote: true,
+       defaultSort: {active:'id', direction:'asc'}
+     })
+     addEntitiesPaginationTrait<Todo>(),
+     addEntitiesSyncToRouteQueryParams()
+   )({
+     actionsGroupKey: '[Todos]',
+     featureSelector: createFeatureSelector<TestState>>(
+       'todos',
+     ),
+   });
+
+
+// generated actions
+traits.actions.loadTodosUsingRouteQueryParams()
 ```
 <a name="addFilterEntitiesTrait"></a>
 
@@ -246,6 +281,7 @@ export interface TestState
 extends LoadEntitiesState<Todo>, FilterEntitiesState<TodoFilter>{}
 
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      //addFilterEntitiesTrait<Todo,TodoFilter>() // no params uses remote filtering
      addFilterEntitiesTrait<Todo,TodoFilter>({filterFn: (filter, entity) => // local filtering
@@ -313,9 +349,9 @@ traits.selectors.selectTodosList
 traits.selectors.selectTodosMap
 traits.selectors.selectTodosIds
 traits.selectors.selectTodosTotal
-traits.selectors.isLoadingTodos
-traits.selectors.isSuccessTodosSuccess
-traits.selectors.isFailTodosFail
+traits.selectors.isTodosLoading
+traits.selectors.isTodosLoadingSuccess
+traits.selectors.isTodosLoadingFail
 ```
 <a name="addLoadEntityTraits"></a>
 
@@ -335,6 +371,9 @@ more than once as long as the entityName para is different</p>
 
 **Example**  
 ```js
+export interface TestState
+extends LoadEntityState<Client,'client'>{}
+
 const traits = createEntityFeatureFactory(
 ...addLoadEntityTraits({
        entityName: 'client',
@@ -378,10 +417,8 @@ traits.selectors.isFailLoadClient()
 ```js
 // The following trait config
 
-export interface TestState
-extends EntityAndStatusState<Todo>,FilterState<TodoFilter>{}
-
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      addResetEntitiesStateTrait()
    )({
@@ -407,6 +444,7 @@ export interface TestState
 extends EntityAndStatusState<Todo>,MultipleSelectionState{}
 
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      addSelectEntitiesTrait<Todo>()
    )({
@@ -453,6 +491,7 @@ export interface TestState
 extends EntityAndStatusState<Todo>,SelectEntityState{}
 
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      addSelectEntityTrait<Todo>()
    )({
@@ -488,6 +527,9 @@ traits.selectors.selectTodoSelected()
 
 **Example**  
 ```js
+export interface TestState
+extends SetEntityState<Client,'client'>{}
+
 const traits = createEntityFeatureFactory(
 addSetEntityTraits({
        entityName: 'client',
@@ -527,8 +569,10 @@ export interface TestState
 extends EntityAndStatusState<Todo>, SortState<Todo>{}
 
    const traits = createEntityFeatureFactory(
+     {entityName: 'Todo'},
      addLoadEntitiesTrait<Todo>(),
      addSortEntitiesTrait<Todo>({
+       remote: true,
        defaultSort: {active:'id', direction:'asc'}
      })
    )({
