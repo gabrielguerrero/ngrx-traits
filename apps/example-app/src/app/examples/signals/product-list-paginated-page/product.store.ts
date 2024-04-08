@@ -11,13 +11,13 @@ import {
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
-  withLogger,
+  withSyncToWebStorage,
 } from '@ngrx-traits/signals';
-import { signalStore, type, withMethods } from '@ngrx/signals';
+import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
-import { Product, ProductFilter } from '../../models';
+import { Product } from '../../models';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
 
@@ -70,20 +70,24 @@ export const ProductsRemoteStore = signalStore(
         );
     },
   }),
-  withCalls(() => ({
+  withCalls(({ productsSelectedEntity }) => ({
     loadProductDetail: {
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
     },
-    checkout: () => inject(OrderService).checkout(),
+    checkout: () =>
+      inject(OrderService).checkout({
+        productId: productsSelectedEntity()!.id,
+        quantity: 1,
+      }),
   })),
 );
 
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
   withEntitiesLocalFilter({
     entity,
     collection,
@@ -106,6 +110,12 @@ export const ProductsLocalStore = signalStore(
     entity,
     collection,
   }),
+  withSyncToWebStorage({
+    key: 'products',
+    type: 'session',
+    restoreOnInit: true,
+    saveStateChangesAfterMs: 300,
+  }),
   withEntitiesLoadingCall({
     collection,
     fetchEntities: ({ productsFilter }) => {
@@ -125,7 +135,6 @@ export const ProductsLocalStore = signalStore(
     },
     checkout: () => inject(OrderService).checkout(),
   })),
-  withLogger('sdsd'),
 );
 
 export const ProductsLocalStore2 = signalStore(

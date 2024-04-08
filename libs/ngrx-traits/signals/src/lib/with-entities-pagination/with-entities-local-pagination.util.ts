@@ -19,17 +19,19 @@ export function getWithEntitiesLocalPaginationKeys(config?: {
 }
 
 export function gotoFirstPageIfFilterOrSortChanges(
-  input: Record<string, unknown>,
+  store: Record<string, unknown>,
   filterKey: string,
   sortKey: string,
   entitiesCurrentPageKey: string,
   loadEntitiesPageKey: string,
 ) {
-  if (filterKey in input || sortKey in input) {
-    const filter = input[filterKey] as Signal<any>;
-    const sort = input[sortKey] as Signal<any>;
-    const entitiesCurrentPage = input[entitiesCurrentPageKey] as Signal<any>;
-    const loadEntitiesPage = input[loadEntitiesPageKey] as (options: {
+  if (filterKey in store || sortKey in store) {
+    const filter = store[filterKey] as Signal<unknown>;
+    const sort = store[sortKey] as Signal<unknown>;
+    const entitiesCurrentPage = store[entitiesCurrentPageKey] as Signal<{
+      pageIndex: number;
+    }>;
+    const loadEntitiesPage = store[loadEntitiesPageKey] as (options: {
       pageIndex: number;
     }) => void;
     let lastFilter = filter?.();
