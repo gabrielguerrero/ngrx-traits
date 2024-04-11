@@ -23,14 +23,14 @@ import { getWithEntitiesLocalPaginationKeys } from '../with-entities-pagination/
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 
 export type EntitiesMultiSelectionState = {
-  selectedIdsMap: Record<string | number, boolean>;
+  entitiesSelectedIdsMap: Record<string | number, boolean>;
 };
 export type NamedEntitiesMultiSelectionState<Collection extends string> = {
   [K in Collection as `${K}SelectedIdsMap`]: Record<string | number, boolean>;
 };
 
 export type EntitiesMultiSelectionComputed<Entity> = {
-  selectedEntities: Signal<Entity[]>;
+  entitiesSelected: Signal<Entity[]>;
   isAllEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 };
 export type NamedEntitiesMultiSelectionComputed<
@@ -80,10 +80,10 @@ function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
   return {
     selectedIdsMapKey: collection
       ? `${config.collection}SelectedIdsMap`
-      : 'selectedIdsMap',
+      : 'entitiesSelectedIdsMap',
     selectedEntitiesKey: collection
       ? `${config.collection}SelectedEntities`
-      : 'selectedEntities',
+      : 'entitiesSelected',
     selectEntitiesKey: collection
       ? `select${capitalizedProp}Entities`
       : 'selectEntities',

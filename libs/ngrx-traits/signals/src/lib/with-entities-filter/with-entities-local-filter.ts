@@ -3,6 +3,7 @@ import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
+  withComputed,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -27,21 +28,49 @@ export type NamedEntitiesFilterState<Collection extends string, Filter> = {
   [K in Collection as `${K}Filter`]: Filter;
 };
 
+export type EntitiesFilterComputed = {
+  isEntitiesFilterChanged: Signal<boolean>;
+};
+export type NamedEntitiesFilterComputed<Collection extends string> = {
+  [K in Collection as `is${Capitalize<string & K>}FilterChanged`]: Signal<boolean>;
+};
+
 export type EntitiesFilterMethods<Filter> = {
-  filterEntities: (options: {
-    filter: Filter;
-    debounce?: number;
-    patch?: boolean;
-    forceLoad?: boolean;
-  }) => void;
+  filterEntities: (
+    options:
+      | {
+          filter: Filter;
+          debounce?: number;
+          patch?: false | undefined;
+          forceLoad?: boolean;
+        }
+      | {
+          filter: Partial<Filter>;
+          debounce?: number;
+          patch: true;
+          forceLoad?: boolean;
+        },
+  ) => void;
+  resetEntitiesFilter: () => void;
 };
 export type NamedEntitiesFilterMethods<Collection extends string, Filter> = {
-  [K in Collection as `filter${Capitalize<string & K>}Entities`]: (options: {
-    filter: Filter;
-    debounce?: number;
-    patch?: boolean;
-    forceLoad?: boolean;
-  }) => void;
+  [K in Collection as `filter${Capitalize<string & K>}Entities`]: (
+    options:
+      | {
+          filter: Filter;
+          debounce?: number;
+          patch?: false | undefined;
+          forceLoad?: boolean;
+        }
+      | {
+          filter: Partial<Filter>;
+          debounce?: number;
+          patch: true;
+          forceLoad?: boolean;
+        },
+  ) => void;
+} & {
+  [K in Collection as `reset${Capitalize<string & K>}Filter`]: () => void;
 };
 
 /**
@@ -93,7 +122,7 @@ export function withEntitiesLocalFilter<
   },
   {
     state: EntitiesFilterState<Filter>;
-    signals: {};
+    signals: EntitiesFilterComputed;
     methods: EntitiesFilterMethods<Filter>;
   }
 >;
@@ -150,7 +179,7 @@ export function withEntitiesLocalFilter<
   },
   {
     state: NamedEntitiesFilterState<Collection, Filter>;
-    signals: {};
+    signals: NamedEntitiesFilterComputed<Collection>;
     methods: NamedEntitiesFilterMethods<Collection, Filter>;
   }
 >;
@@ -169,9 +198,22 @@ export function withEntitiesLocalFilter<
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
-  const { filterEntitiesKey, filterKey } = getWithEntitiesFilterKeys(config);
+  const {
+    filterEntitiesKey,
+    filterKey,
+    resetEntitiesFilterKey,
+    isEntitiesFilterChangedKey,
+  } = getWithEntitiesFilterKeys(config);
   return signalStoreFeature(
     withState({ [filterKey]: defaultFilter }),
+    withComputed((state: Record<string, Signal<unknown>>) => {
+      const filter = state[filterKey] as Signal<Filter>;
+      return {
+        [isEntitiesFilterChangedKey]: computed(() => {
+          return JSON.stringify(filter()) !== JSON.stringify(defaultFilter);
+        }),
+      };
+    }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const filter = state[filterKey] as Signal<Filter>;
       const entitiesMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
@@ -180,31 +222,35 @@ export function withEntitiesLocalFilter<
       // the ids array of the state with the filtered ids array, and the state.entities depends on it,
       // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
       const entities = computed(() => Object.values(entitiesMap()));
-      return {
-        [filterEntitiesKey]: rxMethod<{
-          filter: Filter;
-          debounce?: number;
-          patch?: boolean;
-          forceLoad?: boolean;
-        }>(
-          pipe(
-            debounceFilterPipe(filter),
-            tap((value) => {
-              const newEntities = entities().filter((entity) => {
-                return filterFn(entity, value.filter);
-              });
-              patchState(
-                state as StateSignal<EntitiesFilterState<Filter>>,
-                {
-                  [filterKey]: value.filter,
-                },
-                {
-                  [idsKey]: newEntities.map((entity) => entity.id),
-                },
-              );
-            }),
-          ),
+      const filterEntities = rxMethod<{
+        filter: Filter;
+        debounce?: number;
+        patch?: boolean;
+        forceLoad?: boolean;
+      }>(
+        pipe(
+          debounceFilterPipe(filter),
+          tap((value) => {
+            const newEntities = entities().filter((entity) => {
+              return filterFn(entity, value.filter);
+            });
+            patchState(
+              state as StateSignal<EntitiesFilterState<Filter>>,
+              {
+                [filterKey]: value.filter,
+              },
+              {
+                [idsKey]: newEntities.map((entity) => entity.id),
+              },
+            );
+          }),
         ),
+      );
+      return {
+        [filterEntitiesKey]: filterEntities,
+        [resetEntitiesFilterKey]: () => {
+          filterEntities({ filter: defaultFilter });
+        },
       };
     }),
   );

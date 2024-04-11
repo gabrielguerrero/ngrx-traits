@@ -19,6 +19,12 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
     filterEntitiesKey: collection
       ? `filter${capitalizedProp}Entities`
       : 'filterEntities',
+    isEntitiesFilterChangedKey: collection
+      ? `is${capitalizedProp}FilterChanged`
+      : 'isEntitiesFilterChanged',
+    resetEntitiesFilterKey: collection
+      ? `reset${capitalizedProp}Filter`
+      : 'resetEntitiesFilter',
   };
 }
 
