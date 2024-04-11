@@ -27,7 +27,7 @@ export type CallStateMethods = {
 } & {
   setLoaded: () => void;
 } & {
-  setError: () => void;
+  setError: (error?: unknown) => void;
 };
 export type NamedCallState<Prop extends string> = {
   [K in Prop as `${K}CallStatus`]: CallStatus;
@@ -44,7 +44,7 @@ export type NamedCallStateMethods<Prop extends string> = {
 } & {
   [K in Prop as `set${Capitalize<string & K>}Loaded`]: () => void;
 } & {
-  [K in Prop as `set${Capitalize<string & K>}Error`]: () => void;
+  [K in Prop as `set${Capitalize<string & K>}Error`]: (error?: unknown) => void;
 };
 
 /**

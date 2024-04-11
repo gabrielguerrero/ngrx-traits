@@ -22,14 +22,14 @@ import { getWithEntitiesLocalPaginationKeys } from '../with-entities-pagination/
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 
 export type EntitiesSingleSelectionState = {
-  selectedId?: string | number;
+  entitiesSelectedId?: string | number;
 };
 export type NamedEntitiesSingleSelectionState<Collection extends string> = {
   [K in Collection as `${K}SelectedId`]?: string | number;
 };
 
 export type EntitiesSingleSelectionComputed<Entity> = {
-  selectedEntity: Signal<Entity | undefined>;
+  entitiesSelectedEntity: Signal<Entity | undefined>;
 };
 export type NamedEntitiesSingleSelectionComputed<
   Entity,
@@ -60,10 +60,12 @@ function getEntitiesSingleSelectionKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    selectedIdKey: collection ? `${config.collection}SelectedId` : 'selectedId',
+    selectedIdKey: collection
+      ? `${config.collection}SelectedId`
+      : 'entitiesSelectedId',
     selectedEntityKey: collection
       ? `${config.collection}SelectedEntity`
-      : 'selectedEntity',
+      : 'entitiesSelectedEntity',
     selectEntityKey: collection
       ? `select${capitalizedProp}Entity`
       : 'selectEntity',

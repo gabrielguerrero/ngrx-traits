@@ -23,7 +23,7 @@ import {
 } from './with-entities-local-pagination.util';
 
 export type EntitiesPaginationLocalState = {
-  pagination: {
+  entitiesPagination: {
     currentPage: number;
     pageSize: number;
   };

@@ -115,7 +115,7 @@ export function withCalls<
         ? Calls[K]['resultProp'] extends string
           ? Calls[K]['resultProp']
           : `${K & string}Result`
-        : `${K & string}Result`]?: ExtractCallResultType<Calls[K]>;
+        : `${K & string}Result`]: ExtractCallResultType<Calls[K]>;
     };
     signals: NamedCallStateComputed<keyof Calls & string>;
     methods: {

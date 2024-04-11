@@ -1,8 +1,9 @@
-import { Signal } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
+  withComputed,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -219,30 +220,47 @@ export function withEntitiesRemoteFilter<
   defaultFilter: Filter;
 }): SignalStoreFeature<any, any> {
   const { setLoadingKey } = getWithCallStatusKeys({ prop: config.collection });
-  const { filterKey, filterEntitiesKey } = getWithEntitiesFilterKeys(config);
+  const {
+    filterKey,
+    filterEntitiesKey,
+    resetEntitiesFilterKey,
+    isEntitiesFilterChangedKey,
+  } = getWithEntitiesFilterKeys(config);
   return signalStoreFeature(
     withState({ [filterKey]: defaultFilter }),
+    withComputed((state: Record<string, Signal<unknown>>) => {
+      const filter = state[filterKey] as Signal<Filter>;
+      return {
+        [isEntitiesFilterChangedKey]: computed(() => {
+          return JSON.stringify(filter()) !== JSON.stringify(defaultFilter);
+        }),
+      };
+    }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const setLoading = state[setLoadingKey] as () => void;
       const filter = state[filterKey] as Signal<Filter>;
 
-      return {
-        [filterEntitiesKey]: rxMethod<{
-          filter: Filter;
-          debounce?: number;
-          patch?: boolean;
-          forceLoad?: boolean;
-        }>(
-          pipe(
-            debounceFilterPipe(filter),
-            tap((value) => {
-              setLoading();
-              patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
-                [filterKey]: value.filter,
-              });
-            }),
-          ),
+      const filterEntities = rxMethod<{
+        filter: Filter;
+        debounce?: number;
+        patch?: boolean;
+        forceLoad?: boolean;
+      }>(
+        pipe(
+          debounceFilterPipe(filter),
+          tap((value) => {
+            setLoading();
+            patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
+              [filterKey]: value.filter,
+            });
+          }),
         ),
+      );
+      return {
+        [filterEntitiesKey]: filterEntities,
+        [resetEntitiesFilterKey]: () => {
+          filterEntities({ filter: defaultFilter });
+        },
       };
     }),
   );
