@@ -51,7 +51,7 @@ export type PaginationState = {
 };
 
 export type EntitiesPaginationRemoteState = {
-  pagination: PaginationState;
+  entitiesPagination: PaginationState;
 };
 
 export type NamedEntitiesPaginationRemoteState<Collection extends string> = {
@@ -591,7 +591,7 @@ export function withEntitiesRemotePagination<
 
 function isEntitiesPageInCache(
   page: number,
-  pagination: EntitiesPaginationRemoteState['pagination'],
+  pagination: EntitiesPaginationRemoteState['entitiesPagination'],
 ) {
   const startIndex = page * pagination.pageSize;
   let endIndex = startIndex + pagination.pageSize - 1;
