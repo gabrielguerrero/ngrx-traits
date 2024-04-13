@@ -17,7 +17,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
-import { getWithEntitiesKeys } from '../util';
+import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
   debounceFilterPipe,
   getWithEntitiesFilterKeys,
@@ -104,8 +104,11 @@ export type NamedEntitiesFilterMethods<Collection extends string, Filter> = {
  *
  *  // generates the following signals
  *  store.productsFilter // { search: string }
- *  // generates the following methods signals
- * store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  // generates the following computed signals
+ *  store.isProductsFilterChanged // boolean
+ *  // generates the following methods
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductsFilter  // () => void
  */
 export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
@@ -155,10 +158,13 @@ export function withEntitiesLocalFilter<
  *   }),
  *  );
  *
- *  // generates the following signals
+ * // generates the following signals
  *  store.productsFilter // { search: string }
- *  // generates the following methods signals
- * store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  // generates the following computed signals
+ *  store.isProductsFilterChanged // boolean
+ *  // generates the following methods
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductsFilter  // () => void
  */
 export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
@@ -197,7 +203,8 @@ export function withEntitiesLocalFilter<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
+  const { entityMapKey, idsKey, clearEntitiesCacheKey } =
+    getWithEntitiesKeys(config);
   const {
     filterEntitiesKey,
     filterKey,
@@ -222,6 +229,7 @@ export function withEntitiesLocalFilter<
       // the ids array of the state with the filtered ids array, and the state.entities depends on it,
       // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
       const entities = computed(() => Object.values(entitiesMap()));
+      const clearEntitiesCache = combineFunctions(state[clearEntitiesCacheKey]);
       const filterEntities = rxMethod<{
         filter: Filter;
         debounce?: number;
@@ -243,6 +251,7 @@ export function withEntitiesLocalFilter<
                 [idsKey]: newEntities.map((entity) => entity.id),
               },
             );
+            clearEntitiesCache();
           }),
         ),
       );

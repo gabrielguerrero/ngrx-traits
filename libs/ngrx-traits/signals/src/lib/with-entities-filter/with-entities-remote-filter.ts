@@ -16,6 +16,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
+import { combineFunctions, getWithEntitiesKeys } from '../util';
 import type {
   CallStateMethods,
   NamedCallStateMethods,
@@ -95,10 +96,13 @@ import type {
  * //     });
  * //   },
  *  })),
- *   // generates the following signals
- *  store.productsFilter // { name: string } stored filter
+ * // generates the following signals
+ *  store.productsFilter // { search: string }
+ *  // generates the following computed signals
+ *  store.isProductsFilterChanged // boolean
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { name: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductsFilter  // () => void
  */
 export function withEntitiesRemoteFilter<
   Entity extends { id: string | number },
@@ -181,10 +185,13 @@ export function withEntitiesRemoteFilter<
  * //     });
  * //   },
  *  })),
- *  // generates the following signals
- *  store.productsFilter // { name: string } stored filter
+ * // generates the following signals
+ *  store.productsFilter // { search: string }
+ *  // generates the following computed signals
+ *  store.isProductsFilterChanged // boolean
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { name: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductsFilter  // () => void
  */
 
 export function withEntitiesRemoteFilter<
@@ -226,6 +233,8 @@ export function withEntitiesRemoteFilter<
     resetEntitiesFilterKey,
     isEntitiesFilterChangedKey,
   } = getWithEntitiesFilterKeys(config);
+  const { clearEntitiesCacheKey } = getWithEntitiesKeys(config);
+
   return signalStoreFeature(
     withState({ [filterKey]: defaultFilter }),
     withComputed((state: Record<string, Signal<unknown>>) => {
@@ -240,6 +249,8 @@ export function withEntitiesRemoteFilter<
       const setLoading = state[setLoadingKey] as () => void;
       const filter = state[filterKey] as Signal<Filter>;
 
+      const clearEntitiesCache = combineFunctions(state[clearEntitiesCacheKey]);
+
       const filterEntities = rxMethod<{
         filter: Filter;
         debounce?: number;
@@ -253,10 +264,12 @@ export function withEntitiesRemoteFilter<
             patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
               [filterKey]: value.filter,
             });
+            clearEntitiesCache();
           }),
         ),
       );
       return {
+        [clearEntitiesCacheKey]: clearEntitiesCache,
         [filterEntitiesKey]: filterEntities,
         [resetEntitiesFilterKey]: () => {
           filterEntities({ filter: defaultFilter });

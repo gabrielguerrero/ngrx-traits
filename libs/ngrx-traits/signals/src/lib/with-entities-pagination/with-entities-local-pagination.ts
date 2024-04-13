@@ -8,19 +8,21 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
+import {
+  EntityState,
+  NamedEntityState,
+  setAllEntities,
+} from '@ngrx/signals/entities';
 import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { getWithEntitiesKeys } from '../util';
+import { combineFunctions, getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
-import {
-  getWithEntitiesLocalPaginationKeys,
-  gotoFirstPageIfFilterOrSortChanges,
-} from './with-entities-local-pagination.util';
+import { getWithEntitiesLocalPaginationKeys } from './with-entities-local-pagination.util';
 
 export type EntitiesPaginationLocalState = {
   entitiesPagination: {
@@ -180,9 +182,7 @@ export function withEntitiesLocalPagination<
   entity?: Entity;
   collection?: Collection;
 } = {}): SignalStoreFeature<any, any> {
-  const { entitiesKey } = getWithEntitiesKeys(config);
-  const { filterKey } = getWithEntitiesFilterKeys(config);
-  const { sortKey } = getWithEntitiesSortKeys(config);
+  const { entitiesKey, clearEntitiesCacheKey } = getWithEntitiesKeys(config);
   const { loadEntitiesPageKey, entitiesCurrentPageKey, paginationKey } =
     getWithEntitiesLocalPaginationKeys(config);
 
@@ -233,9 +233,19 @@ export function withEntitiesLocalPagination<
         currentPage: number;
       }>;
       return {
+        [clearEntitiesCacheKey]: combineFunctions(
+          state[clearEntitiesCacheKey],
+          () => {
+            patchState(state as StateSignal<object>, {
+              [paginationKey]: {
+                ...pagination(),
+                currentPage: 0,
+              },
+            });
+          },
+        ),
         [loadEntitiesPageKey]: ({ pageIndex }: { pageIndex: number }) => {
-          patchState(state as any, {
-            // TODO this is a hack, we need to fix the type of state
+          patchState(state as StateSignal<object>, {
             [paginationKey]: {
               ...pagination(),
               currentPage: pageIndex,
@@ -243,17 +253,6 @@ export function withEntitiesLocalPagination<
           });
         },
       };
-    }),
-    withHooks({
-      onInit: (input) => {
-        gotoFirstPageIfFilterOrSortChanges(
-          input,
-          filterKey,
-          sortKey,
-          entitiesCurrentPageKey,
-          loadEntitiesPageKey,
-        );
-      },
     }),
   );
 }
