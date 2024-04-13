@@ -1,10 +1,9 @@
-import { computed, effect, Signal } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
-  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -17,7 +16,7 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { capitalize, getWithEntitiesKeys } from '../util';
+import { capitalize, combineFunctions, getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesLocalPaginationKeys } from '../with-entities-pagination/with-entities-local-pagination.util';
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
@@ -43,6 +42,7 @@ export type NamedEntitiesMultiSelectionComputed<
     'all' | 'none' | 'some'
   >;
 };
+
 export type EntitiesMultiSelectionMethods = {
   selectEntities: (
     options: { id: string | number } | { ids: (string | number)[] },
@@ -56,6 +56,7 @@ export type EntitiesMultiSelectionMethods = {
   toggleSelectAllEntities: () => void;
   clearEntitiesSelection: () => void;
 };
+
 export type NamedEntitiesMultiSelectionMethods<Collection extends string> = {
   [K in Collection as `select${Capitalize<string & K>}Entities`]: (
     options: { id: string | number } | { ids: (string | number)[] },
@@ -220,7 +221,8 @@ export function withEntitiesMultiSelection<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
+  const { entityMapKey, idsKey, clearEntitiesCacheKey } =
+    getWithEntitiesKeys(config);
   const {
     selectedIdsMapKey,
     selectedEntitiesKey,
@@ -270,7 +272,18 @@ export function withEntitiesMultiSelection<
 
       const idsArray = state[idsKey] as Signal<EntityId[]>;
 
+      const clearEntitiesSelection = () => {
+        patchState(state as StateSignal<object>, {
+          [selectedIdsMapKey]: {},
+        });
+      };
       return {
+        [clearEntitiesCacheKey]: combineFunctions(
+          state[clearEntitiesCacheKey],
+          () => {
+            clearEntitiesSelection();
+          },
+        ),
         [selectEntitiesKey]: (
           options: { id: string | number } | { ids: (string | number)[] },
         ) => {
@@ -318,11 +331,7 @@ export function withEntitiesMultiSelection<
             [selectedIdsMapKey]: { ...oldIdsMap, ...idsMap },
           });
         },
-        [clearEntitiesSelectionKey]: () => {
-          patchState(state as StateSignal<object>, {
-            [selectedIdsMapKey]: {},
-          });
-        },
+        [clearEntitiesSelectionKey]: clearEntitiesSelection,
         [toggleSelectAllEntitiesKey]: () => {
           const allSelected = isAllEntitiesSelected();
           if (allSelected === 'all') {
@@ -343,36 +352,6 @@ export function withEntitiesMultiSelection<
           }
         },
       };
-    }),
-    withHooks({
-      onInit: (store) => {
-        // we need reset the selections if to 0 when the filter changes or sorting changes and is paginated
-        if (filterKey in store || sortKey in store) {
-          const filter = store[filterKey] as Signal<unknown>;
-          const sort = store[sortKey] as Signal<unknown>;
-          const clearEntitiesSelection = store[
-            clearEntitiesSelectionKey
-          ] as EntitiesMultiSelectionMethods['clearEntitiesSelection'];
-          let lastFilter = filter?.();
-          let lastSort = sort?.();
-          /** TODO: there is a small problem here when used together with withSyncToWebStorage an filter or sorting
-           the stored selection will get cleared because this logic detects the sorting and the filtering changing
-           from the default value to the stored value and resets the selection */
-          effect(
-            () => {
-              if (
-                (store[paginationKey] && lastSort !== sort?.()) ||
-                filter?.() !== lastFilter
-              ) {
-                lastFilter = filter?.();
-                lastSort = sort?.();
-                clearEntitiesSelection();
-              }
-            },
-            { allowSignalWrites: true },
-          );
-        }
-      },
     }),
   );
 }

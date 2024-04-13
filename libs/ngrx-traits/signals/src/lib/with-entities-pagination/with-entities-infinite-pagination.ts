@@ -1,13 +1,16 @@
 import { computed, Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
 import {
+  addEntities,
   EntityState,
   NamedEntityState,
   setAllEntities,
@@ -16,7 +19,10 @@ import type {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
+import { distinctUntilChanged, exhaustMap, first, pipe, tap } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
@@ -28,16 +34,11 @@ import {
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
-import type {
-  EntitiesPaginationLocalMethods,
-  NamedEntitiesPaginationLocalMethods,
-} from './with-entities-local-pagination';
-import {
-  getWithEntitiesRemotePaginationKeys,
-  loadEntitiesPageFactory,
-} from './with-entities-remote-pagination.util';
+import { getWithEntitiesInfinitePaginationKeys } from './with-entities-infinite-pagination.util';
+import type { EntitiesPaginationLocalMethods } from './with-entities-local-pagination';
+import { loadEntitiesPageFactory } from './with-entities-remote-pagination.util';
 
-export type PaginationState = {
+export type InfinitePaginationState = {
   currentPage: number;
   requestPage: number;
   pageSize: number;
@@ -49,17 +50,16 @@ export type PaginationState = {
   };
 };
 
-export type EntitiesPaginationRemoteState = {
-  entitiesPagination: PaginationState;
+export type EntitiesPaginationInfiniteState = {
+  entitiesPagination: InfinitePaginationState;
 };
 
-export type NamedEntitiesPaginationRemoteState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: PaginationState;
+export type NamedEntitiesPaginationInfiniteState<Collection extends string> = {
+  [K in Collection as `${K}Pagination`]: InfinitePaginationState;
 };
 
-export type EntitiesPaginationRemoteComputed<Entity> = {
-  entitiesCurrentPage: Signal<{
-    entities: Entity[];
+export type EntitiesPaginationInfiniteComputed = {
+  entitiesPageInfo: Signal<{
     pageIndex: number;
     total: number | undefined;
     pageSize: number;
@@ -74,7 +74,7 @@ export type EntitiesPaginationRemoteComputed<Entity> = {
     page: number;
   }>;
 };
-export type NamedEntitiesPaginationRemoteComputed<
+export type NamedEntitiesPaginationInfiniteComputed<
   Entity,
   Collection extends string,
 > = {
@@ -84,7 +84,7 @@ export type NamedEntitiesPaginationRemoteComputed<
     page: number;
   }>;
 } & {
-  [K in Collection as `${K}CurrentPage`]: Signal<{
+  [K in Collection as `${K}PageInfo`]: Signal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;
@@ -95,12 +95,15 @@ export type NamedEntitiesPaginationRemoteComputed<
     loading: boolean;
   }>;
 };
-export type EntitiesPaginationRemoteMethods<Entity> =
+export type EntitiesPaginationInfiniteMethods<Entity> =
   EntitiesPaginationLocalMethods & {
     setEntitiesLoadedResult: (entities: Entity[], total: number) => void;
+    loadEntitiesNextPage: () => void;
+    loadEntitiesPreviousPage: () => void;
+    loadEntitiesFirstPage: () => void;
   };
 
-export type NamedEntitiesPaginationSetResultMethods<
+export type NamedEntitiesPaginationInfiniteMethods<
   Entity,
   Collection extends string,
 > = {
@@ -108,15 +111,12 @@ export type NamedEntitiesPaginationSetResultMethods<
     entities: Entity[],
     total: number,
   ) => void;
-};
-export type NamedEntitiesPaginationRemoteMethods<
-  Entity,
-  Collection extends string,
-> = NamedEntitiesPaginationLocalMethods<Collection> & {
-  [K in Collection as `set${Capitalize<string & K>}LoadedResult`]: (
-    entities: Entity[],
-    total: number,
-  ) => void;
+} & {
+  [K in Collection as `load${Capitalize<string & K>}NextPage`]: () => void;
+} & {
+  [K in Collection as `load${Capitalize<string & K>}PreviousPage`]: () => void;
+} & {
+  [K in Collection as `load${Capitalize<string & K>}FirstPage`]: () => void;
 };
 /**
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
@@ -140,7 +140,7 @@ export type NamedEntitiesPaginationRemoteMethods<
  *   withEntities({ entity, collection }),
  *   withCallStatus({ prop: collection, initialValue: 'loading' }),
  *
- *   withEntitiesRemotePagination({
+ *   withEntitiesInfinitePagination({
  *     entity,
  *     collection,
  *     pageSize: 5,
@@ -200,7 +200,7 @@ export type NamedEntitiesPaginationRemoteMethods<
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
  *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
-export function withEntitiesRemotePagination<
+export function withEntitiesInfinitePagination<
   Entity extends { id: string | number },
 >(config: {
   pageSize?: number;
@@ -214,9 +214,9 @@ export function withEntitiesRemotePagination<
     methods: CallStateMethods;
   },
   {
-    state: EntitiesPaginationRemoteState;
-    signals: EntitiesPaginationRemoteComputed<Entity>;
-    methods: EntitiesPaginationRemoteMethods<Entity>;
+    state: EntitiesPaginationInfiniteState;
+    signals: EntitiesPaginationInfiniteComputed;
+    methods: EntitiesPaginationInfiniteMethods<Entity>;
   }
 >;
 /**
@@ -243,7 +243,7 @@ export function withEntitiesRemotePagination<
  *   withEntities({ entity, collection }),
  *   withCallStatus({ prop: collection, initialValue: 'loading' }),
  *
- *   withEntitiesRemotePagination({
+ *   withEntitiesInfinitePagination({
  *     entity,
  *     collection,
  *     pageSize: 5,
@@ -304,7 +304,7 @@ export function withEntitiesRemotePagination<
  *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 
-export function withEntitiesRemotePagination<
+export function withEntitiesInfinitePagination<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
@@ -321,11 +321,12 @@ export function withEntitiesRemotePagination<
     methods: NamedCallStateMethods<Collection>;
   },
   {
-    state: NamedEntitiesPaginationRemoteState<Collection>;
-    signals: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
-    methods: NamedEntitiesPaginationRemoteMethods<Entity, Collection>;
+    state: NamedEntitiesPaginationInfiniteState<Collection>;
+    signals: NamedEntitiesPaginationInfiniteComputed<Entity, Collection>;
+    methods: NamedEntitiesPaginationInfiniteMethods<Entity, Collection>;
   }
 >;
+
 /**
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
  * When the page changes, it will try to load the current page from cache if it's not present,
@@ -351,7 +352,7 @@ export function withEntitiesRemotePagination<
  *   withEntities({ entity, collection }),
  *   withCallStatus({ prop: collection, initialValue: 'loading' }),
  *
- *   withEntitiesRemotePagination({
+ *   withEntitiesInfinitePagination({
  *     entity,
  *     collection,
  *     pageSize: 5,
@@ -411,7 +412,7 @@ export function withEntitiesRemotePagination<
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
  *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
-export function withEntitiesRemotePagination<
+export function withEntitiesInfinitePagination<
   Entity extends { id: string | number },
   Collection extends string,
 >({
@@ -429,15 +430,17 @@ export function withEntitiesRemotePagination<
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
   });
-  const { entitiesKey, clearEntitiesCacheKey } = getWithEntitiesKeys(config);
+  const { clearEntitiesCacheKey } = getWithEntitiesKeys(config);
 
   const {
-    loadEntitiesPageKey,
-    entitiesCurrentPageKey,
-    paginationKey,
-    entitiesPagedRequestKey,
+    loadEntitiesNextPageKey,
+    loadEntitiesFirstPageKey,
+    loadEntitiesPreviousPageKey,
+    entitiesPageInfoKey,
     setEntitiesLoadResultKey,
-  } = getWithEntitiesRemotePaginationKeys(config);
+    entitiesPagedRequestKey,
+    paginationKey,
+  } = getWithEntitiesInfinitePaginationKeys(config);
 
   return signalStoreFeature(
     withState({
@@ -454,27 +457,17 @@ export function withEntitiesRemotePagination<
       },
     }),
     withComputed((state: Record<string, Signal<unknown>>) => {
-      const entities = state[entitiesKey] as Signal<Entity[]>;
       const loading = state[loadingKey] as Signal<boolean>;
-      const pagination = state[paginationKey] as Signal<PaginationState>;
-      const entitiesCurrentPageList = computed(() => {
-        const page = pagination().currentPage;
-        const startIndex =
-          page * pagination().pageSize - pagination().cache.start;
-        let endIndex = startIndex + pagination().pageSize;
-        endIndex =
-          endIndex < pagination().cache.end ? endIndex : pagination().cache.end;
+      const pagination = state[
+        paginationKey
+      ] as Signal<InfinitePaginationState>;
 
-        return entities().slice(startIndex, endIndex);
-      });
-
-      const entitiesCurrentPage = computed(() => {
+      const entitiesPageInfo = computed(() => {
         const pagesCount =
           pagination().total && pagination().total! > 0
             ? Math.ceil(pagination().total! / pagination().pageSize)
             : undefined;
         return {
-          entities: entitiesCurrentPageList(),
           pageIndex: pagination().currentPage,
           total: pagination().total,
           pageSize: pagination().pageSize,
@@ -494,25 +487,25 @@ export function withEntitiesRemotePagination<
         page: pagination().requestPage,
       }));
       return {
-        [entitiesCurrentPageKey]: entitiesCurrentPage,
+        [entitiesPageInfoKey]: entitiesPageInfo,
         [entitiesPagedRequestKey]: entitiesPagedRequest,
       };
     }),
     withMethods((state: Record<string, Signal<unknown>>) => {
-      const entities = state[entitiesKey] as Signal<Entity[]>;
-      const pagination = state[paginationKey] as Signal<PaginationState>;
-      const entitiesList = state[entitiesKey] as Signal<Entity[]>;
+      const pagination = state[
+        paginationKey
+      ] as Signal<InfinitePaginationState>;
       const { loadEntitiesPage } = loadEntitiesPageFactory(
         state,
         loadingKey,
         paginationKey,
         setLoadingKey,
       );
+      // TODO refactor some of this code is repeated in remote pagination
       return {
         [clearEntitiesCacheKey]: combineFunctions(
           state[clearEntitiesCacheKey],
           () => {
-            console.log('clearEntitiesCache');
             patchState(
               state as StateSignal<object>,
               config.collection
@@ -523,8 +516,8 @@ export function withEntitiesRemotePagination<
               {
                 [paginationKey]: {
                   ...pagination(),
-                  total: entities.length,
-                  cache: { start: 0, end: entities.length },
+                  total: 0,
+                  cache: { start: 0, end: 0 },
                   currentPage: 0,
                   requestPage: 0,
                 },
@@ -533,39 +526,37 @@ export function withEntitiesRemotePagination<
           },
         ),
         [setEntitiesLoadResultKey]: (entities: Entity[], total: number) => {
-          // TODO extract this function and test all egg cases, like preloading next pages and jumping page
-          const isPreloadNextPagesReady =
-            pagination().currentPage + 1 === pagination().requestPage;
-
-          const newStart = pagination().currentPage * pagination().pageSize;
-          const newEntities = isPreloadNextPagesReady
-            ? [...entitiesList(), ...entities]
-            : entities;
           patchState(
             state as StateSignal<object>,
             config.collection
-              ? setAllEntities(newEntities, {
+              ? addEntities(entities, {
                   collection: config.collection,
                 })
-              : setAllEntities(newEntities),
+              : addEntities(entities),
             {
               [paginationKey]: {
                 ...pagination(),
                 total,
                 cache: {
                   ...pagination().cache,
-                  start: isPreloadNextPagesReady
-                    ? pagination().cache.start
-                    : newStart,
-                  end: isPreloadNextPagesReady
-                    ? pagination().cache.end + entities.length
-                    : newStart + entities.length,
+                  end: pagination().cache.end + entities.length,
                 },
               },
             },
           );
         },
-        [loadEntitiesPageKey]: loadEntitiesPage,
+        [loadEntitiesNextPageKey]: () => {
+          loadEntitiesPage({ pageIndex: pagination().currentPage + 1 });
+        },
+        [loadEntitiesPreviousPageKey]: () => {
+          loadEntitiesPage({
+            pageIndex:
+              pagination().currentPage > 0 ? pagination().currentPage - 1 : 0,
+          });
+        },
+        [loadEntitiesFirstPageKey]: () => {
+          loadEntitiesPage({ pageIndex: 0 });
+        },
       };
     }),
   );
