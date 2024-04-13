@@ -13,6 +13,7 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
+import { combineFunctions, getWithEntitiesKeys } from '../util';
 import type {
   CallStateMethods,
   NamedCallStateMethods,
@@ -224,17 +225,19 @@ export function withEntitiesRemoteSort<
     prop: config.collection,
   });
   const { sortKey, sortEntitiesKey } = getWithEntitiesSortKeys(config);
+  const { clearEntitiesCacheKey } = getWithEntitiesKeys(config);
   return signalStoreFeature(
     withState({ [sortKey]: defaultSort }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const setLoading = state[setLoadingKey] as () => void;
-
+      const clearEntitiesCache = combineFunctions(state[clearEntitiesCacheKey]);
       return {
         [sortEntitiesKey]: ({ sort: newSort }: { sort: Sort<Entity> }) => {
           patchState(state as StateSignal<object>, {
             [sortKey]: newSort,
           });
           setLoading();
+          clearEntitiesCache();
         },
       };
     }),

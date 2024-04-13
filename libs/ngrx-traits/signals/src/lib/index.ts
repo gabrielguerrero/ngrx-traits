@@ -4,6 +4,8 @@ export * from './with-entities-filter/with-entities-local-filter';
 export * from './with-entities-filter/with-entities-remote-filter';
 export * from './with-entities-pagination/with-entities-local-pagination';
 export * from './with-entities-pagination/with-entities-remote-pagination';
+export * from './with-entities-pagination/with-entities-infinite-pagination';
+export * from './with-entities-pagination/signal-infinite-datasource';
 export {
   Sort,
   SortDirection,

@@ -1,10 +1,9 @@
-import { computed, effect, Signal } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
-  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -17,9 +16,6 @@ import {
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { capitalize, getWithEntitiesKeys } from '../util';
-import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
-import { getWithEntitiesLocalPaginationKeys } from '../with-entities-pagination/with-entities-local-pagination.util';
-import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 
 export type EntitiesSingleSelectionState = {
   entitiesSelectedId?: string | number;
@@ -182,10 +178,7 @@ export function withEntitiesSingleSelection<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entityMapKey } = getWithEntitiesKeys(config);
-  const { filterKey } = getWithEntitiesFilterKeys(config);
-  const { sortKey } = getWithEntitiesSortKeys(config);
-  const { paginationKey } = getWithEntitiesLocalPaginationKeys(config);
+  const { entityMapKey, clearEntitiesCacheKey } = getWithEntitiesKeys(config);
   const {
     selectedEntityKey,
     selectEntityKey,
@@ -211,57 +204,27 @@ export function withEntitiesSingleSelection<
       const selectedId = state[selectedIdKey] as Signal<
         string | number | undefined
       >;
+      const deselectEntity = () => {
+        patchState(state as StateSignal<object>, {
+          [selectedIdKey]: undefined,
+        });
+      };
       return {
         [selectEntityKey]: ({ id }: { id: string | number }) => {
           patchState(state as StateSignal<object>, {
             [selectedIdKey]: id,
           });
         },
-        [deselectEntityKey]: () => {
-          patchState(state as StateSignal<object>, {
-            [selectedIdKey]: undefined,
-          });
-        },
+        [deselectEntityKey]: deselectEntity,
         [toggleEntityKey]: ({ id }: { id: string | number }) => {
           patchState(state as StateSignal<object>, {
             [selectedIdKey]: selectedId() === id ? undefined : id,
           });
         },
+        [clearEntitiesCacheKey]: () => {
+          deselectEntity();
+        },
       };
     }),
-    withHooks((store) => ({
-      onInit: () => {
-        // we need reset the selections if to 0 when the filter changes or sorting changes and is paginated
-        if (filterKey in store || sortKey in store) {
-          const filter = store[filterKey] as Signal<unknown>;
-          const sort = store[sortKey] as Signal<unknown>;
-          const deselectEntity = store[deselectEntityKey] as () => void;
-          let lastFilter = filter?.();
-          let lastSort = sort?.();
-          /** TODO: there is a small problem here when used together with withSyncToWebStorage an filter or sorting
-           the stored selection will get cleared because this logic detects the sorting and the filtering changing
-           from the default value to the stored value and resets the selection */
-          effect(
-            () => {
-              if (
-                (store[paginationKey] && lastSort !== sort?.()) ||
-                lastFilter !== filter?.()
-              ) {
-                console.log(
-                  'resetting selection',
-                  store[paginationKey] && lastSort !== sort?.(),
-                  lastFilter !== filter?.(),
-                  { filter: filter?.(), sort: sort?.(), lastFilter, lastSort },
-                );
-                lastFilter = filter?.();
-                lastSort = sort?.();
-                deselectEntity();
-              }
-            },
-            { allowSignalWrites: true },
-          );
-        }
-      },
-    })),
   );
 }

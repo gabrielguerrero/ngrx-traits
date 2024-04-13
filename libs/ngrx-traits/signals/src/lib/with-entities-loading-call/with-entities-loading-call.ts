@@ -5,6 +5,7 @@ import {
   runInInjectionContext,
   Signal,
 } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStoreFeature,
@@ -20,12 +21,25 @@ import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type {
   EmptyFeatureResult,
   SignalStoreFeatureResult,
   SignalStoreSlices,
 } from '@ngrx/signals/src/signal-store-models';
-import { catchError, first, from, map, Observable, of } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  exhaustMap,
+  first,
+  from,
+  map,
+  Observable,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import {
   CallState,
@@ -124,6 +138,7 @@ export function withEntitiesLoadingCall<
           ? { entities: Entity[]; total: number }
           : Entity[] | { entities: Entity[] }
       >;
+  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 }): SignalStoreFeature<
   Input & {
     state: EntityState<Entity> & CallState;
@@ -230,6 +245,7 @@ export function withEntitiesLoadingCall<
         //   ? { entities: Entity[]; total: number }
         //   : Entity[] | { entities: Entity[] }
       >;
+  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 }): SignalStoreFeature<
   Input & {
     state: NamedEntityState<Entity, Collection> & NamedCallState<Collection>;
@@ -247,6 +263,7 @@ export function withEntitiesLoadingCall<
 >({
   collection,
   fetchEntities,
+  ...config
 }: {
   entity?: Entity; // is this needed? entity can come from the method fetchEntities return type
   collection?: Collection;
@@ -255,6 +272,7 @@ export function withEntitiesLoadingCall<
       Input['signals'] &
       Input['methods'],
   ) => Observable<any> | Promise<any>;
+  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 }): SignalStoreFeature<Input, EmptyFeatureResult> {
   const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
     prop: collection,
@@ -273,59 +291,68 @@ export function withEntitiesLoadingCall<
 
     return signalStoreFeature(
       withHooks({
-        onInit: (input, environmentInjector = inject(EnvironmentInjector)) => {
-          effect(() => {
-            if (loading()) {
-              runInInjectionContext(environmentInjector, () => {
-                from(
-                  fetchEntities({
-                    ...store.slices,
-                    ...store.signals,
-                    ...store.methods,
-                  } as SignalStoreSlices<Input['state']> &
-                    Input['signals'] &
-                    Input['methods']),
-                )
-                  .pipe(
-                    map((result) => {
-                      if (Array.isArray(result)) {
+        onInit: (state, environmentInjector = inject(EnvironmentInjector)) => {
+          const loading$ = toObservable(loading);
+          const mapPipe = config.mapPipe ? mapPipes[config.mapPipe] : switchMap;
+
+          loading$
+            .pipe(
+              filter(Boolean),
+              mapPipe(() =>
+                runInInjectionContext(environmentInjector, () =>
+                  from(
+                    fetchEntities({
+                      ...store.slices,
+                      ...store.signals,
+                      ...store.methods,
+                    } as SignalStoreSlices<Input['state']> &
+                      Input['signals'] &
+                      Input['methods']),
+                  ),
+                ).pipe(
+                  map((result) => {
+                    if (Array.isArray(result)) {
+                      patchState(
+                        state,
+                        collection
+                          ? setAllEntities(result as Entity[], {
+                              collection,
+                            })
+                          : setAllEntities(result),
+                      );
+                    } else {
+                      const { entities, total } = result;
+                      if (setEntitiesLoadResult)
+                        setEntitiesLoadResult(entities, total);
+                      else
                         patchState(
-                          input,
+                          state,
                           collection
-                            ? setAllEntities(result as Entity[], {
+                            ? setAllEntities(entities as Entity[], {
                                 collection,
                               })
-                            : setAllEntities(result),
+                            : setAllEntities(entities),
                         );
-                      } else {
-                        const { entities, total } = result;
-                        if (setEntitiesLoadResult)
-                          setEntitiesLoadResult(entities, total);
-                        else
-                          patchState(
-                            input,
-                            collection
-                              ? setAllEntities(entities as Entity[], {
-                                  collection,
-                                })
-                              : setAllEntities(entities),
-                          );
-                      }
-                      setLoaded();
-                    }),
-                    catchError((error: unknown) => {
-                      setError(error);
-                      setLoaded();
-                      return of();
-                    }),
-                    first(),
-                  )
-                  .subscribe();
-              });
-            }
-          });
+                    }
+                    setLoaded();
+                  }),
+                  catchError((error: unknown) => {
+                    setError(error);
+                    setLoaded();
+                    return of();
+                  }),
+                  first(),
+                ),
+              ),
+            )
+            .subscribe();
         },
       }),
     )(store); // we execute the factory so we can pass the input
   };
 }
+const mapPipes = {
+  switchMap: switchMap,
+  concatMap: concatMap,
+  exhaustMap: exhaustMap,
+};
