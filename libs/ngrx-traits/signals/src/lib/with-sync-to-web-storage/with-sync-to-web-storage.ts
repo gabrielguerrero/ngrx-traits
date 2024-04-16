@@ -73,7 +73,6 @@ export const withSyncToWebStorage = ({
     }),
     withHooks(({ loadFromStorage, saveToStorage, ...store }) => ({
       onInit() {
-        console.log('init');
         if (restoreOnInit) loadFromStorage();
 
         if (saveStateChangesAfterMs) {
