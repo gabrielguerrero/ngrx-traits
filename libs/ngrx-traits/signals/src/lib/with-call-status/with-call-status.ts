@@ -16,9 +16,9 @@ export type CallState = {
   callStatus: CallStatus;
 };
 export type CallStateComputed = {
-  loading: Signal<boolean>;
+  isLoading: Signal<boolean>;
 } & {
-  loaded: Signal<boolean>;
+  isLoaded: Signal<boolean>;
 } & {
   error: Signal<string | null>;
 };
@@ -33,9 +33,9 @@ export type NamedCallState<Prop extends string> = {
   [K in Prop as `${K}CallStatus`]: CallStatus;
 };
 export type NamedCallStateComputed<Prop extends string> = {
-  [K in Prop as `${K}Loading`]: Signal<boolean>;
+  [K in Prop as `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
 } & {
-  [K in Prop as `${K}Loaded`]: Signal<boolean>;
+  [K in Prop as `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
 } & {
   [K in Prop as `${K}Error`]: Signal<string | null>;
 };
