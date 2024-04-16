@@ -37,7 +37,7 @@ import { ProductsBranchStore } from './products-branch.store';
       <mat-label>{{ label() }}</mat-label>
       <mat-select
         [formControl]="control"
-        [placeholder]="store.loading() ? 'Loading...' : placeholder()"
+        [placeholder]="store.isLoading() ? 'Loading...' : placeholder()"
         [compareWith]="compareById"
         (closed)="search('')"
       >
@@ -63,7 +63,7 @@ import { ProductsBranchStore } from './products-branch.store';
           >
             {{ item.name }}
           </mat-option>
-          <mat-option disabled *ngIf="store.loading()">
+          <mat-option disabled *ngIf="store.isLoading()">
             <mat-spinner diameter="35"></mat-spinner>
           </mat-option>
         </cdk-virtual-scroll-viewport>
