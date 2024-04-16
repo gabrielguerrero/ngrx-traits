@@ -15,7 +15,7 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { capitalize, getWithEntitiesKeys } from '../util';
+import { capitalize, combineFunctions, getWithEntitiesKeys } from '../util';
 
 export type EntitiesSingleSelectionState = {
   entitiesSelectedId?: string | number;
@@ -221,9 +221,12 @@ export function withEntitiesSingleSelection<
             [selectedIdKey]: selectedId() === id ? undefined : id,
           });
         },
-        [clearEntitiesCacheKey]: () => {
-          deselectEntity();
-        },
+        [clearEntitiesCacheKey]: combineFunctions(
+          state[clearEntitiesCacheKey],
+          () => {
+            deselectEntity();
+          },
+        ),
       };
     }),
   );

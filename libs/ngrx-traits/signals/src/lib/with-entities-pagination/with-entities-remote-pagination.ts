@@ -512,7 +512,6 @@ export function withEntitiesRemotePagination<
         [clearEntitiesCacheKey]: combineFunctions(
           state[clearEntitiesCacheKey],
           () => {
-            console.log('clearEntitiesCache');
             patchState(
               state as StateSignal<object>,
               config.collection
