@@ -1,14 +1,31 @@
-import { Injectable } from '@angular/core';
-import { ProductsStore, ProductsStoreDetail } from '../models';
-import { delay, map } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { delay, map } from 'rxjs/operators';
+
+import {
+  Product,
+  ProductsStore,
+  ProductsStoreDetail,
+  ProductsStoreResponse,
+} from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class ProductsStoreService {
   constructor(private httpClient: HttpClient) {}
 
-  getStores() {
-    return this.httpClient.get<ProductsStore[]>('/stores/').pipe(delay(500));
+  getStores(options?: {
+    search?: string | undefined;
+    sortColumn?: keyof Product | string | undefined;
+    sortAscending?: boolean | undefined;
+    skip?: number | undefined;
+    take?: number | undefined;
+  }) {
+    console.log('getStores', options);
+    return this.httpClient
+      .get<ProductsStoreResponse>('/stores', {
+        params: { ...options, search: options?.search ?? '' },
+      })
+      .pipe(delay(500));
   }
   getStoreDetails(id: number) {
     return this.httpClient

@@ -14,6 +14,14 @@ import { RouterLink } from '@angular/router';
       </mat-card-header>
       <mat-card-content>
         <mat-list>
+          <mat-list-item [routerLink]="'infinite-scroll'">
+            <div matListItemTitle><b>Infinite Scroll Dropdown</b></div>
+            <div matListItemLine>
+              Example using trait to load a product list with filtering and
+              sorting in memory
+            </div>
+          </mat-list-item>
+          <mat-divider></mat-divider>
           <!--          <mat-list-item [routerLink]="'product-list'">-->
           <!--            <div matListItemTitle><b>Simple List</b></div>-->
           <!--            <div matListItemLine>-->
