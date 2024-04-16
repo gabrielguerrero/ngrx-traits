@@ -256,6 +256,7 @@ export function withEntitiesLocalFilter<
         ),
       );
       return {
+        [clearEntitiesCacheKey]: clearEntitiesCache,
         [filterEntitiesKey]: filterEntities,
         [resetEntitiesFilterKey]: () => {
           filterEntities({ filter: defaultFilter });

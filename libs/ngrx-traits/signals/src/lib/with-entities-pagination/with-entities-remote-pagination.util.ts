@@ -86,7 +86,6 @@ export function loadEntitiesPageFactory(
           // the previous exhaustMap to not loading ensures the function
           // can not be called multiple time before results are loaded, which could corrupt the cache
           tap(() => {
-            console.log('loadEntitiesPage', pageIndex);
             patchState(state as StateSignal<object>, {
               [paginationKey]: {
                 ...pagination(),
@@ -101,14 +100,12 @@ export function loadEntitiesPageFactory(
               }) &&
               !forceLoad
             ) {
-              console.log('cached', pageIndex);
               if (
                 !isEntitiesInCache({
                   page: pageIndex + 1,
                   pagination: pagination(),
                 })
               ) {
-                console.log('preloadEntitiesPage', pageIndex);
                 // preload next page
                 patchState(state as StateSignal<object>, {
                   [paginationKey]: {
