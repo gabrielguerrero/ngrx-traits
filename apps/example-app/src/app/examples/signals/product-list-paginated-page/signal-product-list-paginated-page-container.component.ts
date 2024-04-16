@@ -24,7 +24,7 @@ import { ProductsLocalStore } from './product.store';
           [searchProduct]="store.productsFilter()"
           (searchProductChange)="filter($event)"
         ></product-search-form>
-        @if (store.productsLoading()) {
+        @if (store.isProductsLoading()) {
           <mat-spinner></mat-spinner>
         } @else {
           <div class="m-8 grid sm:grid-cols-2 gap-8">
@@ -50,7 +50,7 @@ import { ProductsLocalStore } from './product.store';
 
             <product-detail
               [product]="store.productDetail()"
-              [productLoading]="store.loadProductDetailLoading()"
+              [productLoading]="store.isLoadProductDetailLoading()"
             />
           </div>
         }
@@ -61,11 +61,11 @@ import { ProductsLocalStore } from './product.store';
           color="primary"
           type="submit"
           [disabled]="
-            !store.productsSelectedEntity() || store.checkoutLoading()
+            !store.productsSelectedEntity() || store.isCheckoutLoading()
           "
           (click)="checkout()"
         >
-          @if (store.checkoutLoading()) {
+          @if (store.isCheckoutLoading()) {
             <mat-spinner [diameter]="20"></mat-spinner>
           }
           <span>CHECKOUT</span>
