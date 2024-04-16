@@ -36,6 +36,17 @@ export interface ProductsStoreDetail {
   manager: string;
   departments: Department[];
 }
+export type ProductsStoreQuery = {
+  search?: string | undefined;
+  sortColumn?: keyof ProductsStore | undefined;
+  sortAscending?: string | undefined;
+  skip?: string | undefined;
+  take?: string | undefined;
+};
+export interface ProductsStoreResponse {
+  resultList: ProductsStore[];
+  total: number;
+}
 
 export interface ProductsStoreFilter {
   search?: string;

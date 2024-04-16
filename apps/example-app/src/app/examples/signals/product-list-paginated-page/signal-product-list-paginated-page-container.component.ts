@@ -49,7 +49,7 @@ import { ProductsLocalStore } from './product.store';
             </div>
 
             <product-detail
-              [product]="store.productDetail?.()"
+              [product]="store.productDetail()"
               [productLoading]="store.loadProductDetailLoading()"
             />
           </div>

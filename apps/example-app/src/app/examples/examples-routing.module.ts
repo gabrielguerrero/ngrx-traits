@@ -25,6 +25,13 @@ const routes: Routes = [
             './signals/product-list-paginated-page/signal-product-list-paginated-page-container.component'
           ).then((m) => m.SignalProductListPaginatedPageContainerComponent),
       },
+      {
+        path: 'infinite-scroll',
+        loadComponent: () =>
+          import(
+            './signals/infinete-scroll-page/infinite-scroll-page.component'
+          ).then((m) => m.InfiniteScrollPageComponent),
+      },
     ],
   },
   {

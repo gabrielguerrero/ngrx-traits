@@ -1,18 +1,54 @@
-import { ProductsStore, ProductsStoreDetail } from '../../models';
-import { getRandomInteger } from '../../utils/form-utils';
+import { sortData } from '@ngrx-traits/common';
 import { rest } from 'msw';
 
+import {
+  ProductsStore,
+  ProductsStoreDetail,
+  ProductsStoreQuery,
+  ProductsStoreResponse,
+} from '../../models';
+import { getRandomInteger } from '../../utils/form-utils';
+
 export const storeHandlers = [
-  rest.get<never, never, ProductsStore[]>('/stores', (req, res, context) => {
-    return res(context.status(200), context.json(mockStores));
-  }),
+  rest.get<never, ProductsStoreQuery, ProductsStoreResponse>(
+    '/stores',
+    (req, res, ctx) => {
+      let result = [...mockStores];
+      const options = {
+        search: req.url.searchParams.get('search'),
+        sortColumn: req.url.searchParams.get('sortColumn'),
+        sortAscending: req.url.searchParams.get('sortAscending'),
+        skip: req.url.searchParams.get('skip'),
+        take: req.url.searchParams.get('take'),
+      };
+      if (options?.search)
+        result = mockStores.filter((entity) => {
+          return options?.search
+            ? entity.name.toLowerCase().includes(options?.search.toLowerCase())
+            : false;
+        });
+      const total = result.length;
+      if (options?.skip || options?.take) {
+        const skip = +(options?.skip ?? 0);
+        const take = +(options?.take ?? 0);
+        result = result.slice(skip, skip + take);
+      }
+      if (options?.sortColumn) {
+        result = sortData(result, {
+          active: options.sortColumn as any,
+          direction: options.sortAscending === 'true' ? 'asc' : 'desc',
+        });
+      }
+      return res(ctx.status(200), ctx.json({ resultList: result, total }));
+    },
+  ),
   rest.get<never, { id: string }, ProductsStoreDetail | undefined>(
     '/stores/:id',
     (req, res, context) => {
       const id = +req.params.id;
       const storeDetail = mockStoresDetails.find((value) => value.id === id);
       return res(context.status(200), context.json(storeDetail));
-    }
+    },
   ),
 ];
 
@@ -81,7 +117,7 @@ const names = [
   'Wendi Ellis',
 ];
 
-const mockStoresDetails: ProductsStoreDetail[] = new Array(200)
+const mockStoresDetails: ProductsStoreDetail[] = new Array(500)
   .fill(null)
   .map((_, index) => {
     return {
@@ -114,5 +150,5 @@ const mockStores: ProductsStore[] = mockStoresDetails.map(
     id,
     name,
     address: address.line1 + ', ' + address.town + ', ' + address.postCode,
-  })
+  }),
 );
