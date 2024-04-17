@@ -9,12 +9,12 @@ import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { getWithEntitiesKeys } from '../util';
-import { getWithEntitiesInfinitePaginationKeys } from './with-entities-infinite-pagination.util';
 import { InfinitePaginationState } from './with-entities-remote-scroll-pagination.model';
 import {
   EntitiesPaginationInfiniteMethods,
   NamedEntitiesPaginationInfiniteMethods,
 } from './with-entities-remote-scroll-pagination.model';
+import { getWithEntitiesInfinitePaginationKeys } from './with-entities-remote-scroll-pagination.util';
 
 export function getInfiniteScrollDataSource<Entity, Collection extends string>(
   options:

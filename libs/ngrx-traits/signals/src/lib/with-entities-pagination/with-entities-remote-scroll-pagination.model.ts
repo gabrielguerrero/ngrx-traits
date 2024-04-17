@@ -27,7 +27,7 @@ export type EntitiesPaginationInfiniteComputed = {
     pagesCount: number | undefined;
     hasPrevious: boolean;
     hasNext: boolean;
-    loading: boolean;
+    isLoading: boolean;
   }>;
   entitiesPagedRequest: Signal<{
     startIndex: number;
@@ -53,7 +53,7 @@ export type NamedEntitiesPaginationInfiniteComputed<
     pagesCount: number | undefined;
     hasPrevious: boolean;
     hasNext: boolean;
-    loading: boolean;
+    isLoading: boolean;
   }>;
 };
 export type EntitiesPaginationInfiniteMethods<Entity> =
