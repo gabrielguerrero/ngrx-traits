@@ -80,7 +80,7 @@ function getEntitiesSingleSelectionKeys(config?: { collection?: string }) {
 
 export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
->(config: {
+>(config?: {
   entity?: Entity;
 }): SignalStoreFeature<
   {
@@ -127,7 +127,7 @@ export function withEntitiesSingleSelection<
 export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
   Collection extends string,
->(config: {
+>(config?: {
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
@@ -147,7 +147,7 @@ export function withEntitiesSingleSelection<
 export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
   Collection extends string,
->(config: {
+>(config?: {
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
