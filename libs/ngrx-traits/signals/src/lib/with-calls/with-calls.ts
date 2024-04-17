@@ -26,7 +26,6 @@ import {
   first,
   from,
   map,
-  Observable,
   of,
   pipe,
   switchMap,
@@ -34,33 +33,17 @@ import {
 
 import {
   CallStatus,
-  NamedCallState,
-  NamedCallStateComputed,
-} from '../with-call-status/with-call-status';
+  NamedCallStatusComputed,
+  NamedCallStatusState,
+} from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
+import {
+  Call,
+  CallConfig,
+  ExtractCallParams,
+  ExtractCallResultType,
+} from './with-calls.model';
 import { getWithCallKeys } from './with-calls.util';
-
-type Call<Params extends readonly any[] = any[], Result = any> = (
-  ...args: Params
-) => Observable<Result> | Promise<Result>;
-type CallConfig<
-  Params extends readonly any[] = any[],
-  Result = any,
-  PropName extends string = string,
-> = {
-  call: Call<Params, Result>;
-  resultProp?: PropName;
-  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
-};
-
-export type ExtractCallResultType<T extends Call | CallConfig> =
-  T extends Call<any, infer R>
-    ? R
-    : T extends CallConfig<any, infer R>
-      ? R
-      : never;
-export type ExtractCallParams<T extends Call | CallConfig> =
-  T extends Call<infer P> ? P : T extends CallConfig<infer P> ? P : never;
 
 /**
  * Generates necessary state, computed and methods to track the progress of the call
@@ -110,14 +93,14 @@ export function withCalls<
 ): SignalStoreFeature<
   Input,
   Input & {
-    state: NamedCallState<keyof Calls & string> & {
+    state: NamedCallStatusState<keyof Calls & string> & {
       [K in keyof Calls as Calls[K] extends CallConfig
         ? Calls[K]['resultProp'] extends string
           ? Calls[K]['resultProp']
           : `${K & string}Result`
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]>;
     };
-    signals: NamedCallStateComputed<keyof Calls & string>;
+    signals: NamedCallStatusComputed<keyof Calls & string>;
     methods: {
       [K in keyof Calls]: (...arg: ExtractCallParams<Calls[K]>) => void;
     };

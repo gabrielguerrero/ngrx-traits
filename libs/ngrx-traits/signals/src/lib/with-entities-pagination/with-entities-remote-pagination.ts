@@ -20,102 +20,26 @@ import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
-  CallStateComputed,
-  CallStateMethods,
-  NamedCallStateComputed,
-  NamedCallStateMethods,
-} from '../with-call-status/with-call-status';
+  CallStatusComputed,
+  CallStatusMethods,
+  NamedCallStatusComputed,
+  NamedCallStatusMethods,
+} from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import type {
-  EntitiesPaginationLocalMethods,
-  NamedEntitiesPaginationLocalMethods,
-} from './with-entities-local-pagination';
+import {
+  EntitiesPaginationRemoteComputed,
+  EntitiesPaginationRemoteMethods,
+  EntitiesPaginationRemoteState,
+  NamedEntitiesPaginationRemoteComputed,
+  NamedEntitiesPaginationRemoteMethods,
+  NamedEntitiesPaginationRemoteState,
+  PaginationState,
+} from './with-entities-remote-pagination.model';
 import {
   getWithEntitiesRemotePaginationKeys,
   loadEntitiesPageFactory,
 } from './with-entities-remote-pagination.util';
 
-export type PaginationState = {
-  currentPage: number;
-  requestPage: number;
-  pageSize: number;
-  total: number | undefined;
-  pagesToCache: number;
-  cache: {
-    start: number;
-    end: number;
-  };
-};
-
-export type EntitiesPaginationRemoteState = {
-  entitiesPagination: PaginationState;
-};
-
-export type NamedEntitiesPaginationRemoteState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: PaginationState;
-};
-
-export type EntitiesPaginationRemoteComputed<Entity> = {
-  entitiesCurrentPage: Signal<{
-    entities: Entity[];
-    pageIndex: number;
-    total: number | undefined;
-    pageSize: number;
-    pagesCount: number | undefined;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    loading: boolean;
-  }>;
-  entitiesPagedRequest: Signal<{
-    startIndex: number;
-    size: number;
-    page: number;
-  }>;
-};
-export type NamedEntitiesPaginationRemoteComputed<
-  Entity,
-  Collection extends string,
-> = {
-  [K in Collection as `${K}PagedRequest`]: Signal<{
-    startIndex: number;
-    size: number;
-    page: number;
-  }>;
-} & {
-  [K in Collection as `${K}CurrentPage`]: Signal<{
-    entities: Entity[];
-    pageIndex: number;
-    total: number | undefined;
-    pageSize: number;
-    pagesCount: number | undefined;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    loading: boolean;
-  }>;
-};
-export type EntitiesPaginationRemoteMethods<Entity> =
-  EntitiesPaginationLocalMethods & {
-    setEntitiesLoadedResult: (entities: Entity[], total: number) => void;
-  };
-
-export type NamedEntitiesPaginationSetResultMethods<
-  Entity,
-  Collection extends string,
-> = {
-  [K in Collection as `set${Capitalize<string & K>}LoadedResult`]: (
-    entities: Entity[],
-    total: number,
-  ) => void;
-};
-export type NamedEntitiesPaginationRemoteMethods<
-  Entity,
-  Collection extends string,
-> = NamedEntitiesPaginationLocalMethods<Collection> & {
-  [K in Collection as `set${Capitalize<string & K>}LoadedResult`]: (
-    entities: Entity[],
-    total: number,
-  ) => void;
-};
 /**
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
  * When the page changes, it will try to load the current page from cache if it's not present,
@@ -208,8 +132,8 @@ export function withEntitiesRemotePagination<
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity> & CallStateComputed;
-    methods: CallStateMethods;
+    signals: EntitySignals<Entity> & CallStatusComputed;
+    methods: CallStatusMethods;
   },
   {
     state: EntitiesPaginationRemoteState;
@@ -315,8 +239,8 @@ export function withEntitiesRemotePagination<
   {
     state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
     signals: NamedEntitySignals<Entity, Collection> &
-      NamedCallStateComputed<Collection>;
-    methods: NamedCallStateMethods<Collection>;
+      NamedCallStatusComputed<Collection>;
+    methods: NamedCallStatusMethods<Collection>;
   },
   {
     state: NamedEntitiesPaginationRemoteState<Collection>;
