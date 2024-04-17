@@ -457,7 +457,7 @@ export const store = signalStore(
   // generates the following signals
   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
- store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, loading: boolean }
+ store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
@@ -555,7 +555,7 @@ export const store = signalStore(
   // generates the following signals
   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
- store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, loading: boolean }
+ store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductsNextPage() // loads next page
