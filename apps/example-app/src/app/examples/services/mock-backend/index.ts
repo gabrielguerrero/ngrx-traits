@@ -1,8 +1,9 @@
 import { setupWorker } from 'msw';
-import { productHandlers } from './product.handler';
-import { storeHandlers } from './product-stores.handler';
 
-const worker = setupWorker(...productHandlers, ...storeHandlers);
+import { branchesHandlers } from './branches.handler';
+import { productHandlers } from './product.handler';
+
+const worker = setupWorker(...productHandlers, ...branchesHandlers);
 worker.start({
   onUnhandledRequest: 'warn',
 });

@@ -2,51 +2,48 @@ import { sortData } from '@ngrx-traits/common';
 import { rest } from 'msw';
 
 import {
-  ProductsStore,
-  ProductsStoreDetail,
-  ProductsStoreQuery,
-  ProductsStoreResponse,
+  Branch,
+  BranchDetail,
+  BranchQuery,
+  BranchResponse,
 } from '../../models';
 import { getRandomInteger } from '../../utils/form-utils';
 
-export const storeHandlers = [
-  rest.get<never, ProductsStoreQuery, ProductsStoreResponse>(
-    '/stores',
-    (req, res, ctx) => {
-      let result = [...mockStores];
-      const options = {
-        search: req.url.searchParams.get('search'),
-        sortColumn: req.url.searchParams.get('sortColumn'),
-        sortAscending: req.url.searchParams.get('sortAscending'),
-        skip: req.url.searchParams.get('skip'),
-        take: req.url.searchParams.get('take'),
-      };
-      if (options?.search)
-        result = mockStores.filter((entity) => {
-          return options?.search
-            ? entity.name.toLowerCase().includes(options?.search.toLowerCase())
-            : false;
-        });
-      const total = result.length;
-      if (options?.skip || options?.take) {
-        const skip = +(options?.skip ?? 0);
-        const take = +(options?.take ?? 0);
-        result = result.slice(skip, skip + take);
-      }
-      if (options?.sortColumn) {
-        result = sortData(result, {
-          active: options.sortColumn as any,
-          direction: options.sortAscending === 'true' ? 'asc' : 'desc',
-        });
-      }
-      return res(ctx.status(200), ctx.json({ resultList: result, total }));
-    },
-  ),
-  rest.get<never, { id: string }, ProductsStoreDetail | undefined>(
-    '/stores/:id',
+export const branchesHandlers = [
+  rest.get<never, BranchQuery, BranchResponse>('/branches', (req, res, ctx) => {
+    let result = [...mockBranches];
+    const options = {
+      search: req.url.searchParams.get('search'),
+      sortColumn: req.url.searchParams.get('sortColumn'),
+      sortAscending: req.url.searchParams.get('sortAscending'),
+      skip: req.url.searchParams.get('skip'),
+      take: req.url.searchParams.get('take'),
+    };
+    if (options?.search)
+      result = mockBranches.filter((entity) => {
+        return options?.search
+          ? entity.name.toLowerCase().includes(options?.search.toLowerCase())
+          : false;
+      });
+    const total = result.length;
+    if (options?.skip || options?.take) {
+      const skip = +(options?.skip ?? 0);
+      const take = +(options?.take ?? 0);
+      result = result.slice(skip, skip + take);
+    }
+    if (options?.sortColumn) {
+      result = sortData(result, {
+        active: options.sortColumn as any,
+        direction: options.sortAscending === 'true' ? 'asc' : 'desc',
+      });
+    }
+    return res(ctx.status(200), ctx.json({ resultList: result, total }));
+  }),
+  rest.get<never, { id: string }, BranchDetail | undefined>(
+    '/branches/:id',
     (req, res, context) => {
       const id = +req.params.id;
-      const storeDetail = mockStoresDetails.find((value) => value.id === id);
+      const storeDetail = mockBranchesDetails.find((value) => value.id === id);
       return res(context.status(200), context.json(storeDetail));
     },
   ),
@@ -117,12 +114,12 @@ const names = [
   'Wendi Ellis',
 ];
 
-const mockStoresDetails: ProductsStoreDetail[] = new Array(500)
+const mockBranchesDetails: BranchDetail[] = new Array(500)
   .fill(null)
   .map((_, index) => {
     return {
       id: index,
-      name: 'SuperStore ' + index,
+      name: 'Branch ' + index,
       phone:
         getRandomInteger(100, 300) +
         ' ' +
@@ -141,11 +138,11 @@ const mockStoresDetails: ProductsStoreDetail[] = new Array(500)
       manager: names[getRandomInteger(0, names.length - 1)],
       departments: new Array(200).fill(null).map((value, i) => ({
         id: i,
-        name: 'Departament ' + i + ' of SuperStore ' + index,
+        name: 'Department ' + i + ' of Branch ' + index,
       })),
     };
   });
-const mockStores: ProductsStore[] = mockStoresDetails.map(
+const mockBranches: Branch[] = mockBranchesDetails.map(
   ({ id, name, address }) => ({
     id,
     name,

@@ -17,13 +17,13 @@ export interface ProductDetail extends Product {
   image: string;
 }
 
-export interface ProductsStore {
+export interface Branch {
   id: number;
   name: string;
   address: string;
 }
 
-export interface ProductsStoreDetail {
+export interface BranchDetail {
   id: number;
   name: string;
   phone: string;
@@ -36,19 +36,19 @@ export interface ProductsStoreDetail {
   manager: string;
   departments: Department[];
 }
-export type ProductsStoreQuery = {
+export type BranchQuery = {
   search?: string | undefined;
-  sortColumn?: keyof ProductsStore | undefined;
+  sortColumn?: keyof Branch | undefined;
   sortAscending?: string | undefined;
   skip?: string | undefined;
   take?: string | undefined;
 };
-export interface ProductsStoreResponse {
-  resultList: ProductsStore[];
+export interface BranchResponse {
+  resultList: Branch[];
   total: number;
 }
 
-export interface ProductsStoreFilter {
+export interface BranchFilter {
   search?: string;
 }
 
