@@ -136,7 +136,7 @@ export function withCallStatus<Prop extends string>({
         [loadedKey]: computed(() => callState() === 'loaded'),
         [errorKey]: computed(() => {
           const v = callState();
-          return typeof v === 'object' ? v.error : null;
+          return typeof v === 'object' ? v.error : undefined;
         }),
       };
     }),
