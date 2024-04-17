@@ -194,7 +194,17 @@ export function withEntitiesMultiSelection<
       const selectedIdsMap = state[selectedIdsMapKey] as Signal<
         Record<string | number, boolean>
       >;
-      const selectedIdsArray = computed(() => Object.keys(selectedIdsMap()));
+      const selectedIdsArray = computed(() =>
+        Object.entries(selectedIdsMap()).reduce(
+          (aux, [id, selected]) => {
+            if (selected) {
+              aux.push(id);
+            }
+            return aux;
+          },
+          [] as (string | number)[],
+        ),
+      );
       return {
         [selectedEntitiesKey]: computed(() => {
           return selectedIdsArray().map((id) => entityMap()[id]);
