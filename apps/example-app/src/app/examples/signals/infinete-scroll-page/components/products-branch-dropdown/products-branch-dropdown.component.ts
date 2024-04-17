@@ -13,7 +13,7 @@ import { MatOption, MatSelect } from '@angular/material/select';
 import { getInfiniteScrollDataSource } from '@ngrx-traits/signals';
 
 import { SearchOptionsComponent } from '../../../../components/search-options/search-options.component';
-import { ProductsStore } from '../../../../models';
+import { Branch } from '../../../../models';
 import { ProductsBranchStore } from './products-branch.store';
 
 @Component({
@@ -100,10 +100,10 @@ export class ProductsBranchDropdownComponent {
     this.store.filterEntities({ filter: { search: query } });
   }
 
-  trackByFn(index: number, item: ProductsStore) {
+  trackByFn(index: number, item: Branch) {
     return item.id;
   }
-  compareById(value: ProductsStore, option: ProductsStore) {
+  compareById(value: Branch, option: Branch) {
     return value && option && value.id == option.id;
   }
 }

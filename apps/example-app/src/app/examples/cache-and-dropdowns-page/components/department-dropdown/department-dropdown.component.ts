@@ -1,3 +1,4 @@
+import { AsyncPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -5,49 +6,50 @@ import {
   OnDestroy,
   Output,
 } from '@angular/core';
+import { input } from '@angular/core';
 import {
   ControlValueAccessor,
-  UntypedFormControl,
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
+  UntypedFormControl,
 } from '@angular/forms';
-import { createSelector, Store } from '@ngrx/store';
-import { ProductsStore } from '../../../models';
-import { Observable, Subject } from 'rxjs';
-import { DepartmentLocalTraits } from './department.local-traits';
-import { takeUntil } from 'rxjs/operators';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatOptionModule } from '@angular/material/core';
-import { SearchOptionsComponent } from '../../../components/search-options/search-options.component';
-import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { AsyncPipe } from '@angular/common';
-import { input } from '@angular/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { createSelector, Store } from '@ngrx/store';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { SearchOptionsComponent } from '../../../components/search-options/search-options.component';
+import { Branch } from '../../../models';
+import { DepartmentLocalTraits } from './department.local-traits';
 
 @Component({
   selector: 'department-dropdown',
   template: `
     @if (data$ | async; as data) {
-    <mat-form-field class="container" floatLabel="always">
-      <mat-label>Department</mat-label>
-      <mat-select
-        [formControl]="control"
-        [placeholder]="data.isLoading ? 'Loading...' : 'Please Select'"
-        [compareWith]="compareById"
-        (closed)="search(undefined)"
-      >
-        <search-options (valueChanges)="search($event)"></search-options>
-        @for (item of data.stores; track item) {
-        <mat-option class="fact-item" [value]="item">
-          {{ item.name }}
-        </mat-option>
-        } @if (data.isLoading) {
-        <mat-option disabled>
-          <mat-spinner diameter="35"></mat-spinner>
-        </mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
+      <mat-form-field class="container" floatLabel="always">
+        <mat-label>Department</mat-label>
+        <mat-select
+          [formControl]="control"
+          [placeholder]="data.isLoading ? 'Loading...' : 'Please Select'"
+          [compareWith]="compareById"
+          (closed)="search(undefined)"
+        >
+          <search-options (valueChanges)="search($event)"></search-options>
+          @for (item of data.stores; track item) {
+            <mat-option class="fact-item" [value]="item">
+              {{ item.name }}
+            </mat-option>
+          }
+          @if (data.isLoading) {
+            <mat-option disabled>
+              <mat-spinner diameter="35"></mat-spinner>
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     }
   `,
   styles: [
@@ -92,13 +94,13 @@ export class DepartmentDropdownComponent
     createSelector({
       isLoading: this.traits.localSelectors.isDepartmentsLoading,
       stores: this.traits.localSelectors.selectDepartmentsList,
-    })
+    }),
   );
 
   private onTouch: any;
   destroy = new Subject<void>();
 
-  @Input() set value(value: ProductsStore) {
+  @Input() set value(value: Branch) {
     this.writeValue(value);
   }
   @Input() set storeId(storeId: number | undefined) {
@@ -107,16 +109,18 @@ export class DepartmentDropdownComponent
       this.store.dispatch(
         this.traits.localActions.filterDepartments({
           filters: { storeId },
-        })
+        }),
       );
   }
 
-  @Output() valueChanges = this.control
-    .valueChanges as Observable<ProductsStore>;
+  @Output() valueChanges = this.control.valueChanges as Observable<Branch>;
 
-  constructor(private store: Store, private traits: DepartmentLocalTraits) {}
+  constructor(
+    private store: Store,
+    private traits: DepartmentLocalTraits,
+  ) {}
 
-  writeValue(value: ProductsStore): void {
+  writeValue(value: Branch): void {
     this.control.setValue(value);
   }
 
@@ -135,7 +139,7 @@ export class DepartmentDropdownComponent
     this.destroy.complete();
   }
 
-  compareById(value: ProductsStore, option: ProductsStore) {
+  compareById(value: Branch, option: Branch) {
     return value && option && value.id == option.id;
   }
 
@@ -144,7 +148,7 @@ export class DepartmentDropdownComponent
       this.traits.localActions.filterDepartments({
         filters: { search: text },
         patch: true,
-      })
+      }),
     );
   }
 }

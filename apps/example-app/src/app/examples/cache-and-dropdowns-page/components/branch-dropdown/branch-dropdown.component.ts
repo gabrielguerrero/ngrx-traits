@@ -1,51 +1,46 @@
+import { AsyncPipe } from '@angular/common';
 import {
-  Component,
-  OnInit,
   ChangeDetectionStrategy,
+  Component,
   Input,
-  Output,
   OnDestroy,
+  OnInit,
+  Output,
 } from '@angular/core';
-import { ProductsStore } from '../../../models';
-import { ProductsStoreLocalTraits } from './store.local-traits';
-import { createSelector, Store } from '@ngrx/store';
+import { input } from '@angular/core';
 import {
   ControlValueAccessor,
-  UntypedFormControl,
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule,
+  UntypedFormControl,
 } from '@angular/forms';
+import { MatOptionModule } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { createSelector, Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatOptionModule } from '@angular/material/core';
+
 import { SearchOptionsComponent } from '../../../components/search-options/search-options.component';
-import { MatSelectModule } from '@angular/material/select';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { AsyncPipe } from '@angular/common';
-import { input } from '@angular/core';
+import { Branch } from '../../../models';
+import { BranchLocalTraits } from './store.local-traits';
 
 @Component({
-  selector: 'store-dropdown',
+  selector: 'branch-dropdown',
   template: `
     @if (data$ | async; as data) {
-      <mat-form-field
-        class="container"
-        floatLabel="always"
-        >
-        <mat-label>Store</mat-label>
+      <mat-form-field class="container" floatLabel="always">
+        <mat-label>Branch</mat-label>
         <mat-select
           [formControl]="control"
           [placeholder]="data.isLoading ? 'Loading...' : 'Please Select'"
           [compareWith]="compareById"
           (closed)="search(undefined)"
-          >
+        >
           <search-options (valueChanges)="search($event)"></search-options>
           @for (item of data.stores; track item) {
-            <mat-option
-              class="fact-item"
-              [value]="item"
-              >
+            <mat-option class="fact-item" [value]="item">
               {{ item.name }}
             </mat-option>
           }
@@ -57,7 +52,7 @@ import { input } from '@angular/core';
         </mat-select>
       </mat-form-field>
     }
-    `,
+  `,
   styles: [
     `
       :host {
@@ -70,10 +65,10 @@ import { input } from '@angular/core';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    ProductsStoreLocalTraits,
+    BranchLocalTraits,
     {
       provide: NG_VALUE_ACCESSOR,
-      useExisting: StoreDropdownComponent,
+      useExisting: BranchDropdownComponent,
       multi: true,
     },
   ],
@@ -85,36 +80,38 @@ import { input } from '@angular/core';
     SearchOptionsComponent,
     MatOptionModule,
     MatProgressSpinnerModule,
-    AsyncPipe
-],
+    AsyncPipe,
+  ],
 })
-export class StoreDropdownComponent
+export class BranchDropdownComponent
   implements OnInit, ControlValueAccessor, OnDestroy
 {
   control = new UntypedFormControl();
   data$ = this.store.select(
     createSelector(
-      this.traits.localSelectors.isStoresLoading,
-      this.traits.localSelectors.selectStoresList,
-      (isLoading, stores) => ({ isLoading, stores })
-    )
+      this.traits.localSelectors.isBranchesLoading,
+      this.traits.localSelectors.selectBranchesList,
+      (isLoading, stores) => ({ isLoading, stores }),
+    ),
   );
   private onTouch: any;
   destroy = new Subject<void>();
 
-  @Input() set value(value: ProductsStore) {
+  @Input() set value(value: Branch) {
     this.control.setValue(value);
   }
-  @Output() valueChanges = this.control
-    .valueChanges as Observable<ProductsStore>;
+  @Output() valueChanges = this.control.valueChanges as Observable<Branch>;
 
-  constructor(private store: Store, private traits: ProductsStoreLocalTraits) {}
+  constructor(
+    private store: Store,
+    private traits: BranchLocalTraits,
+  ) {}
 
   ngOnInit(): void {
-    this.store.dispatch(this.traits.localActions.loadStores());
+    this.store.dispatch(this.traits.localActions.loadBranches());
   }
 
-  writeValue(value: ProductsStore): void {
+  writeValue(value: Branch): void {
     this.control.setValue(value);
   }
 
@@ -132,12 +129,12 @@ export class StoreDropdownComponent
     this.destroy.next();
     this.destroy.complete();
   }
-  compareById(value: ProductsStore, option: ProductsStore) {
+  compareById(value: Branch, option: Branch) {
     return value && option && value.id == option.id;
   }
   search(text: string | undefined) {
     this.store.dispatch(
-      this.traits.localActions.filterStores({ filters: { search: text } })
+      this.traits.localActions.filterBranches({ filters: { search: text } }),
     );
   }
 }
