@@ -58,7 +58,10 @@ export type NamedEntitiesPaginationInfiniteComputed<
 };
 export type EntitiesPaginationInfiniteMethods<Entity> =
   EntitiesPaginationLocalMethods & {
-    setEntitiesLoadedResult: (entities: Entity[], total: number) => void;
+    setEntitiesPagedResult: (result: {
+      entities: Entity[];
+      total: number;
+    }) => void;
     loadEntitiesNextPage: () => void;
     loadEntitiesPreviousPage: () => void;
     loadEntitiesFirstPage: () => void;
@@ -67,10 +70,10 @@ export type NamedEntitiesPaginationInfiniteMethods<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `set${Capitalize<string & K>}LoadedResult`]: (
-    entities: Entity[],
-    total: number,
-  ) => void;
+  [K in Collection as `set${Capitalize<string & K>}PagedResult`]: (result: {
+    entities: Entity[];
+    total: number;
+  }) => void;
 } & {
   [K in Collection as `load${Capitalize<string & K>}NextPage`]: () => void;
 } & {

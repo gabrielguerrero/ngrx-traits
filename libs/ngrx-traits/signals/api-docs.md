@@ -20,7 +20,7 @@ and is debounced by default. Requires withEntities and withCallStatus to be pres
 <dd><p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
-to the store using the setAllEntities method or the setEntitiesLoadResult method
+to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.
 Requires withEntities and withCallStatus to be present in the store.</p></dd>
@@ -272,7 +272,7 @@ export const store = signalStore(
 <p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
-to the store using the setAllEntities method or the setEntitiesLoadResult method
+to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.
 Requires withEntities and withCallStatus to be present in the store.</p>

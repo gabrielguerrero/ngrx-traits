@@ -358,7 +358,7 @@ export function withEntitiesRemotePagination<
     entitiesCurrentPageKey,
     paginationKey,
     entitiesPagedRequestKey,
-    setEntitiesLoadResultKey,
+    setEntitiesPagedResultKey,
   } = getWithEntitiesRemotePaginationKeys(config);
 
   return signalStoreFeature(
@@ -453,7 +453,13 @@ export function withEntitiesRemotePagination<
             );
           },
         ),
-        [setEntitiesLoadResultKey]: (entities: Entity[], total: number) => {
+        [setEntitiesPagedResultKey]: ({
+          entities,
+          total,
+        }: {
+          entities: Entity[];
+          total: number;
+        }) => {
           // TODO extract this function and test all egg cases, like preloading next pages and jumping page
           const isPreloadNextPagesReady =
             pagination().currentPage + 1 === pagination().requestPage;

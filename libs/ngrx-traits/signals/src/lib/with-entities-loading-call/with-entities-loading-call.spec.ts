@@ -39,6 +39,7 @@ describe('withEntitiesLoadingCall', () => {
         expect(store.entities()).toEqual(mockProducts);
       });
     }));
+
     it('should setAllEntities if fetchEntities returns an a {entities: Entity[]} ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -61,7 +62,8 @@ describe('withEntitiesLoadingCall', () => {
         expect(store.entities()).toEqual(mockProducts);
       });
     }));
-    it('should setEntitiesLoadResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
+
+    it('should setEntitiesPagedResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withEntities({
@@ -124,6 +126,7 @@ describe('withEntitiesLoadingCall', () => {
         expect(store.productsEntities()).toEqual(mockProducts);
       });
     }));
+
     it('should setAllEntities if fetchEntities returns an a {entities: Entity[]} ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -148,6 +151,7 @@ describe('withEntitiesLoadingCall', () => {
         expect(store.productsEntities()).toEqual(mockProducts);
       });
     }));
+
     it('should set[Collection]LoadResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
