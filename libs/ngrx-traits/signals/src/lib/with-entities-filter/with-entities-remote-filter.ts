@@ -73,7 +73,7 @@ import type {
  * // withHooks(({ productsLoading, setProductsError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //            .getProducts({
  * //                 search: productsFilter().name,
@@ -162,7 +162,7 @@ export function withEntitiesRemoteFilter<
  * // withHooks(({ productsLoading, setProductsError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //              .getProducts({
  * //                 search: productsFilter().name,

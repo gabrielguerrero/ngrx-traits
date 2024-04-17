@@ -32,43 +32,42 @@ import { ProductsBranchStore } from './products-branch.store';
     CdkFixedSizeVirtualScroll,
     CdkVirtualForOf,
   ],
-  template: ` {{ store.entities().length }}
-    <mat-form-field class="container" floatLabel="always">
-      <mat-label>{{ label() }}</mat-label>
-      <mat-select
-        [formControl]="control"
-        [placeholder]="store.isLoading() ? 'Loading...' : placeholder()"
-        [compareWith]="compareById"
-        (closed)="search('')"
+  template: ` <mat-form-field class="container" floatLabel="always">
+    <mat-label>{{ label() }}</mat-label>
+    <mat-select
+      [formControl]="control"
+      [placeholder]="store.isLoading() ? 'Loading...' : placeholder()"
+      [compareWith]="compareById"
+      (closed)="search('')"
+    >
+      <search-options (valueChanges)="search($event)"></search-options>
+      <cdk-virtual-scroll-viewport
+        itemSize="42"
+        class="fact-scroll-viewport"
+        minBufferPx="200"
+        maxBufferPx="200"
       >
-        <search-options (valueChanges)="search($event)"></search-options>
-        <cdk-virtual-scroll-viewport
-          itemSize="42"
-          class="fact-scroll-viewport"
-          minBufferPx="200"
-          maxBufferPx="200"
+        <mat-option
+          *ngIf="!!control.value"
+          class="fact-item"
+          [style]="{ height: 0 }"
+          [value]="control.value"
         >
-          <mat-option
-            *ngIf="!!control.value"
-            class="fact-item"
-            [style]="{ height: 0 }"
-            [value]="control.value"
-          >
-            {{ control.value.name }}
-          </mat-option>
-          <mat-option
-            *cdkVirtualFor="let item of dataSource; trackBy: trackByFn"
-            class="fact-item"
-            [value]="item"
-          >
-            {{ item.name }}
-          </mat-option>
-          <mat-option disabled *ngIf="store.isLoading()">
-            <mat-spinner diameter="35"></mat-spinner>
-          </mat-option>
-        </cdk-virtual-scroll-viewport>
-      </mat-select>
-    </mat-form-field>`,
+          {{ control.value.name }}
+        </mat-option>
+        <mat-option
+          *cdkVirtualFor="let item of dataSource; trackBy: trackByFn"
+          class="fact-item"
+          [value]="item"
+        >
+          {{ item.name }}
+        </mat-option>
+        <mat-option disabled *ngIf="store.isLoading()">
+          <mat-spinner diameter="35"></mat-spinner>
+        </mat-option>
+      </cdk-virtual-scroll-viewport>
+    </mat-select>
+  </mat-form-field>`,
   styles: [
     `
       .fact-scroll-viewport {

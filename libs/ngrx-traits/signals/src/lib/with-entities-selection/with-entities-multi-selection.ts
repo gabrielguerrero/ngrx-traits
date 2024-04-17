@@ -127,15 +127,15 @@ function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
  * store.productsSelectedEntities // Entity[];
  * store.isAllProductsSelected // 'all' | 'none' | 'some';
  * // generates the following methods
- * store.selectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.deselectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.toggleSelectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
  * store.toggleSelectAllProducts // () => void;
  */
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
->(options: {
+>(config: {
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
@@ -189,15 +189,15 @@ export function withEntitiesMultiSelection<
  * store.productsSelectedEntities // Entity[];
  * store.isAllProductsSelected // 'all' | 'none' | 'some';
  * // generates the following methods
- * store.selectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.deselectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.toggleSelectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
  * store.toggleSelectAllProducts // () => void;
  */
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
->(options: {
+>(config: {
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<

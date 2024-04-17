@@ -71,7 +71,7 @@ import type { Sort } from './with-entities-sort.utils';
  * // withHooks(({ productsSort, productsLoading, setProductsError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
  * //                 sortColumn: productsSort().field,
@@ -161,7 +161,7 @@ export function withEntitiesRemoteSort<
  * // withHooks(({ productsSort, productsLoading, setProductsError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
  * //                 sortColumn: productsSort().field,

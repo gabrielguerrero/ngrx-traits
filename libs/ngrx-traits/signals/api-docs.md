@@ -24,8 +24,6 @@ to the store using the setAllEntities method or the setEntitiesLoadResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.
 Requires withEntities and withCallStatus to be present in the store.</p></dd>
-<dt><a href="#withEntitiesMultiSelection">withEntitiesMultiSelection(config)</a></dt>
-<dd><p>Generates state, signals and methods for multi selection of entities</p></dd>
 <dt><a href="#withEntitiesLocalPagination">withEntitiesLocalPagination(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for local pagination of entities in the store.
 Requires withEntities to be present in the store.</p></dd>
@@ -38,6 +36,19 @@ and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
 the result and errors automatically. Requires withEntities and withCallStatus to be used.
 Requires withEntities and withCallStatus to be present in the store.</p></dd>
+<dt><a href="#withEntitiesRemoteScrollPagination">withEntitiesRemoteScrollPagination(config)</a></dt>
+<dd><p>Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
+different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
+of entities keeps growing, ideally for implementing infinite scroll style ui.
+When the page changes, it will try to load the current page from cache if it's not present,
+it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
+and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+and changing the status errors manually
+or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+the result and errors automatically. Requires withEntities and withCallStatus to be used.
+Requires withEntities and withCallStatus to be present in the store.</p></dd>
+<dt><a href="#withEntitiesMultiSelection">withEntitiesMultiSelection(config)</a></dt>
+<dd><p>Generates state, signals and methods for multi selection of entities</p></dd>
 <dt><a href="#withEntitiesSingleSelection">withEntitiesSingleSelection(config)</a></dt>
 <dd><p>Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLocalSort">withEntitiesLocalSort(config)</a></dt>
@@ -81,8 +92,8 @@ const store = signalStore(
  // generates the following signals
  store.usersCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
  // generates the following computed signals
- store.usersLoading // boolean
- store.usersLoaded // boolean
+ store.isUsersLoading // boolean
+ store.isUsersLoaded // boolean
  store.usersError // unknown | null
  // generates the following methods
  store.setUsersLoading // () => void
@@ -122,11 +133,11 @@ withCalls(({ productsSelectedEntity }) => ({
   store.checkoutCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
   store.checkoutResult // the result of the call
   // generates the following computed signals
-  store.loadProductDetailLoading // boolean
-  store.loadProductDetailLoaded // boolean
+  store.isLoadProductDetailLoading // boolean
+  store.isLoadProductDetailLoaded // boolean
   store.loadProductDetailError // string | null
-  store.checkoutLoading // boolean
-  store.checkoutLoaded // boolean
+  store.isCheckoutLoading // boolean
+  store.isCheckoutLoaded // boolean
   store.checkoutError // string | null
   // generates the following methods
   store.loadProductDetail // ({id: string}) => void
@@ -168,10 +179,13 @@ const store = signalStore(
   }),
  );
 
- // generates the following signals
+// generates the following signals
  store.productsFilter // { search: string }
- // generates the following methods signals
-store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ // generates the following computed signals
+ store.isProductsFilterChanged // boolean
+ // generates the following methods
+ store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ store.resetProductsFilter  // () => void
 ```
 <a name="withEntitiesRemoteFilter"></a>
 
@@ -221,11 +235,11 @@ export const store = signalStore(
 // withHooks(({ productsLoading, setProductsError, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
-//       if (productsLoading()) {
+//       if (isProductsLoading()) {
 //         inject(ProductService)
-              .getProducts({
-                 search: productsFilter().name,
-               })
+//              .getProducts({
+//                 search: productsFilter().name,
+//               })
 //           .pipe(
 //             takeUntilDestroyed(),
 //             tap((res) =>
@@ -244,10 +258,13 @@ export const store = signalStore(
 //     });
 //   },
  })),
- // generates the following signals
- store.productsFilter // { name: string } stored filter
+// generates the following signals
+ store.productsFilter // { search: string }
+ // generates the following computed signals
+ store.isProductsFilterChanged // boolean
  // generates the following methods
- store.filterProductsEntities  // (options: { filter: { name: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ store.resetProductsFilter  // () => void
 ```
 <a name="withEntitiesLoadingCall"></a>
 
@@ -315,40 +332,6 @@ export const ProductsRemoteStore = signalStore(
         );
     },
   }),
-```
-<a name="withEntitiesMultiSelection"></a>
-
-## withEntitiesMultiSelection(config)
-<p>Generates state, signals and methods for multi selection of entities</p>
-
-**Kind**: global function  
-
-| Param | Description |
-| --- | --- |
-| config |  |
-| config.entity | <p>the entity type</p> |
-| config.collection | <p>the collection name</p> |
-
-**Example**  
-```js
-const entity = type<Product>();
-const collection = 'products';
-export const store = signalStore(
-  { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withEntitiesMultiSelection({ entity, collection }),
-  );
-
-// generates the following signals
-store.productsSelectedIdsMap // Record<string | number, boolean>;
-// generates the following computed signals
-store.productsSelectedEntities // Entity[];
-store.isAllProductsSelected // 'all' | 'none' | 'some';
-// generates the following methods
-store.selectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
-store.deselectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
-store.toggleSelectProducts // (options: { id: string | number } | { ids: (string | number)[] }) => void;
-store.toggleSelectAllProducts // () => void;
 ```
 <a name="withEntitiesLocalPagination"></a>
 
@@ -447,7 +430,7 @@ export const store = signalStore(
 // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
-//       if (productsLoading()) {
+//       if (isProductsLoading()) {
 //         inject(ProductService)
 //             .getProducts({
 //                take: productsPagedRequest().size,
@@ -479,6 +462,140 @@ export const store = signalStore(
  // generates the following methods
  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+```
+<a name="withEntitiesRemoteScrollPagination"></a>
+
+## withEntitiesRemoteScrollPagination(config)
+<p>Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
+different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
+of entities keeps growing, ideally for implementing infinite scroll style ui.
+When the page changes, it will try to load the current page from cache if it's not present,
+it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
+and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+and changing the status errors manually
+or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+the result and errors automatically. Requires withEntities and withCallStatus to be used.
+Requires withEntities and withCallStatus to be present in the store.</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config |  |
+| config.pageSize | <p>The number of entities to show per page</p> |
+| config.pagesToCache | <p>The number of pages to cache</p> |
+| config.entity | <p>The entity type</p> |
+| config.collection | <p>The name of the collection</p> |
+
+**Example**  
+```js
+const entity = type<Product>();
+const collection = 'products';
+export const store = signalStore(
+  { providedIn: 'root' },
+  // required withEntities and withCallStatus
+  withEntities({ entity, collection }),
+  withCallStatus({ prop: collection, initialValue: 'loading' }),
+
+  withEntitiesRemoteScrollPagination({
+    entity,
+    collection,
+    pageSize: 5,
+    pagesToCache: 2,
+  })
+  // after you can use withEntitiesLoadingCall to connect the filter to
+  // the api call, or do it manually as shown after
+   withEntitiesLoadingCall({
+    collection,
+    fetchEntities: ({ productsPagedRequest }) => {
+      return inject(ProductService)
+        .getProducts({
+          take: productsPagedRequest().size,
+          skip: productsPagedRequest().startIndex,
+        }).pipe(
+          map((d) => ({
+            entities: d.resultList,
+            total: d.total,
+          })),
+        )
+    },
+  }),
+// withEntitiesLoadingCall is the same as doing the following:
+// withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
+//   onInit: async () => {
+//     effect(() => {
+//       if (isProductsLoading()) {
+//         inject(ProductService)
+//             .getProducts({
+//                take: productsPagedRequest().size,
+//                skip: productsPagedRequest().startIndex,
+//              })
+//           .pipe(
+//             takeUntilDestroyed(),
+//             tap((res) =>
+//               patchState(
+//                 state,
+//                 setProductsLoadResult(res.resultList, res.total),
+//               ),
+//             ),
+//             catchError((error) => {
+//               setProductsError(error);
+//               return EMPTY;
+//             }),
+//           )
+//           .subscribe();
+//       }
+//     });
+//   },
+ })),
+
+ // in your component add
+ store = inject(ProductsRemoteStore);
+ dataSource = getInfiniteScrollDataSource(store, { collecrion: 'products' }) // pass this to your cdkVirtualFor see examples section
+  // generates the following signals
+  store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+ // generates the following computed signals
+ store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, loading: boolean }
+ store.productsPagedRequest // { startIndex: number, size: number, page: number }
+ // generates the following methods
+ store.loadProductsNextPage() // loads next page
+ store.loadProductsPreviousPage() // loads previous page
+ store.loadProductsFirstPage() // loads first page
+ store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+```
+<a name="withEntitiesMultiSelection"></a>
+
+## withEntitiesMultiSelection(config)
+<p>Generates state, signals and methods for multi selection of entities</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config |  |
+| config.entity | <p>the entity type</p> |
+| config.collection | <p>the collection name</p> |
+
+**Example**  
+```js
+const entity = type<Product>();
+const collection = 'products';
+export const store = signalStore(
+  { providedIn: 'root' },
+  withEntities({ entity, collection }),
+  withEntitiesMultiSelection({ entity, collection }),
+  );
+
+// generates the following signals
+store.productsSelectedIdsMap // Record<string | number, boolean>;
+// generates the following computed signals
+store.productsSelectedEntities // Entity[];
+store.isAllProductsSelected // 'all' | 'none' | 'some';
+// generates the following methods
+store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+store.toggleSelectAllProducts // () => void;
 ```
 <a name="withEntitiesSingleSelection"></a>
 
@@ -514,9 +631,9 @@ export const store = signalStore(
  // generates the following computed signals
  store.productsSelectedEntity // Entity | undefined
  // generates the following methods
- store.selectProductEntity // (options: { id: string | number }) => void
- store.deselectProductEntity // (options: { id: string | number }) => void
- store.toggleProductEntity // (options: { id: string | number }) => void
+ store.selectProductEntity // (config: { id: string | number }) => void
+ store.deselectProductEntity // (config: { id: string | number }) => void
+ store.toggleProductEntity // (config: { id: string | number }) => void
 ```
 <a name="withEntitiesLocalSort"></a>
 
@@ -600,7 +717,7 @@ export const store = signalStore(
 // withHooks(({ productsSort, productsLoading, setProductsError, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
-//       if (productsLoading()) {
+//       if (isProductsLoading()) {
 //         inject(ProductService)
 //             .getProducts({
 //                 sortColumn: productsSort().field,

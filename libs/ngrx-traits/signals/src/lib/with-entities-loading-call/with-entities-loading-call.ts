@@ -1,5 +1,4 @@
 import {
-  effect,
   EnvironmentInjector,
   inject,
   runInInjectionContext,
@@ -21,7 +20,6 @@ import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type {
   EmptyFeatureResult,
   SignalStoreFeatureResult,
@@ -37,7 +35,6 @@ import {
   Observable,
   of,
   switchMap,
-  tap,
 } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -50,11 +47,7 @@ import {
   NamedCallStateMethods,
 } from '../with-call-status/with-call-status';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import {
-  EntitiesPaginationRemoteMethods,
-  NamedEntitiesPaginationRemoteMethods,
-  NamedEntitiesPaginationSetResultMethods,
-} from '../with-entities-pagination/with-entities-remote-pagination';
+import { EntitiesPaginationRemoteMethods } from '../with-entities-pagination/with-entities-remote-pagination';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
 
 /**
