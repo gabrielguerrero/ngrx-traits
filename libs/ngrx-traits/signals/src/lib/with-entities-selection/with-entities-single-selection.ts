@@ -100,14 +100,14 @@ function getEntitiesSingleSelectionKeys(config?: { collection?: string }) {
  *  // generates the following computed signals
  *  store.productsSelectedEntity // Entity | undefined
  *  // generates the following methods
- *  store.selectProductEntity // (options: { id: string | number }) => void
- *  store.deselectProductEntity // (options: { id: string | number }) => void
- *  store.toggleProductEntity // (options: { id: string | number }) => void
+ *  store.selectProductEntity // (config: { id: string | number }) => void
+ *  store.deselectProductEntity // (config: { id: string | number }) => void
+ *  store.toggleProductEntity // (config: { id: string | number }) => void
  */
 
 export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
->(options: {
+>(config: {
   entity?: Entity;
 }): SignalStoreFeature<
   {
@@ -147,14 +147,14 @@ export function withEntitiesSingleSelection<
  *  // generates the following computed signals
  *  store.productsSelectedEntity // Entity | undefined
  *  // generates the following methods
- *  store.selectProductEntity // (options: { id: string | number }) => void
- *  store.deselectProductEntity // (options: { id: string | number }) => void
- *  store.toggleProductEntity // (options: { id: string | number }) => void
+ *  store.selectProductEntity // (config: { id: string | number }) => void
+ *  store.deselectProductEntity // (config: { id: string | number }) => void
+ *  store.toggleProductEntity // (config: { id: string | number }) => void
  */
 export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
   Collection extends string,
->(options: {
+>(config: {
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<

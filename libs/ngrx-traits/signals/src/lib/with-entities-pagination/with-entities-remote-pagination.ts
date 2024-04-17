@@ -26,8 +26,6 @@ import {
   NamedCallStateMethods,
 } from '../with-call-status/with-call-status';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
-import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 import type {
   EntitiesPaginationLocalMethods,
   NamedEntitiesPaginationLocalMethods,
@@ -167,7 +165,7 @@ export type NamedEntitiesPaginationRemoteMethods<
  * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
  * //                take: productsPagedRequest().size,
@@ -270,7 +268,7 @@ export function withEntitiesRemotePagination<
  * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
  * //                take: productsPagedRequest().size,
@@ -378,7 +376,7 @@ export function withEntitiesRemotePagination<
  * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (productsLoading()) {
+ * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
  * //                take: productsPagedRequest().size,

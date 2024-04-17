@@ -87,11 +87,11 @@ export type ExtractCallParams<T extends Call | CallConfig> =
  *   store.checkoutCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
  *   store.checkoutResult // the result of the call
  *   // generates the following computed signals
- *   store.loadProductDetailLoading // boolean
- *   store.loadProductDetailLoaded // boolean
+ *   store.isLoadProductDetailLoading // boolean
+ *   store.isLoadProductDetailLoaded // boolean
  *   store.loadProductDetailError // string | null
- *   store.checkoutLoading // boolean
- *   store.checkoutLoaded // boolean
+ *   store.isCheckoutLoading // boolean
+ *   store.isCheckoutLoaded // boolean
  *   store.checkoutError // string | null
  *   // generates the following methods
  *   store.loadProductDetail // ({id: string}) => void
