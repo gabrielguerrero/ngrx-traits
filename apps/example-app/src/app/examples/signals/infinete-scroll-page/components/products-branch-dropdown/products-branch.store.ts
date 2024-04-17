@@ -1,10 +1,9 @@
 import { inject } from '@angular/core';
 import {
-  withCalls,
   withCallStatus,
-  withEntitiesInfinitePagination,
   withEntitiesLoadingCall,
   withEntitiesRemoteFilter,
+  withEntitiesRemoteScrollPagination,
   withLogger,
 } from '@ngrx-traits/signals';
 import { signalStore, type } from '@ngrx/signals';
@@ -24,7 +23,7 @@ export const ProductsBranchStore = signalStore(
     entity,
     defaultFilter: { search: '' },
   }),
-  withEntitiesInfinitePagination({
+  withEntitiesRemoteScrollPagination({
     pageSize: 10,
     entity,
   }),

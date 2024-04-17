@@ -67,8 +67,8 @@ export type NamedCallStateMethods<Prop extends string> = {
  *  // generates the following signals
  *  store.usersCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
  *  // generates the following computed signals
- *  store.usersLoading // boolean
- *  store.usersLoaded // boolean
+ *  store.isUsersLoading // boolean
+ *  store.isUsersLoaded // boolean
  *  store.usersError // unknown | null
  *  // generates the following methods
  *  store.setUsersLoading // () => void
@@ -106,8 +106,8 @@ export function withCallStatus(config?: {
  *  // generates the following signals
  *  store.usersCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
  *  // generates the following computed signals
- *  store.usersLoading // boolean
- *  store.usersLoaded // boolean
+ *  store.isUsersLoading // boolean
+ *  store.isUsersLoaded // boolean
  *  store.usersError // unknown | null
  *  // generates the following methods
  *  store.setUsersLoading // () => void

@@ -9,7 +9,7 @@ import { capitalize } from '../util';
 import {
   EntitiesPaginationInfiniteState,
   InfinitePaginationState,
-} from './with-entities-infinite-pagination';
+} from './with-entities-remote-scroll-pagination';
 
 export function getWithEntitiesRemotePaginationKeys(config?: {
   collection?: string;

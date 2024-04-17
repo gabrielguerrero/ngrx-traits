@@ -1,18 +1,13 @@
-import { computed, effect, Signal } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
-  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
-import {
-  EntityState,
-  NamedEntityState,
-  setAllEntities,
-} from '@ngrx/signals/entities';
+import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
   EntitySignals,
   NamedEntitySignals,
@@ -20,8 +15,6 @@ import {
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { combineFunctions, getWithEntitiesKeys } from '../util';
-import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
-import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 import { getWithEntitiesLocalPaginationKeys } from './with-entities-local-pagination.util';
 
 export type EntitiesPaginationLocalState = {
