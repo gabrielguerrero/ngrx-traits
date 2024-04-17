@@ -2,8 +2,6 @@ export function capitalize(name: string) {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
-export type Prettify<T> = { [K in keyof T]: T[K] } & {};
-
 export function getWithEntitiesKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   return {

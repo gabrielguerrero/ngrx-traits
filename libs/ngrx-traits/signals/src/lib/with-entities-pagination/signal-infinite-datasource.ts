@@ -1,10 +1,6 @@
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import {
-  getWithEntitiesKeys,
-  InfinitePaginationState,
-} from '@ngrx-traits/signals';
 import type {
   EntitySignals,
   NamedEntitySignals,
@@ -12,11 +8,13 @@ import type {
 import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { getWithEntitiesInfinitePaginationKeys } from '../../../../../../libs/ngrx-traits/signals/src/lib/with-entities-pagination/with-entities-infinite-pagination.util';
+import { getWithEntitiesKeys } from '../util';
+import { getWithEntitiesInfinitePaginationKeys } from './with-entities-infinite-pagination.util';
+import { InfinitePaginationState } from './with-entities-remote-scroll-pagination.model';
 import {
   EntitiesPaginationInfiniteMethods,
   NamedEntitiesPaginationInfiniteMethods,
-} from './with-entities-remote-scroll-pagination';
+} from './with-entities-remote-scroll-pagination.model';
 
 export function getInfiniteScrollDataSource<Entity, Collection extends string>(
   options:

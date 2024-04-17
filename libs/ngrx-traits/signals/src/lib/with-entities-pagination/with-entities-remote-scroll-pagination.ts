@@ -21,96 +21,24 @@ import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
-  CallStateComputed,
-  CallStateMethods,
-  NamedCallStateComputed,
-  NamedCallStateMethods,
-} from '../with-call-status/with-call-status';
+  CallStatusComputed,
+  CallStatusMethods,
+  NamedCallStatusComputed,
+  NamedCallStatusMethods,
+} from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesInfinitePaginationKeys } from './with-entities-infinite-pagination.util';
-import type { EntitiesPaginationLocalMethods } from './with-entities-local-pagination';
 import { loadEntitiesPageFactory } from './with-entities-remote-pagination.util';
+import {
+  EntitiesPaginationInfiniteComputed,
+  EntitiesPaginationInfiniteMethods,
+  EntitiesPaginationInfiniteState,
+  InfinitePaginationState,
+  NamedEntitiesPaginationInfiniteComputed,
+  NamedEntitiesPaginationInfiniteMethods,
+  NamedEntitiesPaginationInfiniteState,
+} from './with-entities-remote-scroll-pagination.model';
 
-export type InfinitePaginationState = {
-  currentPage: number;
-  requestPage: number;
-  pageSize: number;
-  total: number | undefined;
-  pagesToCache: number;
-  cache: {
-    start: number;
-    end: number;
-  };
-};
-
-export type EntitiesPaginationInfiniteState = {
-  entitiesPagination: InfinitePaginationState;
-};
-
-export type NamedEntitiesPaginationInfiniteState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: InfinitePaginationState;
-};
-
-export type EntitiesPaginationInfiniteComputed = {
-  entitiesPageInfo: Signal<{
-    pageIndex: number;
-    total: number | undefined;
-    pageSize: number;
-    pagesCount: number | undefined;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    loading: boolean;
-  }>;
-  entitiesPagedRequest: Signal<{
-    startIndex: number;
-    size: number;
-    page: number;
-  }>;
-};
-export type NamedEntitiesPaginationInfiniteComputed<
-  Entity,
-  Collection extends string,
-> = {
-  [K in Collection as `${K}PagedRequest`]: Signal<{
-    startIndex: number;
-    size: number;
-    page: number;
-  }>;
-} & {
-  [K in Collection as `${K}PageInfo`]: Signal<{
-    entities: Entity[];
-    pageIndex: number;
-    total: number | undefined;
-    pageSize: number;
-    pagesCount: number | undefined;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    loading: boolean;
-  }>;
-};
-export type EntitiesPaginationInfiniteMethods<Entity> =
-  EntitiesPaginationLocalMethods & {
-    setEntitiesLoadedResult: (entities: Entity[], total: number) => void;
-    loadEntitiesNextPage: () => void;
-    loadEntitiesPreviousPage: () => void;
-    loadEntitiesFirstPage: () => void;
-  };
-
-export type NamedEntitiesPaginationInfiniteMethods<
-  Entity,
-  Collection extends string,
-> = {
-  [K in Collection as `set${Capitalize<string & K>}LoadedResult`]: (
-    entities: Entity[],
-    total: number,
-  ) => void;
-} & {
-  [K in Collection as `load${Capitalize<string & K>}NextPage`]: () => void;
-} & {
-  [K in Collection as `load${Capitalize<string & K>}PreviousPage`]: () => void;
-} & {
-  [K in Collection as `load${Capitalize<string & K>}FirstPage`]: () => void;
-};
 /**
  * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
  * different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
@@ -213,8 +141,8 @@ export function withEntitiesRemoteScrollPagination<
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity> & CallStateComputed;
-    methods: CallStateMethods;
+    signals: EntitySignals<Entity> & CallStatusComputed;
+    methods: CallStatusMethods;
   },
   {
     state: EntitiesPaginationInfiniteState;
@@ -328,8 +256,8 @@ export function withEntitiesRemoteScrollPagination<
   {
     state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
     signals: NamedEntitySignals<Entity, Collection> &
-      NamedCallStateComputed<Collection>;
-    methods: NamedCallStateMethods<Collection>;
+      NamedCallStatusComputed<Collection>;
+    methods: NamedCallStatusMethods<Collection>;
   },
   {
     state: NamedEntitiesPaginationInfiniteState<Collection>;

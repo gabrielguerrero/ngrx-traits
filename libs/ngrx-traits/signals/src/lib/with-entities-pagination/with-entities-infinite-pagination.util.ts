@@ -1,4 +1,4 @@
-import { capitalize } from '@ngrx-traits/signals';
+import { capitalize } from '../util';
 
 export function getWithEntitiesInfinitePaginationKeys(config?: {
   collection?: string;

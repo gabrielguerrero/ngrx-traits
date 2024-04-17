@@ -39,15 +39,15 @@ import {
 import { filter } from 'rxjs/operators';
 
 import {
-  CallState,
-  CallStateComputed,
-  CallStateMethods,
-  NamedCallState,
-  NamedCallStateComputed,
-  NamedCallStateMethods,
-} from '../with-call-status/with-call-status';
+  CallStatusComputed,
+  CallStatusMethods,
+  CallStatusState,
+  NamedCallStatusComputed,
+  NamedCallStatusMethods,
+  NamedCallStatusState,
+} from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { EntitiesPaginationRemoteMethods } from '../with-entities-pagination/with-entities-remote-pagination';
+import { EntitiesPaginationRemoteMethods } from '../with-entities-pagination/with-entities-remote-pagination.model';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
 
 /**
@@ -134,9 +134,9 @@ export function withEntitiesLoadingCall<
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 }): SignalStoreFeature<
   Input & {
-    state: EntityState<Entity> & CallState;
-    signals: EntitySignals<Entity> & CallStateComputed;
-    methods: CallStateMethods;
+    state: EntityState<Entity> & CallStatusState;
+    signals: EntitySignals<Entity> & CallStatusComputed;
+    methods: CallStatusMethods;
   },
   EmptyFeatureResult
 >;
@@ -241,10 +241,11 @@ export function withEntitiesLoadingCall<
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 }): SignalStoreFeature<
   Input & {
-    state: NamedEntityState<Entity, Collection> & NamedCallState<Collection>;
+    state: NamedEntityState<Entity, Collection> &
+      NamedCallStatusState<Collection>;
     signals: NamedEntitySignals<Entity, Collection> &
-      NamedCallStateComputed<Collection>;
-    methods: NamedCallStateMethods<Collection>;
+      NamedCallStatusComputed<Collection>;
+    methods: NamedCallStatusMethods<Collection>;
   },
   EmptyFeatureResult
 >;

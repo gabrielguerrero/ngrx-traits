@@ -8,44 +8,16 @@ import {
   withState,
 } from '@ngrx/signals';
 
+import {
+  CallStatus,
+  CallStatusComputed,
+  CallStatusMethods,
+  CallStatusState,
+  NamedCallStatusComputed,
+  NamedCallStatusMethods,
+  NamedCallStatusState,
+} from './with-call-status.model';
 import { getWithCallStatusKeys } from './with-call-status.util';
-
-export type CallStatus = 'init' | 'loading' | 'loaded' | { error: unknown };
-
-export type CallState = {
-  callStatus: CallStatus;
-};
-export type CallStateComputed = {
-  isLoading: Signal<boolean>;
-} & {
-  isLoaded: Signal<boolean>;
-} & {
-  error: Signal<string | null>;
-};
-export type CallStateMethods = {
-  setLoading: () => void;
-} & {
-  setLoaded: () => void;
-} & {
-  setError: (error?: unknown) => void;
-};
-export type NamedCallState<Prop extends string> = {
-  [K in Prop as `${K}CallStatus`]: CallStatus;
-};
-export type NamedCallStateComputed<Prop extends string> = {
-  [K in Prop as `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
-} & {
-  [K in Prop as `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
-} & {
-  [K in Prop as `${K}Error`]: Signal<string | null>;
-};
-export type NamedCallStateMethods<Prop extends string> = {
-  [K in Prop as `set${Capitalize<string & K>}Loading`]: () => void;
-} & {
-  [K in Prop as `set${Capitalize<string & K>}Loaded`]: () => void;
-} & {
-  [K in Prop as `set${Capitalize<string & K>}Error`]: (error?: unknown) => void;
-};
 
 /**
  * Generates necessary state, computed and methods for call progress status to the store
@@ -80,9 +52,9 @@ export function withCallStatus(config?: {
 }): SignalStoreFeature<
   { state: {}; signals: {}; methods: {} },
   {
-    state: CallState;
-    signals: CallStateComputed;
-    methods: CallStateMethods;
+    state: CallStatusState;
+    signals: CallStatusComputed;
+    methods: CallStatusMethods;
   }
 >;
 
@@ -127,9 +99,9 @@ export function withCallStatus<Prop extends string>(
 ): SignalStoreFeature<
   { state: {}; signals: {}; methods: {} },
   {
-    state: NamedCallState<Prop>;
-    signals: NamedCallStateComputed<Prop>;
-    methods: NamedCallStateMethods<Prop>;
+    state: NamedCallStatusState<Prop>;
+    signals: NamedCallStatusComputed<Prop>;
+    methods: NamedCallStatusMethods<Prop>;
   }
 >;
 export function withCallStatus<Prop extends string>({
