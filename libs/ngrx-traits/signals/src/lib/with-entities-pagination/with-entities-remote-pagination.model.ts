@@ -31,7 +31,7 @@ export type EntitiesPaginationRemoteComputed<Entity> = {
     pagesCount: number | undefined;
     hasPrevious: boolean;
     hasNext: boolean;
-    loading: boolean;
+    isLoading: boolean;
   }>;
   entitiesPagedRequest: Signal<{
     startIndex: number;
@@ -57,7 +57,7 @@ export type NamedEntitiesPaginationRemoteComputed<
     pagesCount: number | undefined;
     hasPrevious: boolean;
     hasNext: boolean;
-    loading: boolean;
+    isLoading: boolean;
   }>;
 };
 export type EntitiesPaginationRemoteMethods<Entity> =

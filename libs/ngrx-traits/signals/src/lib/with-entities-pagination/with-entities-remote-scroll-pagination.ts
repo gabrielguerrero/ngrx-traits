@@ -27,7 +27,6 @@ import {
   NamedCallStatusMethods,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { getWithEntitiesInfinitePaginationKeys } from './with-entities-infinite-pagination.util';
 import { loadEntitiesPageFactory } from './with-entities-remote-pagination.util';
 import {
   EntitiesPaginationInfiniteComputed,
@@ -38,6 +37,7 @@ import {
   NamedEntitiesPaginationInfiniteMethods,
   NamedEntitiesPaginationInfiniteState,
 } from './with-entities-remote-scroll-pagination.model';
+import { getWithEntitiesInfinitePaginationKeys } from './with-entities-remote-scroll-pagination.util';
 
 /**
  * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
@@ -123,7 +123,7 @@ import {
  *   // generates the following signals
  *   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  *  // generates the following computed signals
- *  store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, loading: boolean }
+ *  store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsNextPage() // loads next page
@@ -235,7 +235,7 @@ export function withEntitiesRemoteScrollPagination<
  *   // generates the following signals
  *   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  *  // generates the following computed signals
- *  store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, loading: boolean }
+ *  store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsNextPage() // loads next page
@@ -329,7 +329,7 @@ export function withEntitiesRemoteScrollPagination<
             pagesCount && pagination().total && pagination().total! > 0
               ? pagination().currentPage + 1 < pagesCount
               : true,
-          loading:
+          isLoading:
             loading() && pagination().requestPage === pagination().currentPage,
         };
       });
