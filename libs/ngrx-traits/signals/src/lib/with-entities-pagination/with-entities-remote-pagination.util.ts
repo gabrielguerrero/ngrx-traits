@@ -7,9 +7,9 @@ import { distinctUntilChanged, exhaustMap, first, pipe, tap } from 'rxjs';
 
 import { capitalize } from '../util';
 import {
-  EntitiesPaginationInfiniteState,
-  InfinitePaginationState,
-} from './with-entities-remote-scroll-pagination';
+  EntitiesPaginationRemoteState,
+  PaginationState,
+} from './with-entities-remote-pagination.model';
 
 export function getWithEntitiesRemotePaginationKeys(config?: {
   collection?: string;
@@ -38,12 +38,12 @@ export function isEntitiesInCache(
   options:
     | {
         page: number;
-        pagination: EntitiesPaginationInfiniteState['entitiesPagination'];
+        pagination: EntitiesPaginationRemoteState['entitiesPagination'];
       }
     | {
         start: number;
         end: number;
-        pagination: EntitiesPaginationInfiniteState['entitiesPagination'];
+        pagination: EntitiesPaginationRemoteState['entitiesPagination'];
       },
 ) {
   const pagination = options.pagination;
@@ -68,7 +68,7 @@ export function loadEntitiesPageFactory(
 ) {
   const isLoading = state[loadingKey] as Signal<boolean>;
   const $loading = toObservable(isLoading);
-  const pagination = state[paginationKey] as Signal<InfinitePaginationState>;
+  const pagination = state[paginationKey] as Signal<PaginationState>;
   const setLoading = state[setLoadingKey] as () => void;
 
   const loadEntitiesPage = rxMethod<{

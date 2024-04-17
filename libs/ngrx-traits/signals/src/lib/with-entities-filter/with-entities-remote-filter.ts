@@ -17,21 +17,21 @@ import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
 import { combineFunctions, getWithEntitiesKeys } from '../util';
-import type {
-  CallStateMethods,
-  NamedCallStateMethods,
-} from '../with-call-status/with-call-status';
+import {
+  CallStatusMethods,
+  NamedCallStatusMethods,
+} from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   debounceFilterPipe,
   getWithEntitiesFilterKeys,
 } from './with-entities-filter.util';
-import type {
+import {
   EntitiesFilterMethods,
   EntitiesFilterState,
   NamedEntitiesFilterMethods,
   NamedEntitiesFilterState,
-} from './with-entities-local-filter';
+} from './with-entities-local-filter.model';
 
 /**
  * Generates necessary state, computed and methods for remotely filtering entities in the store,
@@ -114,7 +114,7 @@ export function withEntitiesRemoteFilter<
   {
     state: EntityState<Entity>;
     signals: EntitySignals<Entity>;
-    methods: CallStateMethods;
+    methods: CallStatusMethods;
   },
   {
     state: EntitiesFilterState<Filter>;
@@ -206,7 +206,7 @@ export function withEntitiesRemoteFilter<
   {
     state: NamedEntityState<Entity, any>;
     signals: NamedEntitySignals<Entity, Collection>;
-    methods: NamedCallStateMethods<Collection>;
+    methods: NamedCallStatusMethods<Collection>;
   },
   {
     state: NamedEntitiesFilterState<Collection, Filter>;

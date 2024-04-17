@@ -18,25 +18,16 @@ import {
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { getWithEntitiesKeys } from '../util';
+import {
+  EntitiesSortMethods,
+  EntitiesSortState,
+  NamedEntitiesSortMethods,
+  NamedEntitiesSortState,
+} from './with-entities-local-sort.model';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 import { Sort, sortData, SortDirection } from './with-entities-sort.utils';
 
-export type EntitiesSortState<Entity> = {
-  entitiesSort: Sort<Entity>;
-};
-export type NamedEntitiesSortState<Entity, Collection extends string> = {
-  [K in Collection as `${K}Sort`]: Sort<Entity>;
-};
-
 export { SortDirection };
-export type EntitiesSortMethods<Entity> = {
-  sortEntities: (options: { sort: Sort<Entity> }) => void;
-};
-export type NamedEntitiesSortMethods<Entity, Collection extends string> = {
-  [K in Collection as `sort${Capitalize<string & K>}Entities`]: (options: {
-    sort: Sort<Entity>;
-  }) => void;
-};
 
 /**
  * Generates necessary state, computed and methods for sorting locally entities in the store. Requires withEntities to be present before this function
