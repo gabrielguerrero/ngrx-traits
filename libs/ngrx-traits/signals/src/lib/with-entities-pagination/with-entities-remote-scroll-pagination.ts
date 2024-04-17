@@ -289,7 +289,7 @@ export function withEntitiesRemoteScrollPagination<
     loadEntitiesFirstPageKey,
     loadEntitiesPreviousPageKey,
     entitiesPageInfoKey,
-    setEntitiesLoadResultKey,
+    setEntitiesPagedResultKey,
     entitiesPagedRequestKey,
     paginationKey,
   } = getWithEntitiesInfinitePaginationKeys(config);
@@ -377,7 +377,13 @@ export function withEntitiesRemoteScrollPagination<
             );
           },
         ),
-        [setEntitiesLoadResultKey]: (entities: Entity[], total: number) => {
+        [setEntitiesPagedResultKey]: ({
+          entities,
+          total,
+        }: {
+          entities: Entity[];
+          total: number;
+        }) => {
           patchState(
             state as StateSignal<object>,
             config.collection
