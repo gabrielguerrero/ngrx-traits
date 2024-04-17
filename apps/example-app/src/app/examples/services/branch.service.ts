@@ -1,39 +1,36 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
-import {
-  Product,
-  ProductsStore,
-  ProductsStoreDetail,
-  ProductsStoreResponse,
-} from '../models';
+import { Branch, BranchDetail, BranchResponse, Product } from '../models';
 
 @Injectable({ providedIn: 'root' })
-export class ProductsStoreService {
+export class BranchService {
   constructor(private httpClient: HttpClient) {}
 
-  getStores(options?: {
+  getBranches(options?: {
     search?: string | undefined;
     sortColumn?: keyof Product | string | undefined;
     sortAscending?: boolean | undefined;
     skip?: number | undefined;
     take?: number | undefined;
-  }) {
-    console.log('getStores', options);
+  }): Observable<BranchResponse> {
     return this.httpClient
-      .get<ProductsStoreResponse>('/stores', {
+      .get<BranchResponse>('/branches', {
         params: { ...options, search: options?.search ?? '' },
       })
       .pipe(delay(500));
   }
-  getStoreDetails(id: number) {
+  getBranchDetails(id: number) {
     return this.httpClient
-      .get<ProductsStoreDetail>('/stores/' + id)
+      .get<BranchDetail>('/branches/' + id)
       .pipe(delay(500));
   }
 
-  getStoreDepartments(storeId: number) {
-    return this.getStoreDetails(storeId).pipe(map((v) => v?.departments || []));
+  getBranchDepartments(storeId: number) {
+    return this.getBranchDetails(storeId).pipe(
+      map((v) => v?.departments || []),
+    );
   }
 }

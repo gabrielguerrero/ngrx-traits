@@ -1,21 +1,22 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { Injectable } from '@angular/core';
+import {
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+} from '@ngrx-traits/common';
 import {
   cache,
   createEntityFeatureFactory,
   LocalTraitsConfig,
   TraitsLocalStore,
 } from '@ngrx-traits/core';
-import {
-  addFilterEntitiesTrait,
-  addLoadEntitiesTrait,
-} from '@ngrx-traits/common';
-import { Department, DepartmentFilter } from '../../../models';
-import { Injectable } from '@angular/core';
-import { ProductsStoreService } from '../../../services/products-store.service';
-import { catchError, exhaustMap, map } from 'rxjs/operators';
 import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { storeCacheKeys } from '../store-dropdown/store.local-traits';
+import { catchError, exhaustMap, map } from 'rxjs/operators';
+
+import { Department, DepartmentFilter } from '../../../models';
+import { BranchService } from '../../../services/branch.service';
+import { storeCacheKeys } from '../branch-dropdown/store.local-traits';
 
 const departmentFeatureFactory = createEntityFeatureFactory(
   { entityName: 'department' },
@@ -29,14 +30,14 @@ const departmentFeatureFactory = createEntityFeatureFactory(
     },
     isRemoteFilter: (previous, current) =>
       previous?.storeId !== current?.storeId,
-  })
+  }),
 );
 
 @Injectable()
 export class DepartmentLocalTraits extends TraitsLocalStore<
   typeof departmentFeatureFactory
 > {
-  constructor(private storeService: ProductsStoreService) {
+  constructor(private storeService: BranchService) {
     super();
     this.traits.addEffects(this);
   }
@@ -45,24 +46,24 @@ export class DepartmentLocalTraits extends TraitsLocalStore<
     return this.actions$.pipe(
       ofType(this.localActions.loadDepartments),
       concatLatestFrom(() =>
-        this.store.select(this.localSelectors.selectDepartmentsFilter)
+        this.store.select(this.localSelectors.selectDepartmentsFilter),
       ),
       exhaustMap(([, filters]) =>
         cache({
           key: storeCacheKeys.departments(filters!.storeId),
           store: this.store,
-          source: this.storeService.getStoreDepartments(filters!.storeId),
+          source: this.storeService.getBranchDepartments(filters!.storeId),
           expires: 1000 * 60 * 3,
           maxCacheSize: 3,
         }).pipe(
           map((res) =>
             this.localActions.loadDepartmentsSuccess({
               entities: res,
-            })
+            }),
           ),
-          catchError(() => of(this.localActions.loadDepartmentsFail()))
-        )
-      )
+          catchError(() => of(this.localActions.loadDepartmentsFail())),
+        ),
+      ),
     );
   });
 

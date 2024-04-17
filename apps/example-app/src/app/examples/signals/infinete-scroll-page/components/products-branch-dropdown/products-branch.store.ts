@@ -10,10 +10,10 @@ import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { lastValueFrom } from 'rxjs';
 
-import { ProductsStore } from '../../../../models';
-import { ProductsStoreService } from '../../../../services/products-store.service';
+import { Branch } from '../../../../models';
+import { BranchService } from '../../../../services/branch.service';
 
-const entity = type<ProductsStore>();
+const entity = type<Branch>();
 export const ProductsBranchStore = signalStore(
   withEntities({
     entity,
@@ -30,7 +30,7 @@ export const ProductsBranchStore = signalStore(
   withEntitiesLoadingCall({
     fetchEntities: async ({ entitiesPagedRequest, entitiesFilter }) => {
       const res = await lastValueFrom(
-        inject(ProductsStoreService).getStores({
+        inject(BranchService).getBranches({
           search: entitiesFilter().search,
           skip: entitiesPagedRequest().startIndex,
           take: entitiesPagedRequest().size,

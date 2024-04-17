@@ -1,19 +1,20 @@
+import { Injectable } from '@angular/core';
+import {
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+} from '@ngrx-traits/common';
 import {
   cache,
   createEntityFeatureFactory,
   LocalTraitsConfig,
   TraitsLocalStore,
 } from '@ngrx-traits/core';
-import {
-  addFilterEntitiesTrait,
-  addLoadEntitiesTrait,
-} from '@ngrx-traits/common';
-import { ProductsStore, ProductsStoreFilter } from '../../../models';
-import { Injectable } from '@angular/core';
-import { ProductsStoreService } from '../../../services/products-store.service';
-import { catchError, exhaustMap, map } from 'rxjs/operators';
 import { createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
+import { catchError, exhaustMap, map } from 'rxjs/operators';
+
+import { Branch, BranchFilter } from '../../../models';
+import { BranchService } from '../../../services/branch.service';
 
 export const storeCacheKeys = {
   all: ['stores'],
@@ -22,9 +23,9 @@ export const storeCacheKeys = {
 };
 
 const storeFeatureFactory = createEntityFeatureFactory(
-  { entityName: 'store' },
-  addLoadEntitiesTrait<ProductsStore>(),
-  addFilterEntitiesTrait<ProductsStore, ProductsStoreFilter>({
+  { entityName: 'branch', entitiesName: 'branches' },
+  addLoadEntitiesTrait<Branch>(),
+  addFilterEntitiesTrait<Branch, BranchFilter>({
     filterFn: (filter, entity) => {
       const searchString = filter?.search?.toLowerCase?.();
       return (
@@ -33,32 +34,34 @@ const storeFeatureFactory = createEntityFeatureFactory(
         entity.address.toLowerCase().includes(searchString)
       );
     },
-  })
+  }),
 );
 
 @Injectable()
-export class ProductsStoreLocalTraits extends TraitsLocalStore<
+export class BranchLocalTraits extends TraitsLocalStore<
   typeof storeFeatureFactory
 > {
-  constructor(private storeService: ProductsStoreService) {
+  constructor(private storeService: BranchService) {
     super();
     this.traits.addEffects(this);
   }
 
-  loadStores$ = createEffect(() => {
+  loadBranches$ = createEffect(() => {
     return this.actions$.pipe(
-      ofType(this.localActions.loadStores),
+      ofType(this.localActions.loadBranches),
       exhaustMap(() =>
         cache({
           key: storeCacheKeys.list(),
           store: this.store,
-          source: this.storeService.getStores(),
+          source: this.storeService.getBranches(),
           // no expire param so is stored forever
         }).pipe(
-          map((res) => this.localActions.loadStoresSuccess({ entities: res })),
-          catchError(() => of(this.localActions.loadStoresFail()))
-        )
-      )
+          map((res) =>
+            this.localActions.loadBranchesSuccess({ entities: res.resultList }),
+          ),
+          catchError(() => of(this.localActions.loadBranchesFail())),
+        ),
+      ),
     );
   });
 
