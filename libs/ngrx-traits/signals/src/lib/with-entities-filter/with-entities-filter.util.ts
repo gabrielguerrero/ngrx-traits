@@ -3,7 +3,6 @@ import {
   concatMap,
   debounce,
   distinctUntilChanged,
-  EMPTY,
   of,
   pipe,
   timer,
@@ -36,7 +35,7 @@ export function debounceFilterPipe<Filter, Entity>(filter: Signal<Filter>) {
         debounce?: number;
         patch?: boolean;
         forceLoad?: boolean;
-      }) => (value?.forceLoad ? EMPTY : timer(value.debounce || 300)),
+      }) => (value?.forceLoad ? of({}) : timer(value.debounce || 300)),
     ),
     concatMap((payload) =>
       payload.patch

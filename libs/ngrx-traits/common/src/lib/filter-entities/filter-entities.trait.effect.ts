@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TraitEffect, Type } from '@ngrx-traits/core';
+import { createEffect, ofType } from '@ngrx/effects';
 import { asyncScheduler, EMPTY, of, pipe, timer } from 'rxjs';
 import {
   concatMap,
@@ -10,17 +11,17 @@ import {
   pairwise,
   startWith,
 } from 'rxjs/operators';
-import { createEffect, ofType } from '@ngrx/effects';
-import {
-  FilterEntitiesKeyedConfig,
-  FilterEntitiesSelectors,
-} from './filter-entities.model';
+
+import { EntitiesPaginationActions } from '../entities-pagination';
 import {
   LoadEntitiesActions,
   LoadEntitiesSelectors,
 } from '../load-entities/load-entities.model';
+import {
+  FilterEntitiesKeyedConfig,
+  FilterEntitiesSelectors,
+} from './filter-entities.model';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
-import { EntitiesPaginationActions } from '../entities-pagination';
 
 export function createFilterTraitEffects<Entity, F>(
   allActions: ƟFilterEntitiesActions<F> &
@@ -28,7 +29,7 @@ export function createFilterTraitEffects<Entity, F>(
     EntitiesPaginationActions,
   allSelectors: FilterEntitiesSelectors<Entity, F> &
     LoadEntitiesSelectors<Entity>,
-  allConfigs: FilterEntitiesKeyedConfig<Entity, F>
+  allConfigs: FilterEntitiesKeyedConfig<Entity, F>,
 ): Type<TraitEffect>[] {
   const traitConfig = allConfigs.filter;
   @Injectable()
@@ -42,7 +43,7 @@ export function createFilterTraitEffects<Entity, F>(
           this.actions$.pipe(
             ofType(allActions.filterEntities),
             debounce((value) =>
-              value?.forceLoad ? EMPTY : timer(debounceTime, scheduler)
+              value?.forceLoad ? of({}) : timer(debounceTime, scheduler),
             ),
             concatMap((payload) =>
               payload.patch
@@ -51,15 +52,15 @@ export function createFilterTraitEffects<Entity, F>(
                     map((storedFilters) => ({
                       ...payload,
                       filters: { ...storedFilters, ...payload?.filters },
-                    }))
+                    })),
                   )
-                : of(payload)
+                : of(payload),
             ),
             distinctUntilChanged(
               (previous, current) =>
                 !current?.forceLoad &&
                 JSON.stringify(previous?.filters) ===
-                  JSON.stringify(current?.filters)
+                  JSON.stringify(current?.filters),
             ),
             traitConfig?.isRemoteFilter
               ? pipe(
@@ -71,7 +72,7 @@ export function createFilterTraitEffects<Entity, F>(
                   concatMap(([previous, current]) =>
                     traitConfig?.isRemoteFilter!(
                       previous?.filters,
-                      current?.filters
+                      current?.filters,
                     )
                       ? [
                           allActions.storeEntitiesFilter({
@@ -85,16 +86,16 @@ export function createFilterTraitEffects<Entity, F>(
                             filters: current?.filters,
                             patch: current?.patch,
                           }),
-                        ]
-                  )
+                        ],
+                  ),
                 )
               : map((action) =>
                   allActions.storeEntitiesFilter({
                     filters: action?.filters,
                     patch: action?.patch,
-                  })
-                )
-          )
+                  }),
+                ),
+          ),
     );
 
     loadEntities$ =
@@ -108,8 +109,8 @@ export function createFilterTraitEffects<Entity, F>(
                   allActions.clearEntitiesPagesCache(),
                   allActions.loadEntitiesFirstPage(),
                 ]
-              : [allActions.loadEntities()]
-          )
+              : [allActions.loadEntities()],
+          ),
         );
       });
   }

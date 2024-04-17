@@ -17,9 +17,6 @@ import {
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { capitalize, combineFunctions, getWithEntitiesKeys } from '../util';
-import { getWithEntitiesFilterKeys } from '../with-entities-filter/with-entities-filter.util';
-import { getWithEntitiesLocalPaginationKeys } from '../with-entities-pagination/with-entities-local-pagination.util';
-import { getWithEntitiesSortKeys } from '../with-entities-sort/with-entities-sort.util';
 import {
   EntitiesMultiSelectionComputed,
   EntitiesMultiSelectionMethods,
@@ -88,27 +85,7 @@ function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
  */
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
-  Collection extends string,
 >(config: {
-  entity?: Entity;
-  collection?: Collection;
-}): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
-  {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: {};
-  },
-  {
-    state: NamedEntitiesMultiSelectionState<Collection>;
-    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-    methods: NamedEntitiesMultiSelectionMethods<Collection>;
-  }
->;
-export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
->(options: {
   entity?: Entity;
 }): SignalStoreFeature<
   {
@@ -122,6 +99,7 @@ export function withEntitiesMultiSelection<
     methods: EntitiesMultiSelectionMethods;
   }
 >;
+
 /**
  * Generates state, signals and methods for multi selection of entities
  * @param config
@@ -168,6 +146,27 @@ export function withEntitiesMultiSelection<
     methods: NamedEntitiesMultiSelectionMethods<Collection>;
   }
 >;
+
+export function withEntitiesMultiSelection<
+  Entity extends { id: string | number },
+  Collection extends string,
+>(config: {
+  entity?: Entity;
+  collection?: Collection;
+}): SignalStoreFeature<
+  // TODO: the problem seems be with the state pro, when set to empty
+  //  it works but is it has a namedstate it doesnt
+  {
+    state: NamedEntityState<Entity, any>;
+    signals: NamedEntitySignals<Entity, Collection>;
+    methods: {};
+  },
+  {
+    state: NamedEntitiesMultiSelectionState<Collection>;
+    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+    methods: NamedEntitiesMultiSelectionMethods<Collection>;
+  }
+>;
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
@@ -187,9 +186,6 @@ export function withEntitiesMultiSelection<
     toggleSelectAllEntitiesKey,
     isAllEntitiesSelectedKey,
   } = getEntitiesMultiSelectionKeys(config);
-  const { filterKey } = getWithEntitiesFilterKeys(config);
-  const { sortKey } = getWithEntitiesSortKeys(config);
-  const { paginationKey } = getWithEntitiesLocalPaginationKeys(config);
   return signalStoreFeature(
     withState({ [selectedIdsMapKey]: {} }),
     withComputed((state: Record<string, Signal<unknown>>) => {

@@ -109,7 +109,7 @@ export function withEntitiesRemoteFilter<
   Filter extends Record<string, unknown>,
 >(options: {
   defaultFilter: Filter;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -200,7 +200,7 @@ export function withEntitiesRemoteFilter<
   Filter extends Record<string, unknown>,
 >(options: {
   defaultFilter: Filter;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   {
