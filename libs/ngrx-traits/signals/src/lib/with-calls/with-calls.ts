@@ -182,7 +182,7 @@ export function withCalls<
                 } as StateSignal<object>);
               const setError = (error: unknown) =>
                 patchState(store, {
-                  [callStatusKey]: error,
+                  [callStatusKey]: { error },
                 } as StateSignal<object>);
               acc[setLoadingKey] = () =>
                 patchState(store, {
