@@ -17,6 +17,7 @@ describe('withEntitiesMultiSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.selectEntities({ ids: [mockProducts[4].id, mockProducts[8].id] });
+      expect(store.entitiesSelectedIds()).toEqual(['4', '8']);
       expect(store.entitiesSelected()).toEqual([
         mockProducts[4],
         mockProducts[8],
@@ -28,6 +29,7 @@ describe('withEntitiesMultiSelection', () => {
       patchState(store, setAllEntities(mockProducts));
       store.selectEntities({ ids: [mockProducts[4].id, mockProducts[8].id] });
       store.deselectEntities({ ids: [mockProducts[4].id, mockProducts[8].id] });
+      expect(store.entitiesSelectedIds()).toEqual([]);
       expect(store.entitiesSelected()).toEqual([]);
     });
 
@@ -36,8 +38,10 @@ describe('withEntitiesMultiSelection', () => {
       patchState(store, setAllEntities(mockProducts));
       store.toggleSelectEntities({ id: mockProducts[4].id });
       expect(store.entitiesSelected()).toEqual([mockProducts[4]]);
+      expect(store.entitiesSelectedIds()).toEqual(['4']);
       store.toggleSelectEntities({ id: mockProducts[4].id });
       expect(store.entitiesSelected()).toEqual([]);
+      expect(store.entitiesSelectedIds()).toEqual([]);
     });
 
     it('toggleSelectAllEntities should toggle selection of the entity', () => {
@@ -45,8 +49,10 @@ describe('withEntitiesMultiSelection', () => {
       patchState(store, setAllEntities(mockProducts));
       store.toggleSelectAllEntities();
       expect(store.entitiesSelected().length).toEqual(mockProducts.length);
+      expect(store.entitiesSelectedIds().length).toEqual(mockProducts.length);
       store.toggleSelectAllEntities();
       expect(store.entitiesSelected()).toEqual([]);
+      expect(store.entitiesSelectedIds()).toEqual([]);
     });
 
     it('isAllEntitiesSelected should toggle selection of the entity', () => {
@@ -75,6 +81,7 @@ describe('withEntitiesMultiSelection', () => {
       store.selectProductsEntities({
         ids: [mockProducts[4].id, mockProducts[8].id],
       });
+      expect(store.productsSelectedIds()).toEqual(['4', '8']);
       expect(store.productsSelectedEntities()).toEqual([
         mockProducts[4],
         mockProducts[8],
@@ -91,6 +98,7 @@ describe('withEntitiesMultiSelection', () => {
         ids: [mockProducts[4].id, mockProducts[8].id],
       });
       expect(store.productsSelectedEntities()).toEqual([]);
+      expect(store.productsSelectedIds()).toEqual([]);
     });
 
     it('toggle[Collection]Entities should toggle selection of the entity', () => {
@@ -98,8 +106,10 @@ describe('withEntitiesMultiSelection', () => {
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.toggleSelectProductsEntities({ id: mockProducts[4].id });
       expect(store.productsSelectedEntities()).toEqual([mockProducts[4]]);
+      expect(store.productsSelectedIds()).toEqual(['4']);
       store.toggleSelectProductsEntities({ id: mockProducts[4].id });
       expect(store.productsSelectedEntities()).toEqual([]);
+      expect(store.productsSelectedIds()).toEqual([]);
     });
 
     it('isAll[Collection]Selected should toggle selection of the entity', () => {
