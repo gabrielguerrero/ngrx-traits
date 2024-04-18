@@ -17,7 +17,7 @@ describe('withEntitiesSingleSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.selectEntity({ id: mockProducts[4].id });
-      expect(store.entitiesSelectedEntity()).toEqual(mockProducts[4]);
+      expect(store.entitySelected()).toEqual(mockProducts[4]);
     });
 
     it('deselectEntity should deselect the entity', () => {
@@ -25,16 +25,16 @@ describe('withEntitiesSingleSelection', () => {
       patchState(store, setAllEntities(mockProducts));
       store.selectEntity({ id: mockProducts[4].id });
       store.deselectEntity({ id: mockProducts[4].id });
-      expect(store.entitiesSelectedEntity()).toEqual(undefined);
+      expect(store.entitySelected()).toEqual(undefined);
     });
 
     it('toggleEntity should toggle selection of the entity', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.toggleEntity({ id: mockProducts[4].id });
-      expect(store.entitiesSelectedEntity()).toEqual(mockProducts[4]);
+      expect(store.entitySelected()).toEqual(mockProducts[4]);
       store.toggleEntity({ id: mockProducts[4].id });
-      expect(store.entitiesSelectedEntity()).toEqual(undefined);
+      expect(store.entitySelected()).toEqual(undefined);
     });
   });
 
@@ -48,7 +48,7 @@ describe('withEntitiesSingleSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.selectProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsSelectedEntity()).toEqual(mockProducts[4]);
+      expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
     });
 
     it('deselectEntity should deselect the entity', () => {
@@ -56,16 +56,16 @@ describe('withEntitiesSingleSelection', () => {
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.selectProductsEntity({ id: mockProducts[4].id });
       store.deselectProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsSelectedEntity()).toEqual(undefined);
+      expect(store.productsEntitySelected()).toEqual(undefined);
     });
 
     it('toggleEntity should toggle selection of the entity', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.toggleProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsSelectedEntity()).toEqual(mockProducts[4]);
+      expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
       store.toggleProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsSelectedEntity()).toEqual(undefined);
+      expect(store.productsEntitySelected()).toEqual(undefined);
     });
   });
 });

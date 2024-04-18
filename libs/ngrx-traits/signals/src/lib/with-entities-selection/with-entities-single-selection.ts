@@ -24,28 +24,7 @@ import {
   NamedEntitiesSingleSelectionMethods,
   NamedEntitiesSingleSelectionState,
 } from './with-entities-single-selection.model';
-
-function getEntitiesSingleSelectionKeys(config?: { collection?: string }) {
-  const collection = config?.collection;
-  const capitalizedProp = collection && capitalize(collection);
-  return {
-    selectedIdKey: collection
-      ? `${config.collection}SelectedId`
-      : 'entitiesSelectedId',
-    selectedEntityKey: collection
-      ? `${config.collection}SelectedEntity`
-      : 'entitiesSelectedEntity',
-    selectEntityKey: collection
-      ? `select${capitalizedProp}Entity`
-      : 'selectEntity',
-    deselectEntityKey: collection
-      ? `deselect${capitalizedProp}Entity`
-      : 'deselectEntity',
-    toggleEntityKey: collection
-      ? `toggle${capitalizedProp}Entity`
-      : 'toggleEntity',
-  };
-}
+import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection.util';
 
 /**
  * Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.
@@ -69,9 +48,9 @@ function getEntitiesSingleSelectionKeys(config?: { collection?: string }) {
  *  );
  *
  *  // generates the following signals
- *  store.productsSelectedId // string | number | undefined
+ *  store.productsIdSelected // string | number | undefined
  *  // generates the following computed signals
- *  store.productsSelectedEntity // Entity | undefined
+ *  store.productsEntitySelected // Entity | undefined
  *  // generates the following methods
  *  store.selectProductEntity // (config: { id: string | number }) => void
  *  store.deselectProductEntity // (config: { id: string | number }) => void
@@ -116,9 +95,9 @@ export function withEntitiesSingleSelection<
  *  );
  *
  *  // generates the following signals
- *  store.productsSelectedId // string | number | undefined
+ *  store.productsIdSelected // string | number | undefined
  *  // generates the following computed signals
- *  store.productsSelectedEntity // Entity | undefined
+ *  store.productsEntitySelected // Entity | undefined
  *  // generates the following methods
  *  store.selectProductEntity // (config: { id: string | number }) => void
  *  store.deselectProductEntity // (config: { id: string | number }) => void
