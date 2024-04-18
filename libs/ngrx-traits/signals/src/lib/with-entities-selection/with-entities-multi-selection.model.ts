@@ -8,6 +8,7 @@ export type NamedEntitiesMultiSelectionState<Collection extends string> = {
 };
 export type EntitiesMultiSelectionComputed<Entity> = {
   entitiesSelected: Signal<Entity[]>;
+  entitiesSelectedIds: Signal<(string | number)[]>;
   isAllEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 };
 export type NamedEntitiesMultiSelectionComputed<
@@ -15,6 +16,8 @@ export type NamedEntitiesMultiSelectionComputed<
   Collection extends string,
 > = {
   [K in Collection as `${K}SelectedEntities`]: Signal<Entity[]>;
+} & {
+  [K in Collection as `${K}SelectedIds`]: Signal<Entity[]>;
 } & {
   [K in Collection as `isAll${Capitalize<string & K>}Selected`]: Signal<
     'all' | 'none' | 'some'
