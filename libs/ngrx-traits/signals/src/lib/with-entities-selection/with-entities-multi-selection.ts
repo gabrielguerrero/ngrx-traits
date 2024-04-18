@@ -26,43 +26,12 @@ import {
   NamedEntitiesMultiSelectionMethods,
   NamedEntitiesMultiSelectionState,
 } from './with-entities-multi-selection.model';
-
-function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
-  const collection = config?.collection;
-  const capitalizedProp = collection && capitalize(collection);
-  return {
-    selectedIdsMapKey: collection
-      ? `${config.collection}SelectedIdsMap`
-      : 'entitiesSelectedIdsMap',
-    selectedEntitiesKey: collection
-      ? `${config.collection}SelectedEntities`
-      : 'entitiesSelected',
-    selectedEntitiesIdsKey: collection
-      ? `${config.collection}SelectedIds`
-      : 'entitiesSelectedIds',
-    selectEntitiesKey: collection
-      ? `select${capitalizedProp}Entities`
-      : 'selectEntities',
-    deselectEntitiesKey: collection
-      ? `deselect${capitalizedProp}Entities`
-      : 'deselectEntities',
-    toggleSelectEntitiesKey: collection
-      ? `toggleSelect${capitalizedProp}Entities`
-      : 'toggleSelectEntities',
-    toggleSelectAllEntitiesKey: collection
-      ? `toggleSelectAll${capitalizedProp}Entities`
-      : 'toggleSelectAllEntities',
-    clearEntitiesSelectionKey: collection
-      ? `clear${capitalizedProp}Selection`
-      : 'clearEntitiesSelection',
-    isAllEntitiesSelectedKey: collection
-      ? `isAll${capitalizedProp}Selected`
-      : 'isAllEntitiesSelected',
-  };
-}
+import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.util';
 
 /**
- * Generates state, signals and methods for multi selection of entities
+ * Generates state, signals and methods for multi selection of entities.
+ * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
+ * correctly in using remote pagination, because they cant select all the data
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name
@@ -77,9 +46,9 @@ function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
  *   );
  *
  * // generates the following signals
- * store.productsSelectedIdsMap // Record<string | number, boolean>;
+ * store.productsIdsSelectedMap // Record<string | number, boolean>;
  * // generates the following computed signals
- * store.productsSelectedEntities // Entity[];
+ * store.productsEntitiesSelected // Entity[];
  * store.isAllProductsSelected // 'all' | 'none' | 'some';
  * // generates the following methods
  * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
@@ -105,7 +74,9 @@ export function withEntitiesMultiSelection<
 >;
 
 /**
- * Generates state, signals and methods for multi selection of entities
+ * Generates state, signals and methods for multi selection of entities.
+ * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
+ * correctly in using remote pagination, because they cant select all the data
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name
@@ -120,9 +91,9 @@ export function withEntitiesMultiSelection<
  *   );
  *
  * // generates the following signals
- * store.productsSelectedIdsMap // Record<string | number, boolean>;
+ * store.productsIdsSelectedMap // Record<string | number, boolean>;
  * // generates the following computed signals
- * store.productsSelectedEntities // Entity[];
+ * store.productsEntitiesSelected // Entity[];
  * store.isAllProductsSelected // 'all' | 'none' | 'some';
  * // generates the following methods
  * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;

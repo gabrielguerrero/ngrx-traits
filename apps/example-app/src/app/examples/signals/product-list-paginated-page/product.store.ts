@@ -70,7 +70,7 @@ export const ProductsRemoteStore = signalStore(
         );
     },
   }),
-  withCalls(({ productsSelectedEntity }) => ({
+  withCalls(({ productsEntitySelected }) => ({
     loadProductDetail: {
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
@@ -78,7 +78,7 @@ export const ProductsRemoteStore = signalStore(
     },
     checkout: () =>
       inject(OrderService).checkout({
-        productId: productsSelectedEntity()!.id,
+        productId: productsEntitySelected()!.id,
         quantity: 1,
       }),
   })),
