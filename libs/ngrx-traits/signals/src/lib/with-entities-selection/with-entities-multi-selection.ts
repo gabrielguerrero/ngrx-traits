@@ -1,9 +1,10 @@
-import { computed, Signal } from '@angular/core';
+import { computed, effect, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -36,6 +37,9 @@ function getEntitiesMultiSelectionKeys(config?: { collection?: string }) {
     selectedEntitiesKey: collection
       ? `${config.collection}SelectedEntities`
       : 'entitiesSelected',
+    selectedEntitiesIdsKey: collection
+      ? `${config.collection}SelectedIds`
+      : 'entitiesSelectedIds',
     selectEntitiesKey: collection
       ? `select${capitalizedProp}Entities`
       : 'selectEntities',
@@ -179,6 +183,7 @@ export function withEntitiesMultiSelection<
   const {
     selectedIdsMapKey,
     selectedEntitiesKey,
+    selectedEntitiesIdsKey,
     deselectEntitiesKey,
     toggleSelectEntitiesKey,
     clearEntitiesSelectionKey,
@@ -197,7 +202,7 @@ export function withEntitiesMultiSelection<
       const selectedIdsArray = computed(() =>
         Object.entries(selectedIdsMap()).reduce(
           (aux, [id, selected]) => {
-            if (selected) {
+            if (selected && entityMap()[id]) {
               aux.push(id);
             }
             return aux;
@@ -206,6 +211,7 @@ export function withEntitiesMultiSelection<
         ),
       );
       return {
+        [selectedEntitiesIdsKey]: selectedIdsArray,
         [selectedEntitiesKey]: computed(() => {
           return selectedIdsArray().map((id) => entityMap()[id]);
         }),
