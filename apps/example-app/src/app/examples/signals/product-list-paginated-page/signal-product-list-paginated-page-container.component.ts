@@ -31,7 +31,7 @@ import { ProductsLocalStore } from './product.store';
             <div>
               <product-list
                 [list]="store.productsCurrentPage().entities"
-                [selectedProduct]="store.productsSelectedEntity()"
+                [selectedProduct]="store.productsEntitySelected()"
                 [selectedSort]="{
                   active: $any(store.productsSort().field),
                   direction: store.productsSort().direction
@@ -61,7 +61,7 @@ import { ProductsLocalStore } from './product.store';
           color="primary"
           type="submit"
           [disabled]="
-            !store.productsSelectedEntity() || store.isCheckoutLoading()
+            !store.productsEntitySelected() || store.isCheckoutLoading()
           "
           (click)="checkout()"
         >

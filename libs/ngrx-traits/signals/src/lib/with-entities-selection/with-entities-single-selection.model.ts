@@ -1,19 +1,19 @@
 import { Signal } from '@angular/core';
 
 export type EntitiesSingleSelectionState = {
-  entitiesSelectedId?: string | number;
+  idSelected?: string | number;
 };
 export type NamedEntitiesSingleSelectionState<Collection extends string> = {
-  [K in Collection as `${K}SelectedId`]?: string | number;
+  [K in Collection as `${K}IdSelected`]?: string | number;
 };
 export type EntitiesSingleSelectionComputed<Entity> = {
-  entitiesSelectedEntity: Signal<Entity | undefined>;
+  entitySelected: Signal<Entity | undefined>;
 };
 export type NamedEntitiesSingleSelectionComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}SelectedEntity`]: Signal<Entity | undefined>;
+  [K in Collection as `${K}EntitySelected`]: Signal<Entity | undefined>;
 };
 export type EntitiesSingleSelectionMethods = {
   selectEntity: (options: { id: string | number }) => void;
