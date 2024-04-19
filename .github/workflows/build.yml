@@ -27,7 +27,7 @@ jobs:
         cache: 'npm'
     - run: npm ci --legacy-peer-deps
     - run: npm run build
-    - run: npm test
+    - run: npm run test-all
 
 
   publish:
