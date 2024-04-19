@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { withCalls } from '@ngrx-traits/signals';
 import { signalStore, withState } from '@ngrx/signals';
 import { Subject, throwError } from 'rxjs';
+
+import { withCalls } from '../index';
 
 describe('withCalls', () => {
   const apiResponse = new Subject<string>();

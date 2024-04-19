@@ -15,7 +15,7 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { capitalize, combineFunctions, getWithEntitiesKeys } from '../util';
+import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
   EntitiesSingleSelectionComputed,
   EntitiesSingleSelectionMethods,
