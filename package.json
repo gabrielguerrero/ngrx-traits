@@ -6,7 +6,7 @@
     "postinstall": "node ./decorate-angular-cli.js",
     "nx": "nx",
     "start": "nx serve",
-    "test": "nx test ngrx-traits-core",
+    "test": "nx affected:test",
     "build": "nx run-many --all --target=build",
     "test-all": "nx run-many --all --target=test",
     "lint": "nx lint ngrx-traits",

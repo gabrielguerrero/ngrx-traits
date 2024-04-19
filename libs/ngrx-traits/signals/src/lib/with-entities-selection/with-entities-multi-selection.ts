@@ -1,10 +1,9 @@
-import { computed, effect, Signal } from '@angular/core';
+import { computed, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
-  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -17,7 +16,7 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { capitalize, combineFunctions, getWithEntitiesKeys } from '../util';
+import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
   EntitiesMultiSelectionComputed,
   EntitiesMultiSelectionMethods,

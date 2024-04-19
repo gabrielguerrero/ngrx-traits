@@ -9,35 +9,36 @@ import { Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { getWithEntitiesKeys } from '../util';
-import { InfinitePaginationState } from './with-entities-remote-scroll-pagination.model';
 import {
-  EntitiesPaginationInfiniteMethods,
-  NamedEntitiesPaginationInfiniteMethods,
+  EntitiesScrollPaginationMethods,
+  NamedEntitiesScrollPaginationMethods,
+  ScrollPaginationState,
 } from './with-entities-remote-scroll-pagination.model';
 import { getWithEntitiesInfinitePaginationKeys } from './with-entities-remote-scroll-pagination.util';
 
 export function getInfiniteScrollDataSource<Entity, Collection extends string>(
   options:
     | {
-        store: EntitySignals<Entity> &
-          EntitiesPaginationInfiniteMethods<Entity>;
+        store: EntitySignals<Entity> & EntitiesScrollPaginationMethods<Entity>;
       }
     | {
         collection: Collection;
         store: NamedEntitySignals<Entity, Collection> &
-          NamedEntitiesPaginationInfiniteMethods<Entity, Collection>;
+          NamedEntitiesScrollPaginationMethods<Entity, Collection>;
       },
 ) {
   const collection = 'collection' in options ? options.collection : undefined;
-  const { loadEntitiesNextPageKey, paginationKey } =
+  const { loadMoreEntitiesKey, entitiesScrollCacheKey } =
     getWithEntitiesInfinitePaginationKeys({
       collection,
     });
   const { entitiesKey } = getWithEntitiesKeys({ collection });
   const store = options.store as Record<string, unknown>;
   const entities = store[entitiesKey] as Signal<Entity[]>;
-  const pagination = store[paginationKey] as Signal<InfinitePaginationState>;
-  const loadEntitiesNextPage = store[loadEntitiesNextPageKey] as () => void;
+  const entitiesScrollCache = store[
+    entitiesScrollCacheKey
+  ] as Signal<ScrollPaginationState>;
+  const loadMoreEntities = store[loadMoreEntitiesKey] as () => void;
 
   class MyDataSource extends DataSource<Entity> {
     subscription?: Subscription;
@@ -46,15 +47,17 @@ export function getInfiniteScrollDataSource<Entity, Collection extends string>(
       this.subscription = collectionViewer.viewChange
         .pipe(
           filter(({ end, start }) => {
-            const { pageSize, total, cache } = pagination();
+            const { bufferSize, total } = entitiesScrollCache();
             // filter first request that is done by the cdkscroll,
             // filter last request
             // only do requests when you pass a specific threshold
-            return start != 0 && end <= total! && end + pageSize >= cache.end;
+            return (
+              start != 0 && end <= total! && end + bufferSize >= entities.length
+            );
           }),
         )
         .subscribe(() => {
-          loadEntitiesNextPage();
+          loadMoreEntities();
         });
       return this.entitiesList;
     }

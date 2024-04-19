@@ -69,6 +69,10 @@ export const withSyncToWebStorage = ({
           patchState(store, JSON.parse(stateJson));
           return true;
         },
+        clearFromStore() {
+          if (type === 'local') window.localStorage.removeItem(key);
+          else window.sessionStorage.removeItem(key);
+        },
       };
     }),
     withHooks(({ loadFromStorage, saveToStorage, ...store }) => ({

@@ -1,4 +1,8 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { signalStore, type } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+import { of } from 'rxjs';
+
 import {
   withCallStatus,
   withEntitiesLoadingCall,
@@ -6,11 +10,7 @@ import {
   withEntitiesRemoteFilter,
   withEntitiesRemotePagination,
   withEntitiesSingleSelection,
-} from '@ngrx-traits/signals';
-import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
-import { of } from 'rxjs';
-
+} from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
 
@@ -116,7 +116,7 @@ describe('withEntitiesRemoteFilter', () => {
     });
   }));
 
-  it(' should resetPage to and selection when  when filter is executed', fakeAsync(() => {
+  it(' should resetPage to and selection when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({
@@ -151,7 +151,7 @@ describe('withEntitiesRemoteFilter', () => {
       store.selectEntity({ id: mockProducts[0].id });
       store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
       store.loadEntitiesPage({ pageIndex: 3 });
-      expect(store.entitiesSelectedEntity()).toEqual(mockProducts[0]);
+      expect(store.entitySelected()).toEqual(mockProducts[0]);
       expect(store.entitiesSelected?.()).toEqual([
         mockProducts[2],
         mockProducts[3],
@@ -164,7 +164,7 @@ describe('withEntitiesRemoteFilter', () => {
       });
       tick(400);
       // check selection and page reset
-      expect(store.entitiesSelectedEntity()).toEqual(undefined);
+      expect(store.entitySelected()).toEqual(undefined);
       expect(store.entitiesSelected()).toEqual([]);
       expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
       // check filter

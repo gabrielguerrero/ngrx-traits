@@ -1,6 +1,5 @@
 import {
   CdkFixedSizeVirtualScroll,
-  CdkScrollableModule,
   CdkVirtualForOf,
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';

@@ -24,16 +24,16 @@ export const ProductsBranchStore = signalStore(
     defaultFilter: { search: '' },
   }),
   withEntitiesRemoteScrollPagination({
-    pageSize: 10,
+    bufferSize: 30,
     entity,
   }),
   withEntitiesLoadingCall({
-    fetchEntities: async ({ entitiesPagedRequest, entitiesFilter }) => {
+    fetchEntities: async ({ entitiesRequest, entitiesFilter }) => {
       const res = await lastValueFrom(
         inject(BranchService).getBranches({
           search: entitiesFilter().search,
-          skip: entitiesPagedRequest().startIndex,
-          take: entitiesPagedRequest().size,
+          skip: entitiesRequest().startIndex,
+          take: entitiesRequest().size,
         }),
       );
       return { entities: res.resultList, total: res.total };
