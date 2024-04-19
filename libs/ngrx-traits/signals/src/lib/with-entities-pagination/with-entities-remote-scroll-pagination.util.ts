@@ -15,8 +15,8 @@ export function getWithEntitiesInfinitePaginationKeys(config?: {
     loadMoreEntitiesKey: collection
       ? `loadMore${capitalizedProp}`
       : 'loadMoreEntities',
-    setEntitiesPagedResultKey: collection
-      ? `set${capitalizedProp}PagedResult`
-      : 'setEntitiesPagedResult',
+    setEntitiesResultKey: collection
+      ? `set${capitalizedProp}Result`
+      : 'setEntitiesResult',
   };
 }

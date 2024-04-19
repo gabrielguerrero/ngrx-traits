@@ -358,7 +358,7 @@ export function withEntitiesRemotePagination<
     entitiesCurrentPageKey,
     paginationKey,
     entitiesPagedRequestKey,
-    setEntitiesPagedResultKey,
+    setEntitiesResultKey,
   } = getWithEntitiesRemotePaginationKeys(config);
 
   return signalStoreFeature(
@@ -453,7 +453,7 @@ export function withEntitiesRemotePagination<
             );
           },
         ),
-        [setEntitiesPagedResultKey]: ({
+        [setEntitiesResultKey]: ({
           entities,
           total,
         }: {

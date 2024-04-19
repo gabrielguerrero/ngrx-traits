@@ -62,7 +62,7 @@ describe('withEntitiesLoadingCall', () => {
       });
     }));
 
-    it('should setEntitiesPagedResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
+    it('should setEntitiesResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withEntities({

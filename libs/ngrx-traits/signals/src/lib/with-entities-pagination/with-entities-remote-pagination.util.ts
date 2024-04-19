@@ -29,9 +29,9 @@ export function getWithEntitiesRemotePaginationKeys(config?: {
     loadEntitiesPageKey: collection
       ? `load${capitalizedProp}Page`
       : 'loadEntitiesPage',
-    setEntitiesPagedResultKey: collection
-      ? `set${capitalizedProp}PagedResult`
-      : 'setEntitiesPagedResult',
+    setEntitiesResultKey: collection
+      ? `set${capitalizedProp}Result`
+      : 'setEntitiesResult',
   };
 }
 export function isEntitiesInCache(
