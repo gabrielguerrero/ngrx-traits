@@ -54,7 +54,7 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  * Generates a onInit hook that fetches entities from a remote source
  * when the [collection]Loading is true, by calling the fetchEntities function
  * and if successful, it will call set[Collection]Loaded and also set the entities
- * to the store using the setAllEntities method or the setEntitiesPagedResult method
+ * to the store using the setAllEntities method or the setEntitiesResult method
  * if it exists (comes from withEntitiesRemotePagination),
  * if an error occurs it will set the error to the store using set[Collection]Error with the error.
  * Requires withEntities and withCallStatus to be present in the store.
@@ -145,7 +145,7 @@ export function withEntitiesLoadingCall<
  * Generates a onInit hook that fetches entities from a remote source
  * when the [collection]Loading is true, by calling the fetchEntities function
  * and if successful, it will call set[Collection]Loaded and also set the entities
- * to the store using the setAllEntities method or the setEntitiesPagedResult method
+ * to the store using the setAllEntities method or the setEntitiesResult method
  * if it exists (comes from withEntitiesRemotePagination),
  * if an error occurs it will set the error to the store using set[Collection]Error with the error.
  * Requires withEntities and withCallStatus to be present in the store.
@@ -271,16 +271,17 @@ export function withEntitiesLoadingCall<
   const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
     prop: collection,
   });
-  const { setEntitiesPagedResultKey } = getWithEntitiesRemotePaginationKeys({
+  const { setEntitiesResultKey } = getWithEntitiesRemotePaginationKeys({
     collection,
   });
   return (store) => {
     const loading = store.signals[loadingKey] as Signal<boolean>;
     const setLoaded = store.methods[setLoadedKey] as () => void;
     const setError = store.methods[setErrorKey] as (error: unknown) => void;
-    const setEntitiesPagedResult = store.methods[
-      setEntitiesPagedResultKey
-    ] as (result: { entities: Entity[]; total: number }) => void;
+    const setEntitiesResult = store.methods[setEntitiesResultKey] as (result: {
+      entities: Entity[];
+      total: number;
+    }) => void;
 
     return signalStoreFeature(
       withHooks({
@@ -315,8 +316,8 @@ export function withEntitiesLoadingCall<
                       );
                     } else {
                       const { entities, total } = result;
-                      if (setEntitiesPagedResult)
-                        setEntitiesPagedResult({ entities, total });
+                      if (setEntitiesResult)
+                        setEntitiesResult({ entities, total });
                       else
                         patchState(
                           state,

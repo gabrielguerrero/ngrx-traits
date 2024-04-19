@@ -27,17 +27,14 @@ export type NamedEntitiesScrollPaginationComputed<
   }>;
 };
 export type EntitiesScrollPaginationMethods<Entity> = {
-  setEntitiesPagedResult: (result: {
-    entities: Entity[];
-    total: number;
-  }) => void;
+  setEntitiesResult: (result: { entities: Entity[]; total: number }) => void;
   loadMoreEntities: () => void;
 };
 export type NamedEntitiesScrollPaginationMethods<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `set${Capitalize<string & K>}PagedResult`]: (result: {
+  [K in Collection as `set${Capitalize<string & K>}Result`]: (result: {
     entities: Entity[];
     total: number;
   }) => void;
