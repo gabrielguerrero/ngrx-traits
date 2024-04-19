@@ -20,7 +20,7 @@ and is debounced by default. Requires withEntities and withCallStatus to be pres
 <dd><p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
-to the store using the setAllEntities method or the setEntitiesPagedResult method
+to the store using the setAllEntities method or the setEntitiesResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.
 Requires withEntities and withCallStatus to be present in the store.</p></dd>
@@ -48,7 +48,9 @@ or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest
 the result and errors automatically. Requires withEntities and withCallStatus to be used.
 Requires withEntities and withCallStatus to be present in the store.</p></dd>
 <dt><a href="#withEntitiesMultiSelection">withEntitiesMultiSelection(config)</a></dt>
-<dd><p>Generates state, signals and methods for multi selection of entities</p></dd>
+<dd><p>Generates state, signals and methods for multi selection of entities.
+Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
+correctly in using remote pagination, because they cant select all the data</p></dd>
 <dt><a href="#withEntitiesSingleSelection">withEntitiesSingleSelection(config)</a></dt>
 <dd><p>Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLocalSort">withEntitiesLocalSort(config)</a></dt>
@@ -272,7 +274,7 @@ export const store = signalStore(
 <p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
-to the store using the setAllEntities method or the setEntitiesPagedResult method
+to the store using the setAllEntities method or the setEntitiesResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.
 Requires withEntities and withCallStatus to be present in the store.</p>
@@ -482,8 +484,7 @@ Requires withEntities and withCallStatus to be present in the store.</p>
 | Param | Description |
 | --- | --- |
 | config |  |
-| config.pageSize | <p>The number of entities to show per page</p> |
-| config.pagesToCache | <p>The number of pages to cache</p> |
+| config.bufferSize | <p>The number of entities to show per page</p> |
 | config.entity | <p>The entity type</p> |
 | config.collection | <p>The name of the collection</p> |
 
@@ -500,7 +501,7 @@ export const store = signalStore(
   withEntitiesRemoteScrollPagination({
     entity,
     collection,
-    pageSize: 5,
+    bufferSize: 5,
     pagesToCache: 2,
   })
   // after you can use withEntitiesLoadingCall to connect the filter to
@@ -553,9 +554,9 @@ export const store = signalStore(
  store = inject(ProductsRemoteStore);
  dataSource = getInfiniteScrollDataSource(store, { collecrion: 'products' }) // pass this to your cdkVirtualFor see examples section
   // generates the following signals
-  store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+  store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
- store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ store.productsPageInfo // {  pageIndex: number, total: number, bufferSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductsNextPage() // loads next page
@@ -566,7 +567,9 @@ export const store = signalStore(
 <a name="withEntitiesMultiSelection"></a>
 
 ## withEntitiesMultiSelection(config)
-<p>Generates state, signals and methods for multi selection of entities</p>
+<p>Generates state, signals and methods for multi selection of entities.
+Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
+correctly in using remote pagination, because they cant select all the data</p>
 
 **Kind**: global function  
 
@@ -587,9 +590,9 @@ export const store = signalStore(
   );
 
 // generates the following signals
-store.productsSelectedIdsMap // Record<string | number, boolean>;
+store.productsIdsSelectedMap // Record<string | number, boolean>;
 // generates the following computed signals
-store.productsSelectedEntities // Entity[];
+store.productsEntitiesSelected // Entity[];
 store.isAllProductsSelected // 'all' | 'none' | 'some';
 // generates the following methods
 store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
@@ -627,9 +630,9 @@ export const store = signalStore(
  );
 
  // generates the following signals
- store.productsSelectedId // string | number | undefined
+ store.productsIdSelected // string | number | undefined
  // generates the following computed signals
- store.productsSelectedEntity // Entity | undefined
+ store.productsEntitySelected // Entity | undefined
  // generates the following methods
  store.selectProductEntity // (config: { id: string | number }) => void
  store.deselectProductEntity // (config: { id: string | number }) => void

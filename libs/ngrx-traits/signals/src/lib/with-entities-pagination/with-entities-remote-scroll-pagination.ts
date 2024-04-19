@@ -282,7 +282,7 @@ export function withEntitiesRemoteScrollPagination<
 
   const {
     loadMoreEntitiesKey,
-    setEntitiesPagedResultKey,
+    setEntitiesResultKey,
     entitiesRequestKey,
     entitiesScrollCacheKey,
   } = getWithEntitiesInfinitePaginationKeys(config);
@@ -339,7 +339,7 @@ export function withEntitiesRemoteScrollPagination<
             );
           },
         ),
-        [setEntitiesPagedResultKey]: ({
+        [setEntitiesResultKey]: ({
           entities,
           total,
         }: {

@@ -83,7 +83,6 @@ export const ProductsRemoteStore = signalStore(
       }),
   })),
 );
-
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
