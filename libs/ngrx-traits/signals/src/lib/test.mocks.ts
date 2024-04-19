@@ -1,5 +1,4 @@
-import { Product } from '../../../../../apps/example-app/src/app/examples/models';
-import { getRandomInteger } from '../../../../../apps/example-app/src/app/examples/utils/form-utils';
+import { Product } from './test.model';
 
 const snes = [
   'Super Mario World',

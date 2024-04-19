@@ -1,5 +1,6 @@
-import { withCallStatus } from '@ngrx-traits/signals';
 import { signalStore } from '@ngrx/signals';
+
+import { withCallStatus } from '../index';
 
 describe('withCallStatus', () => {
   const Store = signalStore(withCallStatus());

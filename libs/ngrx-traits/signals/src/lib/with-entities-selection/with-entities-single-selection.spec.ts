@@ -1,7 +1,7 @@
-import { withEntitiesSingleSelection } from '@ngrx-traits/signals';
 import { patchState, signalStore, type } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
+import { withEntitiesSingleSelection } from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
 

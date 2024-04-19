@@ -1,8 +1,10 @@
-import { Signal } from '@angular/core';
+import { effect, Signal, untracked } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -16,6 +18,7 @@ import {
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
+import { filter } from 'rxjs/operators';
 
 import { getWithEntitiesKeys } from '../util';
 import {
@@ -55,7 +58,7 @@ export { SortDirection };
  */
 export function withEntitiesLocalSort<
   Entity extends { id: string | number },
->(options: {
+>(config: {
   defaultSort: Sort<Entity>;
   entity?: Entity;
 }): SignalStoreFeature<
@@ -97,7 +100,7 @@ export function withEntitiesLocalSort<
 export function withEntitiesLocalSort<
   Entity extends { id: string | number },
   Collection extends string,
->(options: {
+>(config: {
   defaultSort: Sort<Entity>;
   entity?: Entity;
   collection?: Collection;
@@ -132,21 +135,24 @@ export function withEntitiesLocalSort<
     withState({ [sortKey]: defaultSort }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       return {
-        [sortEntitiesKey]: ({ sort: newSort }: { sort: Sort<Entity> }) => {
+        [sortEntitiesKey]: ({
+          sort: newSort,
+        }: { sort?: Sort<Entity> } = {}) => {
+          const sort = newSort ?? defaultSort;
           patchState(
             state as StateSignal<object>,
             {
-              [sortKey]: newSort,
+              [sortKey]: sort,
             },
             config.collection
               ? setAllEntities(
-                  sortData(state[entitiesKey]() as Entity[], newSort),
+                  sortData(state[entitiesKey]() as Entity[], sort),
                   {
                     collection: config.collection,
                   },
                 )
               : setAllEntities(
-                  sortData(state[entitiesKey]() as Entity[], newSort),
+                  sortData(state[entitiesKey]() as Entity[], sort),
                 ),
           );
         },

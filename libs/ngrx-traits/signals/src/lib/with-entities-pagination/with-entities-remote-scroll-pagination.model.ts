@@ -1,72 +1,39 @@
 import { Signal } from '@angular/core';
 
-import { EntitiesPaginationLocalMethods } from './with-entities-local-pagination.model';
-
-export type InfinitePaginationState = {
-  currentPage: number;
-  requestPage: number;
-  pageSize: number;
+export type ScrollPaginationState = {
+  bufferSize: number;
   total: number | undefined;
-  pagesToCache: number;
-  cache: {
-    start: number;
-    end: number;
-  };
+  hasMore: boolean;
 };
-export type EntitiesPaginationInfiniteState = {
-  entitiesPagination: InfinitePaginationState;
+export type EntitiesScrollPaginationState = {
+  entitiesScrollCache: ScrollPaginationState;
 };
-export type NamedEntitiesPaginationInfiniteState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: InfinitePaginationState;
+export type NamedEntitiesScrollPaginationState<Collection extends string> = {
+  [K in Collection as `${K}ScrollCache`]: ScrollPaginationState;
 };
-export type EntitiesPaginationInfiniteComputed = {
-  entitiesPageInfo: Signal<{
-    pageIndex: number;
-    total: number | undefined;
-    pageSize: number;
-    pagesCount: number | undefined;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    isLoading: boolean;
-  }>;
-  entitiesPagedRequest: Signal<{
+export type EntitiesScrollPaginationComputed = {
+  entitiesRequest: Signal<{
     startIndex: number;
     size: number;
-    page: number;
   }>;
 };
-export type NamedEntitiesPaginationInfiniteComputed<
+export type NamedEntitiesScrollPaginationComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}PagedRequest`]: Signal<{
+  [K in Collection as `${K}Request`]: Signal<{
     startIndex: number;
     size: number;
-    page: number;
-  }>;
-} & {
-  [K in Collection as `${K}PageInfo`]: Signal<{
-    entities: Entity[];
-    pageIndex: number;
-    total: number | undefined;
-    pageSize: number;
-    pagesCount: number | undefined;
-    hasPrevious: boolean;
-    hasNext: boolean;
-    isLoading: boolean;
   }>;
 };
-export type EntitiesPaginationInfiniteMethods<Entity> =
-  EntitiesPaginationLocalMethods & {
-    setEntitiesPagedResult: (result: {
-      entities: Entity[];
-      total: number;
-    }) => void;
-    loadEntitiesNextPage: () => void;
-    loadEntitiesPreviousPage: () => void;
-    loadEntitiesFirstPage: () => void;
-  };
-export type NamedEntitiesPaginationInfiniteMethods<
+export type EntitiesScrollPaginationMethods<Entity> = {
+  setEntitiesPagedResult: (result: {
+    entities: Entity[];
+    total: number;
+  }) => void;
+  loadMoreEntities: () => void;
+};
+export type NamedEntitiesScrollPaginationMethods<
   Entity,
   Collection extends string,
 > = {
@@ -75,9 +42,5 @@ export type NamedEntitiesPaginationInfiniteMethods<
     total: number;
   }) => void;
 } & {
-  [K in Collection as `load${Capitalize<string & K>}NextPage`]: () => void;
-} & {
-  [K in Collection as `load${Capitalize<string & K>}PreviousPage`]: () => void;
-} & {
-  [K in Collection as `load${Capitalize<string & K>}FirstPage`]: () => void;
+  [K in Collection as `loadMore${Capitalize<string & K>}`]: () => void;
 };
