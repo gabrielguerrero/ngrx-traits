@@ -17,9 +17,14 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
+import { getWithEntitiesKeys } from '../util';
+import {
+  broadcast,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import {
   debounceFilterPipe,
+  getWithEntitiesFilterEvents,
   getWithEntitiesFilterKeys,
 } from './with-entities-filter.util';
 import {
@@ -161,8 +166,8 @@ export function withEntitiesLocalFilter<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entityMapKey, idsKey, clearEntitiesCacheKey } =
-    getWithEntitiesKeys(config);
+  const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
+  const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
   const {
     filterEntitiesKey,
     filterKey,
@@ -179,6 +184,7 @@ export function withEntitiesLocalFilter<
         }),
       };
     }),
+    withEventHandler(),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const filter = state[filterKey] as Signal<Filter>;
       const entitiesMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
@@ -187,7 +193,6 @@ export function withEntitiesLocalFilter<
       // the ids array of the state with the filtered ids array, and the state.entities depends on it,
       // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
       const entities = computed(() => Object.values(entitiesMap()));
-      const clearEntitiesCache = combineFunctions(state[clearEntitiesCacheKey]);
       const filterEntities = rxMethod<{
         filter: Filter;
         debounce?: number;
@@ -209,12 +214,11 @@ export function withEntitiesLocalFilter<
                 [idsKey]: newEntities.map((entity) => entity.id),
               },
             );
-            clearEntitiesCache();
+            broadcast(state, entitiesFilterChanged(value));
           }),
         ),
       );
       return {
-        [clearEntitiesCacheKey]: clearEntitiesCache,
         [filterEntitiesKey]: filterEntities,
         [resetEntitiesFilterKey]: () => {
           filterEntities({ filter: defaultFilter });

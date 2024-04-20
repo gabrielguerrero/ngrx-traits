@@ -5,12 +5,14 @@ import { withEntities } from '@ngrx/signals/entities';
 import {
   withCallStatus,
   withEntitiesLoadingCall,
+  withEntitiesMultiSelection,
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
+  withEntitiesSingleSelection,
 } from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
-import { sortData } from './with-entities-sort.utils';
+import { sortData } from './with-entities-local-sort.util';
 
 describe('withEntitiesRemoteSort', () => {
   const entity = type<Product>();
@@ -137,5 +139,58 @@ describe('withEntitiesRemoteSort', () => {
       });
     });
   }));
-  // TODO check sort event gets fired
+
+  it(' should resetPage to and selection when sort is executed', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemotePagination({ entity }),
+        withEntitiesSingleSelection({ entity }),
+        withEntitiesMultiSelection({ entity }),
+        withEntitiesRemoteSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesSort }) => {
+            let result = [...mockProducts];
+            if (entitiesSort()?.field) {
+              result = sortData(result, {
+                field: entitiesSort()?.field as any,
+                direction: entitiesSort().direction,
+              });
+            }
+
+            return Promise.resolve({ entities: result, total: result.length });
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.flushEffects();
+      tick(400);
+      store.selectEntity({ id: mockProducts[0].id });
+      store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
+      store.loadEntitiesPage({ pageIndex: 3 });
+      expect(store.entitySelected()).toEqual(mockProducts[0]);
+      expect(store.entitiesSelected?.()).toEqual([
+        mockProducts[2],
+        mockProducts[3],
+      ]);
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
+
+      store.sortEntities({
+        sort: { field: 'price', direction: 'desc' },
+      });
+      tick(400);
+      // check selection and page reset
+      expect(store.entitySelected()).toEqual(undefined);
+      expect(store.entitiesSelected()).toEqual([]);
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      // check filter
+      expect(store.entities().length).toEqual(mockProducts.length);
+    });
+  }));
 });

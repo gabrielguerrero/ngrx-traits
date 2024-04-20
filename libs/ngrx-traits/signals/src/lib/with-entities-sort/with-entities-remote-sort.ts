@@ -13,20 +13,24 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
   CallStatusMethods,
   NamedCallStatusMethods,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
+  broadcast,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
+import type { Sort } from './with-entities-local-sort.model';
+import {
   EntitiesSortMethods,
   EntitiesSortState,
   NamedEntitiesSortMethods,
   NamedEntitiesSortState,
 } from './with-entities-local-sort.model';
+import { getWithEntitiesRemoteSortEvents } from './with-entities-remote-sort.util';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
-import type { Sort } from './with-entities-sort.utils';
 
 /**
  * Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
@@ -225,19 +229,19 @@ export function withEntitiesRemoteSort<
     prop: config.collection,
   });
   const { sortKey, sortEntitiesKey } = getWithEntitiesSortKeys(config);
-  const { clearEntitiesCacheKey } = getWithEntitiesKeys(config);
+  const { entitiesRemoteSortChanged } = getWithEntitiesRemoteSortEvents(config);
   return signalStoreFeature(
     withState({ [sortKey]: defaultSort }),
+    withEventHandler(),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const setLoading = state[setLoadingKey] as () => void;
-      const clearEntitiesCache = combineFunctions(state[clearEntitiesCacheKey]);
       return {
         [sortEntitiesKey]: ({ sort: newSort }: { sort: Sort<Entity> }) => {
           patchState(state as StateSignal<object>, {
             [sortKey]: newSort,
           });
           setLoading();
-          clearEntitiesCache();
+          broadcast(state, entitiesRemoteSortChanged({ sort: newSort }));
         },
       };
     }),

@@ -1,5 +1,10 @@
-import { Sort } from './with-entities-sort.utils';
-
+export type SortDirection = 'asc' | 'desc' | '';
+export type Sort<Entity> = {
+  /** The id of the column being sorted. */
+  field: keyof Entity | string;
+  /** The sort direction. */
+  direction: SortDirection;
+};
 export type EntitiesSortState<Entity> = {
   entitiesSort: Sort<Entity>;
 };

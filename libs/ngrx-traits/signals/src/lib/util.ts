@@ -8,35 +8,5 @@ export function getWithEntitiesKeys(config?: { collection?: string }) {
     idsKey: collection ? `${config.collection}Ids` : 'ids',
     entitiesKey: collection ? `${config.collection}Entities` : 'entities',
     entityMapKey: collection ? `${config.collection}EntityMap` : 'entityMap',
-    clearEntitiesCacheKey: collection
-      ? `clearEntities${config.collection}Cache`
-      : 'clearEntitiesCache',
   };
-}
-
-export type OverridableFunction = {
-  (...args: unknown[]): void;
-  impl?: (...args: unknown[]) => void;
-};
-
-export function combineFunctions(
-  previous?: OverridableFunction,
-  next?: (...args: unknown[]) => void,
-): OverridableFunction {
-  if (previous && !next) {
-    return previous;
-  }
-  const previousImplementation = previous?.impl;
-  const fun: OverridableFunction =
-    previous ??
-    ((...args: unknown[]) => {
-      fun.impl?.(...args);
-    });
-  fun.impl = next
-    ? (...args: unknown[]) => {
-        previousImplementation?.(...args);
-        next(...args);
-      }
-    : undefined;
-  return fun;
 }

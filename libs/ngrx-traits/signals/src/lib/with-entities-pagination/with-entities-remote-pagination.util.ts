@@ -1,15 +1,8 @@
-import { Signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { patchState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { distinctUntilChanged, exhaustMap, first, pipe, tap } from 'rxjs';
-
 import { capitalize } from '../util';
 import {
-  EntitiesPaginationRemoteState,
-  PaginationState,
-} from './with-entities-remote-pagination.model';
+  createEvent,
+  props,
+} from '../with-event-handler/with-event-handler.util';
 
 export function getWithEntitiesRemotePaginationKeys(config?: {
   collection?: string;
@@ -34,96 +27,18 @@ export function getWithEntitiesRemotePaginationKeys(config?: {
       : 'setEntitiesResult',
   };
 }
-export function isEntitiesInCache(
-  options:
-    | {
-        page: number;
-        pagination: EntitiesPaginationRemoteState['entitiesPagination'];
-      }
-    | {
-        start: number;
-        end: number;
-        pagination: EntitiesPaginationRemoteState['entitiesPagination'];
-      },
-) {
-  const pagination = options.pagination;
-  const startIndex =
-    'start' in options ? options.start : options.page * pagination.pageSize;
-  let endIndex =
-    'end' in options ? options.end : startIndex + pagination.pageSize - 1;
-  endIndex =
-    pagination.total && endIndex > pagination.total
-      ? pagination.total - 1
-      : endIndex;
-  return (
-    startIndex >= pagination.cache.start && endIndex <= pagination.cache.end
-  );
-}
 
-export function loadEntitiesPageFactory(
-  state: Record<string, Signal<unknown>>,
-  loadingKey: string,
-  paginationKey: string,
-  setLoadingKey: string,
-) {
-  const isLoading = state[loadingKey] as Signal<boolean>;
-  const $loading = toObservable(isLoading);
-  const pagination = state[paginationKey] as Signal<PaginationState>;
-  const setLoading = state[setLoadingKey] as () => void;
-
-  const loadEntitiesPage = rxMethod<{
-    pageIndex: number;
-    forceLoad?: boolean;
-  }>(
-    pipe(
-      distinctUntilChanged(
-        (previous, current) =>
-          !current.forceLoad && previous.pageIndex === current.pageIndex,
-      ),
-      exhaustMap(({ pageIndex, forceLoad }) =>
-        $loading.pipe(
-          first((loading) => !loading),
-          // the previous exhaustMap to not loading ensures the function
-          // can not be called multiple time before results are loaded, which could corrupt the cache
-          tap(() => {
-            patchState(state as StateSignal<object>, {
-              [paginationKey]: {
-                ...pagination(),
-                currentPage: pageIndex,
-                requestPage: pageIndex,
-              },
-            });
-            if (
-              isEntitiesInCache({
-                page: pageIndex,
-                pagination: pagination(),
-              }) &&
-              !forceLoad
-            ) {
-              if (
-                !isEntitiesInCache({
-                  page: pageIndex + 1,
-                  pagination: pagination(),
-                })
-              ) {
-                // preload next page
-                patchState(state as StateSignal<object>, {
-                  [paginationKey]: {
-                    ...pagination(),
-                    currentPage: pageIndex,
-                    requestPage: pageIndex + 1,
-                  },
-                });
-                setLoading();
-              }
-              return;
-            }
-            setLoading();
-          }),
-        ),
-      ),
+export function getWithEntitiesRemotePaginationEvents(config?: {
+  collection?: string;
+}) {
+  const collection = config?.collection;
+  return {
+    entitiesRemotePageChanged: createEvent(
+      `${collection}.entitiesRemotePageChanged`,
+      props<{ pageIndex: number; isPageInCache: boolean }>(),
     ),
-  );
-
-  return { loadEntitiesPage };
+    entitiesPagedResultsLoaded: createEvent(
+      `${collection}.entitiesPagedResultsLoaded`,
+    ),
+  };
 }

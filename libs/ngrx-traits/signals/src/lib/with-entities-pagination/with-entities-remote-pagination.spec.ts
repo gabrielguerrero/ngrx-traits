@@ -12,7 +12,7 @@ import {
 } from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
-import { sortData } from '../with-entities-sort/with-entities-sort.utils';
+import { sortData } from '../with-entities-sort/with-entities-local-sort.util';
 
 describe('withEntitiesRemotePagination', () => {
   const entity = type<Product>();

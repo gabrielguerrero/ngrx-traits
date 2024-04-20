@@ -25,6 +25,8 @@ import type {
   SignalStoreFeatureResult,
   SignalStoreSlices,
 } from '@ngrx/signals/src/signal-store-models';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
+import { Prettify } from '@ngrx/signals/src/ts-helpers';
 import {
   catchError,
   concatMap,
@@ -117,9 +119,12 @@ export function withEntitiesLoadingCall<
   fetchEntities,
 }: {
   fetchEntities: (
-    store: SignalStoreSlices<Input['state']> &
-      Input['signals'] &
-      Input['methods'],
+    store: Prettify<
+      SignalStoreSlices<Input['state']> &
+        Input['signals'] &
+        Input['methods'] &
+        StateSignal<Prettify<Input['state']>>
+    >,
   ) =>
     | Observable<
         Input['methods'] extends EntitiesPaginationRemoteMethods<Entity>
@@ -212,9 +217,12 @@ export function withEntitiesLoadingCall<
   // entity?: Entity; // is this needed? entity can come from the method fetchEntities return type
   collection: Collection;
   fetchEntities: (
-    store: SignalStoreSlices<Input['state']> &
-      Input['signals'] &
-      Input['methods'],
+    store: Prettify<
+      SignalStoreSlices<Input['state']> &
+        Input['signals'] &
+        Input['methods'] &
+        StateSignal<Prettify<Input['state']>>
+    >,
   ) =>
     | Observable<
         Entity[] | { entities: Entity[]; total?: number }
