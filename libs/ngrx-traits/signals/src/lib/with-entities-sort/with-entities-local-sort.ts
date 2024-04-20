@@ -1,10 +1,8 @@
-import { effect, Signal, untracked } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
-  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -18,19 +16,24 @@ import {
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { filter } from 'rxjs/operators';
 
 import { getWithEntitiesKeys } from '../util';
+import {
+  broadcast,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import {
   EntitiesSortMethods,
   EntitiesSortState,
   NamedEntitiesSortMethods,
   NamedEntitiesSortState,
+  Sort,
 } from './with-entities-local-sort.model';
+import {
+  getWithEntitiesLocalSortEvents,
+  sortData,
+} from './with-entities-local-sort.util';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
-import { Sort, sortData, SortDirection } from './with-entities-sort.utils';
-
-export { SortDirection };
 
 /**
  * Generates necessary state, computed and methods for sorting locally entities in the store. Requires withEntities to be present before this function
@@ -131,8 +134,10 @@ export function withEntitiesLocalSort<
 }): SignalStoreFeature<any, any> {
   const { entitiesKey } = getWithEntitiesKeys(config);
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
+  const { entitiesLocalSortChanged } = getWithEntitiesLocalSortEvents(config);
   return signalStoreFeature(
     withState({ [sortKey]: defaultSort }),
+    withEventHandler(),
     withMethods((state: Record<string, Signal<unknown>>) => {
       return {
         [sortEntitiesKey]: ({
@@ -155,6 +160,7 @@ export function withEntitiesLocalSort<
                   sortData(state[entitiesKey]() as Entity[], sort),
                 ),
           );
+          broadcast(state, entitiesLocalSortChanged({ sort }));
         },
       };
     }),

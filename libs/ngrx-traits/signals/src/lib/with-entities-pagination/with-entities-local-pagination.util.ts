@@ -1,4 +1,12 @@
+import { Signal } from '@angular/core';
+import { patchState } from '@ngrx/signals';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
+
 import { capitalize } from '../util';
+import {
+  createEvent,
+  props,
+} from '../with-event-handler/with-event-handler.util';
 
 export function getWithEntitiesLocalPaginationKeys(config?: {
   collection?: string;
@@ -15,5 +23,33 @@ export function getWithEntitiesLocalPaginationKeys(config?: {
     loadEntitiesPageKey: collection
       ? `load${capitalizedProp}Page`
       : 'loadEntitiesPage',
+  };
+}
+export function setCurrentPage(
+  state: Record<string, Signal<unknown>>,
+  paginationKey: string,
+  pageIndex: number,
+) {
+  const pagination = state[paginationKey] as Signal<{
+    pageSize: number;
+    currentPage: number;
+  }>;
+  patchState(state as StateSignal<object>, {
+    [paginationKey]: {
+      ...pagination(),
+      currentPage: pageIndex,
+    },
+  });
+}
+
+export function getWithEntitiesLocalPaginationEvents(config?: {
+  collection?: string;
+}) {
+  const collection = config?.collection;
+  return {
+    entitiesLocalPageChanged: createEvent(
+      `${collection}.entitiesLocalPageChanged`,
+      props<{ pageIndex: number }>(),
+    ),
   };
 }

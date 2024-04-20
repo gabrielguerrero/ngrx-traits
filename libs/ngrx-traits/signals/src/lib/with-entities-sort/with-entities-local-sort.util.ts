@@ -1,11 +1,10 @@
-export declare type SortDirection = 'asc' | 'desc' | '';
+import {
+  createEvent,
+  props,
+} from '../with-event-handler/with-event-handler.util';
+import { Sort } from './with-entities-local-sort.model';
+
 const MAX_SAFE_INTEGER = 9007199254740991;
-export type Sort<Entity> = {
-  /** The id of the column being sorted. */
-  field: keyof Entity | string;
-  /** The sort direction. */
-  direction: SortDirection;
-};
 
 export function _isNumberValue(value: any): boolean {
   // parseFloat(value) handles most of the cases we're interested in (it treats null, empty string,
@@ -75,4 +74,16 @@ export function sortData<T>(data: T[], sort: Sort<T>): T[] {
 
     return comparatorResult * (direction === 'asc' ? 1 : -1);
   });
+}
+
+export function getWithEntitiesLocalSortEvents(config?: {
+  collection?: string;
+}) {
+  const collection = config?.collection;
+  return {
+    entitiesLocalSortChanged: createEvent(
+      `${collection}.entitiesLocalSortChanged`,
+      props<{ sort: Sort<any> }>(),
+    ),
+  };
 }

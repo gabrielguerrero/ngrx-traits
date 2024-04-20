@@ -1,4 +1,5 @@
 import { capitalize } from '../util';
+import { createEvent } from '../with-event-handler/with-event-handler.util';
 
 export function getWithEntitiesInfinitePaginationKeys(config?: {
   collection?: string;
@@ -18,5 +19,15 @@ export function getWithEntitiesInfinitePaginationKeys(config?: {
     setEntitiesResultKey: collection
       ? `set${capitalizedProp}Result`
       : 'setEntitiesResult',
+  };
+}
+
+export function getWithEntitiesScrollPaginationEvents(config?: {
+  collection?: string;
+}) {
+  const collection = config?.collection;
+  return {
+    loadingMoreEntities: createEvent(`${collection}.loadingMoreEntities`),
+    entitiesResultsLoaded: createEvent(`${collection}.entitiesResultsLoaded`),
   };
 }

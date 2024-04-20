@@ -1,6 +1,5 @@
 import { computed, Signal } from '@angular/core';
 import {
-  patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
@@ -12,9 +11,15 @@ import {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
+import { getWithEntitiesKeys } from '../util';
+import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
+import { getWithEntitiesLocalSortEvents } from '../with-entities-sort/with-entities-local-sort.util';
+import {
+  broadcast,
+  onEvent,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import {
   EntitiesPaginationLocalComputed,
   EntitiesPaginationLocalMethods,
@@ -23,7 +28,11 @@ import {
   NamedEntitiesPaginationLocalMethods,
   NamedEntitiesPaginationLocalState,
 } from './with-entities-local-pagination.model';
-import { getWithEntitiesLocalPaginationKeys } from './with-entities-local-pagination.util';
+import {
+  getWithEntitiesLocalPaginationEvents,
+  getWithEntitiesLocalPaginationKeys,
+  setCurrentPage,
+} from './with-entities-local-pagination.util';
 
 /**
  * Generates necessary state, computed and methods for local pagination of entities in the store.
@@ -135,9 +144,13 @@ export function withEntitiesLocalPagination<
   entity?: Entity;
   collection?: Collection;
 } = {}): SignalStoreFeature<any, any> {
-  const { entitiesKey, clearEntitiesCacheKey } = getWithEntitiesKeys(config);
+  const { entitiesKey } = getWithEntitiesKeys(config);
   const { loadEntitiesPageKey, entitiesCurrentPageKey, paginationKey } =
     getWithEntitiesLocalPaginationKeys(config);
+  const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+  const { entitiesLocalPageChanged } =
+    getWithEntitiesLocalPaginationEvents(config);
+  const { entitiesLocalSortChanged } = getWithEntitiesLocalSortEvents(config);
 
   return signalStoreFeature(
     withState({
@@ -180,30 +193,17 @@ export function withEntitiesLocalPagination<
         [entitiesCurrentPageKey]: entitiesCurrentPage,
       };
     }),
+    withEventHandler((state) => [
+      onEvent(entitiesFilterChanged, entitiesLocalSortChanged, () => {
+        setCurrentPage(state, paginationKey, 0);
+      }),
+    ]),
+
     withMethods((state: Record<string, Signal<unknown>>) => {
-      const pagination = state[paginationKey] as Signal<{
-        pageSize: number;
-        currentPage: number;
-      }>;
       return {
-        [clearEntitiesCacheKey]: combineFunctions(
-          state[clearEntitiesCacheKey],
-          () => {
-            patchState(state as StateSignal<object>, {
-              [paginationKey]: {
-                ...pagination(),
-                currentPage: 0,
-              },
-            });
-          },
-        ),
         [loadEntitiesPageKey]: ({ pageIndex }: { pageIndex: number }) => {
-          patchState(state as StateSignal<object>, {
-            [paginationKey]: {
-              ...pagination(),
-              currentPage: pageIndex,
-            },
-          });
+          setCurrentPage(state, paginationKey, pageIndex);
+          broadcast(state, entitiesLocalPageChanged({ pageIndex }));
         },
       };
     }),

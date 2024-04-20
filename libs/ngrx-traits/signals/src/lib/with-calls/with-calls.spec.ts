@@ -30,7 +30,6 @@ describe('withCalls', () => {
       const store = new Store();
       expect(store.isTestCallLoading()).toBeFalsy();
       store.testCall({ ok: false });
-      console.log(store.testCallCallStatus());
       expect(store.testCallError()).toEqual(new Error('fail'));
       expect(store.testCallResult()).toBe(undefined);
     });

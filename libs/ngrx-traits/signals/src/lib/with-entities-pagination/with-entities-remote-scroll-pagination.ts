@@ -22,7 +22,7 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { exhaustMap, first, pipe, tap } from 'rxjs';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
+import { getWithEntitiesKeys } from '../util';
 import {
   CallStatusComputed,
   CallStatusMethods,
@@ -30,6 +30,13 @@ import {
   NamedCallStatusMethods,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
+import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
+import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
+import {
+  broadcast,
+  onEvent,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import {
   EntitiesScrollPaginationComputed,
   EntitiesScrollPaginationMethods,
@@ -39,7 +46,10 @@ import {
   NamedEntitiesScrollPaginationState,
   ScrollPaginationState,
 } from './with-entities-remote-scroll-pagination.model';
-import { getWithEntitiesInfinitePaginationKeys } from './with-entities-remote-scroll-pagination.util';
+import {
+  getWithEntitiesInfinitePaginationKeys,
+  getWithEntitiesScrollPaginationEvents,
+} from './with-entities-remote-scroll-pagination.util';
 
 /**
  * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
@@ -278,7 +288,7 @@ export function withEntitiesRemoteScrollPagination<
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
   });
-  const { clearEntitiesCacheKey, entitiesKey } = getWithEntitiesKeys(config);
+  const { entitiesKey } = getWithEntitiesKeys(config);
 
   const {
     loadMoreEntitiesKey,
@@ -286,6 +296,11 @@ export function withEntitiesRemoteScrollPagination<
     entitiesRequestKey,
     entitiesScrollCacheKey,
   } = getWithEntitiesInfinitePaginationKeys(config);
+
+  const { loadingMoreEntities, entitiesResultsLoaded } =
+    getWithEntitiesScrollPaginationEvents(config);
+  const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+  const { entitiesRemoteSortChanged } = getWithEntitiesRemoteSortEvents(config);
 
   return signalStoreFeature(
     withState({
@@ -309,6 +324,11 @@ export function withEntitiesRemoteScrollPagination<
         [entitiesRequestKey]: entitiesPagedRequest,
       };
     }),
+    withEventHandler((state) => [
+      onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () => {
+        clearEntitiesCache(state, config, entitiesScrollCacheKey);
+      }),
+    ]),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const entitiesScrollCache = state[
         entitiesScrollCacheKey
@@ -317,28 +337,8 @@ export function withEntitiesRemoteScrollPagination<
       const isLoading = state[loadingKey] as Signal<boolean>;
       const $loading = toObservable(isLoading);
       const setLoading = state[setLoadingKey] as () => void;
-      // TODO refactor some of this code is repeated in remote entitiesScrollCache
+
       return {
-        [clearEntitiesCacheKey]: combineFunctions(
-          state[clearEntitiesCacheKey],
-          () => {
-            patchState(
-              state as StateSignal<object>,
-              config.collection
-                ? setAllEntities([], {
-                    collection: config.collection,
-                  })
-                : setAllEntities([]),
-              {
-                [entitiesScrollCacheKey]: {
-                  ...entitiesScrollCache(),
-                  total: 0,
-                  hasMore: true,
-                },
-              },
-            );
-          },
-        ),
         [setEntitiesResultKey]: ({
           entities,
           total,
@@ -362,6 +362,7 @@ export function withEntitiesRemoteScrollPagination<
               },
             },
           );
+          broadcast(state, entitiesResultsLoaded());
         },
         [loadMoreEntitiesKey]: rxMethod<void>(
           pipe(
@@ -371,7 +372,10 @@ export function withEntitiesRemoteScrollPagination<
                 // the previous exhaustMap to not loading ensures the function
                 // can not be called multiple time before results are loaded, which could corrupt the cache
                 tap(() => {
-                  if (entitiesScrollCache().hasMore) setLoading();
+                  if (entitiesScrollCache().hasMore) {
+                    setLoading();
+                    broadcast(state, loadingMoreEntities());
+                  }
                 }),
               ),
             ),
@@ -379,5 +383,30 @@ export function withEntitiesRemoteScrollPagination<
         ),
       };
     }),
+  );
+}
+
+function clearEntitiesCache(
+  state: Record<string, Signal<unknown>>,
+  config: { collection?: string },
+  entitiesScrollCacheKey: string,
+) {
+  const entitiesScrollCache = state[
+    entitiesScrollCacheKey
+  ] as Signal<ScrollPaginationState>;
+  patchState(
+    state as StateSignal<object>,
+    config.collection
+      ? setAllEntities([], {
+          collection: config.collection,
+        })
+      : setAllEntities([]),
+    {
+      [entitiesScrollCacheKey]: {
+        ...entitiesScrollCache(),
+        total: 0,
+        hasMore: true,
+      },
+    },
   );
 }

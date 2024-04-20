@@ -144,8 +144,7 @@ describe('withEntitiesLocalPagination', () => {
     });
   }));
 
-  // TODO fix this test when refactor to use withEventHandler
-  xit('should resetPage when sort is executed', fakeAsync(() => {
+  it('should resetPage when sort is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({
