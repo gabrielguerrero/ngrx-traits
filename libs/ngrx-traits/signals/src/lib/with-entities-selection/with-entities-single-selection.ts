@@ -15,7 +15,13 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
+import { getWithEntitiesKeys } from '../util';
+import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
+import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
+import {
+  onEvent,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import {
   EntitiesSingleSelectionComputed,
   EntitiesSingleSelectionMethods,
@@ -130,7 +136,7 @@ export function withEntitiesSingleSelection<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entityMapKey, clearEntitiesCacheKey } = getWithEntitiesKeys(config);
+  const { entityMapKey } = getWithEntitiesKeys(config);
   const {
     selectedEntityKey,
     selectEntityKey,
@@ -138,6 +144,10 @@ export function withEntitiesSingleSelection<
     toggleEntityKey,
     selectedIdKey,
   } = getEntitiesSingleSelectionKeys(config);
+
+  const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+  const { entitiesRemoteSortChanged } = getWithEntitiesRemoteSortEvents(config);
+
   return signalStoreFeature(
     withState({ [selectedIdKey]: undefined }),
     withComputed((state: Record<string, Signal<unknown>>) => {
@@ -173,13 +183,15 @@ export function withEntitiesSingleSelection<
             [selectedIdKey]: selectedId() === id ? undefined : id,
           });
         },
-        [clearEntitiesCacheKey]: combineFunctions(
-          state[clearEntitiesCacheKey],
-          () => {
-            deselectEntity();
-          },
-        ),
       };
+    }),
+    withEventHandler((state) => {
+      return [
+        onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () => {
+          const deselectEntity = state[deselectEntityKey] as () => void;
+          deselectEntity();
+        }),
+      ];
     }),
   );
 }

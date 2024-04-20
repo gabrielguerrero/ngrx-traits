@@ -87,6 +87,11 @@ export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
   withCallStatus({ collection, initialValue: 'loading' }),
+  withEntitiesLocalPagination({
+    entity,
+    collection,
+    pageSize: 5,
+  }),
   withEntitiesLocalFilter({
     entity,
     collection,
@@ -94,11 +99,6 @@ export const ProductsLocalStore = signalStore(
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
-  }),
-  withEntitiesLocalPagination({
-    entity,
-    collection,
-    pageSize: 5,
   }),
   withEntitiesLocalSort({
     entity,
@@ -108,12 +108,6 @@ export const ProductsLocalStore = signalStore(
   withEntitiesSingleSelection({
     entity,
     collection,
-  }),
-  withSyncToWebStorage({
-    key: 'products',
-    type: 'session',
-    restoreOnInit: true,
-    saveStateChangesAfterMs: 300,
   }),
   withEntitiesLoadingCall({
     collection,
@@ -135,7 +129,6 @@ export const ProductsLocalStore = signalStore(
     checkout: () => inject(OrderService).checkout(),
   })),
 );
-
 export const ProductsLocalStore2 = signalStore(
   { providedIn: 'root' },
   withEntities({ entity }),

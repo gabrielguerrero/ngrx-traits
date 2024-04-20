@@ -10,10 +10,6 @@ export * from './with-entities-pagination/with-entities-remote-pagination.model'
 export * from './with-entities-pagination/with-entities-remote-scroll-pagination';
 export * from './with-entities-pagination/with-entities-remote-scroll-pagination.model';
 export * from './with-entities-pagination/signal-infinite-datasource';
-export {
-  Sort,
-  SortDirection,
-} from './with-entities-sort/with-entities-sort.utils';
 export * from './with-entities-sort/with-entities-local-sort';
 export * from './with-entities-sort/with-entities-local-sort.model';
 export * from './with-entities-sort/with-entities-remote-sort';

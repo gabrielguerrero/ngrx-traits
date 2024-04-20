@@ -16,7 +16,13 @@ import {
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
+import { getWithEntitiesKeys } from '../util';
+import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
+import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
+import {
+  onEvent,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import {
   EntitiesMultiSelectionComputed,
   EntitiesMultiSelectionMethods,
@@ -148,8 +154,7 @@ export function withEntitiesMultiSelection<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entityMapKey, idsKey, clearEntitiesCacheKey } =
-    getWithEntitiesKeys(config);
+  const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
   const {
     selectedIdsMapKey,
     selectedEntitiesKey,
@@ -161,6 +166,10 @@ export function withEntitiesMultiSelection<
     toggleSelectAllEntitiesKey,
     isAllEntitiesSelectedKey,
   } = getEntitiesMultiSelectionKeys(config);
+
+  const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+  const { entitiesRemoteSortChanged } = getWithEntitiesRemoteSortEvents(config);
+
   return signalStoreFeature(
     withState({ [selectedIdsMapKey]: {} }),
     withComputed((state: Record<string, Signal<unknown>>) => {
@@ -198,6 +207,13 @@ export function withEntitiesMultiSelection<
         }),
       };
     }),
+    withEventHandler((state) => {
+      return [
+        onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () =>
+          clearEntitiesSelection(state, selectedIdsMapKey),
+        ),
+      ];
+    }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const selectedIdsMap = state[selectedIdsMapKey] as Signal<
         Record<string | number, boolean>
@@ -208,18 +224,7 @@ export function withEntitiesMultiSelection<
 
       const idsArray = state[idsKey] as Signal<EntityId[]>;
 
-      const clearEntitiesSelection = () => {
-        patchState(state as StateSignal<object>, {
-          [selectedIdsMapKey]: {},
-        });
-      };
       return {
-        [clearEntitiesCacheKey]: combineFunctions(
-          state[clearEntitiesCacheKey],
-          () => {
-            clearEntitiesSelection();
-          },
-        ),
         [selectEntitiesKey]: (
           options: { id: string | number } | { ids: (string | number)[] },
         ) => {
@@ -290,4 +295,12 @@ export function withEntitiesMultiSelection<
       };
     }),
   );
+}
+function clearEntitiesSelection(
+  state: Record<string, Signal<unknown>>,
+  selectedIdsMapKey: string,
+) {
+  patchState(state as StateSignal<object>, {
+    [selectedIdsMapKey]: {},
+  });
 }

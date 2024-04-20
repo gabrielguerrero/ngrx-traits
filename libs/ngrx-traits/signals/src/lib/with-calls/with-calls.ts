@@ -19,6 +19,7 @@ import type {
   SignalStoreSlices,
 } from '@ngrx/signals/src/signal-store-models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
+import { Prettify } from '@ngrx/signals/src/ts-helpers';
 import {
   catchError,
   concatMap,
@@ -86,9 +87,12 @@ export function withCalls<
   const Calls extends Record<string, Call | CallConfig>,
 >(
   callsFactory: (
-    store: SignalStoreSlices<Input['state']> &
-      Input['signals'] &
-      Input['methods'],
+    store: Prettify<
+      SignalStoreSlices<Input['state']> &
+        Input['signals'] &
+        Input['methods'] &
+        StateSignal<Prettify<Input['state']>>
+    >,
   ) => Calls,
 ): SignalStoreFeature<
   Input,
@@ -111,9 +115,12 @@ export function withCalls<
       ...store.slices,
       ...store.signals,
       ...store.methods,
-    } as SignalStoreSlices<Input['state']> &
-      Input['signals'] &
-      Input['methods']);
+    } as Prettify<
+      SignalStoreSlices<Input['state']> &
+        Input['signals'] &
+        Input['methods'] &
+        StateSignal<Prettify<Input['state']>>
+    >);
     const callsState = Object.entries(calls).reduce(
       (acc, [callName, call]) => {
         const { callStatusKey } = getWithCallStatusKeys({ prop: callName });

@@ -96,6 +96,4 @@ describe('withEntitiesLocalSort', () => {
       direction: 'desc',
     });
   });
-
-  // TODO check sort event gets fired
 });

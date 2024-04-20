@@ -9,6 +9,10 @@ import {
 } from 'rxjs';
 
 import { capitalize } from '../util';
+import {
+  createEvent,
+  props,
+} from '../with-event-handler/with-event-handler.util';
 
 export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   const collection = config?.collection;
@@ -51,4 +55,14 @@ export function debounceFilterPipe<Filter, Entity>(filter: Signal<Filter>) {
         JSON.stringify(previous?.filter) === JSON.stringify(current?.filter),
     ),
   );
+}
+
+export function getWithEntitiesFilterEvents(config?: { collection?: string }) {
+  const collection = config?.collection;
+  return {
+    entitiesFilterChanged: createEvent(
+      `${collection}.entitiesFilterChanged`,
+      props<{ filter: unknown }>(),
+    ),
+  };
 }

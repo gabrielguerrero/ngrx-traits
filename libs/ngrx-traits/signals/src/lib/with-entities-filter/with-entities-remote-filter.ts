@@ -16,14 +16,18 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
-import { combineFunctions, getWithEntitiesKeys } from '../util';
 import {
   CallStatusMethods,
   NamedCallStatusMethods,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
+  broadcast,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
+import {
   debounceFilterPipe,
+  getWithEntitiesFilterEvents,
   getWithEntitiesFilterKeys,
 } from './with-entities-filter.util';
 import {
@@ -233,7 +237,7 @@ export function withEntitiesRemoteFilter<
     resetEntitiesFilterKey,
     isEntitiesFilterChangedKey,
   } = getWithEntitiesFilterKeys(config);
-  const { clearEntitiesCacheKey } = getWithEntitiesKeys(config);
+  const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
 
   return signalStoreFeature(
     withState({ [filterKey]: defaultFilter }),
@@ -245,11 +249,10 @@ export function withEntitiesRemoteFilter<
         }),
       };
     }),
+    withEventHandler(),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const setLoading = state[setLoadingKey] as () => void;
       const filter = state[filterKey] as Signal<Filter>;
-
-      const clearEntitiesCache = combineFunctions(state[clearEntitiesCacheKey]);
 
       const filterEntities = rxMethod<{
         filter: Filter;
@@ -264,12 +267,11 @@ export function withEntitiesRemoteFilter<
             patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
               [filterKey]: value.filter,
             });
-            clearEntitiesCache();
+            broadcast(state, entitiesFilterChanged(value));
           }),
         ),
       );
       return {
-        [clearEntitiesCacheKey]: clearEntitiesCache,
         [filterEntitiesKey]: filterEntities,
         [resetEntitiesFilterKey]: () => {
           filterEntities({ filter: defaultFilter });
