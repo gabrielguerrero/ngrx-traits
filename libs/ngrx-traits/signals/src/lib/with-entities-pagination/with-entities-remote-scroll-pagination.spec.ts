@@ -1,9 +1,11 @@
+import { ListRange } from '@angular/cdk/collections';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { of } from 'rxjs';
+import { BehaviorSubject, lastValueFrom, of } from 'rxjs';
 
 import {
+  getInfiniteScrollDataSource,
   withCallStatus,
   withEntitiesLoadingCall,
   withEntitiesRemoteFilter,
@@ -17,7 +19,7 @@ import { sortData } from '../with-entities-sort/with-entities-local-sort.util';
 describe('withEntitiesRemoteScrollPagination', () => {
   const entity = type<Product>();
 
-  it('entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
+  it('entitiesCurrentPage should split entities in the correct pages using a result with entities and total', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({ entity }),
@@ -42,6 +44,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
       );
 
       const store = new Store();
+
       TestBed.flushEffects();
       expect(store.entities()).toEqual([]);
       store.setLoading();
@@ -50,7 +53,110 @@ describe('withEntitiesRemoteScrollPagination', () => {
       expect(store.entities().length).toEqual(10);
       expect(store.entities()).toEqual(mockProducts.slice(0, 10));
       expect(store.entitiesScrollCache().hasMore).toEqual(true);
-      expect(store.entitiesScrollCache().total).toEqual(25);
+      expect(store.entitiesScrollCache().bufferSize).toEqual(10);
+
+      store.loadMoreEntities();
+      tick();
+      // check the second load
+      expect(store.entities().length).toEqual(20);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 20));
+      expect(store.entitiesScrollCache().hasMore).toEqual(true);
+      store.loadMoreEntities();
+      tick();
+      expect(store.entities().length).toEqual(25);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 25));
+      expect(store.entitiesScrollCache().hasMore).toEqual(false);
+    });
+  }));
+
+  it('entitiesCurrentPage should split entities in the correct pages using a result with entities and hasMore', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const bufferSize = 10;
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteScrollPagination({ entity, bufferSize }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesRequest }) => {
+            let result = [...mockProducts.slice(0, 25)];
+            const total = result.length;
+            const options = {
+              skip: entitiesRequest()?.startIndex,
+              take: entitiesRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({
+              entities: result,
+              hasMore: result.length == bufferSize,
+            });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first load
+      expect(store.entities().length).toEqual(10);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 10));
+      expect(store.entitiesScrollCache().hasMore).toEqual(true);
+      expect(store.entitiesScrollCache().bufferSize).toEqual(10);
+
+      store.loadMoreEntities();
+      tick();
+      // check the second load
+      expect(store.entities().length).toEqual(20);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 20));
+      expect(store.entitiesScrollCache().hasMore).toEqual(true);
+      store.loadMoreEntities();
+      tick();
+      expect(store.entities().length).toEqual(25);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 25));
+      expect(store.entitiesScrollCache().hasMore).toEqual(false);
+    });
+  }));
+
+  it('entitiesCurrentPage should split entities in the correct pages using a result with just entities ', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const bufferSize = 10;
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteScrollPagination({ entity, bufferSize }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesRequest }) => {
+            let result = [...mockProducts.slice(0, 25)];
+            const options = {
+              skip: entitiesRequest()?.startIndex,
+              take: entitiesRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({
+              entities: result,
+            });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first load
+      expect(store.entities().length).toEqual(10);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 10));
+      expect(store.entitiesScrollCache().hasMore).toEqual(true);
       expect(store.entitiesScrollCache().bufferSize).toEqual(10);
 
       store.loadMoreEntities();
@@ -106,7 +212,6 @@ describe('withEntitiesRemoteScrollPagination', () => {
       expect(store.productsEntities().length).toEqual(10);
       expect(store.productsEntities()).toEqual(mockProducts.slice(0, 10));
       expect(store.productsScrollCache().hasMore).toEqual(true);
-      expect(store.productsScrollCache().total).toEqual(25);
       expect(store.productsScrollCache().bufferSize).toEqual(10);
 
       store.loadMoreProducts();
@@ -237,4 +342,132 @@ describe('withEntitiesRemoteScrollPagination', () => {
       expect(store.entities().length).toEqual(30);
     });
   }));
+
+  describe('getInfiniteScrollDataSource', () => {
+    it('dataSource result should return all results while iterated', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({ entity }),
+          withCallStatus(),
+          withEntitiesRemoteScrollPagination({ entity, bufferSize: 10 }),
+          withEntitiesLoadingCall({
+            fetchEntities: ({ entitiesRequest }) => {
+              let result = [...mockProducts.slice(0, 25)];
+              const total = result.length;
+              const options = {
+                skip: entitiesRequest()?.startIndex,
+                take: entitiesRequest()?.size,
+              };
+              if (options?.skip || options?.take) {
+                const skip = +(options?.skip ?? 0);
+                const take = +(options?.take ?? 0);
+                result = result.slice(skip, skip + take);
+              }
+              return of({ entities: result, total });
+            },
+          }),
+        );
+
+        const store = new Store();
+        TestBed.flushEffects();
+        const dataSource = getInfiniteScrollDataSource({ store });
+        const collectionViewer = new BehaviorSubject<ListRange>({
+          start: 0,
+          end: 10,
+        });
+
+        expect(store.entities()).toEqual([]);
+        store.setLoading();
+        tick();
+        const list$ = dataSource.connect({ viewChange: collectionViewer });
+        let entities: Product[] = [];
+        list$.subscribe((data) => {
+          entities = data;
+        });
+
+        // check the first load
+        expect(entities.length).toEqual(10);
+        expect(entities).toEqual(mockProducts.slice(0, 10));
+
+        collectionViewer.next({ start: 10, end: 20 });
+        tick();
+        // check the second load
+        expect(entities.length).toEqual(20);
+        expect(entities).toEqual(mockProducts.slice(0, 20));
+
+        collectionViewer.next({ start: 20, end: 30 });
+        tick();
+        expect(entities.length).toEqual(25);
+        expect(entities).toEqual(mockProducts.slice(0, 25));
+      });
+    }));
+
+    it('with collection dataSource result should return all results while iterated', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const collection = 'products';
+        const Store = signalStore(
+          withEntities({ entity, collection }),
+          withCallStatus({ collection }),
+          withEntitiesRemoteScrollPagination({
+            entity,
+            collection,
+            bufferSize: 10,
+          }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: ({ productsRequest }) => {
+              let result = [...mockProducts.slice(0, 25)];
+              const total = result.length;
+              const options = {
+                skip: productsRequest()?.startIndex,
+                take: productsRequest()?.size,
+              };
+              if (options?.skip || options?.take) {
+                const skip = +(options?.skip ?? 0);
+                const take = +(options?.take ?? 0);
+                result = result.slice(skip, skip + take);
+              }
+              return of({ entities: result, total });
+            },
+          }),
+        );
+
+        const store = new Store();
+        TestBed.flushEffects();
+        const dataSource = getInfiniteScrollDataSource({
+          store,
+          collection,
+          entity,
+        });
+        const collectionViewer = new BehaviorSubject<ListRange>({
+          start: 0,
+          end: 10,
+        });
+
+        expect(store.productsEntities()).toEqual([]);
+        store.setProductsLoading();
+        tick();
+        const list$ = dataSource.connect({ viewChange: collectionViewer });
+        let entities: Product[] = [];
+        list$.subscribe((data) => {
+          entities = data;
+        });
+
+        // check the first load
+        expect(entities.length).toEqual(10);
+        expect(entities).toEqual(mockProducts.slice(0, 10));
+
+        collectionViewer.next({ start: 10, end: 20 });
+        tick();
+        // check the second load
+        expect(entities.length).toEqual(20);
+        expect(entities).toEqual(mockProducts.slice(0, 20));
+
+        collectionViewer.next({ start: 20, end: 30 });
+        tick();
+        expect(entities.length).toEqual(25);
+        expect(entities).toEqual(mockProducts.slice(0, 25));
+      });
+    }));
+  });
 });

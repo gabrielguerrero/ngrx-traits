@@ -45,3 +45,12 @@ export type NamedEntitiesPaginationLocalMethods<Collection extends string> = {
     pageIndex: number;
   }) => void;
 };
+
+export type SetEntitiesResult<ResultParam> = {
+  setEntitiesResult: (result: ResultParam) => void;
+};
+export type NamedSetEntitiesResult<Collection extends string, ResultParam> = {
+  [K in Collection as `set${Capitalize<string & K>}Result`]: (
+    result: ResultParam,
+  ) => void;
+};
