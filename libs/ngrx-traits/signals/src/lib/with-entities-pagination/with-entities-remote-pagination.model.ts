@@ -3,6 +3,8 @@ import { Signal } from '@angular/core';
 import {
   EntitiesPaginationLocalMethods,
   NamedEntitiesPaginationLocalMethods,
+  NamedSetEntitiesResult,
+  SetEntitiesResult,
 } from './with-entities-local-pagination.model';
 
 export type PaginationState = {
@@ -60,17 +62,13 @@ export type NamedEntitiesPaginationRemoteComputed<
     isLoading: boolean;
   }>;
 };
+
 export type EntitiesPaginationRemoteMethods<Entity> =
-  EntitiesPaginationLocalMethods & {
-    setEntitiesResult: (result: { entities: Entity[]; total: number }) => void;
-  };
+  EntitiesPaginationLocalMethods &
+    SetEntitiesResult<{ entities: Entity[]; total: number }>;
 
 export type NamedEntitiesPaginationRemoteMethods<
   Entity,
   Collection extends string,
-> = NamedEntitiesPaginationLocalMethods<Collection> & {
-  [K in Collection as `set${Capitalize<string & K>}Result`]: (result: {
-    entities: Entity[];
-    total: number;
-  }) => void;
-};
+> = NamedEntitiesPaginationLocalMethods<Collection> &
+  NamedSetEntitiesResult<Collection, { entities: Entity[]; total: number }>;

@@ -305,7 +305,6 @@ export function withEntitiesRemoteScrollPagination<
   return signalStoreFeature(
     withState({
       [entitiesScrollCacheKey]: {
-        total: undefined,
         bufferSize,
         hasMore: true,
       },
@@ -339,13 +338,21 @@ export function withEntitiesRemoteScrollPagination<
       const setLoading = state[setLoadingKey] as () => void;
 
       return {
-        [setEntitiesResultKey]: ({
-          entities,
-          total,
-        }: {
-          entities: Entity[];
-          total: number;
-        }) => {
+        [setEntitiesResultKey]: (
+          options:
+            | {
+                entities: Entity[];
+                total: number;
+              }
+            | {
+                entities: Entity[];
+                hasMore: boolean;
+              }
+            | {
+                entities: Entity[];
+              },
+        ) => {
+          const entities = options.entities;
           const entitiesOld = state[entitiesKey] as Signal<Entity[]>;
           patchState(
             state as StateSignal<object>,
@@ -357,8 +364,12 @@ export function withEntitiesRemoteScrollPagination<
             {
               [entitiesScrollCacheKey]: {
                 ...entitiesScrollCache(),
-                total,
-                hasMore: entitiesOld().length + entities.length < total,
+                hasMore:
+                  'hasMore' in options
+                    ? options.hasMore
+                    : 'total' in options
+                      ? entitiesOld().length + entities.length < options.total
+                      : entities.length == entitiesScrollCache().bufferSize,
               },
             },
           );

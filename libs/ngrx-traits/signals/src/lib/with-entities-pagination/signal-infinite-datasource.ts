@@ -23,6 +23,7 @@ export function getInfiniteScrollDataSource<Entity, Collection extends string>(
       }
     | {
         collection: Collection;
+        entity: Entity;
         store: NamedEntitySignals<Entity, Collection> &
           NamedEntitiesScrollPaginationMethods<Entity, Collection>;
       },
@@ -47,13 +48,11 @@ export function getInfiniteScrollDataSource<Entity, Collection extends string>(
       this.subscription = collectionViewer.viewChange
         .pipe(
           filter(({ end, start }) => {
-            const { bufferSize, total } = entitiesScrollCache();
+            const { bufferSize, hasMore } = entitiesScrollCache();
             // filter first request that is done by the cdkscroll,
             // filter last request
             // only do requests when you pass a specific threshold
-            return (
-              start != 0 && end <= total! && end + bufferSize >= entities.length
-            );
+            return start != 0 && hasMore && end + bufferSize >= entities.length;
           }),
         )
         .subscribe(() => {

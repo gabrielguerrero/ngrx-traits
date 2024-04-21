@@ -11,7 +11,6 @@ import {
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
-  withSyncToWebStorage,
 } from '@ngrx-traits/signals';
 import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
@@ -38,6 +37,11 @@ export const ProductsRemoteStore = signalStore(
     pageSize: 5,
     pagesToCache: 2,
   }),
+  // withEntitiesRemoteScrollPagination({
+  //   bufferSize: 5,
+  //   collection,
+  //   entity
+  // }),
   withEntitiesRemoteSort({
     entity,
     collection,
