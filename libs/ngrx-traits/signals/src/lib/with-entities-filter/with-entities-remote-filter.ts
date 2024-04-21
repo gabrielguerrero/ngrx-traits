@@ -208,7 +208,7 @@ export function withEntitiesRemoteFilter<
   collection?: Collection;
 }): SignalStoreFeature<
   {
-    state: NamedEntityState<Entity, any>;
+    state: NamedEntityState<Entity, string>;
     signals: NamedEntitySignals<Entity, Collection>;
     methods: NamedCallStatusMethods<Collection>;
   },

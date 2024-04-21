@@ -76,7 +76,7 @@ import {
 export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
   Filter extends Record<string, unknown>,
->(options: {
+>(config: {
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
   entity?: Entity;
@@ -133,7 +133,7 @@ export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
   Collection extends string,
   Filter extends Record<string, unknown>,
->(options: {
+>(config: {
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
   entity?: Entity;

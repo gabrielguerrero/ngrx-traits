@@ -199,7 +199,7 @@ describe('withEntitiesRemoteFilter', () => {
                   : false,
               );
             }
-            return of(result);
+            return of({ entities: result, total: result.length });
           },
         }),
       );

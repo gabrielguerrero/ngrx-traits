@@ -49,7 +49,10 @@ import {
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { EntitiesPaginationRemoteMethods } from '../with-entities-pagination/with-entities-remote-pagination.model';
+import {
+  NamedSetEntitiesResult,
+  SetEntitiesResult,
+} from '../with-entities-pagination/with-entities-local-pagination.model';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
 
 /**
@@ -127,13 +130,13 @@ export function withEntitiesLoadingCall<
     >,
   ) =>
     | Observable<
-        Input['methods'] extends EntitiesPaginationRemoteMethods<Entity>
-          ? { entities: Entity[]; total: number }
-          : Entity[] | { entities: Entity[] } // should this be { entities: Entity[];} for consistency?
+        Input['methods'] extends SetEntitiesResult<infer ResultParam>
+          ? ResultParam
+          : Entity[] | { entities: Entity[] }
       >
     | Promise<
-        Input['methods'] extends EntitiesPaginationRemoteMethods<Entity>
-          ? { entities: Entity[]; total: number }
+        Input['methods'] extends SetEntitiesResult<infer ResultParam>
+          ? ResultParam
           : Entity[] | { entities: Entity[] }
       >;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
@@ -225,26 +228,20 @@ export function withEntitiesLoadingCall<
     >,
   ) =>
     | Observable<
-        Entity[] | { entities: Entity[]; total?: number }
-        // // TODO bellow is not working as expected
-        // Input['methods'] extends NamedEntitiesPaginationSetResultMethods<
-        //   Entity,
-        //   Collection
-        // >
-        //   ? { entities: Entity[]; total: number } & Prettify<
-        //       NamedEntitiesPaginationSetResultMethods<Entity, Collection>
-        //     >
-        //   : Entity[] | { entities: Entity[] }
+        Input['methods'] extends NamedSetEntitiesResult<
+          Collection,
+          infer ResultParam
+        >
+          ? ResultParam
+          : Entity[] | { entities: Entity[] }
       >
     | Promise<
-        Entity[] | { entities: Entity[]; total?: number }
-        // TODO bellow is not working as expected
-        // Input['methods'] extends NamedEntitiesPaginationRemoteSetResult<
-        //   Entity,
-        //   Collection
-        // >
-        //   ? { entities: Entity[]; total: number }
-        //   : Entity[] | { entities: Entity[] }
+        Input['methods'] extends NamedSetEntitiesResult<
+          Collection,
+          infer ResultParam
+        >
+          ? ResultParam
+          : Entity[] | { entities: Entity[] }
       >;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
 }): SignalStoreFeature<
@@ -288,7 +285,6 @@ export function withEntitiesLoadingCall<
     const setError = store.methods[setErrorKey] as (error: unknown) => void;
     const setEntitiesResult = store.methods[setEntitiesResultKey] as (result: {
       entities: Entity[];
-      total: number;
     }) => void;
 
     return signalStoreFeature(
@@ -313,28 +309,19 @@ export function withEntitiesLoadingCall<
                   ),
                 ).pipe(
                   map((result) => {
-                    if (Array.isArray(result)) {
+                    if (setEntitiesResult) setEntitiesResult(result);
+                    else {
+                      const entities = Array.isArray(result)
+                        ? result
+                        : result.entities;
                       patchState(
                         state,
                         collection
-                          ? setAllEntities(result as Entity[], {
+                          ? setAllEntities(entities as Entity[], {
                               collection,
                             })
-                          : setAllEntities(result),
+                          : setAllEntities(entities),
                       );
-                    } else {
-                      const { entities, total } = result;
-                      if (setEntitiesResult)
-                        setEntitiesResult({ entities, total });
-                      else
-                        patchState(
-                          state,
-                          collection
-                            ? setAllEntities(entities as Entity[], {
-                                collection,
-                              })
-                            : setAllEntities(entities),
-                        );
                     }
                     setLoaded();
                   }),

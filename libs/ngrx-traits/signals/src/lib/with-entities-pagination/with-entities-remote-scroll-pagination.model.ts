@@ -1,8 +1,12 @@
 import { Signal } from '@angular/core';
 
+import {
+  NamedSetEntitiesResult,
+  SetEntitiesResult,
+} from './with-entities-local-pagination.model';
+
 export type ScrollPaginationState = {
   bufferSize: number;
-  total: number | undefined;
   hasMore: boolean;
 };
 export type EntitiesScrollPaginationState = {
@@ -26,18 +30,37 @@ export type NamedEntitiesScrollPaginationComputed<
     size: number;
   }>;
 };
-export type EntitiesScrollPaginationMethods<Entity> = {
-  setEntitiesResult: (result: { entities: Entity[]; total: number }) => void;
+export type EntitiesScrollPaginationMethods<Entity> = SetEntitiesResult<
+  | {
+      entities: Entity[];
+      total: number;
+    }
+  | {
+      entities: Entity[];
+      hasMore: boolean;
+    }
+  | {
+      entities: Entity[];
+    }
+> & {
   loadMoreEntities: () => void;
 };
 export type NamedEntitiesScrollPaginationMethods<
   Entity,
   Collection extends string,
-> = {
-  [K in Collection as `set${Capitalize<string & K>}Result`]: (result: {
-    entities: Entity[];
-    total: number;
-  }) => void;
-} & {
+> = NamedSetEntitiesResult<
+  Collection,
+  | {
+      entities: Entity[];
+      total: number;
+    }
+  | {
+      entities: Entity[];
+      hasMore: boolean;
+    }
+  | {
+      entities: Entity[];
+    }
+> & {
   [K in Collection as `loadMore${Capitalize<string & K>}`]: () => void;
 };
