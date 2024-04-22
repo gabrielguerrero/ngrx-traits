@@ -35,10 +35,12 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 /**
  * Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
  * and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
- * and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]LoadResult if is paginated
+ * and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
  * with the sorted result that come from the backend, plus changing the status  and set errors is needed.
  * or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
- * the result and errors automatically. Requires withEntities and withCallStatus to be present before this function.
+ * the result and errors automatically.
+ *
+ * Requires withEntities and withCallStatus to be present before this function.
  *
  * @param config
  * @param config.defaultSort - The default sort to use when the store is initialized
@@ -125,10 +127,12 @@ export function withEntitiesRemoteSort<
 /**
  * Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
  * and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
- * and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]LoadResult if is paginated
+ * and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
  * with the sorted result that come from the backend, plus changing the status  and set errors is needed.
  * or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
- * the result and errors automatically. Requires withEntities and withCallStatus to be present before this function.
+ * the result and errors automatically.
+ *
+ * Requires withEntities and withCallStatus to be present before this function.
  *
  * @param config
  * @param config.defaultSort - The default sort to use when the store is initialized

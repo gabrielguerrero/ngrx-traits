@@ -42,37 +42,3 @@ export const ProductsBranchStore = signalStore(
   }),
   withLogger('branchStore'),
 );
-// const collection = 'products';
-// export const ProductsBranchStore2 = signalStore(
-//   withEntities({
-//     entity,
-//     collection,
-//   }),
-//   withCallStatus({ initialValue: 'loading', collection }),
-//   withEntitiesRemoteFilter({
-//     entity,
-//     defaultFilter: { search: '' },
-//     collection,
-//   }),
-//   withEntitiesRemoteScrollPagination({
-//     bufferSize: 30,
-//     entity,
-//     collection,
-//   }),
-//   withEntitiesLoadingCall({
-//     collection,
-//     fetchEntities: async ({ productsRequest, productsFilter }) => {
-//       const res = await lastValueFrom(
-//         inject(BranchService).getBranches({
-//           search: productsFilter().search,
-//           skip: productsRequest().startIndex,
-//           take: productsRequest().size,
-//         }),
-//       );
-//       return { entities: res.resultList, total: res.total };
-//     },
-//   }),
-//   withLogger('branchStore'),
-// );
-// const store = new ProductsBranchStore2();
-// getInfiniteScrollDataSource({ store, collection, entity });

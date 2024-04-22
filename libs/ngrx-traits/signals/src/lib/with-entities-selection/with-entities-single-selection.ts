@@ -33,7 +33,9 @@ import {
 import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection.util';
 
 /**
- * Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.
+ * Generates state, computed and methods for single selection of entities.
+ *
+ * Requires withEntities to be present before this function.
  * @param config
  * @param config.collection - The collection name
  * @param config.entity - The entity type
@@ -80,7 +82,9 @@ export function withEntitiesSingleSelection<
   }
 >;
 /**
- * Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.
+ * Generates state, computed and methods for single selection of entities.
+ *
+ * Requires withEntities to be present before this function.
  * @param config
  * @param config.collection - The collection name
  * @param config.entity - The entity type

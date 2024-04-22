@@ -17,29 +17,31 @@ and store the result of the call</p></dd>
 <dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
-and is debounced by default. Requires withEntities to be used.</p></dd>
+and is debounced by default.</p>
+<p>Requires withEntities to be used.</p></dd>
 <dt><a href="#withEntitiesRemoteFilter">withEntitiesRemoteFilter(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
 and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
 or use withEntitiesLoadingCall to call the api with the [collection]Filter params
-and is debounced by default. Requires withEntities and withCallStatus to be present before this function.</p></dd>
+and is debounced by default.</p>
+<p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLoadingCall">withEntitiesLoadingCall(config)</a></dt>
 <dd><p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
 to the store using the setAllEntities method or the setEntitiesResult method
 if it exists (comes from withEntitiesRemotePagination),
-if an error occurs it will set the error to the store using set[Collection]Error with the error.
-Requires withEntities and withCallStatus to be present in the store.</p></dd>
+if an error occurs it will set the error to the store using set[Collection]Error with the error.</p>
+<p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
 <dt><a href="#withEntitiesLocalPagination">withEntitiesLocalPagination(config)</a></dt>
-<dd><p>Generates necessary state, computed and methods for local pagination of entities in the store.
-Requires withEntities to be present in the store.</p></dd>
+<dd><p>Generates necessary state, computed and methods for local pagination of entities in the store.</p>
+<p>Requires withEntities to be present in the store.</p></dd>
 <dt><a href="#withEntitiesRemotePagination">withEntitiesRemotePagination(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remote pagination of entities in the store.
 When the page changes, it will try to load the current page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
 the result and errors automatically. Requires withEntities and withCallStatus to be used.
@@ -50,26 +52,34 @@ different between this and withEntitiesRemotePagination this will can only got t
 of entities keeps growing, ideally for implementing infinite scroll style ui.
 When the page changes, it will try to load the current page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
-the result and errors automatically. Requires withEntities and withCallStatus to be used.
-Requires withEntities and withCallStatus to be present in the store.</p></dd>
+the result and errors automatically. Requires withEntities and withCallStatus to be used.</p>
+<p>The generated set[Collection]Result method will append the entities to the cache of entities,
+it requires either just set of requested entities set[Collection]Result({ entities }) in which case it will assume there is no more result if you set less entities
+than the requested buffer size, or you can provide an extra param to the entities, total set[Collection]Result({ entities, total }) so it calculates if there is more
+or a hasMore param set[Collection]Result({entities, hasMore}) that you can set to false to indicate the end of the entities.</p>
+<p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
 <dt><a href="#withEntitiesMultiSelection">withEntitiesMultiSelection(config)</a></dt>
 <dd><p>Generates state, signals and methods for multi selection of entities.
 Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
-correctly in using remote pagination, because they cant select all the data</p></dd>
+correctly in using remote pagination, because they cant select all the data.</p>
+<p>Requires withEntities to be used before this feature.</p></dd>
 <dt><a href="#withEntitiesSingleSelection">withEntitiesSingleSelection(config)</a></dt>
-<dd><p>Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.</p></dd>
+<dd><p>Generates state, computed and methods for single selection of entities.</p>
+<p>Requires withEntities to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLocalSort">withEntitiesLocalSort(config)</a></dt>
-<dd><p>Generates necessary state, computed and methods for sorting locally entities in the store. Requires withEntities to be present before this function</p></dd>
+<dd><p>Generates necessary state, computed and methods for sorting locally entities in the store.</p>
+<p>Requires withEntities to be present before this function</p></dd>
 <dt><a href="#withEntitiesRemoteSort">withEntitiesRemoteSort(config)</a></dt>
 <dd><p>Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
 and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]LoadResult if is paginated
+and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status  and set errors is needed.
 or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
-the result and errors automatically. Requires withEntities and withCallStatus to be present before this function.</p></dd>
+the result and errors automatically.</p>
+<p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEventHandler">withEventHandler(eventHandlerFactory)</a></dt>
 <dd><p>Adds an event handler to the store, allowing the store to listen to events and react to them.
 This helps with the communications between different store feature functions, normally a store feature can only
@@ -176,7 +186,8 @@ withCalls(({ productsSelectedEntity }) => ({
 ## withEntitiesLocalFilter(config)
 <p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
-and is debounced by default. Requires withEntities to be used.</p>
+and is debounced by default.</p>
+<p>Requires withEntities to be used.</p>
 
 **Kind**: global function  
 
@@ -222,7 +233,8 @@ const store = signalStore(
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
 and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
 or use withEntitiesLoadingCall to call the api with the [collection]Filter params
-and is debounced by default. Requires withEntities and withCallStatus to be present before this function.</p>
+and is debounced by default.</p>
+<p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
 
@@ -302,8 +314,8 @@ when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
 to the store using the setAllEntities method or the setEntitiesResult method
 if it exists (comes from withEntitiesRemotePagination),
-if an error occurs it will set the error to the store using set[Collection]Error with the error.
-Requires withEntities and withCallStatus to be present in the store.</p>
+if an error occurs it will set the error to the store using set[Collection]Error with the error.</p>
+<p>Requires withEntities and withCallStatus to be present in the store.</p>
 
 **Kind**: global function  
 
@@ -364,8 +376,8 @@ export const ProductsRemoteStore = signalStore(
 <a name="withEntitiesLocalPagination"></a>
 
 ## withEntitiesLocalPagination(config)
-<p>Generates necessary state, computed and methods for local pagination of entities in the store.
-Requires withEntities to be present in the store.</p>
+<p>Generates necessary state, computed and methods for local pagination of entities in the store.</p>
+<p>Requires withEntities to be present in the store.</p>
 
 **Kind**: global function  
 
@@ -404,7 +416,7 @@ export const ProductsLocalStore = signalStore(
 <p>Generates necessary state, computed and methods for remote pagination of entities in the store.
 When the page changes, it will try to load the current page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
 the result and errors automatically. Requires withEntities and withCallStatus to be used.
@@ -455,7 +467,7 @@ export const store = signalStore(
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
+// withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
 //       if (isProductsLoading()) {
@@ -469,7 +481,7 @@ export const store = signalStore(
 //             tap((res) =>
 //               patchState(
 //                 state,
-//                 setProductsLoadResult(res.resultList, res.total),
+//                 setProductsResult({ entities: res.resultList, total: res.total } ),
 //               ),
 //             ),
 //             catchError((error) => {
@@ -489,7 +501,7 @@ export const store = signalStore(
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesRemoteScrollPagination"></a>
 
@@ -499,11 +511,15 @@ different between this and withEntitiesRemotePagination this will can only got t
 of entities keeps growing, ideally for implementing infinite scroll style ui.
 When the page changes, it will try to load the current page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
-the result and errors automatically. Requires withEntities and withCallStatus to be used.
-Requires withEntities and withCallStatus to be present in the store.</p>
+the result and errors automatically. Requires withEntities and withCallStatus to be used.</p>
+<p>The generated set[Collection]Result method will append the entities to the cache of entities,
+it requires either just set of requested entities set[Collection]Result({ entities }) in which case it will assume there is no more result if you set less entities
+than the requested buffer size, or you can provide an extra param to the entities, total set[Collection]Result({ entities, total }) so it calculates if there is more
+or a hasMore param set[Collection]Result({entities, hasMore}) that you can set to false to indicate the end of the entities.</p>
+<p>Requires withEntities and withCallStatus to be present in the store.</p>
 
 **Kind**: global function  
 
@@ -548,7 +564,7 @@ export const store = signalStore(
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
+// withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
 //       if (isProductsLoading()) {
@@ -562,7 +578,8 @@ export const store = signalStore(
 //             tap((res) =>
 //               patchState(
 //                 state,
-//                 setProductsLoadResult(res.resultList, res.total),
+//                 // total is not required, you can use hasMore or none see docs
+//                 setProductsResult({ entities: res.resultList, total: res.total } ),
 //               ),
 //             ),
 //             catchError((error) => {
@@ -578,7 +595,7 @@ export const store = signalStore(
 
  // in your component add
  store = inject(ProductsRemoteStore);
- dataSource = getInfiniteScrollDataSource(store, { collecrion: 'products' }) // pass this to your cdkVirtualFor see examples section
+ dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
   // generates the following signals
   store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
@@ -588,14 +605,15 @@ export const store = signalStore(
  store.loadProductsNextPage() // loads next page
  store.loadProductsPreviousPage() // loads previous page
  store.loadProductsFirstPage() // loads first page
- store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesMultiSelection"></a>
 
 ## withEntitiesMultiSelection(config)
 <p>Generates state, signals and methods for multi selection of entities.
 Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
-correctly in using remote pagination, because they cant select all the data</p>
+correctly in using remote pagination, because they cant select all the data.</p>
+<p>Requires withEntities to be used before this feature.</p>
 
 **Kind**: global function  
 
@@ -629,7 +647,8 @@ store.toggleSelectAllProducts // () => void;
 <a name="withEntitiesSingleSelection"></a>
 
 ## withEntitiesSingleSelection(config)
-<p>Generates state, computed and methods for single selection of entities. Requires withEntities to be present before this function.</p>
+<p>Generates state, computed and methods for single selection of entities.</p>
+<p>Requires withEntities to be present before this function.</p>
 
 **Kind**: global function  
 
@@ -667,7 +686,8 @@ export const store = signalStore(
 <a name="withEntitiesLocalSort"></a>
 
 ## withEntitiesLocalSort(config)
-<p>Generates necessary state, computed and methods for sorting locally entities in the store. Requires withEntities to be present before this function</p>
+<p>Generates necessary state, computed and methods for sorting locally entities in the store.</p>
+<p>Requires withEntities to be present before this function</p>
 
 **Kind**: global function  
 
@@ -701,10 +721,11 @@ store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sort
 ## withEntitiesRemoteSort(config)
 <p>Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
 and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]LoadResult if is paginated
+and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status  and set errors is needed.
 or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
-the result and errors automatically. Requires withEntities and withCallStatus to be present before this function.</p>
+the result and errors automatically.</p>
+<p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
 

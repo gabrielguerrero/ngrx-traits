@@ -36,7 +36,9 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
 /**
  * Generates state, signals and methods for multi selection of entities.
  * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
- * correctly in using remote pagination, because they cant select all the data
+ * correctly in using remote pagination, because they cant select all the data.
+ *
+ * Requires withEntities to be used before this feature.
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name
@@ -81,7 +83,9 @@ export function withEntitiesMultiSelection<
 /**
  * Generates state, signals and methods for multi selection of entities.
  * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
- * correctly in using remote pagination, because they cant select all the data
+ * correctly in using remote pagination, because they cant select all the data.
+ *
+ * Requires withEntities to be used before this feature.
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name

@@ -62,7 +62,9 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  * to the store using the setAllEntities method or the setEntitiesResult method
  * if it exists (comes from withEntitiesRemotePagination),
  * if an error occurs it will set the error to the store using set[Collection]Error with the error.
+ *
  * Requires withEntities and withCallStatus to be present in the store.
+ *
  * @param config - Configuration object
  * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
  * @param config.collection - The collection name
@@ -156,7 +158,9 @@ export function withEntitiesLoadingCall<
  * to the store using the setAllEntities method or the setEntitiesResult method
  * if it exists (comes from withEntitiesRemotePagination),
  * if an error occurs it will set the error to the store using set[Collection]Error with the error.
+ *
  * Requires withEntities and withCallStatus to be present in the store.
+ *
  * @param config - Configuration object
  * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
  * @param config.collection - The collection name
