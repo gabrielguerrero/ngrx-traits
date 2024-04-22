@@ -108,10 +108,13 @@ export function withEntitiesLocalSort<
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
+  // TODO: we have a problem  with the state property, when set to string
+  // it works but is it has a Collection, some methods are not generated, it seems
+  // to only be accessible using store['filterEntities']
+  // the workaround doesn't cause any issues, because the signals prop does work and still
+  // gives the right error requiring withEntities to be used
   {
-    state: NamedEntityState<Entity, any>;
+    state: NamedEntityState<Entity, string>;
     signals: NamedEntitySignals<Entity, Collection>;
     methods: {};
   },
