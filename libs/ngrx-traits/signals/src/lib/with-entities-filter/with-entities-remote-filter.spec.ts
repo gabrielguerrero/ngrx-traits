@@ -85,6 +85,45 @@ describe('withEntitiesRemoteFilter', () => {
     });
   }));
 
+  it('should filter entities after provide debounce', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+          defaultDebounce: 1000,
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesFilter }) => {
+            let result = [...mockProducts];
+            if (entitiesFilter()?.search) {
+              result = mockProducts.filter((entity) =>
+                entitiesFilter()?.search
+                  ? entity.name
+                      .toLowerCase()
+                      .includes(entitiesFilter()?.search.toLowerCase())
+                  : false,
+              );
+            }
+            return of(result);
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.flushEffects();
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar2' },
+      });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(1100);
+      expect(store.entities().length).toEqual(2);
+    });
+  }));
+
   it('should filter entities immediately when forceLoad is true', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
