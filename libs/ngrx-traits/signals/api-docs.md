@@ -196,7 +196,7 @@ and is debounced by default.</p>
 | config |  |
 | config.filterFn | <p>The function that will be used to filter the entities</p> |
 | config.defaultFilter | <p>The default filter to be used</p> |
-| config.entity | <p>The entity tye to be used</p> |
+| config.defaultDebounce | <p>The default debounce time to be used</p> |
 | config.collection | <p>The optional collection name to be used</p> |
 
 **Example**  
@@ -242,6 +242,7 @@ and is debounced by default.</p>
 | --- | --- |
 | config |  |
 | config.defaultFilter | <p>The default filter to be used</p> |
+| config.defaultDebounce | <p>The default debounce time to be used</p> |
 | config.entity | <p>The entity type to be used</p> |
 | config.collection | <p>The optional collection name to be used</p> |
 

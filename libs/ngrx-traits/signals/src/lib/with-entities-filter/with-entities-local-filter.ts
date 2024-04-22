@@ -46,6 +46,7 @@ import {
  * @param config
  * @param config.filterFn - The function that will be used to filter the entities
  * @param config.defaultFilter - The default filter to be used
+ * @param config.defaultDebounce - The default debounce time to be used
  * @param config.entity - The entity tye to be used
  * @param config.collection - The optional collection name to be used
  *
@@ -81,6 +82,7 @@ export function withEntitiesLocalFilter<
 >(config: {
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
+  defaultDebounce?: number;
   entity?: Entity;
 }): SignalStoreFeature<
   {
@@ -104,7 +106,7 @@ export function withEntitiesLocalFilter<
  * @param config
  * @param config.filterFn - The function that will be used to filter the entities
  * @param config.defaultFilter - The default filter to be used
- * @param config.entity - The entity tye to be used
+ * @param config.defaultDebounce - The default debounce time to be used
  * @param config.collection - The optional collection name to be used
  *
  * @example
@@ -140,6 +142,7 @@ export function withEntitiesLocalFilter<
 >(config: {
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
+  defaultDebounce?: number;
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
@@ -171,6 +174,7 @@ export function withEntitiesLocalFilter<
 }: {
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
+  defaultDebounce?: number;
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
@@ -208,7 +212,7 @@ export function withEntitiesLocalFilter<
         forceLoad?: boolean;
       }>(
         pipe(
-          debounceFilterPipe(filter),
+          debounceFilterPipe(filter, config.defaultDebounce),
           tap((value) => {
             const newEntities = entities().filter((entity) => {
               return filterFn(entity, value.filter);

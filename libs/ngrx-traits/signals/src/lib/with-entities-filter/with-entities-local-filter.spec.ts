@@ -69,6 +69,32 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
+  it('should filter entities after default debounce', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+          defaultDebounce: 1000,
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar2' },
+      });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(1100);
+      expect(store.entities().length).toEqual(2);
+    });
+  }));
+
   it('should filter entities immediately when forceLoad is true', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();

@@ -47,6 +47,7 @@ import {
  * Requires withEntities and withCallStatus to be present before this function.
  * @param config
  * @param config.defaultFilter - The default filter to be used
+ * @param config.defaultDebounce - The default debounce time to be used
  * @param config.entity - The entity type to be used
  * @param config.collection - The optional collection name to be used
  *
@@ -115,6 +116,7 @@ export function withEntitiesRemoteFilter<
   Filter extends Record<string, unknown>,
 >(config: {
   defaultFilter: Filter;
+  defaultDebounce?: number;
   entity?: Entity;
 }): SignalStoreFeature<
   {
@@ -138,6 +140,7 @@ export function withEntitiesRemoteFilter<
  * Requires withEntities and withCallStatus to be present before this function.
  * @param config
  * @param config.defaultFilter - The default filter to be used
+ * @param config.defaultDebounce - The default debounce time to be used
  * @param config.entity - The entity type to be used
  * @param config.collection - The optional collection name to be used
  *
@@ -208,6 +211,7 @@ export function withEntitiesRemoteFilter<
   Filter extends Record<string, unknown>,
 >(config: {
   defaultFilter: Filter;
+  defaultDebounce?: number;
   entity?: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
@@ -231,6 +235,7 @@ export function withEntitiesRemoteFilter<
   ...config
 }: {
   entity?: Entity;
+  defaultDebounce?: number;
   collection?: Collection;
   defaultFilter: Filter;
 }): SignalStoreFeature<any, any> {
@@ -265,7 +270,7 @@ export function withEntitiesRemoteFilter<
         forceLoad?: boolean;
       }>(
         pipe(
-          debounceFilterPipe(filter),
+          debounceFilterPipe(filter, config.defaultDebounce),
           tap((value) => {
             setLoading();
             patchState(state as StateSignal<EntitiesFilterState<Filter>>, {

@@ -31,7 +31,10 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   };
 }
 
-export function debounceFilterPipe<Filter, Entity>(filter: Signal<Filter>) {
+export function debounceFilterPipe<Filter, Entity>(
+  filter: Signal<Filter>,
+  defaultDebounce = 300,
+) {
   return pipe(
     debounce(
       (value: {
@@ -39,7 +42,8 @@ export function debounceFilterPipe<Filter, Entity>(filter: Signal<Filter>) {
         debounce?: number;
         patch?: boolean;
         forceLoad?: boolean;
-      }) => (value?.forceLoad ? of({}) : timer(value.debounce || 300)),
+      }) =>
+        value?.forceLoad ? of({}) : timer(value.debounce || defaultDebounce),
     ),
     concatMap((payload) =>
       payload.patch
