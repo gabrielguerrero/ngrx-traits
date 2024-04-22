@@ -42,7 +42,9 @@ import {
  * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
  * and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
  * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
- * and is debounced by default. Requires withEntities and withCallStatus to be present before this function.
+ * and is debounced by default.
+ *
+ * Requires withEntities and withCallStatus to be present before this function.
  * @param config
  * @param config.defaultFilter - The default filter to be used
  * @param config.entity - The entity type to be used
@@ -79,9 +81,9 @@ import {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
  * //         inject(ProductService)
- * //            .getProducts({
+ * //              .getProducts({
  * //                 search: productsFilter().name,
- * //             })
+ * //               })
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
@@ -131,7 +133,9 @@ export function withEntitiesRemoteFilter<
  * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
  * and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
  * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
- * and is debounced by default. Requires withEntities and withCallStatus to be present before this function.
+ * and is debounced by default.
+ *
+ * Requires withEntities and withCallStatus to be present before this function.
  * @param config
  * @param config.defaultFilter - The default filter to be used
  * @param config.entity - The entity type to be used

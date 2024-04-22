@@ -36,7 +36,9 @@ import {
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 
 /**
- * Generates necessary state, computed and methods for sorting locally entities in the store. Requires withEntities to be present before this function
+ * Generates necessary state, computed and methods for sorting locally entities in the store.
+ *
+ * Requires withEntities to be present before this function
  * @param config
  * @param config.defaultSort - The default sort to be applied to the entities
  * @param config.entity - The type entity to be used
@@ -77,7 +79,9 @@ export function withEntitiesLocalSort<
   }
 >;
 /**
- * Generates necessary state, computed and methods for sorting locally entities in the store. Requires withEntities to be present before this function
+ * Generates necessary state, computed and methods for sorting locally entities in the store.
+ *
+ * Requires withEntities to be present before this function
  * @param config
  * @param config.defaultSort - The default sort to be applied to the entities
  * @param config.entity - The type entity to be used

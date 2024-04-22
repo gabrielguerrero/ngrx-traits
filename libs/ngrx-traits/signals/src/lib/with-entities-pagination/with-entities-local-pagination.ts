@@ -36,6 +36,7 @@ import {
 
 /**
  * Generates necessary state, computed and methods for local pagination of entities in the store.
+ *
  * Requires withEntities to be present in the store.
  * @param config
  * @param config.pageSize - The number of entities to show per page
@@ -54,7 +55,7 @@ import {
  *     entity,
  *     collection,
  *     pageSize: 5,
- *   }));
+ *   }),
  *
  *   // generates the following signals
  *   store.productsPagination // { currentPage: 0, pageSize: 5 }
@@ -83,6 +84,7 @@ export function withEntitiesLocalPagination<
 >;
 /**
  * Generates necessary state, computed and methods for local pagination of entities in the store.
+ *
  * Requires withEntities to be present in the store.
  * @param config
  * @param config.pageSize - The number of entities to show per page

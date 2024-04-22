@@ -37,11 +37,6 @@ export const ProductsRemoteStore = signalStore(
     pageSize: 5,
     pagesToCache: 2,
   }),
-  // withEntitiesRemoteScrollPagination({
-  //   bufferSize: 5,
-  //   collection,
-  //   entity
-  // }),
   withEntitiesRemoteSort({
     entity,
     collection,
