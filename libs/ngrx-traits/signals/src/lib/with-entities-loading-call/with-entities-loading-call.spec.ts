@@ -151,7 +151,7 @@ describe('withEntitiesLoadingCall', () => {
       });
     }));
 
-    it('should set[Collection]LoadResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
+    it('should set[Collection]Result if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withEntities({

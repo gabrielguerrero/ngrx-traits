@@ -57,119 +57,16 @@ import {
  * of entities keeps growing, ideally for implementing infinite scroll style ui.
  * When the page changes, it will try to load the current page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+ * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
  * the result and errors automatically. Requires withEntities and withCallStatus to be used.
- * Requires withEntities and withCallStatus to be present in the store.
- * @param config
- * @param config.bufferSize - The number of entities loaded each time
- * @param config.entity - The entity type
- * @param config.collection - The name of the collection
  *
- * @example
- * const entity = type<Product>();
- * const collection = 'products';
- * export const store = signalStore(
- *   { providedIn: 'root' },
- *   // required withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ * The generated set[Collection]Result method will append the entities to the cache of entities,
+ * it requires either just set of requested entities set[Collection]Result({ entities }) in which case it will assume there is no more result if you set less entities
+ * than the requested buffer size, or you can provide an extra param to the entities, total set[Collection]Result({ entities, total }) so it calculates if there is more
+ * or a hasMore param set[Collection]Result({entities, hasMore}) that you can set to false to indicate the end of the entities.
  *
- *   withEntitiesRemoteScrollPagination({
- *     entity,
- *     collection,
- *     bufferSize: 5,
- *     pagesToCache: 2,
- *   })
- *   // after you can use withEntitiesLoadingCall to connect the filter to
- *   // the api call, or do it manually as shown after
- *    withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productsPagedRequest }) => {
- *       return inject(ProductService)
- *         .getProducts({
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
- *         }).pipe(
- *           map((d) => ({
- *             entities: d.resultList,
- *             total: d.total,
- *           })),
- *         )
- *     },
- *   }),
- * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
- * //   onInit: async () => {
- * //     effect(() => {
- * //       if (isProductsLoading()) {
- * //         inject(ProductService)
- * //             .getProducts({
- * //                take: productsPagedRequest().size,
- * //                skip: productsPagedRequest().startIndex,
- * //              })
- * //           .pipe(
- * //             takeUntilDestroyed(),
- * //             tap((res) =>
- * //               patchState(
- * //                 state,
- * //                 setProductsLoadResult(res.resultList, res.total),
- * //               ),
- * //             ),
- * //             catchError((error) => {
- * //               setProductsError(error);
- * //               return EMPTY;
- * //             }),
- * //           )
- * //           .subscribe();
- * //       }
- * //     });
- * //   },
- *  })),
- *
- *  // in your component add
- *  store = inject(ProductsRemoteStore);
- *  dataSource = getInfiniteScrollDataSource(store, { collecrion: 'products' }) // pass this to your cdkVirtualFor see examples section
- *   // generates the following signals
- *   store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
- *  // generates the following computed signals
- *  store.productsPageInfo // {  pageIndex: number, total: number, bufferSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
- *  // generates the following methods
- *  store.loadProductsNextPage() // loads next page
- *  store.loadProductsPreviousPage() // loads previous page
- *  store.loadProductsFirstPage() // loads first page
- *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
- */
-export function withEntitiesRemoteScrollPagination<
-  Entity extends { id: string | number },
->(config: {
-  bufferSize?: number;
-  entity?: Entity;
-}): SignalStoreFeature<
-  {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity> & CallStatusComputed;
-    methods: CallStatusMethods;
-  },
-  {
-    state: EntitiesScrollPaginationState;
-    signals: EntitiesScrollPaginationComputed;
-    methods: EntitiesScrollPaginationMethods<Entity>;
-  }
->;
-
-/**
- * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
- * different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
- * of entities keeps growing, ideally for implementing infinite scroll style ui.
- * When the page changes, it will try to load the current page from cache if it's not present,
- * it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
- * and changing the status errors manually
- * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
- * the result and errors automatically. Requires withEntities and withCallStatus to be used.
  * Requires withEntities and withCallStatus to be present in the store.
  * @param config
  * @param config.bufferSize - The number of entities to show per page
@@ -209,7 +106,7 @@ export function withEntitiesRemoteScrollPagination<
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -223,7 +120,8 @@ export function withEntitiesRemoteScrollPagination<
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setProductsLoadResult(res.resultList, res.total),
+ * //                 // total is not required, you can use hasMore or none see docs
+ * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
  * //               ),
  * //             ),
  * //             catchError((error) => {
@@ -239,7 +137,7 @@ export function withEntitiesRemoteScrollPagination<
  *
  *  // in your component add
  *  store = inject(ProductsRemoteStore);
- *  dataSource = getInfiniteScrollDataSource(store, { collecrion: 'products' }) // pass this to your cdkVirtualFor see examples section
+ *  dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
  *   // generates the following signals
  *   store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  *  // generates the following computed signals
@@ -249,7 +147,123 @@ export function withEntitiesRemoteScrollPagination<
  *  store.loadProductsNextPage() // loads next page
  *  store.loadProductsPreviousPage() // loads previous page
  *  store.loadProductsFirstPage() // loads first page
- *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ */
+export function withEntitiesRemoteScrollPagination<
+  Entity extends { id: string | number },
+>(config: {
+  bufferSize?: number;
+  entity?: Entity;
+}): SignalStoreFeature<
+  {
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity> & CallStatusComputed;
+    methods: CallStatusMethods;
+  },
+  {
+    state: EntitiesScrollPaginationState;
+    signals: EntitiesScrollPaginationComputed;
+    methods: EntitiesScrollPaginationMethods<Entity>;
+  }
+>;
+
+/**
+ * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
+ * different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
+ * of entities keeps growing, ideally for implementing infinite scroll style ui.
+ * When the page changes, it will try to load the current page from cache if it's not present,
+ * it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
+ * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+ * and changing the status errors manually
+ * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+ * the result and errors automatically. Requires withEntities and withCallStatus to be used.
+ *
+ * The generated set[Collection]Result method will append the entities to the cache of entities,
+ * it requires either just set of requested entities set[Collection]Result({ entities }) in which case it will assume there is no more result if you set less entities
+ * than the requested buffer size, or you can provide an extra param to the entities, total set[Collection]Result({ entities, total }) so it calculates if there is more
+ * or a hasMore param set[Collection]Result({entities, hasMore}) that you can set to false to indicate the end of the entities.
+ *
+ * Requires withEntities and withCallStatus to be present in the store.
+ * @param config
+ * @param config.bufferSize - The number of entities to show per page
+ * @param config.entity - The entity type
+ * @param config.collection - The name of the collection
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   // required withEntities and withCallStatus
+ *   withEntities({ entity, collection }),
+ *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *
+ *   withEntitiesRemoteScrollPagination({
+ *     entity,
+ *     collection,
+ *     bufferSize: 5,
+ *     pagesToCache: 2,
+ *   })
+ *   // after you can use withEntitiesLoadingCall to connect the filter to
+ *   // the api call, or do it manually as shown after
+ *    withEntitiesLoadingCall({
+ *     collection,
+ *     fetchEntities: ({ productsPagedRequest }) => {
+ *       return inject(ProductService)
+ *         .getProducts({
+ *           take: productsPagedRequest().size,
+ *           skip: productsPagedRequest().startIndex,
+ *         }).pipe(
+ *           map((d) => ({
+ *             entities: d.resultList,
+ *             total: d.total,
+ *           })),
+ *         )
+ *     },
+ *   }),
+ * // withEntitiesLoadingCall is the same as doing the following:
+ * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * //   onInit: async () => {
+ * //     effect(() => {
+ * //       if (isProductsLoading()) {
+ * //         inject(ProductService)
+ * //             .getProducts({
+ * //                take: productsPagedRequest().size,
+ * //                skip: productsPagedRequest().startIndex,
+ * //              })
+ * //           .pipe(
+ * //             takeUntilDestroyed(),
+ * //             tap((res) =>
+ * //               patchState(
+ * //                 state,
+ * //                 // total is not required, you can use hasMore or none see docs
+ * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
+ * //               ),
+ * //             ),
+ * //             catchError((error) => {
+ * //               setProductsError(error);
+ * //               return EMPTY;
+ * //             }),
+ * //           )
+ * //           .subscribe();
+ * //       }
+ * //     });
+ * //   },
+ *  })),
+ *
+ *  // in your component add
+ *  store = inject(ProductsRemoteStore);
+ *  dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
+ *   // generates the following signals
+ *   store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+ *  // generates the following computed signals
+ *  store.productsPageInfo // {  pageIndex: number, total: number, bufferSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
+ *  // generates the following methods
+ *  store.loadProductsNextPage() // loads next page
+ *  store.loadProductsPreviousPage() // loads previous page
+ *  store.loadProductsFirstPage() // loads first page
+ *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },

@@ -39,7 +39,9 @@ import {
 /**
  * Generates necessary state, computed and methods for locally filtering entities in the store,
  * the generated filter[collenction]Entities method will filter the entities based on the filter function
- * and is debounced by default. Requires withEntities to be used.
+ * and is debounced by default.
+ *
+ * Requires withEntities to be used.
  *
  * @param config
  * @param config.filterFn - The function that will be used to filter the entities
@@ -65,7 +67,7 @@ import {
  *   }),
  *  );
  *
- *  // generates the following signals
+ * // generates the following signals
  *  store.productsFilter // { search: string }
  *  // generates the following computed signals
  *  store.isProductsFilterChanged // boolean
@@ -95,7 +97,9 @@ export function withEntitiesLocalFilter<
 /**
  * Generates necessary state, computed and methods for locally filtering entities in the store,
  * the generated filter[collenction]Entities method will filter the entities based on the filter function
- * and is debounced by default. Requires withEntities to be used.
+ * and is debounced by default.
+ *
+ * Requires withEntities to be used.
  *
  * @param config
  * @param config.filterFn - The function that will be used to filter the entities
@@ -155,6 +159,7 @@ export function withEntitiesLocalFilter<
     methods: NamedEntitiesFilterMethods<Collection, Filter>;
   }
 >;
+
 export function withEntitiesLocalFilter<
   Entity extends { id: string | number },
   Collection extends string,

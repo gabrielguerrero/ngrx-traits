@@ -54,111 +54,12 @@ import {
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
  * When the page changes, it will try to load the current page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+ * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
- * the result and errors automatically. Requires withEntities and withCallStatus to be present before this function.
- * @param config
- * @param config.pageSize - The number of entities to show per page
- * @param config.currentPage - The current page to show
- * @param config.pagesToCache - The number of pages to cache
- * @param config.entity - The entity type
- * @param config.collection - The name of the collection
+ * the result and errors automatically.
  *
- * @example
- * export const ProductsRemoteStore = signalStore(
- *   { providedIn: 'root' },
- *   // required withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
- *
- *   withEntitiesRemotePagination({
- *     entity,
- *     collection,
- *     pageSize: 5,
- *     pagesToCache: 2,
- *   })
- *   // after you can use withEntitiesLoadingCall to connect the filter to
- *   // the api call, or do it manually as shown after
- *    withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productsPagedRequest }) => {
- *       return inject(ProductService)
- *         .getProducts({
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
- *         }).pipe(
- *           map((d) => ({
- *             entities: d.resultList,
- *             total: d.total,
- *           })),
- *         )
- *     },
- *   }),
- * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
- * //   onInit: async () => {
- * //     effect(() => {
- * //       if (isProductsLoading()) {
- * //         inject(ProductService)
- * //             .getProducts({
- * //                take: productsPagedRequest().size,
- * //                skip: productsPagedRequest().startIndex,
- * //              })
- * //           .pipe(
- * //             takeUntilDestroyed(),
- * //             tap((res) =>
- * //               patchState(
- * //                 state,
- * //                 setProductsLoadResult(res.resultList, res.total),
- * //               ),
- * //             ),
- * //             catchError((error) => {
- * //               setProductsError(error);
- * //               return EMPTY;
- * //             }),
- * //           )
- * //           .subscribe();
- * //       }
- * //     });
- * //   },
- *  })),
- *   // generates the following signals
- *   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
- *  // generates the following computed signals
- *  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
- *  // generates the following methods
- *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
- */
-export function withEntitiesRemotePagination<
-  Entity extends { id: string | number },
->(config: {
-  pageSize?: number;
-  currentPage?: number;
-  pagesToCache?: number;
-  entity?: Entity;
-}): SignalStoreFeature<
-  {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity> & CallStatusComputed;
-    methods: CallStatusMethods;
-  },
-  {
-    state: EntitiesPaginationRemoteState;
-    signals: EntitiesPaginationRemoteComputed<Entity>;
-    methods: EntitiesPaginationRemoteMethods<Entity>;
-  }
->;
-/**
- * Generates necessary state, computed and methods for remote pagination of entities in the store.
- * When the page changes, it will try to load the current page from cache if it's not present,
- * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
- * and changing the status errors manually
- * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
- * the result and errors automatically. Requires withEntities and withCallStatus to be present before this function.
+ * Requires withEntities and withCallStatus to be present before this function.
  * @param config
  * @param config.pageSize - The number of entities to show per page
  * @param config.currentPage - The current page to show
@@ -199,7 +100,7 @@ export function withEntitiesRemotePagination<
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -213,7 +114,7 @@ export function withEntitiesRemotePagination<
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setProductsLoadResult(res.resultList, res.total),
+ * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
  * //               ),
  * //             ),
  * //             catchError((error) => {
@@ -233,7 +134,112 @@ export function withEntitiesRemotePagination<
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ */
+export function withEntitiesRemotePagination<
+  Entity extends { id: string | number },
+>(config: {
+  pageSize?: number;
+  currentPage?: number;
+  pagesToCache?: number;
+  entity?: Entity;
+}): SignalStoreFeature<
+  {
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity> & CallStatusComputed;
+    methods: CallStatusMethods;
+  },
+  {
+    state: EntitiesPaginationRemoteState;
+    signals: EntitiesPaginationRemoteComputed<Entity>;
+    methods: EntitiesPaginationRemoteMethods<Entity>;
+  }
+>;
+/**
+ * Generates necessary state, computed and methods for remote pagination of entities in the store.
+ * When the page changes, it will try to load the current page from cache if it's not present,
+ * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
+ * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+ * and changing the status errors manually
+ * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+ * the result and errors automatically.
+ *
+ * Requires withEntities and withCallStatus to be present before this function.
+ * @param config
+ * @param config.pageSize - The number of entities to show per page
+ * @param config.currentPage - The current page to show
+ * @param config.pagesToCache - The number of pages to cache
+ * @param config.entity - The entity type
+ * @param config.collection - The name of the collection
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   // required withEntities and withCallStatus
+ *   withEntities({ entity, collection }),
+ *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *
+ *   withEntitiesRemotePagination({
+ *     entity,
+ *     collection,
+ *     pageSize: 5,
+ *     pagesToCache: 2,
+ *   })
+ *   // after you can use withEntitiesLoadingCall to connect the filter to
+ *   // the api call, or do it manually as shown after
+ *    withEntitiesLoadingCall({
+ *     collection,
+ *     fetchEntities: ({ productsPagedRequest }) => {
+ *       return inject(ProductService)
+ *         .getProducts({
+ *           take: productsPagedRequest().size,
+ *           skip: productsPagedRequest().startIndex,
+ *         }).pipe(
+ *           map((d) => ({
+ *             entities: d.resultList,
+ *             total: d.total,
+ *           })),
+ *         )
+ *     },
+ *   }),
+ * // withEntitiesLoadingCall is the same as doing the following:
+ * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * //   onInit: async () => {
+ * //     effect(() => {
+ * //       if (isProductsLoading()) {
+ * //         inject(ProductService)
+ * //             .getProducts({
+ * //                take: productsPagedRequest().size,
+ * //                skip: productsPagedRequest().startIndex,
+ * //              })
+ * //           .pipe(
+ * //             takeUntilDestroyed(),
+ * //             tap((res) =>
+ * //               patchState(
+ * //                 state,
+ * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
+ * //               ),
+ * //             ),
+ * //             catchError((error) => {
+ * //               setProductsError(error);
+ * //               return EMPTY;
+ * //             }),
+ * //           )
+ * //           .subscribe();
+ * //       }
+ * //     });
+ * //   },
+ *  })),
+ *   // generates the following signals
+ *   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+ *  // generates the following computed signals
+ *  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
+ *  // generates the following methods
+ *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
+ *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 
 export function withEntitiesRemotePagination<
@@ -262,7 +268,7 @@ export function withEntitiesRemotePagination<
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
  * When the page changes, it will try to load the current page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]LoadResult to set the result
+ * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
  * the result and errors automatically. Requires withEntities and withCallStatus to be used.
@@ -307,7 +313,7 @@ export function withEntitiesRemotePagination<
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsLoadResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -321,7 +327,7 @@ export function withEntitiesRemotePagination<
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setProductsLoadResult(res.resultList, res.total),
+ * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
  * //               ),
  * //             ),
  * //             catchError((error) => {
@@ -341,7 +347,7 @@ export function withEntitiesRemotePagination<
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsLoadResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemotePagination<
   Entity extends { id: string | number },
