@@ -106,7 +106,7 @@ import {
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -118,11 +118,8 @@ import {
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
- * //               patchState(
- * //                 state,
  * //                 // total is not required, you can use hasMore or none see docs
- * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
- * //               ),
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
  * //             ),
  * //             catchError((error) => {
  * //               setProductsError(error);
@@ -147,7 +144,7 @@ import {
  *  store.loadProductsNextPage() // loads next page
  *  store.loadProductsPreviousPage() // loads previous page
  *  store.loadProductsFirstPage() // loads first page
- *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
@@ -222,7 +219,7 @@ export function withEntitiesRemoteScrollPagination<
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -234,11 +231,8 @@ export function withEntitiesRemoteScrollPagination<
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
- * //               patchState(
- * //                 state,
  * //                 // total is not required, you can use hasMore or none see docs
- * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
- * //               ),
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
  * //             ),
  * //             catchError((error) => {
  * //               setProductsError(error);
@@ -263,7 +257,7 @@ export function withEntitiesRemoteScrollPagination<
  *  store.loadProductsNextPage() // loads next page
  *  store.loadProductsPreviousPage() // loads previous page
  *  store.loadProductsFirstPage() // loads first page
- *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
@@ -306,8 +300,8 @@ export function withEntitiesRemoteScrollPagination<
 
   const {
     loadMoreEntitiesKey,
-    setEntitiesResultKey,
-    entitiesRequestKey,
+    setEntitiesPagedResultKey,
+    entitiesPagedRequestKey,
     entitiesScrollCacheKey,
   } = getWithEntitiesInfinitePaginationKeys(config);
 
@@ -334,7 +328,7 @@ export function withEntitiesRemoteScrollPagination<
         size: entitiesScrollCache().bufferSize,
       }));
       return {
-        [entitiesRequestKey]: entitiesPagedRequest,
+        [entitiesPagedRequestKey]: entitiesPagedRequest,
       };
     }),
     withEventHandler((state) => [
@@ -352,7 +346,7 @@ export function withEntitiesRemoteScrollPagination<
       const setLoading = state[setLoadingKey] as () => void;
 
       return {
-        [setEntitiesResultKey]: (
+        [setEntitiesPagedResultKey]: (
           options:
             | {
                 entities: Entity[];
