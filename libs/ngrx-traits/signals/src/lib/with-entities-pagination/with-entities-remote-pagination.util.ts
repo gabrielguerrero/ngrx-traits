@@ -22,9 +22,9 @@ export function getWithEntitiesRemotePaginationKeys(config?: {
     loadEntitiesPageKey: collection
       ? `load${capitalizedProp}Page`
       : 'loadEntitiesPage',
-    setEntitiesResultKey: collection
-      ? `set${capitalizedProp}Result`
-      : 'setEntitiesResult',
+    setEntitiesPagedResultKey: collection
+      ? `set${capitalizedProp}PagedResult`
+      : 'setEntitiesPagedResult',
   };
 }
 

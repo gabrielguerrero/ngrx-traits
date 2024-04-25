@@ -47,7 +47,7 @@ export type NamedEntitiesPaginationLocalMethods<Collection extends string> = {
 };
 
 export type SetEntitiesResult<ResultParam> = {
-  setEntitiesResult: (result: ResultParam) => void;
+  setEntitiesPagedResult: (result: ResultParam) => void;
 };
 export type NamedSetEntitiesResult<Collection extends string, ResultParam> = {
   [K in Collection as `set${Capitalize<string & K>}Result`]: (
