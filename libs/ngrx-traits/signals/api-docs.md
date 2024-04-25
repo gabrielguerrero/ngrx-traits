@@ -30,7 +30,7 @@ and is debounced by default.</p>
 <dd><p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
-to the store using the setAllEntities method or the setEntitiesResult method
+to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
@@ -313,7 +313,7 @@ export const store = signalStore(
 <p>Generates a onInit hook that fetches entities from a remote source
 when the [collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
-to the store using the setAllEntities method or the setEntitiesResult method
+to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p>
@@ -468,7 +468,7 @@ export const store = signalStore(
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+// withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
 //       if (isProductsLoading()) {
@@ -482,7 +482,7 @@ export const store = signalStore(
 //             tap((res) =>
 //               patchState(
 //                 state,
-//                 setProductsResult({ entities: res.resultList, total: res.total } ),
+//                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
 //               ),
 //             ),
 //             catchError((error) => {
@@ -502,7 +502,7 @@ export const store = signalStore(
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesRemoteScrollPagination"></a>
 
@@ -565,7 +565,7 @@ export const store = signalStore(
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+// withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
 //       if (isProductsLoading()) {
@@ -580,7 +580,7 @@ export const store = signalStore(
 //               patchState(
 //                 state,
 //                 // total is not required, you can use hasMore or none see docs
-//                 setProductsResult({ entities: res.resultList, total: res.total } ),
+//                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
 //               ),
 //             ),
 //             catchError((error) => {
@@ -606,7 +606,7 @@ export const store = signalStore(
  store.loadProductsNextPage() // loads next page
  store.loadProductsPreviousPage() // loads previous page
  store.loadProductsFirstPage() // loads first page
- store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesMultiSelection"></a>
 

@@ -10,15 +10,15 @@ export function getWithEntitiesInfinitePaginationKeys(config?: {
     entitiesScrollCacheKey: collection
       ? `${config.collection}ScrollCache`
       : 'entitiesScrollCache',
-    entitiesRequestKey: collection
-      ? `${config.collection}Request`
-      : 'entitiesRequest',
+    entitiesPagedRequestKey: collection
+      ? `${config.collection}PagedRequest`
+      : 'entitiesPagedRequest',
     loadMoreEntitiesKey: collection
       ? `loadMore${capitalizedProp}`
       : 'loadMoreEntities',
-    setEntitiesResultKey: collection
-      ? `set${capitalizedProp}Result`
-      : 'setEntitiesResult',
+    setEntitiesPagedResultKey: collection
+      ? `set${capitalizedProp}PagedResult`
+      : 'setEntitiesPagedResult',
   };
 }
 

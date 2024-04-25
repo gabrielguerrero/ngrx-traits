@@ -16,7 +16,7 @@ export type NamedEntitiesScrollPaginationState<Collection extends string> = {
   [K in Collection as `${K}ScrollCache`]: ScrollPaginationState;
 };
 export type EntitiesScrollPaginationComputed = {
-  entitiesRequest: Signal<{
+  entitiesPagedRequest: Signal<{
     startIndex: number;
     size: number;
   }>;
@@ -25,7 +25,7 @@ export type NamedEntitiesScrollPaginationComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}Request`]: Signal<{
+  [K in Collection as `${K}PagedRequest`]: Signal<{
     startIndex: number;
     size: number;
   }>;

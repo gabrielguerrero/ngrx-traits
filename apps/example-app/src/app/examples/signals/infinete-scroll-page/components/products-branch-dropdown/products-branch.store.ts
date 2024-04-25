@@ -29,12 +29,12 @@ export const ProductsBranchStore = signalStore(
     entity,
   }),
   withEntitiesLoadingCall({
-    fetchEntities: async ({ entitiesRequest, entitiesFilter }) => {
+    fetchEntities: async ({ entitiesPagedRequest, entitiesFilter }) => {
       const res = await lastValueFrom(
         inject(BranchService).getBranches({
           search: entitiesFilter().search,
-          skip: entitiesRequest().startIndex,
-          take: entitiesRequest().size,
+          skip: entitiesPagedRequest().startIndex,
+          take: entitiesPagedRequest().size,
         }),
       );
       return { entities: res.resultList, total: res.total };

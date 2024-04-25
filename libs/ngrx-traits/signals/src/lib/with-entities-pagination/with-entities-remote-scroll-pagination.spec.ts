@@ -26,12 +26,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         withCallStatus(),
         withEntitiesRemoteScrollPagination({ entity, bufferSize: 10 }),
         withEntitiesLoadingCall({
-          fetchEntities: ({ entitiesRequest }) => {
+          fetchEntities: ({ entitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: entitiesRequest()?.startIndex,
-              take: entitiesRequest()?.size,
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -77,12 +77,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         withCallStatus(),
         withEntitiesRemoteScrollPagination({ entity, bufferSize }),
         withEntitiesLoadingCall({
-          fetchEntities: ({ entitiesRequest }) => {
+          fetchEntities: ({ entitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: entitiesRequest()?.startIndex,
-              take: entitiesRequest()?.size,
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -130,11 +130,11 @@ describe('withEntitiesRemoteScrollPagination', () => {
         withCallStatus(),
         withEntitiesRemoteScrollPagination({ entity, bufferSize }),
         withEntitiesLoadingCall({
-          fetchEntities: ({ entitiesRequest }) => {
+          fetchEntities: ({ entitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const options = {
-              skip: entitiesRequest()?.startIndex,
-              take: entitiesRequest()?.size,
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -186,12 +186,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
         withEntitiesLoadingCall({
           collection,
-          fetchEntities: ({ productsRequest }) => {
+          fetchEntities: ({ productsPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: productsRequest()?.startIndex,
-              take: productsRequest()?.size,
+              skip: productsPagedRequest()?.startIndex,
+              take: productsPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -241,7 +241,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
           defaultFilter: { search: '', foo: 'bar' },
         }),
         withEntitiesLoadingCall({
-          fetchEntities: ({ entitiesFilter, entitiesRequest }) => {
+          fetchEntities: ({ entitiesFilter, entitiesPagedRequest }) => {
             let result = [...mockProducts];
             const total = result.length;
             if (entitiesFilter()?.search)
@@ -253,8 +253,8 @@ describe('withEntitiesRemoteScrollPagination', () => {
                   : false,
               );
             const options = {
-              skip: entitiesRequest()?.startIndex,
-              take: entitiesRequest()?.size,
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -298,7 +298,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
           defaultSort: { field: 'id', direction: 'asc' },
         }),
         withEntitiesLoadingCall({
-          fetchEntities: ({ entitiesSort, entitiesRequest }) => {
+          fetchEntities: ({ entitiesSort, entitiesPagedRequest }) => {
             let result = [...mockProducts];
             const total = result.length;
 
@@ -309,8 +309,8 @@ describe('withEntitiesRemoteScrollPagination', () => {
               });
             }
             const options = {
-              skip: entitiesRequest()?.startIndex,
-              take: entitiesRequest()?.size,
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -351,12 +351,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
           withCallStatus(),
           withEntitiesRemoteScrollPagination({ entity, bufferSize: 10 }),
           withEntitiesLoadingCall({
-            fetchEntities: ({ entitiesRequest }) => {
+            fetchEntities: ({ entitiesPagedRequest }) => {
               let result = [...mockProducts.slice(0, 25)];
               const total = result.length;
               const options = {
-                skip: entitiesRequest()?.startIndex,
-                take: entitiesRequest()?.size,
+                skip: entitiesPagedRequest()?.startIndex,
+                take: entitiesPagedRequest()?.size,
               };
               if (options?.skip || options?.take) {
                 const skip = +(options?.skip ?? 0);
@@ -415,12 +415,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productsRequest }) => {
+            fetchEntities: ({ productsPagedRequest }) => {
               let result = [...mockProducts.slice(0, 25)];
               const total = result.length;
               const options = {
-                skip: productsRequest()?.startIndex,
-                take: productsRequest()?.size,
+                skip: productsPagedRequest()?.startIndex,
+                take: productsPagedRequest()?.size,
               };
               if (options?.skip || options?.take) {
                 const skip = +(options?.skip ?? 0);

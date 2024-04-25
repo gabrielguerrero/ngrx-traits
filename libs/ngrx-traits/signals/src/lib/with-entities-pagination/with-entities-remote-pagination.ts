@@ -100,7 +100,7 @@ import {
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -112,10 +112,7 @@ import {
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
- * //               patchState(
- * //                 state,
- * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
- * //               ),
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
  * //             ),
  * //             catchError((error) => {
  * //               setProductsError(error);
@@ -134,7 +131,7 @@ import {
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemotePagination<
   Entity extends { id: string | number },
@@ -205,7 +202,7 @@ export function withEntitiesRemotePagination<
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -217,10 +214,7 @@ export function withEntitiesRemotePagination<
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
- * //               patchState(
- * //                 state,
- * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
- * //               ),
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
  * //             ),
  * //             catchError((error) => {
  * //               setProductsError(error);
@@ -239,7 +233,7 @@ export function withEntitiesRemotePagination<
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 
 export function withEntitiesRemotePagination<
@@ -313,7 +307,7 @@ export function withEntitiesRemotePagination<
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductsLoading()) {
@@ -327,7 +321,7 @@ export function withEntitiesRemotePagination<
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setProductsResult({ entities: res.resultList, total: res.total } ),
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
  * //               ),
  * //             ),
  * //             catchError((error) => {
@@ -347,7 +341,7 @@ export function withEntitiesRemotePagination<
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemotePagination<
   Entity extends { id: string | number },
@@ -374,7 +368,7 @@ export function withEntitiesRemotePagination<
     entitiesCurrentPageKey,
     paginationKey,
     entitiesPagedRequestKey,
-    setEntitiesResultKey,
+    setEntitiesPagedResultKey,
   } = getWithEntitiesRemotePaginationKeys(config);
 
   const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
@@ -454,7 +448,7 @@ export function withEntitiesRemotePagination<
       const setLoading = state[setLoadingKey] as () => void;
 
       return {
-        [setEntitiesResultKey]: ({
+        [setEntitiesPagedResultKey]: ({
           entities,
           total,
         }: {
