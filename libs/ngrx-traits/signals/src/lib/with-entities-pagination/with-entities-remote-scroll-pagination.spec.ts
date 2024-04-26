@@ -2,7 +2,7 @@ import { ListRange } from '@angular/cdk/collections';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { BehaviorSubject, lastValueFrom, of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import {
   getInfiniteScrollDataSource,
@@ -19,12 +19,16 @@ import { sortData } from '../with-entities-sort/with-entities-local-sort.util';
 describe('withEntitiesRemoteScrollPagination', () => {
   const entity = type<Product>();
 
-  it('entitiesCurrentPage should split entities in the correct pages using a result with entities and total', fakeAsync(() => {
+  it(' should append entities when using load more and using a result with entities and total', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({ entity }),
         withCallStatus(),
-        withEntitiesRemoteScrollPagination({ entity, bufferSize: 10 }),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize: 10,
+          pagesToCache: 1,
+        }),
         withEntitiesLoadingCall({
           fetchEntities: ({ entitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
@@ -52,83 +56,34 @@ describe('withEntitiesRemoteScrollPagination', () => {
       // check the first load
       expect(store.entities().length).toEqual(10);
       expect(store.entities()).toEqual(mockProducts.slice(0, 10));
-      expect(store.entitiesScrollCache().hasMore).toEqual(true);
-      expect(store.entitiesScrollCache().bufferSize).toEqual(10);
+      expect(store.pagination().hasMore).toEqual(true);
+      expect(store.pagination().pageSize).toEqual(10);
 
       store.loadMoreEntities();
       tick();
       // check the second load
       expect(store.entities().length).toEqual(20);
       expect(store.entities()).toEqual(mockProducts.slice(0, 20));
-      expect(store.entitiesScrollCache().hasMore).toEqual(true);
+      expect(store.pagination().hasMore).toEqual(true);
       store.loadMoreEntities();
       tick();
       expect(store.entities().length).toEqual(25);
       expect(store.entities()).toEqual(mockProducts.slice(0, 25));
-      expect(store.entitiesScrollCache().hasMore).toEqual(false);
+      expect(store.pagination().hasMore).toEqual(false);
     });
   }));
 
-  it('entitiesCurrentPage should split entities in the correct pages using a result with entities and hasMore', fakeAsync(() => {
+  it('should append entities when using load more and using a result with entities and hasMore', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const bufferSize = 10;
+      const pageSize = 10;
       const Store = signalStore(
         withEntities({ entity }),
         withCallStatus(),
-        withEntitiesRemoteScrollPagination({ entity, bufferSize }),
-        withEntitiesLoadingCall({
-          fetchEntities: ({ entitiesPagedRequest }) => {
-            let result = [...mockProducts.slice(0, 25)];
-            const total = result.length;
-            const options = {
-              skip: entitiesPagedRequest()?.startIndex,
-              take: entitiesPagedRequest()?.size,
-            };
-            if (options?.skip || options?.take) {
-              const skip = +(options?.skip ?? 0);
-              const take = +(options?.take ?? 0);
-              result = result.slice(skip, skip + take);
-            }
-            return of({
-              entities: result,
-              hasMore: result.length == bufferSize,
-            });
-          },
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize,
+          pagesToCache: 1,
         }),
-      );
-
-      const store = new Store();
-      TestBed.flushEffects();
-      expect(store.entities()).toEqual([]);
-      store.setLoading();
-      tick();
-      // check the first load
-      expect(store.entities().length).toEqual(10);
-      expect(store.entities()).toEqual(mockProducts.slice(0, 10));
-      expect(store.entitiesScrollCache().hasMore).toEqual(true);
-      expect(store.entitiesScrollCache().bufferSize).toEqual(10);
-
-      store.loadMoreEntities();
-      tick();
-      // check the second load
-      expect(store.entities().length).toEqual(20);
-      expect(store.entities()).toEqual(mockProducts.slice(0, 20));
-      expect(store.entitiesScrollCache().hasMore).toEqual(true);
-      store.loadMoreEntities();
-      tick();
-      expect(store.entities().length).toEqual(25);
-      expect(store.entities()).toEqual(mockProducts.slice(0, 25));
-      expect(store.entitiesScrollCache().hasMore).toEqual(false);
-    });
-  }));
-
-  it('entitiesCurrentPage should split entities in the correct pages using a result with just entities ', fakeAsync(() => {
-    TestBed.runInInjectionContext(() => {
-      const bufferSize = 10;
-      const Store = signalStore(
-        withEntities({ entity }),
-        withCallStatus(),
-        withEntitiesRemoteScrollPagination({ entity, bufferSize }),
         withEntitiesLoadingCall({
           fetchEntities: ({ entitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
@@ -143,6 +98,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
             }
             return of({
               entities: result,
+              hasMore: result.length == pageSize,
             });
           },
         }),
@@ -156,24 +112,79 @@ describe('withEntitiesRemoteScrollPagination', () => {
       // check the first load
       expect(store.entities().length).toEqual(10);
       expect(store.entities()).toEqual(mockProducts.slice(0, 10));
-      expect(store.entitiesScrollCache().hasMore).toEqual(true);
-      expect(store.entitiesScrollCache().bufferSize).toEqual(10);
+      expect(store.pagination().hasMore).toEqual(true);
+      expect(store.pagination().pageSize).toEqual(10);
 
       store.loadMoreEntities();
       tick();
       // check the second load
       expect(store.entities().length).toEqual(20);
       expect(store.entities()).toEqual(mockProducts.slice(0, 20));
-      expect(store.entitiesScrollCache().hasMore).toEqual(true);
+      expect(store.pagination().hasMore).toEqual(true);
       store.loadMoreEntities();
       tick();
       expect(store.entities().length).toEqual(25);
       expect(store.entities()).toEqual(mockProducts.slice(0, 25));
-      expect(store.entitiesScrollCache().hasMore).toEqual(false);
+      expect(store.pagination().hasMore).toEqual(false);
     });
   }));
 
-  it('with collection entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
+  it('should append entities when using load more and using a result with just entities ', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const pageSize = 10;
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize,
+          pagesToCache: 1,
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesPagedRequest }) => {
+            let result = [...mockProducts.slice(0, 25)];
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({
+              entities: result,
+            });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first load
+      expect(store.entities().length).toEqual(10);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 10));
+      expect(store.pagination().hasMore).toEqual(true);
+      expect(store.pagination().pageSize).toEqual(10);
+
+      store.loadMoreEntities();
+      tick();
+      // check the second load
+      expect(store.entities().length).toEqual(20);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 20));
+      expect(store.pagination().hasMore).toEqual(true);
+      store.loadMoreEntities();
+      tick();
+      expect(store.entities().length).toEqual(25);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 25));
+      expect(store.pagination().hasMore).toEqual(false);
+    });
+  }));
+
+  it('with collection should append entities when using load more ', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const collection = 'products';
       const Store = signalStore(
@@ -182,7 +193,8 @@ describe('withEntitiesRemoteScrollPagination', () => {
         withEntitiesRemoteScrollPagination({
           entity,
           collection,
-          bufferSize: 10,
+          pageSize: 10,
+          pagesToCache: 1,
         }),
         withEntitiesLoadingCall({
           collection,
@@ -211,31 +223,149 @@ describe('withEntitiesRemoteScrollPagination', () => {
       // check the first load
       expect(store.productsEntities().length).toEqual(10);
       expect(store.productsEntities()).toEqual(mockProducts.slice(0, 10));
-      expect(store.productsScrollCache().hasMore).toEqual(true);
-      expect(store.productsScrollCache().bufferSize).toEqual(10);
+      expect(store.productsPagination().hasMore).toEqual(true);
+      expect(store.productsPagination().pageSize).toEqual(10);
 
       store.loadMoreProducts();
       tick();
       // check the second load
       expect(store.productsEntities().length).toEqual(20);
       expect(store.productsEntities()).toEqual(mockProducts.slice(0, 20));
-      expect(store.productsScrollCache().hasMore).toEqual(true);
+      expect(store.productsPagination().hasMore).toEqual(true);
       store.loadMoreProducts();
       tick();
       expect(store.productsEntities().length).toEqual(25);
       expect(store.productsEntities()).toEqual(mockProducts.slice(0, 25));
-      expect(store.productsScrollCache().hasMore).toEqual(false);
+      expect(store.productsPagination().hasMore).toEqual(false);
     });
   }));
 
-  it(' should reset cache when filter is executed', fakeAsync(() => {
+  it('using next and previous entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize: 10,
+          pagesToCache: 3,
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesPagedRequest }) => {
+            let result = [...mockProducts.slice(0, 35)];
+            const total = result.length;
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first page
+      expect(store.entities().length).toEqual(30);
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 10),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      store.loadEntitiesNextPage();
+      tick();
+      // check the second page
+      expect(store.entities().length).toEqual(30); // same as before because its cached
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(10, 20),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      store.loadEntitiesNextPage();
+      tick();
+
+      // check the third page
+      expect(store.entities().length).toEqual(35); // increased because it loads more
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(20, 30),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      store.loadEntitiesNextPage();
+      tick();
+
+      // check the 4th and last page
+      expect(store.entities().length).toEqual(35); // same as before
+      expect(store.entitiesCurrentPage().entities.length).toEqual(5);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(30, 35),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(false);
+
+      // check going previous page
+      store.loadEntitiesPreviousPage();
+      tick();
+
+      // check the third page again
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(20, 30),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      // check going first page
+      store.loadEntitiesFirstPage();
+      tick();
+      // check the first page
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 10),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+    });
+  }));
+
+  it('should reset cache when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({
           entity,
         }),
         withCallStatus({ initialValue: 'loading' }),
-        withEntitiesRemoteScrollPagination({ entity, bufferSize: 30 }),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize: 10,
+          pagesToCache: 3,
+        }),
         withEntitiesRemoteFilter({
           entity,
           defaultFilter: { search: '', foo: 'bar' },
@@ -285,14 +415,18 @@ describe('withEntitiesRemoteScrollPagination', () => {
     });
   }));
 
-  it(' should reset cache when sort is executed', fakeAsync(() => {
+  it('should reset cache when sort is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({
           entity,
         }),
         withCallStatus({ initialValue: 'loading' }),
-        withEntitiesRemoteScrollPagination({ entity, bufferSize: 30 }),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize: 10,
+          pagesToCache: 3,
+        }),
         withEntitiesRemoteSort({
           entity,
           defaultSort: { field: 'id', direction: 'asc' },
@@ -349,10 +483,14 @@ describe('withEntitiesRemoteScrollPagination', () => {
         const Store = signalStore(
           withEntities({ entity }),
           withCallStatus(),
-          withEntitiesRemoteScrollPagination({ entity, bufferSize: 10 }),
+          withEntitiesRemoteScrollPagination({
+            entity,
+            pageSize: 10,
+            pagesToCache: 4,
+          }),
           withEntitiesLoadingCall({
             fetchEntities: ({ entitiesPagedRequest }) => {
-              let result = [...mockProducts.slice(0, 25)];
+              let result = [...mockProducts.slice(0, 110)];
               const total = result.length;
               const options = {
                 skip: entitiesPagedRequest()?.startIndex,
@@ -378,7 +516,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
         expect(store.entities()).toEqual([]);
         store.setLoading();
-        tick();
+        tick(400);
         const list$ = dataSource.connect({ viewChange: collectionViewer });
         let entities: Product[] = [];
         list$.subscribe((data) => {
@@ -386,19 +524,37 @@ describe('withEntitiesRemoteScrollPagination', () => {
         });
 
         // check the first load
-        expect(entities.length).toEqual(10);
-        expect(entities).toEqual(mockProducts.slice(0, 10));
+        expect(entities.length).toEqual(40);
+        expect(entities).toEqual(mockProducts.slice(0, 40));
 
+        // check a view that should not trigger a load
         collectionViewer.next({ start: 10, end: 20 });
-        tick();
-        // check the second load
-        expect(entities.length).toEqual(20);
-        expect(entities).toEqual(mockProducts.slice(0, 20));
+        tick(400);
+        // same as before because nothing extra was loaded
+        expect(entities.length).toEqual(40);
 
         collectionViewer.next({ start: 20, end: 30 });
-        tick();
-        expect(entities.length).toEqual(25);
-        expect(entities).toEqual(mockProducts.slice(0, 25));
+        tick(400);
+        // check the second load
+        expect(entities.length).toEqual(80);
+        expect(entities).toEqual(mockProducts.slice(0, 80));
+
+        collectionViewer.next({ start: 40, end: 50 });
+        tick(400);
+        expect(entities.length).toEqual(80);
+
+        collectionViewer.next({ start: 50, end: 60 });
+        tick(400);
+        expect(entities.length).toEqual(80);
+
+        collectionViewer.next({ start: 60, end: 70 });
+        tick(400);
+        expect(entities.length).toEqual(110);
+
+        collectionViewer.next({ start: 100, end: 110 });
+        tick(400);
+        expect(entities.length).toEqual(110);
+        expect(entities).toEqual(mockProducts.slice(0, 110));
       });
     }));
 
@@ -411,7 +567,8 @@ describe('withEntitiesRemoteScrollPagination', () => {
           withEntitiesRemoteScrollPagination({
             entity,
             collection,
-            bufferSize: 10,
+            pageSize: 10,
+            pagesToCache: 1,
           }),
           withEntitiesLoadingCall({
             collection,
@@ -446,7 +603,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
         expect(store.productsEntities()).toEqual([]);
         store.setProductsLoading();
-        tick();
+        tick(400);
         const list$ = dataSource.connect({ viewChange: collectionViewer });
         let entities: Product[] = [];
         list$.subscribe((data) => {
@@ -458,13 +615,13 @@ describe('withEntitiesRemoteScrollPagination', () => {
         expect(entities).toEqual(mockProducts.slice(0, 10));
 
         collectionViewer.next({ start: 10, end: 20 });
-        tick();
+        tick(400);
         // check the second load
         expect(entities.length).toEqual(20);
         expect(entities).toEqual(mockProducts.slice(0, 20));
 
         collectionViewer.next({ start: 20, end: 30 });
-        tick();
+        tick(400);
         expect(entities.length).toEqual(25);
         expect(entities).toEqual(mockProducts.slice(0, 25));
       });

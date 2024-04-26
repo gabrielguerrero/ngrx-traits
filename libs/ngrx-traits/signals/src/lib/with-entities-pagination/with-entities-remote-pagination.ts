@@ -159,9 +159,11 @@ export function withEntitiesRemotePagination<
  * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
- * the result and errors automatically.
+ * the result and errors automatically. Requires withEntities and withCallStatus to be used.
+ * This will only keeps pagesToCache pages in memory, so previous pages will be removed from the cache.
+ * If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.
  *
- * Requires withEntities and withCallStatus to be present before this function.
+ * Requires withEntities and withCallStatus to be present in the store.
  * @param config
  * @param config.pageSize - The number of entities to show per page
  * @param config.currentPage - The current page to show
@@ -214,7 +216,10 @@ export function withEntitiesRemotePagination<
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
- * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
+ * //               patchState(
+ * //                 state,
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
+ * //               ),
  * //             ),
  * //             catchError((error) => {
  * //               setProductsError(error);
@@ -266,6 +271,9 @@ export function withEntitiesRemotePagination<
  * and changing the status errors manually
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
  * the result and errors automatically. Requires withEntities and withCallStatus to be used.
+ * This will only keeps pagesToCache pages in memory, so previous pages will be removed from the cache.
+ * If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.
+ *
  * Requires withEntities and withCallStatus to be present in the store.
  * @param config
  * @param config.pageSize - The number of entities to show per page

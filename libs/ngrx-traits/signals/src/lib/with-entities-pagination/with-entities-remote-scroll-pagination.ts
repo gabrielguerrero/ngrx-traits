@@ -20,7 +20,7 @@ import type {
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { exhaustMap, first, pipe, tap } from 'rxjs';
+import { elementAt, exhaustMap, first, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import {
@@ -37,6 +37,7 @@ import {
   onEvent,
   withEventHandler,
 } from '../with-event-handler/with-event-handler';
+import { EntitiesPaginationRemoteState } from './with-entities-remote-pagination.model';
 import {
   EntitiesScrollPaginationComputed,
   EntitiesScrollPaginationMethods,
@@ -52,9 +53,11 @@ import {
 } from './with-entities-remote-scroll-pagination.util';
 
 /**
- * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
- * different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
- * of entities keeps growing, ideally for implementing infinite scroll style ui.
+ * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store.
+ * This is ideal for implementing infinite scroll where the entities cache keeps growing, or for a paginated list that only
+ * allows going to the next and previous page because you dont know the total number of entities
+ * probably because the data is top big and partitioned in multiple nodes.
+ *
  * When the page changes, it will try to load the current page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
  * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
@@ -69,7 +72,8 @@ import {
  *
  * Requires withEntities and withCallStatus to be present in the store.
  * @param config
- * @param config.bufferSize - The number of entities to show per page
+ * @param config.pageSize - The number of entities to show per page
+ * @param config.pagesToCache - The number of pages to cache
  * @param config.entity - The entity type
  * @param config.collection - The name of the collection
  *
@@ -85,7 +89,7 @@ import {
  *   withEntitiesRemoteScrollPagination({
  *     entity,
  *     collection,
- *     bufferSize: 5,
+ *     pageSize: 5,
  *     pagesToCache: 2,
  *   })
  *   // after you can use withEntitiesLoadingCall to connect the filter to
@@ -136,21 +140,23 @@ import {
  *  store = inject(ProductsRemoteStore);
  *  dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
  *   // generates the following signals
- *   store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+ *   store.productsPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  *  // generates the following computed signals
- *  store.productsPageInfo // {  pageIndex: number, total: number, bufferSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
+ *  store.productsCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productsPagedRequest // { startIndex: number, size: number }
  *  // generates the following methods
  *  store.loadProductsNextPage() // loads next page
  *  store.loadProductsPreviousPage() // loads previous page
  *  store.loadProductsFirstPage() // loads first page
+ *  store.loadMoreProducts() // loads more entities (used for infinite scroll datasource)
  *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
 >(config: {
-  bufferSize?: number;
   entity?: Entity;
+  pageSize?: number;
+  pagesToCache?: number;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -159,15 +165,17 @@ export function withEntitiesRemoteScrollPagination<
   },
   {
     state: EntitiesScrollPaginationState;
-    signals: EntitiesScrollPaginationComputed;
+    signals: EntitiesScrollPaginationComputed<Entity>;
     methods: EntitiesScrollPaginationMethods<Entity>;
   }
 >;
 
 /**
- * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store. The
- * different between this and withEntitiesRemotePagination this will can only got to next and previous page, and the cache
- * of entities keeps growing, ideally for implementing infinite scroll style ui.
+ * Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store.
+ * This is ideal for implementing infinite scroll where the entities cache keeps growing, or for a paginated list that only
+ * allows going to the next and previous page because you dont know the total number of entities
+ * probably because the data is top big and partitioned in multiple nodes.
+ *
  * When the page changes, it will try to load the current page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
  * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
@@ -182,7 +190,8 @@ export function withEntitiesRemoteScrollPagination<
  *
  * Requires withEntities and withCallStatus to be present in the store.
  * @param config
- * @param config.bufferSize - The number of entities to show per page
+ * @param config.pageSize - The number of entities to show per page
+ * @param config.pagesToCache - The number of pages to cache
  * @param config.entity - The entity type
  * @param config.collection - The name of the collection
  *
@@ -198,7 +207,7 @@ export function withEntitiesRemoteScrollPagination<
  *   withEntitiesRemoteScrollPagination({
  *     entity,
  *     collection,
- *     bufferSize: 5,
+ *     pageSize: 5,
  *     pagesToCache: 2,
  *   })
  *   // after you can use withEntitiesLoadingCall to connect the filter to
@@ -249,23 +258,25 @@ export function withEntitiesRemoteScrollPagination<
  *  store = inject(ProductsRemoteStore);
  *  dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
  *   // generates the following signals
- *   store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+ *   store.productsPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  *  // generates the following computed signals
- *  store.productsPageInfo // {  pageIndex: number, total: number, bufferSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
+ *  store.productsCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productsPagedRequest // { startIndex: number, size: number }
  *  // generates the following methods
  *  store.loadProductsNextPage() // loads next page
  *  store.loadProductsPreviousPage() // loads previous page
  *  store.loadProductsFirstPage() // loads first page
+ *  store.loadMoreProducts() // loads more entities (used for infinite scroll datasource)
  *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  bufferSize?: number;
   entity?: Entity;
   collection?: Collection;
+  pageSize?: number;
+  pagesToCache?: number;
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, string>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
@@ -284,14 +295,14 @@ export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
   Collection extends string,
 >({
-  bufferSize = 10,
+  pageSize = 10,
   pagesToCache = 3,
   ...config
 }: {
-  bufferSize?: number;
-  pagesToCache?: number;
   entity?: Entity;
   collection?: Collection;
+  pageSize?: number;
+  pagesToCache?: number;
 } = {}): SignalStoreFeature<any, any> {
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
@@ -302,7 +313,11 @@ export function withEntitiesRemoteScrollPagination<
     loadMoreEntitiesKey,
     setEntitiesPagedResultKey,
     entitiesPagedRequestKey,
-    entitiesScrollCacheKey,
+    paginationKey,
+    loadEntitiesNextPageKey,
+    loadEntitiesPreviousPageKey,
+    loadEntitiesFirstPageKey,
+    entitiesCurrentPageKey,
   } = getWithEntitiesInfinitePaginationKeys(config);
 
   const { loadingMoreEntities, entitiesResultsLoaded } =
@@ -312,40 +327,145 @@ export function withEntitiesRemoteScrollPagination<
 
   return signalStoreFeature(
     withState({
-      [entitiesScrollCacheKey]: {
-        bufferSize,
+      [paginationKey]: {
+        pageSize,
+        pagesToCache,
+        currentPage: 0,
+        requestPage: 0,
         hasMore: true,
       },
     }),
     withComputed((state: Record<string, Signal<unknown>>) => {
       const entities = state[entitiesKey] as Signal<Entity[]>;
-      const entitiesScrollCache = state[
-        entitiesScrollCacheKey
-      ] as Signal<ScrollPaginationState>;
+      const loading = state[loadingKey] as Signal<boolean>;
+      const pagination = state[paginationKey] as Signal<ScrollPaginationState>;
 
       const entitiesPagedRequest = computed(() => ({
         startIndex: entities().length,
-        size: entitiesScrollCache().bufferSize,
+        size: pagination().pageSize * pagination().pagesToCache,
       }));
+
+      const entitiesCurrentPageList = computed(() => {
+        const page = pagination().currentPage;
+        const startIndex = page * pagination().pageSize;
+        let endIndex = startIndex + pagination().pageSize;
+        endIndex = endIndex < entities().length ? endIndex : entities().length;
+        return entities().slice(startIndex, endIndex);
+      });
+
+      const entitiesCurrentPage = computed(() => {
+        return {
+          entities: entitiesCurrentPageList(),
+          pageIndex: pagination().currentPage,
+          pageSize: pagination().pageSize,
+          hasPrevious: pagination().currentPage - 1 >= 0,
+          hasNext:
+            isEntitiesInCache({
+              page: pagination().currentPage + 1,
+              pagination: pagination(),
+              cacheTotal: entities().length,
+            }) || pagination().hasMore,
+          isLoading:
+            loading() && pagination().requestPage === pagination().currentPage,
+        };
+      });
+
       return {
+        [entitiesCurrentPageKey]: entitiesCurrentPage,
         [entitiesPagedRequestKey]: entitiesPagedRequest,
       };
     }),
     withEventHandler((state) => [
       onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () => {
-        clearEntitiesCache(state, config, entitiesScrollCacheKey);
+        clearEntitiesCache(state, config, paginationKey);
       }),
     ]),
     withMethods((state: Record<string, Signal<unknown>>) => {
-      const entitiesScrollCache = state[
-        entitiesScrollCacheKey
-      ] as Signal<ScrollPaginationState>;
-
+      const pagination = state[paginationKey] as Signal<ScrollPaginationState>;
       const isLoading = state[loadingKey] as Signal<boolean>;
       const $loading = toObservable(isLoading);
       const setLoading = state[setLoadingKey] as () => void;
+      const entities = state[entitiesKey] as Signal<Entity[]>;
 
       return {
+        [loadEntitiesFirstPageKey]: () => {
+          patchState(state as StateSignal<object>, {
+            [paginationKey]: {
+              ...pagination(),
+              currentPage: 0,
+              requestPage: 0,
+            },
+          });
+        },
+        [loadEntitiesPreviousPageKey]: () => {
+          const currentPage = pagination().currentPage;
+          if (currentPage > 0) {
+            patchState(state as StateSignal<object>, {
+              [paginationKey]: {
+                ...pagination(),
+                currentPage: currentPage - 1,
+                requestPage: currentPage - 1,
+              },
+            });
+          }
+        },
+        [loadEntitiesNextPageKey]: rxMethod<void>(
+          pipe(
+            exhaustMap(() =>
+              $loading.pipe(
+                first((loading) => !loading),
+                // the previous exhaustMap to not loading ensures the function
+                // can not be called multiple time before results are loaded, which could corrupt the cache
+                tap(() => {
+                  const currentPage = pagination().currentPage;
+                  const nextPage = currentPage + 1;
+                  if (
+                    isEntitiesInCache({
+                      page: nextPage,
+                      pagination: pagination(),
+                      cacheTotal: entities().length,
+                    })
+                  ) {
+                    patchState(state as StateSignal<object>, {
+                      [paginationKey]: {
+                        ...pagination(),
+                        currentPage: nextPage,
+                      },
+                    });
+
+                    if (
+                      !isEntitiesInCache({
+                        page: nextPage + 1,
+                        pagination: pagination(),
+                        cacheTotal: entities().length,
+                      })
+                    ) {
+                      // preload next page
+                      patchState(state as StateSignal<object>, {
+                        [paginationKey]: {
+                          ...pagination(),
+                          currentPage: nextPage,
+                          requestPage: nextPage + 1,
+                        },
+                      });
+                      setLoading();
+                      broadcast(state, loadingMoreEntities());
+                    }
+                  } else if (pagination().hasMore) {
+                    patchState(state as StateSignal<object>, {
+                      [paginationKey]: {
+                        ...pagination(),
+                        currentPage: nextPage,
+                      },
+                    });
+                    setLoading();
+                    broadcast(state, loadingMoreEntities());
+                  }
+                }),
+              ),
+            ),
+          ),
+        ),
         [setEntitiesPagedResultKey]: (
           options:
             | {
@@ -370,14 +490,15 @@ export function withEntitiesRemoteScrollPagination<
                 })
               : addEntities(entities),
             {
-              [entitiesScrollCacheKey]: {
-                ...entitiesScrollCache(),
+              [paginationKey]: {
+                ...pagination(),
                 hasMore:
                   'hasMore' in options
                     ? options.hasMore
                     : 'total' in options
                       ? entitiesOld().length + entities.length < options.total
-                      : entities.length == entitiesScrollCache().bufferSize,
+                      : entities.length ==
+                        pagination().pageSize * pagination().pagesToCache,
               },
             },
           );
@@ -391,7 +512,7 @@ export function withEntitiesRemoteScrollPagination<
                 // the previous exhaustMap to not loading ensures the function
                 // can not be called multiple time before results are loaded, which could corrupt the cache
                 tap(() => {
-                  if (entitiesScrollCache().hasMore) {
+                  if (pagination().hasMore) {
                     setLoading();
                     broadcast(state, loadingMoreEntities());
                   }
@@ -408,11 +529,9 @@ export function withEntitiesRemoteScrollPagination<
 function clearEntitiesCache(
   state: Record<string, Signal<unknown>>,
   config: { collection?: string },
-  entitiesScrollCacheKey: string,
+  paginationKey: string,
 ) {
-  const entitiesScrollCache = state[
-    entitiesScrollCacheKey
-  ] as Signal<ScrollPaginationState>;
+  const pagination = state[paginationKey] as Signal<ScrollPaginationState>;
   patchState(
     state as StateSignal<object>,
     config.collection
@@ -421,11 +540,25 @@ function clearEntitiesCache(
         })
       : setAllEntities([]),
     {
-      [entitiesScrollCacheKey]: {
-        ...entitiesScrollCache(),
+      [paginationKey]: {
+        ...pagination(),
         total: 0,
         hasMore: true,
       },
     },
+  );
+}
+
+function isEntitiesInCache(options: {
+  page: number;
+  pagination: EntitiesScrollPaginationState['pagination'];
+  cacheTotal: number;
+}) {
+  const pagination = options.pagination;
+  const startIndex = options.page * pagination.pageSize;
+  const endIndex = startIndex + pagination.pageSize - 1;
+  return (
+    endIndex <= options.cacheTotal ||
+    (!pagination.hasMore && startIndex <= options.cacheTotal) // check for last page
   );
 }

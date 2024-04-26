@@ -527,7 +527,7 @@ or a hasMore param set[Collection]Result({entities, hasMore}) that you can set t
 | Param | Description |
 | --- | --- |
 | config |  |
-| config.bufferSize | <p>The number of entities to show per page</p> |
+| config.pageSize | <p>The number of entities to show per page</p> |
 | config.entity | <p>The entity type</p> |
 | config.collection | <p>The name of the collection</p> |
 
@@ -544,7 +544,7 @@ export const store = signalStore(
   withEntitiesRemoteScrollPagination({
     entity,
     collection,
-    bufferSize: 5,
+    pageSize: 5,
     pagesToCache: 2,
   })
   // after you can use withEntitiesLoadingCall to connect the filter to
@@ -598,9 +598,9 @@ export const store = signalStore(
  store = inject(ProductsRemoteStore);
  dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
   // generates the following signals
-  store.productsPagination // { currentPage: number, requestPage: number, bufferSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+  store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
- store.productsPageInfo // {  pageIndex: number, total: number, bufferSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ store.productsPageInfo // {  pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductsNextPage() // loads next page
