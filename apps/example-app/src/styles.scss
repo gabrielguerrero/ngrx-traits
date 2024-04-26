@@ -38,3 +38,8 @@ $angular-client-theme: mat.define-dark-theme(
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.mdc-notched-outline__notch
+{
+  border-right: none;
+}

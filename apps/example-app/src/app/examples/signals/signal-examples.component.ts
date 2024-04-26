@@ -14,11 +14,19 @@ import { RouterLink } from '@angular/router';
       </mat-card-header>
       <mat-card-content>
         <mat-list>
-          <mat-list-item [routerLink]="'infinite-scroll'">
+          <mat-list-item [routerLink]="'infinite-scroll-dropdown'">
             <div matListItemTitle><b>Infinite Scroll Dropdown</b></div>
             <div matListItemLine>
-              Example using trait to load a product list with filtering and
-              sorting in memory
+              Example of withEntitiesRemoteScrollPagination used to create a
+              dropdown with infinite scroll
+            </div>
+          </mat-list-item>
+          <mat-list-item [routerLink]="'infinite-scroll-list'">
+            <div matListItemTitle><b>Infinite Scroll List</b></div>
+            <div matListItemLine>
+              Example of withEntitiesRemoteScrollPagination used to create a
+              list tha is paginated for desktop mode and uses an infinite scroll
+              in mobile mode
             </div>
           </mat-list-item>
           <mat-divider></mat-divider>
@@ -33,10 +41,11 @@ import { RouterLink } from '@angular/router';
           <mat-list-item [routerLink]="'product-list-paginated'">
             <div matListItemTitle><b>Paginated List</b></div>
             <div matListItemLine>
-              Example using trait to load a product list with remote filtering
-              and sorting and pagination
+              Example using store features to load a product list with remote
+              filtering and detail view
             </div>
           </mat-list-item>
+
           <!--          <mat-divider></mat-divider>-->
           <!--          <mat-list-item [routerLink]="'product-picker'">-->
           <!--            <div matListItemTitle>-->

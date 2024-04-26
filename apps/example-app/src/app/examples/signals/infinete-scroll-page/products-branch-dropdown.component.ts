@@ -11,8 +11,8 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { getInfiniteScrollDataSource } from '@ngrx-traits/signals';
 
-import { SearchOptionsComponent } from '../../../../components/search-options/search-options.component';
-import { Branch } from '../../../../models';
+import { SearchOptionsComponent } from '../../components/search-options/search-options.component';
+import { Branch } from '../../models';
 import { ProductsBranchStore } from './products-branch.store';
 
 @Component({

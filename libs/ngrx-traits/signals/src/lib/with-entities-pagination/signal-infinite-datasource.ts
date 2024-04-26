@@ -5,7 +5,7 @@ import type {
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
-import { Observable, Subscription } from 'rxjs';
+import { debounceTime, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { getWithEntitiesKeys } from '../util';
@@ -20,25 +20,26 @@ export function getInfiniteScrollDataSource<Entity, Collection extends string>(
   options:
     | {
         store: EntitySignals<Entity> & EntitiesScrollPaginationMethods<Entity>;
+        debounceLoadMoreTime?: number;
       }
     | {
         collection: Collection;
         entity: Entity;
         store: NamedEntitySignals<Entity, Collection> &
           NamedEntitiesScrollPaginationMethods<Entity, Collection>;
+        debounceLoadMoreTime?: number;
       },
 ) {
   const collection = 'collection' in options ? options.collection : undefined;
-  const { loadMoreEntitiesKey, entitiesScrollCacheKey } =
+  const debounceLoadMoreTime = options.debounceLoadMoreTime ?? 300;
+  const { loadMoreEntitiesKey, paginationKey } =
     getWithEntitiesInfinitePaginationKeys({
       collection,
     });
   const { entitiesKey } = getWithEntitiesKeys({ collection });
   const store = options.store as Record<string, unknown>;
   const entities = store[entitiesKey] as Signal<Entity[]>;
-  const entitiesScrollCache = store[
-    entitiesScrollCacheKey
-  ] as Signal<ScrollPaginationState>;
+  const pagination = store[paginationKey] as Signal<ScrollPaginationState>;
   const loadMoreEntities = store[loadMoreEntitiesKey] as () => void;
 
   class MyDataSource extends DataSource<Entity> {
@@ -48,12 +49,10 @@ export function getInfiniteScrollDataSource<Entity, Collection extends string>(
       this.subscription = collectionViewer.viewChange
         .pipe(
           filter(({ end, start }) => {
-            const { bufferSize, hasMore } = entitiesScrollCache();
-            // filter first request that is done by the cdkscroll,
-            // filter last request
-            // only do requests when you pass a specific threshold
-            return start != 0 && hasMore && end + bufferSize >= entities.length;
+            const { pageSize, hasMore } = pagination();
+            return start != 0 && hasMore && end + pageSize >= entities().length;
           }),
+          debounceTime(debounceLoadMoreTime),
         )
         .subscribe(() => {
           loadMoreEntities();
