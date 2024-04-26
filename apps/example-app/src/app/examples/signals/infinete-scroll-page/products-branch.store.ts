@@ -1,18 +1,16 @@
 import { inject } from '@angular/core';
 import {
-  getInfiniteScrollDataSource,
   withCallStatus,
   withEntitiesLoadingCall,
   withEntitiesRemoteFilter,
   withEntitiesRemoteScrollPagination,
-  withLogger,
 } from '@ngrx-traits/signals';
 import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { lastValueFrom } from 'rxjs';
 
-import { Branch } from '../../../../models';
-import { BranchService } from '../../../../services/branch.service';
+import { Branch } from '../../models';
+import { BranchService } from '../../services/branch.service';
 
 const entity = type<Branch>();
 export const ProductsBranchStore = signalStore(
@@ -25,7 +23,7 @@ export const ProductsBranchStore = signalStore(
     defaultFilter: { search: '' },
   }),
   withEntitiesRemoteScrollPagination({
-    bufferSize: 30,
+    pageSize: 10,
     entity,
   }),
   withEntitiesLoadingCall({
@@ -37,8 +35,7 @@ export const ProductsBranchStore = signalStore(
           take: entitiesPagedRequest().size,
         }),
       );
-      return { entities: res.resultList, total: res.total };
+      return { entities: res.resultList };
     },
   }),
-  withLogger('branchStore'),
 );
