@@ -1,31 +1,29 @@
+import { CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  EventEmitter,
-  Input,
+  input,
   OnDestroy,
   output,
-  Output,
 } from '@angular/core';
-import { Product, ProductOrder } from '../../models';
-import { Selected, Sort } from '@ngrx-traits/common';
-import { Dictionary } from '@ngrx/entity';
 import {
+  ReactiveFormsModule,
   UntypedFormArray,
   UntypedFormBuilder,
-  ReactiveFormsModule,
 } from '@angular/forms';
-import { rebuildFormArray } from '../../utils/form-utils';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { CurrencyPipe } from '@angular/common';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
-import { input } from '@angular/core';
+import { Selected, Sort } from '@ngrx-traits/common';
+import { Dictionary } from '@ngrx/entity';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { Product, ProductOrder } from '../../models';
+import { rebuildFormArray } from '../../utils/form-utils';
 
 @Component({
   selector: 'product-basket',
@@ -172,7 +170,7 @@ export class ProductBasketComponent implements OnDestroy {
         rowControl.valueChanges
           .pipe(takeUntil(this.destroy$))
           .subscribe(({ quantity }) =>
-            this.updateProduct.emit({ ...this._list[index], quantity })
+            this.updateProduct.emit({ ...this._list[index], quantity }),
           );
         return rowControl;
       },

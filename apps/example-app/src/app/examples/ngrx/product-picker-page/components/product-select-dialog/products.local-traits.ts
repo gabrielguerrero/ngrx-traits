@@ -1,0 +1,68 @@
+import { Injectable } from '@angular/core';
+import {
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+  addSelectEntityTrait,
+  addSortEntitiesTrait,
+} from '@ngrx-traits/common';
+import {
+  createEntityFeatureFactory,
+  LocalTraitsConfig,
+  TraitsLocalStore,
+} from '@ngrx-traits/core';
+import { createEffect, ofType } from '@ngrx/effects';
+import { of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+
+import { Product, ProductFilter } from '../../../../models';
+import { ProductService } from '../../../../services/product.service';
+
+const productFeatureFactory = createEntityFeatureFactory(
+  { entityName: 'product' },
+  addLoadEntitiesTrait<Product>(),
+  addSelectEntityTrait<Product>(),
+  addFilterEntitiesTrait<Product, ProductFilter>({
+    filterFn: (filter, entity) => {
+      return (
+        !filter.search ||
+        entity.name.toLowerCase().includes(filter.search.toLowerCase())
+      );
+    },
+  }),
+  addSortEntitiesTrait<Product>({
+    remote: false,
+    defaultSort: { direction: 'asc', active: 'name' },
+  }),
+);
+
+@Injectable()
+export class ProductsLocalTraits extends TraitsLocalStore<
+  typeof productFeatureFactory
+> {
+  loadProducts$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(this.localActions.loadProducts),
+      switchMap(() =>
+        //call your service to get the products data
+        this.productService.getProducts().pipe(
+          map((res) =>
+            this.localActions.loadProductsSuccess({ entities: res.resultList }),
+          ),
+          catchError(() => of(this.localActions.loadProductsFail())),
+        ),
+      ),
+    ),
+  );
+
+  constructor(private productService: ProductService) {
+    super();
+    this.traits.addEffects(this);
+  }
+
+  setup(): LocalTraitsConfig<typeof productFeatureFactory> {
+    return {
+      componentName: 'ProductsPickerComponent',
+      traitsFactory: productFeatureFactory,
+    };
+  }
+}
