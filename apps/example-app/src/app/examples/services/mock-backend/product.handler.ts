@@ -1,13 +1,15 @@
+import { sortData } from '@ngrx-traits/common';
 import { rest } from 'msw';
+
 import { Product, ProductDetail } from '../../models';
 import { getRandomInteger } from '../../utils/form-utils';
-import { sortData } from '@ngrx-traits/common';
+
 export const productHandlers = [
   rest.post<{ productId: string; quantity: number }[], never, string>(
     '/checkout',
     (req, res, ctx) => {
       return res(ctx.status(200), ctx.json('123'));
-    }
+    },
   ),
   rest.get<never, { id: string }, ProductDetail | undefined>(
     '/products/:id',
@@ -24,7 +26,7 @@ export const productHandlers = [
           releaseDate: '' + getRandomInteger(1990, 2000),
         } as ProductDetail);
       return res(ctx.status(200), ctx.json(productDetail));
-    }
+    },
   ),
   rest.get<never, ProductsQuery, ProductsResponse>(
     '/products',
@@ -56,7 +58,7 @@ export const productHandlers = [
         });
       }
       return res(ctx.status(200), ctx.json({ resultList: result, total }));
-    }
+    },
   ),
 ];
 

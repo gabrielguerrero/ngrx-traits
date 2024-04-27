@@ -4,21 +4,19 @@ import {
   ElementRef,
   inject,
   Input,
-  OnDestroy,
-  OnInit,
+  input,
   Output,
   viewChild,
 } from '@angular/core';
-import { input } from '@angular/core';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
-import { Observable, Subject } from 'rxjs';
-import { delay, takeUntil } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { delay } from 'rxjs/operators';
 
 @Component({
   selector: 'search-options',
