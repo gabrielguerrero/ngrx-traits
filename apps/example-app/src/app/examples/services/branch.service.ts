@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
 
-import { Branch, BranchDetail, BranchResponse, Product } from '../models';
+import { BranchDetail, BranchResponse, Product } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class BranchService {

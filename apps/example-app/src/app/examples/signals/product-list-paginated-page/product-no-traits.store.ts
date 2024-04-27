@@ -1,5 +1,5 @@
 import { computed, effect, inject } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStore,
@@ -10,8 +10,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, empty, lastValueFrom, of, tap } from 'rxjs';
+import { EMPTY, tap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { Product } from '../../models';

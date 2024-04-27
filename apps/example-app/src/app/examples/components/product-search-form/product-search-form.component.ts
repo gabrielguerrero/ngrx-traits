@@ -1,9 +1,10 @@
+import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ProductFilter } from '../../models';
-import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { JsonPipe } from '@angular/common';
+import { MatInputModule } from '@angular/material/input';
+
+import { ProductFilter } from '../../models';
 
 @Component({
   selector: 'product-search-form',

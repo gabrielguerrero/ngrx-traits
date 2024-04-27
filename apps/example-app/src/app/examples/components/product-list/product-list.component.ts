@@ -1,14 +1,15 @@
+import { CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
   input,
   output,
 } from '@angular/core';
-import { Product } from '../../models';
-import { Sort } from '@ngrx-traits/common';
-import { CurrencyPipe } from '@angular/common';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { Sort } from '@ngrx-traits/common';
+
+import { Product } from '../../models';
 
 @Component({
   selector: 'product-list',
