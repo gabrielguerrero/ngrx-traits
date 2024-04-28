@@ -39,6 +39,13 @@ const routes: Routes = [
             './signals/infinete-scroll-page/products-branch-list.component'
           ).then((m) => m.ProductsBranchListComponent),
       },
+      {
+        path: 'products-shop',
+        loadChildren: () =>
+          import(
+            './signals/product-shop-page/product-shop-page-routing.module'
+          ).then((m) => m.ProductShopPageRoutingModule),
+      },
     ],
   },
   {

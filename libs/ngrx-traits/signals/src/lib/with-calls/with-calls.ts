@@ -174,7 +174,7 @@ export function withCalls<
                   ? call.resultProp
                   : `${callName}Result`,
               });
-
+              // TODO: fix as any
               const mapPipe =
                 isCallConfig(call) && call.mapPipe
                   ? mapPipes[call.mapPipe]
@@ -182,27 +182,27 @@ export function withCalls<
               const setLoading = () =>
                 patchState(store, {
                   [callStatusKey]: 'loading',
-                } as StateSignal<object>);
+                } as any);
               const setLoaded = () =>
                 patchState(store, {
                   [callStatusKey]: 'loaded',
-                } as StateSignal<object>);
+                } as any);
               const setError = (error: unknown) =>
                 patchState(store, {
                   [callStatusKey]: { error },
-                } as StateSignal<object>);
+                } as any);
               acc[setLoadingKey] = () =>
                 patchState(store, {
                   [callStatusKey]: 'loading',
-                } as StateSignal<object>);
+                } as any);
               acc[setLoadedKey] = () =>
                 patchState(store, {
                   [callStatusKey]: 'loaded',
-                } as StateSignal<object>);
+                } as any);
               acc[setErrorKey] = (error?: unknown) =>
                 patchState(store, {
                   [callStatusKey]: { error },
-                } as StateSignal<object>);
+                } as any);
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
                   mapPipe((params) => {
