@@ -17,7 +17,7 @@ export type NamedEntitiesMultiSelectionComputed<
 > = {
   [K in Collection as `${K}EntitiesSelected`]: Signal<Entity[]>;
 } & {
-  [K in Collection as `${K}IdsSelected`]: Signal<Entity[]>;
+  [K in Collection as `${K}IdsSelected`]: Signal<(string | number)[]>;
 } & {
   [K in Collection as `isAll${Capitalize<string & K>}Selected`]: Signal<
     'all' | 'none' | 'some'
