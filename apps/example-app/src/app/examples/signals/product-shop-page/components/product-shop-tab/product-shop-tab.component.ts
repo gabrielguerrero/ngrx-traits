@@ -57,7 +57,7 @@ import { ProductsShopStore } from '../../products-shop.store';
       @if (store.isLoadProductDetailLoading()) {
         <mat-spinner />
       } @else if (store.isLoadProductDetailLoaded()) {
-        <product-detail [product]="store.productDetail()" />
+        <product-detail [product]="store.productDetail()!" />
       } @else {
         <div class="content-center"><h2>Please Select a product</h2></div>
       }
