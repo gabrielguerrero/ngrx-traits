@@ -98,15 +98,8 @@ import { ProductsLocalStore } from './product.store';
   ],
   providers: [ProductsLocalStore],
 })
-export class SignalProductListPaginatedPageContainerComponent
-  implements OnInit
-{
+export class SignalProductListPaginatedPageContainerComponent {
   store = inject(ProductsLocalStore);
-
-  ngOnInit() {
-    // this.store.productDetail;
-    // this.store.loadProductDetail({ id: '12' });
-  }
 
   select({ id }: Product) {
     this.store.selectProductsEntity({ id });
