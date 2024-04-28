@@ -1,7 +1,7 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import {
   withCallStatus,
@@ -96,6 +96,65 @@ describe('withEntitiesLoadingCall', () => {
         store.setLoading();
         tick();
         expect(store.entities()).toEqual(mockProducts.slice(0, 30));
+      });
+    }));
+
+    it('should call setLoaded and onSuccess if fetchEntities call is successful', fakeAsync(() => {
+      const onSuccess = jest.fn();
+      const onError = jest.fn();
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({
+            entity,
+          }),
+          withCallStatus(),
+          withEntitiesLoadingCall({
+            fetchEntities: () => {
+              let result = [...mockProducts];
+              return of(result);
+            },
+            onSuccess,
+            onError,
+          }),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.entities()).toEqual([]);
+        store.setLoading();
+        tick();
+        expect(store.entities()).toEqual(mockProducts);
+        expect(store.isLoaded()).toBeTruthy();
+        expect(onSuccess).toHaveBeenCalledWith(mockProducts);
+        expect(onError).not.toHaveBeenCalled();
+      });
+    }));
+
+    it('should call setError and onError if fetchEntities call fails ', fakeAsync(() => {
+      const onSuccess = jest.fn();
+      const onError = jest.fn();
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({
+            entity,
+          }),
+          withCallStatus(),
+          withEntitiesLoadingCall({
+            fetchEntities: () => {
+              return throwError(() => new Error('fail'));
+            },
+            onSuccess,
+            onError,
+          }),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.entities()).toEqual([]);
+        store.setLoading();
+        tick();
+        expect(store.entities()).toEqual([]);
+        expect(store.error()).toEqual(new Error('fail'));
+        expect(onError).toHaveBeenCalledWith(new Error('fail'));
+        expect(onSuccess).not.toHaveBeenCalled();
       });
     }));
   });

@@ -57,6 +57,13 @@ import { getWithCallKeys } from './with-calls.util';
  *       call: ({ id }: { id: string }) =>
  *         inject(ProductService).getProductDetail(id),
  *       resultProp: 'productDetail',
+ *       mapPipe: 'switchMap', // default is 'exhaustMap'
+ *       onSuccess: (result) => {
+ *       // do something with the result
+ *       },
+ *       onError: (error) => {
+ *       // do something with the error
+ *       },
  *     },
  *     checkout: () =>
  *       inject(OrderService).checkout({
@@ -102,7 +109,7 @@ export function withCalls<
         ? Calls[K]['resultProp'] extends string
           ? Calls[K]['resultProp']
           : `${K & string}Result`
-        : `${K & string}Result`]: ExtractCallResultType<Calls[K]>;
+        : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
     signals: NamedCallStatusComputed<keyof Calls & string>;
     methods: {
@@ -216,12 +223,18 @@ export function withCalls<
                             [resultPropKey]: result,
                           });
                           setLoaded();
-                        }),
-                        catchError((error: unknown) => {
-                          setError(error);
-                          return of();
+                          isCallConfig(call) &&
+                            call.onSuccess &&
+                            call.onSuccess(result);
                         }),
                         first(),
+                        catchError((error: unknown) => {
+                          setError(error);
+                          isCallConfig(call) &&
+                            call.onError &&
+                            call.onError(error);
+                          return of();
+                        }),
                       );
                     });
                   }),

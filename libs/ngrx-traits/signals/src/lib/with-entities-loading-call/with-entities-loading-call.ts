@@ -68,6 +68,8 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  * @param config - Configuration object
  * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
  * @param config.collection - The collection name
+ * @param config.onSuccess - A function that is called when the fetchEntities is successful
+ * @param config.onError - A function that is called when the fetchEntities fails
  * can be an array of entities or an object with entities and total
  *
  * @example
@@ -142,6 +144,12 @@ export function withEntitiesLoadingCall<
           : Entity[] | { entities: Entity[] }
       >;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+  onSuccess?: (
+    result: Input['methods'] extends SetEntitiesResult<infer ResultParam>
+      ? ResultParam
+      : Entity[] | { entities: Entity[] },
+  ) => void;
+  onError?: (error: any) => void;
 }): SignalStoreFeature<
   Input & {
     state: EntityState<Entity> & CallStatusState;
@@ -164,6 +172,8 @@ export function withEntitiesLoadingCall<
  * @param config - Configuration object
  * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
  * @param config.collection - The collection name
+ * @param config.onSuccess - A function that is called when the fetchEntities is successful
+ * @param config.onError - A function that is called when the fetchEntities fails
  * can be an array of entities or an object with entities and total
  *
  * @example
@@ -248,6 +258,15 @@ export function withEntitiesLoadingCall<
           : Entity[] | { entities: Entity[] }
       >;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+  onSuccess?: (
+    result: Input['methods'] extends NamedSetEntitiesResult<
+      Collection,
+      infer ResultParam
+    >
+      ? ResultParam
+      : Entity[] | { entities: Entity[] },
+  ) => void;
+  onError?: (error: any) => void;
 }): SignalStoreFeature<
   Input & {
     state: NamedEntityState<Entity, Collection> &
@@ -276,6 +295,8 @@ export function withEntitiesLoadingCall<
       Input['methods'],
   ) => Observable<any> | Promise<any>;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+  onSuccess?: (result: any) => void;
+  onError?: (error: any) => void;
 }): SignalStoreFeature<Input, EmptyFeatureResult> {
   const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
     prop: collection,
@@ -328,13 +349,14 @@ export function withEntitiesLoadingCall<
                       );
                     }
                     setLoaded();
-                  }),
-                  catchError((error: unknown) => {
-                    setError(error);
-                    setLoaded();
-                    return of();
+                    if (config.onSuccess) config.onSuccess(result);
                   }),
                   first(),
+                  catchError((error: unknown) => {
+                    setError(error);
+                    if (config.onError) config.onError(error);
+                    return of();
+                  }),
                 ),
               ),
             )
