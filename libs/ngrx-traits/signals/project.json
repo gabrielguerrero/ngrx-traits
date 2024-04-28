@@ -37,7 +37,7 @@
       "options": {
         "commands": [
           {
-            "command": "cp ../../../../.npmrc . &&  npm version {args.versionNumber} && npm publish --access public --verbose",
+            "command": "npm version {args.versionNumber} && npm publish --access public --verbose",
             "forwardAllArgs": false
           }
         ],
