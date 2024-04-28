@@ -279,7 +279,7 @@ export function withEntitiesRemoteScrollPagination<
   pagesToCache?: number;
 }): SignalStoreFeature<
   {
-    state: NamedEntityState<Entity, string>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
+    state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
     signals: NamedEntitySignals<Entity, Collection> &
       NamedCallStatusComputed<Collection>;
     methods: NamedCallStatusMethods<Collection>;
