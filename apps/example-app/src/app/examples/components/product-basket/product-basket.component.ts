@@ -94,7 +94,7 @@ import { rebuildFormArray } from '../../utils/form-utils';
           </td>
         </ng-container>
         <ng-container matColumnDef="total">
-          <th mat-header-cell mat-sort-header *matHeaderCellDef>Total</th>
+          <th mat-header-cell *matHeaderCellDef>Total</th>
           <td mat-cell *matCellDef="let row">
             {{ row.price * (row.quantity || 1) | currency }}
           </td>
@@ -145,7 +145,6 @@ import { rebuildFormArray } from '../../utils/form-utils';
 })
 export class ProductBasketComponent implements OnDestroy {
   controls = new UntypedFormArray([]);
-  _list: ProductOrder[] = [];
   destroy$ = new Subject<void>();
   displayedColumns: (keyof ProductOrder | 'select' | 'total')[] = [
     'select',
@@ -169,9 +168,10 @@ export class ProductBasketComponent implements OnDestroy {
         });
         rowControl.valueChanges
           .pipe(takeUntil(this.destroy$))
-          .subscribe(({ quantity }) =>
-            this.updateProduct.emit({ ...this._list[index], quantity }),
-          );
+          .subscribe(({ quantity }) => {
+            console.log('updateProduct', { ...this.list()[index], quantity });
+            this.updateProduct.emit({ ...this.list()[index], quantity });
+          });
         return rowControl;
       },
       values,

@@ -122,9 +122,7 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
->({
-  fetchEntities,
-}: {
+>(config: {
   fetchEntities: (
     store: Prettify<
       SignalStoreSlices<Input['state']> &
@@ -228,9 +226,7 @@ export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
   Collection extends string,
->({
-  fetchEntities,
-}: {
+>(config: {
   // entity?: Entity; // is this needed? entity can come from the method fetchEntities return type
   collection: Collection;
   fetchEntities: (

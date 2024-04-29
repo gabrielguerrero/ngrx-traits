@@ -1,17 +1,17 @@
 import { inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   withCalls,
   withCallStatus,
   withEntitiesLoadingCall,
-  withEntitiesLocalFilter,
   withEntitiesLocalPagination,
   withEntitiesLocalSort,
   withEntitiesMultiSelection,
   withEntitiesRemoteFilter,
   withEntitiesRemotePagination,
-  withEntitiesRemoteScrollPagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
+  withLogger,
 } from '@ngrx-traits/signals';
 import {
   patchState,
@@ -80,7 +80,6 @@ const orderItemsStoreFeature = signalStoreFeature(
     entity: orderEntity,
     collection: orderItemsCollection,
   }),
-  withCallStatus({ initialValue: 'loading', collection: orderItemsCollection }),
   withEntitiesLocalSort({
     entity: orderEntity,
     collection: orderItemsCollection,
@@ -90,14 +89,14 @@ const orderItemsStoreFeature = signalStoreFeature(
     entity: orderEntity,
     collection: orderItemsCollection,
   }),
-  withEntitiesSingleSelection({
-    entity: orderEntity,
-    collection: orderItemsCollection,
-  }),
   withEntitiesLocalPagination({
     pageSize: 10,
     entity: orderEntity,
     collection: orderItemsCollection,
+  }),
+  withLogger({
+    name: 'orderItemsStore',
+    filterState: ({ orderItemsEntityMap }) => ({ orderItemsEntityMap }),
   }),
 );
 
@@ -107,32 +106,41 @@ export const ProductsShopStore = signalStore(
   orderItemsStoreFeature,
   withEntitiesLoadingCall({
     collection: productsCollection,
-    fetchEntities: async ({ productsPagedRequest, productsFilter }) => {
+    fetchEntities: async ({
+      productsPagedRequest,
+      productsFilter,
+      productsSort,
+    }) => {
       const res = await lastValueFrom(
         inject(ProductService).getProducts({
           search: productsFilter().search,
           skip: productsPagedRequest().startIndex,
           take: productsPagedRequest().size,
+          sortAscending: productsSort().direction === 'asc',
+          sortColumn: productsSort().field,
         }),
       );
       return { entities: res.resultList, total: res.total };
     },
   }),
-  withCalls(({ orderItemsEntities }) => ({
-    loadProductDetail: {
-      call: ({ id }: { id: string }) =>
-        inject(ProductService).getProductDetail(id),
-      resultProp: 'productDetail',
-      mapPipe: 'switchMap',
+  withCalls(({ orderItemsEntities }, snackBar = inject(MatSnackBar)) => ({
+    loadProductDetail: ({ id }: { id: string }) =>
+      inject(ProductService).getProductDetail(id),
+    checkout: {
+      call: () =>
+        inject(OrderService).checkout(
+          ...orderItemsEntities().map((p) => ({
+            productId: p.id,
+            quantity: p.quantity!,
+          })),
+        ),
+      resultProp: 'orderNumber',
+      onSuccess: (orderId) => {
+        snackBar.open(`Order number: ${orderId}`, 'Close', {
+          duration: 5000,
+        });
+      },
     },
-
-    checkout: () =>
-      inject(OrderService).checkout(
-        ...orderItemsEntities().map((p) => ({
-          productId: p.id,
-          quantity: p.quantity!,
-        })),
-      ),
   })),
   withMethods(
     ({ productsEntitySelected, orderItemsIdsSelected, ...state }) => ({
