@@ -40,7 +40,7 @@ import { RouterLink } from '@angular/router';
           <mat-list-item [routerLink]="'products-shop'" style="height: 90px;">
             <div matListItemTitle>
               <b
-                >Complex example using multi collections and most of the store
+                >Complex example using two collections and most of the store
                 features</b
               >
             </div>

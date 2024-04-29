@@ -111,7 +111,7 @@ export function withEntitiesRemoteSort<
   Entity extends { id: string | number },
 >(config: {
   defaultSort: Sort<Entity>;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -203,7 +203,7 @@ export function withEntitiesRemoteSort<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  entity?: Entity;
+  entity: Entity;
   defaultSort: Sort<Entity>;
   collection?: Collection;
 }): SignalStoreFeature<
@@ -225,7 +225,7 @@ export function withEntitiesRemoteSort<
   defaultSort,
   ...config
 }: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
   defaultSort: Sort<Entity>;
 }): SignalStoreFeature<any, any> {

@@ -169,12 +169,9 @@ export function withCalls<
         (state, environmentInjector = inject(EnvironmentInjector)) => {
           const methods = Object.entries(calls).reduce(
             (acc, [callName, call]) => {
-              const {
-                callStatusKey,
-                setLoadingKey,
-                setLoadedKey,
-                setErrorKey,
-              } = getWithCallStatusKeys({ prop: callName });
+              const { callStatusKey } = getWithCallStatusKeys({
+                prop: callName,
+              });
               const { resultPropKey, callNameKey } = getWithCallKeys({
                 callName,
                 resultProp: isCallConfig(call)
@@ -186,6 +183,7 @@ export function withCalls<
                 isCallConfig(call) && call.mapPipe
                   ? mapPipes[call.mapPipe]
                   : exhaustMap;
+
               const setLoading = () =>
                 patchState(store, {
                   [callStatusKey]: 'loading',
@@ -198,18 +196,7 @@ export function withCalls<
                 patchState(store, {
                   [callStatusKey]: { error },
                 } as any);
-              acc[setLoadingKey] = () =>
-                patchState(store, {
-                  [callStatusKey]: 'loading',
-                } as any);
-              acc[setLoadedKey] = () =>
-                patchState(store, {
-                  [callStatusKey]: 'loaded',
-                } as any);
-              acc[setErrorKey] = (error?: unknown) =>
-                patchState(store, {
-                  [callStatusKey]: { error },
-                } as any);
+
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
                   mapPipe((params) => {
