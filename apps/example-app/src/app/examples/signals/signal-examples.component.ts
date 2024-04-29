@@ -30,14 +30,6 @@ import { RouterLink } from '@angular/router';
             </div>
           </mat-list-item>
           <mat-divider></mat-divider>
-          <!--          <mat-list-item [routerLink]="'product-list'">-->
-          <!--            <div matListItemTitle><b>Simple List</b></div>-->
-          <!--            <div matListItemLine>-->
-          <!--              Example using trait to load a product list with filtering and-->
-          <!--              sorting in memory-->
-          <!--            </div>-->
-          <!--          </mat-list-item>-->
-          <!--          <mat-divider></mat-divider>-->
           <mat-list-item [routerLink]="'product-list-paginated'">
             <div matListItemTitle><b>Paginated List</b></div>
             <div matListItemLine>
@@ -45,43 +37,20 @@ import { RouterLink } from '@angular/router';
               filtering and detail view
             </div>
           </mat-list-item>
-
-          <!--          <mat-divider></mat-divider>-->
-          <!--          <mat-list-item [routerLink]="'product-picker'">-->
-          <!--            <div matListItemTitle>-->
-          <!--              <b>Local store example with a product picker</b>-->
-          <!--            </div>-->
-          <!--            <div matListItemLine>-->
-          <!--              Example using local traits to load a product list with filtering-->
-          <!--              and sorting in memory-->
-          <!--            </div>-->
-          <!--          </mat-list-item>-->
-          <!--          <mat-divider></mat-divider>-->
           <mat-list-item [routerLink]="'products-shop'" style="height: 90px;">
             <div matListItemTitle>
-              <b>Using addCrudEntities and creating loadProduct custom trait</b>
+              <b
+                >Complex example using multi collections and most of the store
+                features</b
+              >
             </div>
             <div matListItemLine style="white-space: normal">
-              This is a more complex example were we add a product basket, so
-              you can buy more than one product at a time. Here you will see how
-              to use the addCrudEntities and we create a custom trait called
-              loadProduct to help with the preview of the product
+              Example using two collection in the store, one for products and
+              one for a product basket, you can find here examples of withCalls,
+              remote pagination,sorting and filtering , local sorting,
+              pagination, single and multi selection and more
             </div>
           </mat-list-item>
-          <!--          <mat-divider></mat-divider>-->
-          <!--          <mat-list-item-->
-          <!--            [routerLink]="'cache-and-dropdowns'"-->
-          <!--            style="height: 110px;"-->
-          <!--          >-->
-          <!--            <div matListItemTitle>-->
-          <!--              <b>Example using local traits in dropdowns with cache</b>-->
-          <!--            </div>-->
-          <!--            <div matListItemLine style="white-space: normal">-->
-          <!--              Here you can see how to use local store in two dropdowns where-->
-          <!--              selecting one trigger a load in the second, plus how you can use-->
-          <!--              cache to reduce the number of calls they do-->
-          <!--            </div>-->
-          <!--          </mat-list-item>-->
         </mat-list>
       </mat-card-content>
     </mat-card>

@@ -64,6 +64,41 @@ describe('withSyncToWebStorage', () => {
     });
   });
 
+  it('should save and load to local session using filtered state and onRestore be called', () => {
+    const onRestore = jest.fn();
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withSyncToWebStorage({
+          key: 'test',
+          type: 'session',
+          restoreOnInit: false,
+          saveStateChangesAfterMs: 0,
+          filterState: (state) => ({
+            ids: state.ids,
+            entityMap: state.entityMap,
+          }),
+          onRestore,
+        }),
+      );
+      const store = new Store();
+      store.clearFromStore();
+      TestBed.flushEffects();
+      store.setLoaded();
+      patchState(store, setAllEntities(mockProducts));
+      store.saveToStorage();
+
+      store.setLoading();
+      patchState(store, setAllEntities(mockProducts.slice(0, 30)));
+
+      store.loadFromStorage();
+      expect(store.entities()).toEqual(mockProducts);
+      expect(store.isLoading()).toBe(true); // it keeps the current value because it was filtered
+      expect(onRestore).toBeCalled();
+    });
+  });
+
   it('should save after milliseconds set in saveStateChangesAfterMs if is greater than 0 ', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
