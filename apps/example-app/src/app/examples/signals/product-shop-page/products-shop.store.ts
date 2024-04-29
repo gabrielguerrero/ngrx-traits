@@ -11,7 +11,7 @@ import {
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
-  withLogger,
+  withStateLogger,
 } from '@ngrx-traits/signals';
 import {
   patchState,
@@ -94,7 +94,7 @@ const orderItemsStoreFeature = signalStoreFeature(
     entity: orderEntity,
     collection: orderItemsCollection,
   }),
-  withLogger({
+  withStateLogger({
     name: 'orderItemsStore',
     filterState: ({ orderItemsEntityMap }) => ({ orderItemsEntityMap }),
   }),

@@ -13,9 +13,9 @@ import type {
 /**
  * Log the state of the store on every change
  * @param name - The name of the store to log
- * @param filterState - filter the state before logging
+ * @param filterState - optional filter the state before logging
  */
-export function withLogger<Input extends SignalStoreFeatureResult>({
+export function withStateLogger<Input extends SignalStoreFeatureResult>({
   name,
   filterState,
 }: {
