@@ -5,7 +5,7 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ main, next, beta, '*.x' ]
+    branches: [ main, next, beta, rc, '*.x' ]
   pull_request:
     branches: '*'
 
@@ -32,8 +32,8 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    # only allows semantic release on main, next, beta, and 1*x branches, github doesnt do regex matching so we have to manually when we are over version 20
-    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' || github.ref == 'refs/heads/beta' || (startsWith(github.ref, 'refs/heads/1') && endsWith(github.ref, '.x')) }}
+    # only allows semantic release on main, next, beta, rc, and 1*x branches, github doesnt do regex matching so we have to manually when we are over version 20
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/rc' || (startsWith(github.ref, 'refs/heads/1') && endsWith(github.ref, '.x')) }}
     needs: [quality]
     steps:
       - uses: actions/checkout@v4
