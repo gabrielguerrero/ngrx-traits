@@ -68,7 +68,7 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
 export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
 >(config?: {
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -117,7 +117,7 @@ export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
   Collection extends string,
 >(config?: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   // TODO: the problem seems be with the state pro, when set to empty
@@ -137,7 +137,7 @@ export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
   Collection extends string,
 >(config?: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey } = getWithEntitiesKeys(config);

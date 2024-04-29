@@ -139,7 +139,7 @@ export function withEntitiesRemotePagination<
   pageSize?: number;
   currentPage?: number;
   pagesToCache?: number;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -248,7 +248,7 @@ export function withEntitiesRemotePagination<
   pageSize?: number;
   currentPage?: number;
   pagesToCache?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   {
@@ -363,9 +363,9 @@ export function withEntitiesRemotePagination<
   pageSize?: number;
   currentPage?: number;
   pagesToCache?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
-} = {}): SignalStoreFeature<any, any> {
+}): SignalStoreFeature<any, any> {
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
   });

@@ -69,7 +69,7 @@ export function withEntitiesLocalPagination<
 >(config: {
   pageSize?: number;
   currentPage?: number;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -118,7 +118,7 @@ export function withEntitiesLocalPagination<
 >(config: {
   pageSize?: number;
   currentPage?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   {
@@ -143,9 +143,9 @@ export function withEntitiesLocalPagination<
 }: {
   pageSize?: number;
   currentPage?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
-} = {}): SignalStoreFeature<any, any> {
+}): SignalStoreFeature<any, any> {
   const { entitiesKey } = getWithEntitiesKeys(config);
   const { loadEntitiesPageKey, entitiesCurrentPageKey, paginationKey } =
     getWithEntitiesLocalPaginationKeys(config);

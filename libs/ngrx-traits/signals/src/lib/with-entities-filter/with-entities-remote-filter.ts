@@ -117,7 +117,7 @@ export function withEntitiesRemoteFilter<
 >(config: {
   defaultFilter: Filter;
   defaultDebounce?: number;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -212,7 +212,7 @@ export function withEntitiesRemoteFilter<
 >(config: {
   defaultFilter: Filter;
   defaultDebounce?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   {
@@ -234,7 +234,7 @@ export function withEntitiesRemoteFilter<
   defaultFilter,
   ...config
 }: {
-  entity?: Entity;
+  entity: Entity;
   defaultDebounce?: number;
   collection?: Collection;
   defaultFilter: Filter;

@@ -154,7 +154,7 @@ import {
 export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
 >(config: {
-  entity?: Entity;
+  entity: Entity;
   pageSize?: number;
   pagesToCache?: number;
 }): SignalStoreFeature<
@@ -273,7 +273,7 @@ export function withEntitiesRemoteScrollPagination<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
   pageSize?: number;
   pagesToCache?: number;
@@ -299,11 +299,11 @@ export function withEntitiesRemoteScrollPagination<
   pagesToCache = 3,
   ...config
 }: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
   pageSize?: number;
   pagesToCache?: number;
-} = {}): SignalStoreFeature<any, any> {
+}): SignalStoreFeature<any, any> {
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
   });

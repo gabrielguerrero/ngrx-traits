@@ -31,7 +31,7 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   };
 }
 
-export function debounceFilterPipe<Filter, Entity>(
+export function debounceFilterPipe<Filter>(
   filter: Signal<Filter>,
   defaultDebounce = 300,
 ) {

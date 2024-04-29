@@ -227,7 +227,6 @@ export function withEntitiesLoadingCall<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  // entity?: Entity; // is this needed? entity can come from the method fetchEntities return type
   collection: Collection;
   fetchEntities: (
     store: Prettify<
@@ -283,7 +282,6 @@ export function withEntitiesLoadingCall<
   fetchEntities,
   ...config
 }: {
-  entity?: Entity; // is this needed? entity can come from the method fetchEntities return type
   collection?: Collection;
   fetchEntities: (
     store: SignalStoreSlices<Input['state']> &
