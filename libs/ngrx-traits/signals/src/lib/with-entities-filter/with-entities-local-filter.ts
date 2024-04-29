@@ -83,7 +83,7 @@ export function withEntitiesLocalFilter<
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
   defaultDebounce?: number;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -143,7 +143,7 @@ export function withEntitiesLocalFilter<
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
   defaultDebounce?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   // TODO: we have a problem  with the state property, when set to any
@@ -175,7 +175,7 @@ export function withEntitiesLocalFilter<
   filterFn: (entity: Entity, filter?: Filter) => boolean;
   defaultFilter: Filter;
   defaultDebounce?: number;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);

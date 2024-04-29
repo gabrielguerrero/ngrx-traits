@@ -65,7 +65,7 @@ export function withEntitiesLocalSort<
   Entity extends { id: string | number },
 >(config: {
   defaultSort: Sort<Entity>;
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -109,7 +109,7 @@ export function withEntitiesLocalSort<
   Collection extends string,
 >(config: {
   defaultSort: Sort<Entity>;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   // TODO: we have a problem  with the state property, when set to any
@@ -136,7 +136,7 @@ export function withEntitiesLocalSort<
   ...config
 }: {
   defaultSort: Sort<Entity>;
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
   const { entitiesKey } = getWithEntitiesKeys(config);

@@ -33,7 +33,7 @@ import { ProductsShopStore } from '../../products-shop.store';
             (sort)="sortBasket($event)"
           ></product-basket>
         </mat-card-content>
-        <mat-card-actions [align]="'end'">
+        <mat-card-actions class="flex gap-4" [align]="'end'">
           <button
             mat-stroked-button
             color="primary"

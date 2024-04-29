@@ -66,7 +66,7 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
 export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
 >(config: {
-  entity?: Entity;
+  entity: Entity;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -114,7 +114,7 @@ export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   // TODO: the problem seems be with the state pro, when set to empty
@@ -135,7 +135,7 @@ export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<
   // TODO: the problem seems be with the state pro, when set to empty
@@ -155,7 +155,7 @@ export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
   Collection extends string,
 >(config: {
-  entity?: Entity;
+  entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
