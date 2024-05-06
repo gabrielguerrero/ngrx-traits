@@ -57,6 +57,7 @@ import { getWithCallKeys } from './with-calls.util';
  *       call: ({ id }: { id: string }) =>
  *         inject(ProductService).getProductDetail(id),
  *       resultProp: 'productDetail',
+ *       // storeResult: false, // will omit storing the result, and remove the result prop from the store
  *       mapPipe: 'switchMap', // default is 'exhaustMap'
  *       onSuccess: (result) => {
  *       // do something with the result
@@ -106,9 +107,11 @@ export function withCalls<
   Input & {
     state: NamedCallStatusState<keyof Calls & string> & {
       [K in keyof Calls as Calls[K] extends CallConfig
-        ? Calls[K]['resultProp'] extends string
-          ? Calls[K]['resultProp']
-          : `${K & string}Result`
+        ? Calls[K]['storeResult'] extends false
+          ? never
+          : Calls[K]['resultProp'] extends string
+            ? Calls[K]['resultProp']
+            : `${K & string}Result`
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
     signals: NamedCallStatusComputed<keyof Calls & string>;
@@ -138,7 +141,9 @@ export function withCalls<
             ? call.resultProp
             : `${callName}Result`,
         });
-        acc[resultPropKey] = undefined;
+        if (!isCallConfig(call) || call.storeResult !== false) {
+          acc[resultPropKey] = undefined;
+        }
         return acc;
       },
       {} as Record<string, any>,
@@ -206,9 +211,14 @@ export function withCalls<
                         isCallConfig(call) ? call.call(params) : call(params),
                       ).pipe(
                         map((result) => {
-                          patchState(state, {
-                            [resultPropKey]: result,
-                          });
+                          if (
+                            !isCallConfig(call) ||
+                            call.storeResult !== false
+                          ) {
+                            patchState(state, {
+                              [resultPropKey]: result,
+                            });
+                          }
                           setLoaded();
                           isCallConfig(call) &&
                             call.onSuccess &&
