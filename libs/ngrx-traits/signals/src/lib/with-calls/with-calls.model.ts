@@ -11,6 +11,7 @@ export type CallConfig<
   call: Call<Params, Result>;
   resultProp?: PropName;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+  storeResult?: boolean;
   onSuccess?: (result: Result) => void;
   onError?: (error: any) => void;
 };

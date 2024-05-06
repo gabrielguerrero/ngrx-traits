@@ -68,5 +68,30 @@ describe('withCalls', () => {
         expect(onError).toHaveBeenCalledWith(new Error('fail'));
       });
     });
+    it('Successful call should set status to loading and loaded ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall: {
+              call: ({ ok }: { ok: boolean }) => {
+                return ok ? apiResponse : throwError(() => new Error('fail'));
+              },
+              storeResult: false,
+              onSuccess,
+              onError,
+            },
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        store.testCall({ ok: true });
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(onSuccess).toHaveBeenCalledWith('test');
+      });
+    });
   });
 });
