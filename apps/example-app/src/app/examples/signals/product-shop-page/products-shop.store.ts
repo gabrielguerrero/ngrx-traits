@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
+  typedCallConfig,
   withCalls,
   withCallStatus,
   withEntitiesLoadingCall,
@@ -12,6 +13,7 @@ import {
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
   withStateLogger,
+  withSyncToWebStorage,
 } from '@ngrx-traits/signals';
 import {
   patchState,
@@ -98,6 +100,14 @@ const orderItemsStoreFeature = signalStoreFeature(
     name: 'orderItemsStore',
     filterState: ({ orderItemsEntityMap }) => ({ orderItemsEntityMap }),
   }),
+  withSyncToWebStorage({
+    key: 'orderItems',
+    type: 'session',
+    filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+      orderItemsEntityMap,
+      orderItemsIds,
+    }),
+  }),
 );
 
 export const ProductsShopStore = signalStore(
@@ -126,7 +136,7 @@ export const ProductsShopStore = signalStore(
   withCalls(({ orderItemsEntities }, snackBar = inject(MatSnackBar)) => ({
     loadProductDetail: ({ id }: { id: string }) =>
       inject(ProductService).getProductDetail(id),
-    checkout: {
+    checkout: typedCallConfig({
       call: () =>
         inject(OrderService).checkout(
           ...orderItemsEntities().map((p) => ({
@@ -140,7 +150,7 @@ export const ProductsShopStore = signalStore(
           duration: 5000,
         });
       },
-    },
+    }),
   })),
   withMethods(
     ({ productsEntitySelected, orderItemsIdsSelected, ...state }) => ({

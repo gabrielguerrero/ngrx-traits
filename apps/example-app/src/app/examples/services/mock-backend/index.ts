@@ -5,7 +5,7 @@ import { productHandlers } from './product.handler';
 
 const worker = setupWorker(...productHandlers, ...branchesHandlers);
 worker.start({
-  onUnhandledRequest: 'warn',
+  onUnhandledRequest: 'bypass',
 });
 console.log('msw started');
 export { worker };

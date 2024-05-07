@@ -1,14 +1,6 @@
 import { effect } from '@angular/core';
-import {
-  getState,
-  SignalStoreFeature,
-  signalStoreFeature,
-  withHooks,
-} from '@ngrx/signals';
-import type {
-  EmptyFeatureResult,
-  SignalStoreFeatureResult,
-} from '@ngrx/signals/src/signal-store-models';
+import { getState, signalStoreFeature, type, withHooks } from '@ngrx/signals';
+import type { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
 
 /**
  * Log the state of the store on every change
@@ -21,8 +13,9 @@ export function withStateLogger<Input extends SignalStoreFeatureResult>({
 }: {
   name: string;
   filterState?: (state: Input['state']) => Partial<Input['state']>;
-}): SignalStoreFeature<Input, EmptyFeatureResult> {
+}) {
   return signalStoreFeature(
+    type<Input>(),
     withHooks({
       onInit(store) {
         effect(() => {

@@ -286,7 +286,8 @@ export function withEntitiesLoadingCall<
   fetchEntities: (
     store: SignalStoreSlices<Input['state']> &
       Input['signals'] &
-      Input['methods'],
+      Input['methods'] &
+      StateSignal<Prettify<Input['state']>>,
   ) => Observable<any> | Promise<any>;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
   onSuccess?: (result: any) => void;
@@ -298,67 +299,74 @@ export function withEntitiesLoadingCall<
   const { setEntitiesPagedResultKey } = getWithEntitiesRemotePaginationKeys({
     collection,
   });
-  return (store) => {
-    const loading = store.signals[loadingKey] as Signal<boolean>;
-    const setLoaded = store.methods[setLoadedKey] as () => void;
-    const setError = store.methods[setErrorKey] as (error: unknown) => void;
-    const setEntitiesPagedResult = store.methods[
-      setEntitiesPagedResultKey
-    ] as (result: { entities: Entity[] }) => void;
 
-    return signalStoreFeature(
-      withHooks({
-        onInit: (state, environmentInjector = inject(EnvironmentInjector)) => {
-          const loading$ = toObservable(loading);
-          const mapPipe = config.mapPipe ? mapPipes[config.mapPipe] : switchMap;
+  return signalStoreFeature(
+    withHooks(
+      (
+        store: Record<string, Signal<unknown>>,
+        environmentInjector = inject(EnvironmentInjector),
+      ) => {
+        const loading = store[loadingKey] as Signal<boolean>;
+        const setLoaded = store[setLoadedKey] as () => void;
+        const setError = store[setErrorKey] as (error: unknown) => void;
+        const setEntitiesPagedResult = store[
+          setEntitiesPagedResultKey
+        ] as (result: { entities: Entity[] }) => void;
+        return {
+          onInit: () => {
+            const loading$ = toObservable(loading);
+            const mapPipe = config.mapPipe
+              ? mapPipes[config.mapPipe]
+              : switchMap;
 
-          loading$
-            .pipe(
-              filter(Boolean),
-              mapPipe(() =>
-                runInInjectionContext(environmentInjector, () =>
-                  from(
-                    fetchEntities({
-                      ...store.slices,
-                      ...store.signals,
-                      ...store.methods,
-                    } as SignalStoreSlices<Input['state']> &
-                      Input['signals'] &
-                      Input['methods']),
+            loading$
+              .pipe(
+                filter(Boolean),
+                mapPipe(() =>
+                  runInInjectionContext(environmentInjector, () =>
+                    from(
+                      fetchEntities(
+                        store as SignalStoreSlices<Input['state']> &
+                          Input['signals'] &
+                          Input['methods'] &
+                          StateSignal<Prettify<Input['state']>>,
+                      ),
+                    ),
+                  ).pipe(
+                    map((result) => {
+                      if (setEntitiesPagedResult)
+                        setEntitiesPagedResult(result);
+                      else {
+                        const entities = Array.isArray(result)
+                          ? result
+                          : result.entities;
+                        patchState(
+                          store as StateSignal<object>,
+                          collection
+                            ? setAllEntities(entities as Entity[], {
+                                collection,
+                              })
+                            : setAllEntities(entities),
+                        );
+                      }
+                      setLoaded();
+                      if (config.onSuccess) config.onSuccess(result);
+                    }),
+                    first(),
+                    catchError((error: unknown) => {
+                      setError(error);
+                      if (config.onError) config.onError(error);
+                      return of();
+                    }),
                   ),
-                ).pipe(
-                  map((result) => {
-                    if (setEntitiesPagedResult) setEntitiesPagedResult(result);
-                    else {
-                      const entities = Array.isArray(result)
-                        ? result
-                        : result.entities;
-                      patchState(
-                        state,
-                        collection
-                          ? setAllEntities(entities as Entity[], {
-                              collection,
-                            })
-                          : setAllEntities(entities),
-                      );
-                    }
-                    setLoaded();
-                    if (config.onSuccess) config.onSuccess(result);
-                  }),
-                  first(),
-                  catchError((error: unknown) => {
-                    setError(error);
-                    if (config.onError) config.onError(error);
-                    return of();
-                  }),
                 ),
-              ),
-            )
-            .subscribe();
-        },
-      }),
-    )(store); // we execute the factory so we can pass the input
-  };
+              )
+              .subscribe();
+          },
+        };
+      },
+    ),
+  );
 }
 const mapPipes = {
   switchMap: switchMap,
