@@ -3,8 +3,8 @@ import { effect, inject, PLATFORM_ID } from '@angular/core';
 import {
   getState,
   patchState,
-  SignalStoreFeature,
   signalStoreFeature,
+  type,
   withHooks,
   withMethods,
   withState,
@@ -36,6 +36,11 @@ import { Prettify } from '@ngrx/signals/src/ts-helpers';
  *      type: 'session',
  *      restoreOnInit: true,
  *      saveStateChangesAfterMs: 300,
+ *      // optionally, filter the state before saving to the storage
+ *      filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+ *       orderItemsEntityMap,
+ *       orderItemsIds,
+ *     }),
  *  }),
  *  );
  *  // generates the following methods
@@ -43,14 +48,9 @@ import { Prettify } from '@ngrx/signals/src/ts-helpers';
  *  store.loadFromStorage();
  *  store.clearFromStore();
  */
-export type SyncToWebStorageMethods = {
-  saveToStorage: () => void;
-  loadFromStorage: () => void;
-  clearFromStore: () => void;
-};
 export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   key,
-  type,
+  type: storageType,
   saveStateChangesAfterMs = 500,
   restoreOnInit = true,
   filterState,
@@ -69,15 +69,9 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
         StateSignal<Prettify<Input['state']>>
     >,
   ) => void;
-}): SignalStoreFeature<
-  Input,
-  {
-    state: {};
-    methods: SyncToWebStorageMethods;
-    signals: {};
-  }
-> {
+}) {
   return signalStoreFeature(
+    type<Input>(),
     withState({}),
     withMethods((store) => {
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
@@ -86,7 +80,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
           const state = filterState
             ? filterState(getState(store))
             : getState(store);
-          if (type === 'local')
+          if (storageType === 'local')
             window.localStorage.setItem(key, JSON.stringify(state));
           else window.sessionStorage.setItem(key, JSON.stringify(state));
         },
@@ -95,7 +89,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
             return false;
           }
           let stateJson =
-            type === 'local'
+            storageType === 'local'
               ? window.localStorage.getItem(key)
               : window.sessionStorage.getItem(key);
           if (!stateJson) {
@@ -113,7 +107,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
           return true;
         },
         clearFromStore() {
-          if (type === 'local') window.localStorage.removeItem(key);
+          if (storageType === 'local') window.localStorage.removeItem(key);
           else window.sessionStorage.removeItem(key);
         },
       };
@@ -135,5 +129,5 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
         }
       },
     })),
-  ) as any;
+  );
 }

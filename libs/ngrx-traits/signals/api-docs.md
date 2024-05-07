@@ -143,9 +143,9 @@ and store the result of the call</p>
 
 **Kind**: global function  
 
-| Param |
-| --- |
-| callsFactory | 
+| Param | Type | Description |
+| --- | --- | --- |
+| callsFactory | <code>callsFactory</code> | <p>a factory function that receives the store and returns an object of type {Record&lt;string, Call | CallConfig&gt;} with the calls to be made</p> |
 
 **Example**  
 ```js
@@ -154,6 +154,7 @@ withCalls(({ productsSelectedEntity }) => ({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
+      // storeResult: false, // will omit storing the result, and remove the result prop from the store
       mapPipe: 'switchMap', // default is 'exhaustMap'
       onSuccess: (result) => {
       // do something with the result
@@ -969,6 +970,11 @@ const store = signalStore(
      type: 'session',
      restoreOnInit: true,
      saveStateChangesAfterMs: 300,
+     // optionally, filter the state before saving to the storage
+     filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+      orderItemsEntityMap,
+      orderItemsIds,
+    }),
  }),
  );
  // generates the following methods
