@@ -49,11 +49,11 @@ import { getWithCallKeys } from './with-calls.util';
 /**
  * Generates necessary state, computed and methods to track the progress of the call
  * and store the result of the call
- * @param callsFactory
+ * @param {callsFactory} callsFactory - a factory function that receives the store and returns an object of type {Record<string, Call | CallConfig>} with the calls to be made
  *
  * @example
  *  withCalls(({ productsSelectedEntity }) => ({
- *     loadProductDetail: {
+ *     loadProductDetail: typedCallConfig({
  *       call: ({ id }: { id: string }) =>
  *         inject(ProductService).getProductDetail(id),
  *       resultProp: 'productDetail',
@@ -65,7 +65,7 @@ import { getWithCallKeys } from './with-calls.util';
  *       onError: (error) => {
  *       // do something with the error
  *       },
- *     },
+ *     }),
  *     checkout: () =>
  *       inject(OrderService).checkout({
  *         productId: productsSelectedEntity()!.id,
@@ -121,10 +121,12 @@ export function withCalls<
   }
 > {
   return (store) => {
+    const { slices, methods, signals, hooks, ...rest } = store;
     const calls = callsFactory({
-      ...store.slices,
-      ...store.signals,
-      ...store.methods,
+      ...slices,
+      ...signals,
+      ...methods,
+      ...rest,
     } as Prettify<
       SignalStoreSlices<Input['state']> &
         Input['signals'] &
@@ -256,3 +258,11 @@ const mapPipes = {
   concatMap: concatMap,
   exhaustMap: exhaustMap,
 };
+
+export function typedCallConfig<
+  Params extends readonly any[] = any[],
+  Result = any,
+  PropName extends string = string,
+>(config: CallConfig<Params, Result, PropName>) {
+  return config;
+}
