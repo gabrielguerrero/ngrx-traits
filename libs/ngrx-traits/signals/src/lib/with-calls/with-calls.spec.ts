@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { signalStore, withState } from '@ngrx/signals';
-import { Subject, throwError } from 'rxjs';
+import { patchState, signalStore, withState } from '@ngrx/signals';
+import { Subject, tap, throwError } from 'rxjs';
 
-import { withCalls } from '../index';
+import { typedCallConfig, withCalls } from '../index';
 
 describe('withCalls', () => {
   const apiResponse = new Subject<string>();
@@ -72,15 +72,22 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
-          withCalls(() => ({
-            testCall: {
+          withCalls((store) => ({
+            testCall: typedCallConfig({
               call: ({ ok }: { ok: boolean }) => {
-                return ok ? apiResponse : throwError(() => new Error('fail'));
+                return ok
+                  ? apiResponse
+                  : apiResponse.pipe(
+                      tap(() => throwError(() => new Error('fail'))),
+                    );
               },
               storeResult: false,
-              onSuccess,
+              onSuccess: (result) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result });
+              },
               onError,
-            },
+            }),
           })),
         );
         const store = new Store();
@@ -91,6 +98,7 @@ describe('withCalls', () => {
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect((store as any).testCallResult).toBeUndefined();
         expect(onSuccess).toHaveBeenCalledWith('test');
+        expect(store.foo()).toBe('test');
       });
     });
   });
