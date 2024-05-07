@@ -1,0 +1,33 @@
+{
+	"name": "ngrx-traits",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": {
+		  "VARIANT": "20-bullseye",
+		  "EXTRA_NODE_VERSION": "lts/hydrogen"
+		}
+	  },
+	"features": {
+		"ghcr.io/devcontainers-contrib/features/nx-npm:1": {}
+	},
+	"postCreateCommand": "sh .devcontainer/hooks/postCreateCommand.sh",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"angular.ng-template",
+				"nrwl.angular-console",
+				"esbenp.prettier-vscode",
+				"firsttris.vscode-jest-runner",
+				"dbaeumer.vscode-eslint"
+			]
+		}
+	},
+	"mounts": [
+		"source=ngrx-traits-cache,target=${containerWorkspaceFolder}/.angular,type=volume", // cache volume
+		"source=ngrx-traits-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume", //deps volume
+		"source=ngrx-traits-bashhistory,target=/commandhistory,type=volume", // bash history
+		"source=ngrx-traits-extensions,target=/root/.vscode-server/extensions,type=volume", // extensions volume
+		// And/or for VS Code Insiders
+		"source=ngrx-traits-extensions-insiders,target=/root/.vscode-server-insiders/extensions,type=volume" // indiders volume
+	  ]
+}
