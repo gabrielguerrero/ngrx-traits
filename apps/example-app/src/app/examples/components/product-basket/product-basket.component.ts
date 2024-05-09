@@ -80,6 +80,7 @@ import { rebuildFormArray } from '../../utils/form-utils';
             mat-cell
             *matCellDef="let row; let index = index"
             [formGroup]="$any(controls.at(index))"
+            class="!p-2"
           >
             <mat-form-field>
               <input

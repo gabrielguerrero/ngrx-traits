@@ -1,6 +1,7 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import { Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Subject, tap, throwError } from 'rxjs';
 
 import { typedCallConfig, withCalls } from '../index';
 
@@ -42,6 +43,47 @@ describe('withCalls', () => {
       store.testCall({ ok: false });
       expect(store.testCallError()).toEqual(new Error('fail'));
       expect(store.testCallResult()).toBe(undefined);
+    });
+  });
+
+  it('passing a signal should call when signal value changes ', async () => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      const param = signal({ ok: true });
+      store.testCall(param);
+      TestBed.flushEffects();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      param.set({ ok: true });
+      TestBed.flushEffects();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test2');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test2');
+    });
+  });
+
+  it('passing a observable should call when value changes ', async () => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      const param = new BehaviorSubject({ ok: true });
+
+      store.testCall(param);
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      param.next({ ok: true });
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test2');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test2');
     });
   });
 

@@ -15,13 +15,14 @@ import { ProductsShopStore } from '../../products-shop.store';
 @Component({
   selector: 'product-shop-tab',
   template: `
-    <div class="m-8 grid sm:grid-cols-2" style="gap: 10px">
+    <div class="m-8 grid sm:grid-cols-2 gap-4">
       <mat-card>
         <mat-card-header>
           <mat-card-title>Product List</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <product-search-form
+            class="m-2"
             [searchProduct]="store.productsFilter()"
             (searchProductChange)="filter($event)"
           />
