@@ -27,6 +27,7 @@ import {
   first,
   from,
   map,
+  Observable,
   of,
   pipe,
   switchMap,
@@ -47,8 +48,12 @@ import {
 import { getWithCallKeys } from './with-calls.util';
 
 /**
- * Generates necessary state, computed and methods to track the progress of the call
- * and store the result of the call
+ * Generates necessary state, computed and methods to track the progress of the
+ * call and store the result of the call. The generated methods are rxMethods with
+ * the same name as the original call, which accepts either the original parameters
+ * or a Signal or Observable of the same type as the original parameters. The Signal
+ * or Observable type will be the type of the first param if it only has one parameter
+ * or an array with the same type as the parameters.
  * @param {callsFactory} callsFactory - a factory function that receives the store and returns an object of type {Record<string, Call | CallConfig>} with the calls to be made
  *
  * @example
@@ -86,7 +91,7 @@ import { getWithCallKeys } from './with-calls.util';
  *   store.isCheckoutLoaded // boolean
  *   store.checkoutError // string | null
  *   // generates the following methods
- *   store.loadProductDetail // ({id: string}) => void
+ *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
  *   store.checkout // () => void
  *
  */
@@ -116,7 +121,25 @@ export function withCalls<
     };
     signals: NamedCallStatusComputed<keyof Calls & string>;
     methods: {
-      [K in keyof Calls]: (...arg: ExtractCallParams<Calls[K]>) => void;
+      [K in keyof Calls]: ExtractCallParams<Calls[K]> extends []
+        ? { (): void }
+        : ExtractCallParams<Calls[K]> extends [any]
+          ? {
+              (
+                param:
+                  | ExtractCallParams<Calls[K]>[0]
+                  | Observable<ExtractCallParams<Calls[K]>[0]>
+                  | Signal<ExtractCallParams<Calls[K]>[0]>,
+              ): void;
+            }
+          : {
+              (...params: ExtractCallParams<Calls[K]>): void;
+              (
+                param:
+                  | Observable<readonly [...ExtractCallParams<Calls[K]>]>
+                  | Signal<readonly [...ExtractCallParams<Calls[K]>]>,
+              ): void;
+            };
     };
   }
 > {

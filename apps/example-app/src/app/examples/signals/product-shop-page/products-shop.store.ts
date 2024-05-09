@@ -136,6 +136,7 @@ export const ProductsShopStore = signalStore(
   withCalls(({ orderItemsEntities }, snackBar = inject(MatSnackBar)) => ({
     loadProductDetail: ({ id }: { id: string }) =>
       inject(ProductService).getProductDetail(id),
+
     checkout: typedCallConfig({
       call: () =>
         inject(OrderService).checkout(
