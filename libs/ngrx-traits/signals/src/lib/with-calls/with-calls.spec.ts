@@ -97,7 +97,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
       });
     });
     it('Fail on a call should set status return error ', async () => {
@@ -107,7 +107,7 @@ describe('withCalls', () => {
         store.testCall2({ ok: false });
         expect(store.testCall2Error()).toEqual(new Error('fail'));
         expect(store.result()).toBe(undefined);
-        expect(onError).toHaveBeenCalledWith(new Error('fail'));
+        expect(onError).toHaveBeenCalledWith(new Error('fail'), { ok: false });
       });
     });
     it('Successful call should set status to loading and loaded ', async () => {
@@ -139,7 +139,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect((store as any).testCallResult).toBeUndefined();
-        expect(onSuccess).toHaveBeenCalledWith('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
         expect(store.foo()).toBe('test');
       });
     });
@@ -175,6 +175,65 @@ describe('withCalls', () => {
         expect((store as any).testCallResult).toBeUndefined();
         expect(store.foo()).toBe('test');
         expect(store.baz()).toBe('test');
+      });
+    });
+
+    it('check onSuccess receives params', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withState({ ok: false }),
+          withCalls((store) => ({
+            testCall: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok
+                  ? apiResponse
+                  : apiResponse.pipe(
+                      tap(() => throwError(() => new Error('fail'))),
+                    );
+              },
+              resultProp: 'baz',
+              onSuccess: (result, { ok }) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result, ok });
+              },
+              onError,
+            }),
+          })),
+          withCalls((store) => ({
+            testCall2: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return apiResponse;
+              },
+              resultProp: 'baz2',
+              onSuccess: (result, { ok }) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result, ok });
+              },
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        store.testCall({ ok: true });
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test');
+        expect(store.baz()).toBe('test');
+        expect(store.ok()).toBe(true);
+
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2({ ok: true });
+        expect(store.isTestCall2Loading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCall2Loaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test2');
+        expect(store.baz2()).toBe('test2');
+        expect(store.ok()).toBe(true);
       });
     });
   });

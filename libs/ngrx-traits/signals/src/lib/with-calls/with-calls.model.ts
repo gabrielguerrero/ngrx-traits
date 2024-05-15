@@ -12,8 +12,8 @@ export type CallConfig<
   resultProp?: PropName;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
   storeResult?: boolean;
-  onSuccess?: (result: Result) => void;
-  onError?: (error: unknown) => void;
+  onSuccess?: (result: Result, ...params: Params) => void;
+  onError?: (error: unknown, ...params: Params) => void;
 };
 export type ExtractCallResultType<T extends Call | CallConfig> =
   T extends Call<any, infer R>

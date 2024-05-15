@@ -64,10 +64,10 @@ import { getWithCallKeys } from './with-calls.util';
  *       resultProp: 'productDetail',
  *       // storeResult: false, // will omit storing the result, and remove the result prop from the store
  *       mapPipe: 'switchMap', // default is 'exhaustMap'
- *       onSuccess: (result) => {
+ *       onSuccess: (result, callParam) => {
  *       // do something with the result
  *       },
- *       onError: (error) => {
+ *       onError: (error, callParam) => {
  *       // do something with the error
  *       },
  *     }),
@@ -247,14 +247,14 @@ export function withCalls<
                           setLoaded();
                           isCallConfig(call) &&
                             call.onSuccess &&
-                            call.onSuccess(result);
+                            call.onSuccess(result, params);
                         }),
                         first(),
                         catchError((error: unknown) => {
                           setError(error);
                           isCallConfig(call) &&
                             call.onError &&
-                            call.onError(error);
+                            call.onError(error, params);
                           return of();
                         }),
                       );
