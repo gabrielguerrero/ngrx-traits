@@ -143,5 +143,39 @@ describe('withCalls', () => {
         expect(store.foo()).toBe('test');
       });
     });
+
+    it('check typedCallConfig with resultProp generates custom prop name ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls((store) => ({
+            testCall: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok
+                  ? apiResponse
+                  : apiResponse.pipe(
+                      tap(() => throwError(() => new Error('fail'))),
+                    );
+              },
+              resultProp: 'baz',
+              onSuccess: (result) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result });
+              },
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        store.testCall({ ok: true });
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test');
+        expect(store.baz()).toBe('test');
+      });
+    });
   });
 });

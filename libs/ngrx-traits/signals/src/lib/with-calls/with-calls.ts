@@ -109,13 +109,13 @@ export function withCalls<
   ) => Calls,
 ): SignalStoreFeature<
   Input,
-  Input & {
+  {
     state: NamedCallStatusState<keyof Calls & string> & {
       [K in keyof Calls as Calls[K] extends CallConfig
         ? Calls[K]['storeResult'] extends false
           ? never
-          : Calls[K]['resultProp'] extends string
-            ? Calls[K]['resultProp']
+          : Calls[K]['resultProp'] extends string | undefined
+            ? Calls[K]['resultProp'] & string
             : `${K & string}Result`
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
@@ -286,6 +286,13 @@ export function typedCallConfig<
   Params extends readonly any[] = any[],
   Result = any,
   PropName extends string = string,
->(config: CallConfig<Params, Result, PropName>) {
-  return config;
+  C extends CallConfig<Params, Result, PropName> = CallConfig<
+    Params,
+    Result,
+    PropName
+  >,
+>(config: CallConfig<Params, Result, PropName>): C {
+  // this fixes weird issue where typedCallConfig was not generating the right types
+  // when CallConfig resultProp was defined
+  return { ...config } as C;
 }
