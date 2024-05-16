@@ -52,4 +52,6 @@ export type NamedEntitiesMultiSelectionMethods<Collection extends string> = {
   [K in Collection as `toggleSelectAll${Capitalize<
     string & K
   >}Entities`]: () => void;
+} & {
+  [K in Collection as `clear${Capitalize<string & K>}Selection`]: () => void;
 };
