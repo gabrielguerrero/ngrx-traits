@@ -201,7 +201,6 @@ export function withCalls<
                     ? call.resultProp
                     : `${callName}Result`,
               });
-              console.log({ callNameKey, callStatusKey, resultPropKey });
               // TODO: fix as any
               const mapPipe =
                 isCallConfig(call) && call.mapPipe

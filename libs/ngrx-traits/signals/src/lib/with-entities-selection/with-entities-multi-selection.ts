@@ -276,7 +276,9 @@ export function withEntitiesMultiSelection<
             [selectedIdsMapKey]: { ...oldIdsMap, ...idsMap },
           });
         },
-        [clearEntitiesSelectionKey]: clearEntitiesSelection,
+        [clearEntitiesSelectionKey]: () => {
+          clearEntitiesSelection(state, selectedIdsMapKey);
+        },
         [toggleSelectAllEntitiesKey]: () => {
           const allSelected = isAllEntitiesSelected();
           if (allSelected === 'all') {
