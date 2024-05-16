@@ -9,7 +9,7 @@ export type CallConfig<
   PropName extends string = string,
 > = {
   call: Call<Params, Result>;
-  resultProp?: PropName;
+  resultProp: PropName;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
   storeResult?: boolean;
   onSuccess?: (result: Result, ...params: Params) => void;
@@ -22,4 +22,4 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
       ? R
       : never;
 export type ExtractCallParams<T extends Call | CallConfig> =
-  T extends Call<infer P> ? P : T extends CallConfig<infer P> ? P : never;
+  T extends Call<infer P> ? P : T extends CallConfig<infer P> ? P : [];

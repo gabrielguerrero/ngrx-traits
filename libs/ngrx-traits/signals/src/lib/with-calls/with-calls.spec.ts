@@ -46,6 +46,25 @@ describe('withCalls', () => {
     });
   });
 
+  it('Successful call of a no parameters method, should set status to loading and loaded ', async () => {
+    const Store = signalStore(
+      withState({ foo: 'bar' }),
+      withCalls(() => ({
+        testCall: () => {
+          return apiResponse;
+        },
+      })),
+    );
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+    });
+  });
   it('passing a signal should call when signal value changes ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -108,6 +127,55 @@ describe('withCalls', () => {
         expect(store.testCall2Error()).toEqual(new Error('fail'));
         expect(store.result()).toBe(undefined);
         expect(onError).toHaveBeenCalledWith(new Error('fail'), { ok: false });
+      });
+    });
+    it('Successful call of a no parameters method and resultProp, should set status to loading and loaded ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: typedCallConfig({
+              call: () => {
+                return apiResponse;
+              },
+              resultProp: 'result',
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2();
+        expect(store.isTestCall2Loading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCall2Loaded()).toBeTruthy();
+        expect(store.result()).toBe('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+      });
+    });
+    it('Successful call of a no parameters method and no resultProp, should set status to loading and loaded ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: typedCallConfig({
+              call: () => {
+                return apiResponse;
+              },
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2();
+        expect(store.isTestCall2Loading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCall2Loaded()).toBeTruthy();
+        expect(store.testCall2Result()).toBe('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
       });
     });
     it('Successful call should set status to loading and loaded ', async () => {
