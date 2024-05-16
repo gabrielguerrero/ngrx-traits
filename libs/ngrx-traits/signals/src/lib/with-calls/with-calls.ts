@@ -114,32 +114,23 @@ export function withCalls<
       [K in keyof Calls as Calls[K] extends CallConfig
         ? Calls[K]['storeResult'] extends false
           ? never
-          : Calls[K]['resultProp'] extends string | undefined
-            ? Calls[K]['resultProp'] & string
-            : `${K & string}Result`
+          : Calls[K]['resultProp'] extends ''
+            ? `${K & string}Result`
+            : Calls[K]['resultProp'] & string
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
     signals: NamedCallStatusComputed<keyof Calls & string>;
     methods: {
       [K in keyof Calls]: ExtractCallParams<Calls[K]> extends []
         ? { (): void }
-        : ExtractCallParams<Calls[K]> extends [any]
-          ? {
-              (
-                param:
-                  | ExtractCallParams<Calls[K]>[0]
-                  | Observable<ExtractCallParams<Calls[K]>[0]>
-                  | Signal<ExtractCallParams<Calls[K]>[0]>,
-              ): void;
-            }
-          : {
-              (...params: ExtractCallParams<Calls[K]>): void;
-              (
-                param:
-                  | Observable<readonly [...ExtractCallParams<Calls[K]>]>
-                  | Signal<readonly [...ExtractCallParams<Calls[K]>]>,
-              ): void;
-            };
+        : {
+            (
+              param:
+                | ExtractCallParams<Calls[K]>[0]
+                | Observable<ExtractCallParams<Calls[K]>[0]>
+                | Signal<ExtractCallParams<Calls[K]>[0]>,
+            ): void;
+          };
     };
   }
 > {
@@ -162,9 +153,10 @@ export function withCalls<
         acc[callStatusKey] = 'init';
         const { resultPropKey } = getWithCallKeys({
           callName,
-          resultProp: isCallConfig(call)
-            ? call.resultProp
-            : `${callName}Result`,
+          resultProp:
+            isCallConfig(call) && call.resultProp?.length
+              ? call.resultProp
+              : `${callName}Result`,
         });
         if (!isCallConfig(call) || call.storeResult !== false) {
           acc[resultPropKey] = undefined;
@@ -204,10 +196,12 @@ export function withCalls<
               });
               const { resultPropKey, callNameKey } = getWithCallKeys({
                 callName,
-                resultProp: isCallConfig(call)
-                  ? call.resultProp
-                  : `${callName}Result`,
+                resultProp:
+                  isCallConfig(call) && call.resultProp?.length
+                    ? call.resultProp
+                    : `${callName}Result`,
               });
+              console.log({ callNameKey, callStatusKey, resultPropKey });
               // TODO: fix as any
               const mapPipe =
                 isCallConfig(call) && call.mapPipe
@@ -285,14 +279,18 @@ const mapPipes = {
 export function typedCallConfig<
   Params extends readonly any[] = any[],
   Result = any,
-  PropName extends string = string,
+  PropName extends string = '',
   C extends CallConfig<Params, Result, PropName> = CallConfig<
     Params,
     Result,
     PropName
   >,
->(config: CallConfig<Params, Result, PropName>): C {
+>(
+  config: Omit<CallConfig<Params, Result, PropName>, 'resultProp'> & {
+    resultProp?: PropName;
+  },
+) {
   // this fixes weird issue where typedCallConfig was not generating the right types
   // when CallConfig resultProp was defined
-  return { ...config } as C;
+  return { ...config, resultProp: config.resultProp ?? '' } as C;
 }
