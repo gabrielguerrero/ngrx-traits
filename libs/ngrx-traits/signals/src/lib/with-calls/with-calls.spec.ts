@@ -129,6 +129,30 @@ describe('withCalls', () => {
         expect(onError).toHaveBeenCalledWith(new Error('fail'), { ok: false });
       });
     });
+    it('Fail on a call should set status return error with correct type if mapError is used ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok ? apiResponse : throwError(() => new Error('fail'));
+              },
+              mapError: (error, { ok }) => (error as Error).message + ' ' + ok,
+              resultProp: 'result',
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2({ ok: false });
+        expect(store.testCall2Error()).toEqual('fail false');
+        expect(store.result()).toBe(undefined);
+        expect(onError).toHaveBeenCalledWith('fail false', { ok: false });
+      });
+    });
     it('Successful call of a no parameters method and resultProp, should set status to loading and loaded ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(

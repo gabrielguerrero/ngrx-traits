@@ -1,4 +1,4 @@
-import { signalStore } from '@ngrx/signals';
+import { signalStore, type } from '@ngrx/signals';
 
 import { withCallStatus } from '../index';
 
@@ -28,6 +28,17 @@ describe('withCallStatus', () => {
     const store = new Store();
     expect(store.isLoading()).toEqual(true);
   });
+
+  it('setError should make error return the object set with typed error', () => {
+    const Store = signalStore(
+      withCallStatus({ errorType: type<'error1' | 'error2'>() }),
+    );
+    const store = new Store();
+    expect(store.error()).toEqual(undefined);
+    store.setError('error1');
+    expect(store.error() === 'error1').toBeTruthy();
+  });
+
   it('check prop rename works', () => {
     const Store = signalStore(withCallStatus({ prop: 'test' }));
     const store = new Store();

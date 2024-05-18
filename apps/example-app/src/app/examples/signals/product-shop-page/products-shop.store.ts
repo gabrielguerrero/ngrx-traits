@@ -53,7 +53,11 @@ const productsStoreFeature = signalStoreFeature(
     entity: productsEntity,
     collection: productsCollection,
   }),
-  withCallStatus({ initialValue: 'loading', collection: productsCollection }),
+  withCallStatus({
+    initialValue: 'loading',
+    collection: productsCollection,
+    errorType: type<string>(),
+  }),
   withEntitiesRemoteFilter({
     entity: productsEntity,
     collection: productsCollection,
@@ -132,6 +136,7 @@ export const ProductsShopStore = signalStore(
       );
       return { entities: res.resultList, total: res.total };
     },
+    mapError: (error) => (error as Error).message,
   }),
   withCalls(({ orderItemsEntities }, snackBar = inject(MatSnackBar)) => ({
     loadProductDetail: ({ id }: { id: string }) =>
@@ -148,6 +153,12 @@ export const ProductsShopStore = signalStore(
       resultProp: 'orderNumber',
       onSuccess: (orderId) => {
         snackBar.open(`Order number: ${orderId}`, 'Close', {
+          duration: 5000,
+        });
+      },
+      mapError: (error) => (error as Error).message,
+      onError: (error) => {
+        snackBar.open(error, 'Close', {
           duration: 5000,
         });
       },
