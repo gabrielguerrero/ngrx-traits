@@ -44,6 +44,8 @@ import {
   CallConfig,
   ExtractCallParams,
   ExtractCallResultType,
+  NamedCallsStatusComputed,
+  NamedCallsStatusErrorComputed,
 } from './with-calls.model';
 import { getWithCallKeys } from './with-calls.util';
 
@@ -67,6 +69,9 @@ import { getWithCallKeys } from './with-calls.util';
  *       onSuccess: (result, callParam) => {
  *       // do something with the result
  *       },
+ *       mapError: (error, callParam) => {
+ *         return // transform the error before storing it
+ *       }
  *       onError: (error, callParam) => {
  *       // do something with the error
  *       },
@@ -89,7 +94,7 @@ import { getWithCallKeys } from './with-calls.util';
  *   store.loadProductDetailError // string | null
  *   store.isCheckoutLoading // boolean
  *   store.isCheckoutLoaded // boolean
- *   store.checkoutError // string | null
+ *   store.checkoutError // unknown | null
  *   // generates the following methods
  *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
  *   store.checkout // () => void
@@ -119,7 +124,8 @@ export function withCalls<
             : Calls[K]['resultProp'] & string
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
-    signals: NamedCallStatusComputed<keyof Calls & string>;
+    signals: NamedCallsStatusComputed<keyof Calls & string> &
+      NamedCallsStatusErrorComputed<Calls>;
     methods: {
       [K in keyof Calls]: ExtractCallParams<Calls[K]> extends []
         ? { (): void }
@@ -244,10 +250,14 @@ export function withCalls<
                         }),
                         first(),
                         catchError((error: unknown) => {
-                          setError(error);
+                          const e =
+                            (isCallConfig(call) &&
+                              call.mapError?.(error, params)) ||
+                            error;
+                          setError(e);
                           isCallConfig(call) &&
                             call.onError &&
-                            call.onError(error, params);
+                            call.onError(e, params);
                           return of();
                         }),
                       );
@@ -279,13 +289,15 @@ export function typedCallConfig<
   Params extends readonly any[] = any[],
   Result = any,
   PropName extends string = '',
-  C extends CallConfig<Params, Result, PropName> = CallConfig<
+  Error = unknown,
+  C extends CallConfig<Params, Result, PropName, Error> = CallConfig<
     Params,
     Result,
-    PropName
+    PropName,
+    Error
   >,
 >(
-  config: Omit<CallConfig<Params, Result, PropName>, 'resultProp'> & {
+  config: Omit<CallConfig<Params, Result, PropName, Error>, 'resultProp'> & {
     resultProp?: PropName;
   },
 ) {

@@ -25,6 +25,7 @@ import { getWithCallStatusKeys } from './with-call-status.util';
  * @param config.prop - The name of the property for which this represents the call status
  * @param config.initialValue - The initial value of the call status
  * @param config.collection - The name of the collection for which this represents the call status is an alias to prop param
+ * @param config.errorType - The type of the error
  * they do the same thing
  *
  * prop or collection is required
@@ -33,7 +34,7 @@ import { getWithCallStatusKeys } from './with-call-status.util';
  *  withCallStatus({ prop: 'users', })
  *  // other valid configurations
  *  // withCallStatus()
- *  // withCallStatus({ collection: 'users', initialValue: 'loading' })
+ *  // withCallStatus({ collection: 'users', initialValue: 'loading' , errorType: type<string>()})
  *  )
  *
  *  // generates the following signals
@@ -47,14 +48,15 @@ import { getWithCallStatusKeys } from './with-call-status.util';
  *  store.setUsersLoaded // () => void
  *  store.setUsersError // (error?: unknown) => void
  */
-export function withCallStatus(config?: {
+export function withCallStatus<Error = unknown>(config?: {
   initialValue?: CallStatus;
+  errorType?: Error;
 }): SignalStoreFeature<
   { state: {}; signals: {}; methods: {} },
   {
     state: CallStatusState;
-    signals: CallStatusComputed;
-    methods: CallStatusMethods;
+    signals: CallStatusComputed<Error>;
+    methods: CallStatusMethods<Error>;
   }
 >;
 
@@ -64,6 +66,7 @@ export function withCallStatus(config?: {
  * @param config.prop - The name of the property for which this represents the call status
  * @param config.initialValue - The initial value of the call status
  * @param config.collection - The name of the collection for which this represents the call status is an alias to prop param
+ * @param config.errorType - The type of the error
  * they do the same thing
  *
  * prop or collection is required
@@ -72,7 +75,7 @@ export function withCallStatus(config?: {
  *  withCallStatus({ prop: 'users', })
  *  // other valid configurations
  *  // withCallStatus()
- *  // withCallStatus({ collection: 'users', initialValue: 'loading' })
+ *  // withCallStatus({ collection: 'users', initialValue: 'loading' , errorType: type<string>()})
  *  )
  *
  *  // generates the following signals
@@ -86,22 +89,24 @@ export function withCallStatus(config?: {
  *  store.setUsersLoaded // () => void
  *  store.setUsersError // (error?: unknown) => void
  */
-export function withCallStatus<Prop extends string>(
+export function withCallStatus<Prop extends string, Error = unknown>(
   config?:
     | {
         prop: Prop;
         initialValue?: CallStatus;
+        errorType?: Error;
       }
     | {
         collection: Prop;
         initialValue?: CallStatus;
+        errorType?: Error;
       },
 ): SignalStoreFeature<
   { state: {}; signals: {}; methods: {} },
   {
     state: NamedCallStatusState<Prop>;
-    signals: NamedCallStatusComputed<Prop>;
-    methods: NamedCallStatusMethods<Prop>;
+    signals: NamedCallStatusComputed<Prop, Error>;
+    methods: NamedCallStatusMethods<Prop, Error>;
   }
 >;
 export function withCallStatus<Prop extends string>({

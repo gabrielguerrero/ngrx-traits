@@ -69,6 +69,7 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
  * @param config.collection - The collection name
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
+ * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
  * can be an array of entities or an object with entities and total
  *
@@ -122,6 +123,7 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
+  Error = unknown,
 >(config: {
   fetchEntities: (
     store: Prettify<
@@ -147,12 +149,13 @@ export function withEntitiesLoadingCall<
       ? ResultParam
       : Entity[] | { entities: Entity[] },
   ) => void;
+  mapError?: (error: unknown) => Error;
   onError?: (error: any) => void;
 }): SignalStoreFeature<
   Input & {
     state: EntityState<Entity> & CallStatusState;
-    signals: EntitySignals<Entity> & CallStatusComputed;
-    methods: CallStatusMethods;
+    signals: EntitySignals<Entity> & CallStatusComputed<Error>;
+    methods: CallStatusMethods<Error>;
   },
   EmptyFeatureResult
 >;
@@ -171,6 +174,7 @@ export function withEntitiesLoadingCall<
  * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
  * @param config.collection - The collection name
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
+ * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
  * can be an array of entities or an object with entities and total
  *
@@ -226,6 +230,7 @@ export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
   Collection extends string,
+  Error = unknown,
 >(config: {
   collection: Collection;
   fetchEntities: (
@@ -261,14 +266,15 @@ export function withEntitiesLoadingCall<
       ? ResultParam
       : Entity[] | { entities: Entity[] },
   ) => void;
-  onError?: (error: any) => void;
+  mapError?: (error: unknown) => Error;
+  onError?: (error: Error) => void;
 }): SignalStoreFeature<
   Input & {
     state: NamedEntityState<Entity, Collection> &
       NamedCallStatusState<Collection>;
     signals: NamedEntitySignals<Entity, Collection> &
-      NamedCallStatusComputed<Collection>;
-    methods: NamedCallStatusMethods<Collection>;
+      NamedCallStatusComputed<Collection, Error>;
+    methods: NamedCallStatusMethods<Collection, Error>;
   },
   EmptyFeatureResult
 >;
@@ -277,6 +283,7 @@ export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
   Collection extends string,
+  Error = unknown,
 >({
   collection,
   fetchEntities,
@@ -291,7 +298,8 @@ export function withEntitiesLoadingCall<
   ) => Observable<any> | Promise<any>;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
   onSuccess?: (result: any) => void;
-  onError?: (error: any) => void;
+  mapError?: (error: unknown) => Error;
+  onError?: (error: Error) => void;
 }): SignalStoreFeature<Input, EmptyFeatureResult> {
   const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
     prop: collection,
@@ -354,8 +362,11 @@ export function withEntitiesLoadingCall<
                     }),
                     first(),
                     catchError((error: unknown) => {
-                      setError(error);
-                      if (config.onError) config.onError(error);
+                      const e = config.mapError
+                        ? config.mapError(error)
+                        : error;
+                      setError(e);
+                      if (config.onError) config.onError(e as Error);
                       return of();
                     }),
                   ),

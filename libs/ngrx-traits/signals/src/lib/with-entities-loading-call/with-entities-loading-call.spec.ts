@@ -157,6 +157,36 @@ describe('withEntitiesLoadingCall', () => {
         expect(onSuccess).not.toHaveBeenCalled();
       });
     }));
+
+    it('should call setError and onError if fetchEntities call fails with correct type if mapError is used', fakeAsync(() => {
+      const onSuccess = jest.fn();
+      const onError = jest.fn();
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({
+            entity,
+          }),
+          withCallStatus({ errorType: type<string>() }),
+          withEntitiesLoadingCall({
+            fetchEntities: () => {
+              return throwError(() => new Error('fail'));
+            },
+            onSuccess,
+            mapError: (error) => (error as Error).message,
+            onError,
+          }),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.entities()).toEqual([]);
+        store.setLoading();
+        tick();
+        expect(store.entities()).toEqual([]);
+        expect(store.error()).toEqual('fail');
+        expect(onError).toHaveBeenCalledWith('fail');
+        expect(onSuccess).not.toHaveBeenCalled();
+      });
+    }));
   });
 
   describe('with collection set[Collection]Loading should call fetch entities', () => {
