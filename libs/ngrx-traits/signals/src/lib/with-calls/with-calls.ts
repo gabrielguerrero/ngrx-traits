@@ -127,14 +127,14 @@ export function withCalls<
     signals: NamedCallsStatusComputed<keyof Calls & string> &
       NamedCallsStatusErrorComputed<Calls>;
     methods: {
-      [K in keyof Calls]: ExtractCallParams<Calls[K]> extends []
+      [K in keyof Calls]: Calls[K] extends (() => any) | CallConfig<undefined>
         ? { (): void }
         : {
             (
               param:
-                | ExtractCallParams<Calls[K]>[0]
-                | Observable<ExtractCallParams<Calls[K]>[0]>
-                | Signal<ExtractCallParams<Calls[K]>[0]>,
+                | ExtractCallParams<Calls[K]>
+                | Observable<ExtractCallParams<Calls[K]>>
+                | Signal<ExtractCallParams<Calls[K]>>,
             ): void;
           };
     };
@@ -286,18 +286,18 @@ const mapPipes = {
 };
 
 export function typedCallConfig<
-  Params extends readonly any[] = any[],
+  Param extends any = undefined,
   Result = any,
   PropName extends string = '',
   Error = unknown,
-  C extends CallConfig<Params, Result, PropName, Error> = CallConfig<
-    Params,
+  C extends CallConfig<Param, Result, PropName, Error> = CallConfig<
+    Param,
     Result,
     PropName,
     Error
   >,
 >(
-  config: Omit<CallConfig<Params, Result, PropName, Error>, 'resultProp'> & {
+  config: Omit<CallConfig<Param, Result, PropName, Error>, 'resultProp'> & {
     resultProp?: PropName;
   },
 ) {
