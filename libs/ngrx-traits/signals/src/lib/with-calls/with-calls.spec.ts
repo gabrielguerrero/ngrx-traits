@@ -25,6 +25,7 @@ describe('withCalls', () => {
       },
     })),
   );
+
   it('Successful call should set status to loading and loaded ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -36,6 +37,7 @@ describe('withCalls', () => {
       expect(store.testCallResult()).toBe('test');
     });
   });
+
   it('Fail on a call should set status return error ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -65,6 +67,7 @@ describe('withCalls', () => {
       expect(store.testCallResult()).toBe('test');
     });
   });
+
   it('passing a signal should call when signal value changes ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -153,6 +156,7 @@ describe('withCalls', () => {
         expect(onError).toHaveBeenCalledWith('fail false', { ok: false });
       });
     });
+
     it('Successful call of a no parameters method and resultProp, should set status to loading and loaded ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -178,6 +182,7 @@ describe('withCalls', () => {
         expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
       });
     });
+
     it('Successful call of a no parameters method and no resultProp, should set status to loading and loaded ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -202,6 +207,7 @@ describe('withCalls', () => {
         expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
       });
     });
+
     it('Successful call should set status to loading and loaded ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
