@@ -24,10 +24,10 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci --legacy-peer-deps
-    - run: npm run build
-    - run: npm run test-all
+        cache: 'yarn'
+    - run: yarn --frozen-lockfile --non-interactive
+    - run: yarn build
+    - run: yarn test-all
 
 
   publish:
@@ -42,10 +42,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-      - run: npm ci --legacy-peer-deps
-      - run: npm run build
-      - run: npm run semantic-release
+          cache: 'yarn'
+      - run: yarn --frozen-lockfile --non-interactive
+      - run: yarn build
+      - run: yarn semantic-release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
