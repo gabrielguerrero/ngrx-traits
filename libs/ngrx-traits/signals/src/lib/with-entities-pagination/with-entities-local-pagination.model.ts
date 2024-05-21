@@ -50,7 +50,7 @@ export type SetEntitiesResult<ResultParam> = {
   setEntitiesPagedResult: (result: ResultParam) => void;
 };
 export type NamedSetEntitiesResult<Collection extends string, ResultParam> = {
-  [K in Collection as `set${Capitalize<string & K>}Result`]: (
+  [K in Collection as `set${Capitalize<string & K>}PagedResult`]: (
     result: ResultParam,
   ) => void;
 };
