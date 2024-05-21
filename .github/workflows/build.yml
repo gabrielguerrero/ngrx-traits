@@ -9,7 +9,6 @@ on:
   pull_request:
     branches: '*'
 
-
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -26,7 +25,6 @@ jobs:
     - run: npm ci --legacy-peer-deps
     - run: npm run build
     - run: npm run test-all
-
 
   publish:
     runs-on: ubuntu-latest
