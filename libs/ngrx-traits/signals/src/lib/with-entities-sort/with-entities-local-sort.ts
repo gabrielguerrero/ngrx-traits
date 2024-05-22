@@ -1,8 +1,9 @@
-import { Signal } from '@angular/core';
+import { effect, Signal, untracked } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -18,6 +19,7 @@ import {
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { getWithEntitiesKeys } from '../util';
+import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   broadcast,
   withEventHandler,
@@ -142,6 +144,7 @@ export function withEntitiesLocalSort<
   const { entitiesKey } = getWithEntitiesKeys(config);
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
   const { entitiesLocalSortChanged } = getWithEntitiesLocalSortEvents(config);
+
   return signalStoreFeature(
     withState({ [sortKey]: defaultSort }),
     withEventHandler(),
@@ -168,6 +171,24 @@ export function withEntitiesLocalSort<
                 ),
           );
           broadcast(state, entitiesLocalSortChanged({ sort }));
+        },
+      };
+    }),
+    withHooks((state: Record<string, unknown>) => {
+      const { loadedKey } = getWithCallStatusKeys({ prop: config?.collection });
+      const loaded = state[loadedKey] as Signal<boolean> | undefined;
+      return {
+        onInit: () => {
+          if (loaded) {
+            const sortEntities = state[sortEntitiesKey] as () => void;
+            effect(() => {
+              if (loaded()) {
+                untracked(() => {
+                  sortEntities();
+                });
+              }
+            });
+          }
         },
       };
     }),
