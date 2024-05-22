@@ -43,7 +43,6 @@ export function sortData<T>(data: T[], sort: Sort<T>): T[] {
   if (!active || direction === '') {
     return data;
   }
-
   return data.sort((a, b) => {
     const valueA = sortingDataAccessor(a, active as string);
     const valueB = sortingDataAccessor(b, active as string);
