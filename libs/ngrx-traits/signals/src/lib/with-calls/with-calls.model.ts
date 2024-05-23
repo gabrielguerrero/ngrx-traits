@@ -24,8 +24,6 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
     : T extends CallConfig<any, infer R>
       ? R
       : never;
-export type ExtractCallParams<T extends Call | CallConfig> =
-  T extends Call<infer P> ? P : T extends CallConfig<infer P> ? P : undefined;
 
 export type NamedCallsStatusComputed<Prop extends string> = {
   [K in Prop as `is${Capitalize<string & K>}Loading`]: Signal<boolean>;

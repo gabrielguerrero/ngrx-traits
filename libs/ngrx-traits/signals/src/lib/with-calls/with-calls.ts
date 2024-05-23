@@ -35,14 +35,12 @@ import {
 
 import {
   CallStatus,
-  NamedCallStatusComputed,
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   Call,
   CallConfig,
-  ExtractCallParams,
   ExtractCallResultType,
   NamedCallsStatusComputed,
   NamedCallsStatusErrorComputed,
@@ -127,16 +125,25 @@ export function withCalls<
     signals: NamedCallsStatusComputed<keyof Calls & string> &
       NamedCallsStatusErrorComputed<Calls>;
     methods: {
-      [K in keyof Calls]: Calls[K] extends (() => any) | CallConfig<undefined>
-        ? { (): void }
-        : {
-            (
-              param:
-                | ExtractCallParams<Calls[K]>
-                | Observable<ExtractCallParams<Calls[K]>>
-                | Signal<ExtractCallParams<Calls[K]>>,
-            ): void;
-          };
+      [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
+        ? P extends []
+          ? () => void
+          : {
+              (param: P[0]): void;
+              (param: Observable<P[0]> | Signal<P[0]>): void;
+            }
+        : Calls[K] extends CallConfig
+          ? Parameters<Calls[K]['call']> extends undefined[]
+            ? () => void
+            : {
+                (...param: Parameters<Calls[K]['call']>): void;
+                (
+                  param:
+                    | Observable<Parameters<Calls[K]['call']>[0]>
+                    | Signal<Parameters<Calls[K]['call']>[0]>,
+                ): void;
+              }
+          : never;
     };
   }
 > {
