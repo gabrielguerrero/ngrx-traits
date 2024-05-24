@@ -1,6 +1,11 @@
 # @ngrx-traits/signals
 
 Set of prebuilt ngrx signals Custom Store Features that solve common problems such as adding pagination, sorting, filtering, selection of entities, and more.
+
+[![Join the discord server at https://discord.gg/CEjF5D3NCh](https://img.shields.io/discord/1241018601541079070.svg?color=7389D8&labelColor=6A7EC2&logo=discord&logoColor=ffffff&style=flat-square)](https://discord.gg/CEjF5D3NCh)
+[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](https://commitizen.github.io/cz-cli/)
+[![npm version](https://badge.fury.io/js/@ngrx-traits%2Fsignals.svg)](https://www.npmjs.com/@ngrx-traits/signals)
+
 # Features
 
 - ✅ Reduce boilerplate with generated strongly typed signals and methods.
@@ -28,14 +33,24 @@ Set of prebuilt ngrx signals Custom Store Features that solve common problems su
 
 ### [Articles](#articles) 
 
+### [Discord](https://discord.gg/CEjF5D3NCh)
+
 
 ## Installation
 
 Besides angular, you will need to have ngrx/signals installed with this lib you can do so with:
 
 ```npm i @ngrx/signals --save```
+or 
+```yarn add @ngrx/signals```
 
-Install @ngrx-traits/signals
+Then you can install  @ngrx-traits/signals with:
+
+```npm i @ngrx-traits/signals --save```
+
+or
+
+```yarn add @ngrx-traits/signals```
 
 ```npm i @ngrx-traits/signals --save```
 
@@ -67,10 +82,22 @@ export const ProductsLocalStore = signalStore(
       }
     },
   })),
+  withCalls(() => ({
+    loadProductDetail: ({ id }: { id: string }) =>
+      inject(ProductService).getProductDetail(id),
+  })),
+  // 👆 adds signals isLoadProductDetailLoading(), loadProductDetailResult()
+  // and method loadProductDetail({id})
 );
 ```
 In the example, we use the `withCallStatus` store feature, which adds computed signals like isLoading() and isLoaded() and corresponding setters setLoading and setLoading. You can see them being used in the withHooks to load the products.
+
 You can also see in the example `withEntitiesLocalPagination`, which will add signal entitiesCurrentPage() and loadEntitiesPage({pageIndex: number}) that we can use to render a paginated list like the one below.
+
+Finally `withCalls` adds the signals like  isLoadProductDetailLoading(), isLoadProductDetailError() and  loadProductDetailResult() and the method loadProductDetail({id}) that when called will change the status while the call is being made and store the result when it's done.
+
+Now let's see how we can use them in a component.
+
 
 ```html
   @if (store.isLoading()) {
@@ -84,7 +111,8 @@ You can also see in the example `withEntitiesLocalPagination`, which will add si
             product of store.entitiesCurrentPage().entities;
             track product.id
           ) {
-            <mat-list-item>{{ product.name }}</mat-list-item>
+            <!-- 👇 using loadProductDetail -->
+            <mat-list-item (click)="store.loadProductDetail(product)">{{ product.name }}</mat-list-item>
           }
         </mat-list>
         <!-- 👇 entitiesCurrentPage has all the props
@@ -97,6 +125,15 @@ You can also see in the example `withEntitiesLocalPagination`, which will add si
           (page)="store.loadEntitiesPage($event)"
         />
       </div>
+     <!-- 👇 using isLoadProductDetailLoading for the progress 
+      and loadProductDetailResult for the stored result-->
+      @if (store.isLoadProductDetailLoading()) {
+      <mat-spinner />
+      } @else if (store.isLoadProductDetailLoaded()) {
+      <product-detail [product]="store.loadProductDetailResult()!" />
+      } @else {
+      <h2>Please Select a product</h2>
+      }
   }
 `,
 })
@@ -105,6 +142,32 @@ export class SignalProductListPaginatedPageContainerComponent {
 
 }
 ```
+
+`withCalls` is very flexible you can see other examples below.
+```typescript
+   withCalls(({ productsSelectedEntity }) => ({
+    loadProductDetail: typedCallConfig({
+      call: ({ id }: { id: string }) =>
+        inject(ProductService).getProductDetail(id),
+      resultProp: 'productDetail', // change the prop name of the result
+      // storeResult: false, // will omit storing the result, and remove the result prop from the store
+      mapPipe: 'switchMap', // default is 'exhaustMap'
+      onSuccess: (result, callParam) => {
+      // do something with the result
+      },
+      onError: (error, callParam) => {
+      // do something with the error
+      },
+    }),
+     // you can add as many calls as you want
+    checkout: () =>
+      inject(OrderService).checkout({
+        productId: productsSelectedEntity()!.id,
+        quantity: 1,
+      }),
+  }))
+````
+
 Most store features support a collection param that allows you have custom names in the generated signals and methods for example:
 
 ```typescript 
@@ -129,7 +192,11 @@ Most store features support a collection param that allows you have custom names
           setProductsError(e);
         }
       }
-    }))
+    })),
+    withCalls(() => ({
+      loadProductDetail: ({ id }: { id: string }) =>
+        inject(ProductService).getProductDetail(id),
+    })),
   );
 ```
 To see a full list of the store features in the library with details and examples, check the [API](../libs/ngrx-traits/signals/api-docs.md) documentation.

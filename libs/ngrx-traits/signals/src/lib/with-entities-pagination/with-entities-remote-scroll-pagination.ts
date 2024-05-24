@@ -37,7 +37,6 @@ import {
   onEvent,
   withEventHandler,
 } from '../with-event-handler/with-event-handler';
-import { EntitiesPaginationRemoteState } from './with-entities-remote-pagination.model';
 import {
   EntitiesScrollPaginationComputed,
   EntitiesScrollPaginationMethods,

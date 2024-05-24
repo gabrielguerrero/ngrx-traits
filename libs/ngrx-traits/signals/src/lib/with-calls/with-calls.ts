@@ -69,7 +69,7 @@ import { getWithCallKeys } from './with-calls.util';
  *       },
  *       mapError: (error, callParam) => {
  *         return // transform the error before storing it
- *       }
+ *       },
  *       onError: (error, callParam) => {
  *       // do something with the error
  *       },
