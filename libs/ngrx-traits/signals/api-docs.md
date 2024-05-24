@@ -15,9 +15,9 @@ See <code>createReducer</code>.</p></dd>
 <dd><p>Generates necessary state, computed and methods to track the progress of the
 call and store the result of the call. The generated methods are rxMethods with
 the same name as the original call, which accepts either the original parameters
-or a Signal or Observable of the same type as the original parameters. The Signal
-or Observable type will be the type of the first param if it only has one parameter
-or an array with the same type as the parameters.</p></dd>
+or a Signal or Observable of the same type as the original parameters.
+The original call can only have zero or one parameter, use an object with multiple
+props as first param if you need more.</p></dd>
 <dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
@@ -146,9 +146,9 @@ const store = signalStore(
 <p>Generates necessary state, computed and methods to track the progress of the
 call and store the result of the call. The generated methods are rxMethods with
 the same name as the original call, which accepts either the original parameters
-or a Signal or Observable of the same type as the original parameters. The Signal
-or Observable type will be the type of the first param if it only has one parameter
-or an array with the same type as the parameters.</p>
+or a Signal or Observable of the same type as the original parameters.
+The original call can only have zero or one parameter, use an object with multiple
+props as first param if you need more.</p>
 
 **Kind**: global function  
 
