@@ -12,8 +12,12 @@ See <code>createReducer</code>.</p></dd>
 <dt><a href="#withCallStatus">withCallStatus(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for call progress status to the store</p></dd>
 <dt><a href="#withCalls">withCalls(callsFactory)</a></dt>
-<dd><p>Generates necessary state, computed and methods to track the progress of the call
-and store the result of the call</p></dd>
+<dd><p>Generates necessary state, computed and methods to track the progress of the
+call and store the result of the call. The generated methods are rxMethods with
+the same name as the original call, which accepts either the original parameters
+or a Signal or Observable of the same type as the original parameters. The Signal
+or Observable type will be the type of the first param if it only has one parameter
+or an array with the same type as the parameters.</p></dd>
 <dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
@@ -113,7 +117,8 @@ See <code>createReducer</code>.</p>
 | config | <p>Configuration object</p> |
 | config.prop | <p>The name of the property for which this represents the call status</p> |
 | config.initialValue | <p>The initial value of the call status</p> |
-| config.collection | <p>The name of the collection for which this represents the call status is an alias to prop param they do the same thing</p> <p>prop or collection is required</p> |
+| config.collection | <p>The name of the collection for which this represents the call status is an alias to prop param</p> |
+| config.errorType | <p>The type of the error they do the same thing</p> <p>prop or collection is required</p> |
 
 **Example**  
 ```js
@@ -121,7 +126,7 @@ const store = signalStore(
  withCallStatus({ prop: 'users', })
  // other valid configurations
  // withCallStatus()
- // withCallStatus({ collection: 'users', initialValue: 'loading' })
+ // withCallStatus({ collection: 'users', initialValue: 'loading' , errorType: type<string>()})
  )
 
  // generates the following signals
@@ -138,8 +143,12 @@ const store = signalStore(
 <a name="withCalls"></a>
 
 ## withCalls(callsFactory)
-<p>Generates necessary state, computed and methods to track the progress of the call
-and store the result of the call</p>
+<p>Generates necessary state, computed and methods to track the progress of the
+call and store the result of the call. The generated methods are rxMethods with
+the same name as the original call, which accepts either the original parameters
+or a Signal or Observable of the same type as the original parameters. The Signal
+or Observable type will be the type of the first param if it only has one parameter
+or an array with the same type as the parameters.</p>
 
 **Kind**: global function  
 
@@ -150,19 +159,22 @@ and store the result of the call</p>
 **Example**  
 ```js
 withCalls(({ productsSelectedEntity }) => ({
-    loadProductDetail: {
+    loadProductDetail: typedCallConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
       // storeResult: false, // will omit storing the result, and remove the result prop from the store
       mapPipe: 'switchMap', // default is 'exhaustMap'
-      onSuccess: (result) => {
+      onSuccess: (result, callParam) => {
       // do something with the result
       },
-      onError: (error) => {
+      mapError: (error, callParam) => {
+        return // transform the error before storing it
+      },
+      onError: (error, callParam) => {
       // do something with the error
       },
-    },
+    }),
     checkout: () =>
       inject(OrderService).checkout({
         productId: productsSelectedEntity()!.id,
@@ -181,9 +193,9 @@ withCalls(({ productsSelectedEntity }) => ({
   store.loadProductDetailError // string | null
   store.isCheckoutLoading // boolean
   store.isCheckoutLoaded // boolean
-  store.checkoutError // string | null
+  store.checkoutError // unknown | null
   // generates the following methods
-  store.loadProductDetail // ({id: string}) => void
+  store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
   store.checkout // () => void
 ```
 <a name="withEntitiesLocalFilter"></a>
@@ -331,6 +343,7 @@ if an error occurs it will set the error to the store using set[Collection]Error
 | config.fetchEntities | <p>A function that fetches the entities from a remote source the return type</p> |
 | config.collection | <p>The collection name</p> |
 | config.onSuccess | <p>A function that is called when the fetchEntities is successful</p> |
+| config.mapError | <p>A function to transform the error before setting it to the store, requires withCallStatus errorType to be set</p> |
 | config.onError | <p>A function that is called when the fetchEntities fails can be an array of entities or an object with entities and total</p> |
 
 **Example**  

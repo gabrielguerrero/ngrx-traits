@@ -3,7 +3,15 @@ To run the examples:
 ```
 git clone https://github.com/gabrielguerrero/ngrx-traits.git
 cd ngrx-traits
-npm i
+```
+Then for yarn
+```
+yarn
+yarn start
+```
+or for npm 
+```
+npm i --legacy-peer-deps
 npm start
 ```
 
