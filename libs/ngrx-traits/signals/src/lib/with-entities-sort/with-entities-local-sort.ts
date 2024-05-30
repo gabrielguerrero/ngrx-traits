@@ -13,6 +13,8 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import {
+  EntityIdKey,
+  EntityIdProps,
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
@@ -47,6 +49,7 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * @param config.defaultSort - The default sort to be applied to the entities
  * @param config.entity - The type entity to be used
  * @param config.collection - The name of the collection for which will be sorted
+ * @param config.idKey - The key to use as the id for the entity
  *
  * @example
  * const entity = type<Product>();
@@ -66,55 +69,13 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
  */
 export function withEntitiesLocalSort<
-  Entity extends { id: string | number },
->(config: {
-  defaultSort: Sort<Entity>;
-  entity: Entity;
-}): SignalStoreFeature<
-  {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
-    methods: {};
-  },
-  {
-    state: EntitiesSortState<Entity>;
-    signals: {};
-    methods: EntitiesSortMethods<Entity>;
-  }
->;
-/**
- * Generates necessary state, computed and methods for sorting locally entities in the store.
- *
- * Requires withEntities to be present before this function
- * @param config
- * @param config.defaultSort - The default sort to be applied to the entities
- * @param config.entity - The type entity to be used
- * @param config.collection - The name of the collection for which will be sorted
- *
- * @example
- * const entity = type<Product>();
- * const collection = 'products';
- * export const store = signalStore(
- *   { providedIn: 'root' },
- *   withEntities({ entity, collection }),
- *   withEntitiesLocalSort({
- *     entity,
- *     collection,
- *     defaultSort: { field: 'name', direction: 'asc' },
- *   }),
- * );
- * // generates the following signals
- * store.productsSort - the current sort applied to the products
- * // generates the following methods
- * store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
- */
-export function withEntitiesLocalSort<
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
 >(config: {
   defaultSort: Sort<Entity>;
   entity: Entity;
-  collection?: Collection;
+  collection: Collection;
+  idKey?: EntityIdKey<Entity>;
 }): SignalStoreFeature<
   // TODO: we have a problem  with the state property, when set to any
   // it works but is it has a Collection, some methods are not generated, it seems
@@ -132,16 +93,57 @@ export function withEntitiesLocalSort<
     methods: NamedEntitiesSortMethods<Collection, Collection>;
   }
 >;
-export function withEntitiesLocalSort<
-  Entity extends { id: string | number },
-  Collection extends string,
->({
+/**
+ * Generates necessary state, computed and methods for sorting locally entities in the store.
+ *
+ * Requires withEntities to be present before this function
+ * @param config
+ * @param config.defaultSort - The default sort to be applied to the entities
+ * @param config.entity - The type entity to be used
+ * @param config.collection - The name of the collection for which will be sorted
+ * @param config.idKey - The key to use as the id for the entity
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   withEntities({ entity, collection }),
+ *   withEntitiesLocalSort({
+ *     entity,
+ *     collection,
+ *     defaultSort: { field: 'name', direction: 'asc' },
+ *   }),
+ * );
+ * // generates the following signals
+ * store.productsSort - the current sort applied to the products
+ * // generates the following methods
+ * store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
+ */
+export function withEntitiesLocalSort<Entity>(config: {
+  defaultSort: Sort<Entity>;
+  entity: Entity;
+  idKey?: EntityIdKey<Entity>;
+}): SignalStoreFeature<
+  {
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
+    methods: {};
+  },
+  {
+    state: EntitiesSortState<Entity>;
+    signals: {};
+    methods: EntitiesSortMethods<Entity>;
+  }
+>;
+export function withEntitiesLocalSort<Entity, Collection extends string>({
   defaultSort,
   ...config
 }: {
   defaultSort: Sort<Entity>;
   entity: Entity;
   collection?: Collection;
+  idKey?: EntityIdKey<Entity>;
 }): SignalStoreFeature<any, any> {
   const { entitiesKey, idsKey } = getWithEntitiesKeys(config);
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
@@ -159,7 +161,8 @@ export function withEntitiesLocalSort<
           patchState(state as StateSignal<object>, {
             [sortKey]: sort,
             [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
-              (entity) => entity.id,
+              (entity) =>
+                config.idKey ? entity[config.idKey] : (entity as any).id,
             ),
           });
           broadcast(state, entitiesLocalSortChanged({ sort }));

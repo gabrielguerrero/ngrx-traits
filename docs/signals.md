@@ -90,9 +90,16 @@ export const ProductsLocalStore = signalStore(
   // and method loadProductDetail({id})
 );
 ```
+
+### withCallStatus
+
 In the example, we use the `withCallStatus` store feature, which adds computed signals like isLoading() and isLoaded() and corresponding setters setLoading and setLoading. You can see them being used in the withHooks to load the products.
 
+### withEntitiesLocalPagination
+
 You can also see in the example `withEntitiesLocalPagination`, which will add signal entitiesCurrentPage() and loadEntitiesPage({pageIndex: number}) that we can use to render a paginated list like the one below.
+
+### withCalls
 
 Finally `withCalls` adds the signals like  isLoadProductDetailLoading(), isLoadProductDetailError() and  loadProductDetailResult() and the method loadProductDetail({id}) that when called will change the status while the call is being made and store the result when it's done.
 
@@ -199,6 +206,62 @@ Most store features support a collection param that allows you have custom names
     })),
   );
 ```
+### withEntitiesLoadingCall
+Now we can also replace that withHook with withEntitiesLoadingCall, which is similar to withCalls but is specialized on entities list,
+it will call the fetchEntities, when the entities status it set to loading, and will handle the storing the result, status changes and errors if any for you.
+
+```typescript
+const entity = type<Product>();
+  const collection = "products";
+  export const ProductsLocalStore = signalStore(
+  withEntities({ entity, collection }),
+  withCallStatus({ collection, initialValue: "loading" }),
+  withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
+  // 👇 replaces withHook, will store entities result, change the status and handle errors
+  withEntitiesLoadingCall({
+  entity,
+  collection,
+  fetchEntities: () =>
+    inject(ProductService)
+      .getProducts()
+      .pipe((res) => res.resultList),
+  }),
+  withCalls(() => ({
+  loadProductDetail: ({ id }: { id: string }) =>
+      inject(ProductService).getProductDetail(id),
+  })),
+  );
+```
+
+### Custom ids
+By default, the withEntities expect the Entity to have an id prop, but you can change that by passing a custom id  like:
+```typescript
+const entityConfig = {
+  entity: type<Product>(),
+  collection: "products",
+  idKey: "productId",
+} as const; // 👈 important to use as const otherwise collection and idKey type will be a string instead of a string literal 
+
+export const ProductsLocalStore = signalStore(
+  withEntities(entityConfig),
+  withCallStatus({ ...entityConfig, initialValue: "loading" }),
+  withEntitiesLocalPagination({ ...entityConfig, pageSize: 5 }),
+  withEntitiesLoadingCall({
+    ...entityConfig,
+    fetchEntities: () =>
+      inject(ProductService)
+        .getProducts()
+        .pipe((res) => res.resultList),
+  }),
+  withCalls(() => ({
+    loadProductDetail: ({ id }: { id: string }) =>
+      inject(ProductService).getProductDetail(id),
+  })),
+);
+```
+You create a entityConfig like shown above using as const, and the you need to spread it to all withEntities* that you are using
+
+```typescript
 To see a full list of the store features in the library with details and examples, check the [API](../libs/ngrx-traits/signals/api-docs.md) documentation.
 
 Also, I recommend checking the example section, where you can see multiple use cases for the library. [Examples](../apps/example-app/src/app/examples/signals)

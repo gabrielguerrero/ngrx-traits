@@ -17,6 +17,7 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import {
+  EntityIdKey,
   EntitySignals,
   NamedEntitySignals,
 } from '@ngrx/signals/entities/src/models';
@@ -66,12 +67,13 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  * Requires withEntities and withCallStatus to be present in the store.
  *
  * @param config - Configuration object or factory function that returns the configuration object
- * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
+ * @param config.fetchEntities - A function that fetches the entities from a remote source, the return type can be an array of entities or an object with entities and total
  * @param config.collection - The collection name
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
  * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
- * can be an array of entities or an object with entities and total
+ * @param config.idKey - The key to use as the id for the entity
+ *
  *
  * @example
  * export const ProductsRemoteStore = signalStore(
@@ -122,113 +124,7 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  */
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
-  Entity extends { id: string | number },
-  Error = unknown,
->(config: {
-  fetchEntities: (
-    store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
-        Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
-    >,
-  ) =>
-    | Observable<
-        Input['methods'] extends SetEntitiesResult<infer ResultParam>
-          ? ResultParam
-          : Entity[] | { entities: Entity[] }
-      >
-    | Promise<
-        Input['methods'] extends SetEntitiesResult<infer ResultParam>
-          ? ResultParam
-          : Entity[] | { entities: Entity[] }
-      >;
-  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
-  onSuccess?: (
-    result: Input['methods'] extends SetEntitiesResult<infer ResultParam>
-      ? ResultParam
-      : Entity[] | { entities: Entity[] },
-  ) => void;
-  mapError?: (error: unknown) => Error;
-  onError?: (error: any) => void;
-}): SignalStoreFeature<
-  Input & {
-    state: EntityState<Entity> & CallStatusState;
-    signals: EntitySignals<Entity> & CallStatusComputed<Error>;
-    methods: CallStatusMethods<Error>;
-  },
-  EmptyFeatureResult
->;
-
-/**
- * Generates a onInit hook that fetches entities from a remote source
- * when the [collection]Loading is true, by calling the fetchEntities function
- * and if successful, it will call set[Collection]Loaded and also set the entities
- * to the store using the setAllEntities method or the setEntitiesPagedResult method
- * if it exists (comes from withEntitiesRemotePagination),
- * if an error occurs it will set the error to the store using set[Collection]Error with the error.
- *
- * Requires withEntities and withCallStatus to be present in the store.
- *
- * @param config - Configuration object or factory function that returns the configuration object
- * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
- * @param config.collection - The collection name
- * @param config.onSuccess - A function that is called when the fetchEntities is successful
- * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
- * @param config.onError - A function that is called when the fetchEntities fails
- * can be an array of entities or an object with entities and total
- *
- * @example
- * export const ProductsRemoteStore = signalStore(
- *   { providedIn: 'root' },
- *   // requires at least withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
- *   // other features
- *   withEntitiesRemoteFilter({
- *     entity,
- *     collection,
- *     defaultFilter: { name: '' },
- *   }),
- *   withEntitiesRemotePagination({
- *     entity,
- *     collection,
- *     pageSize: 5,
- *     pagesToCache: 2,
- *   }),
- *   withEntitiesRemoteSort({
- *     entity,
- *     collection,
- *     defaultSort: { field: 'name', direction: 'asc' },
- *   }),
- *   // now we add the withEntitiesLoadingCall, in this case any time the filter,
- *   // pagination or sort changes they call set[Collection]Loading() which then
- *   // triggers the onInit effect that checks if [collection]Loading(), if true
- *   // then calls fetchEntities function
- *   withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
- *       return inject(ProductService)
- *         .getProducts({
- *           search: productsFilter().name,
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
- *           sortColumn: productsSort().field,
- *           sortAscending: productsSort().direction === 'asc',
- *         })
- *         .pipe(
- *           map((d) => ({
- *             entities: d.resultList,
- *             total: d.total,
- *           })),
- *         );
- *     },
- *   }),
- */
-
-export function withEntitiesLoadingCall<
-  Input extends SignalStoreFeatureResult,
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
   Error = unknown,
 >(config: {
@@ -268,6 +164,8 @@ export function withEntitiesLoadingCall<
   ) => void;
   mapError?: (error: unknown) => Error;
   onError?: (error: Error) => void;
+  entity?: Entity;
+  idKey?: EntityIdKey<Entity>;
 }): SignalStoreFeature<
   Input & {
     state: NamedEntityState<Entity, Collection> &
@@ -290,12 +188,13 @@ export function withEntitiesLoadingCall<
  * Requires withEntities and withCallStatus to be present in the store.
  *
  * @param config - Configuration object or factory function that returns the configuration object
- * @param config.fetchEntities - A function that fetches the entities from a remote source the return type
+ * @param config.fetchEntities - A function that fetches the entities from a remote source, the return type can be an array of entities or an object with entities and total
  * @param config.collection - The collection name
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
  * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
- * can be an array of entities or an object with entities and total
+ * @param config.idKey - The key to use as the id for the entity
+ *
  *
  * @example
  * export const ProductsRemoteStore = signalStore(
@@ -346,6 +245,48 @@ export function withEntitiesLoadingCall<
  */
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
+  Entity,
+  Error = unknown,
+>(config: {
+  fetchEntities: (
+    store: Prettify<
+      SignalStoreSlices<Input['state']> &
+        Input['signals'] &
+        Input['methods'] &
+        StateSignal<Prettify<Input['state']>>
+    >,
+  ) =>
+    | Observable<
+        Input['methods'] extends SetEntitiesResult<infer ResultParam>
+          ? ResultParam
+          : Entity[] | { entities: Entity[] }
+      >
+    | Promise<
+        Input['methods'] extends SetEntitiesResult<infer ResultParam>
+          ? ResultParam
+          : Entity[] | { entities: Entity[] }
+      >;
+  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+  onSuccess?: (
+    result: Input['methods'] extends SetEntitiesResult<infer ResultParam>
+      ? ResultParam
+      : Entity[] | { entities: Entity[] },
+  ) => void;
+  mapError?: (error: unknown) => Error;
+  onError?: (error: any) => void;
+  entity?: Entity;
+  idKey?: EntityIdKey<Entity>;
+}): SignalStoreFeature<
+  Input & {
+    state: EntityState<Entity> & CallStatusState;
+    signals: EntitySignals<Entity> & CallStatusComputed<Error>;
+    methods: CallStatusMethods<Error>;
+  },
+  EmptyFeatureResult
+>;
+
+export function withEntitiesLoadingCall<
+  Input extends SignalStoreFeatureResult,
   Entity extends { id: string | number },
   const Collection extends string = '',
   Error = unknown,
@@ -359,6 +300,7 @@ export function withEntitiesLoadingCall<
     >,
   ) => {
     collection?: Collection;
+    idKey?: EntityIdKey<Entity>;
     fetchEntities: () =>
       | Observable<
           Collection extends ''
@@ -416,7 +358,7 @@ export function withEntitiesLoadingCall<
 
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
   Error = unknown,
 >(
@@ -433,6 +375,7 @@ export function withEntitiesLoadingCall<
         onSuccess?: (result: any) => void;
         mapError?: (error: unknown) => Error;
         onError?: (error: Error) => void;
+        idKey?: EntityIdKey<Entity>;
       }
     | ((
         store: Prettify<
@@ -448,6 +391,7 @@ export function withEntitiesLoadingCall<
         onSuccess?: (result: any) => void;
         mapError?: (error: unknown) => Error;
         onError?: (error: Error) => void;
+        idKey?: EntityIdKey<Entity>;
       }),
 ): SignalStoreFeature<Input, EmptyFeatureResult> {
   return (store) => {
@@ -459,6 +403,7 @@ export function withEntitiesLoadingCall<
       onError,
       mapError,
       mapPipe: mapPipeType,
+      idKey,
     } = typeof configFactory === 'function'
       ? configFactory({
           ...slices,
@@ -522,8 +467,11 @@ export function withEntitiesLoadingCall<
                             collection
                               ? setAllEntities(entities as Entity[], {
                                   collection,
+                                  idKey: idKey ?? ('id' as EntityIdKey<Entity>),
                                 })
-                              : setAllEntities(entities),
+                              : setAllEntities(entities, {
+                                  idKey: idKey ?? ('id' as EntityIdKey<Entity>),
+                                }),
                           );
                         }
                         setLoaded();

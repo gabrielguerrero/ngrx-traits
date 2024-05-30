@@ -48,18 +48,26 @@ import { getWithCallStatusKeys } from './with-call-status.util';
  *  store.setUsersLoaded // () => void
  *  store.setUsersError // (error?: unknown) => void
  */
-export function withCallStatus<Error = unknown>(config?: {
-  initialValue?: CallStatus;
-  errorType?: Error;
-}): SignalStoreFeature<
+export function withCallStatus<Prop extends string, Error = unknown>(
+  config:
+    | {
+        prop: Prop;
+        initialValue?: CallStatus;
+        errorType?: Error;
+      }
+    | {
+        collection: Prop;
+        initialValue?: CallStatus;
+        errorType?: Error;
+      },
+): SignalStoreFeature<
   { state: {}; signals: {}; methods: {} },
   {
-    state: CallStatusState;
-    signals: CallStatusComputed<Error>;
-    methods: CallStatusMethods<Error>;
+    state: NamedCallStatusState<Prop>;
+    signals: NamedCallStatusComputed<Prop, Error>;
+    methods: NamedCallStatusMethods<Prop, Error>;
   }
 >;
-
 /**
  * Generates necessary state, computed and methods for call progress status to the store
  * @param config - Configuration object
@@ -89,26 +97,18 @@ export function withCallStatus<Error = unknown>(config?: {
  *  store.setUsersLoaded // () => void
  *  store.setUsersError // (error?: unknown) => void
  */
-export function withCallStatus<Prop extends string, Error = unknown>(
-  config?:
-    | {
-        prop: Prop;
-        initialValue?: CallStatus;
-        errorType?: Error;
-      }
-    | {
-        collection: Prop;
-        initialValue?: CallStatus;
-        errorType?: Error;
-      },
-): SignalStoreFeature<
+export function withCallStatus<Error = unknown>(config?: {
+  initialValue?: CallStatus;
+  errorType?: Error;
+}): SignalStoreFeature<
   { state: {}; signals: {}; methods: {} },
   {
-    state: NamedCallStatusState<Prop>;
-    signals: NamedCallStatusComputed<Prop, Error>;
-    methods: NamedCallStatusMethods<Prop, Error>;
+    state: CallStatusState;
+    signals: CallStatusComputed<Error>;
+    methods: CallStatusMethods<Error>;
   }
 >;
+
 export function withCallStatus<Prop extends string>({
   prop,
   initialValue = 'init',
