@@ -1,9 +1,10 @@
-import { computed, Signal } from '@angular/core';
+import { computed, effect, Signal, untracked } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -18,6 +19,7 @@ import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
+import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   broadcast,
   withEventHandler,
@@ -234,6 +236,34 @@ export function withEntitiesLocalFilter<
         [filterEntitiesKey]: filterEntities,
         [resetEntitiesFilterKey]: () => {
           filterEntities({ filter: defaultFilter });
+        },
+      };
+    }),
+    withHooks((state: Record<string, unknown>) => {
+      const { loadedKey } = getWithCallStatusKeys({ prop: config?.collection });
+      const loaded = state[loadedKey] as Signal<boolean> | undefined;
+      const filter = state[filterKey] as Signal<Filter>;
+      return {
+        onInit: () => {
+          if (loaded) {
+            const filterEntities = state[filterEntitiesKey] as (options: {
+              filter: Filter;
+              debounce?: number;
+              patch?: boolean;
+              forceLoad?: boolean;
+            }) => void;
+            effect(() => {
+              if (loaded()) {
+                untracked(() => {
+                  filterEntities({
+                    filter: filter(),
+                    debounce: 0,
+                    forceLoad: true,
+                  });
+                });
+              }
+            });
+          }
         },
       };
     }),

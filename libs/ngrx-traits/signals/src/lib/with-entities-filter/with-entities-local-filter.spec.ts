@@ -3,6 +3,7 @@ import { patchState, signalStore, type } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import {
+  withCallStatus,
   withEntitiesLocalFilter,
   withEntitiesLocalPagination,
   withEntitiesMultiSelection,
@@ -69,6 +70,43 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
+  it('should filter entities using previous filter when withCallStatus loaded', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: 'zero', foo: 'bar2' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+    });
+  }));
   it('should filter entities after default debounce', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
