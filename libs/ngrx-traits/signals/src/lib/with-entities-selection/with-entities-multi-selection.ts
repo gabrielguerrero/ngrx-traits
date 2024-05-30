@@ -66,24 +66,27 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * store.toggleSelectAllProducts // () => void;
  */
 export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
+  Entity,
+  Collection extends string,
 >(config: {
   entity: Entity;
+  collection: Collection;
   clearOnFilter?: boolean;
   clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
+  // TODO: the problem seems be with the state pro, when set to empty
+  //  it works but is it has a namedstate it doesnt
   {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    state: NamedEntityState<Entity, any>;
+    signals: NamedEntitySignals<Entity, Collection>;
     methods: {};
   },
   {
-    state: EntitiesMultiSelectionState;
-    signals: EntitiesMultiSelectionComputed<Entity>;
-    methods: EntitiesMultiSelectionMethods;
+    state: NamedEntitiesMultiSelectionState<Collection>;
+    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+    methods: NamedEntitiesMultiSelectionMethods<Collection>;
   }
 >;
-
 /**
  * Generates state, signals and methods for multi selection of entities.
  * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
@@ -116,31 +119,25 @@ export function withEntitiesMultiSelection<
  * store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
  * store.toggleSelectAllProducts // () => void;
  */
-export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config: {
+export function withEntitiesMultiSelection<Entity>(config: {
   entity: Entity;
-  collection: Collection;
   clearOnFilter?: boolean;
   clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
   {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
     methods: {};
   },
   {
-    state: NamedEntitiesMultiSelectionState<Collection>;
-    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-    methods: NamedEntitiesMultiSelectionMethods<Collection>;
+    state: EntitiesMultiSelectionState;
+    signals: EntitiesMultiSelectionComputed<Entity>;
+    methods: EntitiesMultiSelectionMethods;
   }
 >;
 
 export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
 >(config: {
   entity: Entity;

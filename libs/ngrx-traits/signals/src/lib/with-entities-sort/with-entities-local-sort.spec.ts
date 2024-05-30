@@ -55,6 +55,58 @@ describe('withEntitiesLocalSort', () => {
       direction: 'desc',
     });
   });
+
+  it('should sort entities with custom id', () => {
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    const entityConfig = {
+      entity: type<ProductCustom>(),
+      idKey: 'productId',
+    } as const;
+    const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+      ...p,
+      productId: id,
+    }));
+    const Store = signalStore(
+      withEntities(entityConfig),
+      withEntitiesLocalSort({
+        ...entityConfig,
+        defaultSort: { field: 'name', direction: 'asc' },
+      }),
+    );
+    const store = new Store();
+    patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+    expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+    // check default sort
+    store.sortEntities();
+    expect(
+      store
+        .entities()
+        .map((e) => e.name)
+        .slice(0, 5),
+    ).toEqual([
+      '1080° Avalanche',
+      'Animal Crossing',
+      'Arkanoid: Doh it Again',
+      'Battalion Wars',
+      'BattleClash',
+    ]);
+    // sort by price
+    store.sortEntities({
+      sort: { field: 'price', direction: 'desc' },
+    });
+    expect(
+      store
+        .entities()
+        .map((e) => e.price)
+        .slice(0, 5),
+    ).toEqual([178, 175, 172, 169, 166]);
+    expect(store.entities().length).toEqual(mockProducts.length);
+    expect(store.entitiesSort()).toEqual({
+      field: 'price',
+      direction: 'desc',
+    });
+  });
+
   it('with collection should sort entities and store sort', () => {
     const collection = 'products';
     const Store = signalStore(
@@ -96,6 +148,59 @@ describe('withEntitiesLocalSort', () => {
         .slice(0, 5),
     ).toEqual([178, 175, 172, 169, 166]);
     expect(store.productsEntities().length).toEqual(mockProducts.length);
+    expect(store.productsSort()).toEqual({
+      field: 'price',
+      direction: 'desc',
+    });
+  });
+
+  it('with collection should sort entities with custom id and store sort', () => {
+    const collection = 'products';
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    const entityConfig = {
+      entity: type<ProductCustom>(),
+      collection,
+      idKey: 'productId',
+    } as const;
+    const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+      ...p,
+      productId: id,
+    }));
+    const Store = signalStore(
+      withEntities(entityConfig),
+      withEntitiesLocalSort({
+        ...entityConfig,
+        defaultSort: { field: 'name', direction: 'asc' },
+      }),
+    );
+    const store = new Store();
+    patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+    expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+    // check default sort
+    store.sortProductsEntities();
+    expect(
+      store
+        .productsEntities()
+        .map((e) => e.name)
+        .slice(0, 5),
+    ).toEqual([
+      '1080° Avalanche',
+      'Animal Crossing',
+      'Arkanoid: Doh it Again',
+      'Battalion Wars',
+      'BattleClash',
+    ]);
+    // sort by price
+    store.sortProductsEntities({
+      sort: { field: 'price', direction: 'desc' },
+    });
+    expect(
+      store
+        .productsEntities()
+        .map((e) => e.price)
+        .slice(0, 5),
+    ).toEqual([178, 175, 172, 169, 166]);
+    expect(store.productsEntities().length).toEqual(mockProductsCustom.length);
     expect(store.productsSort()).toEqual({
       field: 'price',
       direction: 'desc',

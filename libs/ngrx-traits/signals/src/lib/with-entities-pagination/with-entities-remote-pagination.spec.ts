@@ -264,6 +264,102 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage().hasNext).toEqual(true);
     });
   }));
+  it('setEntitiesPagedResult and custom id should store entities', fakeAsync(() => {
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    const entityConfig = {
+      entity: type<ProductCustom>(),
+      idKey: 'productId',
+    } as const;
+    const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+      ...p,
+      productId: id,
+    }));
+    TestBed.runInInjectionContext(() => {
+      const fetchEntitiesSpy = jest.fn();
+      const Store = signalStore(
+        withEntities(entityConfig),
+        withCallStatus(),
+        withEntitiesRemotePagination({ ...entityConfig, pageSize: 10 }),
+        withHooks(
+          ({
+            isLoading,
+            setLoaded,
+            entitiesPagedRequest,
+            setEntitiesPagedResult,
+          }) => ({
+            onInit: () => {
+              const fetchEntities = ({
+                entitiesPagedRequest,
+              }: {
+                entitiesPagedRequest: Signal<{
+                  startIndex: number;
+                  size: number;
+                  page: number;
+                }>;
+              }) => {
+                fetchEntitiesSpy(entitiesPagedRequest());
+                let result = [...mockProductsCustom];
+                const total = result.length;
+                const options = {
+                  skip: entitiesPagedRequest()?.startIndex,
+                  take: entitiesPagedRequest()?.size,
+                };
+                if (options?.skip || options?.take) {
+                  const skip = +(options?.skip ?? 0);
+                  const take = +(options?.take ?? 0);
+                  result = result.slice(skip, skip + take);
+                }
+                return of({ entities: result, total });
+              };
+
+              effect(() => {
+                if (isLoading()) {
+                  untracked(() => {
+                    fetchEntities({
+                      entitiesPagedRequest,
+                    }).subscribe((result) => {
+                      setEntitiesPagedResult(result);
+                      setLoaded();
+                    });
+                  });
+                }
+              });
+            },
+          }),
+        ),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      jest.spyOn(store, 'setLoading');
+      tick();
+      // basic check for the first page
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+
+      // load a page not in cache
+      store.loadEntitiesPage({ pageIndex: 7 });
+      tick();
+      expect(fetchEntitiesSpy).toHaveBeenCalledWith({
+        startIndex: 70,
+        size: 30,
+        page: 7,
+      });
+      // check the page
+
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProductsCustom.slice(70, 80),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(7);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().pagesCount).toEqual(13);
+      expect(store.entitiesCurrentPage().total).toEqual(mockProducts.length);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+    });
+  }));
 
   it('setEntitiesPagedResult with collection should store entities', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
@@ -353,6 +449,108 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.productsCurrentPage().hasNext).toEqual(true);
     });
   }));
+
+  it('setEntitiesPagedResult with collection and custom id should store entities', fakeAsync(() => {
+    const collection = 'products';
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    const entityConfig = {
+      entity: type<ProductCustom>(),
+      idKey: 'productId',
+      collection,
+    } as const;
+    const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+      ...p,
+      productId: id,
+    }));
+    TestBed.runInInjectionContext(() => {
+      const fetchEntitiesSpy = jest.fn();
+      const Store = signalStore(
+        withEntities(entityConfig),
+        withCallStatus(entityConfig),
+        withEntitiesRemotePagination({ ...entityConfig, pageSize: 10 }),
+        withHooks(
+          ({
+            isProductsLoading,
+            setProductsLoaded,
+            productsPagedRequest,
+            setProductsPagedResult,
+          }) => ({
+            onInit: () => {
+              const fetchEntities = ({
+                entitiesPagedRequest,
+              }: {
+                entitiesPagedRequest: Signal<{
+                  startIndex: number;
+                  size: number;
+                  page: number;
+                }>;
+              }) => {
+                fetchEntitiesSpy(entitiesPagedRequest());
+                let result = [...mockProductsCustom];
+                const total = result.length;
+                const options = {
+                  skip: entitiesPagedRequest()?.startIndex,
+                  take: entitiesPagedRequest()?.size,
+                };
+                if (options?.skip || options?.take) {
+                  const skip = +(options?.skip ?? 0);
+                  const take = +(options?.take ?? 0);
+                  result = result.slice(skip, skip + take);
+                }
+                return of({ entities: result, total });
+              };
+
+              effect(() => {
+                if (isProductsLoading()) {
+                  untracked(() => {
+                    fetchEntities({
+                      entitiesPagedRequest: productsPagedRequest,
+                    }).subscribe((result) => {
+                      setProductsPagedResult(result);
+                      setProductsLoaded();
+                    });
+                  });
+                }
+              });
+            },
+          }),
+        ),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.productsEntities()).toEqual([]);
+      store.setProductsLoading();
+      jest.spyOn(store, 'setProductsLoading');
+      tick();
+      // basic check for the first page
+      expect(store.productsCurrentPage().entities.length).toEqual(10);
+
+      // load a page not in cache
+      store.loadProductsPage({ pageIndex: 7 });
+      tick();
+      expect(fetchEntitiesSpy).toHaveBeenCalledWith({
+        startIndex: 70,
+        size: 30,
+        page: 7,
+      });
+      // check the page
+
+      expect(store.productsCurrentPage().entities.length).toEqual(10);
+      expect(store.productsCurrentPage().entities).toEqual(
+        mockProductsCustom.slice(70, 80),
+      );
+      expect(store.productsCurrentPage().pageIndex).toEqual(7);
+      expect(store.productsCurrentPage().pageSize).toEqual(10);
+      expect(store.productsCurrentPage().pagesCount).toEqual(13);
+      expect(store.productsCurrentPage().total).toEqual(
+        mockProductsCustom.length,
+      );
+      expect(store.productsCurrentPage().hasPrevious).toEqual(true);
+      expect(store.productsCurrentPage().hasNext).toEqual(true);
+    });
+  }));
+
   it('with collection entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const collection = 'products';
@@ -587,7 +785,6 @@ describe('withEntitiesRemotePagination', () => {
                 const take = +(options?.take ?? 0);
                 result = result.slice(skip, skip + take);
               }
-              console.log({ result: result.length, total });
               return of({ entities: result, total });
             },
           }),

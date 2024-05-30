@@ -73,6 +73,69 @@ describe('withEntitiesRemoteScrollPagination', () => {
     });
   }));
 
+  it(' should append entities with custome id  when using load more and using a result with entities and total', fakeAsync(() => {
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    const entityConfig = {
+      entity: type<ProductCustom>(),
+      idKey: 'productId',
+    } as const;
+    const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+      ...p,
+      productId: id,
+    }));
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities(entityConfig),
+        withCallStatus(),
+        withEntitiesRemoteScrollPagination({
+          ...entityConfig,
+          pageSize: 10,
+          pagesToCache: 1,
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesPagedRequest }) => {
+            let result = [...mockProductsCustom.slice(0, 25)];
+            const total = result.length;
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+          },
+        }),
+      );
+
+      const store = new Store();
+
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first load
+      expect(store.entities().length).toEqual(10);
+      expect(store.entities()).toEqual(mockProductsCustom.slice(0, 10));
+      expect(store.pagination().hasMore).toEqual(true);
+      expect(store.pagination().pageSize).toEqual(10);
+
+      store.loadMoreEntities();
+      tick();
+      // check the second load
+      expect(store.entities().length).toEqual(20);
+      expect(store.entities()).toEqual(mockProductsCustom.slice(0, 20));
+      expect(store.pagination().hasMore).toEqual(true);
+      store.loadMoreEntities();
+      tick();
+      expect(store.entities().length).toEqual(25);
+      expect(store.entities()).toEqual(mockProductsCustom.slice(0, 25));
+      expect(store.pagination().hasMore).toEqual(false);
+    });
+  }));
+
   it('should append entities when using load more and using a result with entities and hasMore', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const pageSize = 10;
@@ -240,6 +303,70 @@ describe('withEntitiesRemoteScrollPagination', () => {
     });
   }));
 
+  it('with collection should append entities with custom id when using load more ', fakeAsync(() => {
+    const collection = 'products';
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    const entityConfig = {
+      entity: type<ProductCustom>(),
+      idKey: 'productId',
+      collection,
+    } as const;
+    const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+      ...p,
+      productId: id,
+    }));
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities(entityConfig),
+        withCallStatus(entityConfig),
+        withEntitiesRemoteScrollPagination({
+          ...entityConfig,
+          pageSize: 10,
+          pagesToCache: 1,
+        }),
+        withEntitiesLoadingCall({
+          ...entityConfig,
+          fetchEntities: ({ productsPagedRequest }) => {
+            let result = [...mockProductsCustom.slice(0, 25)];
+            const total = result.length;
+            const options = {
+              skip: productsPagedRequest()?.startIndex,
+              take: productsPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.productsEntities()).toEqual([]);
+      store.setProductsLoading();
+      tick();
+      // check the first load
+      expect(store.productsEntities().length).toEqual(10);
+      expect(store.productsEntities()).toEqual(mockProductsCustom.slice(0, 10));
+      expect(store.productsPagination().hasMore).toEqual(true);
+      expect(store.productsPagination().pageSize).toEqual(10);
+
+      store.loadMoreProducts();
+      tick();
+      // check the second load
+      expect(store.productsEntities().length).toEqual(20);
+      expect(store.productsEntities()).toEqual(mockProductsCustom.slice(0, 20));
+      expect(store.productsPagination().hasMore).toEqual(true);
+      store.loadMoreProducts();
+      tick();
+      expect(store.productsEntities().length).toEqual(25);
+      expect(store.productsEntities()).toEqual(mockProductsCustom.slice(0, 25));
+      expect(store.productsPagination().hasMore).toEqual(false);
+    });
+  }));
   it('using next and previous entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
