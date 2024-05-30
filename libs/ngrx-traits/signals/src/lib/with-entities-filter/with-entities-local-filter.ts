@@ -9,7 +9,8 @@ import {
   withState,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import type {
+import {
+  EntityIdKey,
   EntityMap,
   EntitySignals,
   NamedEntitySignals,
@@ -48,9 +49,9 @@ import {
  * @param config
  * @param config.filterFn - The function that will be used to filter the entities
  * @param config.defaultFilter - The default filter to be used
- * @param config.defaultDebounce - The default debounce time to be used
- * @param config.entity - The entity tye to be used
+ * @param config.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
  * @param config.collection - The optional collection name to be used
+ * @param config.idKey - The key to use as the id for the entity
  *
  * @example
  * const entity = type<Product>();
@@ -79,66 +80,7 @@ import {
  *  store.resetProductsFilter  // () => void
  */
 export function withEntitiesLocalFilter<
-  Entity extends { id: string | number },
-  Filter extends Record<string, unknown>,
->(config: {
-  filterFn: (entity: Entity, filter?: Filter) => boolean;
-  defaultFilter: Filter;
-  defaultDebounce?: number;
-  entity: Entity;
-}): SignalStoreFeature<
-  {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
-    methods: {};
-  },
-  {
-    state: EntitiesFilterState<Filter>;
-    signals: EntitiesFilterComputed;
-    methods: EntitiesFilterMethods<Filter>;
-  }
->;
-/**
- * Generates necessary state, computed and methods for locally filtering entities in the store,
- * the generated filter[collenction]Entities method will filter the entities based on the filter function
- * and is debounced by default.
- *
- * Requires withEntities to be used.
- *
- * @param config
- * @param config.filterFn - The function that will be used to filter the entities
- * @param config.defaultFilter - The default filter to be used
- * @param config.defaultDebounce - The default debounce time to be used
- * @param config.collection - The optional collection name to be used
- *
- * @example
- * const entity = type<Product>();
- * const collection = 'products';
- * const store = signalStore(
- *   { providedIn: 'root' },
- *   // requires withEntities to be used
- *   withEntities({ entity, collection }),
- *
- *   withEntitiesLocalFilter({
- *     entity,
- *     collection,
- *     defaultFilter: { search: '' },
- *     filterFn: (entity, filter) =>
- *       !filter?.search || // if there is no search term return all entities
- *       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
- *   }),
- *  );
- *
- * // generates the following signals
- *  store.productsFilter // { search: string }
- *  // generates the following computed signals
- *  store.isProductsFilterChanged // boolean
- *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
- *  store.resetProductsFilter  // () => void
- */
-export function withEntitiesLocalFilter<
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
   Filter extends Record<string, unknown>,
 >(config: {
@@ -146,7 +88,8 @@ export function withEntitiesLocalFilter<
   defaultFilter: Filter;
   defaultDebounce?: number;
   entity: Entity;
-  collection?: Collection;
+  collection: Collection;
+  idKey?: EntityIdKey<Entity>;
 }): SignalStoreFeature<
   // TODO: we have a problem  with the state property, when set to any
   // it works but is it has a Collection, some methods are not generated, it seems
@@ -164,9 +107,70 @@ export function withEntitiesLocalFilter<
     methods: NamedEntitiesFilterMethods<Collection, Filter>;
   }
 >;
-
+/**
+ * Generates necessary state, computed and methods for locally filtering entities in the store,
+ * the generated filter[collenction]Entities method will filter the entities based on the filter function
+ * and is debounced by default.
+ *
+ * Requires withEntities to be used.
+ *
+ * @param config
+ * @param config.filterFn - The function that will be used to filter the entities
+ * @param config.defaultFilter - The default filter to be used
+ * @param config.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
+ * @param config.entity - The entity tye to be used
+ * @param config.collection - The optional collection name to be used
+ * @param config.idKey - The key to use as the id for the entity
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * const store = signalStore(
+ *   { providedIn: 'root' },
+ *   // requires withEntities to be used
+ *   withEntities({ entity, collection }),
+ *
+ *   withEntitiesLocalFilter({
+ *     entity,
+ *     collection,
+ *     defaultFilter: { search: '' },
+ *     filterFn: (entity, filter) =>
+ *       !filter?.search || // if there is no search term return all entities
+ *       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+ *   }),
+ *  );
+ *
+ * // generates the following signals
+ *  store.productsFilter // { search: string }
+ *  // generates the following computed signals
+ *  store.isProductsFilterChanged // boolean
+ *  // generates the following methods
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductsFilter  // () => void
+ */
 export function withEntitiesLocalFilter<
-  Entity extends { id: string | number },
+  Entity,
+  Filter extends Record<string, unknown>,
+>(config: {
+  filterFn: (entity: Entity, filter?: Filter) => boolean;
+  defaultFilter: Filter;
+  defaultDebounce?: number;
+  entity: Entity;
+  idKey?: EntityIdKey<Entity>;
+}): SignalStoreFeature<
+  {
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
+    methods: {};
+  },
+  {
+    state: EntitiesFilterState<Filter>;
+    signals: EntitiesFilterComputed;
+    methods: EntitiesFilterMethods<Filter>;
+  }
+>;
+export function withEntitiesLocalFilter<
+  Entity,
   Collection extends string,
   Filter extends Record<string, unknown>,
 >({
@@ -179,6 +183,7 @@ export function withEntitiesLocalFilter<
   defaultDebounce?: number;
   entity: Entity;
   collection?: Collection;
+  idKey?: EntityIdKey<Entity>;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
   const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
@@ -225,7 +230,9 @@ export function withEntitiesLocalFilter<
                 [filterKey]: value.filter,
               },
               {
-                [idsKey]: newEntities.map((entity) => entity.id),
+                [idsKey]: newEntities.map(
+                  (entity) => (entity as any)[config.idKey ?? 'id'],
+                ),
               },
             );
             broadcast(state, entitiesFilterChanged(value));

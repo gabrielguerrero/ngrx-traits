@@ -66,25 +66,29 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  *  store.deselectProductEntity // (config: { id: string | number }) => void
  *  store.toggleProductEntity // (config: { id: string | number }) => void
  */
-
 export function withEntitiesSingleSelection<
-  Entity extends { id: string | number },
+  Entity,
+  Collection extends string,
 >(config?: {
   entity: Entity;
+  collection: Collection;
   clearOnFilter?: boolean;
   clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
+  // TODO: the problem seems be with the state pro, when set to empty
+  //  it works but is it has a namedstate it doesnt
   {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    state: NamedEntityState<Entity, any>;
+    signals: NamedEntitySignals<Entity, Collection>;
     methods: {};
   },
   {
-    state: EntitiesSingleSelectionState;
-    signals: EntitiesSingleSelectionComputed<Entity>;
-    methods: EntitiesSingleSelectionMethods;
+    state: NamedEntitiesSingleSelectionState<Collection>;
+    signals: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
+    methods: NamedEntitiesSingleSelectionMethods<Collection>;
   }
 >;
+
 /**
  * Generates state, computed and methods for single selection of entities.
  *
@@ -94,7 +98,6 @@ export function withEntitiesSingleSelection<
  * @param config.entity - The entity type
  * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
  * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
- *
  * @example
  * const entity = type<Product>();
  * const collection = 'products';
@@ -119,30 +122,25 @@ export function withEntitiesSingleSelection<
  *  store.deselectProductEntity // (config: { id: string | number }) => void
  *  store.toggleProductEntity // (config: { id: string | number }) => void
  */
-export function withEntitiesSingleSelection<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config?: {
+
+export function withEntitiesSingleSelection<Entity>(config?: {
   entity: Entity;
-  collection?: Collection;
   clearOnFilter?: boolean;
   clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
   {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
     methods: {};
   },
   {
-    state: NamedEntitiesSingleSelectionState<Collection>;
-    signals: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
-    methods: NamedEntitiesSingleSelectionMethods<Collection>;
+    state: EntitiesSingleSelectionState;
+    signals: EntitiesSingleSelectionComputed<Entity>;
+    methods: EntitiesSingleSelectionMethods;
   }
 >;
 export function withEntitiesSingleSelection<
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
 >(config?: {
   entity: Entity;

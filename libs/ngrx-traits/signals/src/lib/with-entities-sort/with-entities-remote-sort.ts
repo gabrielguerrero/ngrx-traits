@@ -108,22 +108,25 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * store.sortProductsEntities // (options: { sort: Sort<Entity>; }) => void;
  */
 export function withEntitiesRemoteSort<
-  Entity extends { id: string | number },
+  Entity,
+  Collection extends string,
 >(config: {
-  defaultSort: Sort<Entity>;
   entity: Entity;
+  defaultSort: Sort<Entity>;
+  collection: Collection;
 }): SignalStoreFeature<
   {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
-    methods: CallStatusMethods;
+    state: NamedEntityState<Entity, any>;
+    signals: NamedEntitySignals<Entity, Collection>;
+    methods: NamedCallStatusMethods<Collection>;
   },
   {
-    state: EntitiesSortState<Entity>;
+    state: NamedEntitiesSortState<Entity, Collection>;
     signals: {};
-    methods: EntitiesSortMethods<Entity>;
+    methods: NamedEntitiesSortMethods<Entity, Collection>;
   }
 >;
+
 /**
  * Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
  * and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
@@ -199,29 +202,23 @@ export function withEntitiesRemoteSort<
  * // and the following methods
  * store.sortProductsEntities // (options: { sort: Sort<Entity>; }) => void;
  */
-export function withEntitiesRemoteSort<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config: {
-  entity: Entity;
+export function withEntitiesRemoteSort<Entity>(config: {
   defaultSort: Sort<Entity>;
-  collection?: Collection;
+  entity: Entity;
 }): SignalStoreFeature<
   {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: NamedCallStatusMethods<Collection>;
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
+    methods: CallStatusMethods;
   },
   {
-    state: NamedEntitiesSortState<Entity, Collection>;
+    state: EntitiesSortState<Entity>;
     signals: {};
-    methods: NamedEntitiesSortMethods<Entity, Collection>;
+    methods: EntitiesSortMethods<Entity>;
   }
 >;
-export function withEntitiesRemoteSort<
-  Entity extends { id: string | number },
-  Collection extends string,
->({
+
+export function withEntitiesRemoteSort<Entity, Collection extends string>({
   defaultSort,
   ...config
 }: {

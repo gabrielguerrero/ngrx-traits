@@ -62,6 +62,39 @@ describe('withEntitiesLoadingCall', () => {
         });
       }));
 
+      it('should setAllEntities with custom id if fetchEntities returns an a {entities: Entity[]} ', fakeAsync(() => {
+        type ProductCustom = Omit<Product, 'id'> & { productId: string };
+        const entityConfig = {
+          entity: type<ProductCustom>(),
+          idKey: 'productId',
+        } as const;
+        const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+          ...p,
+          productId: id,
+        }));
+        TestBed.runInInjectionContext(() => {
+          const Store = signalStore(
+            withEntities({
+              ...entityConfig,
+            }),
+            withCallStatus(),
+            withEntitiesLoadingCall({
+              ...entityConfig,
+              fetchEntities: () => {
+                let result = [...mockProductsCustom];
+                return of({ entities: result });
+              },
+            }),
+          );
+          const store = new Store();
+          TestBed.flushEffects();
+          expect(store.entities()).toEqual([]);
+          store.setLoading();
+          tick();
+          expect(store.entities()).toEqual(mockProductsCustom);
+        });
+      }));
+
       it('should setEntitiesPagedResult if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
@@ -277,6 +310,54 @@ describe('withEntitiesLoadingCall', () => {
           store.setProductsLoading();
           tick();
           expect(store.productsEntities()).toEqual(mockProducts.slice(0, 30));
+        });
+      }));
+
+      it('should set[Collection]Result with customId if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
+        type ProductCustom = Omit<Product, 'id'> & { productId: string };
+        const entityConfig = {
+          entity: type<ProductCustom>(),
+          idKey: 'productId',
+          collection,
+        } as const;
+        const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+          ...p,
+          productId: id,
+        }));
+        TestBed.runInInjectionContext(() => {
+          const Store = signalStore(
+            withEntities(entityConfig),
+            withCallStatus(entityConfig),
+            withEntitiesRemotePagination({
+              ...entityConfig,
+              pageSize: 10,
+            }),
+            withEntitiesLoadingCall({
+              ...entityConfig,
+              fetchEntities: ({ productsPagedRequest }) => {
+                let result = [...mockProductsCustom];
+                const total = result.length;
+                const options = {
+                  skip: productsPagedRequest()?.startIndex,
+                  take: productsPagedRequest()?.size,
+                };
+                if (options?.skip || options?.take) {
+                  const skip = +(options?.skip ?? 0);
+                  const take = +(options?.take ?? 0);
+                  result = result.slice(skip, skip + take);
+                }
+                return of({ entities: result, total });
+              },
+            }),
+          );
+          const store = new Store();
+          TestBed.flushEffects();
+          expect(store.productsEntities()).toEqual([]);
+          store.setProductsLoading();
+          tick();
+          expect(store.productsEntities()).toEqual(
+            mockProductsCustom.slice(0, 30),
+          );
         });
       }));
     });

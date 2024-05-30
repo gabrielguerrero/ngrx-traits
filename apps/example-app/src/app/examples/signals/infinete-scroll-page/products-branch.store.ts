@@ -43,34 +43,4 @@ export const ProductsBranchStore = signalStore(
       },
     })),
   ),
-  signalStoreFeature(
-    withEntities({
-      entity: entity2,
-      collection,
-    }),
-    withCallStatus({ initialValue: 'loading', collection }),
-    withEntitiesRemoteFilter({
-      entity: entity2,
-      collection,
-      defaultFilter: { search: '' },
-    }),
-    withEntitiesRemoteScrollPagination({
-      pageSize: 10,
-      entity: entity2,
-      collection,
-    }),
-    withEntitiesLoadingCall({
-      collection,
-      fetchEntities: async ({ productsPagedRequest, productsFilter }) => {
-        const res = await lastValueFrom(
-          inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-          }),
-        );
-        return { entities: res.resultList };
-      },
-    }),
-  ),
 );
