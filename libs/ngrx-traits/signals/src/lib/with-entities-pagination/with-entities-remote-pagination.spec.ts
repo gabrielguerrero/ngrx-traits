@@ -88,6 +88,76 @@ describe('withEntitiesRemotePagination', () => {
     });
   }));
 
+  it('entitiesCurrentPage page size change should split entities in the correct pages', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemotePagination({ entity, pageSize: 10 }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesPagedRequest }) => {
+            let result = [...mockProducts.slice(0, 40)];
+            const total = result.length;
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first page
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 10),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().pagesCount).toEqual(4);
+      expect(store.entitiesCurrentPage().total).toEqual(40);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      store.loadEntitiesPage({ pageIndex: 1, pageSize: 15 });
+      // check the second page
+      expect(store.entitiesCurrentPage().entities.length).toEqual(15);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(15, 30),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(15);
+      expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+      expect(store.entitiesCurrentPage().total).toEqual(40);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      store.loadEntitiesPage({ pageIndex: 2 });
+      tick();
+      // check the third page
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(30, 40),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(15);
+      expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+      expect(store.entitiesCurrentPage().total).toEqual(40);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(false);
+    });
+  }));
+
   it('setEntitiesPagedResult should store entities', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const fetchEntitiesSpy = jest.fn();

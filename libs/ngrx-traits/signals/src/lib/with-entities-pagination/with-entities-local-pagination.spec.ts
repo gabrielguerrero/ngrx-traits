@@ -61,6 +61,54 @@ describe('withEntitiesLocalPagination', () => {
     expect(store.entitiesCurrentPage().hasNext).toEqual(false);
   });
 
+  it('entitiesCurrentPage page size change should split entities in the correct pages', () => {
+    const Store = signalStore(
+      withEntities({ entity }),
+      withEntitiesLocalPagination({ entity, pageSize: 10 }),
+    );
+
+    const store = new Store();
+    patchState(store, setAllEntities(mockProducts.slice(0, 40)));
+    // check the first page
+    expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(0, 10),
+    );
+    expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+    expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+    expect(store.entitiesCurrentPage().pagesCount).toEqual(4);
+    expect(store.entitiesCurrentPage().total).toEqual(40);
+    expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
+    expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+    store.loadEntitiesPage({ pageIndex: 1, pageSize: 15 });
+    // check the second page
+    expect(store.entitiesCurrentPage().entities.length).toEqual(15);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(15, 30),
+    );
+    expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
+    expect(store.entitiesCurrentPage().pageSize).toEqual(15);
+    expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.entitiesCurrentPage().total).toEqual(40);
+    expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+    expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+    store.loadEntitiesPage({ pageIndex: 2 });
+
+    // check the third page
+    expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(30, 40),
+    );
+    expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
+    expect(store.entitiesCurrentPage().pageSize).toEqual(15);
+    expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.entitiesCurrentPage().total).toEqual(40);
+    expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+    expect(store.entitiesCurrentPage().hasNext).toEqual(false);
+  });
+
   it('with collection entitiesCurrentPage should split entities in the correct pages', () => {
     const collection = 'products';
     const Store = signalStore(

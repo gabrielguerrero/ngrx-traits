@@ -38,11 +38,12 @@ export type NamedEntitiesPaginationLocalComputed<
   }>;
 };
 export type EntitiesPaginationLocalMethods = {
-  loadEntitiesPage: (options: { pageIndex: number }) => void;
+  loadEntitiesPage: (options: { pageIndex: number; pageSize?: number }) => void;
 };
 export type NamedEntitiesPaginationLocalMethods<Collection extends string> = {
   [K in Collection as `load${Capitalize<string & K>}Page`]: (options: {
     pageIndex: number;
+    pageSize?: number;
   }) => void;
 };
 

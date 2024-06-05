@@ -203,8 +203,14 @@ export function withEntitiesLocalPagination<
 
     withMethods((state: Record<string, Signal<unknown>>) => {
       return {
-        [loadEntitiesPageKey]: ({ pageIndex }: { pageIndex: number }) => {
-          setCurrentPage(state, paginationKey, pageIndex);
+        [loadEntitiesPageKey]: ({
+          pageIndex,
+          pageSize,
+        }: {
+          pageIndex: number;
+          pageSize?: number;
+        }) => {
+          setCurrentPage(state, paginationKey, pageIndex, pageSize);
           broadcast(state, entitiesLocalPageChanged({ pageIndex }));
         },
       };
