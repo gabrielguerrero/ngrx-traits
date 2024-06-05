@@ -15,7 +15,7 @@ import { ProductsShopStore } from '../../products-shop.store';
 @Component({
   selector: 'product-shop-tab',
   template: `
-    <div class="m-8 grid sm:grid-cols-2 gap-4">
+    <div class="sm:m-4 grid sm:grid-cols-2 gap-4">
       <mat-card>
         <mat-card-header>
           <mat-card-title>Product List</mat-card-title>
@@ -37,6 +37,7 @@ import { ProductsShopStore } from '../../products-shop.store';
               (sort)="sort($event)"
             />
             <mat-paginator
+              [pageSizeOptions]="[5, 10, 25, 100]"
               [length]="store.productsCurrentPage().total"
               [pageSize]="store.productsCurrentPage().pageSize"
               [pageIndex]="store.productsCurrentPage().pageIndex"

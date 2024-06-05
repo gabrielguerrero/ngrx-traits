@@ -497,6 +497,7 @@ export function withEntitiesRemotePagination<
         },
         [loadEntitiesPageKey]: rxMethod<{
           pageIndex: number;
+          pageSize?: number;
           forceLoad?: boolean;
         }>(
           pipe(
@@ -504,7 +505,7 @@ export function withEntitiesRemotePagination<
               (previous, current) =>
                 !current.forceLoad && previous.pageIndex === current.pageIndex,
             ),
-            exhaustMap(({ pageIndex, forceLoad }) =>
+            exhaustMap(({ pageIndex, forceLoad, pageSize }) =>
               $loading.pipe(
                 first((loading) => !loading),
                 // the previous exhaustMap to not loading ensures the function
@@ -514,6 +515,7 @@ export function withEntitiesRemotePagination<
                     [paginationKey]: {
                       ...pagination(),
                       currentPage: pageIndex,
+                      pageSize: pageSize ?? pagination().pageSize,
                       requestPage: pageIndex,
                     },
                   });

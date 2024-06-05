@@ -27,7 +27,7 @@ import { ProductsLocalStore } from './product.store';
         @if (store.isProductsLoading()) {
           <mat-spinner></mat-spinner>
         } @else {
-          <div class="m-8 grid sm:grid-cols-2 gap-8">
+          <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
             <div>
               <product-list
                 [list]="store.productsCurrentPage().entities"
@@ -41,10 +41,11 @@ import { ProductsLocalStore } from './product.store';
               ></product-list>
               <!-- [selectedSort]="store.productsSort()" -->
               <mat-paginator
+                [pageSizeOptions]="[5, 10, 25, 100]"
                 [length]="store.productsCurrentPage().total"
                 [pageSize]="store.productsCurrentPage().pageSize"
                 [pageIndex]="store.productsCurrentPage().pageIndex"
-                (page)="loadPage($event)"
+                (page)="store.loadProductsPage($event)"
               ></mat-paginator>
             </div>
 
@@ -121,9 +122,5 @@ export class SignalProductListPaginatedPageContainerComponent {
     this.store.sortProductsEntities({
       sort: { field: sort.active as string, direction: sort.direction },
     });
-  }
-
-  loadPage($event: PageEvent) {
-    this.store.loadProductsPage({ pageIndex: $event.pageIndex });
   }
 }

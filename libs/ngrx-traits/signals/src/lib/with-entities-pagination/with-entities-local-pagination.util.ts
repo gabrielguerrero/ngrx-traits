@@ -29,6 +29,7 @@ export function setCurrentPage(
   state: Record<string, Signal<unknown>>,
   paginationKey: string,
   pageIndex: number,
+  pageSize?: number,
 ) {
   const pagination = state[paginationKey] as Signal<{
     pageSize: number;
@@ -38,6 +39,7 @@ export function setCurrentPage(
     [paginationKey]: {
       ...pagination(),
       currentPage: pageIndex,
+      pageSize: pageSize ?? pagination().pageSize,
     },
   });
 }
