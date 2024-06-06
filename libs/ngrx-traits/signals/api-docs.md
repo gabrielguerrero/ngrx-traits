@@ -339,7 +339,7 @@ if an error occurs it will set the error to the store using set[Collection]Error
 
 | Param | Description |
 | --- | --- |
-| config | <p>Configuration object</p> |
+| config | <p>Configuration object or factory function that returns the configuration object</p> |
 | config.fetchEntities | <p>A function that fetches the entities from a remote source the return type</p> |
 | config.collection | <p>The collection name</p> |
 | config.onSuccess | <p>A function that is called when the fetchEntities is successful</p> |

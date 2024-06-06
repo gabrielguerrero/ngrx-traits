@@ -30,8 +30,8 @@ export const ProductsBranchStore = signalStore(
       pageSize: 10,
       entity,
     }),
-    withEntitiesLoadingCall({
-      fetchEntities: async ({ entitiesPagedRequest, entitiesFilter }) => {
+    withEntitiesLoadingCall(({ entitiesPagedRequest, entitiesFilter }) => ({
+      fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(BranchService).getBranches({
             search: entitiesFilter().search,
@@ -41,7 +41,7 @@ export const ProductsBranchStore = signalStore(
         );
         return { entities: res.resultList };
       },
-    }),
+    })),
   ),
   signalStoreFeature(
     withEntities({
