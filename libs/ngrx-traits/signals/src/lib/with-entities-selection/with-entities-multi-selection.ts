@@ -42,6 +42,8 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name
+ * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
+ * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
  *
  * @example
  * const entity = type<Product>();
@@ -67,6 +69,8 @@ export function withEntitiesMultiSelection<
   Entity extends { id: string | number },
 >(config: {
   entity: Entity;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -89,6 +93,8 @@ export function withEntitiesMultiSelection<
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name
+ * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
+ * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
  *
  * @example
  * const entity = type<Product>();
@@ -115,7 +121,9 @@ export function withEntitiesMultiSelection<
   Collection extends string,
 >(config: {
   entity: Entity;
-  collection?: Collection;
+  collection: Collection;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
   // TODO: the problem seems be with the state pro, when set to empty
   //  it works but is it has a namedstate it doesnt
@@ -137,26 +145,8 @@ export function withEntitiesMultiSelection<
 >(config: {
   entity: Entity;
   collection?: Collection;
-}): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
-  {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: {};
-  },
-  {
-    state: NamedEntitiesMultiSelectionState<Collection>;
-    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-    methods: NamedEntitiesMultiSelectionMethods<Collection>;
-  }
->;
-export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config: {
-  entity: Entity;
-  collection?: Collection;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
   const {
@@ -212,11 +202,24 @@ export function withEntitiesMultiSelection<
       };
     }),
     withEventHandler((state) => {
-      return [
-        onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () =>
-          clearEntitiesSelection(state, selectedIdsMapKey),
-        ),
-      ];
+      const clearOnFilter = config?.clearOnFilter ?? true;
+      const clearOnRemoteSort = config?.clearOnRemoteSort ?? true;
+      const events = [];
+      if (clearOnFilter) {
+        events.push(
+          onEvent(entitiesFilterChanged, () => {
+            clearEntitiesSelection(state, selectedIdsMapKey);
+          }),
+        );
+      }
+      if (clearOnRemoteSort) {
+        events.push(
+          onEvent(entitiesRemoteSortChanged, () => {
+            clearEntitiesSelection(state, selectedIdsMapKey);
+          }),
+        );
+      }
+      return events;
     }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const selectedIdsMap = state[selectedIdsMapKey] as Signal<

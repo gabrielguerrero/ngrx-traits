@@ -163,7 +163,7 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
-  it(' should resetPage to and selection when filter is executed', fakeAsync(() => {
+  it(' should reset page to and selection when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({
@@ -201,6 +201,56 @@ describe('withEntitiesLocalFilter', () => {
       expect(store.entitySelected()).toEqual(undefined);
       expect(store.entitiesSelected()).toEqual([]);
       expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      // check filter
+      expect(store.entities().length).toEqual(2);
+    });
+  }));
+
+  it(' should not reset selection when filter is executed if configured that way', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withEntitiesSingleSelection({
+          entity,
+          clearOnFilter: false,
+          clearOnRemoteSort: false,
+        }),
+        withEntitiesMultiSelection({
+          entity,
+          clearOnFilter: false,
+          clearOnRemoteSort: false,
+        }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.selectEntity({ id: mockProducts[0].id });
+      store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
+      expect(store.entitySelected()).toEqual(mockProducts[0]);
+      expect(store.entitiesSelected?.()).toEqual([
+        mockProducts[2],
+        mockProducts[3],
+      ]);
+
+      store.filterEntities({
+        filter: { search: 'zero' },
+        patch: true,
+      });
+      tick(400);
+      // check selection was not reset
+      expect(store.entitySelected()).toEqual(mockProducts[0]);
+      expect(store.entitiesSelected?.()).toEqual([
+        mockProducts[2],
+        mockProducts[3],
+      ]);
       // check filter
       expect(store.entities().length).toEqual(2);
     });

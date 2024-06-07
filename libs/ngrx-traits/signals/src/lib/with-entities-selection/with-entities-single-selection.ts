@@ -39,6 +39,8 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  * @param config
  * @param config.collection - The collection name
  * @param config.entity - The entity type
+ * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
+ * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
  *
  * @example
  * const entity = type<Product>();
@@ -69,6 +71,8 @@ export function withEntitiesSingleSelection<
   Entity extends { id: string | number },
 >(config?: {
   entity: Entity;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -88,6 +92,8 @@ export function withEntitiesSingleSelection<
  * @param config
  * @param config.collection - The collection name
  * @param config.entity - The entity type
+ * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
+ * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
  *
  * @example
  * const entity = type<Product>();
@@ -119,6 +125,8 @@ export function withEntitiesSingleSelection<
 >(config?: {
   entity: Entity;
   collection?: Collection;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
   // TODO: the problem seems be with the state pro, when set to empty
   //  it works but is it has a namedstate it doesnt
@@ -139,6 +147,8 @@ export function withEntitiesSingleSelection<
 >(config?: {
   entity: Entity;
   collection?: Collection;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey } = getWithEntitiesKeys(config);
   const {
@@ -190,12 +200,26 @@ export function withEntitiesSingleSelection<
       };
     }),
     withEventHandler((state) => {
-      return [
-        onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () => {
-          const deselectEntity = state[deselectEntityKey] as () => void;
-          deselectEntity();
-        }),
-      ];
+      const clearOnFilter = config?.clearOnFilter ?? true;
+      const clearOnRemoteSort = config?.clearOnRemoteSort ?? true;
+      const events = [];
+      if (clearOnFilter) {
+        events.push(
+          onEvent(entitiesFilterChanged, () => {
+            const deselectEntity = state[deselectEntityKey] as () => void;
+            deselectEntity();
+          }),
+        );
+      }
+      if (clearOnRemoteSort) {
+        events.push(
+          onEvent(entitiesRemoteSortChanged, () => {
+            const deselectEntity = state[deselectEntityKey] as () => void;
+            deselectEntity();
+          }),
+        );
+      }
+      return events;
     }),
   );
 }
