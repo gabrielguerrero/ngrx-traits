@@ -503,7 +503,9 @@ export function withEntitiesRemotePagination<
           pipe(
             distinctUntilChanged(
               (previous, current) =>
-                !current.forceLoad && previous.pageIndex === current.pageIndex,
+                !current.forceLoad &&
+                previous.pageIndex === current.pageIndex &&
+                previous.pageSize === current.pageSize,
             ),
             exhaustMap(({ pageIndex, forceLoad, pageSize }) =>
               $loading.pipe(

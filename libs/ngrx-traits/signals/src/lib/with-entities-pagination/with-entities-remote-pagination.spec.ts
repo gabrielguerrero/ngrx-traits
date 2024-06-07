@@ -131,7 +131,7 @@ describe('withEntitiesRemotePagination', () => {
 
       store.loadEntitiesPage({ pageIndex: 1, pageSize: 15 });
       tick();
-      // check the second page
+      // check the first page on the new page size
       expect(store.entitiesCurrentPage().entities.length).toEqual(15);
       expect(store.entitiesCurrentPage().entities).toEqual(
         mockProducts.slice(0, 15),
@@ -143,9 +143,27 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
       expect(store.entitiesCurrentPage().hasNext).toEqual(true);
 
-      store.loadEntitiesPage({ pageIndex: 2 });
+      store.loadEntitiesPage({ pageIndex: 1, pageSize: 10 });
+      tick();
+
+      // check we can go back to the original page size
+      expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 10),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.entitiesCurrentPage().pagesCount).toEqual(4);
+      expect(store.entitiesCurrentPage().total).toEqual(40);
+      expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
+      expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+      // switch back to the 15 page size
+      store.loadEntitiesPage({ pageIndex: 0, pageSize: 15 });
       tick();
       // check the third page
+      store.loadEntitiesPage({ pageIndex: 2 });
+      tick();
       expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
       expect(store.entitiesCurrentPage().entities.length).toEqual(10);
       expect(store.entitiesCurrentPage().entities).toEqual(
