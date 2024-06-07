@@ -645,6 +645,8 @@ correctly in using remote pagination, because they cant select all the data.</p>
 | config |  |
 | config.entity | <p>the entity type</p> |
 | config.collection | <p>the collection name</p> |
+| config.clearOnFilter | <p>Clear the selected entity when the filter changes (default: true)</p> |
+| config.clearOnRemoteSort | <p>Clear the selected entity when the remote sort changes (default: true)</p> |
 
 **Example**  
 ```js
@@ -680,6 +682,8 @@ store.toggleSelectAllProducts // () => void;
 | config |  |
 | config.collection | <p>The collection name</p> |
 | config.entity | <p>The entity type</p> |
+| config.clearOnFilter | <p>Clear the selected entity when the filter changes (default: true)</p> |
+| config.clearOnRemoteSort | <p>Clear the selected entity when the remote sort changes (default: true)</p> |
 
 **Example**  
 ```js

@@ -511,14 +511,18 @@ export function withEntitiesRemotePagination<
                 // the previous exhaustMap to not loading ensures the function
                 // can not be called multiple time before results are loaded, which could corrupt the cache
                 tap(() => {
-                  patchState(state as StateSignal<object>, {
-                    [paginationKey]: {
-                      ...pagination(),
-                      currentPage: pageIndex,
-                      pageSize: pageSize ?? pagination().pageSize,
-                      requestPage: pageIndex,
-                    },
-                  });
+                  const size = pageSize ?? pagination().pageSize;
+                  if (size !== pagination().pageSize)
+                    clearEntitiesCache(state, config, size);
+                  else
+                    patchState(state as StateSignal<object>, {
+                      [paginationKey]: {
+                        ...pagination(),
+                        currentPage: pageIndex,
+                        pageSize: size,
+                        requestPage: pageIndex,
+                      },
+                    });
                   if (
                     isEntitiesInCache({
                       page: pageIndex,
@@ -572,9 +576,8 @@ export function withEntitiesRemotePagination<
 function clearEntitiesCache<Entity>(
   state: Record<string, Signal<unknown>>,
   config: { collection?: string },
+  pageSize?: number,
 ) {
-  const { entitiesKey } = getWithEntitiesKeys(config);
-  const entities = state[entitiesKey] as Signal<Entity[]>;
   const { paginationKey } = getWithEntitiesRemotePaginationKeys(config);
   const pagination = state[paginationKey] as Signal<PaginationState>;
   patchState(
@@ -587,8 +590,9 @@ function clearEntitiesCache<Entity>(
     {
       [paginationKey]: {
         ...pagination(),
-        total: entities.length,
-        cache: { start: 0, end: entities.length },
+        pageSize: pageSize ?? pagination().pageSize,
+        total: 0,
+        cache: { start: 0, end: 0 },
         currentPage: 0,
         requestPage: 0,
       },
