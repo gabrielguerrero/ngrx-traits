@@ -1,9 +1,15 @@
 import { Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export type Call<Param extends any = any, Result = any> =
-  | (() => Observable<Result> | Promise<Result>)
-  | ((arg: Param) => Observable<Result> | Promise<Result>);
+export type ObservableCall<Param = any, Result = any> =
+  | (() => Observable<Result>)
+  | ((arg: Param) => Observable<Result>);
+export type PromiseCall<Param = any, Result = any> =
+  | (() => Promise<Result>)
+  | ((arg: Param) => Promise<Result>);
+export type Call<Param = any, Result = any> =
+  | ObservableCall<Param, Result>
+  | PromiseCall<Param, Result>;
 export type CallConfig<
   Param = any,
   Result = any,
