@@ -1,10 +1,13 @@
 import {
   computed,
+  DestroyRef,
   EnvironmentInjector,
   inject,
+  isDevMode,
   runInInjectionContext,
   Signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStoreFeature,
@@ -24,13 +27,21 @@ import {
   catchError,
   concatMap,
   exhaustMap,
-  first,
+  finalize,
   from,
+  ignoreElements,
   map,
+  merge,
   Observable,
   of,
   pipe,
+  share,
+  Subject,
   switchMap,
+  take,
+  takeUntil,
+  tap,
+  timer,
 } from 'rxjs';
 
 import {
@@ -44,6 +55,7 @@ import {
   ExtractCallResultType,
   NamedCallsStatusComputed,
   NamedCallsStatusErrorComputed,
+  ObservableCall,
 } from './with-calls.model';
 import { getWithCallKeys } from './with-calls.util';
 
@@ -97,6 +109,7 @@ import { getWithCallKeys } from './with-calls.util';
  *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
  *   store.checkout // () => void
  *
+ * @warning The default mapPipe is {@link https://www.learnrxjs.io/learn-rxjs/operators/transformation/exhaustmap exhaustMap}. If your call returns an observable that does not complete after the first value is emitted, any changes to the input params will be ignored. Either specify {@link https://www.learnrxjs.io/learn-rxjs/operators/transformation/switchmap switchMap} as mapPipe, or use {@link https://www.learnrxjs.io/learn-rxjs/operators/filtering/take take(1)} or {@link https://www.learnrxjs.io/learn-rxjs/operators/filtering/first first()} as part of your call.
  */
 export function withCalls<
   Input extends SignalStoreFeatureResult,
@@ -233,14 +246,14 @@ export function withCalls<
                   [callStatusKey]: { error },
                 } as any);
 
+              const callFn = getCallFn(callName, call);
+
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
                   mapPipe((params) => {
                     setLoading();
                     return runInInjectionContext(environmentInjector, () => {
-                      return from(
-                        isCallConfig(call) ? call.call(params) : call(params),
-                      ).pipe(
+                      return callFn(params).pipe(
                         map((result) => {
                           if (
                             !isCallConfig(call) ||
@@ -255,7 +268,7 @@ export function withCalls<
                             call.onSuccess &&
                             call.onSuccess(result, params);
                         }),
-                        first(),
+                        takeUntilDestroyed(),
                         catchError((error: unknown) => {
                           const e =
                             (isCallConfig(call) &&
@@ -283,7 +296,9 @@ export function withCalls<
   };
 }
 
-function isCallConfig(call: Call | CallConfig): call is CallConfig {
+function isCallConfig<Param, Result>(
+  call: Call<Param, Result> | CallConfig<Param, Result>,
+): call is CallConfig<Param, Result> {
   return typeof call === 'object';
 }
 const mapPipes = {
@@ -293,7 +308,7 @@ const mapPipes = {
 };
 
 export function typedCallConfig<
-  Param extends any = undefined,
+  Param = undefined,
   Result = any,
   PropName extends string = '',
   Error = unknown,
@@ -311,4 +326,56 @@ export function typedCallConfig<
   // this fixes weird issue where typedCallConfig was not generating the right types
   // when CallConfig resultProp was defined
   return { ...config, resultProp: config.resultProp ?? '' } as C;
+}
+
+function getCallFn<Param, Result>(
+  callName: string,
+  call: Call<Param, Result> | CallConfig<Param, Result>,
+): ObservableCall<Param, Result> {
+  if (isCallConfig(call)) {
+    if (!call.mapPipe) {
+      return wrapMapPipeWarning(callName, call.call);
+    } else {
+      return (params) => from(call.call(params));
+    }
+  } else {
+    return wrapMapPipeWarning(callName, call);
+  }
+}
+
+/**
+ * @private
+ * Wraps a call with a warning mechanism in dev mode.
+ * If the call does not complete after the first value, it logs a warning
+ * indicating that the default "exhaustMap" pipe is being used.
+ */
+function wrapMapPipeWarning<Param, Result>(
+  callName: string,
+  call: Call<Param, Result>,
+): ObservableCall<Param, Result> {
+  if (isDevMode()) {
+    return (params) => {
+      const source$ = from(call(params)).pipe(
+        finalize(() => completed$.next()),
+        share(),
+      );
+      const completed$ = new Subject<void>();
+
+      const monitor$ = source$.pipe(
+        take(1),
+        switchMap(() => timer(100)),
+        tap(() => {
+          console.warn(
+            `withCalls "${callName}" did not complete after the first value and is using the default "exhaustMap" pipe. This means that subsequent values from params will be ignored until the observable completes. Please specify the mapPipe operator or use an observable that completes to avoid this warning.`,
+          );
+        }),
+        takeUntil(completed$),
+        ignoreElements(),
+      );
+
+      return merge(monitor$, source$);
+    };
+  } else {
+    return (params) => from(call(params));
+  }
 }
