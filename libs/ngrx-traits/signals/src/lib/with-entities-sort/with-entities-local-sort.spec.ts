@@ -1,8 +1,12 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
-import { withCallStatus, withEntitiesLocalSort } from '../index';
+import {
+  withCallStatus,
+  withEntitiesLocalFilter,
+  withEntitiesLocalSort,
+} from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
 
@@ -166,4 +170,118 @@ describe('withEntitiesLocalSort', () => {
       ]);
     });
   });
+
+  it('should sort entities after filter', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+
+      store.filterEntities({
+        filter: { search: 'Yoshi' },
+      });
+      tick(400);
+      expect(store.entities()).toEqual([
+        {
+          name: "Super Mario World 2: Yoshi's Island",
+          id: '39',
+          description: 'Super Nintendo Game',
+          price: 88,
+        },
+        {
+          name: "Yoshi's Cookie",
+          id: '20',
+          description: 'Super Nintendo Game',
+          price: 50,
+        },
+        {
+          name: "Yoshi's Safari",
+          id: '15',
+          description: 'Super Nintendo Game',
+          price: 40,
+        },
+      ]);
+    });
+  }));
+
+  it('store with default sort entities and default filter should render correctly', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: 'Yoshi' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      tick(400);
+      expect(store.entities()).toEqual([
+        {
+          name: "Super Mario World 2: Yoshi's Island",
+          id: '39',
+          description: 'Super Nintendo Game',
+          price: 88,
+        },
+        {
+          name: "Yoshi's Cookie",
+          id: '20',
+          description: 'Super Nintendo Game',
+          price: 50,
+        },
+        {
+          name: "Yoshi's Safari",
+          id: '15',
+          description: 'Super Nintendo Game',
+          price: 40,
+        },
+      ]);
+    });
+  }));
 });
