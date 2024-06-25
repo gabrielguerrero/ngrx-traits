@@ -20,8 +20,10 @@ import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
+import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import {
   broadcast,
+  onEvent,
   withEventHandler,
 } from '../with-event-handler/with-event-handler';
 import {
@@ -141,7 +143,7 @@ export function withEntitiesLocalSort<
   entity: Entity;
   collection?: Collection;
 }): SignalStoreFeature<any, any> {
-  const { entitiesKey } = getWithEntitiesKeys(config);
+  const { entitiesKey, idsKey } = getWithEntitiesKeys(config);
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
   const { entitiesLocalSortChanged } = getWithEntitiesLocalSortEvents(config);
 
@@ -154,25 +156,20 @@ export function withEntitiesLocalSort<
           sort: newSort,
         }: { sort?: Sort<Entity> } = {}) => {
           const sort = newSort ?? defaultSort;
-          patchState(
-            state as StateSignal<object>,
-            {
-              [sortKey]: sort,
-            },
-            config.collection
-              ? setAllEntities(
-                  sortData(state[entitiesKey]() as Entity[], sort),
-                  {
-                    collection: config.collection,
-                  },
-                )
-              : setAllEntities(
-                  sortData(state[entitiesKey]() as Entity[], sort),
-                ),
-          );
+          patchState(state as StateSignal<object>, {
+            [sortKey]: sort,
+            [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
+              (entity) => entity.id,
+            ),
+          });
           broadcast(state, entitiesLocalSortChanged({ sort }));
         },
       };
+    }),
+    withEventHandler((state: Record<string, unknown>) => {
+      const sortEntities = state[sortEntitiesKey] as () => void;
+      const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+      return [onEvent(entitiesFilterChanged, () => sortEntities())];
     }),
     withHooks((state: Record<string, unknown>) => {
       const { loadedKey } = getWithCallStatusKeys({ prop: config?.collection });
