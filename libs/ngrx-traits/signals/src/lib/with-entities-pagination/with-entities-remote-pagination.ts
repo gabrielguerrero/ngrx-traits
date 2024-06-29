@@ -408,7 +408,9 @@ export function withEntitiesRemotePagination<
           page * pagination().pageSize - pagination().cache.start;
         let endIndex = startIndex + pagination().pageSize;
         endIndex =
-          endIndex < pagination().cache.end ? endIndex : pagination().cache.end;
+          endIndex < pagination().cache.end
+            ? endIndex
+            : pagination().cache.end + 1;
 
         return entities().slice(startIndex, endIndex);
       });
@@ -487,8 +489,8 @@ export function withEntitiesRemotePagination<
                     ? pagination().cache.start
                     : newStart,
                   end: isPreloadNextPagesReady
-                    ? pagination().cache.end + entities.length
-                    : newStart + entities.length,
+                    ? pagination().cache.end + entities.length - 1
+                    : newStart + entities.length - 1,
                 },
               },
             },

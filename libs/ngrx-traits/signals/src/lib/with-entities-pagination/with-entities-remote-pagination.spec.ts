@@ -529,7 +529,7 @@ describe('withEntitiesRemotePagination', () => {
         // basic check the second page
         expect(store.entitiesCurrentPage().entities.length).toEqual(10);
         expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
-        // load load last page in cache
+        // load last page in cache
         store.loadEntitiesPage({ pageIndex: 2 });
         expect(store.entitiesCurrentPage().entities.length).toEqual(10);
         expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
@@ -559,6 +559,79 @@ describe('withEntitiesRemotePagination', () => {
         expect(store.entitiesCurrentPage().total).toEqual(mockProducts.length);
         expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
         expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+      });
+    }));
+
+    it('test pageCache 1 renders correctly', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const fetchEntitiesSpy = jest.fn();
+        const Store = signalStore(
+          withEntities({ entity }),
+          withCallStatus(),
+          withEntitiesRemotePagination({
+            entity,
+            pageSize: 10,
+            pagesToCache: 1,
+          }),
+          withEntitiesLoadingCall({
+            fetchEntities: ({ entitiesPagedRequest }) => {
+              fetchEntitiesSpy(entitiesPagedRequest());
+              let result = mockProducts.slice(0, 21);
+              const total = result.length;
+              const options = {
+                skip: entitiesPagedRequest()?.startIndex,
+                take: entitiesPagedRequest()?.size,
+              };
+              if (options?.skip || options?.take) {
+                const skip = +(options?.skip ?? 0);
+                const take = +(options?.take ?? 0);
+                result = result.slice(skip, skip + take);
+              }
+              console.log({ result: result.length, total });
+              return of({ entities: result, total });
+            },
+          }),
+        );
+
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.entities()).toEqual([]);
+        store.setLoading();
+        tick();
+        // basic check the first page
+        expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+        expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+        // load next cached page
+        store.loadEntitiesPage({ pageIndex: 1 });
+        tick();
+        // basic check the second page
+        expect(store.entitiesCurrentPage().entities.length).toEqual(10);
+        expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
+        // load last page in cache
+        store.loadEntitiesPage({ pageIndex: 2 });
+        tick();
+        expect(store.entitiesCurrentPage().entities.length).toEqual(1);
+        expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
+        tick();
+
+        expect(fetchEntitiesSpy).toHaveBeenCalledTimes(3);
+        // check preload next pages call
+        expect(fetchEntitiesSpy).toHaveBeenCalledWith({
+          startIndex: 20,
+          size: 10,
+          page: 2,
+        });
+
+        // only three calls should have been made the initial and the preload next pages
+        expect(fetchEntitiesSpy).toHaveBeenCalledTimes(3);
+        expect(store.entitiesCurrentPage().entities).toEqual(
+          mockProducts.slice(20, 21),
+        );
+        expect(store.entitiesCurrentPage().pageSize).toEqual(10);
+        expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+        expect(store.entitiesCurrentPage().total).toEqual(21);
+        expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+        expect(store.entitiesCurrentPage().hasNext).toEqual(false);
       });
     }));
   });
