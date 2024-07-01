@@ -9,10 +9,10 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
+  EntityComputed,
   EntityId,
   EntityMap,
-  EntitySignals,
-  NamedEntitySignals,
+  NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
@@ -78,12 +78,12 @@ export function withEntitiesMultiSelection<
   //  it works but is it has a namedstate it doesnt
   {
     state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
   {
     state: NamedEntitiesMultiSelectionState<Collection>;
-    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+    computed: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
     methods: NamedEntitiesMultiSelectionMethods<Collection>;
   }
 >;
@@ -126,12 +126,12 @@ export function withEntitiesMultiSelection<Entity>(config: {
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   },
   {
     state: EntitiesMultiSelectionState;
-    signals: EntitiesMultiSelectionComputed<Entity>;
+    computed: EntitiesMultiSelectionComputed<Entity>;
     methods: EntitiesMultiSelectionMethods;
   }
 >;

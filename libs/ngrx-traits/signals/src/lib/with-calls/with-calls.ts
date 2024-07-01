@@ -19,7 +19,7 @@ import {
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type {
   SignalStoreFeatureResult,
-  SignalStoreSlices,
+  StateSignals,
 } from '@ngrx/signals/src/signal-store-models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { Prettify } from '@ngrx/signals/src/ts-helpers';
@@ -117,8 +117,8 @@ export function withCalls<
 >(
   callsFactory: (
     store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >,
@@ -135,7 +135,7 @@ export function withCalls<
             : Calls[K]['resultProp'] & string
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
-    signals: NamedCallsStatusComputed<keyof Calls & string> &
+    computed: NamedCallsStatusComputed<keyof Calls & string> &
       NamedCallsStatusErrorComputed<Calls>;
     methods: {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
@@ -161,15 +161,15 @@ export function withCalls<
   }
 > {
   return (store) => {
-    const { slices, methods, signals, hooks, ...rest } = store;
+    const { stateSignals, methods, computedSignals, hooks, ...rest } = store;
     const calls = callsFactory({
-      ...slices,
-      ...signals,
+      ...stateSignals,
+      ...computedSignals,
       ...methods,
       ...rest,
     } as Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >);

@@ -1,7 +1,7 @@
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { PageInfoModel } from '@ngrx-traits/common';
 import { ActionCreator, Selector, Store } from '@ngrx/store';
-import { TypedAction } from '@ngrx/store/src/models';
+import { Action } from '@ngrx/store/src/models';
 import { Observable, Subscription, withLatestFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -14,7 +14,7 @@ function getDataSource<T>({
   store: Store;
   selectEntitiesList: Selector<any, T[]>;
   selectEntitiesPageInfo: Selector<any, PageInfoModel>;
-  loadEntitiesNextPage: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesNextPage: ActionCreator<string, () => Action<string>>;
 }) {
   class MyDataSource extends DataSource<T> {
     subscription?: Subscription;

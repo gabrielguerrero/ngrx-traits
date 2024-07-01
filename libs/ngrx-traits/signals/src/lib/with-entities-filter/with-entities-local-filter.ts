@@ -10,10 +10,10 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
-  EntityIdKey,
+  EntityComputed,
   EntityMap,
-  EntitySignals,
-  NamedEntitySignals,
+  NamedEntityComputed,
+  SelectEntityId,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
@@ -51,7 +51,7 @@ import {
  * @param config.defaultFilter - The default filter to be used
  * @param config.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
  * @param config.collection - The optional collection name to be used
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -89,7 +89,7 @@ export function withEntitiesLocalFilter<
   defaultDebounce?: number;
   entity: Entity;
   collection: Collection;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   // TODO: we have a problem  with the state property, when set to any
   // it works but is it has a Collection, some methods are not generated, it seems
@@ -98,12 +98,12 @@ export function withEntitiesLocalFilter<
   // gives the right error requiring withEntities to be used
   {
     state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
   {
     state: NamedEntitiesFilterState<Collection, Filter>;
-    signals: NamedEntitiesFilterComputed<Collection>;
+    computed: NamedEntitiesFilterComputed<Collection>;
     methods: NamedEntitiesFilterMethods<Collection, Filter>;
   }
 >;
@@ -120,7 +120,7 @@ export function withEntitiesLocalFilter<
  * @param config.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
  * @param config.entity - The entity tye to be used
  * @param config.collection - The optional collection name to be used
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -156,16 +156,16 @@ export function withEntitiesLocalFilter<
   defaultFilter: Filter;
   defaultDebounce?: number;
   entity: Entity;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   },
   {
     state: EntitiesFilterState<Filter>;
-    signals: EntitiesFilterComputed;
+    computed: EntitiesFilterComputed;
     methods: EntitiesFilterMethods<Filter>;
   }
 >;
@@ -183,7 +183,7 @@ export function withEntitiesLocalFilter<
   defaultDebounce?: number;
   entity: Entity;
   collection?: Collection;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
   const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
@@ -230,8 +230,10 @@ export function withEntitiesLocalFilter<
                 [filterKey]: value.filter,
               },
               {
-                [idsKey]: newEntities.map(
-                  (entity) => (entity as any)[config.idKey ?? 'id'],
+                [idsKey]: newEntities.map((entity) =>
+                  config.selectId
+                    ? config.selectId(entity)
+                    : (entity as any)['id'],
                 ),
               },
             );

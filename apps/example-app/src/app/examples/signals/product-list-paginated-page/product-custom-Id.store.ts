@@ -9,7 +9,7 @@ import {
   withEntitiesSingleSelection,
 } from '@ngrx-traits/signals';
 import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
 import { Product } from '../../models';
@@ -18,36 +18,36 @@ import { ProductService } from '../../services/product.service';
 
 // Example of wihEntities with a custom id key
 type ProductCustom = Omit<Product, 'id'> & { productId: string };
-const entityConfig = {
+const config = entityConfig({
   entity: type<ProductCustom>(),
   collection: 'products',
-  idKey: 'productId' as any,
-} as const;
+  selectId: (entity) => entity.productId,
+});
 
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: 'loading' }),
+  withEntities(config),
+  withCallStatus({ ...config, initialValue: 'loading' }),
   withEntitiesLocalPagination({
-    ...entityConfig,
+    ...config,
     pageSize: 5,
   }),
   withEntitiesLocalFilter({
-    ...entityConfig,
+    ...config,
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
   withEntitiesLocalSort({
-    ...entityConfig,
+    ...config,
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesSingleSelection({
-    ...entityConfig,
+    ...config,
   }),
   withEntitiesLoadingCall({
-    ...entityConfig,
+    ...config,
     fetchEntities: ({ productsFilter }) => {
       return inject(ProductService)
         .getProducts({
