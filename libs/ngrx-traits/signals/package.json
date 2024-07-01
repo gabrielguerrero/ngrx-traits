@@ -6,8 +6,8 @@
     "build": "ng-packagr -p package.json"
   },
   "peerDependencies": {
-    "@angular/core": "^17.1.0",
-    "@ngrx/signals": "^17.1.1",
+    "@angular/core": "^18.0.5",
+    "@ngrx/signals": "^18.0.0-rc.2",
     "rxjs": "^7.8.1"
   },
   "optionalDependencies": {
