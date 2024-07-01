@@ -91,13 +91,8 @@ export function withEntitiesLocalFilter<
   collection: Collection;
   selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
-  // TODO: we have a problem  with the state property, when set to any
-  // it works but is it has a Collection, some methods are not generated, it seems
-  // to only be accessible using store['filterEntities']
-  // the workaround doesn't cause any issues, because the signals prop does work and still
-  // gives the right error requiring withEntities to be used
   {
-    state: NamedEntityState<Entity, any>;
+    state: NamedEntityState<Entity, Collection>;
     computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },

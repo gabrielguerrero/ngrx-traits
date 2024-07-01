@@ -74,10 +74,8 @@ export function withEntitiesMultiSelection<
   clearOnFilter?: boolean;
   clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
   {
-    state: NamedEntityState<Entity, any>;
+    state: NamedEntityState<Entity, Collection>;
     computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
