@@ -13,15 +13,15 @@
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
-$angular-client-primary: mat.define-palette(mat.$teal-palette, 500);
-$angular-client-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+$angular-client-primary: mat.m2-define-palette(mat.$m2-teal-palette, 500);
+$angular-client-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
 
 // The warn palette is optional (defaults to red).
-$angular-client-warn: mat.define-palette(mat.$red-palette);
+$angular-client-warn: mat.m2-define-palette(mat.$m2-red-palette);
 
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
-$angular-client-theme: mat.define-dark-theme(
+$angular-client-theme: mat.m2-define-dark-theme(
   (
     color: (
       primary: $angular-client-primary,

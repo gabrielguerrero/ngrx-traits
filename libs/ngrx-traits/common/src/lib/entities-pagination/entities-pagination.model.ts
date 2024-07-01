@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { LoadEntitiesState } from '../load-entities';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
 
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
+import { LoadEntitiesState } from '../load-entities';
 
 export type CacheType = 'full' | 'partial' | 'grow';
 export interface EntitiesPaginationState {
@@ -25,52 +25,52 @@ export type EntitiesPaginationActions = {
     (props: {
       index: number;
       forceLoad?: boolean;
-    }) => { index: number; forceLoad?: boolean } & TypedAction<string>
+    }) => { index: number; forceLoad?: boolean } & Action<string>
   >;
-  loadEntitiesPageSuccess: ActionCreator<string, () => TypedAction<string>>;
-  loadEntitiesPageFail: ActionCreator<string, () => TypedAction<string>>;
-  loadEntitiesNextPage: ActionCreator<string, () => TypedAction<string>>;
-  loadEntitiesPreviousPage: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesPageSuccess: ActionCreator<string, () => Action<string>>;
+  loadEntitiesPageFail: ActionCreator<string, () => Action<string>>;
+  loadEntitiesNextPage: ActionCreator<string, () => Action<string>>;
+  loadEntitiesPreviousPage: ActionCreator<string, () => Action<string>>;
   loadEntitiesFirstPage: ActionCreator<
     string,
-    (forceLoad?: boolean) => { forceLoad?: boolean } & TypedAction<string>
+    (forceLoad?: boolean) => { forceLoad?: boolean } & Action<string>
   >;
-  loadEntitiesLastPage: ActionCreator<string, () => TypedAction<string>>;
-  clearEntitiesPagesCache: ActionCreator<string, () => TypedAction<string>>;
+  loadEntitiesLastPage: ActionCreator<string, () => Action<string>>;
+  clearEntitiesPagesCache: ActionCreator<string, () => Action<string>>;
 };
 
 export type EntitiesPaginationSelectors<T> = {
   selectEntitiesCurrentPageList: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
   ) => T[];
   selectEntitiesCurrentPage: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
   ) => PageModel<T>;
   selectEntitiesPagedRequest: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
   ) => PagedRequest;
   selectEntitiesCurrentPageInfo: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
   ) => PageInfoModel;
   isLoadingEntitiesCurrentPage: (
-    state: LoadEntitiesState<T> & EntitiesPaginationState
+    state: LoadEntitiesState<T> & EntitiesPaginationState,
   ) => boolean;
 };
 
 export type EntitiesPaginationMutators<Entity> = {
   mergePaginatedEntities<
-    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState,
   >(
     entities: Entity[],
     total: number | undefined,
-    state: S
+    state: S,
   ): S;
   setEntitiesPage<
     Entity,
-    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState,
   >(
     state: S,
-    index: number
+    index: number,
   ): S;
 };
 

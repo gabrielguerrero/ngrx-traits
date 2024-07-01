@@ -1,7 +1,8 @@
-import { LoadEntitiesState } from '../load-entities/load-entities.model';
-
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from '@ngrx-traits/core';
+import { Action } from '@ngrx/store';
+import { ActionCreator } from '@ngrx/store/src/models';
+
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 export declare type SortDirection = 'asc' | 'desc' | '';
 
@@ -22,24 +23,24 @@ export interface SortEntitiesState<T> {
 export type SortEntitiesActions<T> = {
   sortEntities: ActionCreator<
     string,
-    (props: Sort<T>) => Sort<T> & TypedAction<string>
+    (props: Sort<T>) => Sort<T> & Action<string>
   >;
   /**
    * Sets the default sort back
    */
-  resetEntitiesSort: ActionCreator<string, () => TypedAction<string>>;
+  resetEntitiesSort: ActionCreator<string, () => Action<string>>;
 };
 
 export type SortEntitiesSelectors<T> = {
   selectEntitiesSort: (
-    state: LoadEntitiesState<T> & SortEntitiesState<T>
+    state: LoadEntitiesState<T> & SortEntitiesState<T>,
   ) => Sort<T>;
 };
 
 export type SortEntitiesMutators<T> = {
   sortEntities<S extends LoadEntitiesState<T> & SortEntitiesState<T>>(
     { active, direction }: Sort<T>,
-    state: S
+    state: S,
   ): S;
 };
 

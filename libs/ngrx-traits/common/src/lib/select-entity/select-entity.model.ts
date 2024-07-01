@@ -1,5 +1,7 @@
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 import { KeyedConfig } from '@ngrx-traits/core';
+import { Action } from '@ngrx/store';
+import { ActionCreator } from '@ngrx/store/src/models';
+
 import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 export interface SelectEntityState {
@@ -9,39 +11,35 @@ export interface SelectEntityState {
 export type SelectEntityActions = {
   selectEntity: ActionCreator<
     string,
-    (props: {
-      id: number | string;
-    }) => { id: number | string } & TypedAction<string>
+    (props: { id: number | string }) => { id: number | string } & Action<string>
   >;
-  deselectEntity: ActionCreator<string, () => TypedAction<string>>;
+  deselectEntity: ActionCreator<string, () => Action<string>>;
   toggleSelectEntity: ActionCreator<
     string,
-    (props: {
-      id: number | string;
-    }) => { id: number | string } & TypedAction<string>
+    (props: { id: number | string }) => { id: number | string } & Action<string>
   >;
 };
 
 export type SelectEntitySelectors<T> = {
   selectEntityIdSelected: (
-    state: LoadEntitiesState<T> & SelectEntityState
+    state: LoadEntitiesState<T> & SelectEntityState,
   ) => string | number | undefined;
   selectEntitySelected: (
-    state: LoadEntitiesState<T> & SelectEntityState
+    state: LoadEntitiesState<T> & SelectEntityState,
   ) => T | undefined;
 };
 
 export type SelectEntityMutators<T> = {
   selectEntity<S extends LoadEntitiesState<T> & SelectEntityState>(
     id: string | number,
-    state: S
+    state: S,
   ): S;
   deselectEntity<S extends LoadEntitiesState<T> & SelectEntityState>(
-    state: S
+    state: S,
   ): S;
   toggleSelectEntity<S extends LoadEntitiesState<T> & SelectEntityState>(
     id: string | number,
-    state: S
+    state: S,
   ): S;
 };
 

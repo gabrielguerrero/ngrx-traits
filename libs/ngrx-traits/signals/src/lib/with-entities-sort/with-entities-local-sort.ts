@@ -13,10 +13,9 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import {
-  EntityIdKey,
-  EntityIdProps,
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
+  SelectEntityId,
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
@@ -49,7 +48,7 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * @param config.defaultSort - The default sort to be applied to the entities
  * @param config.entity - The type entity to be used
  * @param config.collection - The name of the collection for which will be sorted
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -75,7 +74,7 @@ export function withEntitiesLocalSort<
   defaultSort: Sort<Entity>;
   entity: Entity;
   collection: Collection;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   // TODO: we have a problem  with the state property, when set to any
   // it works but is it has a Collection, some methods are not generated, it seems
@@ -84,12 +83,12 @@ export function withEntitiesLocalSort<
   // gives the right error requiring withEntities to be used
   {
     state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
   {
     state: NamedEntitiesSortState<Entity, Collection>;
-    signals: {};
+    computed: {};
     methods: NamedEntitiesSortMethods<Collection, Collection>;
   }
 >;
@@ -101,7 +100,7 @@ export function withEntitiesLocalSort<
  * @param config.defaultSort - The default sort to be applied to the entities
  * @param config.entity - The type entity to be used
  * @param config.collection - The name of the collection for which will be sorted
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -123,16 +122,16 @@ export function withEntitiesLocalSort<
 export function withEntitiesLocalSort<Entity>(config: {
   defaultSort: Sort<Entity>;
   entity: Entity;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   },
   {
     state: EntitiesSortState<Entity>;
-    signals: {};
+    computed: {};
     methods: EntitiesSortMethods<Entity>;
   }
 >;
@@ -143,7 +142,7 @@ export function withEntitiesLocalSort<Entity, Collection extends string>({
   defaultSort: Sort<Entity>;
   entity: Entity;
   collection?: Collection;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<any, any> {
   const { entitiesKey, idsKey } = getWithEntitiesKeys(config);
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
@@ -162,7 +161,7 @@ export function withEntitiesLocalSort<Entity, Collection extends string>({
             [sortKey]: sort,
             [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
               (entity) =>
-                config.idKey ? entity[config.idKey] : (entity as any).id,
+                config.selectId ? config.selectId(entity) : (entity as any).id,
             ),
           });
           broadcast(state, entitiesLocalSortChanged({ sort }));

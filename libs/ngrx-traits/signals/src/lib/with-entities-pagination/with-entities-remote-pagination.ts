@@ -14,9 +14,9 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import {
-  EntityIdKey,
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
+  SelectEntityId,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
@@ -69,7 +69,7 @@ import {
  * @param config.pagesToCache - The number of pages to cache
  * @param config.entity - The entity type
  * @param config.collection - The name of the collection
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -150,17 +150,17 @@ export function withEntitiesRemotePagination<
   pagesToCache?: number;
   entity: Entity;
   collection: Collection;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
-    signals: NamedEntitySignals<Entity, Collection> &
+    computed: NamedEntityComputed<Entity, Collection> &
       NamedCallStatusComputed<Collection>;
     methods: NamedCallStatusMethods<Collection>;
   },
   {
     state: NamedEntitiesPaginationRemoteState<Collection>;
-    signals: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
+    computed: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
     methods: NamedEntitiesPaginationRemoteMethods<Entity, Collection>;
   }
 >;
@@ -181,7 +181,7 @@ export function withEntitiesRemotePagination<
  * @param config.pagesToCache - The number of pages to cache
  * @param config.entity - The entity type
  * @param config.collection - The name of the collection
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -254,16 +254,16 @@ export function withEntitiesRemotePagination<Entity>(config: {
   currentPage?: number;
   pagesToCache?: number;
   entity: Entity;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity> & CallStatusComputed;
+    computed: EntityComputed<Entity> & CallStatusComputed;
     methods: CallStatusMethods;
   },
   {
     state: EntitiesPaginationRemoteState;
-    signals: EntitiesPaginationRemoteComputed<Entity>;
+    computed: EntitiesPaginationRemoteComputed<Entity>;
     methods: EntitiesPaginationRemoteMethods<Entity>;
   }
 >;
@@ -282,7 +282,7 @@ export function withEntitiesRemotePagination<
   pagesToCache?: number;
   entity: Entity;
   collection?: Collection;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<any, any> {
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
@@ -395,10 +395,10 @@ export function withEntitiesRemotePagination<
             config.collection
               ? setAllEntities(newEntities, {
                   collection: config.collection,
-                  idKey: config.idKey ?? ('id' as EntityIdKey<Entity>),
+                  selectId: config.selectId ?? ((entity) => (entity as any).id),
                 })
               : setAllEntities(newEntities, {
-                  idKey: config.idKey ?? ('id' as EntityIdKey<Entity>),
+                  selectId: config.selectId ?? ((entity) => (entity as any).id),
                 }),
             {
               [paginationKey]: {

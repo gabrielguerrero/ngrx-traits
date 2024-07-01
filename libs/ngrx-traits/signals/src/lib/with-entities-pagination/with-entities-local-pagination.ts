@@ -8,8 +8,8 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
 
 import { getWithEntitiesKeys } from '../util';
@@ -75,12 +75,12 @@ export function withEntitiesLocalPagination<
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
-    signals: NamedEntitySignals<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
   {
     state: NamedEntitiesPaginationLocalState<Collection>;
-    signals: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
+    computed: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
     methods: NamedEntitiesPaginationLocalMethods<Collection>;
   }
 >;
@@ -121,12 +121,12 @@ export function withEntitiesLocalPagination<Entity>(config: {
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   },
   {
     state: EntitiesPaginationLocalState;
-    signals: EntitiesPaginationLocalComputed<Entity>;
+    computed: EntitiesPaginationLocalComputed<Entity>;
     methods: EntitiesPaginationLocalMethods;
   }
 >;

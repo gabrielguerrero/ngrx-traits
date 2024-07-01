@@ -61,10 +61,10 @@ export function withCallStatus<Prop extends string, Error = unknown>(
         errorType?: Error;
       },
 ): SignalStoreFeature<
-  { state: {}; signals: {}; methods: {} },
+  { state: {}; computed: {}; methods: {} },
   {
     state: NamedCallStatusState<Prop>;
-    signals: NamedCallStatusComputed<Prop, Error>;
+    computed: NamedCallStatusComputed<Prop, Error>;
     methods: NamedCallStatusMethods<Prop, Error>;
   }
 >;
@@ -101,10 +101,10 @@ export function withCallStatus<Error = unknown>(config?: {
   initialValue?: CallStatus;
   errorType?: Error;
 }): SignalStoreFeature<
-  { state: {}; signals: {}; methods: {} },
+  { state: {}; computed: {}; methods: {} },
   {
     state: CallStatusState;
-    signals: CallStatusComputed<Error>;
+    computed: CallStatusComputed<Error>;
     methods: CallStatusMethods<Error>;
   }
 >;

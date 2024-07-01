@@ -11,7 +11,7 @@ import {
 } from '@ngrx/signals';
 import type {
   SignalStoreFeatureResult,
-  SignalStoreSlices,
+  StateSignals,
 } from '@ngrx/signals/src/signal-store-models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { Prettify } from '@ngrx/signals/src/ts-helpers';
@@ -63,8 +63,8 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   filterState?: (state: Input['state']) => Partial<Input['state']>;
   onRestore?: (
     store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >,
@@ -98,8 +98,8 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
           patchState(store, JSON.parse(stateJson));
           onRestore?.(
             store as Prettify<
-              SignalStoreSlices<Input['state']> &
-                Input['signals'] &
+              StateSignals<Input['state']> &
+                Input['computed'] &
                 Input['methods'] &
                 StateSignal<Prettify<Input['state']>>
             >,

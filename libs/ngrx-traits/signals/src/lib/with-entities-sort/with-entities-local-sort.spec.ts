@@ -1,6 +1,10 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+import {
+  entityConfig,
+  setAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
 
 import {
   withCallStatus,
@@ -58,23 +62,23 @@ describe('withEntitiesLocalSort', () => {
 
   it('should sort entities with custom id', () => {
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
-    const entityConfig = {
+    const config = entityConfig({
       entity: type<ProductCustom>(),
-      idKey: 'productId',
-    } as const;
+      selectId: (e) => e.productId,
+    });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
       ...p,
       productId: id,
     }));
     const Store = signalStore(
-      withEntities(entityConfig),
+      withEntities(config),
       withEntitiesLocalSort({
-        ...entityConfig,
+        ...config,
         defaultSort: { field: 'name', direction: 'asc' },
       }),
     );
     const store = new Store();
-    patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+    patchState(store, setAllEntities(mockProductsCustom, config));
     expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
     // check default sort
     store.sortEntities();
@@ -155,26 +159,25 @@ describe('withEntitiesLocalSort', () => {
   });
 
   it('with collection should sort entities with custom id and store sort', () => {
-    const collection = 'products';
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
-    const entityConfig = {
+    const config = entityConfig({
       entity: type<ProductCustom>(),
-      collection,
-      idKey: 'productId',
-    } as const;
+      collection: 'products',
+      selectId: (e) => e.productId,
+    });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
       ...p,
       productId: id,
     }));
     const Store = signalStore(
-      withEntities(entityConfig),
+      withEntities(config),
       withEntitiesLocalSort({
-        ...entityConfig,
+        ...config,
         defaultSort: { field: 'name', direction: 'asc' },
       }),
     );
     const store = new Store();
-    patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+    patchState(store, setAllEntities(mockProductsCustom, config));
     expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
     // check default sort
     store.sortProductsEntities();
