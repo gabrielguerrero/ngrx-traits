@@ -1,12 +1,13 @@
-import { createTraitFactory, insertIf } from '@ngrx-traits/core';
-import { GenericActionCreator } from '../load-entities';
-import { TraitActionsFactoryConfig } from '@ngrx-traits/core';
-import { createAction, createReducer, on, Store } from '@ngrx/store';
 import { Injectable } from '@angular/core';
+import { createTraitFactory, insertIf } from '@ngrx-traits/core';
+import { TraitActionsFactoryConfig } from '@ngrx-traits/core';
 import { TraitEffect } from '@ngrx-traits/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createAction, createReducer, on, Store } from '@ngrx/store';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
 import { mapTo } from 'rxjs/operators';
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
+
+import { GenericActionCreator } from '../load-entities';
 
 /**
  * Generates the ngrx code needed to reset the current state to the initial state.
@@ -33,7 +34,7 @@ import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 export function addResetEntitiesStateTrait(
   traitConfig: {
     resetOn?: readonly ActionCreator[];
-  } = {}
+  } = {},
 ) {
   return createTraitFactory({
     key: 'reset',
@@ -43,7 +44,7 @@ export function addResetEntitiesStateTrait(
       entitiesName,
     }: TraitActionsFactoryConfig) => ({
       resetEntitiesState: createAction(
-        `${actionsGroupKey} Reset ${entitiesName} State`
+        `${actionsGroupKey} Reset ${entitiesName} State`,
       ),
     }),
     reducer: ({ allActions, initialState }) =>
@@ -52,8 +53,8 @@ export function addResetEntitiesStateTrait(
         on(allActions.resetEntitiesState, () => initialState),
         ...insertIf<typeof initialState>(traitConfig.resetOn, () =>
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          on(...traitConfig.resetOn!, () => initialState)
-        )
+          on(...traitConfig.resetOn!, () => initialState),
+        ),
       ),
   });
 }

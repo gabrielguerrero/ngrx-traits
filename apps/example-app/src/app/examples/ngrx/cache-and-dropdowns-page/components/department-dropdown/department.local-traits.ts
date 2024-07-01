@@ -10,7 +10,8 @@ import {
   LocalTraitsConfig,
   TraitsLocalStore,
 } from '@ngrx-traits/core';
-import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
 import { of } from 'rxjs';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 

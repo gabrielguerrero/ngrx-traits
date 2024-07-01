@@ -1,8 +1,16 @@
+import { inject, Injectable } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   createTraitFactory,
   TraitActionsFactoryConfig,
   TraitEffect,
 } from '@ngrx-traits/core';
+import { createEffect, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
+import { createAction, createReducer, on, props } from '@ngrx/store';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
+import { delay, map, mapTo, tap } from 'rxjs/operators';
+
 import {
   EntitiesPaginationActions,
   EntitiesPaginationMutators,
@@ -13,18 +21,12 @@ import {
   FilterEntitiesMutators,
   filterEntitiesTraitKey,
 } from '../filter-entities';
+import { LoadEntitiesActions } from '../load-entities';
 import {
   SortEntitiesActions,
   SortEntitiesMutators,
   sortTraitKey,
 } from '../sort-entities';
-import { LoadEntitiesActions } from '../load-entities';
-import { createAction, createReducer, on, props } from '@ngrx/store';
-import { inject, Injectable } from '@angular/core';
-import { concatLatestFrom, createEffect, ofType } from '@ngrx/effects';
-import { ActivatedRoute, Router } from '@angular/router';
-import { delay, map, mapTo, tap } from 'rxjs/operators';
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 
 /**
  * Generates ngrx code necessary to load and set to the current route query params for the filter, sort and paging traits
@@ -55,7 +57,7 @@ import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
 export function addEntitiesSyncToRouteQueryParams() {
   let setEntitiesRouteQueryParams: ActionCreator<
     string,
-    (props: { params: any }) => { params: any } & TypedAction<string>
+    (props: { params: any }) => { params: any } & Action<string>
   >;
   return createTraitFactory({
     key: 'entitiesSyncToRouteQueryParams',
@@ -63,12 +65,12 @@ export function addEntitiesSyncToRouteQueryParams() {
     actions({ actionsGroupKey, entitiesName }: TraitActionsFactoryConfig) {
       const actions = {
         loadEntitiesUsingRouteQueryParams: createAction(
-          `${actionsGroupKey} Load ${entitiesName} Using Route Query Params`
+          `${actionsGroupKey} Load ${entitiesName} Using Route Query Params`,
         ),
       };
       setEntitiesRouteQueryParams = createAction(
         `${actionsGroupKey} Set ${entitiesName} Route Query Params`,
-        props<{ params: any }>()
+        props<{ params: any }>(),
       );
       return { ...actions, setEntitiesRouteQueryParams } as typeof actions;
     },
@@ -84,7 +86,7 @@ export function addEntitiesSyncToRouteQueryParams() {
           if (params.page) {
             newState = allMutators.setEntitiesPage(
               newState as any,
-              +params.page
+              +params.page,
             );
             delete params.page;
           }
@@ -94,7 +96,7 @@ export function addEntitiesSyncToRouteQueryParams() {
                 active: params.sortActive,
                 direction: params.sortDirection,
               },
-              newState as any
+              newState as any,
             );
             delete params.sortActive;
             delete params.sortDirection;
@@ -104,7 +106,7 @@ export function addEntitiesSyncToRouteQueryParams() {
           }
 
           return newState;
-        })
+        }),
       );
     },
     effects({ allActions: a }) {
@@ -122,7 +124,7 @@ export function addEntitiesSyncToRouteQueryParams() {
           return this.actions$.pipe(
             ofType(allActions.loadEntitiesUsingRouteQueryParams),
             concatLatestFrom(() => this.activatedRoute.queryParams),
-            map(([_, params]) => setEntitiesRouteQueryParams({ params }))
+            map(([_, params]) => setEntitiesRouteQueryParams({ params })),
           );
         });
 
@@ -130,8 +132,10 @@ export function addEntitiesSyncToRouteQueryParams() {
           return this.actions$.pipe(
             ofType(setEntitiesRouteQueryParams),
             mapTo(
-              (allActions as unknown as LoadEntitiesActions<any>).loadEntities()
-            )
+              (
+                allActions as unknown as LoadEntitiesActions<any>
+              ).loadEntities(),
+            ),
           );
         });
 
@@ -143,10 +147,10 @@ export function addEntitiesSyncToRouteQueryParams() {
                 ofType(allActions.filterEntities),
                 tap(({ filters }) => {
                   this.updateUrl(filters);
-                })
+                }),
               );
             },
-            { dispatch: false }
+            { dispatch: false },
           );
 
         onSort$ =
@@ -161,10 +165,10 @@ export function addEntitiesSyncToRouteQueryParams() {
                     sortActive: active,
                     sortDirection: direction,
                   });
-                })
+                }),
               );
             },
-            { dispatch: false }
+            { dispatch: false },
           );
 
         onPaginate$ =
@@ -177,10 +181,10 @@ export function addEntitiesSyncToRouteQueryParams() {
                   this.updateUrl({
                     page: index,
                   });
-                })
+                }),
               );
             },
-            { dispatch: false }
+            { dispatch: false },
           );
 
         updateUrl(queryParams: any) {

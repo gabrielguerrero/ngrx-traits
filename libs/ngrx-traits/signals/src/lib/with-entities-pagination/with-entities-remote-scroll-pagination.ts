@@ -15,9 +15,9 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import {
-  EntityIdKey,
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
+  SelectEntityId,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
@@ -76,7 +76,7 @@ import {
  * @param config.pagesToCache - The number of pages to cache
  * @param config.entity - The entity type
  * @param config.collection - The name of the collection
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  * @example
  * const entity = type<Product>();
@@ -160,17 +160,17 @@ export function withEntitiesRemoteScrollPagination<
   collection: Collection;
   pageSize?: number;
   pagesToCache?: number;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
-    signals: NamedEntitySignals<Entity, Collection> &
+    computed: NamedEntityComputed<Entity, Collection> &
       NamedCallStatusComputed<Collection>;
     methods: NamedCallStatusMethods<Collection>;
   },
   {
     state: NamedEntitiesScrollPaginationState<Collection>;
-    signals: NamedEntitiesScrollPaginationComputed<Entity, Collection>;
+    computed: NamedEntitiesScrollPaginationComputed<Entity, Collection>;
     methods: NamedEntitiesScrollPaginationMethods<Entity, Collection>;
   }
 >;
@@ -277,16 +277,16 @@ export function withEntitiesRemoteScrollPagination<Entity>(config: {
   entity: Entity;
   pageSize?: number;
   pagesToCache?: number;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity> & CallStatusComputed;
+    computed: EntityComputed<Entity> & CallStatusComputed;
     methods: CallStatusMethods;
   },
   {
     state: EntitiesScrollPaginationState;
-    signals: EntitiesScrollPaginationComputed<Entity>;
+    computed: EntitiesScrollPaginationComputed<Entity>;
     methods: EntitiesScrollPaginationMethods<Entity>;
   }
 >;
@@ -303,7 +303,7 @@ export function withEntitiesRemoteScrollPagination<
   collection?: Collection;
   pageSize?: number;
   pagesToCache?: number;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<any, any> {
   const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
     prop: config.collection,
@@ -488,10 +488,10 @@ export function withEntitiesRemoteScrollPagination<
             config.collection
               ? addEntities(entities, {
                   collection: config.collection,
-                  idKey: config.idKey ?? ('id' as EntityIdKey<Entity>),
+                  selectId: config.selectId ?? ((entity) => (entity as any).id),
                 })
               : addEntities(entities, {
-                  idKey: config.idKey ?? ('id' as EntityIdKey<Entity>),
+                  selectId: config.selectId ?? ((entity) => (entity as any).id),
                 }),
             {
               [paginationKey]: {

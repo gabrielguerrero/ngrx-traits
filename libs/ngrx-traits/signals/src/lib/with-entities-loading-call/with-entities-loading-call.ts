@@ -17,14 +17,14 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import {
-  EntityIdKey,
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
+  SelectEntityId,
 } from '@ngrx/signals/entities/src/models';
 import type {
   EmptyFeatureResult,
   SignalStoreFeatureResult,
-  SignalStoreSlices,
+  StateSignals,
 } from '@ngrx/signals/src/signal-store-models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { Prettify } from '@ngrx/signals/src/ts-helpers';
@@ -72,7 +72,7 @@ import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
  * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  *
  * @example
@@ -131,8 +131,8 @@ export function withEntitiesLoadingCall<
   collection: Collection;
   fetchEntities: (
     store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >,
@@ -165,12 +165,12 @@ export function withEntitiesLoadingCall<
   mapError?: (error: unknown) => Error;
   onError?: (error: Error) => void;
   entity?: Entity;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   Input & {
     state: NamedEntityState<Entity, Collection> &
       NamedCallStatusState<Collection>;
-    signals: NamedEntitySignals<Entity, Collection> &
+    computed: NamedEntityComputed<Entity, Collection> &
       NamedCallStatusComputed<Collection, Error>;
     methods: NamedCallStatusMethods<Collection, Error>;
   },
@@ -193,7 +193,7 @@ export function withEntitiesLoadingCall<
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
  * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
- * @param config.idKey - The key to use as the id for the entity
+ * @param config.selectId - The function to use to select the id of the entity
  *
  *
  * @example
@@ -250,8 +250,8 @@ export function withEntitiesLoadingCall<
 >(config: {
   fetchEntities: (
     store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >,
@@ -275,11 +275,11 @@ export function withEntitiesLoadingCall<
   mapError?: (error: unknown) => Error;
   onError?: (error: any) => void;
   entity?: Entity;
-  idKey?: EntityIdKey<Entity>;
+  selectId?: SelectEntityId<Entity>;
 }): SignalStoreFeature<
   Input & {
     state: EntityState<Entity> & CallStatusState;
-    signals: EntitySignals<Entity> & CallStatusComputed<Error>;
+    computed: EntityComputed<Entity> & CallStatusComputed<Error>;
     methods: CallStatusMethods<Error>;
   },
   EmptyFeatureResult
@@ -293,14 +293,14 @@ export function withEntitiesLoadingCall<
 >(
   config: (
     store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >,
   ) => {
     collection?: Collection;
-    idKey?: EntityIdKey<Entity>;
+    selectId?: SelectEntityId<Entity>;
     fetchEntities: () =>
       | Observable<
           Collection extends ''
@@ -343,13 +343,13 @@ export function withEntitiesLoadingCall<
     (Collection extends ''
       ? {
           state: EntityState<Entity> & CallStatusState;
-          signals: EntitySignals<Entity> & CallStatusComputed<Error>;
+          computed: EntityComputed<Entity> & CallStatusComputed<Error>;
           methods: CallStatusMethods<Error>;
         }
       : {
           state: NamedEntityState<Entity, Collection> &
             NamedCallStatusState<Collection>;
-          signals: NamedEntitySignals<Entity, Collection> &
+          computed: NamedEntityComputed<Entity, Collection> &
             NamedCallStatusComputed<Collection, Error>;
           methods: NamedCallStatusMethods<Collection, Error>;
         }),
@@ -366,8 +366,8 @@ export function withEntitiesLoadingCall<
     | {
         collection?: Collection;
         fetchEntities: (
-          store: SignalStoreSlices<Input['state']> &
-            Input['signals'] &
+          store: StateSignals<Input['state']> &
+            Input['computed'] &
             Input['methods'] &
             StateSignal<Prettify<Input['state']>>,
         ) => Observable<any> | Promise<any>;
@@ -375,12 +375,12 @@ export function withEntitiesLoadingCall<
         onSuccess?: (result: any) => void;
         mapError?: (error: unknown) => Error;
         onError?: (error: Error) => void;
-        idKey?: EntityIdKey<Entity>;
+        selectId?: SelectEntityId<Entity>;
       }
     | ((
         store: Prettify<
-          SignalStoreSlices<Input['state']> &
-            Input['signals'] &
+          StateSignals<Input['state']> &
+            Input['computed'] &
             Input['methods'] &
             StateSignal<Prettify<Input['state']>>
         >,
@@ -391,11 +391,11 @@ export function withEntitiesLoadingCall<
         onSuccess?: (result: any) => void;
         mapError?: (error: unknown) => Error;
         onError?: (error: Error) => void;
-        idKey?: EntityIdKey<Entity>;
+        selectId?: SelectEntityId<Entity>;
       }),
 ): SignalStoreFeature<Input, EmptyFeatureResult> {
   return (store) => {
-    const { slices, methods, signals, hooks, ...rest } = store;
+    const { stateSignals, methods, computedSignals, hooks, ...rest } = store;
     const {
       collection,
       fetchEntities,
@@ -403,16 +403,16 @@ export function withEntitiesLoadingCall<
       onError,
       mapError,
       mapPipe: mapPipeType,
-      idKey,
+      selectId,
     } = typeof configFactory === 'function'
       ? configFactory({
-          ...slices,
-          ...signals,
+          ...stateSignals,
+          ...computedSignals,
           ...methods,
           ...rest,
         } as Prettify<
-          SignalStoreSlices<Input['state']> &
-            Input['signals'] &
+          StateSignals<Input['state']> &
+            Input['computed'] &
             Input['methods'] &
             StateSignal<Prettify<Input['state']>>
         >)
@@ -448,8 +448,8 @@ export function withEntitiesLoadingCall<
                     runInInjectionContext(environmentInjector, () =>
                       from(
                         fetchEntities(
-                          store as SignalStoreSlices<Input['state']> &
-                            Input['signals'] &
+                          store as StateSignals<Input['state']> &
+                            Input['computed'] &
                             Input['methods'] &
                             StateSignal<Prettify<Input['state']>>,
                         ),
@@ -467,10 +467,14 @@ export function withEntitiesLoadingCall<
                             collection
                               ? setAllEntities(entities as Entity[], {
                                   collection,
-                                  idKey: idKey ?? ('id' as EntityIdKey<Entity>),
+                                  selectId:
+                                    selectId ??
+                                    ((entity) => (entity as any).id),
                                 })
-                              : setAllEntities(entities, {
-                                  idKey: idKey ?? ('id' as EntityIdKey<Entity>),
+                              : setAllEntities(entities as Entity[], {
+                                  selectId:
+                                    selectId ??
+                                    ((entity) => (entity as any).id as string),
                                 }),
                           );
                         }

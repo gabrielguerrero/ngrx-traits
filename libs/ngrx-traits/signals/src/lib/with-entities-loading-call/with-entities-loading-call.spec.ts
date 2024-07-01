@@ -1,6 +1,6 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { of, throwError } from 'rxjs';
 
 import {
@@ -64,10 +64,10 @@ describe('withEntitiesLoadingCall', () => {
 
       it('should setAllEntities with custom id if fetchEntities returns an a {entities: Entity[]} ', fakeAsync(() => {
         type ProductCustom = Omit<Product, 'id'> & { productId: string };
-        const entityConfig = {
+        const config = entityConfig({
           entity: type<ProductCustom>(),
-          idKey: 'productId',
-        } as const;
+          selectId: (p) => p.productId,
+        });
         const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
           ...p,
           productId: id,
@@ -75,11 +75,11 @@ describe('withEntitiesLoadingCall', () => {
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({
-              ...entityConfig,
+              ...config,
             }),
             withCallStatus(),
             withEntitiesLoadingCall({
-              ...entityConfig,
+              ...config,
               fetchEntities: () => {
                 let result = [...mockProductsCustom];
                 return of({ entities: result });
@@ -315,25 +315,25 @@ describe('withEntitiesLoadingCall', () => {
 
       it('should set[Collection]Result with customId if fetchEntities returns an a {entities: Entity[], total: number} ', fakeAsync(() => {
         type ProductCustom = Omit<Product, 'id'> & { productId: string };
-        const entityConfig = {
+        const config = entityConfig({
           entity: type<ProductCustom>(),
-          idKey: 'productId',
+          selectId: (p) => p.productId,
           collection,
-        } as const;
+        });
         const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
           ...p,
           productId: id,
         }));
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
-            withEntities(entityConfig),
-            withCallStatus(entityConfig),
+            withEntities(config),
+            withCallStatus(config),
             withEntitiesRemotePagination({
-              ...entityConfig,
+              ...config,
               pageSize: 10,
             }),
             withEntitiesLoadingCall({
-              ...entityConfig,
+              ...config,
               fetchEntities: ({ productsPagedRequest }) => {
                 let result = [...mockProductsCustom];
                 const total = result.length;

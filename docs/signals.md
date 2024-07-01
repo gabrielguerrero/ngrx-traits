@@ -236,18 +236,18 @@ const entity = type<Product>();
 ### Custom ids
 By default, the withEntities expect the Entity to have an id prop, but you can change that by passing a custom id  like:
 ```typescript
-const entityConfig = {
+const config = entityConfig({
   entity: type<Product>(),
   collection: "products",
-  idKey: "productId",
-} as const; // 👈 important to use as const otherwise collection and idKey type will be a string instead of a string literal 
+  selectId: (product: Product) => product.productId,
+});  
 
 export const ProductsLocalStore = signalStore(
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: "loading" }),
-  withEntitiesLocalPagination({ ...entityConfig, pageSize: 5 }),
+  withEntities(config),
+  withCallStatus({ ...config, initialValue: "loading" }),
+  withEntitiesLocalPagination({ ...config, pageSize: 5 }),
   withEntitiesLoadingCall({
-    ...entityConfig,
+    ...config,
     fetchEntities: () =>
       inject(ProductService)
         .getProducts()
@@ -259,7 +259,7 @@ export const ProductsLocalStore = signalStore(
   })),
 );
 ```
-You create a entityConfig like shown above using as const, and the you need to spread it to all withEntities* that you are using
+Create a entityConfig like shown above, and then spread it to all withEntities* that you are using.
 
 ```typescript
 To see a full list of the store features in the library with details and examples, check the [API](../libs/ngrx-traits/signals/api-docs.md) documentation.
