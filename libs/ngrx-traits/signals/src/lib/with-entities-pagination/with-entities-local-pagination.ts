@@ -74,7 +74,7 @@ export function withEntitiesLocalPagination<
   collection: Collection;
 }): SignalStoreFeature<
   {
-    state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
+    state: NamedEntityState<Entity, Collection>;
     computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
