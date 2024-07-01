@@ -1,7 +1,7 @@
 import { effect, Signal, untracked } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type, withHooks } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { of } from 'rxjs';
 
 import {
@@ -266,10 +266,10 @@ describe('withEntitiesRemotePagination', () => {
   }));
   it('setEntitiesPagedResult and custom id should store entities', fakeAsync(() => {
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
-    const entityConfig = {
+    const config = entityConfig({
       entity: type<ProductCustom>(),
-      idKey: 'productId',
-    } as const;
+      selectId: (entity) => entity.productId,
+    });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
       ...p,
       productId: id,
@@ -277,9 +277,9 @@ describe('withEntitiesRemotePagination', () => {
     TestBed.runInInjectionContext(() => {
       const fetchEntitiesSpy = jest.fn();
       const Store = signalStore(
-        withEntities(entityConfig),
+        withEntities(config),
         withCallStatus(),
-        withEntitiesRemotePagination({ ...entityConfig, pageSize: 10 }),
+        withEntitiesRemotePagination({ ...config, pageSize: 10 }),
         withHooks(
           ({
             isLoading,
@@ -453,11 +453,11 @@ describe('withEntitiesRemotePagination', () => {
   it('setEntitiesPagedResult with collection and custom id should store entities', fakeAsync(() => {
     const collection = 'products';
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
-    const entityConfig = {
+    const config = entityConfig({
       entity: type<ProductCustom>(),
-      idKey: 'productId',
+      selectId: (entity) => entity.productId,
       collection,
-    } as const;
+    });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
       ...p,
       productId: id,
@@ -465,9 +465,9 @@ describe('withEntitiesRemotePagination', () => {
     TestBed.runInInjectionContext(() => {
       const fetchEntitiesSpy = jest.fn();
       const Store = signalStore(
-        withEntities(entityConfig),
-        withCallStatus(entityConfig),
-        withEntitiesRemotePagination({ ...entityConfig, pageSize: 10 }),
+        withEntities(config),
+        withCallStatus(config),
+        withEntitiesRemotePagination({ ...config, pageSize: 10 }),
         withHooks(
           ({
             isProductsLoading,

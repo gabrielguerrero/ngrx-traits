@@ -1,8 +1,7 @@
-import { Comparer, EntityAdapter, EntityState, IdSelector } from '@ngrx/entity';
-
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
-import { Dictionary } from '@ngrx/entity/src/models';
 import { KeyedConfig } from '@ngrx-traits/core';
+import { Comparer, EntityAdapter, EntityState, IdSelector } from '@ngrx/entity';
+import { Dictionary } from '@ngrx/entity/src/models';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
 
 export type Status = 'loading' | 'success' | 'fail';
 
@@ -16,7 +15,7 @@ export type LoadEntitiesActions<T> = {
   /**
    * load entities from backend
    */
-  loadEntities: ActionCreator<string, () => TypedAction<string>>;
+  loadEntities: ActionCreator<string, () => Action<string>>;
   /**
    * entities where loaded successfully
    */
@@ -25,14 +24,14 @@ export type LoadEntitiesActions<T> = {
     (props: {
       entities: T[];
       total?: number;
-    }) => { entities: T[]; total?: number } & TypedAction<string>
+    }) => { entities: T[]; total?: number } & Action<string>
   >;
   /**
    * entities failed loading
    */
   loadEntitiesFail: ActionCreator<
     string,
-    (props?: { error?: string }) => { error?: string } & TypedAction<string>
+    (props?: { error?: string }) => { error?: string } & Action<string>
   >;
 };
 
@@ -85,7 +84,7 @@ export type LoadEntitiesMutators<T> = {
 
 export type GenericActionCreator = ActionCreator<
   string,
-  (...args: unknown[]) => TypedAction<string>
+  (...args: unknown[]) => Action<string>
 >;
 
 export const loadEntitiesTraitKey = 'loadEntities';

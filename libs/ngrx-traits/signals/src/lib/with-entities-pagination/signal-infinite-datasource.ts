@@ -2,8 +2,8 @@ import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import type {
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
 import { debounceTime, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
@@ -19,13 +19,13 @@ import { getWithEntitiesInfinitePaginationKeys } from './with-entities-remote-sc
 export function getInfiniteScrollDataSource<Entity, Collection extends string>(
   options:
     | {
-        store: EntitySignals<Entity> & EntitiesScrollPaginationMethods<Entity>;
+        store: EntityComputed<Entity> & EntitiesScrollPaginationMethods<Entity>;
         debounceLoadMoreTime?: number;
       }
     | {
         collection: Collection;
         entity: Entity;
-        store: NamedEntitySignals<Entity, Collection> &
+        store: NamedEntityComputed<Entity, Collection> &
           NamedEntitiesScrollPaginationMethods<Entity, Collection>;
         debounceLoadMoreTime?: number;
       },

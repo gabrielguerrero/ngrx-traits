@@ -1,10 +1,11 @@
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
+
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 import {
   EntitiesPaginationActions,
   EntitiesPaginationSelectors,
   EntitiesPaginationState,
 } from './entities-pagination.model';
-import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 /**
  * @internal
@@ -12,7 +13,7 @@ import { LoadEntitiesState } from '../load-entities/load-entities.model';
 export type ƟPaginationActions = EntitiesPaginationActions & {
   setEntitiesRequestPage: ActionCreator<
     string,
-    (props: { index: number }) => { index: number } & TypedAction<string>
+    (props: { index: number }) => { index: number } & Action<string>
   >;
 };
 
@@ -22,9 +23,9 @@ export type ƟPaginationActions = EntitiesPaginationActions & {
 export type ƟEntitiesPaginationSelectors<Entity> =
   EntitiesPaginationSelectors<Entity> & {
     isEntitiesCurrentPageInCache: (
-      state: LoadEntitiesState<Entity> & EntitiesPaginationState
+      state: LoadEntitiesState<Entity> & EntitiesPaginationState,
     ) => boolean;
     isEntitiesNextPageInCache: (
-      state: LoadEntitiesState<Entity> & EntitiesPaginationState
+      state: LoadEntitiesState<Entity> & EntitiesPaginationState,
     ) => boolean;
   };

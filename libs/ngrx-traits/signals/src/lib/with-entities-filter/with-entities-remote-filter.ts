@@ -9,8 +9,8 @@ import {
 } from '@ngrx/signals';
 import type { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import type {
-  EntitySignals,
-  NamedEntitySignals,
+  EntityComputed,
+  NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
@@ -124,12 +124,12 @@ export function withEntitiesRemoteFilter<
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: NamedCallStatusMethods<Collection>;
   },
   {
     state: NamedEntitiesFilterState<Collection, Filter>;
-    signals: {};
+    computed: {};
     methods: NamedEntitiesFilterMethods<Collection, Filter>;
   }
 >;
@@ -218,12 +218,12 @@ export function withEntitiesRemoteFilter<
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: CallStatusMethods;
   },
   {
     state: EntitiesFilterState<Filter>;
-    signals: {};
+    computed: {};
     methods: EntitiesFilterMethods<Filter>;
   }
 >;

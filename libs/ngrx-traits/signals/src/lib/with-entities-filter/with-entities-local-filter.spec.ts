@@ -1,6 +1,10 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+import {
+  entityConfig,
+  setAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
 
 import {
   withCallStatus,
@@ -343,14 +347,14 @@ describe('withEntitiesLocalFilter', () => {
   describe('custom ids and filters', () => {
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
     it('should filter entities', fakeAsync(() => {
-      const entityConfig = {
+      const config = entityConfig({
         entity: type<ProductCustom>(),
-        idKey: 'productId',
-      } as const;
+        selectId: (entity) => entity.productId,
+      });
       const Store = signalStore(
-        withEntities(entityConfig),
+        withEntities(config),
         withEntitiesLocalFilter({
-          ...entityConfig,
+          ...config,
           defaultFilter: { search: '', foo: 'bar' },
           filterFn: (entity, filter) =>
             !filter?.search ||
@@ -363,7 +367,7 @@ describe('withEntitiesLocalFilter', () => {
       }));
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+        patchState(store, setAllEntities(mockProductsCustom, config));
         store.filterEntities({
           filter: { search: 'zero', foo: 'bar2' },
         });
@@ -387,15 +391,15 @@ describe('withEntitiesLocalFilter', () => {
       });
     }));
     it('should filter entities with collection', fakeAsync(() => {
-      const entityConfig = {
+      const config = entityConfig({
         entity: type<ProductCustom>(),
+        selectId: (entity) => entity.productId,
         collection: 'products',
-        idKey: 'productId',
-      } as const;
+      });
       const Store = signalStore(
-        withEntities(entityConfig),
+        withEntities(config),
         withEntitiesLocalFilter({
-          ...entityConfig,
+          ...config,
           defaultFilter: { search: '', foo: 'bar' },
           filterFn: (entity, filter) =>
             !filter?.search ||
@@ -408,7 +412,7 @@ describe('withEntitiesLocalFilter', () => {
       }));
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+        patchState(store, setAllEntities(mockProductsCustom, config));
         store.filterProductsEntities({
           filter: { search: 'zero', foo: 'bar2' },
         });
