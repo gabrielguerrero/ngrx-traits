@@ -1,12 +1,12 @@
-import { PostfixProps, PrefixProps, TraitActions } from '@ngrx-traits/core';
-
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
+import { PostfixProps } from '@ngrx-traits/core';
+import { Action } from '@ngrx/store';
+import { ActionCreator } from '@ngrx/store/src/models';
 
 type SetActions<T> = {
   /**
    * set entity in the store
    */
-  set: ActionCreator<string, (props: T) => TypedAction<string>>;
+  set: ActionCreator<string, (props: T) => Action<string>>;
 };
 export type SetEntityActions<Entity, J extends string> = PostfixProps<
   SetActions<Entity>,

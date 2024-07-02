@@ -1,4 +1,5 @@
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
+
 import { FilterEntitiesActions } from './filter-entities.model';
 
 /**
@@ -10,6 +11,6 @@ export type ƟFilterEntitiesActions<F> = FilterEntitiesActions<F> & {
     (props: {
       filters?: F;
       patch?: boolean;
-    }) => { filters?: F; patch?: boolean } & TypedAction<string>
+    }) => { filters?: F; patch?: boolean } & Action<string>
   >;
 };

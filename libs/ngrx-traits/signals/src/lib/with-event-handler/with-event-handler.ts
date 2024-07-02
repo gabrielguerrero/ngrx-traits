@@ -5,7 +5,7 @@ import {
 } from '@ngrx/signals';
 import type {
   SignalStoreFeatureResult,
-  SignalStoreSlices,
+  StateSignals,
 } from '@ngrx/signals/src/signal-store-models';
 import { StateSignal } from '@ngrx/signals/src/state-signal';
 import { Prettify } from '@ngrx/signals/src/ts-helpers';
@@ -63,8 +63,8 @@ const ON_EVENT = '__onEvent';
 export function withEventHandler<Input extends SignalStoreFeatureResult>(
   eventHandlerFactory?: (
     store: Prettify<
-      SignalStoreSlices<Input['state']> &
-        Input['signals'] &
+      StateSignals<Input['state']> &
+        Input['computed'] &
         Input['methods'] &
         StateSignal<Prettify<Input['state']>>
     >,

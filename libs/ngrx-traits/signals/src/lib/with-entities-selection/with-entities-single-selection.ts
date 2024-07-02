@@ -9,9 +9,9 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
+  EntityComputed,
   EntityMap,
-  EntitySignals,
-  NamedEntitySignals,
+  NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
 import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
@@ -75,16 +75,14 @@ export function withEntitiesSingleSelection<
   clearOnFilter?: boolean;
   clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
   {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    state: NamedEntityState<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   },
   {
     state: NamedEntitiesSingleSelectionState<Collection>;
-    signals: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
+    computed: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
     methods: NamedEntitiesSingleSelectionMethods<Collection>;
   }
 >;
@@ -130,12 +128,12 @@ export function withEntitiesSingleSelection<Entity>(config?: {
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   },
   {
     state: EntitiesSingleSelectionState;
-    signals: EntitiesSingleSelectionComputed<Entity>;
+    computed: EntitiesSingleSelectionComputed<Entity>;
     methods: EntitiesSingleSelectionMethods;
   }
 >;

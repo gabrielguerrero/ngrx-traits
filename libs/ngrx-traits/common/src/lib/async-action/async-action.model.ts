@@ -1,13 +1,14 @@
 import { PostfixProps, PrefixProps } from '@ngrx-traits/core';
 import { ActionCreator, NotAllowedCheck } from '@ngrx/store';
-import { TypedAction } from '@ngrx/store/src/models';
+import { Action } from '@ngrx/store/src/models';
+
 import { StatusState } from '../load-entities';
 
 export type ActionCreatorWithOptionalProps<T> = T extends undefined
-  ? ActionCreator<string, () => TypedAction<string>>
+  ? ActionCreator<string, () => Action<string>>
   : ActionCreator<
       string,
-      (props: T & NotAllowedCheck<T & object>) => T & TypedAction<string>
+      (props: T & NotAllowedCheck<T & object>) => T & Action<string>
     >;
 
 type AsyncActions<Request, Response, Failure> = {
@@ -24,14 +25,14 @@ type StatusSelectors<S extends StatusState> = {
 
 export type AsyncActionState<J extends string> = PrefixProps<StatusState, J>;
 
-export type AsyncActionSelectors<J extends string, S extends StatusState> = PostfixProps<
-  StatusSelectors<S>,
-  J
->;
+export type AsyncActionSelectors<
+  J extends string,
+  S extends StatusState,
+> = PostfixProps<StatusSelectors<S>, J>;
 
 export type AsyncActionActions<
   Request,
   Response,
   Failure,
-  J extends string
+  J extends string,
 > = PrefixProps<AsyncActions<Request, Response, Failure>, J>;

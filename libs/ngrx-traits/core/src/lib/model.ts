@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
+import { Type } from '@angular/core';
+import { Action, ActionType, MemoizedSelector } from '@ngrx/store';
 import {
   ActionCreator,
   Selector,
   SelectorWithProps,
-  TypedAction,
 } from '@ngrx/store/src/models';
-import { Action, ActionType, MemoizedSelector } from '@ngrx/store';
-import { Type } from '@angular/core';
+
 import { TraitEffect } from './trait-effect';
 
 export type TraitActions = {
-  [key: string]: ActionCreator<string, (...args: any[]) => TypedAction<string>>;
+  [key: string]: ActionCreator<string, (...args: any[]) => Action<string>>;
 };
 
 export type TraitSelectors<State> = {
@@ -35,11 +35,11 @@ export interface BaseFeatureTraits<State = any, A = any, S = any> {
 export type FeatureTraits<
   State,
   A extends TraitActions = TraitActions,
-  S extends TraitSelectors<State> = TraitSelectors<State>
+  S extends TraitSelectors<State> = TraitSelectors<State>,
 > = BaseFeatureTraits<State, A, FeatureSelectors<State, S>>;
 
 export type BaseEntityFeatureFactory<State, A, S> = (
-  config: Config<State>
+  config: Config<State>,
 ) => BaseFeatureTraits<State, A, S>;
 
 export type EntityFeatureFactory<
@@ -47,9 +47,9 @@ export type EntityFeatureFactory<
   EntitiesName extends string = `${EntityName}s`,
   State = any,
   A extends TraitActions = TraitActions,
-  S extends TraitSelectors<State> = TraitSelectors<State>
+  S extends TraitSelectors<State> = TraitSelectors<State>,
 > = (
-  config: Config<State>
+  config: Config<State>,
 ) => FeatureTraits<
   State,
   EntityName extends string
@@ -62,7 +62,7 @@ export type EntityFeatureFactory<
 
 export type Config<
   State,
-  F extends MemoizedSelector<object, State> = MemoizedSelector<object, State>
+  F extends MemoizedSelector<object, State> = MemoizedSelector<object, State>,
 > = {
   actionsGroupKey: string;
   featureSelector: F | string;
@@ -79,11 +79,11 @@ export type AllTraitConfigs = {
 
 export type TraitActionsFactory<
   A extends TraitActions = TraitActions,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = (options: TraitActionsFactoryConfig<C>) => A;
 
 export type TraitActionsFactoryConfig<
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = {
   actionsGroupKey: string;
   entityName: string;
@@ -93,22 +93,22 @@ export type TraitActionsFactoryConfig<
 export type TraitSelectorsFactory<
   State = unknown,
   S extends TraitSelectors<State> = TraitSelectors<State>,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = (options: TraitSelectorsFactoryConfig<C>) => S;
 
 export type TraitSelectorsFactoryConfig<
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = {
   previousSelectors: TraitSelectors<unknown> | undefined;
   allConfigs: C;
 };
 export type TraitInitialStateFactory<
   State = unknown,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = (options: TraitInitialStateFactoryConfig<C>) => State;
 
 export type TraitInitialStateFactoryConfig<
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = {
   previousInitialState: any;
   allConfigs: C;
@@ -117,11 +117,11 @@ export type TraitInitialStateFactoryConfig<
 export type TraitStateMutatorsFactory<
   State = unknown,
   M extends TraitStateMutators<State> = TraitStateMutators<State>,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = (options: TraitStateMutatorsFactoryConfig<C>) => M;
 
 export type TraitStateMutatorsFactoryConfig<
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = {
   allSelectors: TraitSelectors<any>;
   previousMutators: TraitStateMutators<unknown> | undefined;
@@ -133,9 +133,9 @@ export type TraitReducerFactory<
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>,
   M extends TraitStateMutators<State> = TraitStateMutators<State>,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = (
-  options: TraitReducerFactoryConfig<State, A, S, M, C>
+  options: TraitReducerFactoryConfig<State, A, S, M, C>,
 ) => (initialState: State, action: Action) => State;
 
 export type TraitReducerFactoryConfig<
@@ -143,7 +143,7 @@ export type TraitReducerFactoryConfig<
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>,
   M extends TraitStateMutators<State> = TraitStateMutators<State>,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = {
   initialState: State;
   allActions: A;
@@ -156,14 +156,14 @@ export type TraitEffectsFactory<
   State = unknown,
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = (options: TraitEffectsFactoryConfig<State, A, S, C>) => Type<TraitEffect>[];
 
 export type TraitEffectsFactoryConfig<
   State = unknown,
   A extends TraitActions = TraitActions,
   S extends TraitSelectors<State> = TraitSelectors<State>,
-  C extends AllTraitConfigs = AllTraitConfigs
+  C extends AllTraitConfigs = AllTraitConfigs,
 > = {
   allActions: A;
   allSelectors: S;
@@ -181,7 +181,7 @@ export interface TraitFactory<
   M extends TraitStateMutators<State> = any,
   KEY extends string = string,
   C = any,
-  KC extends AllTraitConfigs = KeyedConfig<KEY, C>
+  KC extends AllTraitConfigs = KeyedConfig<KEY, C>,
 > {
   key: KEY;
   config?: C;
@@ -201,53 +201,46 @@ export type UnionToIntersection<T> = (
   ? R
   : never;
 
-export type ExtractStateType<T> = T extends TraitFactory<infer State>
-  ? State
-  : T extends ReadonlyArray<TraitFactory>
-  ? UnionToIntersection<ExtractStateType<ExtractArrayElementTypes<T>>>
-  : T extends BaseFeatureTraits<infer State>
-  ? State
-  : never;
+export type ExtractStateType<T> =
+  T extends TraitFactory<infer State>
+    ? State
+    : T extends ReadonlyArray<TraitFactory>
+      ? UnionToIntersection<ExtractStateType<ExtractArrayElementTypes<T>>>
+      : T extends BaseFeatureTraits<infer State>
+        ? State
+        : never;
 
-export type ExtractActionsType<T> = T extends TraitFactory<any, infer A>
-  ? A
-  : T extends ReadonlyArray<TraitFactory>
-  ? UnionToIntersection<ExtractActionsType<ExtractArrayElementTypes<T>>>
-  : T extends BaseFeatureTraits<any, infer A>
-  ? A
-  : never;
+export type ExtractActionsType<T> =
+  T extends TraitFactory<any, infer A>
+    ? A
+    : T extends ReadonlyArray<TraitFactory>
+      ? UnionToIntersection<ExtractActionsType<ExtractArrayElementTypes<T>>>
+      : T extends BaseFeatureTraits<any, infer A>
+        ? A
+        : never;
 
-export type ExtractSelectorsType<T> = T extends TraitFactory<any, any, infer S>
-  ? S
-  : T extends ReadonlyArray<TraitFactory>
-  ? UnionToIntersection<ExtractSelectorsType<ExtractArrayElementTypes<T>>>
-  : T extends BaseFeatureTraits<any, any, infer S>
-  ? S
-  : never;
+export type ExtractSelectorsType<T> =
+  T extends TraitFactory<any, any, infer S>
+    ? S
+    : T extends ReadonlyArray<TraitFactory>
+      ? UnionToIntersection<ExtractSelectorsType<ExtractArrayElementTypes<T>>>
+      : T extends BaseFeatureTraits<any, any, infer S>
+        ? S
+        : never;
 
-export type ExtractMutatorsType<T> = T extends TraitFactory<
-  any,
-  any,
-  any,
-  infer M
->
-  ? M
-  : T extends ReadonlyArray<TraitFactory>
-  ? UnionToIntersection<ExtractMutatorsType<ExtractArrayElementTypes<T>>>
-  : never;
+export type ExtractMutatorsType<T> =
+  T extends TraitFactory<any, any, any, infer M>
+    ? M
+    : T extends ReadonlyArray<TraitFactory>
+      ? UnionToIntersection<ExtractMutatorsType<ExtractArrayElementTypes<T>>>
+      : never;
 
-export type ExtractKeyedConfigType<T> = T extends TraitFactory<
-  any,
-  any,
-  any,
-  any,
-  infer KEY,
-  infer C
->
-  ? KeyedConfig<KEY, C>
-  : T extends ReadonlyArray<TraitFactory>
-  ? UnionToIntersection<ExtractKeyedConfigType<ExtractArrayElementTypes<T>>>
-  : never;
+export type ExtractKeyedConfigType<T> =
+  T extends TraitFactory<any, any, any, any, infer KEY, infer C>
+    ? KeyedConfig<KEY, C>
+    : T extends ReadonlyArray<TraitFactory>
+      ? UnionToIntersection<ExtractKeyedConfigType<ExtractArrayElementTypes<T>>>
+      : never;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type PrefixProps<T, P extends string> = {
@@ -264,19 +257,19 @@ type Replace<
   FindKey extends string,
   FindKey2 extends string,
   ReplaceKey extends string,
-  ReplaceKey2 extends string
+  ReplaceKey2 extends string,
 > = Target extends `${infer Prefix}${FindKey}${infer Postfix}`
   ? `${Prefix}${Capitalize<ReplaceKey>}${Postfix}`
   : Target extends `${infer Prefix}${FindKey2}${infer Postfix}`
-  ? `${Prefix}${Capitalize<ReplaceKey2>}${Postfix}`
-  : Target;
+    ? `${Prefix}${Capitalize<ReplaceKey2>}${Postfix}`
+    : Target;
 
 export type ReplaceProps<
   Target,
   FindKey extends string,
   FindKey2 extends string,
   ReplaceKey extends string,
-  ReplaceKey2 extends string
+  ReplaceKey2 extends string,
 > = {
   [Prop in keyof Target as Replace<
     string & Prop,
@@ -289,5 +282,5 @@ export type ReplaceProps<
 export type ReplaceEntityNames<
   T,
   EntityName extends string,
-  EntitiesName extends string
+  EntitiesName extends string,
 > = ReplaceProps<T, 'Entities', 'Entity', EntitiesName, EntityName>;

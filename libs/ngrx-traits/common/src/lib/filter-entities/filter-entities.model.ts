@@ -1,6 +1,6 @@
-import { LoadEntitiesState } from '../load-entities/load-entities.model';
+import { Action, ActionCreator } from '@ngrx/store/src/models';
 
-import { ActionCreator, TypedAction } from '@ngrx/store/src/models';
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 export interface FilterEntitiesState<F> {
   filters?: F;
@@ -17,12 +17,12 @@ export interface FilterActionOverload<F> {
     filters: FilterPatchConditionalType<F, P>;
     forceLoad: boolean;
     patch: P;
-  } & TypedAction<string>;
+  } & Action<string>;
   (props?: { filters: F; forceLoad?: boolean }): {
     filters: F;
     forceLoad: boolean;
     patch: boolean;
-  } & TypedAction<string>;
+  } & Action<string>;
 }
 
 export type FilterEntitiesActions<F> = {
@@ -42,14 +42,14 @@ export type FilterEntitiesSelectors<T, F> = {
    * @param state
    */
   selectEntitiesFilter: (
-    state: LoadEntitiesState<T> & FilterEntitiesState<F>
+    state: LoadEntitiesState<T> & FilterEntitiesState<F>,
   ) => F | undefined;
 };
 
 export type FilterEntitiesMutators<T, F> = {
   setEntitiesFilters<S extends LoadEntitiesState<T> & FilterEntitiesState<F>>(
     filter: F | undefined,
-    state: S
+    state: S,
   ): S;
 };
 

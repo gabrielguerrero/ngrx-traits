@@ -1,7 +1,7 @@
 import { ListRange } from '@angular/cdk/collections';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { BehaviorSubject, of } from 'rxjs';
 
 import {
@@ -75,20 +75,20 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
   it(' should append entities with custome id  when using load more and using a result with entities and total', fakeAsync(() => {
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
-    const entityConfig = {
+    const config = entityConfig({
       entity: type<ProductCustom>(),
-      idKey: 'productId',
-    } as const;
+      selectId: (entity) => entity.productId,
+    });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
       ...p,
       productId: id,
     }));
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
-        withEntities(entityConfig),
+        withEntities(config),
         withCallStatus(),
         withEntitiesRemoteScrollPagination({
-          ...entityConfig,
+          ...config,
           pageSize: 10,
           pagesToCache: 1,
         }),
@@ -306,26 +306,26 @@ describe('withEntitiesRemoteScrollPagination', () => {
   it('with collection should append entities with custom id when using load more ', fakeAsync(() => {
     const collection = 'products';
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
-    const entityConfig = {
+    const config = entityConfig({
       entity: type<ProductCustom>(),
-      idKey: 'productId',
+      selectId: (entity) => entity.productId,
       collection,
-    } as const;
+    });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
       ...p,
       productId: id,
     }));
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
-        withEntities(entityConfig),
-        withCallStatus(entityConfig),
+        withEntities(config),
+        withCallStatus(config),
         withEntitiesRemoteScrollPagination({
-          ...entityConfig,
+          ...config,
           pageSize: 10,
           pagesToCache: 1,
         }),
         withEntitiesLoadingCall({
-          ...entityConfig,
+          ...config,
           fetchEntities: ({ productsPagedRequest }) => {
             let result = [...mockProductsCustom.slice(0, 25)];
             const total = result.length;

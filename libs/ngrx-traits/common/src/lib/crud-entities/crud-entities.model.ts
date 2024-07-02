@@ -1,7 +1,8 @@
 import { Predicate, Update } from '@ngrx/entity/src/models';
-import { LoadEntitiesState } from '../load-entities/load-entities.model';
 import { ActionCreator } from '@ngrx/store';
-import { TypedAction } from '@ngrx/store/src/models';
+import { Action } from '@ngrx/store/src/models';
+
+import { LoadEntitiesState } from '../load-entities/load-entities.model';
 
 export enum ChangeType {
   CREATED = 'c',
@@ -24,30 +25,28 @@ export interface CrudEntitiesState<T> {
 export type CrudEntitiesActions<T> = {
   addEntities: ActionCreator<
     string,
-    (...entities: T[]) => { entities: T[] } & TypedAction<string>
+    (...entities: T[]) => { entities: T[] } & Action<string>
   >;
   removeEntities: ActionCreator<
     string,
     (
       ...keys: string[] | number[]
-    ) => { keys: string[] | number[] } & TypedAction<string>
+    ) => { keys: string[] | number[] } & Action<string>
   >;
   updateEntities: ActionCreator<
     string,
-    (...updates: Update<T>[]) => { updates: Update<T>[] } & TypedAction<string>
+    (...updates: Update<T>[]) => { updates: Update<T>[] } & Action<string>
   >;
   upsertEntities: ActionCreator<
     string,
-    (...entities: T[]) => { entities: T[] } & TypedAction<string>
+    (...entities: T[]) => { entities: T[] } & Action<string>
   >;
 
   removeAllEntities: ActionCreator<
     string,
-    (
-      predicate?: Predicate<T>
-    ) => { predicate?: Predicate<T> } & TypedAction<string>
+    (predicate?: Predicate<T>) => { predicate?: Predicate<T> } & Action<string>
   >;
-  clearEntitiesChanges: ActionCreator<string, () => TypedAction<string>>;
+  clearEntitiesChanges: ActionCreator<string, () => Action<string>>;
 };
 
 export type CrudEntitiesSelectors<Entity> = {
@@ -58,7 +57,7 @@ export type CrudEntitiesSelectors<Entity> = {
    * @param props
    */
   selectEntitiesChangesList: (
-    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   ) => EntityChange<Entity>[];
 
   /**
@@ -70,58 +69,58 @@ export type CrudEntitiesSelectors<Entity> = {
    * @param state
    */
   selectFilteredEntitiesChangesList: (
-    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    state: LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   ) => EntityChange<Entity>[];
 };
 
 export type CrudEntitiesMutators<Entity> = {
   addEntities<S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>>(
     entities: Entity[],
-    state: S
+    state: S,
   ): S;
 
   removeEntities<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
     keys: string[],
-    state: S
+    state: S,
   ): S;
   removeEntities<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
     keys: number[],
-    state: S
+    state: S,
   ): S;
   removeEntities<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
     predicate: Predicate<Entity>,
-    state: S
+    state: S,
   ): S;
 
   removeAllEntities<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
-    state: S
+    state: S,
   ): S;
 
   clearEntitiesChanges<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
-    state: S
+    state: S,
   ): S;
 
   updateEntities<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
     updates: Update<Entity>[],
-    state: S
+    state: S,
   ): S;
   upsertEntities<
-    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & CrudEntitiesState<Entity>,
   >(
     entities: Entity[],
-    state: S
+    state: S,
   ): S;
 };
 
