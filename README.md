@@ -9,4 +9,6 @@ There are two versions of this library one for ngrx and one for ngrx/signals.
 - @ngrx-traits/{core,common} compatible with ngrx  go [here](docs/ngrx.md) for documentation.
 
 
+## Contributing
 
+NGRX Traits is an open source project. Read our [contributing guidelines](./CONTRIBUTING.md) on how to get involved.
