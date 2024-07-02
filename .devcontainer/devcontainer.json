@@ -4,7 +4,7 @@
 		"dockerfile": "Dockerfile",
 		"args": {
 		  "VARIANT": "20-bullseye",
-		  "EXTRA_NODE_VERSION": "lts/hydrogen"
+		  "EXTRA_NODE_VERSION": "lts/iron"
 		}
 	  },
 	"features": {
