@@ -38,11 +38,12 @@ export type NamedEntitiesPaginationLocalComputed<
   }>;
 };
 export type EntitiesPaginationLocalMethods = {
-  loadEntitiesPage: (options: { pageIndex: number }) => void;
+  loadEntitiesPage: (options: { pageIndex: number; pageSize?: number }) => void;
 };
 export type NamedEntitiesPaginationLocalMethods<Collection extends string> = {
   [K in Collection as `load${Capitalize<string & K>}Page`]: (options: {
     pageIndex: number;
+    pageSize?: number;
   }) => void;
 };
 
@@ -50,7 +51,7 @@ export type SetEntitiesResult<ResultParam> = {
   setEntitiesPagedResult: (result: ResultParam) => void;
 };
 export type NamedSetEntitiesResult<Collection extends string, ResultParam> = {
-  [K in Collection as `set${Capitalize<string & K>}Result`]: (
+  [K in Collection as `set${Capitalize<string & K>}PagedResult`]: (
     result: ResultParam,
   ) => void;
 };

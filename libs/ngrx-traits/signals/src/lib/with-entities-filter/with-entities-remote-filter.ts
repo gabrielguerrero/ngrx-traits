@@ -47,100 +47,7 @@ import {
  * Requires withEntities and withCallStatus to be present before this function.
  * @param config
  * @param config.defaultFilter - The default filter to be used
- * @param config.defaultDebounce - The default debounce time to be used
- * @param config.entity - The entity type to be used
- * @param config.collection - The optional collection name to be used
- *
- * @example
- * const entity = type<Product>();
- * const collection = 'products';
- * export const store = signalStore(
- *   { providedIn: 'root' },
- *   // requires withEntities and withCallStatus to be used
- *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
- *
- *   withEntitiesRemoteFilter({
- *     entity,
- *     collection,
- *     defaultFilter: { name: '' },
- *   }),
- *   // after you can use withEntitiesLoadingCall to connect the filter to
- *   // the api call, or do it manually as shown after
- *    withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productsFilter }) => {
- *       return inject(ProductService)
- *         .getProducts({
- *           search: productsFilter().name,
- *         })
- *     },
- *   }),
- * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, ...state }) => ({
- * //   onInit: async () => {
- * //     effect(() => {
- * //       if (isProductsLoading()) {
- * //         inject(ProductService)
- * //              .getProducts({
- * //                 search: productsFilter().name,
- * //               })
- * //           .pipe(
- * //             takeUntilDestroyed(),
- * //             tap((res) =>
- * //               patchState(
- * //                 state,
- * //                 setAllEntities(res.resultList, { collection: 'products' }),
- * //               ),
- * //             ),
- * //             catchError((error) => {
- * //               setProductsError(error);
- * //               return EMPTY;
- * //             }),
- * //           )
- * //           .subscribe();
- * //       }
- * //     });
- * //   },
- *  })),
- * // generates the following signals
- *  store.productsFilter // { search: string }
- *  // generates the following computed signals
- *  store.isProductsFilterChanged // boolean
- *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
- *  store.resetProductsFilter  // () => void
- */
-export function withEntitiesRemoteFilter<
-  Entity extends { id: string | number },
-  Filter extends Record<string, unknown>,
->(config: {
-  defaultFilter: Filter;
-  defaultDebounce?: number;
-  entity: Entity;
-}): SignalStoreFeature<
-  {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
-    methods: CallStatusMethods;
-  },
-  {
-    state: EntitiesFilterState<Filter>;
-    signals: {};
-    methods: EntitiesFilterMethods<Filter>;
-  }
->;
-/**
- * Generates necessary state, computed and methods for remotely filtering entities in the store,
- * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
- * and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
- * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
- * and is debounced by default.
- *
- * Requires withEntities and withCallStatus to be present before this function.
- * @param config
- * @param config.defaultFilter - The default filter to be used
- * @param config.defaultDebounce - The default debounce time to be used
+ * @param config.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
  * @param config.entity - The entity type to be used
  * @param config.collection - The optional collection name to be used
  *
@@ -206,14 +113,14 @@ export function withEntitiesRemoteFilter<
  */
 
 export function withEntitiesRemoteFilter<
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
   Filter extends Record<string, unknown>,
 >(config: {
   defaultFilter: Filter;
   defaultDebounce?: number;
   entity: Entity;
-  collection?: Collection;
+  collection: Collection;
 }): SignalStoreFeature<
   {
     state: NamedEntityState<Entity, any>;
@@ -226,8 +133,103 @@ export function withEntitiesRemoteFilter<
     methods: NamedEntitiesFilterMethods<Collection, Filter>;
   }
 >;
+
+/**
+ * Generates necessary state, computed and methods for remotely filtering entities in the store,
+ * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
+ * and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
+ * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
+ * and is debounced by default.
+ *
+ * Requires withEntities and withCallStatus to be present before this function.
+ * @param config
+ * @param config.defaultFilter - The default filter to be used
+ * @param config.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
+ * @param config.entity - The entity type to be used
+ * @param config.collection - The optional collection name to be used
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   // requires withEntities and withCallStatus to be used
+ *   withEntities({ entity, collection }),
+ *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *
+ *   withEntitiesRemoteFilter({
+ *     entity,
+ *     collection,
+ *     defaultFilter: { name: '' },
+ *   }),
+ *   // after you can use withEntitiesLoadingCall to connect the filter to
+ *   // the api call, or do it manually as shown after
+ *    withEntitiesLoadingCall({
+ *     collection,
+ *     fetchEntities: ({ productsFilter }) => {
+ *       return inject(ProductService)
+ *         .getProducts({
+ *           search: productsFilter().name,
+ *         })
+ *     },
+ *   }),
+ * // withEntitiesLoadingCall is the same as doing the following:
+ * // withHooks(({ productsLoading, setProductsError, ...state }) => ({
+ * //   onInit: async () => {
+ * //     effect(() => {
+ * //       if (isProductsLoading()) {
+ * //         inject(ProductService)
+ * //              .getProducts({
+ * //                 search: productsFilter().name,
+ * //               })
+ * //           .pipe(
+ * //             takeUntilDestroyed(),
+ * //             tap((res) =>
+ * //               patchState(
+ * //                 state,
+ * //                 setAllEntities(res.resultList, { collection: 'products' }),
+ * //               ),
+ * //             ),
+ * //             catchError((error) => {
+ * //               setProductsError(error);
+ * //               return EMPTY;
+ * //             }),
+ * //           )
+ * //           .subscribe();
+ * //       }
+ * //     });
+ * //   },
+ *  })),
+ * // generates the following signals
+ *  store.productsFilter // { search: string }
+ *  // generates the following computed signals
+ *  store.isProductsFilterChanged // boolean
+ *  // generates the following methods
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductsFilter  // () => void
+ */
 export function withEntitiesRemoteFilter<
-  Entity extends { id: string | number },
+  Entity,
+  Filter extends Record<string, unknown>,
+>(config: {
+  defaultFilter: Filter;
+  defaultDebounce?: number;
+  entity: Entity;
+}): SignalStoreFeature<
+  {
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
+    methods: CallStatusMethods;
+  },
+  {
+    state: EntitiesFilterState<Filter>;
+    signals: {};
+    methods: EntitiesFilterMethods<Filter>;
+  }
+>;
+
+export function withEntitiesRemoteFilter<
+  Entity,
   Collection extends string,
   Filter extends Record<string, unknown>,
 >({

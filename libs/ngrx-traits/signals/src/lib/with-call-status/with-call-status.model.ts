@@ -4,34 +4,34 @@ export type CallStatus = 'init' | 'loading' | 'loaded' | { error: unknown };
 export type CallStatusState = {
   callStatus: CallStatus;
 };
-export type CallStatusComputed = {
+export type CallStatusComputed<Error = unknown> = {
   isLoading: Signal<boolean>;
 } & {
   isLoaded: Signal<boolean>;
 } & {
-  error: Signal<string | null>;
+  error: Signal<Error | undefined>;
 };
-export type CallStatusMethods = {
+export type CallStatusMethods<Error = any> = {
   setLoading: () => void;
 } & {
   setLoaded: () => void;
 } & {
-  setError: (error?: unknown) => void;
+  setError: (error?: Error) => void;
 };
 export type NamedCallStatusState<Prop extends string> = {
   [K in Prop as `${K}CallStatus`]: CallStatus;
 };
-export type NamedCallStatusComputed<Prop extends string> = {
+export type NamedCallStatusComputed<Prop extends string, Error = unknown> = {
   [K in Prop as `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
 } & {
   [K in Prop as `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
 } & {
-  [K in Prop as `${K}Error`]: Signal<string | null>;
+  [K in Prop as `${K}Error`]: Signal<Error | null>;
 };
-export type NamedCallStatusMethods<Prop extends string> = {
+export type NamedCallStatusMethods<Prop extends string, Error = any> = {
   [K in Prop as `set${Capitalize<string & K>}Loading`]: () => void;
 } & {
   [K in Prop as `set${Capitalize<string & K>}Loaded`]: () => void;
 } & {
-  [K in Prop as `set${Capitalize<string & K>}Error`]: (error?: unknown) => void;
+  [K in Prop as `set${Capitalize<string & K>}Error`]: (error?: Error) => void;
 };

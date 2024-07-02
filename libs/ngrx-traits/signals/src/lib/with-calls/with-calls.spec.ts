@@ -1,11 +1,12 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import { Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, Subject, tap, throwError } from 'rxjs';
 
 import { typedCallConfig, withCalls } from '../index';
 
 describe('withCalls', () => {
-  const apiResponse = new Subject<string>();
+  let apiResponse = new Subject<string>();
   const onSuccess = jest.fn();
   const onError = jest.fn();
   const Store = signalStore(
@@ -24,6 +25,7 @@ describe('withCalls', () => {
       },
     })),
   );
+
   it('Successful call should set status to loading and loaded ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -35,6 +37,7 @@ describe('withCalls', () => {
       expect(store.testCallResult()).toBe('test');
     });
   });
+
   it('Fail on a call should set status return error ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -42,6 +45,71 @@ describe('withCalls', () => {
       store.testCall({ ok: false });
       expect(store.testCallError()).toEqual(new Error('fail'));
       expect(store.testCallResult()).toBe(undefined);
+    });
+  });
+
+  it('Successful call of a no parameters method, should set status to loading and loaded ', async () => {
+    const Store = signalStore(
+      withState({ foo: 'bar' }),
+      withCalls(() => ({
+        testCall: () => {
+          return apiResponse;
+        },
+      })),
+    );
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+    });
+  });
+
+  it('passing a signal should call when signal value changes ', async () => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      const param = signal({ ok: true });
+      store.testCall(param);
+      TestBed.flushEffects();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+      apiResponse.complete();
+
+      apiResponse = new Subject<string>();
+      param.set({ ok: true });
+      TestBed.flushEffects();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test2');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test2');
+    });
+  });
+
+  it('passing a observable should call when value changes ', async () => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      const param = new BehaviorSubject({ ok: true });
+
+      store.testCall(param);
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+      apiResponse.complete();
+
+      apiResponse = new Subject<string>();
+      param.next({ ok: true });
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test2');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test2');
     });
   });
 
@@ -55,7 +123,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
       });
     });
     it('Fail on a call should set status return error ', async () => {
@@ -65,9 +133,85 @@ describe('withCalls', () => {
         store.testCall2({ ok: false });
         expect(store.testCall2Error()).toEqual(new Error('fail'));
         expect(store.result()).toBe(undefined);
-        expect(onError).toHaveBeenCalledWith(new Error('fail'));
+        expect(onError).toHaveBeenCalledWith(new Error('fail'), { ok: false });
       });
     });
+    it('Fail on a call should set status return error with correct type if mapError is used ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok ? apiResponse : throwError(() => new Error('fail'));
+              },
+              mapError: (error, { ok }) => (error as Error).message + ' ' + ok,
+              resultProp: 'result',
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2({ ok: false });
+        expect(store.testCall2Error()).toEqual('fail false');
+        expect(store.result()).toBe(undefined);
+        expect(onError).toHaveBeenCalledWith('fail false', { ok: false });
+      });
+    });
+
+    it('Successful call of a no parameters method and resultProp, should set status to loading and loaded ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: typedCallConfig({
+              call: () => {
+                return apiResponse;
+              },
+              resultProp: 'result',
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2();
+        expect(store.isTestCall2Loading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCall2Loaded()).toBeTruthy();
+        expect(store.result()).toBe('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+      });
+    });
+
+    it('Successful call of a no parameters method and no resultProp, should set status to loading and loaded ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: typedCallConfig({
+              call: () => {
+                return apiResponse;
+              },
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2();
+        expect(store.isTestCall2Loading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCall2Loaded()).toBeTruthy();
+        expect(store.testCall2Result()).toBe('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+      });
+    });
+
     it('Successful call should set status to loading and loaded ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -97,9 +241,270 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect((store as any).testCallResult).toBeUndefined();
-        expect(onSuccess).toHaveBeenCalledWith('test');
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
         expect(store.foo()).toBe('test');
       });
+    });
+
+    it('check typedCallConfig with resultProp generates custom prop name ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls((store) => ({
+            testCall: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok
+                  ? apiResponse
+                  : apiResponse.pipe(
+                      tap(() => throwError(() => new Error('fail'))),
+                    );
+              },
+              resultProp: 'baz',
+              onSuccess: (result) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result });
+              },
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        store.testCall({ ok: true });
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test');
+        expect(store.baz()).toBe('test');
+      });
+    });
+
+    it('check onSuccess receives params', async () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withState({ ok: false }),
+          withCalls((store) => ({
+            testCall: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok
+                  ? apiResponse
+                  : apiResponse.pipe(
+                      tap(() => throwError(() => new Error('fail'))),
+                    );
+              },
+              resultProp: 'baz',
+              onSuccess: (result, { ok }) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result, ok });
+              },
+              onError,
+            }),
+          })),
+          withCalls((store) => ({
+            testCall2: typedCallConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return apiResponse;
+              },
+              resultProp: 'baz2',
+              onSuccess: (result, { ok }) => {
+                // patchState should be able to update the store inside onSuccess
+                patchState(store, { foo: result, ok });
+              },
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        store.testCall({ ok: true });
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test');
+        expect(store.baz()).toBe('test');
+        expect(store.ok()).toBe(true);
+
+        expect(store.isTestCall2Loading()).toBeFalsy();
+        store.testCall2({ ok: true });
+        expect(store.isTestCall2Loading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCall2Loaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test2');
+        expect(store.baz2()).toBe('test2');
+        expect(store.ok()).toBe(true);
+      });
+    });
+  });
+
+  it('returning an observable should update when value changes ', async () => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      const param = new BehaviorSubject({ ok: true });
+
+      store.testCall(param);
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      apiResponse.next('test2');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test2');
+
+      expect(apiResponse.observed).toBe(true);
+    });
+  });
+
+  it('returning an observable should update to error state when it errors', async () => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+      const param = new BehaviorSubject({ ok: true });
+
+      store.testCall(param);
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      apiResponse.error(new Error('fail'));
+      expect(store.testCallError()).toEqual(new Error('fail'));
+      expect(store.testCallResult()).toBe('test');
+
+      expect(apiResponse.observed).toBe(false);
+    });
+  });
+
+  it('returning a promise should output when value returns', async () => {
+    let response: Promise<string>;
+    TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        withCalls(() => ({
+          testCall: () => {
+            response = Promise.resolve('test');
+            return response;
+          },
+        })),
+      );
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      apiResponse.complete();
+      await response;
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+    });
+  });
+
+  it("should warn in dev mode if no callConfig is used when using an observable that doesn't complete within 100ms", () => {
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      /* Empty */
+    });
+    TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        withCalls(() => ({
+          testCall: () => apiResponse,
+        })),
+      );
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(consoleWarn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("should warn in dev mode if a mapPipe has not been set when using an observable that doesn't complete within 100ms", () => {
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      /* Empty */
+    });
+    TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: () => apiResponse,
+          }),
+        })),
+      );
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(consoleWarn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("should not warn in dev mode if a mapPipe has been set when using an observable that doesn't complete within 100ms", () => {
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      /* Empty */
+    });
+    TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: () => apiResponse,
+            mapPipe: 'switchMap',
+          }),
+        })),
+      );
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(consoleWarn).not.toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it("should not warn in dev mode if a mapPipe has been explicitly set to exhaustMap when using an observable that doesn't complete within 100ms", () => {
+    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      /* Empty */
+    });
+    TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: () => apiResponse,
+            mapPipe: 'exhaustMap',
+          }),
+        })),
+      );
+      const store = new Store();
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      expect(store.isTestCallLoading()).toBeTruthy();
+      apiResponse.next('test');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('test');
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(consoleWarn).not.toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -67,6 +67,21 @@ describe('withEntitiesMultiSelection', () => {
       store.toggleSelectEntities({ id: mockProducts[4].id });
       expect(store.isAllEntitiesSelected()).toEqual('some');
     });
+
+    it('cleanEntitiesSelected should clear selection', () => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.toggleSelectAllEntities();
+      expect(store.isAllEntitiesSelected()).toEqual('all');
+      store.clearEntitiesSelection();
+      expect(store.isAllEntitiesSelected()).toEqual('none');
+      store.toggleSelectEntities({ ids: mockProducts.map((p) => p.id) });
+      expect(store.isAllEntitiesSelected()).toEqual('all');
+      store.toggleSelectEntities({ id: mockProducts[4].id });
+      expect(store.isAllEntitiesSelected()).toEqual('some');
+      store.clearEntitiesSelection();
+      expect(store.isAllEntitiesSelected()).toEqual('none');
+    });
   });
 
   describe('with collection', () => {
@@ -125,6 +140,23 @@ describe('withEntitiesMultiSelection', () => {
       expect(store.isAllProductsSelected()).toEqual('all');
       store.toggleSelectProductsEntities({ id: mockProducts[4].id });
       expect(store.isAllProductsSelected()).toEqual('some');
+    });
+
+    it('clean[Collection]Selected should clear selection', () => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts, { collection }));
+      store.toggleSelectAllProductsEntities();
+      expect(store.isAllProductsSelected()).toEqual('all');
+      store.clearProductsSelection();
+      expect(store.isAllProductsSelected()).toEqual('none');
+      store.toggleSelectProductsEntities({
+        ids: mockProducts.map((p) => p.id),
+      });
+      expect(store.isAllProductsSelected()).toEqual('all');
+      store.toggleSelectProductsEntities({ id: mockProducts[4].id });
+      expect(store.isAllProductsSelected()).toEqual('some');
+      store.clearProductsSelection();
+      expect(store.isAllProductsSelected()).toEqual('none');
     });
   });
 });

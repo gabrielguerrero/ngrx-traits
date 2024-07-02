@@ -3,6 +3,7 @@ import { patchState, signalStore, type } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import {
+  withCallStatus,
   withEntitiesLocalFilter,
   withEntitiesLocalPagination,
   withEntitiesMultiSelection,
@@ -55,6 +56,44 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
+  it('should filter entities using default when withCallStatus loaded', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: 'zero', foo: 'bar2' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+    });
+  }));
+
   it('should filter entities after debounce', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -69,6 +108,43 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
+  it('should filter entities using previous filter when withCallStatus loaded', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: 'zero', foo: 'bar2' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+    });
+  }));
   it('should filter entities after default debounce', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
@@ -125,7 +201,7 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
-  it(' should resetPage to and selection when filter is executed', fakeAsync(() => {
+  it(' should reset page to and selection when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({
@@ -163,6 +239,56 @@ describe('withEntitiesLocalFilter', () => {
       expect(store.entitySelected()).toEqual(undefined);
       expect(store.entitiesSelected()).toEqual([]);
       expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      // check filter
+      expect(store.entities().length).toEqual(2);
+    });
+  }));
+
+  it(' should not reset selection when filter is executed if configured that way', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withEntitiesSingleSelection({
+          entity,
+          clearOnFilter: false,
+          clearOnRemoteSort: false,
+        }),
+        withEntitiesMultiSelection({
+          entity,
+          clearOnFilter: false,
+          clearOnRemoteSort: false,
+        }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.selectEntity({ id: mockProducts[0].id });
+      store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
+      expect(store.entitySelected()).toEqual(mockProducts[0]);
+      expect(store.entitiesSelected?.()).toEqual([
+        mockProducts[2],
+        mockProducts[3],
+      ]);
+
+      store.filterEntities({
+        filter: { search: 'zero' },
+        patch: true,
+      });
+      tick(400);
+      // check selection was not reset
+      expect(store.entitySelected()).toEqual(mockProducts[0]);
+      expect(store.entitiesSelected?.()).toEqual([
+        mockProducts[2],
+        mockProducts[3],
+      ]);
       // check filter
       expect(store.entities().length).toEqual(2);
     });
@@ -213,4 +339,97 @@ describe('withEntitiesLocalFilter', () => {
       expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
     });
   }));
+
+  describe('custom ids and filters', () => {
+    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    it('should filter entities', fakeAsync(() => {
+      const entityConfig = {
+        entity: type<ProductCustom>(),
+        idKey: 'productId',
+      } as const;
+      const Store = signalStore(
+        withEntities(entityConfig),
+        withEntitiesLocalFilter({
+          ...entityConfig,
+          defaultFilter: { search: '', foo: 'bar' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+        ...p,
+        productId: id,
+      }));
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+        store.filterEntities({
+          filter: { search: 'zero', foo: 'bar2' },
+        });
+        expect(store.entities().length).toEqual(mockProducts.length);
+        tick(400);
+        expect(store.entities().length).toEqual(2);
+        expect(store.entities()).toEqual([
+          {
+            description: 'Super Nintendo Game',
+            productId: '1',
+            name: 'F-Zero',
+            price: 12,
+          },
+          {
+            description: 'GameCube Game',
+            productId: '80',
+            name: 'F-Zero GX',
+            price: 55,
+          },
+        ]);
+      });
+    }));
+    it('should filter entities with collection', fakeAsync(() => {
+      const entityConfig = {
+        entity: type<ProductCustom>(),
+        collection: 'products',
+        idKey: 'productId',
+      } as const;
+      const Store = signalStore(
+        withEntities(entityConfig),
+        withEntitiesLocalFilter({
+          ...entityConfig,
+          defaultFilter: { search: '', foo: 'bar' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
+        ...p,
+        productId: id,
+      }));
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProductsCustom, entityConfig));
+        store.filterProductsEntities({
+          filter: { search: 'zero', foo: 'bar2' },
+        });
+        expect(store.productsEntities().length).toEqual(mockProducts.length);
+        tick(400);
+        expect(store.productsEntities().length).toEqual(2);
+        expect(store.productsEntities()).toEqual([
+          {
+            description: 'Super Nintendo Game',
+            productId: '1',
+            name: 'F-Zero',
+            price: 12,
+          },
+          {
+            description: 'GameCube Game',
+            productId: '80',
+            name: 'F-Zero GX',
+            price: 55,
+          },
+        ]);
+      });
+    }));
+  });
 });

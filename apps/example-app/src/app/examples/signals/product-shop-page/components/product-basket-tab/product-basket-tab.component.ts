@@ -9,11 +9,12 @@ import { ProductBasketComponent } from '../../../../components/product-basket/pr
 import { ProductDetailComponent } from '../../../../components/product-detail/product-detail.component';
 import { Product } from '../../../../models';
 import { ProductsShopStore } from '../../products-shop.store';
+import { SmartProductDetailComponent } from '../smart-product-detail/smart-product-detail.component';
 
 @Component({
   selector: 'product-basket-tab',
   template: `
-    <div gdColumns="700px 500px" style="gap: 10px">
+    <div class="grid gap-4 m-8">
       <mat-card>
         <mat-card-header>
           <mat-card-title>Product Basket</mat-card-title>
@@ -30,6 +31,8 @@ import { ProductsShopStore } from '../../products-shop.store';
             (toggleAllSelectForRemove)="
               store.toggleSelectAllOrderItemsEntities()
             "
+            [selectedProduct]="store.productsEntitySelected()"
+            (selectProduct)="store.selectProductsEntity($event)"
             (sort)="sortBasket($event)"
           ></product-basket>
         </mat-card-content>
@@ -59,6 +62,11 @@ import { ProductsShopStore } from '../../products-shop.store';
           </button>
         </mat-card-actions>
       </mat-card>
+      @if (store.productsEntitySelected()) {
+        <smart-product-detail
+          [productId]="store.productsEntitySelected()!.id"
+        />
+      }
     </div>
   `,
   styles: [
@@ -80,6 +88,7 @@ import { ProductsShopStore } from '../../products-shop.store';
     MatButtonModule,
     ProductDetailComponent,
     AsyncPipe,
+    SmartProductDetailComponent,
   ],
 })
 export class ProductBasketTabComponent {

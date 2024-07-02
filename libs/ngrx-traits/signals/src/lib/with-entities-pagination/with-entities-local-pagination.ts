@@ -65,21 +65,23 @@ import {
  *   store.loadProductsPage // ({ pageIndex: number }) => void
  */
 export function withEntitiesLocalPagination<
-  Entity extends { id: string | number },
+  Entity,
+  Collection extends string,
 >(config: {
   pageSize?: number;
   currentPage?: number;
   entity: Entity;
+  collection: Collection;
 }): SignalStoreFeature<
   {
-    state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
+    signals: NamedEntitySignals<Entity, Collection>;
     methods: {};
   },
   {
-    state: EntitiesPaginationLocalState;
-    signals: EntitiesPaginationLocalComputed<Entity>;
-    methods: EntitiesPaginationLocalMethods;
+    state: NamedEntitiesPaginationLocalState<Collection>;
+    signals: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
+    methods: NamedEntitiesPaginationLocalMethods<Collection>;
   }
 >;
 /**
@@ -112,31 +114,23 @@ export function withEntitiesLocalPagination<
  *   // generates the following methods
  *   store.loadProductsPage // ({ pageIndex: number }) => void
  */
-export function withEntitiesLocalPagination<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config: {
+export function withEntitiesLocalPagination<Entity>(config: {
   pageSize?: number;
   currentPage?: number;
   entity: Entity;
-  collection?: Collection;
 }): SignalStoreFeature<
   {
-    state: NamedEntityState<Entity, any>; // if put Collection the some props get lost and can only be access ['prop'] weird bug
-    signals: NamedEntitySignals<Entity, Collection>;
+    state: EntityState<Entity>;
+    signals: EntitySignals<Entity>;
     methods: {};
   },
   {
-    state: NamedEntitiesPaginationLocalState<Collection>;
-    signals: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
-    methods: NamedEntitiesPaginationLocalMethods<Collection>;
+    state: EntitiesPaginationLocalState;
+    signals: EntitiesPaginationLocalComputed<Entity>;
+    methods: EntitiesPaginationLocalMethods;
   }
 >;
-
-export function withEntitiesLocalPagination<
-  Entity extends { id: string | number },
-  Collection extends string,
->({
+export function withEntitiesLocalPagination<Entity, Collection extends string>({
   pageSize = 10,
   currentPage = 0,
   ...config
@@ -203,8 +197,14 @@ export function withEntitiesLocalPagination<
 
     withMethods((state: Record<string, Signal<unknown>>) => {
       return {
-        [loadEntitiesPageKey]: ({ pageIndex }: { pageIndex: number }) => {
-          setCurrentPage(state, paginationKey, pageIndex);
+        [loadEntitiesPageKey]: ({
+          pageIndex,
+          pageSize,
+        }: {
+          pageIndex: number;
+          pageSize?: number;
+        }) => {
+          setCurrentPage(state, paginationKey, pageIndex, pageSize);
           broadcast(state, entitiesLocalPageChanged({ pageIndex }));
         },
       };

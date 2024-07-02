@@ -53,7 +53,11 @@ const productsStoreFeature = signalStoreFeature(
     entity: productsEntity,
     collection: productsCollection,
   }),
-  withCallStatus({ initialValue: 'loading', collection: productsCollection }),
+  withCallStatus({
+    initialValue: 'loading',
+    collection: productsCollection,
+    errorType: type<string>(),
+  }),
   withEntitiesRemoteFilter({
     entity: productsEntity,
     collection: productsCollection,
@@ -114,28 +118,28 @@ export const ProductsShopStore = signalStore(
   { providedIn: 'root' },
   productsStoreFeature,
   orderItemsStoreFeature,
-  withEntitiesLoadingCall({
-    collection: productsCollection,
-    fetchEntities: async ({
-      productsPagedRequest,
-      productsFilter,
-      productsSort,
-    }) => {
-      const res = await lastValueFrom(
-        inject(ProductService).getProducts({
-          search: productsFilter().search,
-          skip: productsPagedRequest().startIndex,
-          take: productsPagedRequest().size,
-          sortAscending: productsSort().direction === 'asc',
-          sortColumn: productsSort().field,
-        }),
-      );
-      return { entities: res.resultList, total: res.total };
-    },
-  }),
+  withEntitiesLoadingCall(
+    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+      collection: productsCollection,
+      fetchEntities: async () => {
+        const res = await lastValueFrom(
+          inject(ProductService).getProducts({
+            search: productsFilter().search,
+            skip: productsPagedRequest().startIndex,
+            take: productsPagedRequest().size,
+            sortAscending: productsSort().direction === 'asc',
+            sortColumn: productsSort().field,
+          }),
+        );
+        return { entities: res.resultList, total: res.total };
+      },
+      mapError: (error) => (error as Error).message,
+    }),
+  ),
   withCalls(({ orderItemsEntities }, snackBar = inject(MatSnackBar)) => ({
     loadProductDetail: ({ id }: { id: string }) =>
       inject(ProductService).getProductDetail(id),
+
     checkout: typedCallConfig({
       call: () =>
         inject(OrderService).checkout(
@@ -147,6 +151,12 @@ export const ProductsShopStore = signalStore(
       resultProp: 'orderNumber',
       onSuccess: (orderId) => {
         snackBar.open(`Order number: ${orderId}`, 'Close', {
+          duration: 5000,
+        });
+      },
+      mapError: (error) => (error as Error).message,
+      onError: (error) => {
+        snackBar.open(error, 'Close', {
           duration: 5000,
         });
       },

@@ -30,8 +30,8 @@ export const ProductsBranchStore = signalStore(
       pageSize: 10,
       entity,
     }),
-    withEntitiesLoadingCall({
-      fetchEntities: async ({ entitiesPagedRequest, entitiesFilter }) => {
+    withEntitiesLoadingCall(({ entitiesPagedRequest, entitiesFilter }) => ({
+      fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(BranchService).getBranches({
             search: entitiesFilter().search,
@@ -41,36 +41,6 @@ export const ProductsBranchStore = signalStore(
         );
         return { entities: res.resultList };
       },
-    }),
-  ),
-  signalStoreFeature(
-    withEntities({
-      entity: entity2,
-      collection,
-    }),
-    withCallStatus({ initialValue: 'loading', collection }),
-    withEntitiesRemoteFilter({
-      entity: entity2,
-      collection,
-      defaultFilter: { search: '' },
-    }),
-    withEntitiesRemoteScrollPagination({
-      pageSize: 10,
-      entity: entity2,
-      collection,
-    }),
-    withEntitiesLoadingCall({
-      collection,
-      fetchEntities: async ({ productsPagedRequest, productsFilter }) => {
-        const res = await lastValueFrom(
-          inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-          }),
-        );
-        return { entities: res.resultList };
-      },
-    }),
+    })),
   ),
 );

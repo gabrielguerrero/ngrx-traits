@@ -42,6 +42,8 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * @param config
  * @param config.entity - the entity type
  * @param config.collection - the collection name
+ * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
+ * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
  *
  * @example
  * const entity = type<Product>();
@@ -64,9 +66,63 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * store.toggleSelectAllProducts // () => void;
  */
 export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
+  Entity,
+  Collection extends string,
 >(config: {
   entity: Entity;
+  collection: Collection;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
+}): SignalStoreFeature<
+  // TODO: the problem seems be with the state pro, when set to empty
+  //  it works but is it has a namedstate it doesnt
+  {
+    state: NamedEntityState<Entity, any>;
+    signals: NamedEntitySignals<Entity, Collection>;
+    methods: {};
+  },
+  {
+    state: NamedEntitiesMultiSelectionState<Collection>;
+    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+    methods: NamedEntitiesMultiSelectionMethods<Collection>;
+  }
+>;
+/**
+ * Generates state, signals and methods for multi selection of entities.
+ * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
+ * correctly in using remote pagination, because they cant select all the data.
+ *
+ * Requires withEntities to be used before this feature.
+ * @param config
+ * @param config.entity - the entity type
+ * @param config.collection - the collection name
+ * @param config.clearOnFilter - Clear the selected entity when the filter changes (default: true)
+ * @param config.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
+ *
+ * @example
+ * const entity = type<Product>();
+ * const collection = 'products';
+ * export const store = signalStore(
+ *   { providedIn: 'root' },
+ *   withEntities({ entity, collection }),
+ *   withEntitiesMultiSelection({ entity, collection }),
+ *   );
+ *
+ * // generates the following signals
+ * store.productsIdsSelectedMap // Record<string | number, boolean>;
+ * // generates the following computed signals
+ * store.productsEntitiesSelected // Entity[];
+ * store.isAllProductsSelected // 'all' | 'none' | 'some';
+ * // generates the following methods
+ * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.toggleSelectAllProducts // () => void;
+ */
+export function withEntitiesMultiSelection<Entity>(config: {
+  entity: Entity;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<
   {
     state: EntityState<Entity>;
@@ -80,83 +136,14 @@ export function withEntitiesMultiSelection<
   }
 >;
 
-/**
- * Generates state, signals and methods for multi selection of entities.
- * Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
- * correctly in using remote pagination, because they cant select all the data.
- *
- * Requires withEntities to be used before this feature.
- * @param config
- * @param config.entity - the entity type
- * @param config.collection - the collection name
- *
- * @example
- * const entity = type<Product>();
- * const collection = 'products';
- * export const store = signalStore(
- *   { providedIn: 'root' },
- *   withEntities({ entity, collection }),
- *   withEntitiesMultiSelection({ entity, collection }),
- *   );
- *
- * // generates the following signals
- * store.productsIdsSelectedMap // Record<string | number, boolean>;
- * // generates the following computed signals
- * store.productsEntitiesSelected // Entity[];
- * store.isAllProductsSelected // 'all' | 'none' | 'some';
- * // generates the following methods
- * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.toggleSelectAllProducts // () => void;
- */
 export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
+  Entity,
   Collection extends string,
 >(config: {
   entity: Entity;
   collection?: Collection;
-}): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
-  {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: {};
-  },
-  {
-    state: NamedEntitiesMultiSelectionState<Collection>;
-    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-    methods: NamedEntitiesMultiSelectionMethods<Collection>;
-  }
->;
-
-export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config: {
-  entity: Entity;
-  collection?: Collection;
-}): SignalStoreFeature<
-  // TODO: the problem seems be with the state pro, when set to empty
-  //  it works but is it has a namedstate it doesnt
-  {
-    state: NamedEntityState<Entity, any>;
-    signals: NamedEntitySignals<Entity, Collection>;
-    methods: {};
-  },
-  {
-    state: NamedEntitiesMultiSelectionState<Collection>;
-    signals: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-    methods: NamedEntitiesMultiSelectionMethods<Collection>;
-  }
->;
-export function withEntitiesMultiSelection<
-  Entity extends { id: string | number },
-  Collection extends string,
->(config: {
-  entity: Entity;
-  collection?: Collection;
+  clearOnFilter?: boolean;
+  clearOnRemoteSort?: boolean;
 }): SignalStoreFeature<any, any> {
   const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
   const {
@@ -212,11 +199,24 @@ export function withEntitiesMultiSelection<
       };
     }),
     withEventHandler((state) => {
-      return [
-        onEvent(entitiesFilterChanged, entitiesRemoteSortChanged, () =>
-          clearEntitiesSelection(state, selectedIdsMapKey),
-        ),
-      ];
+      const clearOnFilter = config?.clearOnFilter ?? true;
+      const clearOnRemoteSort = config?.clearOnRemoteSort ?? true;
+      const events = [];
+      if (clearOnFilter) {
+        events.push(
+          onEvent(entitiesFilterChanged, () => {
+            clearEntitiesSelection(state, selectedIdsMapKey);
+          }),
+        );
+      }
+      if (clearOnRemoteSort) {
+        events.push(
+          onEvent(entitiesRemoteSortChanged, () => {
+            clearEntitiesSelection(state, selectedIdsMapKey);
+          }),
+        );
+      }
+      return events;
     }),
     withMethods((state: Record<string, Signal<unknown>>) => {
       const selectedIdsMap = state[selectedIdsMapKey] as Signal<
@@ -276,7 +276,9 @@ export function withEntitiesMultiSelection<
             [selectedIdsMapKey]: { ...oldIdsMap, ...idsMap },
           });
         },
-        [clearEntitiesSelectionKey]: clearEntitiesSelection,
+        [clearEntitiesSelectionKey]: () => {
+          clearEntitiesSelection(state, selectedIdsMapKey);
+        },
         [toggleSelectAllEntitiesKey]: () => {
           const allSelected = isAllEntitiesSelected();
           if (allSelected === 'all') {

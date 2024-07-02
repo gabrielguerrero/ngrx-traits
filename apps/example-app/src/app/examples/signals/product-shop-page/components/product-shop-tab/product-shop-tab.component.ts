@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginator } from '@angular/material/paginator';
@@ -15,13 +15,14 @@ import { ProductsShopStore } from '../../products-shop.store';
 @Component({
   selector: 'product-shop-tab',
   template: `
-    <div class="m-8 grid sm:grid-cols-2" style="gap: 10px">
+    <div class="sm:m-4 grid sm:grid-cols-2 gap-4">
       <mat-card>
         <mat-card-header>
           <mat-card-title>Product List</mat-card-title>
         </mat-card-header>
         <mat-card-content>
           <product-search-form
+            class="m-2"
             [searchProduct]="store.productsFilter()"
             (searchProductChange)="filter($event)"
           />
@@ -32,9 +33,11 @@ import { ProductsShopStore } from '../../products-shop.store';
               [list]="store.productsCurrentPage().entities"
               [selectedProduct]="store.productsEntitySelected()"
               (selectProduct)="select($event)"
+              [selectedSort]="materialSort()"
               (sort)="sort($event)"
             />
             <mat-paginator
+              [pageSizeOptions]="[5, 10, 25, 100]"
               [length]="store.productsCurrentPage().total"
               [pageSize]="store.productsCurrentPage().pageSize"
               [pageIndex]="store.productsCurrentPage().pageIndex"
@@ -89,6 +92,12 @@ import { ProductsShopStore } from '../../products-shop.store';
 export class ProductShopTabComponent {
   store = inject(ProductsShopStore);
 
+  materialSort = computed(() => {
+    return {
+      active: this.store.productsSort().field as keyof Product,
+      direction: this.store.productsSort().direction,
+    };
+  });
   select({ id }: Product) {
     this.store.selectProductsEntity({ id });
     this.store.loadProductDetail({ id });
@@ -100,7 +109,8 @@ export class ProductShopTabComponent {
 
   sort(sort: Sort<Product>) {
     this.store.sortProductsEntities({
-      sort: { field: sort.active as string, direction: sort.direction },
+      sort: { field: sort.active, direction: sort.direction },
     });
+    console.log({ sort });
   }
 }

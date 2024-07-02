@@ -11,7 +11,7 @@ export type PaginationState = {
   currentPage: number;
   requestPage: number;
   pageSize: number;
-  total: number | undefined;
+  total: number;
   pagesToCache: number;
   cache: {
     start: number;

@@ -1,19 +1,28 @@
+import { Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
-export type Call<Params extends readonly any[] = any[], Result = any> = (
-  ...args: Params
-) => Observable<Result> | Promise<Result>;
+export type ObservableCall<Param = any, Result = any> =
+  | (() => Observable<Result>)
+  | ((arg: Param) => Observable<Result>);
+export type PromiseCall<Param = any, Result = any> =
+  | (() => Promise<Result>)
+  | ((arg: Param) => Promise<Result>);
+export type Call<Param = any, Result = any> =
+  | ObservableCall<Param, Result>
+  | PromiseCall<Param, Result>;
 export type CallConfig<
-  Params extends readonly any[] = any[],
+  Param = any,
   Result = any,
   PropName extends string = string,
+  Error = any,
 > = {
-  call: Call<Params, Result>;
-  resultProp?: PropName;
+  call: Call<Param, Result>;
+  resultProp: PropName;
   mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
   storeResult?: boolean;
-  onSuccess?: (result: Result) => void;
-  onError?: (error: unknown) => void;
+  onSuccess?: (result: Result, param: Param) => void;
+  mapError?: (error: unknown, param: Param) => Error;
+  onError?: (error: Error, param: Param) => void;
 };
 export type ExtractCallResultType<T extends Call | CallConfig> =
   T extends Call<any, infer R>
@@ -21,5 +30,21 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
     : T extends CallConfig<any, infer R>
       ? R
       : never;
-export type ExtractCallParams<T extends Call | CallConfig> =
-  T extends Call<infer P> ? P : T extends CallConfig<infer P> ? P : never;
+
+export type NamedCallsStatusComputed<Prop extends string> = {
+  [K in Prop as `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
+} & {
+  [K in Prop as `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
+};
+export type NamedCallsStatusErrorComputed<
+  Calls extends Record<string, Call | CallConfig>,
+> = {
+  [K in keyof Calls as `${K & string}Error`]: Calls[K] extends CallConfig<
+    any,
+    any,
+    any,
+    infer Error
+  >
+    ? Signal<Error | undefined>
+    : Signal<unknown | undefined>;
+};
