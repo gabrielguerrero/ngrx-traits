@@ -11,7 +11,7 @@
     "rxjs": "^7.8.1"
   },
   "optionalDependencies": {
-    "@angular/cdk": "^17.1.0"
+    "@angular/cdk": "^18.0.5"
   },
   "sideEffects": false,
   "repository": {
