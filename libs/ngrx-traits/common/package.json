@@ -13,7 +13,7 @@
     "@ngrx-traits/core": "^18.0.0"
   },
   "optionalDependencies": {
-    "@angular/router": "^17.1.0"
+    "@angular/router": "^18.0.5"
   },
   "sideEffects": false,
   "repository": {
