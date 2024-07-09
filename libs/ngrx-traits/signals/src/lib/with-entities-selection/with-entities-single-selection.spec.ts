@@ -24,7 +24,7 @@ describe('withEntitiesSingleSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.selectEntity({ id: mockProducts[4].id });
-      store.deselectEntity({ id: mockProducts[4].id });
+      store.deselectEntity();
       expect(store.entitySelected()).toEqual(undefined);
     });
 
@@ -55,7 +55,7 @@ describe('withEntitiesSingleSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.selectProductsEntity({ id: mockProducts[4].id });
-      store.deselectProductsEntity({ id: mockProducts[4].id });
+      store.deselectProductsEntity();
       expect(store.productsEntitySelected()).toEqual(undefined);
     });
 

@@ -17,7 +17,7 @@ export type NamedEntitiesSingleSelectionComputed<
 };
 export type EntitiesSingleSelectionMethods = {
   selectEntity: (options: { id: string | number }) => void;
-  deselectEntity: (options: { id: string | number }) => void;
+  deselectEntity: () => void;
   toggleEntity: (options: { id: string | number }) => void;
 };
 export type NamedEntitiesSingleSelectionMethods<Collection extends string> = {
@@ -25,9 +25,7 @@ export type NamedEntitiesSingleSelectionMethods<Collection extends string> = {
     id: string | number;
   }) => void;
 } & {
-  [K in Collection as `deselect${Capitalize<string & K>}Entity`]: (options: {
-    id: string | number;
-  }) => void;
+  [K in Collection as `deselect${Capitalize<string & K>}Entity`]: () => void;
 } & {
   [K in Collection as `toggle${Capitalize<string & K>}Entity`]: (options: {
     id: string | number;
