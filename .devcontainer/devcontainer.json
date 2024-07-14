@@ -25,7 +25,6 @@
 	"mounts": [
 		"source=ngrx-traits-angular-cache,target=${containerWorkspaceFolder}/.angular,type=volume", // angular cache volume
 		"source=ngrx-traits-nx-cache,target=${containerWorkspaceFolder}/.nx,type=volume", // angular cache volume
-		"source=ngrx-traits-tmp,target=${containerWorkspaceFolder}/tmp,type=volume", // tmp volume
 		"source=ngrx-traits-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume", //deps volume
 		"source=ngrx-traits-bashhistory,target=/commandhistory,type=volume", // bash history
 		"source=ngrx-traits-extensions,target=/root/.vscode-server/extensions,type=volume", // extensions volume
