@@ -63,12 +63,21 @@ export type NamedEntitiesPaginationRemoteComputed<
   }>;
 };
 
-export type EntitiesPaginationRemoteMethods<Entity> =
-  EntitiesPaginationLocalMethods &
-    SetEntitiesResult<{ entities: Entity[]; total: number }>;
+export type EntitiesPaginationRemoteMethods<Entity> = {
+  loadEntitiesPage: (options: {
+    pageIndex: number;
+    pageSize?: number;
+    skipLoadingCall?: boolean;
+  }) => void;
+} & SetEntitiesResult<{ entities: Entity[]; total: number }>;
 
 export type NamedEntitiesPaginationRemoteMethods<
   Entity,
   Collection extends string,
-> = NamedEntitiesPaginationLocalMethods<Collection> &
-  NamedSetEntitiesResult<Collection, { entities: Entity[]; total: number }>;
+> = {
+  [K in Collection as `load${Capitalize<string & K>}Page`]: (options: {
+    pageIndex: number;
+    pageSize?: number;
+    skipLoadingCall?: boolean;
+  }) => void;
+} & NamedSetEntitiesResult<Collection, { entities: Entity[]; total: number }>;

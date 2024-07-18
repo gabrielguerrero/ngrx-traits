@@ -76,6 +76,78 @@ describe('withEntitiesRemoteSort', () => {
     });
   }));
 
+  it('should not sort entities if skipLoadingCall? is true but should store sort', fakeAsync(() => {
+    const Store = signalStore(
+      withEntities({
+        entity,
+      }),
+      withCallStatus({ initialValue: 'loading' }),
+      withEntitiesRemoteSort({
+        entity,
+        defaultSort: { field: 'name', direction: 'asc' },
+      }),
+      withEntitiesLoadingCall({
+        fetchEntities: ({ entitiesSort }) => {
+          let result = [...mockProducts];
+          if (entitiesSort()?.field) {
+            result = sortData(result, {
+              field: entitiesSort()?.field as any,
+              direction: entitiesSort().direction,
+            });
+          }
+
+          return Promise.resolve({ entities: result, total: result.length });
+        },
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      TestBed.flushEffects();
+      tick();
+      // check default sort
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      const sortedNames = [
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ];
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual(sortedNames);
+      store.sortEntities({
+        sort: { field: 'price', direction: 'desc' },
+        skipLoadingCall: true,
+      });
+      tick();
+      // check entities sort is not changed
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual(sortedNames);
+      expect(store.entitiesSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
+      // we now trigger the loading call
+      store.setLoading();
+      tick();
+      expect(
+        store
+          .entities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.entities().length).toEqual(mockProducts.length);
+    });
+  }));
+
   it('with collection should sort entities and store sort', fakeAsync(() => {
     const collection = 'products';
     const Store = signalStore(
