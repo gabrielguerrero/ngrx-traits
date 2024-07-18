@@ -53,13 +53,17 @@ import {
 
 /**
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
- * When the page changes, it will try to load the current page from cache if it's not present,
+ * Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
  * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
- * and changing the status errors manually
+ * and changing the status errors manually,
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
- * the result and errors automatically. Requires withEntities and withCallStatus to be used.
- * This will only keeps pagesToCache pages in memory, so previous pages will be removed from the cache.
+ * the result and errors automatically.
+ *
+ * In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
+ * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
+ *
+ * This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
  * If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.
  *
  * Requires withEntities and withCallStatus to be present in the store.
@@ -137,10 +141,9 @@ import {
  *  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
- *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
+ *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
  *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
-
 export function withEntitiesRemotePagination<
   Entity,
   Collection extends string,
@@ -167,14 +170,20 @@ export function withEntitiesRemotePagination<
 
 /**
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
- * When the page changes, it will try to load the current page from cache if it's not present,
+ * Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
  * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
  * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
- * and changing the status errors manually
+ * and changing the status errors manually,
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
  * the result and errors automatically.
  *
- * Requires withEntities and withCallStatus to be present before this function.
+ * In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
+ * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
+ *
+ * This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
+ * If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.
+ *
+ * Requires withEntities and withCallStatus to be present in the store.
  * @param config
  * @param config.pageSize - The number of entities to show per page
  * @param config.currentPage - The current page to show
@@ -228,7 +237,10 @@ export function withEntitiesRemotePagination<
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
- * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
+ * //               patchState(
+ * //                 state,
+ * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
+ * //               ),
  * //             ),
  * //             catchError((error) => {
  * //               setProductsError(error);
@@ -246,7 +258,7 @@ export function withEntitiesRemotePagination<
  *  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
- *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
+ *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
  *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemotePagination<Entity>(config: {
@@ -422,6 +434,7 @@ export function withEntitiesRemotePagination<
           pageIndex: number;
           pageSize?: number;
           forceLoad?: boolean;
+          skipLoadingCall?: boolean;
         }>(
           pipe(
             distinctUntilChanged(
@@ -430,7 +443,7 @@ export function withEntitiesRemotePagination<
                 previous.pageIndex === current.pageIndex &&
                 previous.pageSize === current.pageSize,
             ),
-            exhaustMap(({ pageIndex, forceLoad, pageSize }) =>
+            exhaustMap(({ pageIndex, forceLoad, pageSize, skipLoadingCall }) =>
               $loading.pipe(
                 first((loading) => !loading),
                 // the previous exhaustMap to not loading ensures the function
@@ -469,7 +482,8 @@ export function withEntitiesRemotePagination<
                           requestPage: pageIndex + 1,
                         },
                       });
-                      setLoading();
+
+                      if (!skipLoadingCall) setLoading();
                     }
                     broadcast(
                       state,
@@ -480,7 +494,7 @@ export function withEntitiesRemotePagination<
                     );
                     return;
                   }
-                  setLoading();
+                  if (!skipLoadingCall) setLoading();
                   broadcast(
                     state,
                     entitiesRemotePageChanged({

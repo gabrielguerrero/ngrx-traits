@@ -71,6 +71,39 @@ describe('withEntitiesRemoteFilter', () => {
     });
   }));
 
+  it('should not filter entities is skipLoadingCall is true but should store filter', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      TestBed.flushEffects();
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar2' },
+        skipLoadingCall: true,
+      });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      // now we manually trigger the loading call and should filter
+      store.setLoading();
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+        },
+      ]);
+    });
+  }));
+
   it('should filter entities after provide debounce', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();

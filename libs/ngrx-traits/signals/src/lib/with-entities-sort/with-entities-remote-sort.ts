@@ -26,19 +26,25 @@ import type { Sort } from './with-entities-local-sort.model';
 import {
   EntitiesSortMethods,
   EntitiesSortState,
-  NamedEntitiesSortMethods,
   NamedEntitiesSortState,
 } from './with-entities-local-sort.model';
+import {
+  EntitiesRemoteSortMethods,
+  NamedEntitiesRemoteSortMethods,
+} from './with-entities-remote-sort.model';
 import { getWithEntitiesRemoteSortEvents } from './with-entities-remote-sort.util';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 
 /**
- * Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
+ * Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
  * and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
  * and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
  * with the sorted result that come from the backend, plus changing the status  and set errors is needed.
  * or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
  * the result and errors automatically.
+ *
+ *  In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
+ * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
  *
  * Requires withEntities and withCallStatus to be present before this function.
  *
@@ -105,7 +111,7 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * // generate the following signals
  * store.productsSort // the current sort
  * // and the following methods
- * store.sortProductsEntities // (options: { sort: Sort<Entity>; }) => void;
+ * store.sortProductsEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
  */
 export function withEntitiesRemoteSort<
   Entity,
@@ -123,17 +129,20 @@ export function withEntitiesRemoteSort<
   {
     state: NamedEntitiesSortState<Entity, Collection>;
     computed: {};
-    methods: NamedEntitiesSortMethods<Entity, Collection>;
+    methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
   }
 >;
 
 /**
- * Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
+ * Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
  * and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
  * and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
  * with the sorted result that come from the backend, plus changing the status  and set errors is needed.
  * or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
  * the result and errors automatically.
+ *
+ *  In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
+ * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
  *
  * Requires withEntities and withCallStatus to be present before this function.
  *
@@ -200,7 +209,7 @@ export function withEntitiesRemoteSort<
  * // generate the following signals
  * store.productsSort // the current sort
  * // and the following methods
- * store.sortProductsEntities // (options: { sort: Sort<Entity>; }) => void;
+ * store.sortProductsEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
  */
 export function withEntitiesRemoteSort<Entity>(config: {
   defaultSort: Sort<Entity>;
@@ -214,7 +223,7 @@ export function withEntitiesRemoteSort<Entity>(config: {
   {
     state: EntitiesSortState<Entity>;
     computed: {};
-    methods: EntitiesSortMethods<Entity>;
+    methods: EntitiesRemoteSortMethods<Entity>;
   }
 >;
 
@@ -237,11 +246,17 @@ export function withEntitiesRemoteSort<Entity, Collection extends string>({
     withMethods((state: Record<string, Signal<unknown>>) => {
       const setLoading = state[setLoadingKey] as () => void;
       return {
-        [sortEntitiesKey]: ({ sort: newSort }: { sort: Sort<Entity> }) => {
+        [sortEntitiesKey]: ({
+          sort: newSort,
+          skipLoadingCall,
+        }: {
+          sort: Sort<Entity>;
+          skipLoadingCall?: boolean;
+        }) => {
           patchState(state as StateSignal<object>, {
             [sortKey]: newSort,
           });
-          setLoading();
+          if (!skipLoadingCall) setLoading();
           broadcast(state, entitiesRemoteSortChanged({ sort: newSort }));
         },
       };
