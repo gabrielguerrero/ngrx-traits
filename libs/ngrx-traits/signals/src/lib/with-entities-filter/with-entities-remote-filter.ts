@@ -31,18 +31,23 @@ import {
   getWithEntitiesFilterKeys,
 } from './with-entities-filter.util';
 import {
-  EntitiesFilterMethods,
   EntitiesFilterState,
-  NamedEntitiesFilterMethods,
   NamedEntitiesFilterState,
 } from './with-entities-local-filter.model';
+import {
+  EntitiesRemoteFilterMethods,
+  NamedEntitiesRemoteFilterMethods,
+} from './with-entities-remote-filter.model';
 
 /**
  * Generates necessary state, computed and methods for remotely filtering entities in the store,
  * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
- * and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
+ * and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
  * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
- * and is debounced by default.
+ * and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.
+ *
+ * In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
+ * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
  *
  * Requires withEntities and withCallStatus to be present before this function.
  * @param config
@@ -108,10 +113,9 @@ import {
  *  // generates the following computed signals
  *  store.isProductsFilterChanged // boolean
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  *  store.resetProductsFilter  // () => void
  */
-
 export function withEntitiesRemoteFilter<
   Entity,
   Collection extends string,
@@ -130,16 +134,19 @@ export function withEntitiesRemoteFilter<
   {
     state: NamedEntitiesFilterState<Collection, Filter>;
     computed: {};
-    methods: NamedEntitiesFilterMethods<Collection, Filter>;
+    methods: NamedEntitiesRemoteFilterMethods<Collection, Filter>;
   }
 >;
 
 /**
  * Generates necessary state, computed and methods for remotely filtering entities in the store,
  * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
- * and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
+ * and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
  * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
- * and is debounced by default.
+ * and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.
+ *
+ * In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
+ * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
  *
  * Requires withEntities and withCallStatus to be present before this function.
  * @param config
@@ -205,7 +212,7 @@ export function withEntitiesRemoteFilter<
  *  // generates the following computed signals
  *  store.isProductsFilterChanged // boolean
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  *  store.resetProductsFilter  // () => void
  */
 export function withEntitiesRemoteFilter<
@@ -224,7 +231,7 @@ export function withEntitiesRemoteFilter<
   {
     state: EntitiesFilterState<Filter>;
     computed: {};
-    methods: EntitiesFilterMethods<Filter>;
+    methods: EntitiesRemoteFilterMethods<Filter>;
   }
 >;
 
@@ -270,11 +277,12 @@ export function withEntitiesRemoteFilter<
         debounce?: number;
         patch?: boolean;
         forceLoad?: boolean;
+        skipLoadingCall?: boolean;
       }>(
         pipe(
           debounceFilterPipe(filter, config.defaultDebounce),
           tap((value) => {
-            setLoading();
+            if (!value?.skipLoadingCall) setLoading();
             patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
               [filterKey]: value.filter,
             });
