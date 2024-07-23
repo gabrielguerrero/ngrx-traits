@@ -1,5 +1,6 @@
 import { computed, Signal } from '@angular/core';
 import {
+  patchState,
   signalStoreFeature,
   SignalStoreFeature,
   withComputed,
@@ -11,6 +12,7 @@ import {
   EntityComputed,
   NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
+import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -31,7 +33,6 @@ import {
 import {
   getWithEntitiesLocalPaginationEvents,
   getWithEntitiesLocalPaginationKeys,
-  setCurrentPage,
 } from './with-entities-local-pagination.util';
 
 /**
@@ -148,6 +149,33 @@ export function withEntitiesLocalPagination<Entity, Collection extends string>({
     getWithEntitiesLocalPaginationEvents(config);
   const { entitiesLocalSortChanged } = getWithEntitiesLocalSortEvents(config);
 
+  function setCurrentPage(
+    state: Record<string, Signal<unknown>>,
+    pageIndex: number,
+    pageSize?: number,
+  ) {
+    const { entitiesKey } = getWithEntitiesKeys(config);
+    const entities = state[entitiesKey] as Signal<Entity[]>;
+    const pagination = state[paginationKey] as Signal<{
+      pageSize: number;
+      currentPage: number;
+    }>;
+    const size = pageSize ?? pagination().pageSize;
+    const startIndex = pageIndex * size;
+    const currentPage =
+      startIndex >= 0 && startIndex < entities().length
+        ? pageIndex
+        : pagination().currentPage;
+
+    patchState(state as StateSignal<object>, {
+      [paginationKey]: {
+        ...pagination(),
+        currentPage,
+        pageSize: size,
+      },
+    });
+  }
+
   return signalStoreFeature(
     withState({
       [paginationKey]: {
@@ -191,7 +219,7 @@ export function withEntitiesLocalPagination<Entity, Collection extends string>({
     }),
     withEventHandler((state) => [
       onEvent(entitiesFilterChanged, entitiesLocalSortChanged, () => {
-        setCurrentPage(state, paginationKey, 0);
+        setCurrentPage(state, 0);
       }),
     ]),
 
@@ -204,7 +232,7 @@ export function withEntitiesLocalPagination<Entity, Collection extends string>({
           pageIndex: number;
           pageSize?: number;
         }) => {
-          setCurrentPage(state, paginationKey, pageIndex, pageSize);
+          setCurrentPage(state, pageIndex, pageSize);
           broadcast(state, entitiesLocalPageChanged({ pageIndex }));
         },
       };

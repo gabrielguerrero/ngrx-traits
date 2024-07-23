@@ -26,9 +26,11 @@ and is debounced by default.</p>
 <dt><a href="#withEntitiesRemoteFilter">withEntitiesRemoteFilter(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
-and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
+and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
 or use withEntitiesLoadingCall to call the api with the [collection]Filter params
-and is debounced by default.</p>
+and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLoadingCall">withEntitiesLoadingCall(config)</a></dt>
 <dd><p>Generates a onInit hook that fetches entities from a remote source
@@ -43,13 +45,15 @@ if an error occurs it will set the error to the store using set[Collection]Error
 <p>Requires withEntities to be present in the store.</p></dd>
 <dt><a href="#withEntitiesRemotePagination">withEntitiesRemotePagination(config)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remote pagination of entities in the store.
-When the page changes, it will try to load the current page from cache if it's not present,
+Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
 and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
-and changing the status errors manually
+and changing the status errors manually,
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
-the result and errors automatically. Requires withEntities and withCallStatus to be used.
-This will only keeps pagesToCache pages in memory, so previous pages will be removed from the cache.
+the result and errors automatically.</p>
+<p>In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
 If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
 <dt><a href="#withEntitiesRemoteScrollPagination">withEntitiesRemoteScrollPagination(config)</a></dt>
@@ -80,12 +84,14 @@ correctly in using remote pagination, because they cant select all the data.</p>
 <dd><p>Generates necessary state, computed and methods for sorting locally entities in the store.</p>
 <p>Requires withEntities to be present before this function</p></dd>
 <dt><a href="#withEntitiesRemoteSort">withEntitiesRemoteSort(config)</a></dt>
-<dd><p>Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
+<dd><p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
 and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
 and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status  and set errors is needed.
 or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
 the result and errors automatically.</p>
+<p>In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEventHandler">withEventHandler(eventHandlerFactory)</a></dt>
 <dd></dd>
@@ -94,6 +100,15 @@ the result and errors automatically.</p>
 <p>Event creators reduce the explicitness of class-based event creators.</p></dd>
 <dt><a href="#withStateLogger">withStateLogger(name, filterState)</a></dt>
 <dd><p>Log the state of the store on every change</p></dd>
+<dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams()</a></dt>
+<dd><p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
+The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
+when is not provided the filter will use JSON.stringify to serialize the filter object.</p>
+<p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
+<dt><a href="#withSyncToRouteQueryParams">withSyncToRouteQueryParams()</a></dt>
+<dd><p>Syncs the route query params with the store and back. On init it will load
+the query params once and set them in the store using the mapper.queryParamsToState, after that
+and change on the store will be reflected in the query params using the mapper.stateToQueryParams</p></dd>
 <dt><a href="#withSyncToWebStorage">withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore)</a></dt>
 <dd><p>Sync the state of the store to the web storage</p></dd>
 </dl>
@@ -214,8 +229,10 @@ and is debounced by default.</p>
 | config |  |
 | config.filterFn | <p>The function that will be used to filter the entities</p> |
 | config.defaultFilter | <p>The default filter to be used</p> |
-| config.defaultDebounce | <p>The default debounce time to be used</p> |
+| config.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
+| config.entity | <p>The entity tye to be used</p> |
 | config.collection | <p>The optional collection name to be used</p> |
+| config.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -249,9 +266,11 @@ const store = signalStore(
 ## withEntitiesRemoteFilter(config)
 <p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
-and you should either create an effect that listens toe [collection]Loading can call the api with the [collection]Filter params
+and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
 or use withEntitiesLoadingCall to call the api with the [collection]Filter params
-and is debounced by default.</p>
+and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
@@ -260,7 +279,7 @@ and is debounced by default.</p>
 | --- | --- |
 | config |  |
 | config.defaultFilter | <p>The default filter to be used</p> |
-| config.defaultDebounce | <p>The default debounce time to be used</p> |
+| config.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
 | config.entity | <p>The entity type to be used</p> |
 | config.collection | <p>The optional collection name to be used</p> |
 
@@ -322,7 +341,7 @@ export const store = signalStore(
  // generates the following computed signals
  store.isProductsFilterChanged // boolean
  // generates the following methods
- store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  store.resetProductsFilter  // () => void
 ```
 <a name="withEntitiesLoadingCall"></a>
@@ -341,11 +360,12 @@ if an error occurs it will set the error to the store using set[Collection]Error
 | Param | Description |
 | --- | --- |
 | config | <p>Configuration object or factory function that returns the configuration object</p> |
-| config.fetchEntities | <p>A function that fetches the entities from a remote source the return type</p> |
+| config.fetchEntities | <p>A function that fetches the entities from a remote source, the return type can be an array of entities or an object with entities and total</p> |
 | config.collection | <p>The collection name</p> |
 | config.onSuccess | <p>A function that is called when the fetchEntities is successful</p> |
 | config.mapError | <p>A function to transform the error before setting it to the store, requires withCallStatus errorType to be set</p> |
-| config.onError | <p>A function that is called when the fetchEntities fails can be an array of entities or an object with entities and total</p> |
+| config.onError | <p>A function that is called when the fetchEntities fails</p> |
+| config.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -436,13 +456,15 @@ export const ProductsLocalStore = signalStore(
 
 ## withEntitiesRemotePagination(config)
 <p>Generates necessary state, computed and methods for remote pagination of entities in the store.
-When the page changes, it will try to load the current page from cache if it's not present,
+Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
 and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
-and changing the status errors manually
+and changing the status errors manually,
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
-the result and errors automatically. Requires withEntities and withCallStatus to be used.
-This will only keeps pagesToCache pages in memory, so previous pages will be removed from the cache.
+the result and errors automatically.</p>
+<p>In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
 If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p>
 
@@ -456,6 +478,7 @@ If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPa
 | config.pagesToCache | <p>The number of pages to cache</p> |
 | config.entity | <p>The entity type</p> |
 | config.collection | <p>The name of the collection</p> |
+| config.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -524,7 +547,7 @@ export const store = signalStore(
  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  store.productsPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
- store.loadProductsPage({ pageIndex: number, forceLoad?: boolean }) // loads the page and sets the requestPage to the pageIndex
+ store.loadProductsPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesRemoteScrollPagination"></a>
@@ -725,6 +748,7 @@ export const store = signalStore(
 | config.defaultSort | <p>The default sort to be applied to the entities</p> |
 | config.entity | <p>The type entity to be used</p> |
 | config.collection | <p>The name of the collection for which will be sorted</p> |
+| config.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -747,12 +771,14 @@ store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sort
 <a name="withEntitiesRemoteSort"></a>
 
 ## withEntitiesRemoteSort(config)
-<p>Generates state, signals, and methods to sort entities remotely. When the sort method is called it will store the sort
+<p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
 and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
 and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status  and set errors is needed.
 or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
 the result and errors automatically.</p>
+<p>In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
@@ -823,7 +849,7 @@ export const store = signalStore(
 // generate the following signals
 store.productsSort // the current sort
 // and the following methods
-store.sortProductsEntities // (options: { sort: Sort<Entity>; }) => void;
+store.sortProductsEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
 ```
 <a name="withEventHandler"></a>
 
@@ -960,6 +986,116 @@ effectName$ = createEffect(
 | name | <p>The name of the store to log</p> |
 | filterState | <p>optional filter the state before logging</p> |
 
+<a name="withEntitiesSyncToRouteQueryParams"></a>
+
+## withEntitiesSyncToRouteQueryParams()
+<p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
+The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
+when is not provided the filter will use JSON.stringify to serialize the filter object.</p>
+<p>Requires withEntities and withCallStatus to be present in the store.</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config.collection | <p>The collection name to use as a prefix for the query params. If not provided, the collection name will be used.</p> |
+| config.filterMapper | <p>A function to map the filter object to a query params object.</p> |
+| config.prefix | <p>The prefix to use for the query params. If set to false, the prefix will be disabled.</p> |
+| config.onQueryParamsLoaded | <p>A function to be called when the query params are loaded into the store, (only gets called once).</p> |
+| config.defaultDebounce | <p>The default debounce time to use sync the store changes back to the route query params.</p> |
+
+**Example**  
+```js
+export const ProductsRemoteStore = signalStore(
+  { providedIn: 'root' },
+  // requires at least withEntities and withCallStatus
+  withEntities({ entity, collection }),
+  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withEntitiesRemoteFilter({
+    entity,
+    collection,
+  }),
+  withEntitiesRemotePagination({
+    entity,
+    collection,
+  }),
+  withEntitiesRemoteSort({
+    entity,
+    collection,
+    defaultSort: { field: 'name', direction: 'asc' },
+  }),
+  withEntitiesLoadingCall({
+    collection,
+    fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+      return inject(ProductService)
+        .getProducts({
+          search: productsFilter().name,
+          take: productsPagedRequest().size,
+          skip: productsPagedRequest().startIndex,
+          sortColumn: productsSort().field,
+          sortAscending: productsSort().direction === 'asc',
+        })
+        .pipe(
+          map((d) => ({
+            entities: d.resultList,
+            total: d.total,
+          })),
+        );
+    },
+  }),
+  // syncs the entities filter, pagination, sort and single selection to the route query params
+  withEntitiesSyncToRouteQueryParams({
+    entity,
+    collection,
+  })
+);
+```
+<a name="withSyncToRouteQueryParams"></a>
+
+## withSyncToRouteQueryParams()
+<p>Syncs the route query params with the store and back. On init it will load
+the query params once and set them in the store using the mapper.queryParamsToState, after that
+and change on the store will be reflected in the query params using the mapper.stateToQueryParams</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config.mappers | <p>The mappers to sync the query params with the store</p> |
+| config.defaultDebounce | <p>The debounce time to wait before updating the query params from the store</p> |
+
+**Example**  
+```js
+const Store = signalStore(
+      withState({
+        test: 'test',
+        foo: 'foo',
+        bar: false,
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: (query, store) => {
+            // set the query params in the store (only called once on init)
+              patchState(store, {
+                test: query.test,
+                foo: query.foo,
+                bar: query.bar === 'true',
+              });
+            },
+            stateToQueryParams: (store) =>
+              // return the query params to be set in the route
+              computed(() => ({
+                test: store.test(),
+                foo: store.foo(),
+                bar: store.bar().toString(),
+              })),
+          },
+        ],
+        defaultDebounce: debounce,
+      }),
+    );
+```
 <a name="withSyncToWebStorage"></a>
 
 ## withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore)
