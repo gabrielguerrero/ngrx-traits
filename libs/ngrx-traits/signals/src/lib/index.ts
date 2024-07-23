@@ -22,3 +22,6 @@ export * from './with-logger/with-state-logger';
 export * from './with-calls/with-calls';
 export * from './with-calls/with-calls.model';
 export * from './with-sync-to-web-storage/with-sync-to-web-storage';
+export * from './with-sync-to-route-query-params/with-entities-sync-to-route-query-params';
+export * from './with-sync-to-route-query-params/with-sync-to-route-query-params';
+export * from './with-sync-to-route-query-params/with-sync-to-route-query-params.util';

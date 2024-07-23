@@ -1,8 +1,13 @@
+import { computed, Signal } from '@angular/core';
+
 import {
   createEvent,
   props,
 } from '../with-event-handler/with-event-handler.util';
-import { Sort } from './with-entities-local-sort.model';
+import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
+import { EntitiesSortState, Sort } from './with-entities-local-sort.model';
+import { EntitiesRemoteSortMethods } from './with-entities-remote-sort.model';
+import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 
 const MAX_SAFE_INTEGER = 9007199254740991;
 
@@ -84,5 +89,37 @@ export function getWithEntitiesLocalSortEvents(config?: {
       `${collection}.entitiesLocalSortChanged`,
       props<{ sort: Sort<any> }>(),
     ),
+  };
+}
+export function getQueryMapperForEntitiesSort(config?: {
+  collection?: string;
+}): QueryMapper<{
+  sortBy: string;
+  sortDirection: string;
+}> {
+  const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
+
+  return {
+    queryParamsToState: (query, store) => {
+      const sortBy = query.sortBy;
+      if (sortBy) {
+        const sortDirection = query.sortDirection;
+        const sortEntities = store[
+          sortEntitiesKey
+        ] as EntitiesRemoteSortMethods<unknown>['sortEntities'];
+        sortEntities({
+          sort: { field: sortBy, direction: sortDirection as 'asc' | 'desc' },
+        });
+      }
+    },
+    stateToQueryParams: (store) => {
+      const sort = store[sortKey] as Signal<
+        EntitiesSortState<any>['entitiesSort']
+      >;
+      return computed(() => ({
+        sortBy: sort().field as string,
+        sortDirection: sort().direction,
+      }));
+    },
   };
 }

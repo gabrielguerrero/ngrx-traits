@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { Params } from '@angular/router';
 import {
   withCalls,
   withCallStatus,
@@ -7,6 +8,7 @@ import {
   withEntitiesLocalPagination,
   withEntitiesLocalSort,
   withEntitiesSingleSelection,
+  withEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
 import { signalStore, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
@@ -64,4 +66,12 @@ export const ProductsLocalStore = signalStore(
     },
     checkout: () => inject(OrderService).checkout(),
   })),
+  withEntitiesSyncToRouteQueryParams({
+    collection,
+    entity,
+    onQueryParamsLoaded: ({ productsEntitySelected, loadProductDetail }) => {
+      if (productsEntitySelected())
+        loadProductDetail(productsEntitySelected()!);
+    },
+  }),
 );

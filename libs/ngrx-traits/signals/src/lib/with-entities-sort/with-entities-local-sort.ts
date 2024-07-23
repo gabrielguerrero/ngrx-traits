@@ -153,7 +153,7 @@ export function withEntitiesLocalSort<Entity, Collection extends string>({
         }: { sort?: Sort<Entity> } = {}) => {
           const sort = newSort ?? defaultSort;
           patchState(state as StateSignal<object>, {
-            [sortKey]: sort,
+            [sortKey]: newSort ?? (state[sortKey]() as Sort<Entity>),
             [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
               (entity) =>
                 config.selectId ? config.selectId(entity) : (entity as any).id,
