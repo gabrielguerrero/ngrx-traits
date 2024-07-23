@@ -173,6 +173,7 @@ export function withEntitiesSingleSelection<
       };
     }),
     withMethods((state: Record<string, Signal<unknown>>) => {
+      const entityMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
       const selectedId = state[selectedIdKey] as Signal<
         string | number | undefined
       >;
@@ -184,7 +185,7 @@ export function withEntitiesSingleSelection<
       return {
         [selectEntityKey]: ({ id }: { id: string | number }) => {
           patchState(state as StateSignal<object>, {
-            [selectedIdKey]: id,
+            [selectedIdKey]: entityMap()[id] ? id : undefined,
           });
         },
         [deselectEntityKey]: deselectEntity,
