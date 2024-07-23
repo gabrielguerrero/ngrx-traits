@@ -287,7 +287,7 @@ export function withEntitiesLoadingCall<
 
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
-  Entity extends { id: string | number },
+  Entity,
   const Collection extends string = '',
   Error = unknown,
 >(

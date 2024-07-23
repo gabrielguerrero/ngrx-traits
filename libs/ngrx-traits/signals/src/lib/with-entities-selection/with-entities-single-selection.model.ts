@@ -1,10 +1,10 @@
 import { Signal } from '@angular/core';
 
 export type EntitiesSingleSelectionState = {
-  idSelected?: string | number;
+  idSelected: string | number | undefined;
 };
 export type NamedEntitiesSingleSelectionState<Collection extends string> = {
-  [K in Collection as `${K}IdSelected`]?: string | number;
+  [K in Collection as `${K}IdSelected`]: string | number | undefined;
 };
 export type EntitiesSingleSelectionComputed<Entity> = {
   entitySelected: Signal<Entity | undefined>;
