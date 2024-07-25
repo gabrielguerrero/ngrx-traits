@@ -15,6 +15,7 @@ describe('withEntitiesLocalPagination', () => {
 
   it('entitiesCurrentPage should split entities in the correct pages', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({ entity }),
       withEntitiesLocalPagination({ entity, pageSize: 10 }),
     );
@@ -63,6 +64,7 @@ describe('withEntitiesLocalPagination', () => {
 
   it('entitiesCurrentPage page size change should split entities in the correct pages', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({ entity }),
       withEntitiesLocalPagination({ entity, pageSize: 10 }),
     );
@@ -112,6 +114,7 @@ describe('withEntitiesLocalPagination', () => {
   it('with collection entitiesCurrentPage should split entities in the correct pages', () => {
     const collection = 'products';
     const Store = signalStore(
+      { protectedState: false },
       withEntities({ entity, collection }),
       withEntitiesLocalPagination({ entity, collection, pageSize: 10 }),
     );
@@ -164,6 +167,7 @@ describe('withEntitiesLocalPagination', () => {
   it('should resetPage when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -195,6 +199,7 @@ describe('withEntitiesLocalPagination', () => {
   it('should resetPage when sort is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),

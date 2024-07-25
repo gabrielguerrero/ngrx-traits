@@ -5,13 +5,14 @@ import {
   SignalStoreFeature,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
   EntityComputed,
   NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
+import { Prettify } from '@ngrx/signals/src/ts-helpers';
 
 import {
   CallStatusMethods,
@@ -24,7 +25,6 @@ import {
 } from '../with-event-handler/with-event-handler';
 import type { Sort } from './with-entities-local-sort.model';
 import {
-  EntitiesSortMethods,
   EntitiesSortState,
   NamedEntitiesSortState,
 } from './with-entities-local-sort.model';
@@ -253,7 +253,7 @@ export function withEntitiesRemoteSort<Entity, Collection extends string>({
           sort: Sort<Entity>;
           skipLoadingCall?: boolean;
         }) => {
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [sortKey]: newSort,
           });
           if (!skipLoadingCall) setLoading();

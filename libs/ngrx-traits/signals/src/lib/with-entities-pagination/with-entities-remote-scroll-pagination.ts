@@ -7,21 +7,19 @@ import {
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import {
   addEntities,
+  EntityComputed,
   EntityState,
+  NamedEntityComputed,
   NamedEntityState,
+  SelectEntityId,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import {
-  EntityComputed,
-  NamedEntityComputed,
-  SelectEntityId,
-} from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { elementAt, exhaustMap, first, pipe, tap } from 'rxjs';
+import { exhaustMap, first, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import {
@@ -390,7 +388,7 @@ export function withEntitiesRemoteScrollPagination<
 
       return {
         [loadEntitiesFirstPageKey]: () => {
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [paginationKey]: {
               ...pagination(),
               currentPage: 0,
@@ -401,7 +399,7 @@ export function withEntitiesRemoteScrollPagination<
         [loadEntitiesPreviousPageKey]: () => {
           const currentPage = pagination().currentPage;
           if (currentPage > 0) {
-            patchState(state as StateSignal<object>, {
+            patchState(state as WritableStateSource<object>, {
               [paginationKey]: {
                 ...pagination(),
                 currentPage: currentPage - 1,
@@ -427,7 +425,7 @@ export function withEntitiesRemoteScrollPagination<
                       cacheTotal: entities().length,
                     })
                   ) {
-                    patchState(state as StateSignal<object>, {
+                    patchState(state as WritableStateSource<object>, {
                       [paginationKey]: {
                         ...pagination(),
                         currentPage: nextPage,
@@ -442,7 +440,7 @@ export function withEntitiesRemoteScrollPagination<
                       })
                     ) {
                       // preload next page
-                      patchState(state as StateSignal<object>, {
+                      patchState(state as WritableStateSource<object>, {
                         [paginationKey]: {
                           ...pagination(),
                           currentPage: nextPage,
@@ -453,7 +451,7 @@ export function withEntitiesRemoteScrollPagination<
                       broadcast(state, loadingMoreEntities());
                     }
                   } else if (pagination().hasMore) {
-                    patchState(state as StateSignal<object>, {
+                    patchState(state as WritableStateSource<object>, {
                       [paginationKey]: {
                         ...pagination(),
                         currentPage: nextPage,
@@ -484,7 +482,7 @@ export function withEntitiesRemoteScrollPagination<
           const entities = options.entities;
           const entitiesOld = state[entitiesKey] as Signal<Entity[]>;
           patchState(
-            state as StateSignal<object>,
+            state as WritableStateSource<object>,
             config.collection
               ? addEntities(entities, {
                   collection: config.collection,
@@ -537,7 +535,7 @@ function clearEntitiesCache(
 ) {
   const pagination = state[paginationKey] as Signal<ScrollPaginationState>;
   patchState(
-    state as StateSignal<object>,
+    state as WritableStateSource<object>,
     config.collection
       ? setAllEntities([], {
           collection: config.collection,

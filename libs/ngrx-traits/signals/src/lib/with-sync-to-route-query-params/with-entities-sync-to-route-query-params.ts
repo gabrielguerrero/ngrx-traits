@@ -1,23 +1,22 @@
 import { computed, Signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
+  EmptyFeatureResult,
+  Prettify,
   SignalStoreFeature,
   signalStoreFeature,
+  SignalStoreFeatureResult,
+  StateSignals,
   type,
   withHooks,
+  WritableStateSource,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
   EntityComputed,
+  EntityState,
   NamedEntityComputed,
-} from '@ngrx/signals/entities/src/models';
-import {
-  type EmptyFeatureResult,
-  SignalStoreFeatureResult,
-  type StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
+  NamedEntityState,
+} from '@ngrx/signals/entities';
 import { concatMap, first } from 'rxjs';
 
 import {
@@ -113,7 +112,7 @@ export function withEntitiesSyncToRouteQueryParams<
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) => void;
   defaultDebounce?: number;

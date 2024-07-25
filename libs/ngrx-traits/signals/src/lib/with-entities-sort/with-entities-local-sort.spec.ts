@@ -18,6 +18,7 @@ describe('withEntitiesLocalSort', () => {
   const entity = type<Product>();
   it('should sort entities and store sort', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({
         entity,
       }),
@@ -71,6 +72,7 @@ describe('withEntitiesLocalSort', () => {
       productId: id,
     }));
     const Store = signalStore(
+      { protectedState: false },
       withEntities(config),
       withEntitiesLocalSort({
         ...config,
@@ -114,6 +116,7 @@ describe('withEntitiesLocalSort', () => {
   it('with collection should sort entities and store sort', () => {
     const collection = 'products';
     const Store = signalStore(
+      { protectedState: false },
       withEntities({
         entity,
         collection,
@@ -170,6 +173,7 @@ describe('withEntitiesLocalSort', () => {
       productId: id,
     }));
     const Store = signalStore(
+      { protectedState: false },
       withEntities(config),
       withEntitiesLocalSort({
         ...config,
@@ -213,6 +217,7 @@ describe('withEntitiesLocalSort', () => {
   it('should sort entities using default when withCallStatus loaded', () => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -247,6 +252,7 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const collection = 'products';
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
           collection,
@@ -282,6 +288,7 @@ describe('withEntitiesLocalSort', () => {
   it('should sort entities after filter', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -347,6 +354,7 @@ describe('withEntitiesLocalSort', () => {
   it('store with default sort entities and default filter should render correctly', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),

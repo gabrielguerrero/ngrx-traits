@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 describe('withSyncToRouteQueryParams', () => {
   function init({ debounce }: { debounce?: number } = {}) {
     const Store = signalStore(
+      { protectedState: false },
       withState({
         test: 'test',
         foo: 'foo',

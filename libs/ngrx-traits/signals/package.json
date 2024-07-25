@@ -7,7 +7,7 @@
   },
   "peerDependencies": {
     "@angular/core": "^18.0.5",
-    "@ngrx/signals": "^18.0.0-rc.2",
+    "@ngrx/signals": "^18.0.0",
     "rxjs": "^7.8.1"
   },
   "optionalDependencies": {

@@ -3,18 +3,16 @@ import { effect, inject, PLATFORM_ID } from '@angular/core';
 import {
   getState,
   patchState,
+  Prettify,
   signalStoreFeature,
+  SignalStoreFeatureResult,
+  StateSignals,
   type,
   withHooks,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
-import type {
-  SignalStoreFeatureResult,
-  StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
 
 /**
  * Sync the state of the store to the web storage
@@ -66,7 +64,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) => void;
 }) {
@@ -101,7 +99,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
               StateSignals<Input['state']> &
                 Input['computed'] &
                 Input['methods'] &
-                StateSignal<Prettify<Input['state']>>
+                WritableStateSource<Prettify<Input['state']>>
             >,
           );
           return true;
