@@ -1,14 +1,17 @@
 import { computed, inject } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { signalStoreFeature, type, withHooks, withState } from '@ngrx/signals';
-import type {
+import {
+  Prettify,
+  signalStoreFeature,
   SignalStoreFeatureResult,
   StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
-import { combineLatest, debounce, first, map, timer } from 'rxjs';
+  type,
+  withHooks,
+  withState,
+  WritableStateSource,
+} from '@ngrx/signals';
+import { debounce, first, timer } from 'rxjs';
 
 import { QueryMapper } from './with-sync-to-route-query-params.util';
 
@@ -60,7 +63,7 @@ export function withSyncToRouteQueryParams<
         StateSignals<Input['state']> &
           Input['computed'] &
           Input['methods'] &
-          StateSignal<Prettify<Input['state']>>
+          WritableStateSource<Prettify<Input['state']>>
       >
     >
   >,

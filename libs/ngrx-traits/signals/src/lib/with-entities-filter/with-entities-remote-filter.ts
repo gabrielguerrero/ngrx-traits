@@ -6,14 +6,15 @@ import {
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
-import type { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import type {
   EntityComputed,
+  EntityState,
   NamedEntityComputed,
-} from '@ngrx/signals/entities/src/models';
+  NamedEntityState,
+} from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
 import {
@@ -283,9 +284,12 @@ export function withEntitiesRemoteFilter<
           debounceFilterPipe(filter, config.defaultDebounce),
           tap((value) => {
             if (!value?.skipLoadingCall) setLoading();
-            patchState(state as StateSignal<EntitiesFilterState<Filter>>, {
-              [filterKey]: value.filter,
-            });
+            patchState(
+              state as WritableStateSource<EntitiesFilterState<Filter>>,
+              {
+                [filterKey]: value.filter,
+              },
+            );
             broadcast(state, entitiesFilterChanged(value));
           }),
         ),

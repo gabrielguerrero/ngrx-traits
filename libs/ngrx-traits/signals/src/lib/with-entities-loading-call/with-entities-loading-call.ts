@@ -6,27 +6,23 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
+  EmptyFeatureResult,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
-  withHooks,
-} from '@ngrx/signals';
-import {
-  EntityState,
-  NamedEntityState,
-  setAllEntities,
-} from '@ngrx/signals/entities';
-import {
-  EntityComputed,
-  NamedEntityComputed,
-  SelectEntityId,
-} from '@ngrx/signals/entities/src/models';
-import type {
-  EmptyFeatureResult,
   SignalStoreFeatureResult,
   StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
+  withHooks,
+  WritableStateSource,
+} from '@ngrx/signals';
+import {
+  EntityComputed,
+  EntityState,
+  NamedEntityComputed,
+  NamedEntityState,
+  SelectEntityId,
+  setAllEntities,
+} from '@ngrx/signals/entities';
 import { Prettify } from '@ngrx/signals/src/ts-helpers';
 import {
   catchError,
@@ -134,7 +130,7 @@ export function withEntitiesLoadingCall<
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) =>
     | Observable<
@@ -253,7 +249,7 @@ export function withEntitiesLoadingCall<
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) =>
     | Observable<
@@ -296,7 +292,7 @@ export function withEntitiesLoadingCall<
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) => {
     collection?: Collection;
@@ -369,7 +365,7 @@ export function withEntitiesLoadingCall<
           store: StateSignals<Input['state']> &
             Input['computed'] &
             Input['methods'] &
-            StateSignal<Prettify<Input['state']>>,
+            WritableStateSource<Prettify<Input['state']>>,
         ) => Observable<any> | Promise<any>;
         mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
         onSuccess?: (result: any) => void;
@@ -382,7 +378,7 @@ export function withEntitiesLoadingCall<
           StateSignals<Input['state']> &
             Input['computed'] &
             Input['methods'] &
-            StateSignal<Prettify<Input['state']>>
+            WritableStateSource<Prettify<Input['state']>>
         >,
       ) => {
         collection?: Collection;
@@ -414,7 +410,7 @@ export function withEntitiesLoadingCall<
           StateSignals<Input['state']> &
             Input['computed'] &
             Input['methods'] &
-            StateSignal<Prettify<Input['state']>>
+            WritableStateSource<Prettify<Input['state']>>
         >)
       : configFactory;
     const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
@@ -451,7 +447,7 @@ export function withEntitiesLoadingCall<
                           store as StateSignals<Input['state']> &
                             Input['computed'] &
                             Input['methods'] &
-                            StateSignal<Prettify<Input['state']>>,
+                            WritableStateSource<Prettify<Input['state']>>,
                         ),
                       ),
                     ).pipe(
@@ -463,7 +459,7 @@ export function withEntitiesLoadingCall<
                             ? result
                             : result.entities;
                           patchState(
-                            store as StateSignal<object>,
+                            store as WritableStateSource<object>,
                             collection
                               ? setAllEntities(entities as Entity[], {
                                   collection,
