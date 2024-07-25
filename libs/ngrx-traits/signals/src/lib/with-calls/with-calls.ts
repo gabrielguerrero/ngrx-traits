@@ -10,19 +10,17 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   patchState,
+  Prettify,
   signalStoreFeature,
   SignalStoreFeature,
+  SignalStoreFeatureResult,
+  StateSignals,
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import type {
-  SignalStoreFeatureResult,
-  StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
 import {
   catchError,
   concatMap,
@@ -120,7 +118,7 @@ export function withCalls<
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) => Calls,
 ): SignalStoreFeature<
@@ -171,7 +169,7 @@ export function withCalls<
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >);
     const callsState = Object.entries(calls).reduce(
       (acc, [callName, call]) => {

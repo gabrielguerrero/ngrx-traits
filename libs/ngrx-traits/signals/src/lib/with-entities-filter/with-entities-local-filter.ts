@@ -7,16 +7,17 @@ import {
   withHooks,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
   EntityComputed,
   EntityMap,
+  EntityState,
   NamedEntityComputed,
+  NamedEntityState,
   SelectEntityId,
-} from '@ngrx/signals/entities/src/models';
+} from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
@@ -220,7 +221,7 @@ export function withEntitiesLocalFilter<
               return filterFn(entity, value.filter);
             });
             patchState(
-              state as StateSignal<EntitiesFilterState<Filter>>,
+              state as WritableStateSource<EntitiesFilterState<Filter>>,
               {
                 [filterKey]: value.filter,
               },

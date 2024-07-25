@@ -20,6 +20,7 @@ describe('withEntitiesLocalFilter', () => {
   const entity = type<Product>();
   const collection = 'products';
   const Store = signalStore(
+    { protectedState: false },
     withEntities({
       entity,
     }),
@@ -63,6 +64,7 @@ describe('withEntitiesLocalFilter', () => {
   it('should filter entities using default when withCallStatus loaded', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -115,6 +117,7 @@ describe('withEntitiesLocalFilter', () => {
   it('should filter entities using previous filter when withCallStatus loaded', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -152,6 +155,7 @@ describe('withEntitiesLocalFilter', () => {
   it('should filter entities after default debounce', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -208,6 +212,7 @@ describe('withEntitiesLocalFilter', () => {
   it(' should reset page to and selection when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -251,6 +256,7 @@ describe('withEntitiesLocalFilter', () => {
   it(' should not reset selection when filter is executed if configured that way', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
         }),
@@ -301,6 +307,7 @@ describe('withEntitiesLocalFilter', () => {
   it(' should rename props when collection param is set', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({
           entity,
           collection,
@@ -352,6 +359,7 @@ describe('withEntitiesLocalFilter', () => {
         selectId: (entity) => entity.productId,
       });
       const Store = signalStore(
+        { protectedState: false },
         withEntities(config),
         withEntitiesLocalFilter({
           ...config,
@@ -397,6 +405,7 @@ describe('withEntitiesLocalFilter', () => {
         collection: 'products',
       });
       const Store = signalStore(
+        { protectedState: false },
         withEntities(config),
         withEntitiesLocalFilter({
           ...config,

@@ -1,13 +1,11 @@
 import {
   SignalStoreFeature,
   signalStoreFeature,
-  withMethods,
-} from '@ngrx/signals';
-import type {
   SignalStoreFeatureResult,
   StateSignals,
-} from '@ngrx/signals/src/signal-store-models';
-import { StateSignal } from '@ngrx/signals/src/state-signal';
+  withMethods,
+  WritableStateSource,
+} from '@ngrx/signals';
 import { Prettify } from '@ngrx/signals/src/ts-helpers';
 
 import { Event, EventCreator, EventType } from './with-event-handler.model';
@@ -66,7 +64,7 @@ export function withEventHandler<Input extends SignalStoreFeatureResult>(
       StateSignals<Input['state']> &
         Input['computed'] &
         Input['methods'] &
-        StateSignal<Prettify<Input['state']>>
+        WritableStateSource<Prettify<Input['state']>>
     >,
   ) => EventHandlersTypes<any>[],
 ): SignalStoreFeature<Input, Input> {

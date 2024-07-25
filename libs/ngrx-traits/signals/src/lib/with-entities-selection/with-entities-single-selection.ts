@@ -6,14 +6,15 @@ import {
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
   EntityComputed,
   EntityMap,
+  EntityState,
   NamedEntityComputed,
-} from '@ngrx/signals/entities/src/models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
+  NamedEntityState,
+} from '@ngrx/signals/entities';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -178,19 +179,19 @@ export function withEntitiesSingleSelection<
         string | number | undefined
       >;
       const deselectEntity = () => {
-        patchState(state as StateSignal<object>, {
+        patchState(state as WritableStateSource<object>, {
           [selectedIdKey]: undefined,
         });
       };
       return {
         [selectEntityKey]: ({ id }: { id: string | number }) => {
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [selectedIdKey]: entityMap()[id] ? id : undefined,
           });
         },
         [deselectEntityKey]: deselectEntity,
         [toggleEntityKey]: ({ id }: { id: string | number }) => {
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [selectedIdKey]: selectedId() === id ? undefined : id,
           });
         },

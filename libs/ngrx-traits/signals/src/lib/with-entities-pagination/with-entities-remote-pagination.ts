@@ -7,19 +7,17 @@ import {
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import {
+  EntityComputed,
   EntityState,
+  NamedEntityComputed,
   NamedEntityState,
+  SelectEntityId,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import {
-  EntityComputed,
-  NamedEntityComputed,
-  SelectEntityId,
-} from '@ngrx/signals/entities/src/models';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
 import { distinctUntilChanged, exhaustMap, first, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
@@ -403,7 +401,7 @@ export function withEntitiesRemotePagination<
             ? [...entitiesList(), ...entities]
             : entities;
           patchState(
-            state as StateSignal<object>,
+            state as WritableStateSource<object>,
             config.collection
               ? setAllEntities(newEntities, {
                   collection: config.collection,
@@ -453,7 +451,7 @@ export function withEntitiesRemotePagination<
                   if (size !== pagination().pageSize)
                     clearEntitiesCache(state, config, size);
                   else
-                    patchState(state as StateSignal<object>, {
+                    patchState(state as WritableStateSource<object>, {
                       [paginationKey]: {
                         ...pagination(),
                         currentPage: pageIndex,
@@ -475,7 +473,7 @@ export function withEntitiesRemotePagination<
                       })
                     ) {
                       // preload next page
-                      patchState(state as StateSignal<object>, {
+                      patchState(state as WritableStateSource<object>, {
                         [paginationKey]: {
                           ...pagination(),
                           currentPage: pageIndex,
@@ -520,7 +518,7 @@ function clearEntitiesCache<Entity>(
   const { paginationKey } = getWithEntitiesRemotePaginationKeys(config);
   const pagination = state[paginationKey] as Signal<PaginationState>;
   patchState(
-    state as StateSignal<object>,
+    state as WritableStateSource<object>,
     config.collection
       ? setAllEntities([], {
           collection: config.collection,

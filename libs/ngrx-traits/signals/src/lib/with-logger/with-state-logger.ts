@@ -1,6 +1,11 @@
 import { effect } from '@angular/core';
-import { getState, signalStoreFeature, type, withHooks } from '@ngrx/signals';
-import type { SignalStoreFeatureResult } from '@ngrx/signals/src/signal-store-models';
+import {
+  getState,
+  signalStoreFeature,
+  SignalStoreFeatureResult,
+  type,
+  withHooks,
+} from '@ngrx/signals';
 
 /**
  * Log the state of the store on every change

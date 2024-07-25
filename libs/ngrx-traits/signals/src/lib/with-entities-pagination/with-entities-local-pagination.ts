@@ -6,13 +6,10 @@ import {
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import {
-  EntityComputed,
-  NamedEntityComputed,
-} from '@ngrx/signals/entities/src/models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
+import { EntityComputed, NamedEntityComputed } from '@ngrx/signals/entities';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -167,7 +164,7 @@ export function withEntitiesLocalPagination<Entity, Collection extends string>({
         ? pageIndex
         : pagination().currentPage;
 
-    patchState(state as StateSignal<object>, {
+    patchState(state as WritableStateSource<object>, {
       [paginationKey]: {
         ...pagination(),
         currentPage,

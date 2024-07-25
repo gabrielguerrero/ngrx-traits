@@ -1,10 +1,7 @@
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import type {
-  EntityComputed,
-  NamedEntityComputed,
-} from '@ngrx/signals/entities/src/models';
+import { EntityComputed, NamedEntityComputed } from '@ngrx/signals/entities';
 import { debounceTime, Observable, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
