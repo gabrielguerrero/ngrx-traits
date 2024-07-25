@@ -11,6 +11,7 @@ describe('withSyncToWebStorage', () => {
   it('should save and load to local storage', () => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity }),
         withCallStatus(),
         withSyncToWebStorage({
@@ -39,6 +40,7 @@ describe('withSyncToWebStorage', () => {
   it('should save and load to local session', () => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity }),
         withCallStatus(),
         withSyncToWebStorage({
@@ -68,6 +70,7 @@ describe('withSyncToWebStorage', () => {
     const onRestore = jest.fn();
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity }),
         withCallStatus(),
         withSyncToWebStorage({
@@ -102,6 +105,7 @@ describe('withSyncToWebStorage', () => {
   it('should save after milliseconds set in saveStateChangesAfterMs if is greater than 0 ', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity }),
         withCallStatus(),
         withSyncToWebStorage({
@@ -132,6 +136,7 @@ describe('withSyncToWebStorage', () => {
         `{"entityMap":{"0":{"name":"Super Mario World","id":"0","description":"Super Nintendo Game","price":10},"1":{"name":"F-Zero","id":"1","description":"Super Nintendo Game","price":12}},"ids":["0","1"],"callStatus":"loaded"}`,
       );
       const Store = signalStore(
+        { protectedState: false },
         withEntities({ entity }),
         withCallStatus(),
         withSyncToWebStorage({

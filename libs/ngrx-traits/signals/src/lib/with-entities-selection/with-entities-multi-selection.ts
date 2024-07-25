@@ -6,6 +6,7 @@ import {
   withComputed,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
@@ -14,7 +15,6 @@ import {
   EntityMap,
   NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -239,7 +239,7 @@ export function withEntitiesMultiSelection<
             {} as Record<string | number, boolean>,
           );
 
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [selectedIdsMapKey]: { ...selectedIdsMap(), ...idsMap },
           });
         },
@@ -254,7 +254,7 @@ export function withEntitiesMultiSelection<
             },
             {} as Record<string | number, boolean>,
           );
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [selectedIdsMapKey]: { ...selectedIdsMap(), ...idsMap },
           });
         },
@@ -270,7 +270,7 @@ export function withEntitiesMultiSelection<
             },
             {} as Record<string | number, boolean>,
           );
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [selectedIdsMapKey]: { ...oldIdsMap, ...idsMap },
           });
         },
@@ -280,7 +280,7 @@ export function withEntitiesMultiSelection<
         [toggleSelectAllEntitiesKey]: () => {
           const allSelected = isAllEntitiesSelected();
           if (allSelected === 'all') {
-            patchState(state as StateSignal<object>, {
+            patchState(state as WritableStateSource<object>, {
               [selectedIdsMapKey]: {},
             });
           } else {
@@ -291,7 +291,7 @@ export function withEntitiesMultiSelection<
               },
               {} as Record<string | number, boolean>,
             );
-            patchState(state as StateSignal<object>, {
+            patchState(state as WritableStateSource<object>, {
               [selectedIdsMapKey]: idsMap,
             });
           }
@@ -304,7 +304,7 @@ function clearEntitiesSelection(
   state: Record<string, Signal<unknown>>,
   selectedIdsMapKey: string,
 ) {
-  patchState(state as StateSignal<object>, {
+  patchState(state as WritableStateSource<object>, {
     [selectedIdsMapKey]: {},
   });
 }

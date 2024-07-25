@@ -10,6 +10,7 @@ describe('withEntitiesSingleSelection', () => {
 
   describe('without collection', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({ entity }),
       withEntitiesSingleSelection({ entity }),
     );
@@ -41,6 +42,7 @@ describe('withEntitiesSingleSelection', () => {
   describe('with collection', () => {
     const collection = 'products';
     const Store = signalStore(
+      { protectedState: false },
       withEntities({ entity, collection }),
       withEntitiesSingleSelection({ entity, collection }),
     );

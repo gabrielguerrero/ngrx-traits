@@ -6,18 +6,15 @@ import {
   withHooks,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityState,
-  NamedEntityState,
-  setAllEntities,
-} from '@ngrx/signals/entities';
-import {
   EntityComputed,
+  EntityState,
   NamedEntityComputed,
+  NamedEntityState,
   SelectEntityId,
-} from '@ngrx/signals/entities/src/models';
-import type { StateSignal } from '@ngrx/signals/src/state-signal';
+} from '@ngrx/signals/entities';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -152,7 +149,7 @@ export function withEntitiesLocalSort<Entity, Collection extends string>({
           sort: newSort,
         }: { sort?: Sort<Entity> } = {}) => {
           const sort = newSort ?? defaultSort;
-          patchState(state as StateSignal<object>, {
+          patchState(state as WritableStateSource<object>, {
             [sortKey]: newSort ?? (state[sortKey]() as Sort<Entity>),
             [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
               (entity) =>
