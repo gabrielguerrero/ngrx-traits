@@ -1,5 +1,5 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import {
   entityConfig,
   setAllEntities,
@@ -7,6 +7,7 @@ import {
 } from '@ngrx/signals/entities';
 
 import {
+  Sort,
   withCallStatus,
   withEntitiesLocalFilter,
   withEntitiesLocalSort,
@@ -226,6 +227,43 @@ describe('withEntitiesLocalSort', () => {
           entity,
           defaultSort: { field: 'name', direction: 'asc' },
         }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+    });
+  });
+
+  it('should set default sort using config factory', () => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({
+          myDefault: { field: 'name', direction: 'asc' } as Sort<Product>,
+        }),
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalSort(({ myDefault }) => ({
+          entity,
+          defaultSort: myDefault(),
+        })),
       );
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));

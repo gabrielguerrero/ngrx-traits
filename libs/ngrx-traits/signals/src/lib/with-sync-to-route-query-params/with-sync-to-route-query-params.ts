@@ -13,6 +13,7 @@ import {
 } from '@ngrx/signals';
 import { debounce, first, timer } from 'rxjs';
 
+import { StoreSource } from '../with-store/with-feature-factory.model';
 import { QueryMapper } from './with-sync-to-route-query-params.util';
 
 /**
@@ -56,17 +57,7 @@ import { QueryMapper } from './with-sync-to-route-query-params.util';
 export function withSyncToRouteQueryParams<
   Input extends SignalStoreFeatureResult,
   Params extends Record<string, any>,
-  Mappers extends ReadonlyArray<
-    QueryMapper<
-      any,
-      Prettify<
-        StateSignals<Input['state']> &
-          Input['computed'] &
-          Input['methods'] &
-          WritableStateSource<Prettify<Input['state']>>
-      >
-    >
-  >,
+  Mappers extends ReadonlyArray<QueryMapper<any, StoreSource<Input>>>,
 >(config: { mappers: Mappers; defaultDebounce?: number }) {
   return signalStoreFeature(
     type<Input>(),

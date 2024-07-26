@@ -1,4 +1,4 @@
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import { withEntitiesSingleSelection } from '../index';
@@ -14,10 +14,26 @@ describe('withEntitiesSingleSelection', () => {
       withEntities({ entity }),
       withEntitiesSingleSelection({ entity }),
     );
+
     it('selectEntity should select the entity', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.selectEntity({ id: mockProducts[4].id });
+      expect(store.entitySelected()).toEqual(mockProducts[4]);
+    });
+
+    it('defaultSelectedId should select the entity', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ myDefault: { id: mockProducts[4].id } }),
+        withEntities({ entity }),
+        withEntitiesSingleSelection(({ myDefault }) => ({
+          entity,
+          defaultSelectedId: myDefault().id,
+        })),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
       expect(store.entitySelected()).toEqual(mockProducts[4]);
     });
 

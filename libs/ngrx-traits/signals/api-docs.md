@@ -100,7 +100,7 @@ Useful in cases where you want to further change the state before manually calli
 <p>Event creators reduce the explicitness of class-based event creators.</p></dd>
 <dt><a href="#withStateLogger">withStateLogger(name, filterState)</a></dt>
 <dd><p>Log the state of the store on every change</p></dd>
-<dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams()</a></dt>
+<dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams({entity})</a></dt>
 <dd><p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
 when is not provided the filter will use JSON.stringify to serialize the filter object.</p>
@@ -988,7 +988,7 @@ effectName$ = createEffect(
 
 <a name="withEntitiesSyncToRouteQueryParams"></a>
 
-## withEntitiesSyncToRouteQueryParams()
+## withEntitiesSyncToRouteQueryParams({entity})
 <p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
 when is not provided the filter will use JSON.stringify to serialize the filter object.</p>
