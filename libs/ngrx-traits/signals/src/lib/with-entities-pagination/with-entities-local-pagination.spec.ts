@@ -1,5 +1,5 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import {
@@ -62,6 +62,58 @@ describe('withEntitiesLocalPagination', () => {
     expect(store.entitiesCurrentPage().hasNext).toEqual(false);
   });
 
+  it('should read pageSize be able to read from state using config factory', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withState({ myDefault: { pageSize: 20 } }),
+      withEntities({ entity }),
+      withEntitiesLocalPagination(({ myDefault }) => ({
+        entity,
+        pageSize: myDefault().pageSize,
+      })),
+    );
+
+    const store = new Store();
+    patchState(store, setAllEntities(mockProducts.slice(0, 45)));
+    // check the first page
+    expect(store.entitiesCurrentPage().entities.length).toEqual(20);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(0, 20),
+    );
+    expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+    expect(store.entitiesCurrentPage().pageSize).toEqual(20);
+    expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.entitiesCurrentPage().total).toEqual(45);
+    expect(store.entitiesCurrentPage().hasPrevious).toEqual(false);
+    expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+    store.loadEntitiesPage({ pageIndex: 1 });
+    // check the second page
+    expect(store.entitiesCurrentPage().entities.length).toEqual(20);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(20, 40),
+    );
+    expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
+    expect(store.entitiesCurrentPage().pageSize).toEqual(20);
+    expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.entitiesCurrentPage().total).toEqual(45);
+    expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+    expect(store.entitiesCurrentPage().hasNext).toEqual(true);
+
+    store.loadEntitiesPage({ pageIndex: 2 });
+
+    // check the third page
+    expect(store.entitiesCurrentPage().entities.length).toEqual(5);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(40, 45),
+    );
+    expect(store.entitiesCurrentPage().pageIndex).toEqual(2);
+    expect(store.entitiesCurrentPage().pageSize).toEqual(20);
+    expect(store.entitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.entitiesCurrentPage().total).toEqual(45);
+    expect(store.entitiesCurrentPage().hasPrevious).toEqual(true);
+    expect(store.entitiesCurrentPage().hasNext).toEqual(false);
+  });
   it('entitiesCurrentPage page size change should split entities in the correct pages', () => {
     const Store = signalStore(
       { protectedState: false },

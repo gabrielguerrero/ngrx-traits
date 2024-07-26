@@ -7,6 +7,7 @@ import {
   signalStoreFeature,
   SignalStoreFeatureResult,
   StateSignals,
+  StateSource,
   type,
   withHooks,
   WritableStateSource,
@@ -35,6 +36,12 @@ import {
 import { getQueryMapperForEntitiesPagination } from '../with-entities-pagination/with-entities-local-pagination.util';
 import { getQueryMapperForSingleSelection } from '../with-entities-selection/with-entities-single-selection.util';
 import { getQueryMapperForEntitiesSort } from '../with-entities-sort/with-entities-local-sort.util';
+import { withFeatureFactory } from '../with-store/with-feature-factory';
+import {
+  FeatureConfigFactory,
+  getFeatureConfig,
+  StoreSource,
+} from '../with-store/with-feature-factory.model';
 import { withSyncToRouteQueryParams } from './with-sync-to-route-query-params';
 import { QueryMapper } from './with-sync-to-route-query-params.util';
 
@@ -102,19 +109,12 @@ export function withEntitiesSyncToRouteQueryParams<
   Filter,
   const Collection extends string = '',
   Error = unknown,
->(config?: {
+>(config: {
+  entity: Entity;
   collection?: Collection;
   filterMapper?: FilterQueryMapper<Filter>;
   prefix?: string | false;
-  entity: Entity;
-  onQueryParamsLoaded?: (
-    store: Prettify<
-      StateSignals<Input['state']> &
-        Input['computed'] &
-        Input['methods'] &
-        WritableStateSource<Prettify<Input['state']>>
-    >,
-  ) => void;
+  onQueryParamsLoaded?: (store: StoreSource<Input>) => void;
   defaultDebounce?: number;
 }): SignalStoreFeature<
   Input &

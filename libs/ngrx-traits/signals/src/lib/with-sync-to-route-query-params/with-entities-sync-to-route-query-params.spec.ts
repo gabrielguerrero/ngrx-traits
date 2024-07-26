@@ -230,7 +230,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     it('filter url query params  should update store', () => {
       const Store = signalStore(
         localStoreFeature(),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store } = init({
         Store,
@@ -242,7 +242,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     it('changes on entities filter should update url query params', fakeAsync(() => {
       const Store = signalStore(
         localStoreFeature(),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store, router } = init({
         Store,
@@ -324,7 +324,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     it('url query params sort should update store', () => {
       const Store = signalStore(
         localStoreFeature(),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store } = init({
         Store,
@@ -339,7 +339,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     it('changes on entities sort should update url query params', fakeAsync(() => {
       const Store = signalStore(
         localStoreFeature(),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store, router } = init({
         Store,
@@ -365,7 +365,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const load = new Subject<boolean>();
       const Store = signalStore(
         localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store } = init({
         Store,
@@ -381,7 +381,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const load = new Subject<boolean>();
       const Store = signalStore(
         localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store } = init({
         Store,
@@ -397,7 +397,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const load = new Subject<boolean>();
       const Store = signalStore(
         localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store, router } = init({
         Store,
@@ -423,7 +423,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const load = new Subject<boolean>();
       const Store = signalStore(
         localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store } = init({
         Store,
@@ -439,7 +439,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const load = new Subject<boolean>();
       const Store = signalStore(
         localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store } = init({
         Store,
@@ -455,7 +455,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const load = new Subject<boolean>();
       const Store = signalStore(
         localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams(),
+        withEntitiesSyncToRouteQueryParams({ entity }),
       );
       const { store, router } = init({
         Store,
@@ -481,7 +481,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     const load = new Subject<boolean>();
     const Store = signalStore(
       localStoreFeature({ load }),
-      withEntitiesSyncToRouteQueryParams(),
+      withEntitiesSyncToRouteQueryParams({ entity }),
     );
     const { store, router } = init({
       Store,
@@ -524,7 +524,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     const load = new Subject<boolean>();
     const Store = signalStore(
       remoteStoreFeature({ load }),
-      withEntitiesSyncToRouteQueryParams(),
+      withEntitiesSyncToRouteQueryParams({ entity }),
     );
     const { store, router } = init({
       Store,

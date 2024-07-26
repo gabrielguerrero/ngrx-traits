@@ -1,5 +1,5 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { signalStore, type } from '@ngrx/signals';
+import { signalStore, type, withState } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { of } from 'rxjs';
 
@@ -67,6 +67,46 @@ describe('withEntitiesRemoteFilter', () => {
           price: 55,
         },
       ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+    });
+  }));
+  it('should allow to set default filter from previous state', fakeAsync(() => {
+    const Store = signalStore(
+      withEntities({
+        entity,
+      }),
+      withCallStatus({ initialValue: 'loading' }),
+      withState({ myDefault: { search: '', foo: 'bar' } }),
+      withEntitiesRemoteFilter(({ myDefault }) => ({
+        entity,
+        defaultFilter: myDefault(),
+      })),
+      withEntitiesLoadingCall({
+        fetchEntities: ({ entitiesFilter }) => {
+          let result = [...mockProducts];
+          if (entitiesFilter()?.search) {
+            result = mockProducts.filter((entity) =>
+              entitiesFilter()?.search
+                ? entity.name
+                    .toLowerCase()
+                    .includes(entitiesFilter()?.search.toLowerCase())
+                : false,
+            );
+          }
+          return of(result);
+        },
+      }),
+    );
+
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      TestBed.flushEffects();
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar2' },
+      });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
     });
   }));

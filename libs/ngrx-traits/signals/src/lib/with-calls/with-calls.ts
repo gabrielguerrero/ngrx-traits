@@ -47,6 +47,8 @@ import {
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
+import { withFeatureFactory } from '../with-store/with-feature-factory';
+import { StoreSource } from '../with-store/with-feature-factory.model';
 import {
   Call,
   CallConfig,
@@ -113,14 +115,7 @@ export function withCalls<
   Input extends SignalStoreFeatureResult,
   const Calls extends Record<string, Call | CallConfig>,
 >(
-  callsFactory: (
-    store: Prettify<
-      StateSignals<Input['state']> &
-        Input['computed'] &
-        Input['methods'] &
-        WritableStateSource<Prettify<Input['state']>>
-    >,
-  ) => Calls,
+  callsFactory: (store: StoreSource<Input>) => Calls,
 ): SignalStoreFeature<
   Input,
   {
@@ -158,19 +153,8 @@ export function withCalls<
     };
   }
 > {
-  return (store) => {
-    const { stateSignals, methods, computedSignals, hooks, ...rest } = store;
-    const calls = callsFactory({
-      ...stateSignals,
-      ...computedSignals,
-      ...methods,
-      ...rest,
-    } as Prettify<
-      StateSignals<Input['state']> &
-        Input['computed'] &
-        Input['methods'] &
-        WritableStateSource<Prettify<Input['state']>>
-    >);
+  return withFeatureFactory((store: StoreSource<Input>) => {
+    const calls = callsFactory(store);
     const callsState = Object.entries(calls).reduce(
       (acc, [callName, call]) => {
         const { callStatusKey } = getWithCallStatusKeys({ prop: callName });
@@ -290,8 +274,8 @@ export function withCalls<
           return methods;
         },
       ),
-    )(store) as any; // not found a nice way to remove this any
-  };
+    );
+  }) as any;
 }
 
 function isCallConfig<Param, Result>(
