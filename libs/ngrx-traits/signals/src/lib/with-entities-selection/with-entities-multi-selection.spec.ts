@@ -1,4 +1,4 @@
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import { withEntitiesMultiSelection } from '../index';
@@ -98,6 +98,26 @@ describe('withEntitiesMultiSelection', () => {
       store.selectProductsEntities({
         ids: [mockProducts[4].id, mockProducts[8].id],
       });
+      expect(store.productsIdsSelected()).toEqual(['4', '8']);
+      expect(store.productsEntitiesSelected()).toEqual([
+        mockProducts[4],
+        mockProducts[8],
+      ]);
+    });
+
+    it('defaultSelectedIds should select the entity', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ myDefaultIds: [mockProducts[4].id, mockProducts[8].id] }),
+        withEntities({ entity, collection }),
+        withEntitiesMultiSelection(({ myDefaultIds }) => ({
+          entity,
+          collection,
+          defaultSelectedIds: myDefaultIds(),
+        })),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts, { collection }));
       expect(store.productsIdsSelected()).toEqual(['4', '8']);
       expect(store.productsEntitiesSelected()).toEqual([
         mockProducts[4],

@@ -78,12 +78,15 @@ export function withEventHandler<Input extends SignalStoreFeatureResult>(
             });
           }
         : undefined;
-      return {
-        [ON_EVENT]: combineFunctions(
-          store[ON_EVENT] as OverridableFunction,
-          newHandler,
-        ),
-      };
+      const onEvent = combineFunctions(
+        store[ON_EVENT] as OverridableFunction,
+        newHandler,
+      );
+      return !store[ON_EVENT]
+        ? {
+            [ON_EVENT]: onEvent,
+          }
+        : ({} as any);
     }),
   ) as any;
 }
