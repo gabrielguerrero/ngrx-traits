@@ -1,8 +1,9 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { signalStore, type } from '@ngrx/signals';
+import { signalStore, type, withState } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 
 import {
+  Sort,
   withCallStatus,
   withEntitiesLoadingCall,
   withEntitiesMultiSelection,
@@ -209,6 +210,58 @@ describe('withEntitiesRemoteSort', () => {
         field: 'price',
         direction: 'desc',
       });
+    });
+  }));
+
+  it('should set default sort using config factory', fakeAsync(() => {
+    const collection = 'products';
+    const Store = signalStore(
+      withState({
+        myDefault: { field: 'name', direction: 'asc' } as Sort<Product>,
+      }),
+      withEntities({
+        entity,
+        collection,
+      }),
+      withCallStatus({ initialValue: 'loading', collection }),
+      withEntitiesRemoteSort(({ myDefault }) => ({
+        entity,
+        collection,
+        defaultSort: myDefault(),
+      })),
+      withEntitiesLoadingCall({
+        collection,
+        fetchEntities: ({ productsSort }) => {
+          let result = [...mockProducts];
+          if (productsSort()?.field) {
+            result = sortData(result, {
+              field: productsSort()?.field as any,
+              direction: productsSort().direction,
+            });
+          }
+
+          return Promise.resolve({ entities: result, total: result.length });
+        },
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      TestBed.flushEffects();
+      tick();
+      // check default sort
+      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(
+        store
+          .productsEntities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
     });
   }));
 

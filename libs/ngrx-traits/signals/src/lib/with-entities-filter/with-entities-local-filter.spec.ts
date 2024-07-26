@@ -1,5 +1,5 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import {
   entityConfig,
   setAllEntities,
@@ -57,6 +57,34 @@ describe('withEntitiesLocalFilter', () => {
           price: 55,
         },
       ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+    });
+  }));
+
+  it('should allow to set default filter from previous state', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ myDefault: { search: '', foo: 'bar' } }),
+        withEntities({
+          entity,
+        }),
+        withEntitiesLocalFilter(({ myDefault }) => ({
+          entity,
+          defaultFilter: myDefault(),
+          filterFn: (entity, filter: { search: string; foo: string }) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        })),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar2' },
+      });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
     });
   }));
