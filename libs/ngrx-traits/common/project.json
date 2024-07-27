@@ -6,7 +6,7 @@
   "prefix": "ngrx-traits",
   "targets": {
     "build": {
-      "executor": "@nrwl/angular:package",
+      "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/libs/ngrx-traits/common"],
       "options": {
         "project": "libs/ngrx-traits/common/ng-package.json"
@@ -22,7 +22,7 @@
       "defaultConfiguration": "production"
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
+      "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/libs/ngrx-traits/common"],
       "options": {
         "jestConfig": "libs/ngrx-traits/common/jest.config.ts",
@@ -30,7 +30,7 @@
       }
     },
     "lint": {
-      "executor": "@nrwl/linter:eslint",
+      "executor": "@nx/linter:eslint",
       "options": {
         "lintFilePatterns": [
           "libs/ngrx-traits/common/src/**/*.ts",
