@@ -65,7 +65,7 @@ import {
  * probably because the data is top big and partitioned in multiple nodes.
  *
  * When the page changes, it will try to load the current page from cache if it's not present,
- * it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
+ * it will call set[Collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
  * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually
  * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
