@@ -5,6 +5,7 @@ export type Sort<Entity> = {
   /** The sort direction. */
   direction: SortDirection;
 };
+
 export type EntitiesSortState<Entity> = {
   entitiesSort: Sort<Entity>;
 };
