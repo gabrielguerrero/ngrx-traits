@@ -286,6 +286,68 @@ describe('withEntitiesLocalSort', () => {
     });
   });
 
+  it('should sort using previous sort if sortEntities is called without sort param', () => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({
+          myDefault: { field: 'id', direction: 'asc' } as Sort<Product>,
+        }),
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalSort(({ myDefault }) => ({
+          entity,
+          defaultSort: myDefault(),
+        })),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.flushEffects();
+      expect(store.entitiesSort()).toEqual({ field: 'id', direction: 'asc' });
+      expect(
+        store
+          .entities()
+          .map((e) => e.id)
+          .slice(0, 5),
+      ).toEqual(mockProducts.map((p) => p.id).slice(0, 5));
+
+      store.sortEntities(); // sort again should keep previous sort
+
+      expect(store.entitiesSort()).toEqual({ field: 'id', direction: 'asc' });
+      expect(
+        store
+          .entities()
+          .map((e) => e.id)
+          .slice(0, 5),
+      ).toEqual(mockProducts.map((p) => p.id).slice(0, 5));
+
+      store.sortEntities({ sort: { field: 'name', direction: 'asc' } });
+
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+
+      store.sortEntities(); // sort again should keep previous sort
+
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+
+      // check default sort
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+    });
+  });
+
   it('with collection should sort entities using default when withCallStatus loaded', () => {
     TestBed.runInInjectionContext(() => {
       const collection = 'products';
