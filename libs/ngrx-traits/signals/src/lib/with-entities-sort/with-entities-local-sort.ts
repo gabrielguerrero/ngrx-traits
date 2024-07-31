@@ -125,9 +125,9 @@ export function withEntitiesLocalSort<
           [sortEntitiesKey]: ({
             sort: newSort,
           }: { sort?: Sort<Entity> } = {}) => {
-            const sort = newSort ?? defaultSort;
+            const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
             patchState(state as WritableStateSource<object>, {
-              [sortKey]: newSort ?? (state[sortKey]() as Sort<Entity>),
+              [sortKey]: sort,
               [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
                 (entity) =>
                   config.selectId

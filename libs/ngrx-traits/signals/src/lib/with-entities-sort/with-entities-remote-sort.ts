@@ -13,7 +13,6 @@ import {
   EntityComputed,
   NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
 
 import {
   CallStatusMethods,
@@ -30,7 +29,7 @@ import {
   getFeatureConfig,
   StoreSource,
 } from '../with-store/with-feature-factory.model';
-import type { Sort } from './with-entities-local-sort.model';
+import { Sort } from './with-entities-local-sort.model';
 import {
   EntitiesSortState,
   NamedEntitiesSortState,
@@ -176,14 +175,15 @@ export function withEntitiesRemoteSort<
             sort: newSort,
             skipLoadingCall,
           }: {
-            sort: Sort<Entity>;
+            sort?: Sort<Entity>;
             skipLoadingCall?: boolean;
-          }) => {
+          } = {}) => {
+            const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
             patchState(state as WritableStateSource<object>, {
-              [sortKey]: newSort,
+              [sortKey]: sort,
             });
             if (!skipLoadingCall) setLoading();
-            broadcast(state, entitiesRemoteSortChanged({ sort: newSort }));
+            broadcast(state, entitiesRemoteSortChanged({ sort }));
           },
         };
       }),

@@ -265,6 +265,75 @@ describe('withEntitiesRemoteSort', () => {
     });
   }));
 
+  it('should sort using previous sort if sortEntities is called without sort param', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemoteSort({
+          entity,
+          defaultSort: { field: 'id', direction: 'asc' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesSort }) => {
+            let result = [...mockProducts];
+            if (entitiesSort()?.field) {
+              result = sortData(result, {
+                field: entitiesSort()?.field as any,
+                direction: entitiesSort().direction,
+              });
+            }
+
+            return Promise.resolve({ entities: result, total: result.length });
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.flushEffects();
+      tick();
+      expect(store.entitiesSort()).toEqual({ field: 'id', direction: 'asc' });
+      expect(
+        store
+          .entities()
+          .map((e) => e.id)
+          .slice(0, 5),
+      ).toEqual(mockProducts.map((p) => p.id).slice(0, 5));
+      tick();
+      store.sortEntities(); // sort again should keep previous sort
+      tick();
+      expect(store.entitiesSort()).toEqual({ field: 'id', direction: 'asc' });
+      expect(
+        store
+          .entities()
+          .map((e) => e.id)
+          .slice(0, 5),
+      ).toEqual(mockProducts.map((p) => p.id).slice(0, 5));
+
+      store.sortEntities({ sort: { field: 'name', direction: 'asc' } });
+      tick();
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+
+      store.sortEntities(); // sort again should keep previous sort
+      tick();
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+
+      // check default sort
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+    });
+  }));
   it(' should reset page to and selection when sort is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
