@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterLink } from '@angular/router';
 import { Sort } from '@ngrx-traits/common';
 
 import { ProductDetailComponent } from '../../components/product-detail/product-detail.component';
@@ -39,6 +40,7 @@ import { ProductsLocalStore } from './product.store';
                 (selectProduct)="select($event)"
                 (sort)="sort($event)"
               ></product-list>
+
               <!-- [selectedSort]="store.productsSort()" -->
               <mat-paginator
                 [pageSizeOptions]="[5, 10, 25, 100]"
@@ -52,7 +54,9 @@ import { ProductsLocalStore } from './product.store';
             @if (store.isLoadProductDetailLoading()) {
               <mat-spinner />
             } @else if (store.isLoadProductDetailLoaded()) {
-              <product-detail [product]="store.productDetail()!" />
+              <a routerLink="{{ store.productDetail()?.id }}">
+                <product-detail [product]="store.productDetail()!" />
+              </a>
             } @else {
               <div class="content-center"><h2>Please Select a product</h2></div>
             }
@@ -99,6 +103,7 @@ import { ProductsLocalStore } from './product.store';
     AsyncPipe,
     ProductDetailComponent,
     JsonPipe,
+    RouterLink,
   ],
   providers: [ProductsLocalStore],
 })
