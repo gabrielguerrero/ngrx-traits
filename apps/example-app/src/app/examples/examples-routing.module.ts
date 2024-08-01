@@ -26,6 +26,13 @@ const routes: Routes = [
           ).then((m) => m.SignalProductListPaginatedPageContainerComponent),
       },
       {
+        path: 'product-list-paginated/:id',
+        loadComponent: () =>
+          import(
+            './signals/product-list-paginated-page/route-product-detail.component'
+          ).then((m) => m.RouteProductDetailComponent),
+      },
+      {
         path: 'infinite-scroll-dropdown',
         loadComponent: () =>
           import(
