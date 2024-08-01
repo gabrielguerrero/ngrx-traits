@@ -23,12 +23,12 @@ import {
   broadcast,
   withEventHandler,
 } from '../with-event-handler/with-event-handler';
-import { withFeatureFactory } from '../with-store/with-feature-factory';
+import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
-} from '../with-store/with-feature-factory.model';
+} from '../with-feature-factory/with-feature-factory.model';
 import { Sort } from './with-entities-local-sort.model';
 import {
   EntitiesSortState,

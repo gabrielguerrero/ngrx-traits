@@ -13,7 +13,7 @@ import {
 } from '@ngrx/signals';
 import { debounce, first, timer } from 'rxjs';
 
-import { StoreSource } from '../with-store/with-feature-factory.model';
+import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import { QueryMapper } from './with-sync-to-route-query-params.util';
 
 /**
