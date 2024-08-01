@@ -48,11 +48,9 @@ export const ProductsLocalStore = signalStore(
   }),
   withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter }) => {
+    fetchEntities: () => {
       return inject(ProductService)
-        .getProducts({
-          search: productsFilter().search,
-        })
+        .getProducts()
         .pipe(map((d) => d.resultList));
     },
   }),
