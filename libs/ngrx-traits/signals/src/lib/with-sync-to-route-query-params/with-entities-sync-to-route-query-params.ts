@@ -2,15 +2,11 @@ import { computed, Signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   EmptyFeatureResult,
-  Prettify,
   SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
-  StateSignals,
-  StateSource,
   type,
   withHooks,
-  WritableStateSource,
 } from '@ngrx/signals';
 import {
   EntityComputed,
@@ -36,12 +32,7 @@ import {
 import { getQueryMapperForEntitiesPagination } from '../with-entities-pagination/with-entities-local-pagination.util';
 import { getQueryMapperForSingleSelection } from '../with-entities-selection/with-entities-single-selection.util';
 import { getQueryMapperForEntitiesSort } from '../with-entities-sort/with-entities-local-sort.util';
-import { withFeatureFactory } from '../with-store/with-feature-factory';
-import {
-  FeatureConfigFactory,
-  getFeatureConfig,
-  StoreSource,
-} from '../with-store/with-feature-factory.model';
+import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import { withSyncToRouteQueryParams } from './with-sync-to-route-query-params';
 import { QueryMapper } from './with-sync-to-route-query-params.util';
 
