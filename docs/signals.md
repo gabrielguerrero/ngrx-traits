@@ -18,7 +18,8 @@ Set of prebuilt ngrx signals Custom Store Features that solve common problems su
 - ✅ Store Feature to add single or multi selection entities list
 - ✅ Store Feature to reduce boilerplate needed when calling backend apis
 - ✅ Store Feature to sync the state to local or session storage
-- ✅ Caching
+- ✅ Store Feature to sync the route params and query params
+
 
 ## Table of Contents
 ### [Installation](#installation)
