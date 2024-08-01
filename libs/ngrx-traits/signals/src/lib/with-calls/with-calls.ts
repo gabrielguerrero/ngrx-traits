@@ -47,8 +47,8 @@ import {
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { withFeatureFactory } from '../with-store/with-feature-factory';
-import { StoreSource } from '../with-store/with-feature-factory.model';
+import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
+import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import {
   Call,
   CallConfig,
