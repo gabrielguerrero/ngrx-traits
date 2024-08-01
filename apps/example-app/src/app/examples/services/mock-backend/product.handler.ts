@@ -21,7 +21,7 @@ export const productHandlers = [
         ({
           ...product,
           id: product?.id,
-          image: 'assets/' + images[getRandomInteger(0, 4)],
+          image: 'assets/' + images[+product.id % 6],
           maker: 'Nintendo',
           releaseDate: '' + getRandomInteger(1990, 2000),
         } as ProductDetail);
