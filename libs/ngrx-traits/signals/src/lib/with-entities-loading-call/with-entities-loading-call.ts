@@ -51,12 +51,12 @@ import {
   SetEntitiesResult,
 } from '../with-entities-pagination/with-entities-local-pagination.model';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
-import { withFeatureFactory } from '../with-store/with-feature-factory';
+import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
-} from '../with-store/with-feature-factory.model';
+} from '../with-feature-factory/with-feature-factory.model';
 
 /**
  * Generates a onInit hook that fetches entities from a remote source
