@@ -1,6 +1,5 @@
 import { computed, Signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { EntitiesPaginationState } from '@ngrx-traits/common';
 import { concatMap, first } from 'rxjs';
 
 import { capitalize } from '../util';
@@ -10,7 +9,10 @@ import {
   props,
 } from '../with-event-handler/with-event-handler.util';
 import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
-import { EntitiesPaginationLocalMethods } from './with-entities-local-pagination.model';
+import {
+  EntitiesPaginationLocalMethods,
+  EntitiesPaginationLocalState,
+} from './with-entities-local-pagination.model';
 
 export function getWithEntitiesLocalPaginationKeys(config?: {
   collection?: string;
@@ -79,7 +81,7 @@ export function getQueryMapperForEntitiesPagination(config?: {
     },
     stateToQueryParams: (store) => {
       const pagination = store[paginationKey] as Signal<
-        EntitiesPaginationState['pagination']
+        EntitiesPaginationLocalState['entitiesPagination']
       >;
       return computed(() => ({
         page: (pagination().currentPage + 1).toString(),

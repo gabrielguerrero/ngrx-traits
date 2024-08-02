@@ -10,3 +10,9 @@ export function getWithEntitiesKeys(config?: { collection?: string }) {
     entityMapKey: collection ? `${config.collection}EntityMap` : 'entityMap',
   };
 }
+export function toMap(a: Array<string | number>) {
+  return a.reduce((acum: { [key: string]: boolean }, value) => {
+    acum[value] = true;
+    return acum;
+  }, {});
+}
