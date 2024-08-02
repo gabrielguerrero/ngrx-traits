@@ -1,5 +1,4 @@
 import { computed, Signal } from '@angular/core';
-import { toMap } from '@ngrx-traits/core';
 import {
   patchState,
   signalStoreFeature,
@@ -18,7 +17,7 @@ import {
   NamedEntityComputed,
 } from '@ngrx/signals/entities/src/models';
 
-import { getWithEntitiesKeys } from '../util';
+import { getWithEntitiesKeys, toMap } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
 import {
