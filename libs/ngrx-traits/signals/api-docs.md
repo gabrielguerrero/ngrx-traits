@@ -9,7 +9,7 @@ See <code>createReducer</code>.</p></dd>
 ## Functions
 
 <dl>
-<dt><a href="#withCallStatus">withCallStatus(config)</a></dt>
+<dt><a href="#withCallStatus">withCallStatus(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for call progress status to the store</p></dd>
 <dt><a href="#withCalls">withCalls(callsFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods to track the progress of the
@@ -18,12 +18,12 @@ the same name as the original call, which accepts either the original parameters
 or a Signal or Observable of the same type as the original parameters.
 The original call can only have zero or one parameter, use an object with multiple
 props as first param if you need more.</p></dd>
-<dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(config)</a></dt>
+<dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
 and is debounced by default.</p>
 <p>Requires withEntities to be used.</p></dd>
-<dt><a href="#withEntitiesRemoteFilter">withEntitiesRemoteFilter(config)</a></dt>
+<dt><a href="#withEntitiesRemoteFilter">withEntitiesRemoteFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
 and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
@@ -40,10 +40,10 @@ to the store using the setAllEntities method or the setEntitiesPagedResult metho
 if it exists (comes from withEntitiesRemotePagination),
 if an error occurs it will set the error to the store using set[Collection]Error with the error.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
-<dt><a href="#withEntitiesLocalPagination">withEntitiesLocalPagination(config)</a></dt>
+<dt><a href="#withEntitiesLocalPagination">withEntitiesLocalPagination(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for local pagination of entities in the store.</p>
 <p>Requires withEntities to be present in the store.</p></dd>
-<dt><a href="#withEntitiesRemotePagination">withEntitiesRemotePagination(config)</a></dt>
+<dt><a href="#withEntitiesRemotePagination">withEntitiesRemotePagination(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remote pagination of entities in the store.
 Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
@@ -56,7 +56,7 @@ Useful in cases where you want to further change the state before manually calli
 <p>This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
 If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
-<dt><a href="#withEntitiesRemoteScrollPagination">withEntitiesRemoteScrollPagination(config)</a></dt>
+<dt><a href="#withEntitiesRemoteScrollPagination">withEntitiesRemoteScrollPagination(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store.
 This is ideal for implementing infinite scroll where the entities cache keeps growing, or for a paginated list that only
 allows going to the next and previous page because you dont know the total number of entities
@@ -72,18 +72,18 @@ it requires either just set of requested entities set[Collection]Result({ entiti
 than the requested buffer size, or you can provide an extra param to the entities, total set[Collection]Result({ entities, total }) so it calculates if there is more
 or a hasMore param set[Collection]Result({entities, hasMore}) that you can set to false to indicate the end of the entities.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
-<dt><a href="#withEntitiesMultiSelection">withEntitiesMultiSelection(config)</a></dt>
+<dt><a href="#withEntitiesMultiSelection">withEntitiesMultiSelection(configFactory)</a></dt>
 <dd><p>Generates state, signals and methods for multi selection of entities.
 Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
 correctly in using remote pagination, because they cant select all the data.</p>
 <p>Requires withEntities to be used before this feature.</p></dd>
-<dt><a href="#withEntitiesSingleSelection">withEntitiesSingleSelection(config)</a></dt>
+<dt><a href="#withEntitiesSingleSelection">withEntitiesSingleSelection(configFactory)</a></dt>
 <dd><p>Generates state, computed and methods for single selection of entities.</p>
 <p>Requires withEntities to be present before this function.</p></dd>
-<dt><a href="#withEntitiesLocalSort">withEntitiesLocalSort(config)</a></dt>
+<dt><a href="#withEntitiesLocalSort">withEntitiesLocalSort(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for sorting locally entities in the store.</p>
 <p>Requires withEntities to be present before this function</p></dd>
-<dt><a href="#withEntitiesRemoteSort">withEntitiesRemoteSort(config)</a></dt>
+<dt><a href="#withEntitiesRemoteSort">withEntitiesRemoteSort(configFactory)</a></dt>
 <dd><p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
 and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
 and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
@@ -98,9 +98,18 @@ Useful in cases where you want to further change the state before manually calli
 <dt><a href="#createEvent">createEvent(type, config)</a></dt>
 <dd><p>Creates a configured <code>Creator</code> function that, when called, returns an object in the shape of the <code>Event</code> interface.</p>
 <p>Event creators reduce the explicitness of class-based event creators.</p></dd>
+<dt><a href="#withFeatureFactory">withFeatureFactory(featureFactory)</a></dt>
+<dd><p>This store feature allows access to the store's state, methods, computed signals, to store features that don't have a config factory that
+can access the store. This can be useful for creating store features that need to access the store's state, methods, computed signals, etc. or to wrap store
+features that don't have a config factory that can access the store.</p></dd>
+<dt><a href="#withInputBindings">withInputBindings(inputs)</a></dt>
+<dd></dd>
 <dt><a href="#withStateLogger">withStateLogger(name, filterState)</a></dt>
 <dd><p>Log the state of the store on every change</p></dd>
-<dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams({entity})</a></dt>
+<dt><a href="#withRouteParams">withRouteParams(mapParams)</a></dt>
+<dd><p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
+to an object, this will create a computed for each prop return by the mapParams function</p></dd>
+<dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams()</a></dt>
 <dd><p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
 when is not provided the filter will use JSON.stringify to serialize the filter object.</p>
@@ -122,18 +131,18 @@ See <code>createReducer</code>.</p>
 **Kind**: global constant  
 <a name="withCallStatus"></a>
 
-## withCallStatus(config)
+## withCallStatus(configFactory)
 <p>Generates necessary state, computed and methods for call progress status to the store</p>
 
 **Kind**: global function  
 
 | Param | Description |
 | --- | --- |
-| config | <p>Configuration object</p> |
-| config.prop | <p>The name of the property for which this represents the call status</p> |
-| config.initialValue | <p>The initial value of the call status</p> |
-| config.collection | <p>The name of the collection for which this represents the call status is an alias to prop param</p> |
-| config.errorType | <p>The type of the error they do the same thing</p> <p>prop or collection is required</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.prop | <p>The name of the property for which this represents the call status</p> |
+| configFactory.initialValue | <p>The initial value of the call status</p> |
+| configFactory.collection | <p>The name of the collection for which this represents the call status is an alias to prop param</p> |
+| configFactory.errorType | <p>The type of the error they do the same thing</p> <p>prop or collection is required</p> |
 
 **Example**  
 ```js
@@ -216,7 +225,7 @@ withCalls(({ productsSelectedEntity }) => ({
 ```
 <a name="withEntitiesLocalFilter"></a>
 
-## withEntitiesLocalFilter(config)
+## withEntitiesLocalFilter(configFactory)
 <p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
 and is debounced by default.</p>
@@ -226,13 +235,13 @@ and is debounced by default.</p>
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.filterFn | <p>The function that will be used to filter the entities</p> |
-| config.defaultFilter | <p>The default filter to be used</p> |
-| config.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
-| config.entity | <p>The entity tye to be used</p> |
-| config.collection | <p>The optional collection name to be used</p> |
-| config.selectId | <p>The function to use to select the id of the entity</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.filterFn | <p>The function that will be used to filter the entities</p> |
+| configFactory.defaultFilter | <p>The default filter to be used</p> |
+| configFactory.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
+| configFactory.entity | <p>The entity tye to be used</p> |
+| configFactory.collection | <p>The optional collection name to be used</p> |
+| configFactory.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -263,7 +272,7 @@ const store = signalStore(
 ```
 <a name="withEntitiesRemoteFilter"></a>
 
-## withEntitiesRemoteFilter(config)
+## withEntitiesRemoteFilter(configFactory)
 <p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
 and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
@@ -277,11 +286,11 @@ Useful in cases where you want to further change the state before manually calli
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.defaultFilter | <p>The default filter to be used</p> |
-| config.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
-| config.entity | <p>The entity type to be used</p> |
-| config.collection | <p>The optional collection name to be used</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.defaultFilter | <p>The default filter to be used</p> |
+| configFactory.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
+| configFactory.entity | <p>The entity type to be used</p> |
+| configFactory.collection | <p>The optional collection name to be used</p> |
 
 **Example**  
 ```js
@@ -417,7 +426,7 @@ export const ProductsRemoteStore = signalStore(
 ```
 <a name="withEntitiesLocalPagination"></a>
 
-## withEntitiesLocalPagination(config)
+## withEntitiesLocalPagination(configFactory)
 <p>Generates necessary state, computed and methods for local pagination of entities in the store.</p>
 <p>Requires withEntities to be present in the store.</p>
 
@@ -425,11 +434,11 @@ export const ProductsRemoteStore = signalStore(
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.pageSize | <p>The number of entities to show per page</p> |
-| config.currentPage | <p>The current page to show</p> |
-| config.entity | <p>The entity type</p> |
-| config.collection | <p>The name of the collection</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.pageSize | <p>The number of entities to show per page</p> |
+| configFactory.currentPage | <p>The current page to show</p> |
+| configFactory.entity | <p>The entity type</p> |
+| configFactory.collection | <p>The name of the collection</p> |
 
 **Example**  
 ```js
@@ -454,7 +463,7 @@ export const ProductsLocalStore = signalStore(
 ```
 <a name="withEntitiesRemotePagination"></a>
 
-## withEntitiesRemotePagination(config)
+## withEntitiesRemotePagination(configFactory)
 <p>Generates necessary state, computed and methods for remote pagination of entities in the store.
 Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
@@ -472,13 +481,13 @@ If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPa
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.pageSize | <p>The number of entities to show per page</p> |
-| config.currentPage | <p>The current page to show</p> |
-| config.pagesToCache | <p>The number of pages to cache</p> |
-| config.entity | <p>The entity type</p> |
-| config.collection | <p>The name of the collection</p> |
-| config.selectId | <p>The function to use to select the id of the entity</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.pageSize | <p>The number of entities to show per page</p> |
+| configFactory.currentPage | <p>The current page to show</p> |
+| configFactory.pagesToCache | <p>The number of pages to cache</p> |
+| configFactory.entity | <p>The entity type</p> |
+| configFactory.collection | <p>The name of the collection</p> |
+| configFactory.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -552,7 +561,7 @@ export const store = signalStore(
 ```
 <a name="withEntitiesRemoteScrollPagination"></a>
 
-## withEntitiesRemoteScrollPagination(config)
+## withEntitiesRemoteScrollPagination(configFactory)
 <p>Generates necessary state, computed and methods for remote infinite scroll pagination of entities in the store.
 This is ideal for implementing infinite scroll where the entities cache keeps growing, or for a paginated list that only
 allows going to the next and previous page because you dont know the total number of entities
@@ -573,11 +582,11 @@ or a hasMore param set[Collection]Result({entities, hasMore}) that you can set t
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.pageSize | <p>The number of entities to show per page</p> |
-| config.pagesToCache | <p>The number of pages to cache</p> |
-| config.entity | <p>The entity type</p> |
-| config.collection | <p>The name of the collection</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.pageSize | <p>The number of entities to show per page</p> |
+| configFactory.pagesToCache | <p>The number of pages to cache</p> |
+| configFactory.entity | <p>The entity type</p> |
+| configFactory.collection | <p>The name of the collection</p> |
 
 **Example**  
 ```js
@@ -656,7 +665,7 @@ export const store = signalStore(
 ```
 <a name="withEntitiesMultiSelection"></a>
 
-## withEntitiesMultiSelection(config)
+## withEntitiesMultiSelection(configFactory)
 <p>Generates state, signals and methods for multi selection of entities.
 Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work
 correctly in using remote pagination, because they cant select all the data.</p>
@@ -666,11 +675,11 @@ correctly in using remote pagination, because they cant select all the data.</p>
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.entity | <p>the entity type</p> |
-| config.collection | <p>the collection name</p> |
-| config.clearOnFilter | <p>Clear the selected entity when the filter changes (default: true)</p> |
-| config.clearOnRemoteSort | <p>Clear the selected entity when the remote sort changes (default: true)</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.entity | <p>the entity type</p> |
+| configFactory.collection | <p>the collection name</p> |
+| configFactory.clearOnFilter | <p>Clear the selected entity when the filter changes (default: true)</p> |
+| configFactory.clearOnRemoteSort | <p>Clear the selected entity when the remote sort changes (default: true)</p> |
 
 **Example**  
 ```js
@@ -695,7 +704,7 @@ store.toggleSelectAllProducts // () => void;
 ```
 <a name="withEntitiesSingleSelection"></a>
 
-## withEntitiesSingleSelection(config)
+## withEntitiesSingleSelection(configFactory)
 <p>Generates state, computed and methods for single selection of entities.</p>
 <p>Requires withEntities to be present before this function.</p>
 
@@ -703,11 +712,11 @@ store.toggleSelectAllProducts // () => void;
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.collection | <p>The collection name</p> |
-| config.entity | <p>The entity type</p> |
-| config.clearOnFilter | <p>Clear the selected entity when the filter changes (default: true)</p> |
-| config.clearOnRemoteSort | <p>Clear the selected entity when the remote sort changes (default: true)</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.collection | <p>The collection name</p> |
+| configFactory.entity | <p>The entity type</p> |
+| configFactory.clearOnFilter | <p>Clear the selected entity when the filter changes (default: true)</p> |
+| configFactory.clearOnRemoteSort | <p>Clear the selected entity when the remote sort changes (default: true)</p> |
 
 **Example**  
 ```js
@@ -736,7 +745,7 @@ export const store = signalStore(
 ```
 <a name="withEntitiesLocalSort"></a>
 
-## withEntitiesLocalSort(config)
+## withEntitiesLocalSort(configFactory)
 <p>Generates necessary state, computed and methods for sorting locally entities in the store.</p>
 <p>Requires withEntities to be present before this function</p>
 
@@ -744,11 +753,11 @@ export const store = signalStore(
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.defaultSort | <p>The default sort to be applied to the entities</p> |
-| config.entity | <p>The type entity to be used</p> |
-| config.collection | <p>The name of the collection for which will be sorted</p> |
-| config.selectId | <p>The function to use to select the id of the entity</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.defaultSort | <p>The default sort to be applied to the entities</p> |
+| configFactory.entity | <p>The type entity to be used</p> |
+| configFactory.collection | <p>The name of the collection for which will be sorted</p> |
+| configFactory.selectId | <p>The function to use to select the id of the entity</p> |
 
 **Example**  
 ```js
@@ -770,7 +779,7 @@ store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sort
 ```
 <a name="withEntitiesRemoteSort"></a>
 
-## withEntitiesRemoteSort(config)
+## withEntitiesRemoteSort(configFactory)
 <p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
 and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
 and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
@@ -785,10 +794,10 @@ Useful in cases where you want to further change the state before manually calli
 
 | Param | Description |
 | --- | --- |
-| config |  |
-| config.defaultSort | <p>The default sort to use when the store is initialized</p> |
-| config.entity | <p>The entity type</p> |
-| config.collection | <p>The collection name</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.defaultSort | <p>The default sort to use when the store is initialized</p> |
+| configFactory.entity | <p>The entity type</p> |
+| configFactory.collection | <p>The collection name</p> |
 
 **Example**  
 ```js
@@ -974,6 +983,119 @@ effectName$ = createEffect(
 | type | <p>Describes the event that will be dispatched</p> |
 | config | <p>Additional metadata needed for the handling of the event.  See [Usage Notes](createEvent#usage-notes).</p> |
 
+<a name="withFeatureFactory"></a>
+
+## withFeatureFactory(featureFactory)
+<p>This store feature allows access to the store's state, methods, computed signals, to store features that don't have a config factory that
+can access the store. This can be useful for creating store features that need to access the store's state, methods, computed signals, etc. or to wrap store
+features that don't have a config factory that can access the store.</p>
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| featureFactory | 
+
+**Example**  
+```js
+// Use case 1: allow a custome store feature that receives a plain config object to access the store's state, methods, computed signals.
+function withCustomFeature(config: { fooValue: string }) {
+...// create a custom store feature
+}
+const Store = signalStore(
+      withState({ foo: 'foo' }),
+      // 👇use previous state to configure custom feature
+      withFeatureFactory(({ foo }) => withCustomFeature({ fooV: foo() })),
+      // you can also use a signalStoreFeature inside withFeatureFactory
+      withFeatureFactory(({ foo }) =>
+        signalStoreFeature(
+          withState({ foo2: foo() }),
+          // ... other store features,
+        ),
+      ),
+    );
+
+// Use case 2: use withFeatureFactory inside a custom feature to create a store whose config can be a factory that receives the store
+  function withCustomFeature2<Input extends SignalStoreFeatureResult>(
+      configFactory: FeatureConfigFactory<Input, { foo: string }>,
+    ): SignalStoreFeature<
+      Input,
+      {
+        state: { foo: string };
+        computed: { bar: Signal<string> };
+        methods: { baz: () => number };
+      }
+    > {
+      return withFeatureFactory((store: StoreSource<Input>) => {
+        const config = getFeatureConfig(configFactory, store);
+        return signalStoreFeature(
+          withState<{ foo: string }>({ foo: config.fooValue }),
+          withComputed(({ foo }) => ({ bar: computed(() => foo() + 1) })),
+          withMethods(({ foo, bar }) => ({
+            baz: () => foo() + bar() + 2,
+          })),
+        );
+      }) as any;
+    }
+
+    // now withCustomFeature2 can be used like :
+    const Store = signalStore(
+      // withCustomFeature2({ fooValue: 'foo' }), // usual way with a plain object
+      withState({ fooValue: 'foo' }),
+      // or with a factory that receives the store
+      withCustomFeature2(({ fooValue }) => ({ fooValue: fooValue() })),
+    );
+```
+<a name="withInputBindings"></a>
+
+## withInputBindings(inputs)
+**Kind**: global function  
+**Experimental**: Binds component inputs to the store, so that the store is updated with the latest values of the inputs.  
+
+| Param |
+| --- |
+| inputs | 
+
+**Example**  
+```js
+const Store = signalStore(
+   withInputBindings({
+      pageIndex: 0,
+      length: 0,
+      pageSize: 10,
+      pageSizeOptions: [5, 10, 20],
+    }),
+   //... other features that use foo and bar
+ );
+ // generates the signals
+   store.pageIndex(); // 0
+   store.length(); // 0
+   store.pageSize(); // 10
+   store.pageSizeOptions(); // [5, 10, 20]
+
+   generates the method
+   store.bindInputs({ pageIndex: Signal<number>, length: Signal<number>, pageSize: Signal<number>, pageSizeOptions: Signal<number[]> });
+
+ // use in a component
+   class PaginatorComponent {
+    readonly pageIndex = input.required<number>;
+    readonly length = input.required<number>;
+    readonly pageSize = input.required<number>;
+    readonly pageSizeOptions = input.required<number[]>;
+    readonly store = inject(Store);
+    constructor() {
+      this.store.bindInputs({
+        pageIndex: this.pageIndex,
+        length: this.length,
+        pageSize: this.pageSize,
+        pageSizeOptions: this.pageSizeOptions,
+      });
+      // if the inputs have the same name and type as the store,
+      // you can use bindInputs like
+      // this.store.bindInputs(this);
+    }
+  }
+```
 <a name="withStateLogger"></a>
 
 ## withStateLogger(name, filterState)
@@ -986,9 +1108,37 @@ effectName$ = createEffect(
 | name | <p>The name of the store to log</p> |
 | filterState | <p>optional filter the state before logging</p> |
 
+<a name="withRouteParams"></a>
+
+## withRouteParams(mapParams)
+<p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
+to an object, this will create a computed for each prop return by the mapParams function</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| mapParams | <p>A function to transform the params before they are stored.</p> |
+
+**Example**  
+```js
+// example route  /products/:id/
+const ProductDetailStore = signalStore(
+  withRouteParams(({ id }) => ({ id })),
+  withCalls(() => ({
+    loadProductDetail: (id: string) =>
+      inject(ProductService).getProductDetail(id),
+  })),
+  withHooks(({ loadProductDetail, id }) => ({
+    onInit: () => {
+      loadProductDetail(id());
+    },
+  })),
+);
+```
 <a name="withEntitiesSyncToRouteQueryParams"></a>
 
-## withEntitiesSyncToRouteQueryParams({entity})
+## withEntitiesSyncToRouteQueryParams()
 <p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
 when is not provided the filter will use JSON.stringify to serialize the filter object.</p>
