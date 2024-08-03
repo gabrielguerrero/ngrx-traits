@@ -28,7 +28,7 @@ import { MatIcon } from '@angular/material/icon';
         <a
           class="inline-flex items-center justify-center gap-x-2 rounded-lg bg-white px-3 py-2 outline-none transition-colors hover:bg-zinc-50 hover:text-zinc-800 focus-visible:text-zinc-800 focus-visible:ring-2 focus-visible:ring-blue-500 active:bg-zinc-100"
           target="_blank"
-          href="https://github.com/ng-primitives/ng-primitives/"
+          href="https://github.com/gabrielguerrero/ngrx-traits"
         >
           <!--            <ng-icon class="text-lg" name="bootstrapGithub" />-->
           <span class="hidden font-medium sm:inline">GitHub</span>

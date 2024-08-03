@@ -51,12 +51,12 @@ const store = signalStore(
 
 This trait receives and object to allow specific configurations:
 
-| Property        | Description                                                                                    | Value                           |
-|-----------------|------------------------------------------------------------------------------------------------|---------------------------------|
-| `prop`          | The name of the property for which this represents the call status.                            | string                          |
-| `initialValue ` | The initial value of the call status.                                                          | `init` \| `loading` \| `loaded` |
-| `collection `   | The name of the collection for which this represents the call status is an alias to prop param | string                          |                                 
-| `errorType `    | The type of the error                                                                          | `T`                             |
+| Property     | Description                                                                                    | Value                           |
+|--------------|------------------------------------------------------------------------------------------------|---------------------------------|
+| prop         | The name of the property for which this represents the call status.                            | string                          |
+| initialValue | The initial value of the call status.                                                          | `init` \| `loading` \| `loaded` |
+| collection   | The name of the collection for which this represents the call status is an alias to prop param | string                          |                                 
+| errorType    | The type of the error                                                                          | `T`                             |
 
 ## State
 
@@ -66,24 +66,46 @@ Generates the following signals
 callStatus: 'init' | 'loading' | 'loaded' | { error: unknown }
 ```
 
-## Computed
-
-generates the following computed signals
+If collection provided, the following signals are generated, example: **users**
 
 ```typescript
-isLoading: boolean
-isLoaded: boolean
-error: unknown | null
+callUsersStatus: 'init' | 'loading' | 'loaded' | { error: unknown };
+```
+
+## Computed
+
+Generates the following computed signals
+
+```typescript
+isLoading: Signal<boolean>;
+isLoaded: Signal<boolean>;
+error: Signal<unknown | null>;
+```
+
+If collection provided, the following computed signals are generated, example: **users**
+
+```typescript
+isUsersLoading: Signal<boolean>;
+isUsersLoaded: Signal<boolean>;
+usersError: Signal<unknown | null>;
 ```
 
 ## Methods
 
-generates the following computed signals
+Generates the following methods
 
-```typescript 
+```typescript
 setLoading: () => void;
 setLoaded:() => void;
 setError:(error?: unknown) => void;
+```
+
+If collection provided, the following methods are generated, example: **users**
+
+```typescript
+setUsersLoading: () => void;
+setUsersLoaded:() => void;
+setUsersError:(error?: unknown) => void;
 ```
 
 
