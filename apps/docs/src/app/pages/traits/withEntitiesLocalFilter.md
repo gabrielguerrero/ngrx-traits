@@ -23,8 +23,7 @@ import { withEntitiesLocalFilter } from '@ngrx-traits/signals';
 
 const entity = entityConfig({
     entity: type<T>()
-    collection
-
+    collection: 'users'
 })
 
 const store = signalStore(

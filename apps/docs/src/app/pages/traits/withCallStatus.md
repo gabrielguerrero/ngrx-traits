@@ -39,7 +39,7 @@ const store = signalStore(withCallStatus({ collection: 'users', initialValue: 'l
 
 ## API Reference
 
-This trait receives and object to allow specific configurations:
+This trait receives an object to allow specific configurations:
 
 | Property     | Description                                                                                    | Value                           |
 | ------------ | ---------------------------------------------------------------------------------------------- | ------------------------------- |
