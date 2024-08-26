@@ -17,14 +17,13 @@ Import the withEntitiesLocalFilter trait from `@ngrx-traits/signals`.
 import { withEntitiesLocalFilter } from '@ngrx-traits/signals';
 ```
 
-## Usage
+## Examples
 
 ```typescript
 
 const entity = entityConfig({
-    entity: type<T>()
+    entity: type<T>(),
     collection
-
 })
 
 const store = signalStore(
