@@ -75,7 +75,6 @@ export function withInputBindings<
         return rxMethod<Object>(
           pipe(
             tap((values) => {
-              console.log('values', values);
               patchState(store, { ...values });
             }),
           ),
