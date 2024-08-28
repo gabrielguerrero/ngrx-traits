@@ -548,6 +548,8 @@ function clearEntitiesCache(
         ...pagination(),
         total: 0,
         hasMore: true,
+        currentPage: 0,
+        requestPage: 0,
       },
     },
   );
