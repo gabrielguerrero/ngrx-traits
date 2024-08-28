@@ -594,6 +594,8 @@ describe('withEntitiesRemoteScrollPagination', () => {
       });
       tick(400);
       expect(store.entities().length).toEqual(2);
+      expect(store.pagination().currentPage).toEqual(0);
+      expect(store.pagination().requestPage).toEqual(0);
     });
   }));
 
@@ -656,6 +658,79 @@ describe('withEntitiesRemoteScrollPagination', () => {
       });
       tick(400);
       expect(store.entities().length).toEqual(30);
+      expect(store.pagination().currentPage).toEqual(0);
+      expect(store.pagination().requestPage).toEqual(0);
+    });
+  }));
+
+  it('should reset cache when filter is executed and nextPage was called', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({
+          entity,
+        }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize: 10,
+          pagesToCache: 3,
+        }),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesFilter, entitiesPagedRequest }) => {
+            let result = [...mockProducts];
+            const total = result.length;
+            if (entitiesFilter()?.search)
+              result = mockProducts.filter((entity) =>
+                entitiesFilter()?.search
+                  ? entity.name
+                      .toLowerCase()
+                      .includes(entitiesFilter()?.search.toLowerCase())
+                  : false,
+              );
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+            return Promise.resolve({ entities: result, total: result.length });
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.flushEffects();
+      // first fill cache
+      tick();
+      expect(store.entities().length).toEqual(30);
+      store.loadEntitiesNextPage();
+      tick();
+      tick();
+      store.loadEntitiesNextPage();
+      tick();
+      store.loadEntitiesNextPage();
+      tick();
+      expect(store.entities().length).toEqual(60);
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(30, 40),
+      );
+
+      store.filterEntities({
+        filter: { search: 'zero' },
+        patch: true,
+      });
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.pagination().currentPage).toEqual(0);
+      expect(store.pagination().requestPage).toEqual(0);
     });
   }));
 
