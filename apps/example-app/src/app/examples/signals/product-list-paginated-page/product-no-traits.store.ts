@@ -1,15 +1,6 @@
-import { computed, effect, inject } from '@angular/core';
+import { effect, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  patchState,
-  signalStore,
-  type,
-  withComputed,
-  withHooks,
-  withMethods,
-  withState,
-} from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+import { patchState, signalStore, withHooks, withState } from '@ngrx/signals';
 import { EMPTY, tap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -27,50 +18,31 @@ const productStore = signalStore(
     products: [],
     productsStatus: 'loading',
   }),
-  withComputed(({ productsStatus }) => ({
-    productsLoading: computed(() => productsStatus() === 'loading'),
-    productsLoaded: computed(() => productsStatus() === 'loaded'),
-    productsError: computed(() => {
-      const v = productsStatus();
-      return typeof v === 'object' ? v.error : null;
-    }),
+  withHooks((state) => ({
+    onInit: async () => {
+      effect(
+        () => {
+          if (state.productsStatus() === 'loading') {
+            inject(ProductService)
+              .getProducts()
+              .pipe(
+                takeUntilDestroyed(),
+                tap((res) => {
+                  patchState(state, {
+                    products: res.resultList,
+                    productsStatus: 'loaded',
+                  });
+                }),
+                catchError((error) => {
+                  patchState(state, { productsStatus: { error } });
+                  return EMPTY;
+                }),
+              )
+              .subscribe();
+          }
+        },
+        { allowSignalWrites: true },
+      );
+    },
   })),
-  withMethods((state) => ({
-    setProductsLoading: () => {
-      patchState(state, { productsStatus: 'loading' });
-    },
-    setProductsLoaded: () => {
-      patchState(state, { productsStatus: 'loaded' });
-    },
-    setProductsError: (error: any) => {
-      patchState(state, { productsStatus: { error } });
-    },
-  })),
-  withHooks(
-    ({ productsLoading, setProductsError, setProductsLoaded, ...state }) => ({
-      onInit: async () => {
-        effect(
-          () => {
-            if (productsLoading()) {
-              inject(ProductService)
-                .getProducts()
-                .pipe(
-                  takeUntilDestroyed(),
-                  tap((res) => {
-                    patchState(state, { products: res.resultList });
-                    setProductsLoaded();
-                  }),
-                  catchError((error) => {
-                    setProductsError(error);
-                    return EMPTY;
-                  }),
-                )
-                .subscribe();
-            }
-          },
-          { allowSignalWrites: true },
-        );
-      },
-    }),
-  ),
 );
