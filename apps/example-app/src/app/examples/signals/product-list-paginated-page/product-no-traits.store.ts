@@ -20,15 +20,12 @@ import { ProductService } from '../../services/product.service';
  * Example of the store for the product list page but without using any of the ngrx-traits/signals methods, for comparation of code saved.
  */
 const productStore = signalStore(
-  withEntities({ entity: type<Product>(), collection: 'products' }),
   withState<{
+    products: Product[];
     productsStatus: 'init' | 'loading' | 'loaded' | { error: unknown };
-    productsFilter: { name: string };
-    selectedProduct?: Product;
   }>({
+    products: [],
     productsStatus: 'loading',
-    productsFilter: { name: '' },
-    selectedProduct: undefined,
   }),
   withComputed(({ productsStatus }) => ({
     productsLoading: computed(() => productsStatus() === 'loading'),
@@ -49,32 +46,31 @@ const productStore = signalStore(
       patchState(state, { productsStatus: { error } });
     },
   })),
-  // withEntitiesLoadingCall is the same as doing the following:
-  withHooks(({ productsLoading, setProductsError, ...state }) => ({
-    onInit: async () => {
-      effect(
-        () => {
-          if (productsLoading()) {
-            inject(ProductService)
-              .getProducts()
-              .pipe(
-                takeUntilDestroyed(),
-                tap((res) =>
-                  patchState(
-                    state,
-                    setAllEntities(res.resultList, { collection: 'products' }),
-                  ),
-                ),
-                catchError((error) => {
-                  setProductsError(error);
-                  return EMPTY;
-                }),
-              )
-              .subscribe();
-          }
-        },
-        { allowSignalWrites: true },
-      );
-    },
-  })),
+  withHooks(
+    ({ productsLoading, setProductsError, setProductsLoaded, ...state }) => ({
+      onInit: async () => {
+        effect(
+          () => {
+            if (productsLoading()) {
+              inject(ProductService)
+                .getProducts()
+                .pipe(
+                  takeUntilDestroyed(),
+                  tap((res) => {
+                    patchState(state, { products: res.resultList });
+                    setProductsLoaded();
+                  }),
+                  catchError((error) => {
+                    setProductsError(error);
+                    return EMPTY;
+                  }),
+                )
+                .subscribe();
+            }
+          },
+          { allowSignalWrites: true },
+        );
+      },
+    }),
+  ),
 );
