@@ -43,4 +43,9 @@ export const ProductStore = signalStore(
       },
     };
   }),
+  withHooks((store) => ({
+    onInit: async () => {
+      await store.loadProducts();
+    },
+  })),
 );
