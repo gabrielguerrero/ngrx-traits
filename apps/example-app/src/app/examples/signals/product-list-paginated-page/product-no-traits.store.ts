@@ -24,4 +24,23 @@ export const ProductStore = signalStore(
     products: [],
     productsStatus: 'init',
   }),
+  withMethods((store) => {
+    const productService = inject(ProductService);
+
+    return {
+      async loadProducts(): Promise<void> {
+        patchState(store, { productsStatus: 'loading' });
+
+        try {
+          const res = await firstValueFrom(productService.getProducts());
+          patchState(store, {
+            productsStatus: 'loaded',
+            products: res.resultList,
+          });
+        } catch (e) {
+          patchState(store, { productsStatus: { error: e } });
+        }
+      },
+    };
+  }),
 );
