@@ -1,14 +1,14 @@
-import { effect, inject } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { computed, inject } from '@angular/core';
 import {
   patchState,
   signalStore,
+  withComputed,
   withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, firstValueFrom, pipe, switchMap, tap } from 'rxjs';
+import { EMPTY, pipe, switchMap, tap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { Product } from '../../models';
@@ -25,6 +25,14 @@ export const ProductStore = signalStore(
     products: [],
     productsStatus: 'init',
   }),
+  withComputed(({ productsStatus }) => ({
+    isProductsLoading: computed(() => productsStatus() === 'loading'),
+    isProductsLoaded: computed(() => productsStatus() === 'loaded'),
+    productsError: computed(() => {
+      const v = productsStatus();
+      return typeof v === 'object' ? v.error : null;
+    }),
+  })),
   withMethods((store) => {
     const productService = inject(ProductService);
 

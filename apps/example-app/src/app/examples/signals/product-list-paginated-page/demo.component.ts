@@ -10,9 +10,9 @@ import { ProductStore } from './product-no-traits.store';
   providers: [ProductStore],
   template: `
     <h1>Products List Demo</h1>
-    @if (store.productsStatus() === 'loading') {
+    @if (store.isProductsLoading()) {
       <p class="m-8">Loading...</p>
-    } @else if (store.productsStatus() === 'loaded') {
+    } @else if (store.isProductsLoaded()) {
       <mat-list>
         @for (product of store.products(); track product.id) {
           <mat-list-item>{{ product.name }} </mat-list-item>
