@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { MatList, MatListItem } from '@angular/material/list';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 
@@ -15,6 +16,7 @@ import { ProductStore } from './product-no-traits.store';
     MatProgressSpinner,
     ProductDetailComponent,
     RouterLink,
+    MatPaginator,
   ],
   providers: [ProductStore],
   template: `
@@ -25,13 +27,23 @@ import { ProductStore } from './product-no-traits.store';
       <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
         <div>
           <mat-list>
-            @for (product of store.productsEntities(); track product.id) {
+            @for (
+              product of store.productsCurrentPage().entities;
+              track product.id
+            ) {
               <mat-list-item
                 (click)="store.loadProductDetail({ id: product.id })"
                 >{{ product.name }}
               </mat-list-item>
             }
           </mat-list>
+          <mat-paginator
+            [pageSizeOptions]="[5, 10, 25, 100]"
+            [length]="store.productsCurrentPage().total"
+            [pageSize]="store.productsCurrentPage().pageSize"
+            [pageIndex]="store.productsCurrentPage().pageIndex"
+            (page)="store.loadProductsPage($event)"
+          ></mat-paginator>
         </div>
         @if (store.isLoadProductDetailLoading()) {
           <mat-spinner />

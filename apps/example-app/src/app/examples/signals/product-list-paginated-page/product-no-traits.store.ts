@@ -1,8 +1,15 @@
 import { inject } from '@angular/core';
-import { typedCallConfig, withCalls } from '@ngrx-traits/signals';
+import {
+  typedCallConfig,
+  withCalls,
+  withEntitiesLocalPagination,
+} from '@ngrx-traits/signals';
 import { patchState, signalStore, type, withHooks } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { map } from 'rxjs/operators';
+import {
+  entityConfig,
+  setAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
 
 import { Product } from '../../models';
 import { ProductService } from '../../services/product.service';
@@ -10,9 +17,13 @@ import { ProductService } from '../../services/product.service';
 /**
  * Example of the store for the product list page but without using any of the ngrx-traits/signals methods, for comparation of code saved.
  */
-
+const productsEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'products',
+});
 export const ProductStore = signalStore(
-  withEntities({ entity: type<Product>(), collection: 'products' }),
+  withEntities(productsEntityConfig),
+  withEntitiesLocalPagination(productsEntityConfig),
   withCalls((store) => {
     const productService = inject(ProductService);
     return {
@@ -22,7 +33,7 @@ export const ProductStore = signalStore(
         onSuccess: (res) => {
           patchState(
             store,
-            setAllEntities(res.resultList, { collection: 'products' }),
+            setAllEntities(res.resultList, productsEntityConfig),
           );
         },
       }),
