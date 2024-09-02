@@ -25,7 +25,7 @@ import { ProductStore } from './product-no-traits.store';
       <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
         <div>
           <mat-list>
-            @for (product of store.loadProductsResult(); track product.id) {
+            @for (product of store.productsEntities(); track product.id) {
               <mat-list-item
                 (click)="store.loadProductDetail({ id: product.id })"
                 >{{ product.name }}
