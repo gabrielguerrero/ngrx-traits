@@ -10,11 +10,17 @@ import { ProductStore } from './product-no-traits.store';
   providers: [ProductStore],
   template: `
     <h1>Products List Demo</h1>
-    <mat-list>
-      @for (product of store.products(); track product.id) {
-        <mat-list-item>{{ product.name }} </mat-list-item>
-      }
-    </mat-list>
+    @if (store.productsStatus() === 'loading') {
+      <p class="m-8">Loading...</p>
+    } @else if (store.productsStatus() === 'loaded') {
+      <mat-list>
+        @for (product of store.products(); track product.id) {
+          <mat-list-item>{{ product.name }} </mat-list-item>
+        }
+      </mat-list>
+    } @else {
+      <p>Error</p>
+    }
   `,
 })
 export class DemoComponent {
