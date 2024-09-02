@@ -14,6 +14,9 @@ export const ProductStore = signalStore(
     return {
       loadProducts: () =>
         productService.getProducts().pipe(map((res) => res.resultList)),
+
+      loadProductDetail: ({ id }: { id: string }) =>
+        inject(ProductService).getProductDetail(id),
     };
   }),
   withHooks((store) => ({
