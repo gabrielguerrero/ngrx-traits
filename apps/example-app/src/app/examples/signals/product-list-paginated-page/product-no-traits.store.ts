@@ -33,31 +33,45 @@ export const ProductStore = signalStore(
       return typeof v === 'object' ? v.error : null;
     }),
   })),
-  withMethods((store) => {
-    const productService = inject(ProductService);
+  withMethods((store) => ({
+    setProductsLoading: () => {
+      patchState(store, { productsStatus: 'loading' });
+    },
+    setProductsLoaded: () => {
+      patchState(store, { productsStatus: 'loaded' });
+    },
+    setProductsError: (error: any) => {
+      patchState(store, { productsStatus: { error } });
+    },
+  })),
+  withMethods(
+    ({ setProductsLoading, setProductsLoaded, setProductsError, ...store }) => {
+      const productService = inject(ProductService);
 
-    return {
-      loadProducts: rxMethod<void>(
-        pipe(
-          tap(() => patchState(store, { productsStatus: 'loading' })),
-          switchMap(() =>
-            productService.getProducts().pipe(
-              tap((res) =>
-                patchState(store, {
-                  products: res.resultList,
-                  productsStatus: 'loaded',
+      return {
+        loadProducts: rxMethod<void>(
+          pipe(
+            tap(() => setProductsLoading()),
+            switchMap(() =>
+              productService.getProducts().pipe(
+                tap((res) => {
+                  patchState(store, {
+                    products: res.resultList,
+                    productsStatus: 'loaded',
+                  });
+                  setProductsLoaded();
+                }),
+                catchError((error) => {
+                  setProductsError(error);
+                  return EMPTY;
                 }),
               ),
-              catchError((error) => {
-                patchState(store, { productsStatus: { error } });
-                return EMPTY;
-              }),
             ),
           ),
         ),
-      ),
-    };
-  }),
+      };
+    },
+  ),
   withHooks((store) => ({
     onInit: () => {
       store.loadProducts();
