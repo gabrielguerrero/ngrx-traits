@@ -6,6 +6,7 @@ import {
   withEntitiesLoadingCall,
   withEntitiesLocalFilter,
   withEntitiesLocalPagination,
+  withEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
 import { signalStore, type } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
@@ -39,6 +40,7 @@ export const ProductStore = signalStore(
         .getProducts()
         .pipe(map((d) => d.resultList)),
   })),
+  withEntitiesSyncToRouteQueryParams(productsEntityConfig),
   withCalls(() => {
     return {
       loadProductDetail: typedCallConfig({
