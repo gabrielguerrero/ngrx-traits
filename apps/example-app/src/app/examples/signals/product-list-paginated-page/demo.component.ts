@@ -27,9 +27,9 @@ import { ProductStore } from './product-no-traits.store';
       [searchProduct]="store.productsFilter()"
       (searchProductChange)="store.filterProductsEntities({ filter: $event! })"
     ></product-search-form>
-    @if (store.isLoadProductsLoading()) {
+    @if (store.isProductsLoading()) {
       <p class="m-8">Loading...</p>
-    } @else if (store.isLoadProductsLoaded()) {
+    } @else if (store.isProductsLoaded()) {
       <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
         <div>
           <mat-list>
