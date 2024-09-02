@@ -5,6 +5,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 
 import { ProductDetailComponent } from '../../components/product-detail/product-detail.component';
+import { ProductSearchFormComponent } from '../../components/product-search-form/product-search-form.component';
 import { ProductStore } from './product-no-traits.store';
 
 @Component({
@@ -17,10 +18,15 @@ import { ProductStore } from './product-no-traits.store';
     ProductDetailComponent,
     RouterLink,
     MatPaginator,
+    ProductSearchFormComponent,
   ],
   providers: [ProductStore],
   template: `
     <h1>Products List Demo</h1>
+    <product-search-form
+      [searchProduct]="store.productsFilter()"
+      (searchProductChange)="store.filterProductsEntities({ filter: $event! })"
+    ></product-search-form>
     @if (store.isLoadProductsLoading()) {
       <p class="m-8">Loading...</p>
     } @else if (store.isLoadProductsLoaded()) {

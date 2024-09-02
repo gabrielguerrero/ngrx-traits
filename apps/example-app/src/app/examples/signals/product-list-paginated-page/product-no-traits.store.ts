@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import {
   typedCallConfig,
   withCalls,
+  withEntitiesLocalFilter,
   withEntitiesLocalPagination,
 } from '@ngrx-traits/signals';
 import { patchState, signalStore, type, withHooks } from '@ngrx/signals';
@@ -24,6 +25,13 @@ const productsEntityConfig = entityConfig({
 export const ProductStore = signalStore(
   withEntities(productsEntityConfig),
   withEntitiesLocalPagination(productsEntityConfig),
+  withEntitiesLocalFilter({
+    ...productsEntityConfig,
+    defaultFilter: { search: '' },
+    filterFn: (entity, filter) =>
+      !filter?.search ||
+      entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+  }),
   withCalls((store) => {
     const productService = inject(ProductService);
     return {
