@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { withCalls } from '@ngrx-traits/signals';
+import { typedCallConfig, withCalls } from '@ngrx-traits/signals';
 import { signalStore, withHooks } from '@ngrx/signals';
 import { map } from 'rxjs/operators';
 
@@ -15,8 +15,11 @@ export const ProductStore = signalStore(
       loadProducts: () =>
         productService.getProducts().pipe(map((res) => res.resultList)),
 
-      loadProductDetail: ({ id }: { id: string }) =>
-        inject(ProductService).getProductDetail(id),
+      loadProductDetail: typedCallConfig({
+        call: ({ id }: { id: string }) =>
+          inject(ProductService).getProductDetail(id),
+        resultProp: 'productDetail',
+      }),
     };
   }),
   withHooks((store) => ({
