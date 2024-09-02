@@ -1,4 +1,5 @@
 import { computed, inject } from '@angular/core';
+import { withCallStatus } from '@ngrx-traits/signals';
 import {
   patchState,
   signalStore,
@@ -20,30 +21,10 @@ import { ProductService } from '../../services/product.service';
 export const ProductStore = signalStore(
   withState<{
     products: Product[];
-    productsStatus: 'init' | 'loading' | 'loaded' | { error: unknown };
   }>({
     products: [],
-    productsStatus: 'init',
   }),
-  withComputed(({ productsStatus }) => ({
-    isProductsLoading: computed(() => productsStatus() === 'loading'),
-    isProductsLoaded: computed(() => productsStatus() === 'loaded'),
-    productsError: computed(() => {
-      const v = productsStatus();
-      return typeof v === 'object' ? v.error : null;
-    }),
-  })),
-  withMethods((store) => ({
-    setProductsLoading: () => {
-      patchState(store, { productsStatus: 'loading' });
-    },
-    setProductsLoaded: () => {
-      patchState(store, { productsStatus: 'loaded' });
-    },
-    setProductsError: (error: any) => {
-      patchState(store, { productsStatus: { error } });
-    },
-  })),
+  withCallStatus({ collection: 'products' }),
   withMethods(
     ({ setProductsLoading, setProductsLoaded, setProductsError, ...store }) => {
       const productService = inject(ProductService);
