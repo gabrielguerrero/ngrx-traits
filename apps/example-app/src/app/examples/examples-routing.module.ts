@@ -2,11 +2,16 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { ExamplesComponent } from './examples.component';
+import { DemoComponent } from './signals/product-list-paginated-page/demo.component';
 
 const routes: Routes = [
   {
     path: '',
     component: ExamplesComponent,
+  },
+  {
+    path: 'demo',
+    component: DemoComponent,
   },
   {
     path: 'signals',
