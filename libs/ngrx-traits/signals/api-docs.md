@@ -758,6 +758,7 @@ export const store = signalStore(
 | configFactory.entity | <p>The type entity to be used</p> |
 | configFactory.collection | <p>The name of the collection for which will be sorted</p> |
 | configFactory.selectId | <p>The function to use to select the id of the entity</p> |
+| configFactory.sortFunction | <p>Optional custom function use to sort the entities</p> |
 
 **Example**  
 ```js

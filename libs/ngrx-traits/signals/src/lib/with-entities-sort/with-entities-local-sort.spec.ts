@@ -12,11 +12,28 @@ import {
   withEntitiesLocalFilter,
   withEntitiesLocalSort,
 } from '../index';
-import { mockProducts } from '../test.mocks';
+import { mockProducts as mockProductsOld } from '../test.mocks';
 import { Product } from '../test.model';
+import { sortData } from './with-entities-local-sort.util';
+
+type ProductWithReleaseDate = Product & { releaseDate: Date };
+
+function addYears(date: Date, years: number) {
+  const newDate = new Date(date);
+  newDate.setFullYear(newDate.getFullYear() + years);
+  return newDate;
+}
+const today = new Date('2018/06/28');
+const mockProducts = mockProductsOld.map(
+  (p, index) =>
+    ({
+      ...p,
+      releaseDate: addYears(today, index - 2),
+    }) as ProductWithReleaseDate,
+);
 
 describe('withEntitiesLocalSort', () => {
-  const entity = type<Product>();
+  const entity = type<ProductWithReleaseDate>();
   it('should sort entities and store sort', () => {
     const Store = signalStore(
       { protectedState: false },
@@ -63,7 +80,9 @@ describe('withEntitiesLocalSort', () => {
   });
 
   it('should sort entities with custom id', () => {
-    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    type ProductCustom = Omit<ProductWithReleaseDate, 'id'> & {
+      productId: string;
+    };
     const config = entityConfig({
       entity: type<ProductCustom>(),
       selectId: (e) => e.productId,
@@ -163,7 +182,9 @@ describe('withEntitiesLocalSort', () => {
   });
 
   it('with collection should sort entities with custom id and store sort', () => {
-    type ProductCustom = Omit<Product, 'id'> & { productId: string };
+    type ProductCustom = Omit<ProductWithReleaseDate, 'id'> & {
+      productId: string;
+    };
     const config = entityConfig({
       entity: type<ProductCustom>(),
       collection: 'products',
@@ -434,18 +455,21 @@ describe('withEntitiesLocalSort', () => {
           id: '39',
           description: 'Super Nintendo Game',
           price: 88,
+          releaseDate: expect.any(Date),
         },
         {
           name: "Yoshi's Cookie",
           id: '20',
           description: 'Super Nintendo Game',
           price: 50,
+          releaseDate: expect.any(Date),
         },
         {
           name: "Yoshi's Safari",
           id: '15',
           description: 'Super Nintendo Game',
           price: 40,
+          releaseDate: expect.any(Date),
         },
       ]);
     });
@@ -484,20 +508,144 @@ describe('withEntitiesLocalSort', () => {
           id: '39',
           description: 'Super Nintendo Game',
           price: 88,
+          releaseDate: expect.any(Date),
         },
         {
           name: "Yoshi's Cookie",
           id: '20',
           description: 'Super Nintendo Game',
           price: 50,
+          releaseDate: expect.any(Date),
         },
         {
           name: "Yoshi's Safari",
           id: '15',
           description: 'Super Nintendo Game',
           price: 40,
+          releaseDate: expect.any(Date),
         },
       ]);
     });
   }));
+
+  it('should sort entities by release date', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({
+        entity,
+      }),
+      withEntitiesLocalSort({
+        entity,
+        defaultSort: { field: 'releaseDate', direction: 'desc' },
+      }),
+    );
+    const store = new Store();
+    patchState(store, setAllEntities(mockProducts));
+    expect(store.entitiesSort()).toEqual({
+      field: 'releaseDate',
+      direction: 'desc',
+    });
+    // check default sort
+    store.sortEntities();
+    expect(
+      store
+        .entities()
+        .map((e) => e.releaseDate.toDateString())
+        .slice(0, 5),
+    ).toEqual([
+      'Fri Jun 28 2137',
+      'Thu Jun 28 2136',
+      'Tue Jun 28 2135',
+      'Mon Jun 28 2134',
+      'Sun Jun 28 2133',
+    ]);
+    // sort by price
+    store.sortEntities({
+      sort: { field: 'releaseDate', direction: 'asc' },
+    });
+    expect(
+      store
+        .entities()
+        .map((e) => e.releaseDate.toDateString())
+        .slice(0, 5),
+    ).toEqual([
+      'Tue Jun 28 2016',
+      'Wed Jun 28 2017',
+      'Thu Jun 28 2018',
+      'Fri Jun 28 2019',
+      'Sun Jun 28 2020',
+    ]);
+    expect(store.entities().length).toEqual(mockProducts.length);
+    expect(store.entitiesSort()).toEqual({
+      field: 'releaseDate',
+      direction: 'asc',
+    });
+  });
+
+  it('should sort entities by using custom sort function', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({
+        entity,
+      }),
+      withEntitiesLocalSort({
+        entity,
+        defaultSort: { field: 'sortBySecondWordInName', direction: 'desc' },
+        sortFunction: (entities, sort) => {
+          if (sort.field === 'sortBySecondWordInName') {
+            return entities.sort((a, b) => {
+              const [aFirst, aSecond] = a.name.split(' ');
+              const [bFirst, bSecond] = b.name.split(' ');
+              return (
+                (aSecond || aFirst).localeCompare(bSecond || bFirst) *
+                (sort.direction === 'asc' ? 1 : -1)
+              );
+            });
+          }
+          return sortData(entities, sort);
+        },
+      }),
+    );
+    const store = new Store();
+    patchState(store, setAllEntities(mockProducts));
+    expect(store.entitiesSort()).toEqual({
+      field: 'sortBySecondWordInName',
+      direction: 'desc',
+    });
+    // check default sort
+    store.sortEntities();
+    expect(
+      store
+        .entities()
+        .map((e) => e.name)
+        .slice(0, 5),
+    ).toEqual([
+      'Pokémon XD: Gale of Darkness',
+      'Wario World',
+      "Wario's Woods",
+      'Battalion Wars',
+      'Uniracers',
+    ]);
+    // sort by price
+    store.sortEntities({
+      sort: { field: 'sortBySecondWordInName', direction: 'asc' },
+    });
+    expect(
+      store
+        .entities()
+        .map((e) => e.name)
+        .slice(0, 5),
+    ).toEqual([
+      'Mario & Wario',
+      'Tetris & Dr. Mario',
+      'Tetris 2',
+      'Pikmin 2',
+      'Kirby Air Ride',
+    ]);
+    expect(store.entities().length).toEqual(mockProducts.length);
+    expect(store.entitiesSort()).toEqual({
+      field: 'sortBySecondWordInName',
+      direction: 'asc',
+    });
+  });
 });
