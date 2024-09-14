@@ -44,6 +44,7 @@ import {
 } from './with-entities-local-sort.util';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 
+export { sortData };
 /**
  * Generates necessary state, computed and methods for sorting locally entities in the store.
  *
@@ -53,6 +54,7 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * @param configFactory.entity - The type entity to be used
  * @param configFactory.collection - The name of the collection for which will be sorted
  * @param configFactory.selectId - The function to use to select the id of the entity
+ * @param configFactory.sortFunction - Optional custom function use to sort the entities
  *
  * @example
  * const entity = type<Product>();
@@ -84,6 +86,7 @@ export function withEntitiesLocalSort<
       entity: Entity;
       collection?: Collection;
       selectId?: SelectEntityId<Entity>;
+      sortFunction?: (entities: Entity[], sort: Sort<Entity>) => Entity[];
     }
   >,
 ): SignalStoreFeature<
@@ -128,11 +131,11 @@ export function withEntitiesLocalSort<
             const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
             patchState(state as WritableStateSource<object>, {
               [sortKey]: sort,
-              [idsKey]: sortData(state[entitiesKey]() as Entity[], sort).map(
-                (entity) =>
-                  config.selectId
-                    ? config.selectId(entity)
-                    : (entity as any).id,
+              [idsKey]: (config?.sortFunction
+                ? config.sortFunction(state[entitiesKey]() as Entity[], sort)
+                : sortData(state[entitiesKey]() as Entity[], sort)
+              ).map((entity) =>
+                config.selectId ? config.selectId(entity) : (entity as any).id,
               ),
             });
             broadcast(state, entitiesLocalSortChanged({ sort }));
