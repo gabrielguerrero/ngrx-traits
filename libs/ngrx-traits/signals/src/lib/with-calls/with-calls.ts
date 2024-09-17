@@ -1,6 +1,5 @@
 import {
   computed,
-  DestroyRef,
   EnvironmentInjector,
   inject,
   isDevMode,
@@ -10,15 +9,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   patchState,
-  Prettify,
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
-  StateSignals,
   withComputed,
   withMethods,
   withState,
-  WritableStateSource,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
@@ -26,6 +22,7 @@ import {
   concatMap,
   exhaustMap,
   finalize,
+  first,
   from,
   ignoreElements,
   map,
@@ -41,6 +38,7 @@ import {
   tap,
   timer,
 } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import {
   CallStatus,
@@ -84,6 +82,10 @@ import { getWithCallKeys } from './with-calls.util';
  *       },
  *       onError: (error, callParam) => {
  *       // do something with the error
+ *       },
+ *       skipWhen: (callParam) => {
+ *         // if return true, the call will be skip, if false, the call will execute as usual
+ *         return // boolean | Promise<boolean> | Observable<boolean>
  *       },
  *     }),
  *     checkout: () =>
@@ -229,41 +231,61 @@ export function withCalls<
                 } as any);
 
               const callFn = getCallFn(callName, call);
+              const skipWhenFn =
+                (isCallConfig(call) && call.skipWhen) || undefined;
 
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
-                  mapPipe((params) => {
-                    setLoading();
-                    return runInInjectionContext(environmentInjector, () => {
-                      return callFn(params).pipe(
-                        map((result) => {
-                          if (
-                            !isCallConfig(call) ||
-                            call.storeResult !== false
-                          ) {
-                            patchState(state, {
-                              [resultPropKey]: result,
-                            });
-                          }
-                          setLoaded();
-                          isCallConfig(call) &&
-                            call.onSuccess &&
-                            call.onSuccess(result, params);
-                        }),
-                        takeUntilDestroyed(),
-                        catchError((error: unknown) => {
-                          const e =
-                            (isCallConfig(call) &&
-                              call.mapError?.(error, params)) ||
-                            error;
-                          setError(e);
-                          isCallConfig(call) &&
-                            call.onError &&
-                            call.onError(e, params);
-                          return of();
-                        }),
-                      );
+                  concatMap((params) => {
+                    const skip = skipWhenFn?.(params) ?? false;
+                    const process$ = mapPipe((params) => {
+                      setLoading();
+                      return runInInjectionContext(environmentInjector, () => {
+                        return callFn(params).pipe(
+                          map((result) => {
+                            if (
+                              !isCallConfig(call) ||
+                              call.storeResult !== false
+                            ) {
+                              patchState(state, {
+                                [resultPropKey]: result,
+                              });
+                            }
+                            setLoaded();
+                            isCallConfig(call) &&
+                              call.onSuccess &&
+                              call.onSuccess(result, params);
+                          }),
+                          takeUntilDestroyed(),
+                          catchError((error: unknown) => {
+                            const e =
+                              (isCallConfig(call) &&
+                                call.mapError?.(error, params)) ||
+                              error;
+                            setError(e);
+                            isCallConfig(call) &&
+                              call.onError &&
+                              call.onError(e, params);
+                            return of();
+                          }),
+                        );
+                      });
                     });
+                    if (typeof skip === 'boolean') {
+                      if(isDevMode() && skip)
+                        console.warn(`Call ${callName} is skip`)
+                      return skip ? of() : of(params).pipe(process$);
+                    }
+                    // skip is a promise or observable
+                    return from(skip).pipe(
+                      tap((value) => {
+                        if(isDevMode() && value)
+                          console.warn(`Call ${callName} is skip`)
+                      }),
+                      first((v) => v),
+                      map(() => params),
+                      process$,
+                    );
                   }),
                 ),
               );

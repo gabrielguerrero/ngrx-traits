@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import { BehaviorSubject, Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, of, Subject, tap, throwError } from 'rxjs';
 
 import { typedCallConfig, withCalls } from '../index';
 
@@ -505,6 +505,166 @@ describe('withCalls', () => {
 
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(consoleWarn).not.toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('skipWhen function', () => {
+    it('returning true in skipWhen should skip call ', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: () => apiResponse,
+              mapPipe: 'exhaustMap',
+              skipWhen: () => true,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeFalsy();
+        expect(store.testCallResult()).toBeUndefined();
+        expect(store.testCallCallStatus()).toEqual('init');
+        expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
+      });
+    });
+
+    it('returning false in skipWhen should make call ', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: () => apiResponse,
+              mapPipe: 'exhaustMap',
+              skipWhen: () => false,
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(consoleWarn).not.toHaveBeenCalled();
+      });
+    });
+
+    it('returning an Observable with true in skipWhen should skip call', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: () => apiResponse,
+              mapPipe: 'exhaustMap',
+              skipWhen: () => of(true),
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeFalsy();
+        expect(store.testCallResult()).toBeUndefined();
+        expect(store.testCallCallStatus()).toEqual('init');
+        expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
+      });
+    });
+
+    it('returning an Observable with false in skipWhen should run call', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: () => apiResponse,
+              mapPipe: 'exhaustMap',
+              skipWhen: () => of(false),
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(consoleWarn).not.toHaveBeenCalled();
+      });
+    });
+
+    it('returning a Promise with true in skipWhen should skip call', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: () => apiResponse,
+              mapPipe: 'exhaustMap',
+              skipWhen: () => Promise.resolve(true),
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeFalsy();
+        expect(store.testCallResult()).toBeUndefined();
+        expect(store.testCallCallStatus()).toEqual('init');
+        expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
+      });
+    });
+
+    it('returning a Promise with false in skipWhen should run call', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: () => apiResponse,
+              mapPipe: 'exhaustMap',
+              skipWhen: () => Promise.resolve(false),
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(consoleWarn).not.toHaveBeenCalled();
+      });
     });
   });
 });
