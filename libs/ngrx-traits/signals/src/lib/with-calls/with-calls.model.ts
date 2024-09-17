@@ -23,7 +23,12 @@ export type CallConfig<
   onSuccess?: (result: Result, param: Param) => void;
   mapError?: (error: unknown, param: Param) => Error;
   onError?: (error: Error, param: Param) => void;
+  skipWhen?:
+    | Call<Param, boolean>
+    | (() => boolean)
+    | ((param: Param) => boolean);
 };
+
 export type ExtractCallResultType<T extends Call | CallConfig> =
   T extends Call<any, infer R>
     ? R
