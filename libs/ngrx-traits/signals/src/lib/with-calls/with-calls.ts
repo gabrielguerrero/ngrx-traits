@@ -272,15 +272,15 @@ export function withCalls<
                       });
                     });
                     if (typeof skip === 'boolean') {
-                      if(isDevMode() && skip)
-                        console.warn(`Call ${callName} is skip`)
+                      if (isDevMode() && skip)
+                        console.warn(`Call ${callName} is skip`);
                       return skip ? of() : of(params).pipe(process$);
                     }
                     // skip is a promise or observable
                     return from(skip).pipe(
                       tap((value) => {
-                        if(isDevMode() && value)
-                          console.warn(`Call ${callName} is skip`)
+                        if (isDevMode() && value)
+                          console.warn(`Call ${callName} is skip`);
                       }),
                       first((v) => v),
                       map(() => params),
@@ -311,6 +311,18 @@ const mapPipes = {
   exhaustMap: exhaustMap,
 };
 
+/**
+ * Call configuration object for withCalls
+ * @param config - the call configuration
+ * @param config.call - required, the function that will be called
+ * @param config.mapPipe - optional, default exhaustMap the pipe operator that will be used to map the call result
+ * @param config.storeResult - optional, default true, if false, the result will not be stored in the store
+ * @param config.resultProp - optional, default callName + 'Result', the name of the prop where the result will be stored
+ * @param config.onSuccess - optional, a function that will be called when the call is successful
+ * @param config.mapError - optional, a function that will be called to transform the error before storing it
+ * @param config.onError - optional, a function that will be called when the call fails
+ * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
+ */
 export function typedCallConfig<
   Param = undefined,
   Result = any,
@@ -323,13 +335,45 @@ export function typedCallConfig<
     Error
   >,
 >(
-  config: Omit<CallConfig<Param, Result, PropName, Error>, 'resultProp'> & {
+  config: Omit<
+    CallConfig<Param, Result, PropName, Error>,
+    'resultProp' | 'storeResult'
+  > & {
     resultProp?: PropName;
   },
-) {
-  // this fixes weird issue where typedCallConfig was not generating the right types
-  // when CallConfig resultProp was defined
-  return { ...config, resultProp: config.resultProp ?? '' } as C;
+): C;
+
+/**
+ * Call configuration object for withCalls
+ * @param config - the call configuration
+ * @param config.call - required, the function that will be called
+ * @param config.mapPipe - optional, default exhaustMap the pipe operator that will be used to map the call result
+ * @param config.storeResult - optional, default true, if false, the result will not be stored in the store
+ * @param config.resultProp - optional, default callName + 'Result', the name of the prop where the result will be stored
+ * @param config.onSuccess - optional, a function that will be called when the call is successful
+ * @param config.mapError - optional, a function that will be called to transform the error before storing it
+ * @param config.onError - optional, a function that will be called when the call fails
+ * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
+ */
+export function typedCallConfig<
+  Param = undefined,
+  Result = any,
+  Error = unknown,
+  C extends Omit<
+    CallConfig<Param, Result, '', Error>,
+    'resultProp' | 'storeResult'
+  > & { storeResult: false } = Omit<
+    CallConfig<Param, Result, '', Error>,
+    'resultProp' | 'storeResult'
+  > & { storeResult: false },
+>(
+  config: Omit<
+    CallConfig<Param, Result, '', Error>,
+    'resultProp' | 'storeResult'
+  > & { storeResult: false },
+): C & { resultProp: '' };
+export function typedCallConfig(config: any): any {
+  return { ...config, resultProp: config.resultProp ?? '' };
 }
 
 function getCallFn<Param, Result>(
