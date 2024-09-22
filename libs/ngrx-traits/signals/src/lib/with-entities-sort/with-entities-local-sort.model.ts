@@ -1,7 +1,7 @@
 export type SortDirection = 'asc' | 'desc' | '';
 export type Sort<Entity> = {
   /** The id of the column being sorted. */
-  field: keyof Entity | string;
+  field: keyof Entity | (string & {});
   /** The sort direction. */
   direction: SortDirection;
 };
