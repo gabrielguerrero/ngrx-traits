@@ -116,10 +116,12 @@ export function getQueryMapperForEntitiesSort(config?: {
       const sort = store[sortKey] as Signal<
         EntitiesSortState<any>['entitiesSort']
       >;
-      return computed(() => ({
-        sortBy: sort().field as string,
-        sortDirection: sort().direction,
-      }));
+      return sort
+        ? computed(() => ({
+            sortBy: sort().field as string,
+            sortDirection: sort().direction,
+          }))
+        : null;
     },
   };
 }
