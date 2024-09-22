@@ -262,6 +262,47 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
     }));
 
+    it('filter store and url when there is no sort or pagination', fakeAsync(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({}) => {
+            let result = [...mockProducts.slice(0, 40)];
+            const total = result.length;
+            const response = { entities: result, total };
+            return of(response);
+          },
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity }),
+      );
+      const { store, router } = init({
+        Store,
+        queryParams: { filter: JSON.stringify({ search: 'foo', foo: 'bar' }) },
+      });
+      expect(store.entitiesFilter()).toEqual({ search: 'foo', foo: 'bar' });
+
+      store.filterEntities({
+        filter: { search: 'foo3', foo: 'bar4' },
+        forceLoad: true,
+      });
+      tick(400);
+      expect(router.navigate).toBeCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
+        }),
+        queryParamsHandling: 'merge',
+      });
+    }));
+
     it('filter url query params  should update store, with custom filterMapper', () => {
       const Store = signalStore(
         localStoreFeature(),
@@ -344,6 +385,46 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       const { store, router } = init({
         Store,
         queryParams: { sortBy: 'description', sortDirection: 'desc' },
+      });
+      store.sortEntities({
+        sort: { field: 'name', direction: 'asc' },
+      });
+      tick(400);
+      expect(router.navigate).toBeCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          sortBy: 'name',
+          sortDirection: 'asc',
+        }),
+        queryParamsHandling: 'merge',
+      });
+    }));
+
+    it('changes on entities sort should store and  url if no filter or pagination present', fakeAsync(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({}) => {
+            let result = [...mockProducts.slice(0, 40)];
+            const total = result.length;
+            const response = { entities: result, total };
+            return of(response);
+          },
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity }),
+      );
+      const { store, router } = init({
+        Store,
+        queryParams: { sortBy: 'description', sortDirection: 'desc' },
+      });
+      expect(store.entitiesSort()).toEqual({
+        field: 'description',
+        direction: 'desc',
       });
       store.sortEntities({
         sort: { field: 'name', direction: 'asc' },
@@ -464,6 +545,47 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       TestBed.flushEffects();
       load.next(true);
       tick(400);
+      store.loadEntitiesPage({ pageIndex: 2 });
+      tick(400);
+      expect(router.navigate).toBeCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          page: '3',
+        }),
+        queryParamsHandling: 'merge',
+      });
+    }));
+
+    it('changes on entities page should sync to store and url when there is no filter or sort', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesLocalPagination({ entity, pageSize: 10 }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({}) => {
+            let result = [...mockProducts.slice(0, 40)];
+            const total = result.length;
+            const response = { entities: result, total };
+            return load
+              ? load.pipe(
+                  filter(Boolean),
+                  map(() => response),
+                )
+              : of(response);
+          },
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity }),
+      );
+      const { store, router } = init({
+        Store,
+        queryParams: { page: '2' },
+      });
+      TestBed.flushEffects();
+      load.next(true);
+      tick(400);
+      expect(store.entitiesPagination().currentPage).toEqual(1);
+
       store.loadEntitiesPage({ pageIndex: 2 });
       tick(400);
       expect(router.navigate).toBeCalledWith([], {

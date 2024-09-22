@@ -112,13 +112,15 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
       const filter = store[filterKey] as Signal<
         EntitiesFilterState<any>['entitiesFilter']
       >;
-      return computed(() =>
-        config?.filterMapper
-          ? (config?.filterMapper.filterToQueryParams(filter()) as any)
-          : {
-              filter: JSON.stringify({ ...filter() }),
-            },
-      );
+      return filter
+        ? computed(() =>
+            config?.filterMapper
+              ? (config?.filterMapper.filterToQueryParams(filter()) as any)
+              : {
+                  filter: JSON.stringify({ ...filter() }),
+                },
+          )
+        : null;
     },
   };
 }

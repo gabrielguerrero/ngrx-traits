@@ -83,9 +83,11 @@ export function getQueryMapperForEntitiesPagination(config?: {
       const pagination = store[paginationKey] as Signal<
         EntitiesPaginationLocalState['entitiesPagination']
       >;
-      return computed(() => ({
-        page: (pagination().currentPage + 1).toString(),
-      }));
+      return pagination
+        ? computed(() => ({
+            page: (pagination().currentPage + 1).toString(),
+          }))
+        : null;
     },
   };
 }
