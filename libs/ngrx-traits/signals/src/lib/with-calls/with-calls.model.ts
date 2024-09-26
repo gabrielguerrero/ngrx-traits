@@ -37,9 +37,13 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
       : never;
 
 export type NamedCallsStatusComputed<Prop extends string> = {
-  [K in Prop as `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
+  [K in Prop as K extends `_${infer J}`
+    ? `_is${Capitalize<string & J>}Loading`
+    : `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
 } & {
-  [K in Prop as `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
+  [K in Prop as K extends `_${infer J}`
+    ? `_is${Capitalize<string & J>}Loaded`
+    : `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
 };
 export type NamedCallsStatusErrorComputed<
   Calls extends Record<string, Call | CallConfig>,

@@ -1,19 +1,30 @@
-import { signal } from '@angular/core';
+import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { patchState, signalStore, withState } from '@ngrx/signals';
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withMethods,
+  withState,
+} from '@ngrx/signals';
 import { BehaviorSubject, of, Subject, tap, throwError } from 'rxjs';
 
 import { typedCallConfig, withCalls } from '../index';
 
 describe('withCalls', () => {
   let apiResponse = new Subject<string>();
+  let privateApiResponse = new Subject<string>();
   const onSuccess = jest.fn();
   const onError = jest.fn();
   const Store = signalStore(
+    { protectedState: false },
     withState({ foo: 'bar' }),
     withCalls(() => ({
       testCall: ({ ok }: { ok: boolean }) => {
         return ok ? apiResponse : throwError(() => new Error('fail'));
+      },
+      _testCall: ({ ok }: { ok: boolean }) => {
+        return ok ? privateApiResponse : throwError(() => new Error('fail'));
       },
       testCall2: {
         call: ({ ok }: { ok: boolean }) => {
@@ -23,6 +34,28 @@ describe('withCalls', () => {
         onSuccess,
         onError,
       },
+      _testCall2: typedCallConfig({
+        call: ({ ok }: { ok: boolean }) => {
+          return ok ? privateApiResponse : throwError(() => new Error('fail'));
+        },
+        resultProp: '_result',
+        onSuccess,
+        onError,
+      }),
+    })),
+    withComputed((store) => ({
+      privateIsTestCallLoading: computed(() => store._isTestCallLoading()),
+      privateIsTestCallLoaded: computed(() => store._isTestCallLoaded()),
+      privateTestCallResult: computed(() => store._testCallResult()),
+      privateTestCallError: computed(() => store._testCallError()),
+      privateIsTestCall2Loading: computed(() => store._isTestCall2Loading()),
+      privateIsTestCall2Loaded: computed(() => store._isTestCall2Loaded()),
+      privateResult: computed(() => store._result()),
+      privateTestCall2Error: computed(() => store._testCall2Error()),
+    })),
+    withMethods((store) => ({
+      privateTestCall: ({ ok }: { ok: boolean }) => store._testCall({ ok }),
+      privateTestCall2: ({ ok }: { ok: boolean }) => store._testCall2({ ok }),
     })),
   );
 
@@ -664,6 +697,56 @@ describe('withCalls', () => {
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect(store.testCallResult()).toEqual('test');
         expect(consoleWarn).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('when using private name', () => {
+    it('Successful call should set status to loading and loaded ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        expect(store.privateIsTestCallLoading()).toBeFalsy();
+        store.privateTestCall({ ok: true });
+        expect(store.privateIsTestCallLoading()).toBeTruthy();
+        privateApiResponse.next('test');
+        expect(store.privateIsTestCallLoaded()).toBeTruthy();
+        expect(store.privateTestCallResult()).toBe('test');
+      });
+    });
+    it('Fail on a call should set status return error ', async () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        expect(store.privateIsTestCallLoading()).toBeFalsy();
+        store.privateTestCall({ ok: false });
+        expect(store.privateTestCallError()).toEqual(new Error('fail'));
+        expect(store.privateTestCallResult()).toBe(undefined);
+      });
+    });
+
+    describe('when using a CallConfig', () => {
+      it('Successful call should set status to loading and loaded ', async () => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          expect(store.privateIsTestCall2Loading()).toBeFalsy();
+          store.privateTestCall2({ ok: true });
+          expect(store.privateIsTestCall2Loading()).toBeTruthy();
+          privateApiResponse.next('test');
+          expect(store.privateIsTestCall2Loaded()).toBeTruthy();
+          expect(store.privateResult()).toBe('test');
+          expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+        });
+      });
+      it('Fail on a call should set status return error ', async () => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          expect(store.privateIsTestCall2Loading()).toBeFalsy();
+          store.privateTestCall2({ ok: false });
+          expect(store.privateTestCall2Error()).toEqual(new Error('fail'));
+          expect(store.privateResult()).toBe(undefined);
+          expect(onError).toHaveBeenCalledWith(new Error('fail'), {
+            ok: false,
+          });
+        });
       });
     });
   });
