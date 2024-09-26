@@ -64,6 +64,8 @@ import { getWithCallKeys } from './with-calls.util';
  * or a Signal or Observable of the same type as the original parameters.
  * The original call can only have zero or one parameter, use an object with multiple
  * props as first param if you need more.
+ * If the name start with an underscore, the call will be private and all generated methods
+ * will also start with an underscore, making it only accessible inside the store.
  * @param {callsFactory} callsFactory - a factory function that receives the store and returns an object of type {Record<string, Call | CallConfig>} with the calls to be made
  *
  * @example
@@ -182,7 +184,7 @@ export function withCalls<
         const callsComputed = Object.keys(calls).reduce(
           (acc, callName) => {
             const { loadingKey, loadedKey, errorKey, callStatusKey } =
-              getWithCallStatusKeys({ prop: callName });
+              getWithCallStatusKeys({ prop: callName, supportPrivate: true });
             const callState = state[callStatusKey] as Signal<CallStatus>;
             acc[loadingKey] = computed(() => callState() === 'loading');
             acc[loadedKey] = computed(() => callState() === 'loaded');
