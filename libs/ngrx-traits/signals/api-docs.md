@@ -17,7 +17,11 @@ call and store the result of the call. The generated methods are rxMethods with
 the same name as the original call, which accepts either the original parameters
 or a Signal or Observable of the same type as the original parameters.
 The original call can only have zero or one parameter, use an object with multiple
-props as first param if you need more.</p></dd>
+props as first param if you need more.
+If the name start with an underscore, the call will be private and all generated methods
+will also start with an underscore, making it only accessible inside the store.</p></dd>
+<dt><a href="#typedCallConfig">typedCallConfig(config)</a></dt>
+<dd><p>Call configuration object for withCalls</p></dd>
 <dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
@@ -172,7 +176,9 @@ call and store the result of the call. The generated methods are rxMethods with
 the same name as the original call, which accepts either the original parameters
 or a Signal or Observable of the same type as the original parameters.
 The original call can only have zero or one parameter, use an object with multiple
-props as first param if you need more.</p>
+props as first param if you need more.
+If the name start with an underscore, the call will be private and all generated methods
+will also start with an underscore, making it only accessible inside the store.</p>
 
 **Kind**: global function  
 **Warning**: The default mapPipe is [exhaustMap](https://www.learnrxjs.io/learn-rxjs/operators/transformation/exhaustmap). If your call returns an observable that does not complete after the first value is emitted, any changes to the input params will be ignored. Either specify [switchMap](https://www.learnrxjs.io/learn-rxjs/operators/transformation/switchmap) as mapPipe, or use [take(1)](https://www.learnrxjs.io/learn-rxjs/operators/filtering/take) or [first()](https://www.learnrxjs.io/learn-rxjs/operators/filtering/first) as part of your call.  
@@ -199,6 +205,10 @@ withCalls(({ productsSelectedEntity }) => ({
       onError: (error, callParam) => {
       // do something with the error
       },
+      skipWhen: (callParam) => {
+        // if return true, the call will be skip, if false, the call will execute as usual
+        return // boolean | Promise<boolean> | Observable<boolean>
+      },
     }),
     checkout: () =>
       inject(OrderService).checkout({
@@ -223,6 +233,25 @@ withCalls(({ productsSelectedEntity }) => ({
   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
   store.checkout // () => void
 ```
+<a name="typedCallConfig"></a>
+
+## typedCallConfig(config)
+<p>Call configuration object for withCalls</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config | <p>the call configuration</p> |
+| config.call | <p>required, the function that will be called</p> |
+| config.mapPipe | <p>optional, default exhaustMap the pipe operator that will be used to map the call result</p> |
+| config.storeResult | <p>optional, default true, if false, the result will not be stored in the store</p> |
+| config.resultProp | <p>optional, default callName + 'Result', the name of the prop where the result will be stored</p> |
+| config.onSuccess | <p>optional, a function that will be called when the call is successful</p> |
+| config.mapError | <p>optional, a function that will be called to transform the error before storing it</p> |
+| config.onError | <p>optional, a function that will be called when the call fails</p> |
+| config.skipWhen | <p>optional, a function that will be called to determine if the call should be skipped</p> |
+
 <a name="withEntitiesLocalFilter"></a>
 
 ## withEntitiesLocalFilter(configFactory)

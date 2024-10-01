@@ -4,6 +4,7 @@ import {
   getState,
   patchState,
   Prettify,
+  SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
   StateSignals,
@@ -67,7 +68,18 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
         WritableStateSource<Prettify<Input['state']>>
     >,
   ) => void;
-}) {
+}): SignalStoreFeature<
+  Input,
+  {
+    state: {};
+    computed: {};
+    methods: {
+      saveToStorage: () => void;
+      loadFromStorage: () => void;
+      clearFromStore: () => void;
+    };
+  }
+> {
   return signalStoreFeature(
     type<Input>(),
     withState({}),

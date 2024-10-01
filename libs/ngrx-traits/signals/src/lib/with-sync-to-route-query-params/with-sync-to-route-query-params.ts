@@ -2,7 +2,9 @@ import { computed, inject } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
+  EmptyFeatureResult,
   Prettify,
+  SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
   StateSignals,
@@ -58,7 +60,10 @@ export function withSyncToRouteQueryParams<
   Input extends SignalStoreFeatureResult,
   Params extends Record<string, any>,
   Mappers extends ReadonlyArray<QueryMapper<any, StoreSource<Input>>>,
->(config: { mappers: Mappers; defaultDebounce?: number }) {
+>(config: {
+  mappers: Mappers;
+  defaultDebounce?: number;
+}): SignalStoreFeature<Input, EmptyFeatureResult> {
   return signalStoreFeature(
     type<Input>(),
     withState({}),

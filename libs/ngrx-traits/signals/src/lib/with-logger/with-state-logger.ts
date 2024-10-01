@@ -1,6 +1,8 @@
 import { effect } from '@angular/core';
 import {
+  EmptyFeatureResult,
   getState,
+  SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
   type,
@@ -18,7 +20,7 @@ export function withStateLogger<Input extends SignalStoreFeatureResult>({
 }: {
   name: string;
   filterState?: (state: Input['state']) => Partial<Input['state']>;
-}) {
+}): SignalStoreFeature<Input, EmptyFeatureResult> {
   return signalStoreFeature(
     type<Input>(),
     withHooks({
