@@ -1,5 +1,5 @@
 ---
-name: withEntitiesRemoteFilter
+name: withEntitiesRemoteFilter - DONE
 order: 4
 ---
 
@@ -23,64 +23,32 @@ Import the withCalls trait from `@ngrx-traits/signals`.
 ```ts
 import { withEntitiesRemoteFilter } from '@ngrx-traits/signals';
 ```
+
 ## Examples
 
 ```typescript
-
 const entityConfig = entityConfig({
-    entity: type<T>(),
-    collection
+  entity: type<T>(),
+  collection,
 });
 
 export const store = signalStore(
-  // requires withEntities and withCallStatus to be used
   withEntities(entityConfig),
   withCallStatus({ ...entityConfig, initialValue: 'loading' }),
-
   withEntitiesRemoteFilter({
     ...entityConfig,
     defaultFilter: { name: '' },
   }),
-  // after you can use withEntitiesLoadingCall to connect the filter to
-  // the api call, or do it manually as shown after
   withEntitiesLoadingCall({
     ...entityConfig,
     fetchEntities: ({ productsFilter }) => {
-      return inject(ProductService)
-        .getProducts({
-          search: productsFilter().name,
-        })
+      return inject(ProductService).getProducts({
+        search: productsFilter().name,
+      });
     },
   }),
-// withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, ...state }) => ({
-//   onInit: async () => {
-//     effect(() => {
-//       if (isProductsLoading()) {
-//         inject(ProductService)
-//              .getProducts({
-//                 search: productsFilter().name,
-//               })
-//           .pipe(
-//             takeUntilDestroyed(),
-//             tap((res) =>
-//               patchState(
-//                 state,
-//                 setAllEntities(res.resultList, { collection: 'products' }),
-//               ),
-//             ),
-//             catchError((error) => {
-//               setProductsError(error);
-//               return EMPTY;
-//             }),
-//           )
-//           .subscribe();
-//       }
-//     });
-//   },
 );
 ```
-
 
 | Property        | Description                                                       | Value                                        |
 | --------------- | ----------------------------------------------------------------- | -------------------------------------------- |

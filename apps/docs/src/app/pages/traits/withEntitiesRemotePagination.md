@@ -1,9 +1,10 @@
 ---
-name: withEntitiesRemotePagination
+name: withEntitiesRemotePagination - DONE
 order: 7
 ---
 
 # withEntitiesRemotePagination
+
 Generates necessary state, computed and methods for remote pagination of entities in the store.
 Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
 it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
@@ -23,87 +24,57 @@ If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPa
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection
+  collection,
 });
 
 export const store = signalStore(
-  // required withEntities and withCallStatus
   withEntities(entityConfig),
-  withCallStatus({...entityConfig, initialValue: 'loading' }),
+  withCallStatus({ ...entityConfig, initialValue: 'loading' }),
   withEntitiesRemotePagination({
     ...entityConfig,
     pageSize: 5,
     pagesToCache: 2,
   }),
-  // after you can use withEntitiesLoadingCall to connect the filter to
-  // the api call, or do it manually as shown after
-   withEntitiesLoadingCall({
-     ...entityConfig,
+  withEntitiesLoadingCall({
+    ...entityConfig,
     fetchEntities: ({ productsPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
           take: productsPagedRequest().size,
           skip: productsPagedRequest().startIndex,
-        }).pipe(
+        })
+        .pipe(
           map((d) => ({
             entities: d.resultList,
             total: d.total,
           })),
-        )
+        );
     },
   }),
-// withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
-//   onInit: async () => {
-//     effect(() => {
-//       if (isProductsLoading()) {
-//         inject(ProductService)
-//             .getProducts({
-//                take: productsPagedRequest().size,
-//                skip: productsPagedRequest().startIndex,
-//              })
-//           .pipe(
-//             takeUntilDestroyed(),
-//             tap((res) =>
-//               patchState(
-//                 state,
-//                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
-//               ),
-//             ),
-//             catchError((error) => {
-//               setProductsError(error);
-//               return EMPTY;
-//             }),
-//           )
-//           .subscribe();
-//       }
-//     });
-//   },
- );
+);
 ```
 
-
-| Property        | Description                                        | Value                                        |
-|-----------------|----------------------------------------------------|----------------------------------------------|
-| entity          | The entity type                                    | `type<T>()`                                  |
-| collection      | The name of the collection. Optional               | string                                       |
-| selectId        | The function to use to select the id of the entity | `SelectEntityId<Entity>`                                       |
-| pageSize        | The number of entities to show per page            | number                                       |
-| currentPage     | The current page to show                           | number                                       |
-| pagesToCache    | The number of pages to cache                       | number                                       |
+| Property     | Description                                        | Value                    |
+| ------------ | -------------------------------------------------- | ------------------------ |
+| entity       | The entity type                                    | `type<T>()`              |
+| collection   | The name of the collection. Optional               | string                   |
+| selectId     | The function to use to select the id of the entity | `SelectEntityId<Entity>` |
+| pageSize     | The number of entities to show per page            | number                   |
+| currentPage  | The current page to show                           | number                   |
+| pagesToCache | The number of pages to cache                       | number                   |
 
 ## State
 
 Generates the following signals
 
 ```typescript
-pagination: Signal<{ currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } }>;
+pagination: Signal<{ currentPage: number; requestPage: number; pageSize: 5; total: number; pagesToCache: number; cache: { start: number; end: number } }>;
 ```
 
 If collection provided, the following signals are generated, example: **users**
 
 ```typescript
-usersPagination: Signal<{ currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } }>;
+usersPagination: Signal<{ currentPage: number; requestPage: number; pageSize: 5; total: number; pagesToCache: number; cache: { start: number; end: number } }>;
 ```
 
 ## Computed
@@ -111,15 +82,15 @@ usersPagination: Signal<{ currentPage: number, requestPage: number, pageSize: 5,
 Generates the following computed signals
 
 ```typescript
-entitiesCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
-entitiesPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
+entitiesCurrentPage: Signal<{ entities: Product[]; pageIndex: number; total: number; pageSize: 5; pagesCount: number; hasPrevious: boolean; hasNext: boolean; isLoading: boolean }>;
+entitiesPagedRequest: Signal<{ startIndex: number; size: number; page: number }>;
 ```
 
 If collection provided, the following computed signals are generated, example: **users**
 
 ```typescript
-usersCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
-usersPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
+usersCurrentPage: Signal<{ entities: Product[]; pageIndex: number; total: number; pageSize: 5; pagesCount: number; hasPrevious: boolean; hasNext: boolean; isLoading: boolean }>;
+usersPagedRequest: Signal<{ startIndex: number; size: number; page: number }>;
 ```
 
 ## Methods

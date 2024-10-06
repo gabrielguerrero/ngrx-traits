@@ -13,8 +13,8 @@ module.exports = {
         sans: ['InterVariable', 'sans-serif']
       },
       colors: {
-        primary: '#e90364',
-        accent: '#fa2c05'
+        primary: '#AA1BB6',
+        accent: '#452070'
       },
       typography: theme => ({
         zinc: {

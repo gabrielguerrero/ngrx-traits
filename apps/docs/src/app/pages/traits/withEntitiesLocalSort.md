@@ -1,5 +1,5 @@
 ---
-name: withEntitiesLocalSort
+name: withEntitiesLocalSort - DONE
 order: 11
 ---
 
@@ -18,25 +18,29 @@ import { withEntitiesLocalSort } from '@ngrx-traits/signals';
 ```
 
 ```typescript
-
 const entity = entityConfig({
-    entity: type<T>()
-    collection: 'users'
-})
+  entity: type<T>(),
+});
 
 const store = signalStore(
-    withEntitiesLocalSort({
-        ...entity,
-        defaultSort: {field: 'name', direction: 'asc'}
-    })
+  withEntitiesLocalSort({
+    ...entity,
+    defaultSort: { field: 'name', direction: 'asc' },
+  }),
 );
 ```
 
 ## Examples
 
 ```typescript
+const entity = entityConfig({
+  entity: type<T>(),
+});
+
 const store = signalStore(
+  withEntities(entity),
   withEntitiesLocalSort({
+    ...entity
     defaultSort: { field: 'name', direction: 'asc' },
   }),
 );
@@ -51,6 +55,7 @@ const entity = entityConfig({
 })
 
 const store = signalStore(
+    withEntities(entity);
     withEntitiesLocalSort({
         ...entity,
         defaultSort: {field: 'name', direction: 'asc'}

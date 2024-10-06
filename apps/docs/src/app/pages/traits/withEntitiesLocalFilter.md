@@ -1,5 +1,5 @@
 ---
-name: withEntitiesLocalFilter
+name: withEntitiesLocalFilter - DONE
 order: 3
 ---
 

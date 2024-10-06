@@ -23,7 +23,7 @@ import { getRouterLinks } from '../../utils/router';
                   <a
                     class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500"
                     [routerLink]="link.link"
-                    routerLinkActive="bg-gradient-to-b from-[#e90364] to-[#fa2c05] text-transparent bg-clip-text"
+                    routerLinkActive="bg-gradient-to-b from-[#AA1BB6] to-[#452070] text-transparent bg-clip-text"
                   >
                     {{ link.name }}
                   </a>

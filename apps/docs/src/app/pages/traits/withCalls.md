@@ -1,5 +1,5 @@
 ---
-name: withCalls
+name: withCalls - DONE
 order: 2
 ---
 
@@ -40,17 +40,11 @@ const store = signalStore(
     loadProductDetail: typedCallConfig({
       call: ({ id }: { id: string }) => inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
-      // storeResult: false, // will omit storing the result, and remove the result prop from the store
-      mapPipe: 'switchMap', // default is 'exhaustMap'
-      onSuccess: (result, callParam) => {
-        // do something with the result
-      },
-      mapError: (error, callParam) => {
-        return; // transform the error before storing it
-      },
-      onError: (error, callParam) => {
-        // do something with the error
-      },
+      mapPipe: 'switchMap',
+      onSuccess: (result, callParam) => {},
+      mapError: (error, callParam) => {},
+      onError: (error, callParam) => {},
+      skipWhen: (callParam) => {},
     }),
   })),
 );
@@ -60,15 +54,16 @@ const store = signalStore(
 
 This trait receives and object to allow specific configurations:
 
-| Property    | Description                                                 | Value                                                                 |
-| ----------- | ----------------------------------------------------------- | --------------------------------------------------------------------- |
-| call        | Async callback.                                             | `(param: ParamType)=> Observable<T>  (param: ParamType)=> Promise<T>` |
-| resultProp  | State property name to store the result of the call.        | string                                                                |
-| storeResult | Whether the result is stored as a signal or not             | boolean                                                               |
-| mapPipe     | Rxjs pipe to use for each call. Default value: `exhaustMap` | `switchMap` \| `exhaustMap` \| `concatMap`                            |
-| onSuccess   | Callback executed after call emits value                    | `()=> void \| (result, param: ParamType)=> void`                      |
-| mapError    | Callback to transform and give type to error                | `(error)=> ErrorType`                                                 |
-| onError     | Callback executed after call emits error                    | `(error: ErrorType, param: ParamType)=> void`                         |
+| Property    | Description                                                 | Value                                                                       |
+| ----------- | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| call        | Async callback.                                             | `(param: ParamType)=> Observable<T>  (param: ParamType)=> Promise<T>`       |
+| resultProp  | State property name to store the result of the call.        | string                                                                      |
+| storeResult | Whether the result is stored as a signal or not.            | boolean. Default: true                                                      |
+| mapPipe     | Rxjs pipe to use for each call. Default value: `exhaustMap` | `switchMap` \| `exhaustMap` \| `concatMap` (default: exhaustMap)            |
+| onSuccess   | Callback executed after call emits value                    | `()=> void \| (result, param: ParamType)=> void`                            |
+| mapError    | Callback to transform and give type to error                | `(error)=> ErrorType`                                                       |
+| onError     | Callback executed after call emits error                    | `(error: ErrorType, param: ParamType)=> void`                               |
+| skipWhen    | Call back to check if the call should be skipped or not     | `(param: ParamType)=> boolean  \| Promise<boolean>  \| Observable<boolean>` |
 
 ## State
 
@@ -77,7 +72,8 @@ Generates the following signals for each call defined within the trait
 Eg: callName: 'getUser', resultProp: user
 
 ```typescript
-user: Signal<T> <-- if storeResult=true
+// When storeResult = true
+user: Signal<T>;
 ```
 
 ## Computed
