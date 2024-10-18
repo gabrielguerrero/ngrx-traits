@@ -884,4 +884,53 @@ describe('withEntitiesRemoteScrollPagination', () => {
       });
     }));
   });
+
+  it('should check deepsignals', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          pageSize: 10,
+          pagesToCache: 1,
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesPagedRequest }) => {
+            let result = [...mockProducts.slice(0, 25)];
+            const total = result.length;
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+          },
+        }),
+      );
+
+      const store = new Store();
+
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first load
+      expect(store.entities().length).toEqual(10);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 10));
+      expect(store.pagination.hasMore()).toEqual(true);
+      expect(store.pagination.pageSize()).toEqual(10);
+
+      store.loadMoreEntities();
+      tick();
+      // check the second load
+      expect(store.entities().length).toEqual(20);
+      expect(store.entities()).toEqual(mockProducts.slice(0, 20));
+      expect(store.pagination.hasMore()).toEqual(true);
+    });
+  }));
 });
