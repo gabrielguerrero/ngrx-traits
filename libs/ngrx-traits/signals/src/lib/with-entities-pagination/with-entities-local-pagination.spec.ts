@@ -276,4 +276,40 @@ describe('withEntitiesLocalPagination', () => {
       expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
     });
   }));
+
+  it('should check deepsignals', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity }),
+      withEntitiesLocalPagination({ entity, pageSize: 10 }),
+    );
+
+    const store = new Store();
+    patchState(store, setAllEntities(mockProducts.slice(0, 25)));
+
+    // Check deep signals
+    expect(store.entitiesCurrentPage.entities().length).toEqual(10);
+    expect(store.entitiesCurrentPage.entities()).toEqual(
+      mockProducts.slice(0, 10),
+    );
+    expect(store.entitiesCurrentPage.pageIndex()).toEqual(0);
+    expect(store.entitiesCurrentPage.pageSize()).toEqual(10);
+    expect(store.entitiesCurrentPage.pagesCount()).toEqual(3);
+    expect(store.entitiesCurrentPage.total()).toEqual(25);
+    expect(store.entitiesCurrentPage.hasPrevious()).toEqual(false);
+    expect(store.entitiesCurrentPage.hasNext()).toEqual(true);
+
+    store.loadEntitiesPage({ pageIndex: 1 });
+
+    expect(store.entitiesCurrentPage.entities().length).toEqual(10);
+    expect(store.entitiesCurrentPage.entities()).toEqual(
+      mockProducts.slice(10, 20),
+    );
+    expect(store.entitiesCurrentPage.pageIndex()).toEqual(1);
+    expect(store.entitiesCurrentPage.pageSize()).toEqual(10);
+    expect(store.entitiesCurrentPage.pagesCount()).toEqual(3);
+    expect(store.entitiesCurrentPage.total()).toEqual(25);
+    expect(store.entitiesCurrentPage.hasPrevious()).toEqual(true);
+    expect(store.entitiesCurrentPage.hasNext()).toEqual(true);
+  });
 });
