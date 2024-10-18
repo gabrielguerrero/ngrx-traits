@@ -6,6 +6,7 @@ import {
   NamedSetEntitiesResult,
   SetEntitiesResult,
 } from './with-entities-local-pagination.model';
+import { DeepSignal } from '@ngrx/signals';
 
 export type PaginationState = {
   currentPage: number;
@@ -25,7 +26,7 @@ export type NamedEntitiesPaginationRemoteState<Collection extends string> = {
   [K in Collection as `${K}Pagination`]: PaginationState;
 };
 export type EntitiesPaginationRemoteComputed<Entity> = {
-  entitiesCurrentPage: Signal<{
+  entitiesCurrentPage: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;
@@ -35,7 +36,7 @@ export type EntitiesPaginationRemoteComputed<Entity> = {
     hasNext: boolean;
     isLoading: boolean;
   }>;
-  entitiesPagedRequest: Signal<{
+  entitiesPagedRequest: DeepSignal<{
     startIndex: number;
     size: number;
     page: number;
@@ -45,13 +46,13 @@ export type NamedEntitiesPaginationRemoteComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}PagedRequest`]: Signal<{
+  [K in Collection as `${K}PagedRequest`]: DeepSignal<{
     startIndex: number;
     size: number;
     page: number;
   }>;
 } & {
-  [K in Collection as `${K}CurrentPage`]: Signal<{
+  [K in Collection as `${K}CurrentPage`]: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;

@@ -1,4 +1,4 @@
-import { Signal } from '@angular/core';
+import { DeepSignal } from '@ngrx/signals';
 
 export type EntitiesPaginationLocalState = {
   entitiesPagination: {
@@ -13,7 +13,7 @@ export type NamedEntitiesPaginationLocalState<Collection extends string> = {
   };
 };
 export type EntitiesPaginationLocalComputed<Entity> = {
-  entitiesCurrentPage: Signal<{
+  entitiesCurrentPage: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;
@@ -27,7 +27,7 @@ export type NamedEntitiesPaginationLocalComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}CurrentPage`]: Signal<{
+  [K in Collection as `${K}CurrentPage`]: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;

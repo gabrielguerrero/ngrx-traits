@@ -1,6 +1,7 @@
 import { computed, Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
+  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -248,7 +249,7 @@ export function withEntitiesRemotePagination<
           return entities().slice(startIndex, endIndex);
         });
 
-        const entitiesCurrentPage = computed(() => {
+        const entitiesCurrentPage = deepComputed(() => {
           const pagesCount =
             pagination().total && pagination().total! > 0
               ? Math.ceil(pagination().total! / pagination().pageSize)

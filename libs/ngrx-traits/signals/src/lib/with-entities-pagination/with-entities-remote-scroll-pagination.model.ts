@@ -4,6 +4,7 @@ import {
   NamedSetEntitiesResult,
   SetEntitiesResult,
 } from './with-entities-local-pagination.model';
+import { DeepSignal } from '@ngrx/signals';
 
 export type ScrollPaginationState = {
   hasMore: boolean;
@@ -19,7 +20,7 @@ export type NamedEntitiesScrollPaginationState<Collection extends string> = {
   [K in Collection as `${K}Pagination`]: ScrollPaginationState;
 };
 export type EntitiesScrollPaginationComputed<Entity> = {
-  entitiesCurrentPage: Signal<{
+  entitiesCurrentPage: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     pageSize: number;
@@ -27,7 +28,7 @@ export type EntitiesScrollPaginationComputed<Entity> = {
     hasNext: boolean;
     isLoading: boolean;
   }>;
-  entitiesPagedRequest: Signal<{
+  entitiesPagedRequest: DeepSignal<{
     startIndex: number;
     size: number;
   }>;
@@ -36,12 +37,12 @@ export type NamedEntitiesScrollPaginationComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}PagedRequest`]: Signal<{
+  [K in Collection as `${K}PagedRequest`]: DeepSignal<{
     startIndex: number;
     size: number;
   }>;
 } & {
-  [K in Collection as `${K}CurrentPage`]: Signal<{
+  [K in Collection as `${K}CurrentPage`]: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     pageSize: number;
