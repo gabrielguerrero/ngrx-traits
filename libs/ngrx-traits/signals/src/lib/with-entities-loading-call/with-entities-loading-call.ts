@@ -11,7 +11,6 @@ import {
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
-  StateSignals,
   withHooks,
   WritableStateSource,
 } from '@ngrx/signals';
@@ -23,7 +22,6 @@ import {
   SelectEntityId,
   setAllEntities,
 } from '@ngrx/signals/entities';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
 import {
   catchError,
   concatMap,
@@ -48,7 +46,6 @@ import {
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   NamedSetEntitiesResult,
-  SetEntitiesResult,
 } from '../with-entities-pagination/with-entities-local-pagination.model';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';

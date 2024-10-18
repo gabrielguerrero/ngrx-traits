@@ -1080,4 +1080,60 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entities().length).toEqual(30);
     });
   }));
+
+  it('should check deepsignals', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemotePagination({ entity, pageSize: 10 }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesPagedRequest }) => {
+            let result = [...mockProducts.slice(0, 25)];
+            const total = result.length;
+            const options = {
+              skip: entitiesPagedRequest()?.startIndex,
+              take: entitiesPagedRequest()?.size,
+            };
+            if (options?.skip || options?.take) {
+              const skip = +(options?.skip ?? 0);
+              const take = +(options?.take ?? 0);
+              result = result.slice(skip, skip + take);
+            }
+            return of({ entities: result, total });
+          },
+        }),
+      );
+
+      const store = new Store();
+      TestBed.flushEffects();
+      expect(store.entities()).toEqual([]);
+      store.setLoading();
+      tick();
+      // check the first page
+      expect(store.entitiesCurrentPage.entities().length).toEqual(10);
+      expect(store.entitiesCurrentPage.entities()).toEqual(
+        mockProducts.slice(0, 10),
+      );
+      expect(store.entitiesCurrentPage.pageIndex()).toEqual(0);
+      expect(store.entitiesCurrentPage.pageSize()).toEqual(10);
+      expect(store.entitiesCurrentPage.pagesCount()).toEqual(3);
+      expect(store.entitiesCurrentPage.total()).toEqual(25);
+      expect(store.entitiesCurrentPage.hasPrevious()).toEqual(false);
+      expect(store.entitiesCurrentPage.hasNext()).toEqual(true);
+
+      store.loadEntitiesPage({ pageIndex: 1 });
+      // check the second page
+      expect(store.entitiesCurrentPage.entities().length).toEqual(10);
+      expect(store.entitiesCurrentPage.entities()).toEqual(
+        mockProducts.slice(10, 20),
+      );
+      expect(store.entitiesCurrentPage.pageIndex()).toEqual(1);
+      expect(store.entitiesCurrentPage.pageSize()).toEqual(10);
+      expect(store.entitiesCurrentPage.pagesCount()).toEqual(3);
+      expect(store.entitiesCurrentPage.total()).toEqual(25);
+      expect(store.entitiesCurrentPage.hasPrevious()).toEqual(true);
+      expect(store.entitiesCurrentPage.hasNext()).toEqual(true);
+    });
+  }));
 });
