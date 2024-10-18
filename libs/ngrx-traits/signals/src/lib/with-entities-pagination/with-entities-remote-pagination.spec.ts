@@ -1081,7 +1081,7 @@ describe('withEntitiesRemotePagination', () => {
     });
   }));
 
-  it('should check deepsignals', () => {
+  it('should check deepsignals', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         withEntities({ entity }),
@@ -1135,5 +1135,5 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage.hasPrevious()).toEqual(true);
       expect(store.entitiesCurrentPage.hasNext()).toEqual(true);
     });
-  });
+  }));
 });
