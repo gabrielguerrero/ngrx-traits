@@ -1,5 +1,6 @@
 import { computed, Signal } from '@angular/core';
 import {
+  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -163,7 +164,7 @@ export function withEntitiesLocalPagination<
           pageSize: number;
           currentPage: number;
         }>;
-        const entitiesCurrentPage = computed(() => {
+        const entitiesCurrentPage = deepComputed(() => {
           const page = pagination().currentPage;
           const startIndex = page * pagination().pageSize;
           let endIndex = startIndex + pagination().pageSize;
