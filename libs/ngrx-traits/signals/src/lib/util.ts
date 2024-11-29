@@ -16,3 +16,6 @@ export function toMap(a: Array<string | number>) {
     return acum;
   }, {});
 }
+export function insertIf<T>(condition: any, getElement: () => T): [T] {
+  return (condition ? [getElement()] : []) as [T];
+}

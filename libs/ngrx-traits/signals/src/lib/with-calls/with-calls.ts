@@ -3,6 +3,7 @@ import {
   EnvironmentInjector,
   inject,
   isDevMode,
+  isSignal,
   runInInjectionContext,
   Signal,
 } from '@angular/core';
@@ -13,6 +14,7 @@ import {
   SignalStoreFeature,
   SignalStoreFeatureResult,
   withComputed,
+  withHooks,
   withMethods,
   withState,
 } from '@ngrx/signals';
@@ -25,6 +27,7 @@ import {
   first,
   from,
   ignoreElements,
+  isObservable,
   map,
   merge,
   Observable,
@@ -40,6 +43,7 @@ import {
 } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+import { insertIf } from '../util';
 import {
   CallStatus,
   NamedCallStatusState,
@@ -89,6 +93,11 @@ import { getWithCallKeys } from './with-calls.util';
  *         // if return true, the call will be skip, if false, the call will execute as usual
  *         return // boolean | Promise<boolean> | Observable<boolean>
  *       },
+ *       callWith: () =>
+ *       // reactively call  with the selected product id, if undefined is return, the call is skip by default
+ *        productsEntitySelected()
+ *            ? { id: productsEntitySelected()!.id }
+ *            : undefined,
  *     }),
  *     checkout: () =>
  *       inject(OrderService).checkout({
@@ -130,7 +139,11 @@ export function withCalls<
           : Calls[K]['resultProp'] extends ''
             ? `${K & string}Result`
             : Calls[K]['resultProp'] & string
-        : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
+        : `${K & string}Result`]: Calls[K] extends
+        | ((...args: any) => any)
+        | CallConfig<any, any, any, any, undefined>
+        ? ExtractCallResultType<Calls[K]> | undefined
+        : ExtractCallResultType<Calls[K]>;
     };
     props: NamedCallsStatusComputed<keyof Calls & string> &
       NamedCallsStatusErrorComputed<Calls>;
@@ -171,13 +184,18 @@ export function withCalls<
               : `${callName}Result`,
         });
         if (!isCallConfig(call) || call.storeResult !== false) {
-          acc[resultPropKey] = undefined;
+          acc[resultPropKey] = isCallConfig(call)
+            ? call.defaultResult
+            : undefined;
         }
         return acc;
       },
       {} as Record<string, any>,
     );
 
+    const hasCallWith = Object.entries(calls).some(
+      ([, call]) => isCallConfig(call) && 'callWith' in call,
+    );
     return signalStoreFeature(
       withState(callsState),
       withComputed((state: Record<string, Signal<unknown>>) => {
@@ -233,8 +251,12 @@ export function withCalls<
                 } as any);
 
               const callFn = getCallFn(callName, call);
-              const skipWhenFn =
-                (isCallConfig(call) && call.skipWhen) || undefined;
+              const skipWhenFn = isCallConfig(call)
+                ? call.skipWhen ??
+                  (call.callWith
+                    ? (param: unknown) => param === undefined || param === false
+                    : undefined)
+                : undefined;
 
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
@@ -298,6 +320,33 @@ export function withCalls<
           return methods;
         },
       ),
+      ...insertIf(hasCallWith, () =>
+        withHooks((store: Record<string, Function>) => ({
+          onInit: () => {
+            for (const [callName, call] of Object.entries(calls)) {
+              if (isCallConfig(call) && 'callWith' in call) {
+                if (
+                  typeof call.callWith === 'function' &&
+                  !isObservable(call.callWith) &&
+                  !isSignal(call.callWith)
+                ) {
+                  store[callName](computed(call.callWith));
+                } else if (
+                  isObservable(call.callWith) ||
+                  isSignal(call.callWith)
+                ) {
+                  store[callName](call.callWith);
+                } else {
+                  const value = call.callWith;
+                  if (value !== undefined && value !== false) {
+                    store[callName](value);
+                  }
+                }
+              }
+            }
+          },
+        })),
+      ),
     );
   }) as any;
 }
@@ -325,26 +374,50 @@ const mapPipes = {
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
  */
+
 export function typedCallConfig<
   Param = undefined,
   Result = any,
   PropName extends string = '',
   Error = unknown,
-  C extends CallConfig<Param, Result, PropName, Error> = CallConfig<
+  C extends CallConfig<Param, Result, PropName, Error, Result> = CallConfig<
     Param,
     Result,
     PropName,
-    Error
+    Error,
+    Result
   >,
+  DefaultResult extends Result | undefined = undefined,
 >(
   config: Omit<
     CallConfig<Param, Result, PropName, Error>,
-    'resultProp' | 'storeResult'
+    'resultProp' | 'storeResult' | 'defaultResult'
+  > & {
+    resultProp?: PropName;
+    defaultResult: NoInfer<Result>;
+  },
+): C;
+export function typedCallConfig<
+  Param = undefined,
+  Result = any,
+  PropName extends string = '',
+  Error = unknown,
+  C extends CallConfig<Param, Result, PropName, Error, undefined> = CallConfig<
+    Param,
+    Result,
+    PropName,
+    Error,
+    undefined
+  >,
+  DefaultResult extends Result | undefined = undefined,
+>(
+  config: Omit<
+    CallConfig<Param, Result, PropName, Error>,
+    'resultProp' | 'storeResult' | 'defaultResult'
   > & {
     resultProp?: PropName;
   },
 ): C;
-
 /**
  * Call configuration object for withCalls
  * @param config - the call configuration
@@ -363,17 +436,17 @@ export function typedCallConfig<
   Error = unknown,
   C extends Omit<
     CallConfig<Param, Result, '', Error>,
-    'resultProp' | 'storeResult'
+    'resultProp' | 'storeResult' | 'defaultResult'
   > & { storeResult: false } = Omit<
     CallConfig<Param, Result, '', Error>,
-    'resultProp' | 'storeResult'
+    'resultProp' | 'storeResult' | 'defaultResult'
   > & { storeResult: false },
 >(
   config: Omit<
     CallConfig<Param, Result, '', Error>,
-    'resultProp' | 'storeResult'
+    'resultProp' | 'storeResult' | 'defaultResult'
   > & { storeResult: false },
-): C & { resultProp: '' };
+): C & { resultProp: ''; defaultResult: undefined };
 export function typedCallConfig(config: any): any {
   return { ...config, resultProp: config.resultProp ?? '' };
 }
@@ -429,3 +502,4 @@ function wrapMapPipeWarning<Param, Result>(
     return (params) => from(call(params));
   }
 }
+type NotUndefined<T> = T extends undefined ? never : T;
