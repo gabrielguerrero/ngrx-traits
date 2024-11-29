@@ -43,7 +43,7 @@ import { ProductsLocalStore } from './product.store';
               <!-- [selectedSort]="store.productsSort()" -->
               <mat-paginator
                 [pageSizeOptions]="[5, 10, 25, 100]"
-                [length]="store.productsCurrentPage().total"
+                [length]="store.productsCurrentPage.total()"
                 [pageSize]="store.productsCurrentPage().pageSize"
                 [pageIndex]="store.productsCurrentPage().pageIndex"
                 (page)="store.loadProductsPage($event)"
@@ -109,7 +109,6 @@ export class SignalProductListPaginatedPageContainerComponent {
 
   select({ id }: Product) {
     this.store.selectProductsEntity({ id });
-    this.store.loadProductDetail({ id });
   }
 
   checkout() {
