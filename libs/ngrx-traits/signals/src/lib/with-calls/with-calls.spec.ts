@@ -7,7 +7,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { BehaviorSubject, of, Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, first, of, Subject, tap, throwError } from 'rxjs';
 
 import { typedCallConfig, withCalls } from '../index';
 
@@ -748,6 +748,400 @@ describe('withCalls', () => {
           });
         });
       });
+    });
+  });
+  describe('when using callWithParams', () => {
+    it('should run call on init when call has no params and callWithParams = undefined', async () =>
+      async () => {
+        let apiResponse = new Subject<string>();
+        const apiMockCall = jest.fn();
+        await TestBed.runInInjectionContext(async () => {
+          const Store = signalStore(
+            withCalls(() => ({
+              testCall: typedCallConfig({
+                call: () => {
+                  apiMockCall();
+                  return apiResponse;
+                },
+                mapPipe: 'exhaustMap',
+                callWith: undefined,
+              }),
+            })),
+          );
+          const store = new Store();
+          expect(store.isTestCallLoading()).toBeTruthy();
+          apiResponse.next('test');
+          expect(store.isTestCallLoaded()).toBeTruthy();
+          expect(store.testCallResult()).toEqual('test');
+          expect(apiMockCall).toHaveBeenCalled();
+        });
+      });
+
+    it('should run on init when call has params and callWithParams = { id: "1" }', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse;
+              },
+              mapPipe: 'exhaustMap',
+              callWith: { id: 'id' },
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: 'id' });
+      });
+    });
+
+    it('should run call everytime there is new values if callWith is a signal', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const idSignal = signal({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: idSignal,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        idSignal.set({ id: '2' });
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '2' });
+      });
+    });
+
+    it('should run call everytime there is new truthy values if callWith is a observable', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const id$ = new BehaviorSubject({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: id$,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        id$.next({ id: '2' });
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '2' });
+      });
+    });
+
+    it('should run call everytime there is new truthy values if callWith is a function', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const idSignal = signal({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: () => ({ id: idSignal().id }),
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        idSignal.set({ id: '2' });
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '2' });
+      });
+    });
+
+    it('should run not call everytime there is new falsy values when callWith is a signal  and not skipWhen is defined ', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const idSignal = signal<{ id: string } | undefined>({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: idSignal,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        idSignal.set(undefined);
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).not.toHaveBeenCalledWith(undefined);
+      });
+    });
+    it('should run not call everytime there is new falsy values when callWith is a observable  and not skipWhen is defined ', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const id$ = new BehaviorSubject<{ id: string } | undefined>({
+          id: '1',
+        });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: id$,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        id$.next(undefined);
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).not.toHaveBeenCalledWith(undefined);
+      });
+    });
+    it('should run not call everytime there is new falsy values when callWith is a function  and not skipWhen is defined ', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const idSignal = signal<{ id: string } | undefined>({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: () => (idSignal() ? { id: idSignal()!.id } : undefined),
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        idSignal.set(undefined);
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).not.toHaveBeenCalledWith(undefined);
+      });
+    });
+    it('should run call everytime there is new falsy values when callWith is a signal  and  skipWhen is defined that allows them', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const idSignal = signal<{ id: string } | undefined>({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: idSignal,
+              skipWhen: () => false,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        idSignal.set(undefined);
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith(undefined);
+      });
+    });
+
+    it('should run call everytime there is new falsy values when callWith is a observable  and  skipWhen is defined that allows them', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const id$ = new BehaviorSubject<{ id: string } | undefined>({
+          id: '1',
+        });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: id$,
+              skipWhen: () => false,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        id$.next(undefined);
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith(undefined);
+      });
+    });
+
+    it('should run call everytime there is new falsy values when callWith is a function  and  skipWhen is defined that allows them', async () => {
+      const apiMockCall = jest.fn();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
+        const idSignal = signal<{ id: string } | undefined>({ id: '1' });
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: typedCallConfig({
+              call: (param: { id: string }) => {
+                apiMockCall(param);
+                return apiResponse.pipe(first());
+              },
+              mapPipe: 'switchMap',
+              callWith: () => (idSignal() ? { id: idSignal()!.id } : undefined),
+              skipWhen: () => false,
+            }),
+          })),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
+
+        idSignal.set(undefined);
+        TestBed.flushEffects();
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test2');
+        expect(apiMockCall).toHaveBeenCalledWith(undefined);
+      });
+    });
+  });
+
+  it('should initialize result with default value if set', async () => {
+    let apiResponse = new Subject<string>();
+    await TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: (param: { id: string }) => {
+              return apiResponse.pipe(first());
+            },
+            defaultResult: 'test initial value',
+          }),
+        })),
+      );
+      const store = new Store();
+
+      expect(store.testCallResult()).toEqual('test initial value');
+      // bellow is just to check that the testCallResult is no longer nullable
+      expect(store.testCallResult().length).toEqual(
+        'test initial value'.length,
+      );
     });
   });
 });
