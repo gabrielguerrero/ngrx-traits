@@ -8,22 +8,29 @@ import {
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { withCalls, withRouteParams } from '@ngrx-traits/signals';
+import {
+  typedCallConfig,
+  withCalls,
+  withRouteParams,
+} from '@ngrx-traits/signals';
 import { signalStore, withHooks } from '@ngrx/signals';
 
 import { ProductService } from '../../services/product.service';
 
 const ProductDetailStore = signalStore(
-  withRouteParams(({ id }) => ({ id })),
-  withCalls(() => ({
-    loadProductDetail: (id: string) =>
-      inject(ProductService).getProductDetail(id),
+  withRouteParams(({ id }) => ({ id: id as string })),
+  withCalls(({ id }) => ({
+    loadProductDetail: typedCallConfig({
+      call: (id: string) => inject(ProductService).getProductDetail(id),
+      callWith: id(),
+    }),
   })),
-  withHooks(({ loadProductDetail, id }) => ({
-    onInit: () => {
-      loadProductDetail(id());
-    },
-  })),
+  // This is the same as the above withCalls
+  // withHooks(({ loadProductDetail, id }) => ({
+  //   onInit: () => {
+  //     loadProductDetail(id());
+  //   },
+  // })),
 );
 @Component({
   selector: 'route-product-detail',
@@ -39,26 +46,19 @@ const ProductDetailStore = signalStore(
   imports: [MatCardModule, MatProgressSpinnerModule, CurrencyPipe],
   providers: [ProductDetailStore],
   template: `
-    @if (store.isLoadProductDetailLoaded()) {
+    @if (store.loadProductDetailResult(); as result) {
       <mat-card>
         <mat-card-header>
-          <mat-card-title>{{
-            store.loadProductDetailResult()?.name
-          }}</mat-card-title>
+          <mat-card-title>{{ result.name }}</mat-card-title>
           <mat-card-subtitle
-            >Price: £{{ store.loadProductDetailResult()?.price | currency }}
+            >Price: £{{ result.price | currency }}
             Released:
-            {{
-              store.loadProductDetailResult()?.releaseDate
-            }}</mat-card-subtitle
+            {{ result.releaseDate }}</mat-card-subtitle
           >
         </mat-card-header>
-        <img
-          mat-card-image
-          src="/{{ store.loadProductDetailResult()?.image }}"
-        />
+        <img mat-card-image src="/{{ result.image }}" />
         <mat-card-content>
-          <p>{{ store.loadProductDetailResult()?.description }}</p>
+          <p>{{ result.description }}</p>
         </mat-card-content>
       </mat-card>
     } @else if (store.isLoadProductDetailLoading()) {
