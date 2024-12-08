@@ -238,9 +238,9 @@ export function withCalls<
 
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
-                  concatMap((params) => {
+                  mapPipe((params) => {
                     const skip = skipWhenFn?.(params) ?? false;
-                    const process$ = mapPipe((params) => {
+                    const process$ = concatMap((params) => {
                       setLoading();
                       return runInInjectionContext(environmentInjector, () => {
                         return callFn(params).pipe(
