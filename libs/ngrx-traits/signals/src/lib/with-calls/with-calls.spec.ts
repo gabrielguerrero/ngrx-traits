@@ -1,5 +1,5 @@
 import { computed, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
   patchState,
   signalStore,
@@ -7,7 +7,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { BehaviorSubject, of, Subject, tap, throwError } from 'rxjs';
+import { BehaviorSubject, delay, of, Subject, tap, throwError } from 'rxjs';
 
 import { typedCallConfig, withCalls } from '../index';
 
@@ -749,5 +749,107 @@ describe('withCalls', () => {
         });
       });
     });
+  });
+
+  describe('withCalls with mapPipe', () => {
+    it('when withCall has mapPipe = switchMap should only process last call', fakeAsync(() => {
+      let aux = 0;
+      const call = jest.fn().mockImplementation(() => {
+        console.log('call');
+        aux++;
+        return of('' + aux).pipe(delay(100));
+      });
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: call,
+            mapPipe: 'switchMap',
+          }),
+        })),
+      );
+      const store = TestBed.inject(Store);
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      store.testCall();
+      store.testCall();
+
+      expect(store.isTestCallLoading()).toBeTruthy();
+      tick(150);
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('3');
+
+      expect(call).toHaveBeenCalledTimes(3);
+    }));
+
+    it('when withCall has mapPipe= exhaustMap should only process first call', fakeAsync(() => {
+      let aux = 0;
+      const call = jest.fn().mockImplementation(() => {
+        console.log('call');
+        aux++;
+        return of('' + aux).pipe(delay(100));
+      });
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: call,
+            mapPipe: 'exhaustMap',
+          }),
+        })),
+      );
+      const store = TestBed.inject(Store);
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      store.testCall();
+      store.testCall();
+
+      expect(store.isTestCallLoading()).toBeTruthy();
+      tick(150);
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(store.testCallResult()).toBe('1');
+
+      expect(call).toHaveBeenCalledTimes(1);
+    }));
+
+    it('when withCall has mapPipe = concatMap should process all calls in sequence', fakeAsync(() => {
+      let aux = 0;
+      const call = jest.fn().mockImplementation(() => {
+        console.log('call');
+        aux++;
+        return of('' + aux).pipe(delay(100));
+      });
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withCalls(() => ({
+          testCall: typedCallConfig({
+            call: call,
+            mapPipe: 'concatMap',
+          }),
+        })),
+      );
+      const store = TestBed.inject(Store);
+      expect(store.isTestCallLoading()).toBeFalsy();
+
+      store.testCall();
+      store.testCall();
+      store.testCall();
+
+      expect(store.isTestCallLoading()).toBeTruthy();
+      tick(110);
+      expect(store.testCallResult()).toBe('1');
+      expect(store.isTestCallLoading()).toBeTruthy();
+      expect(call).toHaveBeenCalledTimes(2);
+      tick(110);
+      expect(store.testCallResult()).toBe('2');
+      expect(store.isTestCallLoading()).toBeTruthy();
+      expect(call).toHaveBeenCalledTimes(3);
+      tick(110);
+      expect(store.testCallResult()).toBe('3');
+      expect(store.isTestCallLoaded()).toBeTruthy();
+      expect(call).toHaveBeenCalledTimes(3);
+    }));
   });
 });
