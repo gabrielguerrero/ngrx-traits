@@ -10,9 +10,9 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import type {
-  EntityComputed,
+  EntityProps,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
@@ -144,23 +144,23 @@ export function withEntitiesRemoteFilter<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: CallStatusMethods;
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: NamedCallStatusMethods<Collection>;
         }),
   Collection extends ''
     ? {
         state: EntitiesFilterState<Filter>;
-        computed: {};
+        props: {};
         methods: EntitiesRemoteFilterMethods<Filter>;
       }
     : {
         state: NamedEntitiesFilterState<Collection, Filter>;
-        computed: {};
+        props: {};
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter>;
       }
 > {

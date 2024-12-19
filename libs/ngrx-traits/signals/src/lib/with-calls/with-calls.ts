@@ -132,7 +132,7 @@ export function withCalls<
             : Calls[K]['resultProp'] & string
         : `${K & string}Result`]: ExtractCallResultType<Calls[K]> | undefined;
     };
-    computed: NamedCallsStatusComputed<keyof Calls & string> &
+    props: NamedCallsStatusComputed<keyof Calls & string> &
       NamedCallsStatusErrorComputed<Calls>;
     methods: {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any

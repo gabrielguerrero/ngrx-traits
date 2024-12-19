@@ -62,7 +62,7 @@ export function withEventHandler<Input extends SignalStoreFeatureResult>(
   eventHandlerFactory?: (
     store: Prettify<
       StateSignals<Input['state']> &
-        Input['computed'] &
+        Input['props'] &
         Input['methods'] &
         WritableStateSource<Prettify<Input['state']>>
     >,

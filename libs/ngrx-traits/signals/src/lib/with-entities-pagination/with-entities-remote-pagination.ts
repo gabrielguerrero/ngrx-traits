@@ -12,9 +12,9 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityComputed,
+  EntityProps,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
   SelectEntityId,
   setAllEntities,
@@ -171,24 +171,24 @@ export function withEntitiesRemotePagination<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity> & CallStatusComputed;
+          props: EntityProps<Entity> & CallStatusComputed;
           methods: CallStatusMethods;
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection> &
+          props: NamedEntityProps<Entity, Collection> &
             NamedCallStatusComputed<Collection>;
           methods: NamedCallStatusMethods<Collection>;
         }),
   Collection extends ''
     ? {
         state: EntitiesPaginationRemoteState;
-        computed: EntitiesPaginationRemoteComputed<Entity>;
+        props: EntitiesPaginationRemoteComputed<Entity>;
         methods: EntitiesPaginationRemoteMethods<Entity>;
       }
     : {
         state: NamedEntitiesPaginationRemoteState<Collection>;
-        computed: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
+        props: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
         methods: NamedEntitiesPaginationRemoteMethods<Entity, Collection>;
       }
 > {
