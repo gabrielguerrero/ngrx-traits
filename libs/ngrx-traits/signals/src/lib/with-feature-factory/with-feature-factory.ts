@@ -67,10 +67,10 @@ export function withFeatureFactory<
   Feature extends SignalStoreFeature<any, infer Out> ? Out : never
 > {
   return ((store) => {
-    const { stateSignals, methods, computedSignals, hooks, ...rest } = store;
+    const { stateSignals, methods, props, hooks, ...rest } = store;
     return featureFactory({
       ...stateSignals,
-      ...computedSignals,
+      ...props,
       ...methods,
       ...rest,
     } as StoreSource<Input>)(store);

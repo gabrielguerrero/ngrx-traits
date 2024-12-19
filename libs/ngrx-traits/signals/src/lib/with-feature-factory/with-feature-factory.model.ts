@@ -13,7 +13,7 @@ export type FeatureConfigFactory<
 
 export type StoreSource<Input extends SignalStoreFeatureResult> = Prettify<
   StateSignals<Input['state']> &
-    Input['computed'] &
+    Input['props'] &
     Input['methods'] &
     WritableStateSource<Prettify<Input['state']>>
 >;

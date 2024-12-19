@@ -15,9 +15,9 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityComputed,
+  EntityProps,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
   SelectEntityId,
   setAllEntities,
@@ -171,13 +171,13 @@ export function withEntitiesLoadingCall<
     (Collection extends ''
       ? {
           state: EntityState<Entity> & CallStatusState;
-          computed: EntityComputed<Entity> & CallStatusComputed<Error>;
+          props: EntityProps<Entity> & CallStatusComputed<Error>;
           methods: CallStatusMethods<Error>;
         }
       : {
           state: NamedEntityState<Entity, Collection> &
             NamedCallStatusState<Collection>;
-          computed: NamedEntityComputed<Entity, Collection> &
+          props: NamedEntityProps<Entity, Collection> &
             NamedCallStatusComputed<Collection, Error>;
           methods: NamedCallStatusMethods<Collection, Error>;
         }),

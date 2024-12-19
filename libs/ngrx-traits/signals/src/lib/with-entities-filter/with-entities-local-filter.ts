@@ -11,10 +11,10 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityComputed,
+  EntityProps,
   EntityMap,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
   SelectEntityId,
 } from '@ngrx/signals/entities';
@@ -110,23 +110,23 @@ export function withEntitiesLocalFilter<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: {};
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: {};
         }),
   Collection extends ''
     ? {
         state: EntitiesFilterState<Filter>;
-        computed: EntitiesFilterComputed;
+        props: EntitiesFilterComputed;
         methods: EntitiesFilterMethods<Filter>;
       }
     : {
         state: NamedEntitiesFilterState<Collection, Filter>;
-        computed: NamedEntitiesFilterComputed<Collection>;
+        props: NamedEntitiesFilterComputed<Collection>;
         methods: NamedEntitiesFilterMethods<Collection, Filter>;
       }
 > {

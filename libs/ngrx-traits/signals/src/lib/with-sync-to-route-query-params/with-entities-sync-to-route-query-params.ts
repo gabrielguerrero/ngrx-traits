@@ -9,9 +9,9 @@ import {
   withHooks,
 } from '@ngrx/signals';
 import {
-  EntityComputed,
+  EntityProps,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
 } from '@ngrx/signals/entities';
 import { concatMap, first } from 'rxjs';
@@ -112,13 +112,13 @@ export function withEntitiesSyncToRouteQueryParams<
     (Collection extends ''
       ? {
           state: EntityState<Entity> & CallStatusState;
-          computed: EntityComputed<Entity> & CallStatusComputed<Error>;
+          props: EntityProps<Entity> & CallStatusComputed<Error>;
           methods: CallStatusMethods<Error>;
         }
       : {
           state: NamedEntityState<Entity, Collection> &
             NamedCallStatusState<Collection>;
-          computed: NamedEntityComputed<Entity, Collection> &
+          props: NamedEntityProps<Entity, Collection> &
             NamedCallStatusComputed<Collection, Error>;
           methods: NamedCallStatusMethods<Collection, Error>;
         }),
@@ -151,8 +151,8 @@ export function withEntitiesSyncToRouteQueryParams<
       return {
         onInit: () => {
           if (config?.onQueryParamsLoaded) {
-            const loading = store[loadingKey] as Signal<boolean>;
-            const loaded = store[loadedKey] as Signal<boolean>;
+            const loading = store[loadingKey] as unknown as  Signal<boolean>;
+            const loaded = store[loadedKey] as unknown as  Signal<boolean>;
             const loaded$ = toObservable(loaded);
             toObservable(loading)
               .pipe(

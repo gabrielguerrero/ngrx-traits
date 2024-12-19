@@ -101,7 +101,7 @@ describe('withFeatureFactory', () => {
       Input,
       {
         state: { foo: string };
-        computed: { bar: Signal<string> };
+        props: { bar: Signal<string> };
         methods: { baz: () => number };
       }
     > {
