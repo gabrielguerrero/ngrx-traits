@@ -71,16 +71,16 @@ export function withCallStatus<
     }
   > = {},
 ): SignalStoreFeature<
-  Input & { state: {}; computed: {}; methods: {} },
+  Input & { state: {}; props: {}; methods: {} },
   Prop extends ''
     ? {
         state: CallStatusState;
-        computed: CallStatusComputed<Error>;
+        props: CallStatusComputed<Error>;
         methods: CallStatusMethods<Error>;
       }
     : {
         state: NamedCallStatusState<Prop>;
-        computed: NamedCallStatusComputed<Prop, Error>;
+        props: NamedCallStatusComputed<Prop, Error>;
         methods: NamedCallStatusMethods<Prop, Error>;
       }
 > {

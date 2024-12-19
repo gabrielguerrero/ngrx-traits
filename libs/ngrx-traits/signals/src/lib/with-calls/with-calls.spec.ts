@@ -755,7 +755,6 @@ describe('withCalls', () => {
     it('when withCall has mapPipe = switchMap should only process last call', fakeAsync(() => {
       let aux = 0;
       const call = jest.fn().mockImplementation(() => {
-        console.log('call');
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -786,7 +785,6 @@ describe('withCalls', () => {
     it('when withCall has mapPipe= exhaustMap should only process first call', fakeAsync(() => {
       let aux = 0;
       const call = jest.fn().mockImplementation(() => {
-        console.log('call');
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -817,7 +815,6 @@ describe('withCalls', () => {
     it('when withCall has mapPipe = concatMap should process all calls in sequence', fakeAsync(() => {
       let aux = 0;
       const call = jest.fn().mockImplementation(() => {
-        console.log('call');
         aux++;
         return of('' + aux).pipe(delay(100));
       });

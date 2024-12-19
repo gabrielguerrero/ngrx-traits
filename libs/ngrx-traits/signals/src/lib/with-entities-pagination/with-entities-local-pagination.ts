@@ -11,7 +11,7 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import { EntityComputed, NamedEntityComputed } from '@ngrx/signals/entities';
+import { EntityProps, NamedEntityProps } from '@ngrx/signals/entities';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -90,23 +90,23 @@ export function withEntitiesLocalPagination<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: {};
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: {};
         }),
   Collection extends ''
     ? {
         state: EntitiesPaginationLocalState;
-        computed: EntitiesPaginationLocalComputed<Entity>;
+        props: EntitiesPaginationLocalComputed<Entity>;
         methods: EntitiesPaginationLocalMethods;
       }
     : {
         state: NamedEntitiesPaginationLocalState<Collection>;
-        computed: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
+        props: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
         methods: NamedEntitiesPaginationLocalMethods<Collection>;
       }
 > {

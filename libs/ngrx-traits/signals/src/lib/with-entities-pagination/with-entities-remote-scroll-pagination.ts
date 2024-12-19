@@ -13,9 +13,9 @@ import {
 } from '@ngrx/signals';
 import {
   addEntities,
-  EntityComputed,
+  EntityProps,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
   SelectEntityId,
   setAllEntities,
@@ -177,24 +177,24 @@ export function withEntitiesRemoteScrollPagination<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity> & CallStatusComputed;
+          props: EntityProps<Entity> & CallStatusComputed;
           methods: CallStatusMethods;
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection> &
+          props: NamedEntityProps<Entity, Collection> &
             NamedCallStatusComputed<Collection>;
           methods: NamedCallStatusMethods<Collection>;
         }),
   Collection extends ''
     ? {
         state: EntitiesScrollPaginationState;
-        computed: EntitiesScrollPaginationComputed<Entity>;
+        props: EntitiesScrollPaginationComputed<Entity>;
         methods: EntitiesScrollPaginationMethods<Entity>;
       }
     : {
         state: NamedEntitiesScrollPaginationState<Collection>;
-        computed: NamedEntitiesScrollPaginationComputed<Entity, Collection>;
+        props: NamedEntitiesScrollPaginationComputed<Entity, Collection>;
         methods: NamedEntitiesScrollPaginationMethods<Entity, Collection>;
       }
 > {
