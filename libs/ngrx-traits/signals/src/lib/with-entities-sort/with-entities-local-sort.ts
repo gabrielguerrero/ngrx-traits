@@ -10,9 +10,9 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityComputed,
+  EntityProps,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
   SelectEntityId,
 } from '@ngrx/signals/entities';
@@ -94,23 +94,23 @@ export function withEntitiesLocalSort<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: {};
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: {};
         }),
   Collection extends ''
     ? {
         state: EntitiesSortState<Entity>;
-        computed: {};
+        props: {};
         methods: EntitiesSortMethods<Entity>;
       }
     : {
         state: NamedEntitiesSortState<Entity, Collection>;
-        computed: {};
+        props: {};
         methods: NamedEntitiesSortMethods<Entity, Collection>;
       }
 > {

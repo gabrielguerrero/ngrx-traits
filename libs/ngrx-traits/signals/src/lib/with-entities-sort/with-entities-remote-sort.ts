@@ -10,8 +10,8 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
-  EntityComputed,
-  NamedEntityComputed,
+  EntityProps,
+  NamedEntityProps,
 } from '@ngrx/signals/entities/src/models';
 
 import {
@@ -137,23 +137,23 @@ export function withEntitiesRemoteSort<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: CallStatusMethods;
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: NamedCallStatusMethods<Collection>;
         }),
   Collection extends ''
     ? {
         state: EntitiesSortState<Entity>;
-        computed: {};
+        props: {};
         methods: EntitiesRemoteSortMethods<Entity>;
       }
     : {
         state: NamedEntitiesSortState<Entity, Collection>;
-        computed: {};
+        props: {};
         methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
       }
 > {

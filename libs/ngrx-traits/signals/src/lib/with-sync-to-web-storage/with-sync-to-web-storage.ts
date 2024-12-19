@@ -66,7 +66,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   onRestore?: (
     store: Prettify<
       StateSignals<Input['state']> &
-        Input['computed'] &
+        Input['props'] &
         Input['methods'] &
         WritableStateSource<Prettify<Input['state']>>
     >,
@@ -75,7 +75,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   Input,
   {
     state: {};
-    computed: {};
+    props: {};
     methods: {
       saveToStorage: () => void;
       loadFromStorage: () => void;
@@ -137,7 +137,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
           onRestore?.(
             store as Prettify<
               StateSignals<Input['state']> &
-                Input['computed'] &
+                Input['props'] &
                 Input['methods'] &
                 WritableStateSource<Prettify<Input['state']>>
             >,

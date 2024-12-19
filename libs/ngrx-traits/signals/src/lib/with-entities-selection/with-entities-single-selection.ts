@@ -10,10 +10,10 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityComputed,
+  EntityProps,
   EntityMap,
   EntityState,
-  NamedEntityComputed,
+  NamedEntityProps,
   NamedEntityState,
 } from '@ngrx/signals/entities';
 
@@ -94,23 +94,23 @@ export function withEntitiesSingleSelection<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: {};
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: {};
         }),
   Collection extends ''
     ? {
         state: EntitiesSingleSelectionState;
-        computed: EntitiesSingleSelectionComputed<Entity>;
+        props: EntitiesSingleSelectionComputed<Entity>;
         methods: EntitiesSingleSelectionMethods;
       }
     : {
         state: NamedEntitiesSingleSelectionState<Collection>;
-        computed: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
+        props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
         methods: NamedEntitiesSingleSelectionMethods<Collection>;
       }
 > {

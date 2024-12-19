@@ -11,10 +11,10 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
-  EntityComputed,
+  EntityProps,
   EntityId,
   EntityMap,
-  NamedEntityComputed,
+  NamedEntityProps,
 } from '@ngrx/signals/entities/src/models';
 
 import { getWithEntitiesKeys, toMap } from '../util';
@@ -93,23 +93,23 @@ export function withEntitiesMultiSelection<
     (Collection extends ''
       ? {
           state: EntityState<Entity>;
-          computed: EntityComputed<Entity>;
+          props: EntityProps<Entity>;
           methods: {};
         }
       : {
           state: NamedEntityState<Entity, Collection>;
-          computed: NamedEntityComputed<Entity, Collection>;
+          props: NamedEntityProps<Entity, Collection>;
           methods: {};
         }),
   Collection extends ''
     ? {
         state: EntitiesMultiSelectionState;
-        computed: EntitiesMultiSelectionComputed<Entity>;
+        props: EntitiesMultiSelectionComputed<Entity>;
         methods: EntitiesMultiSelectionMethods;
       }
     : {
         state: NamedEntitiesMultiSelectionState<Collection>;
-        computed: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+        props: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
         methods: NamedEntitiesMultiSelectionMethods<Collection>;
       }
 > {
