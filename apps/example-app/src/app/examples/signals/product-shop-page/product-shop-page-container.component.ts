@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatIconModule } from '@angular/material/icon';
@@ -59,7 +58,6 @@ import { ProductsShopStore } from './products-shop.store';
     MatIconModule,
     MatBadgeModule,
     RouterOutlet,
-    AsyncPipe,
   ],
 })
 export class ProductShopPageContainerComponent {

@@ -1,4 +1,3 @@
-import { AsyncPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -85,7 +84,6 @@ import { ProductsShopStore } from '../../products-shop.store';
     MatButtonModule,
     ProductListComponent,
     ProductDetailComponent,
-    AsyncPipe,
     MatPaginator,
   ],
 })

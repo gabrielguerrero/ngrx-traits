@@ -109,6 +109,7 @@ describe('withEntitiesLocalFilter', () => {
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
       TestBed.flushEffects();
+      tick();
       expect(store.entities().length).toEqual(2);
       expect(store.entities()).toEqual([
         {
@@ -162,6 +163,7 @@ describe('withEntitiesLocalFilter', () => {
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
       TestBed.flushEffects();
+      tick();
       expect(store.entities().length).toEqual(2);
       expect(store.entities()).toEqual([
         {
