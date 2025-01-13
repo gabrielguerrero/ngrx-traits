@@ -1,4 +1,3 @@
-import { JsonPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -24,7 +23,7 @@ import { ProductFilter } from '../../models';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [FormsModule, MatFormFieldModule, MatInputModule, JsonPipe],
+  imports: [FormsModule, MatFormFieldModule, MatInputModule],
 })
 export class ProductSearchFormComponent {
   searchProduct = model<ProductFilter>();
