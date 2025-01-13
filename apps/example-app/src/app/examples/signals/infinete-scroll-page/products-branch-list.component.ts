@@ -10,7 +10,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatIcon } from '@angular/material/icon';
 import { MatInput } from '@angular/material/input';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -28,7 +27,6 @@ import { ProductsBranchStore } from './products-branch.store';
     MatList,
     MatListItem,
     MatButton,
-    MatIcon,
     MatFormField,
     MatInput,
     FormsModule,

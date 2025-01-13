@@ -6,12 +6,12 @@
     "build": "ng-packagr -p package.json"
   },
   "peerDependencies": {
-    "@angular/core": "^18.0.5",
-    "@ngrx/signals": "^18.1.0",
+    "@angular/core": "^19.0.0",
+    "@ngrx/signals": "^19.0.0",
     "rxjs": "^7.8.1"
   },
   "optionalDependencies": {
-    "@angular/cdk": "^18.0.5"
+    "@angular/cdk": "^19.0.0"
   },
   "sideEffects": false,
   "repository": {
