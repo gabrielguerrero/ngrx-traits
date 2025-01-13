@@ -73,7 +73,7 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage().hasNext).toEqual(true);
 
       store.loadEntitiesPage({ pageIndex: 2 });
-
+      tick();
       // check the third page
       expect(store.entitiesCurrentPage().entities.length).toEqual(5);
       expect(store.entitiesCurrentPage().entities).toEqual(
@@ -147,7 +147,7 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage().hasNext).toEqual(true);
 
       store.loadEntitiesPage({ pageIndex: 2 });
-
+      tick();
       // check the third page
       expect(store.entitiesCurrentPage().entities.length).toEqual(5);
       expect(store.entitiesCurrentPage().entities).toEqual(
@@ -682,7 +682,7 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.productsCurrentPage().hasNext).toEqual(true);
 
       store.loadProductsPage({ pageIndex: 2 });
-
+      tick();
       // check the third page
       expect(store.productsCurrentPage().entities.length).toEqual(5);
       expect(store.productsCurrentPage().entities).toEqual(
@@ -1123,6 +1123,7 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage.hasNext()).toEqual(true);
 
       store.loadEntitiesPage({ pageIndex: 1 });
+      tick();
       // check the second page
       expect(store.entitiesCurrentPage.entities().length).toEqual(10);
       expect(store.entitiesCurrentPage.entities()).toEqual(

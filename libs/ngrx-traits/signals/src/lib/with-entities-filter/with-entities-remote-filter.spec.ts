@@ -1,4 +1,10 @@
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import {
+  discardPeriodicTasks,
+  fakeAsync,
+  flush,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { signalStore, type, withState } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { of } from 'rxjs';
@@ -221,10 +227,7 @@ describe('withEntitiesRemoteFilter', () => {
       expect(store.entities().length).toEqual(mockProducts.length);
       tick(400);
       expect(store.entities().length).toEqual(2);
-      store.filterEntities({
-        filter: { search: 'zero', foo: 'bar' },
-        forceLoad: true,
-      });
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar' });
     });
   }));
 
