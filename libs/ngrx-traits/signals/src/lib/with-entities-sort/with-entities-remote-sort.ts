@@ -9,10 +9,7 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import {
-  EntityProps,
-  NamedEntityProps,
-} from '@ngrx/signals/entities/src/models';
+import { EntityProps, NamedEntityProps } from '@ngrx/signals/entities';
 
 import {
   CallStatusMethods,
