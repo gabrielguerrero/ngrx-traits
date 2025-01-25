@@ -1,4 +1,5 @@
 import {
+  Prettify,
   SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
@@ -6,7 +7,6 @@ import {
   withMethods,
   WritableStateSource,
 } from '@ngrx/signals';
-import { Prettify } from '@ngrx/signals/src/ts-helpers';
 
 import { Event, EventCreator, EventType } from './with-event-handler.model';
 
