@@ -11,11 +11,11 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import {
-  EntityProps,
   EntityId,
   EntityMap,
+  EntityProps,
   NamedEntityProps,
-} from '@ngrx/signals/entities/src/models';
+} from '@ngrx/signals/entities';
 
 import { getWithEntitiesKeys, toMap } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
