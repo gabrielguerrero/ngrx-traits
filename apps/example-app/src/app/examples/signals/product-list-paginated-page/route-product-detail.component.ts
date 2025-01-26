@@ -8,11 +8,7 @@ import {
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {
-  typedCallConfig,
-  withCalls,
-  withRouteParams,
-} from '@ngrx-traits/signals';
+import { callConfig, withCalls, withRouteParams } from '@ngrx-traits/signals';
 import { signalStore, withHooks } from '@ngrx/signals';
 
 import { ProductService } from '../../services/product.service';
@@ -20,7 +16,7 @@ import { ProductService } from '../../services/product.service';
 const ProductDetailStore = signalStore(
   withRouteParams(({ id }) => ({ id: id as string })),
   withCalls(({ id }) => ({
-    loadProductDetail: typedCallConfig({
+    loadProductDetail: callConfig({
       call: (id: string) => inject(ProductService).getProductDetail(id),
       callWith: id(),
     }),

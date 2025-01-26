@@ -1,7 +1,6 @@
-import { computed, effect, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { inject } from '@angular/core';
 import {
-  typedCallConfig,
+  callConfig,
   withCalls,
   withCallStatus,
   withEntitiesLoadingCall,
@@ -11,11 +10,11 @@ import {
   withEntitiesSingleSelection,
   withEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
-import { patchState, signalStore, type, withHooks } from '@ngrx/signals';
-import { setEntities, withEntities } from '@ngrx/signals/entities';
+import { signalStore, type } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
-import { Product, ProductDetail } from '../../models';
+import { Product } from '../../models';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
 
@@ -57,7 +56,7 @@ export const ProductsLocalStore = signalStore(
     },
   }),
   withCalls(({ productsEntitySelected }) => ({
-    loadProductDetail: typedCallConfig({
+    loadProductDetail: callConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',

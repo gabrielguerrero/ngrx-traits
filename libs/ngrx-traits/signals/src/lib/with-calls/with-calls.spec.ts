@@ -17,7 +17,7 @@ import {
   throwError,
 } from 'rxjs';
 
-import { typedCallConfig, withCalls } from '../index';
+import { callConfig, withCalls } from '../index';
 
 describe('withCalls', () => {
   let apiResponse = new Subject<string>();
@@ -42,7 +42,7 @@ describe('withCalls', () => {
         onSuccess,
         onError,
       },
-      _testCall2: typedCallConfig({
+      _testCall2: callConfig({
         call: ({ ok }: { ok: boolean }) => {
           return ok ? privateApiResponse : throwError(() => new Error('fail'));
         },
@@ -182,7 +182,7 @@ describe('withCalls', () => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
           withCalls(() => ({
-            testCall2: typedCallConfig({
+            testCall2: callConfig({
               call: ({ ok }: { ok: boolean }) => {
                 return ok ? apiResponse : throwError(() => new Error('fail'));
               },
@@ -207,7 +207,7 @@ describe('withCalls', () => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
           withCalls(() => ({
-            testCall2: typedCallConfig({
+            testCall2: callConfig({
               call: () => {
                 return apiResponse;
               },
@@ -233,7 +233,7 @@ describe('withCalls', () => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
           withCalls(() => ({
-            testCall2: typedCallConfig({
+            testCall2: callConfig({
               call: () => {
                 return apiResponse;
               },
@@ -258,7 +258,7 @@ describe('withCalls', () => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
           withCalls((store) => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: ({ ok }: { ok: boolean }) => {
                 return ok
                   ? apiResponse
@@ -287,12 +287,12 @@ describe('withCalls', () => {
       });
     });
 
-    it('check typedCallConfig with resultProp generates custom prop name ', async () => {
+    it('check callConfig with resultProp generates custom prop name ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
           withCalls((store) => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: ({ ok }: { ok: boolean }) => {
                 return ok
                   ? apiResponse
@@ -327,7 +327,7 @@ describe('withCalls', () => {
           withState({ foo: 'bar' }),
           withState({ ok: false }),
           withCalls((store) => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: ({ ok }: { ok: boolean }) => {
                 return ok
                   ? apiResponse
@@ -344,7 +344,7 @@ describe('withCalls', () => {
             }),
           })),
           withCalls((store) => ({
-            testCall2: typedCallConfig({
+            testCall2: callConfig({
               call: ({ ok }: { ok: boolean }) => {
                 return apiResponse;
               },
@@ -476,7 +476,7 @@ describe('withCalls', () => {
     TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: () => apiResponse,
           }),
         })),
@@ -502,7 +502,7 @@ describe('withCalls', () => {
     TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: () => apiResponse,
             mapPipe: 'switchMap',
           }),
@@ -529,7 +529,7 @@ describe('withCalls', () => {
     TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: () => apiResponse,
             mapPipe: 'exhaustMap',
           }),
@@ -556,7 +556,7 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => apiResponse,
               mapPipe: 'exhaustMap',
               skipWhen: () => true,
@@ -583,7 +583,7 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => apiResponse,
               mapPipe: 'exhaustMap',
               skipWhen: () => false,
@@ -609,7 +609,7 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => apiResponse,
               mapPipe: 'exhaustMap',
               skipWhen: () => of(true),
@@ -636,7 +636,7 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => apiResponse,
               mapPipe: 'exhaustMap',
               skipWhen: () => of(false),
@@ -662,7 +662,7 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => apiResponse,
               mapPipe: 'exhaustMap',
               skipWhen: () => Promise.resolve(true),
@@ -689,7 +689,7 @@ describe('withCalls', () => {
       TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => apiResponse,
               mapPipe: 'exhaustMap',
               skipWhen: () => Promise.resolve(false),
@@ -769,7 +769,7 @@ describe('withCalls', () => {
       const Store = signalStore(
         { providedIn: 'root' },
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: call,
             mapPipe: 'switchMap',
           }),
@@ -799,7 +799,7 @@ describe('withCalls', () => {
       const Store = signalStore(
         { providedIn: 'root' },
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: call,
             mapPipe: 'exhaustMap',
           }),
@@ -829,7 +829,7 @@ describe('withCalls', () => {
       const Store = signalStore(
         { providedIn: 'root' },
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: call,
             mapPipe: 'concatMap',
           }),
@@ -864,7 +864,7 @@ describe('withCalls', () => {
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => {
                 apiMockCall();
                 return apiResponse;
@@ -889,7 +889,7 @@ describe('withCalls', () => {
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => {
                 apiMockCall();
                 return apiResponse;
@@ -914,7 +914,7 @@ describe('withCalls', () => {
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse;
@@ -939,7 +939,7 @@ describe('withCalls', () => {
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse;
@@ -965,7 +965,7 @@ describe('withCalls', () => {
         const idSignal = signal({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1000,7 +1000,7 @@ describe('withCalls', () => {
         const id$ = new BehaviorSubject({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1035,7 +1035,7 @@ describe('withCalls', () => {
         const idSignal = signal({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1070,7 +1070,7 @@ describe('withCalls', () => {
         const loadingSignal = signal(true);
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => {
                 apiMockCall();
                 return apiResponse.pipe(first());
@@ -1113,7 +1113,7 @@ describe('withCalls', () => {
         const id$ = new BehaviorSubject(true);
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => {
                 apiMockCall();
                 return apiResponse.pipe(first());
@@ -1156,7 +1156,7 @@ describe('withCalls', () => {
         const loadingSignal = signal(true);
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: () => {
                 apiMockCall();
                 return apiResponse.pipe(first());
@@ -1199,7 +1199,7 @@ describe('withCalls', () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1236,7 +1236,7 @@ describe('withCalls', () => {
         });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1271,7 +1271,7 @@ describe('withCalls', () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1306,7 +1306,7 @@ describe('withCalls', () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1344,7 +1344,7 @@ describe('withCalls', () => {
         });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1380,7 +1380,7 @@ describe('withCalls', () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
         const Store = signalStore(
           withCalls(() => ({
-            testCall: typedCallConfig({
+            testCall: callConfig({
               call: (param: { id: string }) => {
                 apiMockCall(param);
                 return apiResponse.pipe(first());
@@ -1415,7 +1415,7 @@ describe('withCalls', () => {
     await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
-          testCall: typedCallConfig({
+          testCall: callConfig({
             call: (param: { id: string }) => {
               return apiResponse.pipe(first());
             },
