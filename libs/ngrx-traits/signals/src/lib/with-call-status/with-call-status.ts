@@ -9,6 +9,7 @@ import {
   withState,
 } from '@ngrx/signals';
 
+import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
   FeatureConfigFactory,
@@ -103,15 +104,19 @@ export function withCallStatus<
       withComputed((state: Record<string, Signal<unknown>>) => {
         const callState = state[callStatusKey] as Signal<CallStatus>;
 
+        const isLoading = computed(() => {
+          return callState() === 'loading';
+        });
+        const isLoaded = computed(() => callState() === 'loaded');
+        const error = computed(() => {
+          const v = callState();
+          return typeof v === 'object' ? v.error : undefined;
+        });
+        registerCallState(store, { loading: isLoading, error });
         return {
-          [loadingKey]: computed(() => {
-            return callState() === 'loading';
-          }),
-          [loadedKey]: computed(() => callState() === 'loaded'),
-          [errorKey]: computed(() => {
-            const v = callState();
-            return typeof v === 'object' ? v.error : undefined;
-          }),
+          [loadingKey]: isLoading,
+          [loadedKey]: isLoaded,
+          [errorKey]: error,
         };
       }),
       withMethods((store) => ({
