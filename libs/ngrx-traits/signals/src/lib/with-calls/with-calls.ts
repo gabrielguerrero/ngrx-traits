@@ -44,6 +44,7 @@ import {
 import { filter } from 'rxjs/operators';
 
 import { insertIf } from '../util';
+import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import {
   CallStatus,
   NamedCallStatusState,
@@ -196,12 +197,15 @@ export function withCalls<
             const { loadingKey, loadedKey, errorKey, callStatusKey } =
               getWithCallStatusKeys({ prop: callName, supportPrivate: true });
             const callState = state[callStatusKey] as Signal<CallStatus>;
-            acc[loadingKey] = computed(() => callState() === 'loading');
-            acc[loadedKey] = computed(() => callState() === 'loaded');
-            acc[errorKey] = computed(() => {
+            const isLoading = computed(() => callState() === 'loading');
+            const error = computed(() => {
               const v = callState();
               return typeof v === 'object' ? v.error : null;
             });
+            registerCallState(store, { loading: isLoading, error });
+            acc[loadingKey] = isLoading;
+            acc[errorKey] = error;
+            acc[loadedKey] = computed(() => callState() === 'loaded');
 
             return acc;
           },
