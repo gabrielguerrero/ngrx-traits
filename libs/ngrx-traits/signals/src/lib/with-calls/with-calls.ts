@@ -54,9 +54,9 @@ import { StoreSource } from '../with-feature-factory/with-feature-factory.model'
 import {
   Call,
   CallConfig,
+  ExtractCallResultPropName,
   ExtractCallResultType,
   NamedCallsStatusComputed,
-  NamedCallsStatusErrorComputed,
   ObservableCall,
 } from './with-calls.model';
 import { getWithCallKeys } from './with-calls.util';
@@ -133,20 +133,12 @@ export function withCalls<
   Input,
   {
     state: NamedCallStatusState<keyof Calls & string> & {
-      [K in keyof Calls as Calls[K] extends CallConfig
-        ? Calls[K]['storeResult'] extends false
-          ? never
-          : Calls[K]['resultProp'] extends ''
-            ? `${K & string}Result`
-            : Calls[K]['resultProp'] & string
-        : `${K & string}Result`]: Calls[K] extends
-        | ((...args: any) => any)
-        | CallConfig<any, any, any, any, undefined>
-        ? ExtractCallResultType<Calls[K]> | undefined
-        : ExtractCallResultType<Calls[K]>;
+      [K in keyof Calls as ExtractCallResultPropName<
+        K,
+        Calls[K]
+      >]: ExtractCallResultType<Calls[K]>;
     };
-    props: NamedCallsStatusComputed<keyof Calls & string> &
-      NamedCallsStatusErrorComputed<Calls>;
+    props: NamedCallsStatusComputed<Calls>;
     methods: {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
         ? P extends []
@@ -361,95 +353,6 @@ const mapPipes = {
   concatMap: concatMap,
   exhaustMap: exhaustMap,
 };
-
-/**
- * Call configuration object for withCalls
- * @param config - the call configuration
- * @param config.call - required, the function that will be called
- * @param config.mapPipe - optional, default exhaustMap the pipe operator that will be used to map the call result
- * @param config.storeResult - optional, default true, if false, the result will not be stored in the store
- * @param config.resultProp - optional, default callName + 'Result', the name of the prop where the result will be stored
- * @param config.onSuccess - optional, a function that will be called when the call is successful
- * @param config.mapError - optional, a function that will be called to transform the error before storing it
- * @param config.onError - optional, a function that will be called when the call fails
- * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- */
-
-export function typedCallConfig<
-  Param = undefined,
-  Result = any,
-  PropName extends string = '',
-  Error = unknown,
-  C extends CallConfig<Param, Result, PropName, Error, Result> = CallConfig<
-    Param,
-    Result,
-    PropName,
-    Error,
-    Result
-  >,
-  DefaultResult extends Result | undefined = undefined,
->(
-  config: Omit<
-    CallConfig<Param, Result, PropName, Error>,
-    'resultProp' | 'storeResult' | 'defaultResult'
-  > & {
-    resultProp?: PropName;
-    defaultResult: NoInfer<Result>;
-  },
-): C;
-export function typedCallConfig<
-  Param = undefined,
-  Result = any,
-  PropName extends string = '',
-  Error = unknown,
-  C extends CallConfig<Param, Result, PropName, Error, undefined> = CallConfig<
-    Param,
-    Result,
-    PropName,
-    Error,
-    undefined
-  >,
-  DefaultResult extends Result | undefined = undefined,
->(
-  config: Omit<
-    CallConfig<Param, Result, PropName, Error>,
-    'resultProp' | 'storeResult' | 'defaultResult'
-  > & {
-    resultProp?: PropName;
-  },
-): C;
-/**
- * Call configuration object for withCalls
- * @param config - the call configuration
- * @param config.call - required, the function that will be called
- * @param config.mapPipe - optional, default exhaustMap the pipe operator that will be used to map the call result
- * @param config.storeResult - optional, default true, if false, the result will not be stored in the store
- * @param config.resultProp - optional, default callName + 'Result', the name of the prop where the result will be stored
- * @param config.onSuccess - optional, a function that will be called when the call is successful
- * @param config.mapError - optional, a function that will be called to transform the error before storing it
- * @param config.onError - optional, a function that will be called when the call fails
- * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- */
-export function typedCallConfig<
-  Param = undefined,
-  Result = any,
-  Error = unknown,
-  C extends Omit<
-    CallConfig<Param, Result, '', Error>,
-    'resultProp' | 'storeResult' | 'defaultResult'
-  > & { storeResult: false } = Omit<
-    CallConfig<Param, Result, '', Error>,
-    'resultProp' | 'storeResult' | 'defaultResult'
-  > & { storeResult: false },
->(
-  config: Omit<
-    CallConfig<Param, Result, '', Error>,
-    'resultProp' | 'storeResult' | 'defaultResult'
-  > & { storeResult: false },
-): C & { resultProp: ''; defaultResult: undefined };
-export function typedCallConfig(config: any): any {
-  return { ...config, resultProp: config.resultProp ?? '' };
-}
 
 function getCallFn<Param, Result>(
   callName: string,

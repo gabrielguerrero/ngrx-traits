@@ -43,7 +43,7 @@ export type CallConfig<
   storeResult?: boolean;
 
   /**
-   * A default value for the result, used if the call produces no result.
+   * A default value for the result before the call is executed
    */
   defaultResult?: NoInfer<DefaultResult>;
 
@@ -97,25 +97,37 @@ export type CallConfig<
     : Signal<boolean> | Observable<boolean> | (() => boolean) | boolean;
 };
 
+export type ExtractCallResultPropName<
+  K extends string | number | symbol,
+  T extends Call | CallConfig,
+> = T extends CallConfig
+  ? T['storeResult'] extends false
+    ? never
+    : T['resultProp'] extends ''
+      ? `${K & string}Result`
+      : T['resultProp'] & string
+  : `${K & string}Result`;
+
 export type ExtractCallResultType<T extends Call | CallConfig> =
   T extends Call<any, infer R>
-    ? R
-    : T extends CallConfig<any, infer R>
-      ? R
+    ? R | undefined
+    : T extends CallConfig<any, infer R, any, any, infer D>
+      ? D extends undefined
+        ? R | undefined
+        : D
       : never;
 
-export type NamedCallsStatusComputed<Prop extends string> = {
-  [K in Prop as K extends `_${infer J}`
+export type NamedCallsStatusComputed<
+  Calls extends Record<string, Call | CallConfig>,
+> = {
+  [K in keyof Calls as K extends `_${infer J}`
     ? `_is${Capitalize<string & J>}Loading`
     : `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
 } & {
-  [K in Prop as K extends `_${infer J}`
+  [K in keyof Calls as K extends `_${infer J}`
     ? `_is${Capitalize<string & J>}Loaded`
     : `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
-};
-export type NamedCallsStatusErrorComputed<
-  Calls extends Record<string, Call | CallConfig>,
-> = {
+} & {
   [K in keyof Calls as `${K & string}Error`]: Calls[K] extends CallConfig<
     any,
     any,
