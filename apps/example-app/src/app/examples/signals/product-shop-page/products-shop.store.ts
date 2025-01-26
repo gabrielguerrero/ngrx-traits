@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  typedCallConfig,
+  callConfig,
   withCalls,
   withCallStatus,
   withEntitiesLoadingCall,
@@ -140,7 +140,7 @@ export const ProductsShopStore = signalStore(
     loadProductDetail: ({ id }: { id: string }) =>
       inject(ProductService).getProductDetail(id),
 
-    checkout: typedCallConfig({
+    checkout: callConfig({
       call: () =>
         inject(OrderService).checkout(
           ...orderItemsEntities().map((p) => ({
