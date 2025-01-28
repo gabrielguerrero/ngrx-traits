@@ -49,12 +49,14 @@ describe('withEntitiesLocalFilter', () => {
           id: '1',
           name: 'F-Zero',
           price: 12,
+          categoryId: 'snes',
         },
         {
           description: 'GameCube Game',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
+          categoryId: 'gamecube',
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
@@ -117,12 +119,14 @@ describe('withEntitiesLocalFilter', () => {
           id: '1',
           name: 'F-Zero',
           price: 12,
+          categoryId: 'snes',
         },
         {
           description: 'GameCube Game',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
+          categoryId: 'gamecube',
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
@@ -171,12 +175,14 @@ describe('withEntitiesLocalFilter', () => {
           id: '1',
           name: 'F-Zero',
           price: 12,
+          categoryId: 'snes',
         },
         {
           description: 'GameCube Game',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
+          categoryId: 'gamecube',
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
@@ -369,12 +375,14 @@ describe('withEntitiesLocalFilter', () => {
           id: '1',
           name: 'F-Zero',
           price: 12,
+          categoryId: 'snes',
         },
         {
           description: 'GameCube Game',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
+          categoryId: 'gamecube',
         },
       ]);
       expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
@@ -418,12 +426,14 @@ describe('withEntitiesLocalFilter', () => {
             productId: '1',
             name: 'F-Zero',
             price: 12,
+            categoryId: 'snes',
           },
           {
             description: 'GameCube Game',
             productId: '80',
             name: 'F-Zero GX',
             price: 55,
+            categoryId: 'gamecube',
           },
         ]);
       });
@@ -464,12 +474,14 @@ describe('withEntitiesLocalFilter', () => {
             productId: '1',
             name: 'F-Zero',
             price: 12,
+            categoryId: 'snes',
           },
           {
             description: 'GameCube Game',
             productId: '80',
             name: 'F-Zero GX',
             price: 55,
+            categoryId: 'gamecube',
           },
         ]);
       });

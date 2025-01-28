@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  categoryId: 'snes' | 'nes' | 'wii' | 'wiiu' | 'switch' | 'gamecube';
 }
 export interface ProductOrder extends Product {
   quantity?: number;

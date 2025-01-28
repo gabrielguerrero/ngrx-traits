@@ -11,8 +11,8 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityProps,
   EntityMap,
+  EntityProps,
   EntityState,
   NamedEntityProps,
   NamedEntityState,
@@ -82,8 +82,6 @@ import {
  *
  * // generates the following signals
  *  store.productsFilter // { search: string }
- *  // generates the following computed signals
- *  store.isProductsFilterChanged // boolean
  *  // generates the following methods
  *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
  *  store.resetProductsFilter  // () => void

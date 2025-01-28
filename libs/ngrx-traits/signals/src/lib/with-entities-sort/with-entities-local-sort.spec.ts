@@ -456,6 +456,7 @@ describe('withEntitiesLocalSort', () => {
           description: 'Super Nintendo Game',
           price: 88,
           releaseDate: expect.any(Date),
+          categoryId: 'snes',
         },
         {
           name: "Yoshi's Cookie",
@@ -463,6 +464,7 @@ describe('withEntitiesLocalSort', () => {
           description: 'Super Nintendo Game',
           price: 50,
           releaseDate: expect.any(Date),
+          categoryId: 'snes',
         },
         {
           name: "Yoshi's Safari",
@@ -470,6 +472,7 @@ describe('withEntitiesLocalSort', () => {
           description: 'Super Nintendo Game',
           price: 40,
           releaseDate: expect.any(Date),
+          categoryId: 'snes',
         },
       ]);
     });
@@ -509,6 +512,7 @@ describe('withEntitiesLocalSort', () => {
           description: 'Super Nintendo Game',
           price: 88,
           releaseDate: expect.any(Date),
+          categoryId: 'snes',
         },
         {
           name: "Yoshi's Cookie",
@@ -516,6 +520,7 @@ describe('withEntitiesLocalSort', () => {
           description: 'Super Nintendo Game',
           price: 50,
           releaseDate: expect.any(Date),
+          categoryId: 'snes',
         },
         {
           name: "Yoshi's Safari",
@@ -523,6 +528,7 @@ describe('withEntitiesLocalSort', () => {
           description: 'Super Nintendo Game',
           price: 40,
           releaseDate: expect.any(Date),
+          categoryId: 'snes',
         },
       ]);
     });

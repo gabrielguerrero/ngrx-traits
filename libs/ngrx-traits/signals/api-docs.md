@@ -11,6 +11,10 @@ See <code>createReducer</code>.</p></dd>
 <dl>
 <dt><a href="#withCallStatus">withCallStatus(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for call progress status to the store</p></dd>
+<dt><a href="#callConfig">callConfig(config)</a></dt>
+<dd><p>Call configuration object for withCalls</p></dd>
+<dt><del><a href="#typedCallConfig">typedCallConfig(config)</a></del></dt>
+<dd><p>Call configuration object for withCalls</p></dd>
 <dt><a href="#withCalls">withCalls(callsFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods to track the progress of the
 call and store the result of the call. The generated methods are rxMethods with
@@ -20,8 +24,16 @@ The original call can only have zero or one parameter, use an object with multip
 props as first param if you need more.
 If the name start with an underscore, the call will be private and all generated methods
 will also start with an underscore, making it only accessible inside the store.</p></dd>
-<dt><a href="#typedCallConfig">typedCallConfig(config)</a></dt>
-<dd><p>Call configuration object for withCalls</p></dd>
+<dt><a href="#withEntitiesHybridFilter">withEntitiesHybridFilter(configFactory)</a></dt>
+<dd><p>Generates necessary state and methods to do remote and local filtering of entities in the store,
+the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
+and if false will call the filterFn to filter the entities locally.</p>
+<p>For the remote case you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [collection]Filter params. filter[collection]Entities
+is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
 the generated filter[collenction]Entities method will filter the entities based on the filter function
@@ -31,8 +43,8 @@ and is debounced by default.</p>
 <dd><p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
 and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params
-and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
+or use withEntitiesLoadingCall to call the api with the [collection]Filter params.
+filter[collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
 <p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
 Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
@@ -168,6 +180,50 @@ const store = signalStore(
  store.setUsersLoaded // () => void
  store.setUsersError // (error?: unknown) => void
 ```
+<a name="callConfig"></a>
+
+## callConfig(config)
+<p>Call configuration object for withCalls</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config | <p>the call configuration</p> |
+| config.call | <p>required, the function that will be called</p> |
+| config.mapPipe | <p>optional, default exhaustMap the pipe operator that will be used to map the call result</p> |
+| config.storeResult | <p>optional, default true, if false, the result will not be stored in the store</p> |
+| config.resultProp | <p>optional, default callName + 'Result', the name of the prop where the result will be stored</p> |
+| config.onSuccess | <p>optional, a function that will be called when the call is successful</p> |
+| config.mapError | <p>optional, a function that will be called to transform the error before storing it</p> |
+| config.onError | <p>optional, a function that will be called when the call fails</p> |
+| config.skipWhen | <p>optional, a function that will be called to determine if the call should be skipped</p> |
+| config.callWith | <p>optional, reactively execute the call with the provided params return by a function or signal or observable</p> |
+| config.defaultResult | <p>optional, A default value for the result before the call is executed</p> |
+
+<a name="typedCallConfig"></a>
+
+## ~~typedCallConfig(config)~~
+***Deprecated***
+
+<p>Call configuration object for withCalls</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config | <p>the call configuration</p> |
+| config.call | <p>required, the function that will be called</p> |
+| config.mapPipe | <p>optional, default exhaustMap the pipe operator that will be used to map the call result</p> |
+| config.storeResult | <p>optional, default true, if false, the result will not be stored in the store</p> |
+| config.resultProp | <p>optional, default callName + 'Result', the name of the prop where the result will be stored</p> |
+| config.onSuccess | <p>optional, a function that will be called when the call is successful</p> |
+| config.mapError | <p>optional, a function that will be called to transform the error before storing it</p> |
+| config.onError | <p>optional, a function that will be called when the call fails</p> |
+| config.skipWhen | <p>optional, a function that will be called to determine if the call should be skipped</p> |
+| config.callWith | <p>optional, reactively execute the call with the provided params return by a function or signal or observable</p> |
+| config.defaultResult | <p>optional, A default value for the result before the call is executed</p> |
+
 <a name="withCalls"></a>
 
 ## withCalls(callsFactory)
@@ -209,6 +265,11 @@ withCalls(({ productsSelectedEntity }) => ({
         // if return true, the call will be skip, if false, the call will execute as usual
         return // boolean | Promise<boolean> | Observable<boolean>
       },
+      callWith: () =>
+      // reactively call  with the selected product id, if undefined is return, the call is skip by default
+       productsEntitySelected()
+           ? { id: productsEntitySelected()!.id }
+           : undefined,
     }),
     checkout: () =>
       inject(OrderService).checkout({
@@ -233,25 +294,97 @@ withCalls(({ productsSelectedEntity }) => ({
   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
   store.checkout // () => void
 ```
-<a name="typedCallConfig"></a>
+<a name="withEntitiesHybridFilter"></a>
 
-## typedCallConfig(config)
-<p>Call configuration object for withCalls</p>
+## withEntitiesHybridFilter(configFactory)
+<p>Generates necessary state and methods to do remote and local filtering of entities in the store,
+the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
+and if false will call the filterFn to filter the entities locally.</p>
+<p>For the remote case you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [collection]Filter params. filter[collection]Entities
+is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
 
 | Param | Description |
 | --- | --- |
-| config | <p>the call configuration</p> |
-| config.call | <p>required, the function that will be called</p> |
-| config.mapPipe | <p>optional, default exhaustMap the pipe operator that will be used to map the call result</p> |
-| config.storeResult | <p>optional, default true, if false, the result will not be stored in the store</p> |
-| config.resultProp | <p>optional, default callName + 'Result', the name of the prop where the result will be stored</p> |
-| config.onSuccess | <p>optional, a function that will be called when the call is successful</p> |
-| config.mapError | <p>optional, a function that will be called to transform the error before storing it</p> |
-| config.onError | <p>optional, a function that will be called when the call fails</p> |
-| config.skipWhen | <p>optional, a function that will be called to determine if the call should be skipped</p> |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.defaultFilter | <p>The default filter to be used</p> |
+| configFactory.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
+| configFactory.filterFn | <p>The function to filter the entities</p> |
+| configFactory.isRemoteFilter | <p>The function to determine if the filter is remote or local</p> |
+| configFactory.entity | <p>The entity type to be used</p> |
+| configFactory.collection | <p>The optional collection name to be used</p> |
+| configFactory.selectId | <p>The optional function to select the id of the entity</p> |
 
+**Example**  
+```js
+const entity = type<Product>();
+const collection = 'products';
+export const store = signalStore(
+  { providedIn: 'root' },
+  // requires withEntities and withCallStatus to be used
+  withEntities({ entity, collection }),
+  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withEntitiesHybridFilter({
+    entity,
+    collection,
+    defaultFilter: { name: '' , category: ''},
+    filterFn: (entity, filter) =>
+       (!filter.name || entity.name.toLowerCase().includes(filter.name.toLowerCase()))
+    // in this case the filter will call setProductsLoading() if the category changes, othewise
+    // it will filter the entities locally using filterFn
+    isRemoteFilter: (previous, current) => {
+         return previous.category !== current.category;
+    }
+  }),
+  // after you can use withEntitiesLoadingCall to connect the filter to
+  // the api call, or do it manually as shown after
+   withEntitiesLoadingCall({
+    collection,
+    fetchEntities: ({ productsFilter }) => {
+      return inject(ProductService)
+        .getProducts({
+          category: productsFilter().category,
+        })
+    },
+  }),
+// withEntitiesLoadingCall is the same as doing the following:
+// withHooks(({ productsLoading, setProductsError, ...state }) => ({
+//   onInit: async () => {
+//     effect(() => {
+//       if (isProductsLoading()) {
+//         inject(ProductService)
+//              .getProducts({
+//                  category: productsFilter().category,
+//               })
+//           .pipe(
+//             takeUntilDestroyed(),
+//             tap((res) =>
+//               patchState(
+//                 state,
+//                 setAllEntities(res.resultList, { collection: 'products' }),
+//               ),
+//             ),
+//             catchError((error) => {
+//               setProductsError(error);
+//               return EMPTY;
+//             }),
+//           )
+//           .subscribe();
+//       }
+//     });
+//   },
+ })),
+// generates the following signals
+ store.productsFilter // { search: string , category: string }
+ // generates the following methods
+ store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
+ store.resetProductsFilter  // () => void
+```
 <a name="withEntitiesLocalFilter"></a>
 
 ## withEntitiesLocalFilter(configFactory)
@@ -293,8 +426,6 @@ const store = signalStore(
 
 // generates the following signals
  store.productsFilter // { search: string }
- // generates the following computed signals
- store.isProductsFilterChanged // boolean
  // generates the following methods
  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
  store.resetProductsFilter  // () => void
@@ -305,8 +436,8 @@ const store = signalStore(
 <p>Generates necessary state, computed and methods for remotely filtering entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
 and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params
-and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
+or use withEntitiesLoadingCall to call the api with the [collection]Filter params.
+filter[collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
 <p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
 Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p>
@@ -326,7 +457,6 @@ Useful in cases where you want to further change the state before manually calli
 const entity = type<Product>();
 const collection = 'products';
 export const store = signalStore(
-  { providedIn: 'root' },
   // requires withEntities and withCallStatus to be used
   withEntities({ entity, collection }),
   withCallStatus({ prop: collection, initialValue: 'loading' }),
@@ -376,8 +506,6 @@ export const store = signalStore(
  })),
 // generates the following signals
  store.productsFilter // { search: string }
- // generates the following computed signals
- store.isProductsFilterChanged // boolean
  // generates the following methods
  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  store.resetProductsFilter  // () => void
