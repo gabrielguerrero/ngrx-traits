@@ -126,17 +126,19 @@ const gamecube = [
   'The Legend of Zelda: Twilight Princess',
   'Odama',
 ];
-export const mockProducts: Product[] = [
+export const mockProducts = [
   ...snes.map((name, id) => ({
     name,
     id: id + '',
     description: 'Super Nintendo Game',
     price: id * 2 + 10,
+    categoryId: 'snes',
   })),
   ...gamecube.map((name, id) => ({
     name,
     id: snes.length + id + '',
     description: 'GameCube Game',
     price: id * 3 + 10,
+    categoryId: 'gamecube',
   })),
-];
+] as Product[];

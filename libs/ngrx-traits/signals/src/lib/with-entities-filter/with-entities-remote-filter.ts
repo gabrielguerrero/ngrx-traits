@@ -51,8 +51,8 @@ import {
  * Generates necessary state, computed and methods for remotely filtering entities in the store,
  * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
  * and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
- * or use withEntitiesLoadingCall to call the api with the [collection]Filter params
- * and is debounced by default. You can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.
+ * or use withEntitiesLoadingCall to call the api with the [collection]Filter params.
+ * filter[collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.
  *
  * In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
  * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
@@ -68,7 +68,6 @@ import {
  * const entity = type<Product>();
  * const collection = 'products';
  * export const store = signalStore(
- *   { providedIn: 'root' },
  *   // requires withEntities and withCallStatus to be used
  *   withEntities({ entity, collection }),
  *   withCallStatus({ prop: collection, initialValue: 'loading' }),
@@ -118,8 +117,6 @@ import {
  *  })),
  * // generates the following signals
  *  store.productsFilter // { search: string }
- *  // generates the following computed signals
- *  store.isProductsFilterChanged // boolean
  *  // generates the following methods
  *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  *  store.resetProductsFilter  // () => void
