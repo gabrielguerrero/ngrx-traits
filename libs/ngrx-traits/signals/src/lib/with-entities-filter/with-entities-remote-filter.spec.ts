@@ -65,12 +65,14 @@ describe('withEntitiesRemoteFilter', () => {
           id: '1',
           name: 'F-Zero',
           price: 12,
+          categoryId: 'snes',
         },
         {
           description: 'GameCube Game',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
+          categoryId: 'gamecube',
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
@@ -136,12 +138,14 @@ describe('withEntitiesRemoteFilter', () => {
       expect(store.entities()).toEqual([
         {
           description: 'Super Nintendo Game',
+          categoryId: 'snes',
           id: '1',
           name: 'F-Zero',
           price: 12,
         },
         {
           description: 'GameCube Game',
+          categoryId: 'gamecube',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
@@ -336,12 +340,14 @@ describe('withEntitiesRemoteFilter', () => {
           id: '1',
           name: 'F-Zero',
           price: 12,
+          categoryId: 'snes',
         },
         {
           description: 'GameCube Game',
           id: '80',
           name: 'F-Zero GX',
           price: 55,
+          categoryId: 'gamecube',
         },
       ]);
       expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
