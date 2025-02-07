@@ -9,6 +9,10 @@ import {
   withState,
 } from '@ngrx/signals';
 
+import {
+  broadcast,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
@@ -25,7 +29,10 @@ import {
   NamedCallStatusMethods,
   NamedCallStatusState,
 } from './with-call-status.model';
-import { getWithCallStatusKeys } from './with-call-status.util';
+import {
+  getWithCallStatusEvents,
+  getWithCallStatusKeys,
+} from './with-call-status.util';
 
 /**
  * Generates necessary state, computed and methods for call progress status to the store
@@ -99,6 +106,9 @@ export function withCallStatus<
       setErrorKey,
     } = getWithCallStatusKeys({ prop });
 
+    const { callLoaded, callLoading, callError } = getWithCallStatusEvents({
+      prop,
+    });
     return signalStoreFeature(
       withState({ [callStatusKey]: config.initialValue ?? 'init' }),
       withComputed((state: Record<string, Signal<unknown>>) => {
@@ -119,12 +129,20 @@ export function withCallStatus<
           [errorKey]: error,
         };
       }),
+      withEventHandler(),
       withMethods((store) => ({
-        [setLoadingKey]: () =>
-          patchState(store, { [callStatusKey]: 'loading' }),
-        [setLoadedKey]: () => patchState(store, { [callStatusKey]: 'loaded' }),
-        [setErrorKey]: (error?: unknown) =>
-          patchState(store, { [callStatusKey]: { error } }),
+        [setLoadingKey]: () => {
+          patchState(store, { [callStatusKey]: 'loading' });
+          broadcast(store, callLoading());
+        },
+        [setLoadedKey]: () => {
+          patchState(store, { [callStatusKey]: 'loaded' });
+          broadcast(store, callLoaded());
+        },
+        [setErrorKey]: (error?: unknown) => {
+          patchState(store, { [callStatusKey]: { error } });
+          broadcast(store, callError({ error }));
+        },
       })),
     );
   }) as any;

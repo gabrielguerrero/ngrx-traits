@@ -1,4 +1,5 @@
 import {
+  computed,
   EnvironmentInjector,
   inject,
   runInInjectionContext,
@@ -22,6 +23,7 @@ import {
   SelectEntityId,
   setAllEntities,
 } from '@ngrx/signals/entities';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   catchError,
   concatMap,
@@ -31,9 +33,9 @@ import {
   map,
   Observable,
   of,
+  pipe,
   switchMap,
 } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import {
   CallStatusComputed,
@@ -43,11 +45,16 @@ import {
   NamedCallStatusMethods,
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
-import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
-  NamedSetEntitiesResult,
-} from '../with-entities-pagination/with-entities-local-pagination.model';
+  getWithCallStatusEvents,
+  getWithCallStatusKeys,
+} from '../with-call-status/with-call-status.util';
+import { NamedSetEntitiesResult } from '../with-entities-pagination/with-entities-local-pagination.model';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
+import {
+  onEvent,
+  withEventHandler,
+} from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
   FeatureConfigFactory,
@@ -183,92 +190,92 @@ export function withEntitiesLoadingCall<
         }),
   EmptyFeatureResult
 > {
-  return withFeatureFactory((_store: StoreSource<Input>) => {
-    const {
-      collection,
-      fetchEntities,
-      onSuccess,
-      onError,
-      mapError,
-      mapPipe: mapPipeType,
-      selectId,
-    } = getFeatureConfig(config, _store);
-    const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
-      prop: collection,
-    });
-    const { setEntitiesPagedResultKey } = getWithEntitiesRemotePaginationKeys({
-      collection,
-    });
+  return withFeatureFactory(
+    (
+      _store: StoreSource<Input>,
+      environmentInjector = inject(EnvironmentInjector),
+    ) => {
+      const {
+        collection,
+        fetchEntities,
+        onSuccess,
+        onError,
+        mapError,
+        mapPipe: mapPipeType,
+        selectId,
+      } = getFeatureConfig(config, _store);
+      const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
+        prop: collection,
+      });
+      const { setEntitiesPagedResultKey } = getWithEntitiesRemotePaginationKeys(
+        {
+          collection,
+        },
+      );
+      const { callLoading } = getWithCallStatusEvents({ prop: collection });
 
-    return signalStoreFeature(
-      withHooks(
-        (
-          store: Record<string, Signal<unknown>>,
-          environmentInjector = inject(EnvironmentInjector),
-        ) => {
+      const setLoaded = _store[setLoadedKey] as () => void;
+      const setError = _store[setErrorKey] as (error: unknown) => void;
+      const setEntitiesPagedResult = _store[
+        setEntitiesPagedResultKey
+      ] as (result: { entities: Entity[] }) => void;
+
+      const mapPipe = mapPipeType ? mapPipes[mapPipeType] : switchMap;
+      const loadEntities = rxMethod<void>(
+        pipe(
+          mapPipe(() =>
+            runInInjectionContext(environmentInjector, () =>
+              from(fetchEntities(_store)),
+            ).pipe(
+              map((result) => {
+                if (setEntitiesPagedResult)
+                  setEntitiesPagedResult(result as { entities: Entity[] });
+                else {
+                  const entities = Array.isArray(result)
+                    ? result
+                    : (result as { entities: Entity[] }).entities;
+                  patchState(
+                    _store as WritableStateSource<object>,
+                    collection
+                      ? setAllEntities(entities as Entity[], {
+                          collection,
+                          selectId:
+                            selectId ?? ((entity) => (entity as any).id),
+                        })
+                      : setAllEntities(entities as Entity[], {
+                          selectId:
+                            selectId ??
+                            ((entity) => (entity as any).id as string),
+                        }),
+                  );
+                }
+                setLoaded();
+                if (onSuccess) onSuccess(result);
+              }),
+              first(),
+              catchError((error: unknown) => {
+                const e = mapError ? mapError(error) : error;
+                setError(e);
+                if (onError) onError(e as Error);
+                return of();
+              }),
+            ),
+          ),
+        ),
+      );
+      return signalStoreFeature(
+        withEventHandler(() => [onEvent(callLoading, () => loadEntities())]),
+        withHooks((store: Record<string, Signal<unknown>>) => {
           const loading = store[loadingKey] as Signal<boolean>;
-          const setLoaded = store[setLoadedKey] as () => void;
-          const setError = store[setErrorKey] as (error: unknown) => void;
-          const setEntitiesPagedResult = store[
-            setEntitiesPagedResultKey
-          ] as (result: { entities: Entity[] }) => void;
           return {
             onInit: () => {
-              const loading$ = toObservable(loading);
-              const mapPipe = mapPipeType ? mapPipes[mapPipeType] : switchMap;
-
-              loading$
-                .pipe(
-                  filter(Boolean),
-                  mapPipe(() =>
-                    runInInjectionContext(environmentInjector, () =>
-                      from(fetchEntities(store as StoreSource<Input>)),
-                    ).pipe(
-                      map((result) => {
-                        if (setEntitiesPagedResult)
-                          setEntitiesPagedResult(
-                            result as { entities: Entity[] },
-                          );
-                        else {
-                          const entities = Array.isArray(result)
-                            ? result
-                            : (result as { entities: Entity[] }).entities;
-                          patchState(
-                            store as WritableStateSource<object>,
-                            collection
-                              ? setAllEntities(entities as Entity[], {
-                                  collection,
-                                  selectId:
-                                    selectId ??
-                                    ((entity) => (entity as any).id),
-                                })
-                              : setAllEntities(entities as Entity[], {
-                                  selectId:
-                                    selectId ??
-                                    ((entity) => (entity as any).id as string),
-                                }),
-                          );
-                        }
-                        setLoaded();
-                        if (onSuccess) onSuccess(result);
-                      }),
-                      first(),
-                      catchError((error: unknown) => {
-                        const e = mapError ? mapError(error) : error;
-                        setError(e);
-                        if (onError) onError(e as Error);
-                        return of();
-                      }),
-                    ),
-                  ),
-                )
-                .subscribe();
+              if (loading()) loadEntities();
             },
           };
-        },
-      ),
-    );
-  }) as any;
+        }),
+      );
+    },
+  ) as any;
 }
 const mapPipes = {
   switchMap: switchMap,
