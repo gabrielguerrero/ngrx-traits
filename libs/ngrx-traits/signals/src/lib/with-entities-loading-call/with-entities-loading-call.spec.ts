@@ -1,7 +1,7 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
-import { of, throwError } from 'rxjs';
+import { delay, of, Subject, throwError } from 'rxjs';
 
 import {
   withCallStatus,
@@ -38,6 +38,108 @@ describe('withEntitiesLoadingCall', () => {
           expect(store.entities()).toEqual(mockProducts);
         });
       }));
+
+      describe('mapPipe', () => {
+        it('should mapPipe = switchMap should only process last call ', fakeAsync(() => {
+          TestBed.runInInjectionContext(() => {
+            let aux = 0;
+            const call = jest.fn().mockImplementation(() => {
+              aux++;
+              return of(mockProducts.slice(0, mockProducts.length - aux)).pipe(
+                delay(100),
+              );
+            });
+            const Store = signalStore(
+              withEntities({
+                entity,
+              }),
+              withCallStatus(),
+              withEntitiesLoadingCall({
+                fetchEntities: call,
+                mapPipe: 'switchMap',
+              }),
+            );
+            const store = new Store();
+            TestBed.flushEffects();
+            expect(store.entities()).toEqual([]);
+            store.setLoading();
+            store.setLoading();
+            store.setLoading();
+            expect(store.isLoading()).toBeTruthy();
+            tick(150);
+            expect(store.isLoading()).toBeFalsy();
+            expect(store.entities().length).toEqual(mockProducts.length - 3);
+          });
+        }));
+
+        it('should mapPipe = exhaustMap should only process first call ', fakeAsync(() => {
+          TestBed.runInInjectionContext(() => {
+            let aux = 0;
+            const call = jest.fn().mockImplementation(() => {
+              aux++;
+              return of(mockProducts.slice(0, mockProducts.length - aux)).pipe(
+                delay(120),
+              );
+            });
+            const Store = signalStore(
+              withEntities({
+                entity,
+              }),
+              withCallStatus(),
+              withEntitiesLoadingCall({
+                fetchEntities: call,
+                mapPipe: 'exhaustMap',
+              }),
+            );
+            const store = new Store();
+            TestBed.flushEffects();
+            expect(store.entities()).toEqual([]);
+            store.setLoading();
+            store.setLoading();
+            store.setLoading();
+            expect(store.isLoading()).toBeTruthy();
+            tick(150);
+            expect(store.isLoading()).toBeFalsy();
+            expect(store.entities().length).toEqual(mockProducts.length - 1);
+          });
+        }));
+
+        it('should mapPipe = concatMap should process all calls in sequence ', fakeAsync(() => {
+          TestBed.runInInjectionContext(() => {
+            let aux = 0;
+            const call = jest.fn().mockImplementation(() => {
+              aux++;
+              return of(mockProducts.slice(0, mockProducts.length - aux)).pipe(
+                delay(100),
+              );
+            });
+            const Store = signalStore(
+              withEntities({
+                entity,
+              }),
+              withCallStatus(),
+              withEntitiesLoadingCall({
+                fetchEntities: call,
+                mapPipe: 'concatMap',
+              }),
+            );
+            const store = new Store();
+            TestBed.flushEffects();
+            expect(store.entities()).toEqual([]);
+            store.setLoading();
+            store.setLoading();
+            store.setLoading();
+            expect(store.isLoading()).toBeTruthy();
+            tick(110);
+            expect(store.entities().length).toEqual(mockProducts.length - 1);
+            tick(110);
+            expect(store.entities().length).toEqual(mockProducts.length - 2);
+            tick(110);
+            expect(store.isLoaded()).toBeTruthy();
+            expect(store.entities().length).toEqual(mockProducts.length - 3);
+          });
+        }));
+      });
 
       it('should setAllEntities if fetchEntities returns an a {entities: Entity[]} ', fakeAsync(() => {
         TestBed.runInInjectionContext(() => {

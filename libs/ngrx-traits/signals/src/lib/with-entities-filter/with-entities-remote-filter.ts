@@ -199,7 +199,6 @@ export function withEntitiesRemoteFilter<
           pipe(
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
-              if (!value?.skipLoadingCall) setLoading();
               patchState(
                 state as WritableStateSource<EntitiesFilterState<Filter>>,
                 {
@@ -207,6 +206,7 @@ export function withEntitiesRemoteFilter<
                 },
               );
               broadcast(state, entitiesFilterChanged(value));
+              if (!value?.skipLoadingCall) setLoading();
             }),
           ),
         );
