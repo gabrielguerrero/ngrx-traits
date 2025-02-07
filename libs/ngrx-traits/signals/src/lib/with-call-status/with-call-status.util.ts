@@ -1,4 +1,8 @@
 import { capitalize } from '../util';
+import {
+  createEvent,
+  props,
+} from '../with-event-handler/with-event-handler.util';
 
 export function getWithCallStatusKeys(config?: {
   prop?: string;
@@ -31,5 +35,17 @@ export function getWithCallStatusKeys(config?: {
     setErrorKey: prop
       ? `${prefix}set${capitalizedProp}Error`
       : `${prefix}setError`,
+  };
+}
+
+export function getWithCallStatusEvents(config?: { prop?: string }) {
+  const collection = config?.prop;
+  return {
+    callLoading: createEvent(`${collection}.callLoading`),
+    callLoaded: createEvent(`${collection}.callLoaded`),
+    callError: createEvent(
+      `${collection}.callError`,
+      props<{ error: unknown }>(),
+    ),
   };
 }

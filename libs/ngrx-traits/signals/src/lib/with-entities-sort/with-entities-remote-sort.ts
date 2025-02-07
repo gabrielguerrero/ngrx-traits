@@ -182,8 +182,8 @@ export function withEntitiesRemoteSort<
             patchState(state as WritableStateSource<object>, {
               [sortKey]: sort,
             });
-            if (!skipLoadingCall) setLoading();
             broadcast(state, entitiesRemoteSortChanged({ sort }));
+            if (!skipLoadingCall) setLoading();
           },
         };
       }),
