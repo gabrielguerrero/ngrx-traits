@@ -134,7 +134,7 @@ import {
  * // generates the following signals
  *  store.productsFilter // { search: string , category: string }
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
+ *  store.filterProductsEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  *  store.resetProductsFilter  // () => void
  */
 export function withEntitiesHybridFilter<
@@ -230,7 +230,6 @@ export function withEntitiesHybridFilter<
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
               const isRemote = config.isRemoteFilter(value.filter, filter());
-              if (isRemote && !value?.skipLoadingCall) setLoading?.();
 
               patchState(
                 state as WritableStateSource<EntitiesFilterState<Filter>>,
@@ -238,7 +237,6 @@ export function withEntitiesHybridFilter<
                   [filterKey]: value.filter,
                 },
               );
-
               if (!isRemote) {
                 const newEntities = entities().filter((entity) => {
                   return filterFn(entity, value.filter);
@@ -254,8 +252,8 @@ export function withEntitiesHybridFilter<
                   },
                 );
               }
-
               broadcast(state, entitiesFilterChanged(value));
+              if (isRemote && !value?.skipLoadingCall) setLoading?.();
             }),
           ),
         );
