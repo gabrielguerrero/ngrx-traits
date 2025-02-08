@@ -1,26 +1,30 @@
+import { RouteMeta } from '@analogjs/router';
 import { isPlatformBrowser } from '@angular/common';
 import { Component, effect, inject, PLATFORM_ID, signal } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
-import { NavbarComponent } from './components/navbar/navbar.component';
-import { SideNavigationComponent } from './components/side-navigation/side-navigation.component';
+import { NavbarComponent } from '../components/navbar/navbar.component';
+import { SideNavigationComponent } from '../components/side-navigation/side-navigation.component';
 
 @Component({
   selector: 'docs-root',
   standalone: true,
   imports: [RouterOutlet, NavbarComponent, SideNavigationComponent],
   template: ` <div>
-    <!--    <docs-navbar [(menuOpen)]="menuOpen" class=" bg-white dark:bg-gray-900" />-->
-    <div class="">
+    <docs-navbar [(menuOpen)]="menuOpen" class=" bg-white dark:bg-gray-900" />
+    <div class="container  mx-auto px-8 pt-24">
       <div class="flex">
-        <!--        <docs-side-navigation class=" md:mr-12" [(menuOpen)]="menuOpen" />-->
+        <docs-side-navigation class=" md:mr-12" [(menuOpen)]="menuOpen" />
         <router-outlet />
       </div>
+      <p class="px-8 py-8 text-center text-xs text-zinc-500">
+        Copyright © {{ year }} Ngrx Traits
+      </p>
     </div>
   </div>`,
 })
-export class AppComponent {
+export default class DocsRootComponent {
   private readonly router = inject(Router);
   private readonly platform = inject(PLATFORM_ID);
   readonly year = new Date().getFullYear();
@@ -40,6 +44,7 @@ export class AppComponent {
         } else {
           document.body.style.overflow = '';
         }
+        console.log('AppComponent', this.menuOpen());
       });
     }
   }

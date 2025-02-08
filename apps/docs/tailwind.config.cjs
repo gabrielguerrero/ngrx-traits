@@ -3,20 +3,21 @@ const { join } = require('node:path');
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'selector',
   content: [
     join(__dirname, '**/!(*.stories|*.spec).{ts,html}'),
-    ...createGlobPatternsForDependencies(__dirname)
+    ...createGlobPatternsForDependencies(__dirname),
   ],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['InterVariable', 'sans-serif']
+        sans: ['InterVariable', 'sans-serif'],
       },
       colors: {
         primary: '#AA1BB6',
-        accent: '#452070'
+        accent: '#6325ac',
       },
-      typography: theme => ({
+      typography: (theme) => ({
         zinc: {
           css: {
             '--tw-prose-headings': theme('colors.zinc.950'),
@@ -25,22 +26,22 @@ module.exports = {
             h1: {
               fontSize: theme('fontSize.2xl'),
               fontWeight: theme('fontWeight.semibold'),
-              marginBottom: theme('margin.2')
+              marginBottom: theme('margin.2'),
             },
             h2: {
               fontSize: theme('fontSize.lg'),
               fontWeight: theme('fontWeight.semibold'),
-              marginBottom: theme('margin.2')
+              marginBottom: theme('margin.2'),
             },
             h3: {
               fontSize: theme('fontSize.base'),
               fontWeight: theme('fontWeight.semibold'),
-              marginBottom: theme('margin.2')
-            }
-          }
-        }
-      })
-    }
+              marginBottom: theme('margin.2'),
+            },
+          },
+        },
+      }),
+    },
   },
-  plugins: [require('@tailwindcss/typography')]
+  plugins: [require('@tailwindcss/typography')],
 };
