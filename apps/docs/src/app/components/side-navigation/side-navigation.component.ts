@@ -14,16 +14,43 @@ import { getRouterLinks } from '../../utils/router';
       >
         @for (section of sections; track section.title) {
           <div>
-            <h2 class="text-md mb-2 font-semibold text-zinc-800">
+            <h2 class=" mb-2 inline-block text-xl font-medium app-title-color">
               {{ section.title }}
             </h2>
-            <ul class="-ml-4">
+            <ul class="ml-1">
               @for (link of section.links; track link) {
-                <li class="text-zinc-600">
+                <li class="text-zinc-600 dark:text-zinc-300 text-sm">
                   <a
-                    class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500"
+                    class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                     [routerLink]="link.link"
-                    routerLinkActive="bg-gradient-to-b from-[#AA1BB6] to-[#452070] text-transparent bg-clip-text"
+                    routerLinkActive="text-sm font-medium text-[#629ef8] "
+                  >
+                    {{ link.name }}
+                  </a>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+        <h2
+          class=" inline-block  bg-clip-text text-xl font-medium app-title-color"
+        >
+          Store Features
+        </h2>
+        @for (section of storeFeatures; track section.title) {
+          <div class="ml-4">
+            <h2
+              class="text-md mb-2 font-semibold text-zinc-600 dark:text-white"
+            >
+              {{ section.title }}
+            </h2>
+            <ul class="ml-1">
+              @for (link of section.links; track link) {
+                <li class="text-zinc-600 dark:text-zinc-300 text-sm">
+                  <a
+                    class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                    [routerLink]="link.link"
+                    routerLinkActive="text-sm font-medium text-blue-400 "
                   >
                     {{ link.name }}
                   </a>
@@ -53,49 +80,160 @@ import { getRouterLinks } from '../../utils/router';
 })
 export class SideNavigationComponent {
   readonly menuOpen = model(false);
-  readonly sections = Object.entries(getRouterLinks())
-    .map(([path, data]) => {
-      // the path as we get it starts with '../pages/', so we remove it, and it also ends with '.md', so we remove it
-      const normalizedPath = path.replace('../pages/', '').replace('.md', '');
-
-      // next split the path up, the first part is the section, the second part is the page
-      const [section] = normalizedPath.split('/');
-
-      // normalize the section name, e.g. 'getting-started' -> 'Getting Started'
-      const sectionTitle = section
-        .split('-')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
-
-      return {
-        section: sectionTitle,
-        link: normalizedPath,
-        name: data['name'],
-        order: data['order'] ?? Infinity,
-      };
-    })
-    // next group the links by section
-    .reduce<Section[]>((acc, { section, link, name, order }) => {
-      const existingSection = acc.find((s) => s.title === section);
-
-      if (existingSection) {
-        existingSection.links.push({ link, name, order });
-
-        // sort the links based on the order property if defined
-        existingSection.links.sort((a, b) => a.order - b.order);
-      } else {
-        acc.push({ title: section, links: [{ link, name, order }] });
-      }
-
-      return acc;
-    }, [])
-    // sort so that getting started is always first
-    .sort((a, b) => {
-      const order = ['Getting Started', 'Signals', 'Traits'];
-
-      // sort based on the order of the section titles
-      return order.indexOf(a.title) - order.indexOf(b.title);
-    });
+  readonly sections = [
+    {
+      title: 'Getting Started',
+      links: [
+        {
+          link: './getting-started/what-is-ngrx-traits',
+          name: 'What is Ngrx Traits?',
+          order: 1,
+        },
+        {
+          link: './getting-started/installation',
+          name: 'Installation',
+          order: 2,
+        },
+        {
+          link: './getting-started/start-coding',
+          name: 'Start Coding',
+          order: 3,
+        },
+      ],
+    },
+  ];
+  storeFeatures = [
+    {
+      title: 'Call Backend',
+      links: [
+        {
+          link: './traits/withCallStatus',
+          name: 'withCallStatus',
+          order: 1,
+        },
+        {
+          link: './traits/withCalls',
+          name: 'withCalls',
+          order: 2,
+        },
+        {
+          link: './traits/withEntitiesLoadingCall',
+          name: 'withEntitiesLoadingCall',
+          order: 5,
+        },
+      ],
+    },
+    {
+      title: 'Entities Filtering',
+      links: [
+        {
+          link: './traits/withEntitiesLocalFilter',
+          name: 'withEntitiesLocalFilter',
+          order: 3,
+        },
+        {
+          link: './traits/withEntitiesRemoteFilter',
+          name: 'withEntitiesRemoteFilter',
+          order: 4,
+        },
+        {
+          link: './traits/withEntitiesHybridFilter',
+          name: 'withEntitiesHybridFilter',
+          order: 4,
+        },
+      ],
+    },
+    {
+      title: 'Entities Pagination',
+      links: [
+        {
+          link: './traits/withEntitiesLocalPagination',
+          name: 'withEntitiesLocalPagination',
+          order: 6,
+        },
+        {
+          link: './traits/withEntitiesRemotePagination',
+          name: 'withEntitiesRemotePagination',
+          order: 7,
+        },
+        {
+          link: './traits/withEntitiesRemoteScrollPagination',
+          name: 'withEntitiesRemoteScrollPagination',
+          order: 8,
+        },
+      ],
+    },
+    {
+      title: 'Entities Selection',
+      links: [
+        {
+          link: './traits/withEntitiesSingleSelection',
+          name: 'withEntitiesSingleSelection',
+          order: 9,
+        },
+        {
+          link: './traits/withEntitiesMultiSelection',
+          name: 'withEntitiesMultiSelection',
+          order: 10,
+        },
+      ],
+    },
+    {
+      title: 'Entities Sorting',
+      links: [
+        {
+          link: './traits/withEntitiesLocalSort',
+          name: 'withEntitiesLocalSort',
+          order: 11,
+        },
+        {
+          link: './traits/withEntitiesRemoteSort',
+          name: 'withEntitiesRemoteSort',
+          order: 12,
+        },
+      ],
+    },
+    {
+      title: 'Sync State To Url and Web Storage',
+      links: [
+        {
+          link: './traits/withSyncToWebStorage',
+          name: 'withSyncToWebStorage',
+          order: 15,
+        },
+        {
+          link: './traits/withRouteParams',
+          name: 'withRouteParams',
+          order: 16,
+        },
+        {
+          link: './traits/withEntitiesSyncToRouteQueryParams',
+          name: 'withEntitiesSyncToRouteQueryParams',
+          order: 17,
+        },
+        {
+          link: './traits/withSyncToRouteQueryParams',
+          name: 'withSyncToRouteQueryParams',
+          order: 18,
+        },
+      ],
+    },
+    {
+      title: 'Others',
+      links: [
+        {
+          link: './traits/withStateLogger',
+          name: 'withStateLogger',
+          order: 14,
+        },
+        {
+          link: './traits/withFeatureFactory',
+          name: 'withFeatureFactory',
+          order: 15,
+        },
+      ],
+    },
+  ];
 }
 
 interface Section {

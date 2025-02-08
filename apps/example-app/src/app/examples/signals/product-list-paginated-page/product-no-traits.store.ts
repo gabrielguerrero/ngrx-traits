@@ -10,8 +10,9 @@ import {
   withState,
 } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { EMPTY, tap } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { EMPTY, pipe, tap } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 
 import { Product } from '../../models';
 import { ProductService } from '../../services/product.service';
@@ -49,6 +50,37 @@ const productStore = signalStore(
       patchState(state, { productsStatus: { error } });
     },
   })),
+  withMethods(
+    ({
+      setProductsLoading,
+      setProductsLoaded,
+      setProductsError,
+      ...store
+    }) => ({
+      loadProducts: rxMethod(
+        pipe(
+          switchMap(() => {
+            setProductsLoading();
+            return inject(ProductService)
+              .getProducts()
+              .pipe(
+                takeUntilDestroyed(),
+                tap((res) =>
+                  patchState(
+                    store,
+                    setAllEntities(res.resultList, { collection: 'products' }),
+                  ),
+                ),
+                catchError((error) => {
+                  setProductsError(error);
+                  return EMPTY;
+                }),
+              );
+          }),
+        ),
+      ),
+    }),
+  ),
   // withEntitiesLoadingCall is the same as doing the following:
   withHooks(({ productsLoading, setProductsError, ...state }) => ({
     onInit: async () => {
