@@ -70,6 +70,8 @@ export const ProductsLocalStore = signalStore(
       //     : undefined, // if no product is selected, skip call
     }),
     checkout: () => inject(OrderService).checkout(),
+    loadProductDetail2: ({ id }: { id: string }) =>
+      inject(ProductService).getProductDetail(id),
   })),
   // loadProductDetail callWith is equivalent to:
   // withHooks((store) => {
@@ -87,3 +89,4 @@ export const ProductsLocalStore = signalStore(
     entity,
   }),
 );
+new ProductsLocalStore().loadProductDetail2Result;

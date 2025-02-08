@@ -1,7 +1,7 @@
 import { provideContent, withMarkdownRenderer } from '@analogjs/content';
 import { withPrismHighlighter } from '@analogjs/content/prism-highlighter';
 import { provideFileRouter } from '@analogjs/router';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, provideImgixLoader } from '@angular/common';
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import {
   APP_INITIALIZER,
@@ -29,6 +29,7 @@ export const appConfig: ApplicationConfig = {
       multi: true,
       deps: [Injector, PLATFORM_ID],
     },
+    provideImgixLoader('https://gabrielguerrerosite-914026926.imgix.net/'),
   ],
 };
 
