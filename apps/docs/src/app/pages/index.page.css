@@ -1,0 +1,113 @@
+
+.background-container {
+  margin: auto;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow: auto;
+  overflow-x: hidden;
+  width: 100dvw;
+  height: 100vh;
+  /*position: fixed;*/
+  /*inset: 0;*/
+  background: linear-gradient(
+    315deg,
+    rgb(41, 40, 40) 33%,
+    rgb(7, 1, 7) 68%,
+    rgb(4, 11, 37) 98%
+  );
+  /*background: linear-gradient(*/
+  /*  315deg,*/
+  /*  rgb(3, 24, 34) 33%,*/
+  /*  rgb(71, 9, 70) 68%,*/
+  /*  rgb(4, 11, 37) 98%*/
+  /*);*/
+  background-color: #535bf2;
+  /*animation: gradient 50s ease infinite;*/
+  background-size: 400% 400%;
+  background-attachment: fixed;
+}
+
+.name-bg{
+  background: linear-gradient(
+    340deg,
+    transparent 60%,
+    rgb(16, 61, 106) 98%
+  );
+}
+@keyframes gradient {
+  0% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 15% 15%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+.wave {
+  /*background: rgba(255, 255, 255, 0.25);*/
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 1000% 1000% 0 0;
+  position: absolute;
+  width: 800%;
+  height:  12rem;
+  /*height: 98%; !* 12rem;*!*/
+  animation: wave 20s -3s linear infinite;
+  transform: translate3d(0, 0, 0);
+  opacity: 0.8;
+  bottom: 0;
+  left: 0;
+  /*z-index: -1;*/
+}
+
+.wave:nth-of-type(2) {
+  /*bottom: -1.25em;*/
+  animation: wave 28s linear reverse infinite;
+  opacity: 0.8;
+}
+
+.wave:nth-of-type(3) {
+  /*bottom: -2.5em;*/
+  animation: wave 20s -1s reverse infinite;
+  opacity: 0.9;
+}
+
+@keyframes wave {
+  2% {
+    transform: translateX(1);
+  }
+
+  25% {
+    transform: translateX(-25%);
+  }
+
+  50% {
+    transform: translateX(-50%);
+  }
+
+  75% {
+    transform: translateX(-25%);
+  }
+
+  100% {
+    transform: translateX(1);
+  }
+}
+
+/*.my-blur {*/
+/*  color: hsl(0 0% 80%);*/
+
+/*  !*font-size: clamp(2rem, 6vw + 1rem, 12rem);*!*/
+/*       !*filter: blur(1.5rem);*!*/
+/*  backdrop-filter: blur(100px);*/
+/*  !*border: 0px solid black;*!*/
+/*  !*border-radius: 20px;*!*/
+/*  !*   background-color:red *!*/
+/*}*/
+.gratio img{
+  aspect-ratio: 1/1;
+}
+::ng-deep a:hover{
+  color: rgb(154 177 251);
+}

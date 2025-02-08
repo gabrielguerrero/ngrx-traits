@@ -26,7 +26,6 @@ import { ProductsShopStore } from './products-shop.store';
         #rla2="routerLinkActive"
         [active]="rla2.isActive"
       >
-        {{ store.error }}
         Basket
         <mat-icon
           [matBadge]="store.orderItemsEntities().length"
