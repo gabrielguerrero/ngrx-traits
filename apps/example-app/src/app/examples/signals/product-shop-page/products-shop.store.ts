@@ -12,7 +12,6 @@ import {
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
-  withStateLogger,
   withSyncToWebStorage,
 } from '@ngrx-traits/signals';
 import {
@@ -30,6 +29,7 @@ import {
 } from '@ngrx/signals/entities';
 import { lastValueFrom } from 'rxjs';
 
+import { withLogger } from '../../../../../../../libs/ngrx-traits/signals/src/lib/with-logger/with-logger';
 import { Product, ProductOrder } from '../../models';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
@@ -100,9 +100,14 @@ const orderItemsStoreFeature = signalStoreFeature(
     entity: orderEntity,
     collection: orderItemsCollection,
   }),
-  withStateLogger({
+  withLogger({
     name: 'orderItemsStore',
-    filterState: ({ orderItemsEntityMap }) => ({ orderItemsEntityMap }),
+    showDiff: true,
+    // filter: ({ orderItemsEntityMap, orderItemsIds }) => ({
+    //   orderItemsEntityMap,
+    //   orderItemsIds,
+    // }),
+    filter: ['orderItemsIdsSelected'],
   }),
   withSyncToWebStorage({
     key: 'orderItems',

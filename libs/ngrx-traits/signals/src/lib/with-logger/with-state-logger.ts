@@ -13,6 +13,7 @@ import {
  * Log the state of the store on every change
  * @param name - The name of the store to log
  * @param filterState - optional filter the state before logging
+ * @Deprecated use withLogger instead
  */
 export function withStateLogger<Input extends SignalStoreFeatureResult>({
   name,
