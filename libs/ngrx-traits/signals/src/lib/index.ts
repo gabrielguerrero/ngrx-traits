@@ -20,6 +20,7 @@ export * from './with-entities-selection/with-entities-multi-selection';
 export * from './with-entities-selection/with-entities-multi-selection.model';
 export * from './with-entities-loading-call/with-entities-loading-call';
 export * from './with-logger/with-state-logger';
+export * from './with-logger/with-logger';
 export * from './with-calls/with-calls';
 export * from './with-calls/with-calls.model';
 export * from './with-calls/call-config';
