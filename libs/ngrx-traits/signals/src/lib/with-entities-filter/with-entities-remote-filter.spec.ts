@@ -76,6 +76,7 @@ describe('withEntitiesRemoteFilter', () => {
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entitiesFilter.search()).toEqual('zero');
     });
   }));
   it('should allow to set default filter from previous state', fakeAsync(() => {
@@ -351,6 +352,7 @@ describe('withEntitiesRemoteFilter', () => {
         },
       ]);
       expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
+      expect(store.productsFilter.search()).toEqual('zero');
     });
   }));
 });
