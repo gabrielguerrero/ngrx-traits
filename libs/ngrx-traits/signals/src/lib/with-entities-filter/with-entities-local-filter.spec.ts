@@ -60,6 +60,7 @@ describe('withEntitiesLocalFilter', () => {
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entitiesFilter.search()).toEqual('zero');
     });
   }));
 
@@ -386,6 +387,7 @@ describe('withEntitiesLocalFilter', () => {
         },
       ]);
       expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
+      expect(store.productsFilter.search()).toEqual('zero');
     });
   }));
 

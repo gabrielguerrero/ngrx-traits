@@ -1,5 +1,6 @@
 import { computed, Signal } from '@angular/core';
 import {
+  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -39,8 +40,8 @@ import {
   getWithEntitiesFilterKeys,
 } from './with-entities-filter.util';
 import {
-  EntitiesFilterState,
-  NamedEntitiesFilterState,
+  EntitiesFilterComputed,
+  NamedEntitiesFilterComputed,
 } from './with-entities-local-filter.model';
 import {
   EntitiesRemoteFilterMethods,
@@ -151,13 +152,13 @@ export function withEntitiesRemoteFilter<
         }),
   Collection extends ''
     ? {
-        state: EntitiesFilterState<Filter>;
-        props: {};
+        state: {};
+        props: EntitiesFilterComputed<Filter>;
         methods: EntitiesRemoteFilterMethods<Filter>;
       }
     : {
-        state: NamedEntitiesFilterState<Collection, Filter>;
-        props: {};
+        state: {};
+        props: NamedEntitiesFilterComputed<Collection, Filter>;
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter>;
       }
 > {
@@ -171,6 +172,7 @@ export function withEntitiesRemoteFilter<
       filterEntitiesKey,
       resetEntitiesFilterKey,
       isEntitiesFilterChangedKey,
+      computedFilterKey,
     } = getWithEntitiesFilterKeys(config);
     const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
 
@@ -182,6 +184,7 @@ export function withEntitiesRemoteFilter<
           [isEntitiesFilterChangedKey]: computed(() => {
             return JSON.stringify(filter()) !== JSON.stringify(defaultFilter);
           }),
+          [computedFilterKey]: deepComputed(() => filter()),
         };
       }),
       withEventHandler(),
@@ -199,12 +202,9 @@ export function withEntitiesRemoteFilter<
           pipe(
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
-              patchState(
-                state as WritableStateSource<EntitiesFilterState<Filter>>,
-                {
-                  [filterKey]: value.filter,
-                },
-              );
+              patchState(state as WritableStateSource<any>, {
+                [filterKey]: value.filter,
+              });
               broadcast(state, entitiesFilterChanged(value));
               if (!value?.skipLoadingCall) setLoading();
             }),
