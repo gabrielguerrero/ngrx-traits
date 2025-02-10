@@ -1,5 +1,6 @@
 import { computed, effect, Signal, untracked } from '@angular/core';
 import {
+  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -41,10 +42,8 @@ import {
 import {
   EntitiesFilterComputed,
   EntitiesFilterMethods,
-  EntitiesFilterState,
   NamedEntitiesFilterComputed,
   NamedEntitiesFilterMethods,
-  NamedEntitiesFilterState,
 } from './with-entities-local-filter.model';
 
 /**
@@ -118,13 +117,13 @@ export function withEntitiesLocalFilter<
         }),
   Collection extends ''
     ? {
-        state: EntitiesFilterState<Filter>;
-        props: EntitiesFilterComputed;
+        state: {};
+        props: EntitiesFilterComputed<Filter>;
         methods: EntitiesFilterMethods<Filter>;
       }
     : {
-        state: NamedEntitiesFilterState<Collection, Filter>;
-        props: NamedEntitiesFilterComputed<Collection>;
+        state: {};
+        props: NamedEntitiesFilterComputed<Collection, Filter>;
         methods: NamedEntitiesFilterMethods<Collection, Filter>;
       }
 > {
@@ -140,6 +139,7 @@ export function withEntitiesLocalFilter<
       filterKey,
       resetEntitiesFilterKey,
       isEntitiesFilterChangedKey,
+      computedFilterKey,
     } = getWithEntitiesFilterKeys(config);
     return signalStoreFeature(
       withState({ [filterKey]: defaultFilter }),
@@ -149,6 +149,7 @@ export function withEntitiesLocalFilter<
           [isEntitiesFilterChangedKey]: computed(() => {
             return JSON.stringify(filter()) !== JSON.stringify(defaultFilter);
           }),
+          [computedFilterKey]: deepComputed(() => filter()),
         };
       }),
       withEventHandler(),
@@ -173,7 +174,7 @@ export function withEntitiesLocalFilter<
                 return filterFn(entity, value.filter);
               });
               patchState(
-                state as WritableStateSource<EntitiesFilterState<Filter>>,
+                state as WritableStateSource<any>,
                 {
                   [filterKey]: value.filter,
                 },
