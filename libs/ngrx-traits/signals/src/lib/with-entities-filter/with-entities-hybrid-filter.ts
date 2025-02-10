@@ -1,5 +1,6 @@
 import { computed, effect, Signal, untracked } from '@angular/core';
 import {
+  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -43,8 +44,8 @@ import {
   getWithEntitiesFilterKeys,
 } from './with-entities-filter.util';
 import {
-  EntitiesFilterState,
-  NamedEntitiesFilterState,
+  EntitiesFilterComputed,
+  NamedEntitiesFilterComputed,
 } from './with-entities-local-filter.model';
 import {
   EntitiesRemoteFilterMethods,
@@ -173,13 +174,13 @@ export function withEntitiesHybridFilter<
         }),
   Collection extends ''
     ? {
-        state: EntitiesFilterState<Filter>;
-        props: {};
+        state: {};
+        props: EntitiesFilterComputed<Filter>;
         methods: EntitiesRemoteFilterMethods<Filter>;
       }
     : {
-        state: NamedEntitiesFilterState<Collection, Filter>;
-        props: {};
+        state: {};
+        props: NamedEntitiesFilterComputed<Collection, Filter>;
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter>;
       }
 > {
@@ -195,6 +196,7 @@ export function withEntitiesHybridFilter<
       filterEntitiesKey,
       resetEntitiesFilterKey,
       isEntitiesFilterChangedKey,
+      computedFilterKey,
     } = getWithEntitiesFilterKeys(config);
     const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
 
@@ -206,6 +208,7 @@ export function withEntitiesHybridFilter<
           [isEntitiesFilterChangedKey]: computed(() => {
             return JSON.stringify(filter()) !== JSON.stringify(defaultFilter);
           }),
+          [computedFilterKey]: deepComputed(() => filter()),
         };
       }),
       withEventHandler(),
@@ -231,26 +234,20 @@ export function withEntitiesHybridFilter<
             tap((value) => {
               const isRemote = config.isRemoteFilter(value.filter, filter());
 
-              patchState(
-                state as WritableStateSource<EntitiesFilterState<Filter>>,
-                {
-                  [filterKey]: value.filter,
-                },
-              );
+              patchState(state as WritableStateSource<any>, {
+                [filterKey]: value.filter,
+              });
               if (!isRemote) {
                 const newEntities = entities().filter((entity) => {
                   return filterFn(entity, value.filter);
                 });
-                patchState(
-                  state as WritableStateSource<EntitiesFilterState<Filter>>,
-                  {
-                    [idsKey]: newEntities.map((entity) =>
-                      config.selectId
-                        ? config.selectId(entity)
-                        : (entity as any)['id'],
-                    ),
-                  },
-                );
+                patchState(state as WritableStateSource<any>, {
+                  [idsKey]: newEntities.map((entity) =>
+                    config.selectId
+                      ? config.selectId(entity)
+                      : (entity as any)['id'],
+                  ),
+                });
               }
               broadcast(state, entitiesFilterChanged(value));
               if (isRemote && !value?.skipLoadingCall) setLoading?.();

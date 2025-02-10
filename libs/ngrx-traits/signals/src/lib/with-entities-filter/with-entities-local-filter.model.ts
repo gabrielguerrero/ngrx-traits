@@ -1,15 +1,15 @@
 import { Signal } from '@angular/core';
+import { DeepSignal } from '@ngrx/signals';
 
-export type EntitiesFilterState<Filter> = { entitiesFilter: Filter };
-export type NamedEntitiesFilterState<Collection extends string, Filter> = {
-  [K in Collection as `${K}Filter`]: Filter;
-};
-export type EntitiesFilterComputed = {
+export type EntitiesFilterComputed<Filter> = {
+  entitiesFilter: DeepSignal<Filter>;
   isEntitiesFilterChanged: Signal<boolean>;
 };
-export type NamedEntitiesFilterComputed<Collection extends string> = {
+
+export type NamedEntitiesFilterComputed<Collection extends string, Filter> = {
   [K in Collection as `is${Capitalize<string & K>}FilterChanged`]: Signal<boolean>;
-};
+} & { [K in Collection as `${K}Filter`]: DeepSignal<Filter> };
+
 export type EntitiesFilterMethods<Filter> = {
   filterEntities: (
     options:

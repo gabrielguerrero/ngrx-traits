@@ -71,6 +71,7 @@ describe('withEntitiesHybridFilter', () => {
           search: 'zero',
           categoryId: 'snes',
         });
+        expect(store.entitiesFilter.search()).toEqual('zero');
       });
     }));
 
@@ -428,6 +429,7 @@ describe('withEntitiesHybridFilter', () => {
           search: 'zero',
           categoryId: 'snes',
         });
+        expect(store.productsFilter.search()).toEqual('zero');
       });
     }));
 
