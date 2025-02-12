@@ -51,6 +51,14 @@ import { RouterLink } from '@angular/router';
               pagination, single and multi selection and more
             </div>
           </mat-list-item>
+          <mat-list-item [routerLink]="'order-list'">
+            <div matListItemTitle><b>Drill-down List</b></div>
+            <div matListItemLine>
+              Example using store features to load a order list where you can
+              expand each order to see the order details, this uses
+              withEntitiesCalls to allow you to load the order details
+            </div>
+          </mat-list-item>
         </mat-list>
       </mat-card-content>
     </mat-card>

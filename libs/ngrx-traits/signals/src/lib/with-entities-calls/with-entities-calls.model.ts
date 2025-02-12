@@ -1,21 +1,39 @@
 import { Signal } from '@angular/core';
+import { CallConfig } from '@ngrx-traits/signals';
 import { Observable } from 'rxjs';
 
-export type ObservableCall<Param = any, Result = any> =
-  | (() => Observable<Result>)
-  | ((arg: Param) => Observable<Result>);
-export type PromiseCall<Param = any, Result = any> =
-  | (() => Promise<Result>)
-  | ((arg: Param) => Promise<Result>);
-export type Call<Param = any, Result = any> =
+type ObservableCall<Param = any, Result = any> = (
+  arg: Param,
+) => Observable<Result>;
+
+type PromiseCall<Param = any, Result = any> = (arg: Param) => Promise<Result>;
+
+type Call<Param = any, Result = any> =
   | ObservableCall<Param, Result>
   | PromiseCall<Param, Result>;
-export type CallConfig<
+export type EntityCall<
+  Entity,
+  Param extends
+    | string
+    | number
+    | Entity
+    | ({
+        entity: Entity;
+      } & Record<string, any>) =
+    | string
+    | number
+    | Entity
+    | ({
+        entity: Entity;
+      } & Record<string, any>),
+  Result extends Partial<Entity> | undefined = Partial<Entity> | undefined,
+> = Call<Param, Result>;
+
+export type EntityCallConfig<
+  Entity = any, // not used inside but is used to pass the entity type to the call
   Param = any,
   Result = any,
-  PropName extends string = string,
   Error = any,
-  DefaultResult = any,
 > = {
   /**
    * The main function to be called.
@@ -23,30 +41,16 @@ export type CallConfig<
   call: Call<Param, Result>;
 
   /**
-   * The name of the property where the result of the call will be stored.
+   *  function that returns the entity id in the params
+   * @param param
    */
-  resultProp: PropName;
-
-  /**
-   * Specifies how to map emissions of the call, using one of the following:
-   * - 'switchMap': Cancels the previous call when a new one starts.
-   * - 'concatMap': Queues calls and executes them sequentially.
-   * - 'exhaustMap': Ignores new calls until the current one completes.
-   * Default is exhaustMap
-   */
-  mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+  paramsSelectId?: (param: NoInfer<Param>) => string;
 
   /**
    * default is true, if false disables automatically storing the result of the
-   * function, and removes the generated types.
+   * function, to allow you do your own implementation using onSuccess.
    */
   storeResult?: boolean;
-
-  /**
-   * A default value for the result before the call is executed
-   */
-  defaultResult?: NoInfer<DefaultResult>;
-
   /**
    * Callback function invoked on successful completion of the call.
    * Receives the result of the call and the parameter used.
@@ -104,43 +108,48 @@ export type CallConfig<
     : Signal<boolean> | Observable<boolean> | (() => boolean) | boolean;
 };
 
-export type ExtractCallResultPropName<
-  K extends string | number | symbol,
-  T extends Call | CallConfig,
-> = T extends CallConfig
-  ? T['storeResult'] extends false
-    ? never
-    : T['resultProp'] extends ''
-      ? `${K & string}Result`
-      : T['resultProp'] & string
-  : `${K & string}Result`;
+export type NamedEntitiesCallsStatusComputed<
+  Calls extends Record<string, EntityCall<any> | EntityCallConfig>,
+> = {
+  [K in keyof Calls as K extends `_${infer J}`
+    ? `_isAny${Capitalize<string & J>}Loading`
+    : `isAny${Capitalize<string & K>}Loading`]: Signal<boolean>;
+} & {
+  [K in keyof Calls as K extends `_${infer J}`
+    ? `_areAll${Capitalize<string & J>}Loaded`
+    : `areAll${Capitalize<string & K>}Loaded`]: Signal<boolean>;
+} & {
+  [K in keyof Calls as `${K & string}Errors`]: Calls[K] extends EntityCallConfig<
+    any,
+    any,
+    infer Error
+  >
+    ? Signal<Error[] | undefined> // TODO map errors with the ids?
+    : Signal<unknown | undefined>;
+};
 
-export type ExtractCallResultType<T extends Call | CallConfig> =
-  T extends Call<any, infer R>
-    ? R | undefined
-    : T extends CallConfig<any, infer R, any, any, infer D>
-      ? D extends undefined
-        ? R | undefined
-        : D
-      : never;
-
-export type NamedCallsStatusComputed<
-  Calls extends Record<string, Call | CallConfig>,
+export type NamedEntitiesCallsStatusMethods<
+  Entity,
+  Calls extends Record<string, EntityCall<Entity> | EntityCallConfig>,
 > = {
   [K in keyof Calls as K extends `_${infer J}`
     ? `_is${Capitalize<string & J>}Loading`
-    : `is${Capitalize<string & K>}Loading`]: Signal<boolean>;
+    : `is${Capitalize<string & K>}Loading`]: (
+    entityOrId: Entity | string | number,
+  ) => boolean;
 } & {
   [K in keyof Calls as K extends `_${infer J}`
     ? `_is${Capitalize<string & J>}Loaded`
-    : `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
+    : `is${Capitalize<string & K>}Loaded`]: (
+    entityOrId: Entity | string | number,
+  ) => boolean;
 } & {
-  [K in keyof Calls as `${K & string}Error`]: Calls[K] extends CallConfig<
+  [K in keyof Calls as `${K & string}Error`]: Calls[K] extends EntityCallConfig<
     any,
     any,
     any,
     infer Error
   >
-    ? Signal<Error | undefined>
-    : Signal<unknown | undefined>;
+    ? (entityOrId: Entity | string | number) => Error | undefined
+    : (entityOrId: Entity | string | number) => unknown | undefined;
 };
