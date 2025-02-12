@@ -41,7 +41,6 @@ import {
   tap,
   timer,
 } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import { insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
@@ -257,7 +256,12 @@ export function withCalls<
               acc[callNameKey] = rxMethod<unknown[]>(
                 pipe(
                   mapPipe((params) => {
-                    const skip = skipWhenFn?.(params) ?? false;
+                    const previousResult = isCallConfig(call)
+                      ? call.storeResult != false
+                        ? state[resultPropKey]()
+                        : undefined
+                      : state[resultPropKey]();
+                    const skip = skipWhenFn?.(params, previousResult) ?? false;
                     const process$ = concatMap((params) => {
                       setLoading();
                       return runInInjectionContext(environmentInjector, () => {
@@ -274,7 +278,7 @@ export function withCalls<
                             setLoaded();
                             isCallConfig(call) &&
                               call.onSuccess &&
-                              call.onSuccess(result, params);
+                              call.onSuccess(result, params, previousResult);
                           }),
                           takeUntilDestroyed(),
                           catchError((error: unknown) => {
@@ -302,7 +306,7 @@ export function withCalls<
                         if (isDevMode() && value)
                           console.warn(`Call ${callName} is skip`);
                       }),
-                      first((v) => v),
+                      first((v) => !v),
                       map(() => params),
                       process$,
                     );
