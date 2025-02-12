@@ -164,7 +164,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
       });
     });
     it('Fail on a call should set status return error ', async () => {
@@ -224,7 +224,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
       });
     });
 
@@ -249,11 +249,11 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.testCall2Result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
       });
     });
 
-    it('Successful call should set status to loading and loaded ', async () => {
+    it('Successful call should set status to loading and loaded 2 ', async () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
@@ -267,7 +267,8 @@ describe('withCalls', () => {
                     );
               },
               storeResult: false,
-              onSuccess: (result) => {
+              onSuccess: (result, param, previousResult) => {
+                onSuccess(result, { ok: true }, previousResult);
                 // patchState should be able to update the store inside onSuccess
                 patchState(store, { foo: result });
               },
@@ -282,7 +283,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect((store as any).testCallResult).toBeUndefined();
-        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
         expect(store.foo()).toBe('test');
       });
     });
@@ -322,6 +323,7 @@ describe('withCalls', () => {
     });
 
     it('check onSuccess receives params', async () => {
+      const onSuccess = jest.fn();
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
@@ -330,13 +332,14 @@ describe('withCalls', () => {
             testCall: callConfig({
               call: ({ ok }: { ok: boolean }) => {
                 return ok
-                  ? apiResponse
+                  ? apiResponse.pipe(first())
                   : apiResponse.pipe(
                       tap(() => throwError(() => new Error('fail'))),
                     );
               },
               resultProp: 'baz',
-              onSuccess: (result, { ok }) => {
+              onSuccess: (result, { ok }, previousResult) => {
+                onSuccess(result, { ok }, previousResult);
                 // patchState should be able to update the store inside onSuccess
                 patchState(store, { foo: result, ok });
               },
@@ -367,6 +370,19 @@ describe('withCalls', () => {
         expect(store.foo()).toBe('test');
         expect(store.baz()).toBe('test');
         expect(store.ok()).toBe(true);
+        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
+
+        //calling again to check previous result
+        expect(store.isTestCallLoading()).toBeFalsy();
+        store.testCall({ ok: true });
+        expect(store.isTestCallLoading()).toBeTruthy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect((store as any).testCallResult).toBeUndefined();
+        expect(store.foo()).toBe('test2');
+        expect(store.baz()).toBe('test2');
+        expect(store.ok()).toBe(true);
+        expect(onSuccess).toHaveBeenCalledWith('test2', { ok: true }, 'test');
 
         expect(store.isTestCall2Loading()).toBeFalsy();
         store.testCall2({ ok: true });
@@ -576,6 +592,39 @@ describe('withCalls', () => {
       });
     });
 
+    it('returning true in skipWhen should skip call using previousResult ', async () => {
+      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+        /* Empty */
+      });
+      TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: callConfig({
+              call: () => apiResponse.pipe(first()),
+              mapPipe: 'exhaustMap',
+              skipWhen: (param, previousResult) => previousResult === 'test',
+            }),
+          })),
+        );
+        const store = new Store();
+        expect(store.isTestCallLoading()).toBeFalsy();
+
+        store.testCall();
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
+        expect(consoleWarn).not.toHaveBeenCalledWith('Call testCall is skip');
+
+        expect(store.isTestCallLoading()).toBeFalsy();
+        apiResponse.next('test2');
+        expect(store.isTestCallLoaded()).toBeFalsy();
+        expect(store.testCallResult()).toBeUndefined();
+        expect(store.testCallCallStatus()).toEqual('init');
+        expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
+      });
+    });
+
     it('returning false in skipWhen should make call ', async () => {
       const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
@@ -606,7 +655,7 @@ describe('withCalls', () => {
       const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -633,7 +682,9 @@ describe('withCalls', () => {
       const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      jest.resetAllMocks();
+      let apiResponse = new Subject<string>();
+      TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -741,7 +792,11 @@ describe('withCalls', () => {
           privateApiResponse.next('test');
           expect(store.privateIsTestCall2Loaded()).toBeTruthy();
           expect(store.privateResult()).toBe('test');
-          expect(onSuccess).toHaveBeenCalledWith('test', { ok: true });
+          expect(onSuccess).toHaveBeenCalledWith(
+            'test',
+            { ok: true },
+            undefined,
+          );
         });
       });
       it('Fail on a call should set status return error ', async () => {

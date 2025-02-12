@@ -57,7 +57,7 @@ import {
  * @param configFactory.filterFn - The function that will be used to filter the entities
  * @param configFactory.defaultFilter - The default filter to be used
  * @param configFactory.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
- * @param configFactory.entity - The entity tye to be used
+ * @param configFactory.entity - The entity type to be used
  * @param configFactory.collection - The optional collection name to be used
  * @param configFactory.selectId - The function to use to select the id of the entity
  *
