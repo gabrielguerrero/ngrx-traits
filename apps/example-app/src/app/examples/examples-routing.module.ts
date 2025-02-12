@@ -26,6 +26,13 @@ const routes: Routes = [
           ).then((m) => m.SignalProductListPaginatedPageContainerComponent),
       },
       {
+        path: 'order-list',
+        loadComponent: () =>
+          import('./signals/order-list/order-list.component').then(
+            (m) => m.OrderListComponent,
+          ),
+      },
+      {
         path: 'product-list-paginated/:id',
         loadComponent: () =>
           import(
