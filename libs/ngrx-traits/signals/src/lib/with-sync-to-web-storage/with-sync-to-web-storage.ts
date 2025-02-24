@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common';
-import { effect, inject, PLATFORM_ID } from '@angular/core';
+import { effect, inject, isDevMode, PLATFORM_ID } from '@angular/core';
 import {
   getState,
   patchState,
@@ -23,6 +23,7 @@ import {
  * @param restoreOnInit - restore the state from the storage on init
  * @param filterState - filter the state before saving to the storage
  * @param onRestore - callback after the state is restored from the storage
+ * @param expires - storage will not be loaded if is older than this many milliseconds
  *
  * @example
  * const store = signalStore(
@@ -54,12 +55,14 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   restoreOnInit = true,
   filterState,
   onRestore,
+  expires,
 }: {
   key: string;
   type: 'session' | 'local';
   restoreOnInit?: boolean;
   saveStateChangesAfterMs?: number;
   filterState?: (state: Input['state']) => Partial<Input['state']>;
+  expires?: number;
   onRestore?: (
     store: Prettify<
       StateSignals<Input['state']> &
@@ -90,9 +93,19 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
           const state = filterState
             ? filterState(getState(store))
             : getState(store);
-          if (storageType === 'local')
+          if (storageType === 'local') {
             window.localStorage.setItem(key, JSON.stringify(state));
-          else window.sessionStorage.setItem(key, JSON.stringify(state));
+            window.localStorage.setItem(
+              key + '-date',
+              new Date().toISOString(),
+            );
+          } else {
+            window.sessionStorage.setItem(key, JSON.stringify(state));
+            window.sessionStorage.setItem(
+              key + '-date',
+              new Date().toISOString(),
+            );
+          }
         },
         loadFromStorage(): boolean {
           if (!isBrowser) {
@@ -104,6 +117,21 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
               : window.sessionStorage.getItem(key);
           if (!stateJson) {
             return false;
+          }
+          if (expires) {
+            const dateStr =
+              storageType === 'local'
+                ? window.localStorage.getItem(key + '-date')
+                : window.sessionStorage.getItem(key + '-date');
+            if (dateStr == null) {
+              return false;
+            }
+            const date = new Date(dateStr);
+            if (new Date().getTime() - date.getTime() > expires) {
+              isDevMode() &&
+                console.warn(`${key} ${storageType} web storage expired`);
+              return false;
+            }
           }
           patchState(store, JSON.parse(stateJson));
           onRestore?.(
