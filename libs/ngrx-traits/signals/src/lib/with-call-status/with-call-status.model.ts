@@ -26,7 +26,7 @@ export type NamedCallStatusComputed<Prop extends string, Error = unknown> = {
 } & {
   [K in Prop as `is${Capitalize<string & K>}Loaded`]: Signal<boolean>;
 } & {
-  [K in Prop as `${K}Error`]: Signal<Error | null>;
+  [K in Prop as `${K}Error`]: Signal<Error | undefined>;
 };
 export type NamedCallStatusMethods<Prop extends string, Error = any> = {
   [K in Prop as `set${Capitalize<string & K>}Loading`]: () => void;
