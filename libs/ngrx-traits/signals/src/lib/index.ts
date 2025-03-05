@@ -23,6 +23,8 @@ export * from './with-logger/with-state-logger';
 export * from './with-logger/with-logger';
 export * from './with-calls/with-calls';
 export * from './with-calls/with-calls.model';
+export * from './with-call-status-map/with-call-status-map';
+export * from './with-call-status-map/with-call-status-map.model';
 export * from './with-calls/call-config';
 export * from './with-sync-to-web-storage/with-sync-to-web-storage';
 export * from './with-sync-to-route-query-params/with-entities-sync-to-route-query-params';
