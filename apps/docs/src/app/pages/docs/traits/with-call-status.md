@@ -19,9 +19,25 @@ import { withCallStatus } from '@ngrx-traits/signals';
 
 ## Usage
 
+Use this when the you need a special way to call you backend that is not handle by [withCalls](/docs/traits/withCalls)
+
 ### Minimal use case
+The following generates a callStatus signal, and getters isLoading isLoaded error, and computed
+setLoading setLoaded and setError
 ```typescript
 const store = signalStore(withCallStatus());
+```
+### Using prop or collection to rename generated
+The following generates a usersCallStatus signal, and getters isUsersLoading isUsersLoaded usersError, and computed
+setUsersLoading setUsersLoaded and setUsersError
+```typescript
+const store = signalStore(withCallStatus({ prop: 'users' }));
+```
+Prop and collection are aliases they cause the same effect, collection is there just so it can be use more easily combined with withEntities* store features
+
+### Typing error
+```typescript
+const store = signalStore(withCallStatus({ collection: 'users', initialValue: 'loading', errorType: type<string>() }));
 ```
 
 ### Using withCallStatus and withMethods to call backend
@@ -83,21 +99,9 @@ export const ProductsRemoteStore = signalStore(
     },
   });
 ```
-  To know more about withEntitiesLoadinCall see docs [here](withEntitiesLoadingCall)
-// TODO examples using it with a manual withMethods, and example using withEntities
-## Examples
+  To know more about withEntitiesLoadingCall see docs [here](/docs/traits/withEntitiesLoadingCall)
 
-```typescript
-const store = signalStore(withCallStatus());
-```
 
-```typescript
-const store = signalStore(withCallStatus({ prop: 'users' }));
-```
-
-```typescript
-const store = signalStore(withCallStatus({ collection: 'users', initialValue: 'loading', errorType: type<string>() }));
-```
 
 ## API Reference
 

@@ -6,7 +6,7 @@ order: 5
 # withEntitiesLoadingCall
 
 Generates a onInit hook that fetches entities from a remote source
-when the [collection]Loading is true, by calling the fetchEntities function
+when the is[Collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
 to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
@@ -104,6 +104,8 @@ export const ProductsLocalStore = signalStore(
   }),
 );
 ```
+
+To know more how it mixes and works with other local store features, check [Working with Entities](/docs/getting-started/working-with-entities) section.
 
 ## API Reference
 

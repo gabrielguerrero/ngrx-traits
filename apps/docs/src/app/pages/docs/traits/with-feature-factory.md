@@ -19,7 +19,7 @@ import { withFeatureFactory } from '@ngrx-traits/signals';
 
 ## Examples
 
-#### Use withFeatureFactory inside a custom feature to create a store whose config can be a factory that receives the store
+#### Use withFeatureFactory inside a custom feature to create a store feature whose config can be a factory that receives the store
 ```typescript
 function withCustomFeature2<Input extends SignalStoreFeatureResult>(
   configFactory: FeatureConfigFactory<Input, { foo: string }>,
@@ -53,7 +53,7 @@ const Store = signalStore(
 
 ```
 
-#### Allow a custome store feature that receives a plain config object to access the store's state, methods, computed signals.
+#### Allow a store feature that receives a plain config object to access the store's state, methods, computed signals.
 
 
 ```typescript

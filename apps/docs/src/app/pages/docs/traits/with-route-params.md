@@ -8,7 +8,7 @@ This store feature provides access to the route params. The mapParams receives t
 to an object, this will create a computed for each prop return by the mapParams function
 
 ## Examples
-
+### Transform url params into store props
 ```typescript
 // example route  /products/:id/
 const ProductDetailStore = signalStore(

@@ -8,7 +8,6 @@ import { signalStore, type, withMethods } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
-import { entityCallConfig } from '../../../../../../../libs/ngrx-traits/signals/src/lib/with-entities-calls/entity-call-config';
 import { withEntitiesCalls } from '../../../../../../../libs/ngrx-traits/signals/src/lib/with-entities-calls/with-entities-calls';
 import { OrderDetail, OrderSummary } from '../../models';
 import { OrderService } from '../../services/order.service';
@@ -34,8 +33,8 @@ export const OrderStore = signalStore(
       loadOrderDetail: (entity: OrderSummary) =>
         orderService.getOrderDetail(entity.id),
       // alternative way to define the call
-      // loadOrderDetail: entityCallConfig({
-      //   call: (entity: OrderSummary) => orderService.getOrderDetail(entity.id),
+      // loadOrderDetail2: entityCallConfig({
+      //   call: (opt: OrderSummary) => orderService.getOrderDetail(entity.id),
       //   skipWhen: (param, previousResult) => !!previousResult?.items,
       // }),
       changeOrderStatus: (option: {
@@ -51,19 +50,13 @@ export const OrderStore = signalStore(
       },
     }),
   }),
-  withMethods(
-    ({
-      loadOrderDetail,
-      isLoadOrderDetailLoaded,
-      toggleSelectOrdersEntities,
-    }) => ({
-      toggleShowDetail(order: OrderSummary) {
-        toggleSelectOrdersEntities(order);
-        // only load the order detail if it is not loaded yet, this can be avoided by using the skipWhen option in the call
-        if (!isLoadOrderDetailLoaded(order)) {
-          loadOrderDetail(order);
-        }
-      },
-    }),
-  ),
+  withMethods((store) => ({
+    toggleShowDetail(order: OrderSummary) {
+      store.toggleSelectOrdersEntities(order);
+      // only load the order detail if it is not loaded yet, this can be avoided by using the skipWhen option in the call
+      if (!store.isLoadOrderDetailLoaded(order)) {
+        store.loadOrderDetail(order);
+      }
+    },
+  })),
 );

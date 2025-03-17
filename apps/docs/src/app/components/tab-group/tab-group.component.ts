@@ -18,12 +18,13 @@ import type { TabComponent } from '../tab/tab.component';
         <button
           class="focus-visible:ring-primary -mb-px h-10 border-b-2 font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-opacity-50 focus-visible:ring-offset-2"
           [ngClass]="{
-            'border-primary text-zinc-950': activeTab()?.label === tab.label,
+            'border-primary text-zinc-600 dark:text-zinc-300':
+              activeTab()?.label === tab.label,
             'border-transparent text-zinc-500': activeTab()?.label !== tab.label
           }"
           (click)="activeTab.set(tab)"
         >
-          {{ tab.label }}
+          {{ tab.label() }}
         </button>
       }
     </div>

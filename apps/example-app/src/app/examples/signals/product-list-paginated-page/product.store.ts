@@ -1,6 +1,8 @@
-import { inject } from '@angular/core';
+import { effect, inject } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   callConfig,
+  withAllCallStatus,
   withCalls,
   withCallStatus,
   withEntitiesLoadingCall,
@@ -10,45 +12,46 @@ import {
   withEntitiesSingleSelection,
   withEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
-import { signalStore, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
+import {
+  signalStore,
+  signalStoreFeature,
+  type,
+  withHooks,
+} from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
 import { Product } from '../../models';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
 
-const entity = type<Product>();
-const collection = 'products';
-
+const productsEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'products',
+});
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: 'loading' }),
+  withErrorSnackbar(),
+  withEntities(productsEntityConfig),
+  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
   withEntitiesLocalPagination({
-    entity,
-    collection,
+    ...productsEntityConfig,
     pageSize: 5,
   }),
   withEntitiesLocalFilter({
-    entity,
-    collection,
+    ...productsEntityConfig,
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
   withEntitiesLocalSort({
-    entity,
-    collection,
+    ...productsEntityConfig,
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesSingleSelection({
-    entity,
-    collection,
-  }),
+  withEntitiesSingleSelection(productsEntityConfig),
   withEntitiesLoadingCall({
-    collection,
+    ...productsEntityConfig,
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()
@@ -69,9 +72,13 @@ export const ProductsLocalStore = signalStore(
       //     ? { id: productsEntitySelected()!.id }
       //     : undefined, // if no product is selected, skip call
     }),
+
     checkout: () => inject(OrderService).checkout(),
-    loadProductDetail2: ({ id }: { id: string }) =>
-      inject(ProductService).getProductDetail(id),
+    loadOrderDetail: callConfig({
+      call: ({ orderId }: { orderId: string }) =>
+        inject(OrderService).getOrderDetail(orderId),
+      resultProp: 'orderDetail',
+    }),
   })),
   // loadProductDetail callWith is equivalent to:
   // withHooks((store) => {
@@ -84,9 +91,23 @@ export const ProductsLocalStore = signalStore(
   //         });
   //   };
   // }),
-  withEntitiesSyncToRouteQueryParams({
-    collection,
-    entity,
-  }),
+  withEntitiesSyncToRouteQueryParams(productsEntityConfig),
 );
-new ProductsLocalStore().loadProductDetail2Result;
+
+export function withErrorSnackbar() {
+  return signalStoreFeature(
+    withAllCallStatus(),
+    withHooks((store, snackBar = inject(MatSnackBar)) => ({
+      onInit: () => {
+        effect(() => {
+          const errors = store.callsErrors();
+          if (errors.length > 0) {
+            snackBar.open('Error processing Call', 'Close', {
+              duration: 5000,
+            });
+          }
+        });
+      },
+    })),
+  );
+}

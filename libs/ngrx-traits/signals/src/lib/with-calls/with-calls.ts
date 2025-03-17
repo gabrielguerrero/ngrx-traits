@@ -74,7 +74,7 @@ import { getWithCallKeys } from './with-calls.util';
  *
  * @example
  *  withCalls(({ productsSelectedEntity }) => ({
- *     loadProductDetail: typedCallConfig({
+ *     loadProductDetail: callConfig({
  *       call: ({ id }: { id: string }) =>
  *         inject(ProductService).getProductDetail(id),
  *       resultProp: 'productDetail',
