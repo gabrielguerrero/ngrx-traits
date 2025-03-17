@@ -21,10 +21,16 @@ If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPa
 
 **Requires** withEntities and withCallStatus to be present in the store.
 
+
+## Examples
+
+### Paginating a list of entities
+In this example we have a list of products and we want to paginate them, we will use the pageSize prop to set the initial page size.
+
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection,
+  collection: 'products'
 });
 
 export const store = signalStore(
@@ -53,7 +59,73 @@ export const store = signalStore(
   }),
 );
 ```
+Now we use it in a component, the generated usersCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
 
+```html
+@for (user of store.productsCurrentPage.entities(); track user.id){
+  {{ user.name }}
+}
+<mat-paginator
+  [pageSizeOptions]="[5, 10, 25, 100]"
+  [length]="store.productsCurrentPage.total()"
+  [pageSize]="store.productsCurrentPage.pageSize()"
+  [pageIndex]="store.productsCurrentPage.pageIndex()"
+  (page)="store.loadProductsPage($event)"
+></mat-paginator>
+```
+
+## Mixing with other remote store features
+You can mix this feature with other remote store features like withEntitiesRemoteSort, withEntitiesRemoteFilter, etc.
+
+
+```typescript
+const productsStoreFeature = signalStoreFeature(
+  withEntities({
+    entity: productsEntity,
+    collection: productsCollection,
+  }),
+  withCallStatus({
+    initialValue: 'loading',
+    collection: productsCollection,
+    errorType: type<string>(),
+  }),
+  withEntitiesRemoteFilter({
+    entity: productsEntity,
+    collection: productsCollection,
+    defaultFilter: { search: '' },
+  }),
+  withEntitiesRemotePagination({
+    entity: productsEntity,
+    collection: productsCollection,
+    pageSize: 10,
+  }),
+  withEntitiesRemoteSort({
+    entity: productsEntity,
+    collection: productsCollection,
+    defaultSort: { field: 'name', direction: 'asc' },
+  }),
+  withEntitiesLoadingCall(
+    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+      collection: productsCollection,
+      fetchEntities: async () => {
+        const res = await lastValueFrom(
+          inject(ProductService).getProducts({
+            search: productsFilter().search,
+            skip: productsPagedRequest().startIndex,
+            take: productsPagedRequest().size,
+            sortAscending: productsSort().direction === 'asc',
+            sortColumn: productsSort().field,
+          }),
+        );
+        return { entities: res.resultList, total: res.total };
+      },
+    }),
+  ),
+);
+```
+To know more how it mixes and works with other local store features, check [Working with Entities](/docs/getting-started/working-with-entities) section.
+
+## API Reference
 | Property     | Description                                        | Value                    |
 | ------------ | -------------------------------------------------- | ------------------------ |
 | entity       | The entity type                                    | `type<T>()`              |

@@ -9,6 +9,11 @@ See <code>createReducer</code>.</p></dd>
 ## Functions
 
 <dl>
+<dt><a href="#withAllCallStatus">withAllCallStatus()</a></dt>
+<dd><p>Adds methods to the store to track the status of all calls in the store</p></dd>
+<dt><a href="#withCallStatusMap">withCallStatusMap(configFactory)</a></dt>
+<dd><p>Generates necessary state, computed and methods for call progress status but map by a key, allowing to implement
+calls of the same type that run on parallel each with its own status.</p></dd>
 <dt><a href="#withCallStatus">withCallStatus(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for call progress status to the store</p></dd>
 <dt><a href="#callConfig">callConfig(config)</a></dt>
@@ -24,6 +29,18 @@ The original call can only have zero or one parameter, use an object with multip
 props as first param if you need more.
 If the name start with an underscore, the call will be private and all generated methods
 will also start with an underscore, making it only accessible inside the store.</p></dd>
+<dt><a href="#entityCallConfig">entityCallConfig(config)</a></dt>
+<dd><p>Call configuration object for withEntitiesCalls</p></dd>
+<dt><a href="#withEntitiesCalls">withEntitiesCalls()</a></dt>
+<dd><p>Generates necessary state, computed and methods to track the progress of
+calls related to an entity and merges the result back to entities list. The generated methods are rxMethods with
+the same name as the original call, which accepts either the original parameters
+or a Signal or Observable of the same type as the original parameters.
+The original call can only have zero or one parameter, use an object with multiple
+props as first param if you need more.
+<em>Important</em> The calls must have a parameter of type Entity  {entity: Entity, ...extra params} or use entityCallConfig
+and the paramsSelectId to return with param prop represents the entityId .
+The call can be skipped based on the result of the previous call, to skip a call return undefined or false.</p></dd>
 <dt><a href="#withEntitiesHybridFilter">withEntitiesHybridFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state and methods to do remote and local filtering of entities in the store,
 the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
@@ -78,7 +95,7 @@ This is ideal for implementing infinite scroll where the entities cache keeps gr
 allows going to the next and previous page because you dont know the total number of entities
 probably because the data is top big and partitioned in multiple nodes.</p>
 <p>When the page changes, it will try to load the current page from cache if it's not present,
-it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
+it will call set[Collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
 and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
@@ -120,7 +137,12 @@ can access the store. This can be useful for creating store features that need t
 features that don't have a config factory that can access the store.</p></dd>
 <dt><a href="#withInputBindings">withInputBindings(inputs)</a></dt>
 <dd></dd>
-<dt><a href="#withStateLogger">withStateLogger(name, filterState)</a></dt>
+<dt><a href="#withLogger">withLogger(name, filter, showDiff)</a></dt>
+<dd><p>Log the state of the store on every change, optionally filter the signals to log
+the filter prop can receive an array with the names of the props to filter, or you can provide a function
+which receives the store as an argument and should return the object to log, if any of the props in the object is a signal
+it will log the value of the signal. If showDiff is true it will log the diff of the state on every change.</p></dd>
+<dt><del><a href="#withStateLogger">withStateLogger(name, filterState)</a></del></dt>
 <dd><p>Log the state of the store on every change</p></dd>
 <dt><a href="#withRouteParams">withRouteParams(mapParams)</a></dt>
 <dd><p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
@@ -134,7 +156,7 @@ when is not provided the filter will use JSON.stringify to serialize the filter 
 <dd><p>Syncs the route query params with the store and back. On init it will load
 the query params once and set them in the store using the mapper.queryParamsToState, after that
 and change on the store will be reflected in the query params using the mapper.stateToQueryParams</p></dd>
-<dt><a href="#withSyncToWebStorage">withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore)</a></dt>
+<dt><a href="#withSyncToWebStorage">withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore, expires)</a></dt>
 <dd><p>Sync the state of the store to the web storage</p></dd>
 </dl>
 
@@ -145,6 +167,106 @@ and change on the store will be reflected in the query params using the mapper.s
 See <code>createReducer</code>.</p>
 
 **Kind**: global constant  
+<a name="withAllCallStatus"></a>
+
+## withAllCallStatus()
+<p>Adds methods to the store to track the status of all calls in the store</p>
+
+**Kind**: global function  
+**Example**  
+```js
+export const ProductsLocalStore = signalStore(
+  withAllCallStatus(), // <-- add this line
+  withEntities({ entity, collection }),
+  withCallStatus({ collection, initialValue: 'loading' }),
+  withEntitiesLoadingCall({
+    collection,
+    fetchEntities: () => {
+      return inject(ProductService)
+        .getProducts()
+        .pipe(map((d) => d.resultList));
+    },
+  }),
+  withCalls(() => ({
+    loadProductDetail: callConfig({
+      call: ({ id }: { id: string }) =>
+        inject(ProductService).getProductDetail(id),
+      resultProp: 'productDetail',
+    }),
+    checkout: () => inject(OrderService).checkout(),
+  })),
+);
+// generates the following methods
+ store.isAnyCallLoading() // Signal<boolean>
+ store.callsErrors // () => Signals<unknown[]>
+```
+<a name="withCallStatusMap"></a>
+
+## withCallStatusMap(configFactory)
+<p>Generates necessary state, computed and methods for call progress status but map by a key, allowing to implement
+calls of the same type that run on parallel each with its own status.</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| configFactory | <p>The configuration object for the feature or a factory function that receives the store and returns the configuration object</p> |
+| configFactory.prop | <p>The name of the property for which this represents the call status</p> |
+| configFactory.initialValue | <p>The initial value of the call status</p> |
+| configFactory.collection | <p>The name of the collection for which this represents the call status is an alias to prop param</p> |
+| configFactory.errorType | <p>The type of the error they do the same thing</p> <p>prop or collection is required</p> |
+
+**Example**  
+```js
+export const Store = signalStore(
+  { providedIn: 'root' },
+  withEntities(orderEntity),
+  withCallStatusMap({ prop: 'loadDetails' }),
+  withMethods((store) => ({
+    loadProducts: rxMethod<{ orderId: string }>(
+      pipe(
+        switchMap((params) => {
+          store.setLoadDetailsLoading(params.orderId);
+          return inject(OrderService)
+            .getOrderDetail(params.orderId)
+            .pipe(
+              tap((res) =>
+                patchState(
+                  store,
+                  updateEntity(
+                    {
+                      id: params.orderId,
+                      changes: { items: res.items },
+                    },
+                    orderEntity,
+                  ),
+                ),
+              ),
+              catchError((error) => {
+                store.setLoadDetailsError(params.orderId, error);
+                return EMPTY;
+              }),
+            );
+        }),
+      ),
+    ),
+  })),
+);
+
+ // generates the following signals
+ store.loadDetailsCallStatus // '{[key:string]: init' | 'loading' | 'loaded' | { error: unknown }}
+ // generates the following computed signals
+ store.isAnyLoadDetailsLoading() // boolean
+ store.areAllLoadDetailsLoaded // boolean
+ store.loadDetailsErrors() // Errors[] | undefined
+ // generates the following methods
+ store.isLoadDetailsLoading(key: string) // boolean
+ store.isLoadDetailsLoaded(key: string) // boolean
+ store.loadDetailsError(key: string) // unknown | null
+ store.setLoadDetailsLoading(key: string) // () => void
+ store.setLoadDetailsLoaded(key: string) // () => void
+ store.setLoadDetailsError(key: string) // (error?: unknown) => void
+```
 <a name="withCallStatus"></a>
 
 ## withCallStatus(configFactory)
@@ -246,7 +368,7 @@ will also start with an underscore, making it only accessible inside the store.<
 **Example**  
 ```js
 withCalls(({ productsSelectedEntity }) => ({
-    loadProductDetail: typedCallConfig({
+    loadProductDetail: callConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
@@ -293,6 +415,97 @@ withCalls(({ productsSelectedEntity }) => ({
   // generates the following methods
   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
   store.checkout // () => void
+```
+<a name="entityCallConfig"></a>
+
+## entityCallConfig(config)
+<p>Call configuration object for withEntitiesCalls</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| config | <p>the call configuration</p> |
+| config.call | <p>required, the function that will be called</p> |
+| config.mapResult | <p>required, a function to transform the result of the call to the entity</p> |
+| config.entityId | <p>required, a function that returns the entity id in the params</p> |
+| config.onSuccess | <p>optional, a function that will be called when the call is successful</p> |
+| config.mapError | <p>optional, a function that will be called to transform the error before storing it</p> |
+| config.onError | <p>optional, a function that will be called when the call fails</p> |
+| config.skipWhen | <p>optional, a function that will be called to determine if the call should be skipped</p> |
+| config.callWith | <p>optional, reactively execute the call with the provided params return by a function or signal or observable</p> |
+| config.defaultResult | <p>optional, A default value for the result before the call is executed</p> |
+
+<a name="withEntitiesCalls"></a>
+
+## withEntitiesCalls()
+<p>Generates necessary state, computed and methods to track the progress of
+calls related to an entity and merges the result back to entities list. The generated methods are rxMethods with
+the same name as the original call, which accepts either the original parameters
+or a Signal or Observable of the same type as the original parameters.
+The original call can only have zero or one parameter, use an object with multiple
+props as first param if you need more.
+<em>Important</em> The calls must have a parameter of type Entity  {entity: Entity, ...extra params} or use entityCallConfig
+and the paramsSelectId to return with param prop represents the entityId .
+The call can be skipped based on the result of the previous call, to skip a call return undefined or false.</p>
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config.entity |  | <p>The entity type to be used</p> |
+| config.collection |  | <p>The optional collection name to be used</p> |
+| config.selectId |  | <p>The function to use to select the id of the entity</p> |
+| config.callsFactory | <code>Record.&lt;string, EntitiesCallConfig&gt;</code> | <p>a factory function that receives the store and returns an object of type  with the calls to be made</p> |
+
+**Example**  
+```js
+const orderEntity = entityConfig({
+  entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
+  collection: 'orders',
+});
+export const OrderStore = signalStore(
+  withEntities(orderEntity),
+  withEntitiesCalls({
+    ...orderEntity,
+    calls: (store, orderService = inject(OrderService)) => ({
+      loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id),
+      // alternative way to define the call
+      // loadOrderDetail: entityCallConfig({
+      //   call: (entity: OrderSummary) => orderService.getOrderDetail(entity.id),
+      //   // skip the call if result is already loaded
+      //   skipWhen: (param, previousResult) => !!previousResult?.items,
+      // }),
+      changeOrderStatus: (option: {
+        entity: OrderSummary;
+        status: OrderSummary['status'];
+      }) => orderService.changeStatus(option.entity.id, option.status),
+      deleteOrder: (entity: OrderSummary) => {
+        return orderService.delete(entity.id).pipe(
+          map((deleted) => {
+            deleted ? undefined : entity; // returning undefined will remove the entity from the store
+          }),
+        );
+      },
+    }),
+  }),
+);
+
+  // generates the following signals
+  store.loadOrderDetailCallStatus // a map { [id: string]:'init' | 'loading' | 'loaded' | { error: unknown }}
+  // similar for changeOrderStatus and deleteOrder *
+  // the calls updates the entities so results, which can be accessed with the usual entities list computed signals
+  // generates the following computed signals
+  store.isAnyLoadOrderDetailLoading: Signal<boolean>
+  store.isAnyLoadOrderDetailLoaded: Signal<boolean>
+  store.loadOrderDetailErrors: Signal<unknown[]>
+  // same for changeOrderStatus and deleteOrder
+  // generates the following methods
+  store.isLoadOrderDetailLoading(id: string) => boolean
+  store.isLoadOrderDetailLoaded(id: string) => boolean
+  store.loadOrderDetailError(id: string) => string | null
+  store.loadOrderDetail ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
+  // same for changeOrderStatus and deleteOrder
 ```
 <a name="withEntitiesHybridFilter"></a>
 
@@ -382,7 +595,7 @@ export const store = signalStore(
 // generates the following signals
  store.productsFilter // { search: string , category: string }
  // generates the following methods
- store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
+ store.filterProductsEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
  store.resetProductsFilter  // () => void
 ```
 <a name="withEntitiesLocalFilter"></a>
@@ -401,7 +614,7 @@ and is debounced by default.</p>
 | configFactory.filterFn | <p>The function that will be used to filter the entities</p> |
 | configFactory.defaultFilter | <p>The default filter to be used</p> |
 | configFactory.defaultDebounce | <p>The default debounce time to be used, if not set it will default to 300ms</p> |
-| configFactory.entity | <p>The entity tye to be used</p> |
+| configFactory.entity | <p>The entity type to be used</p> |
 | configFactory.collection | <p>The optional collection name to be used</p> |
 | configFactory.selectId | <p>The function to use to select the id of the entity</p> |
 
@@ -724,7 +937,7 @@ This is ideal for implementing infinite scroll where the entities cache keeps gr
 allows going to the next and previous page because you dont know the total number of entities
 probably because the data is top big and partitioned in multiple nodes.</p>
 <p>When the page changes, it will try to load the current page from cache if it's not present,
-it will call set[collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
+it will call set[Collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
 and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
 or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
@@ -1254,9 +1467,45 @@ const Store = signalStore(
     }
   }
 ```
+<a name="withLogger"></a>
+
+## withLogger(name, filter, showDiff)
+<p>Log the state of the store on every change, optionally filter the signals to log
+the filter prop can receive an array with the names of the props to filter, or you can provide a function
+which receives the store as an argument and should return the object to log, if any of the props in the object is a signal
+it will log the value of the signal. If showDiff is true it will log the diff of the state on every change.</p>
+
+**Kind**: global function  
+
+| Param | Description |
+| --- | --- |
+| name | <p>The name of the store to log</p> |
+| filter | <p>optional filter function to filter the store signals or an array of keys to filter</p> |
+| showDiff | <p>optional flag to log the diff of the state on every change</p> |
+
+**Example**  
+```js
+const Store = signalStore(
+    withState(() => ({ prop1: 1, prop2: 2 })),
+    withComputed(({ prop1, prop2 }) => ({
+      prop3: computed(() => prop1() + prop2()),
+    })),
+    withLogger({
+      name: 'Store',
+      // by default it will log all state and computed signals
+      // or you can filter with an array of keys
+      // filter: ['prop1', 'prop2'],
+      // or you can filter with a function
+      // filter: ({ prop1, prop2 }) => ({ prop1, prop2 }),
+      // showDiff: true,
+    }),
+  );
+```
 <a name="withStateLogger"></a>
 
-## withStateLogger(name, filterState)
+## ~~withStateLogger(name, filterState)~~
+***Deprecated***
+
 <p>Log the state of the store on every change</p>
 
 **Kind**: global function  
@@ -1406,7 +1655,7 @@ const Store = signalStore(
 ```
 <a name="withSyncToWebStorage"></a>
 
-## withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore)
+## withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore, expires)
 <p>Sync the state of the store to the web storage</p>
 
 **Kind**: global function  
@@ -1419,6 +1668,7 @@ const Store = signalStore(
 | restoreOnInit | <p>restore the state from the storage on init</p> |
 | filterState | <p>filter the state before saving to the storage</p> |
 | onRestore | <p>callback after the state is restored from the storage</p> |
+| expires | <p>storage will not be loaded if is older than this many milliseconds</p> |
 
 **Example**  
 ```js

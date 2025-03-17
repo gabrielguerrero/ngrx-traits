@@ -6,8 +6,10 @@ import { provideHttpClient, withFetch } from '@angular/common/http';
 import {
   APP_INITIALIZER,
   ApplicationConfig,
+  inject,
   Injector,
   PLATFORM_ID,
+  provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideClientHydration } from '@angular/platform-browser';
@@ -20,36 +22,27 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideFileRouter(),
     provideClientHydration(),
-
     provideContent(withMarkdownRenderer(), withPrismHighlighter()),
     provideHttpClient(withFetch()),
-    {
-      provide: APP_INITIALIZER,
-      useFactory: initializeCustomElements,
-      multi: true,
-      deps: [Injector, PLATFORM_ID],
-    },
+    provideAppInitializer(initializeCustomElements),
     provideImgixLoader('https://gabrielguerrerosite-914026926.imgix.net/'),
   ],
 };
 
-export function initializeCustomElements(
-  injector: Injector,
-  platform: object,
-): () => Promise<void> {
-  return async () => {
-    if (isPlatformBrowser(platform)) {
-      const { createCustomElement } = await import('@angular/elements');
-      // Register the custom element with the browser.
+export async function initializeCustomElements() {
+  const injector = inject(Injector);
+  const platform = inject(PLATFORM_ID);
+  if (isPlatformBrowser(platform)) {
+    const { createCustomElement } = await import('@angular/elements');
+    // Register the custom element with the browser.
 
-      customElements.define(
-        'tab-group',
-        createCustomElement(TabGroupComponent, { injector }),
-      );
-      customElements.define(
-        'tab-item',
-        createCustomElement(TabComponent, { injector }),
-      );
-    }
-  };
+    customElements.define(
+      'tab-group',
+      createCustomElement(TabGroupComponent, { injector }),
+    );
+    customElements.define(
+      'tab-item',
+      createCustomElement(TabComponent, { injector }),
+    );
+  }
 }

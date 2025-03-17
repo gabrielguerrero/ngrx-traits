@@ -154,7 +154,7 @@ export class SignalProductListPaginatedPageContainerComponent {
 `withCalls` is very flexible you can see other examples below.
 ```typescript
    withCalls(({ productsSelectedEntity }) => ({
-    loadProductDetail: typedCallConfig({
+    loadProductDetail: callConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail', // change the prop name of the result

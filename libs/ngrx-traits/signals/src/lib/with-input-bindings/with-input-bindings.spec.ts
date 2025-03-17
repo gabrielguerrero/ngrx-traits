@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { typedCallConfig, withCalls } from '@ngrx-traits/signals';
+import { callConfig, withCalls } from '@ngrx-traits/signals';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { of, pipe, tap } from 'rxjs';

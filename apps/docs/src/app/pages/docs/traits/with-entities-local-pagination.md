@@ -17,49 +17,79 @@ Import the withEntitiesLocalPagination trait from `@ngrx-traits/signals`.
 import { withEntitiesLocalPagination } from '@ngrx-traits/signals';
 ```
 
-```typescript
+## Examples
 
+### Paginating a list of entities
+
+In this example we have a list of users and we want to paginate them, we will use the pageSize prop to set the initial page size.
+```typescript
 const entity = entityConfig({
-    entity: type<T>()
+    entity: type<T>(),
     collection: 'users'
 })
 
 const store = signalStore(
+    withEntities(entity),
     withEntitiesLocalPagination({
         ...entity,
         pageSize: 10,
-        currentPage: 0
     })
 );
 ```
+Now we use it in a component, the generated usersCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
 
-## Examples
+```html
+@for (user of store.usersCurrentPage.entities(); track user.id){
+  {{ user.name }}
+}
+<mat-paginator
+  [pageSizeOptions]="[5, 10, 25, 100]"
+  [length]="store.usersCurrentPage.total()"
+  [pageSize]="store.usersCurrentPage.pageSize()"
+  [pageIndex]="store.usersCurrentPage.pageIndex()"
+  (page)="store.loadUsersPage($event)"
+></mat-paginator>
+```
+
+### Mixing with other local store features
+You can mix this feature with other local store features like withEntitiesLocalSort, withEntitiesLocalFilter, etc.
 
 ```typescript
-const store = signalStore(
+const productsEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'products',
+});
+export const ProductsLocalStore = signalStore(
+  { providedIn: 'root' },
+  withEntities(productsEntityConfig),
+  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
   withEntitiesLocalPagination({
-    pageSize: 10,
-    currentPage: 0,
+    ...productsEntityConfig,
+    pageSize: 5,
+  }),
+  withEntitiesLocalFilter({
+    ...productsEntityConfig,
+    defaultFilter: { search: '' },
+    filterFn: (entity, filter) =>
+      !filter?.search ||
+      entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+  }),
+  withEntitiesLocalSort({
+    ...productsEntityConfig,
+    defaultSort: { field: 'name', direction: 'asc' },
+  }),
+  withEntitiesLoadingCall({
+    ...productsEntityConfig,
+    fetchEntities: () => {
+      return inject(ProductService)
+        .getProducts()
+        .pipe(map((d) => d.resultList));
+    },
   }),
 );
 ```
 
-With named collection:
-
-```typescript
-const entity = entityConfig({
-    entity: type<T>()
-    collection: 'users'
-})
-
-const store = signalStore(
-    withEntitiesLocalPagination({
-        ...entity,
-        pageSize: 10,
-        currentPage: 0
-    })
-);
-```
+To know more how it mixes and works with other local store features, check [Working with Entities](/docs/getting-started/working-with-entities) section.
 
 ## API Reference
 

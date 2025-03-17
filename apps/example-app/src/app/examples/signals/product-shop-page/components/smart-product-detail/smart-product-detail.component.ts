@@ -67,21 +67,4 @@ export class SmartProductDetailComponent implements OnInit {
     // 👇 loadProductDetail is an rxMethod it can receive a signal reference
     this.store.loadProductDetail(this.productId);
   }
-  // other ways
-
-  // loadProductDetail = effect(
-  //   () => {
-  //     this.store.loadProductDetail(this.productId());
-  //   },
-  //   { allowSignalWrites: true },
-  // );
-
-  // constructor() {
-  //   effect(
-  //     () => {
-  //       this.store.loadProductDetail(this.productId());
-  //     },
-  //     { allowSignalWrites: true },
-  //   );
-  // }
 }
