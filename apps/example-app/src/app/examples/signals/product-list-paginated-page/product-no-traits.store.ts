@@ -50,63 +50,29 @@ const productStore = signalStore(
       patchState(state, { productsStatus: { error } });
     },
   })),
-  withMethods(
-    ({
-      setProductsLoading,
-      setProductsLoaded,
-      setProductsError,
-      ...store
-    }) => ({
-      loadProducts: rxMethod(
-        pipe(
-          switchMap(() => {
-            setProductsLoading();
-            return inject(ProductService)
-              .getProducts()
-              .pipe(
-                takeUntilDestroyed(),
-                tap((res) =>
-                  patchState(
-                    store,
-                    setAllEntities(res.resultList, { collection: 'products' }),
-                  ),
-                ),
-                catchError((error) => {
-                  setProductsError(error);
-                  return EMPTY;
-                }),
-              );
-          }),
-        ),
-      ),
-    }),
-  ),
   // withEntitiesLoadingCall is the same as doing the following:
   withHooks(({ productsLoading, setProductsError, ...state }) => ({
     onInit: async () => {
-      effect(
-        () => {
-          if (productsLoading()) {
-            inject(ProductService)
-              .getProducts()
-              .pipe(
-                takeUntilDestroyed(),
-                tap((res) =>
-                  patchState(
-                    state,
-                    setAllEntities(res.resultList, { collection: 'products' }),
-                  ),
+      effect(() => {
+        if (productsLoading()) {
+          inject(ProductService)
+            .getProducts()
+            .pipe(
+              takeUntilDestroyed(),
+              tap((res) =>
+                patchState(
+                  state,
+                  setAllEntities(res.resultList, { collection: 'products' }),
                 ),
-                catchError((error) => {
-                  setProductsError(error);
-                  return EMPTY;
-                }),
-              )
-              .subscribe();
-          }
-        },
-        { allowSignalWrites: true },
-      );
+              ),
+              catchError((error) => {
+                setProductsError(error);
+                return EMPTY;
+              }),
+            )
+            .subscribe();
+        }
+      });
     },
   })),
 );

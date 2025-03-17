@@ -92,7 +92,6 @@ export class NavbarComponent {
   readonly menuOpen = model(false);
 
   toggle(): void {
-    console.log('toggle');
     this.menuOpen.update((open) => !open);
   }
 }

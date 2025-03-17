@@ -1,18 +1,45 @@
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { NavigationEnd, Router } from '@angular/router';
+import { Subject } from 'rxjs';
 
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [RouterTestingModule, AppComponent],
-    }).compileComponents();
+  let routerEvents$: Subject<any>;
+  let platformId: Object;
+
+  beforeEach(() => {
+    routerEvents$ = new Subject();
+
+    TestBed.configureTestingModule({
+      imports: [AppComponent, CommonModule],
+      providers: [
+        {
+          provide: Router,
+          useValue: { events: routerEvents$.asObservable() },
+        },
+        {
+          provide: PLATFORM_ID,
+          useValue: 'browser', // mock browser platform
+        },
+      ],
+    });
   });
 
-  it('should create the app', () => {
+  it('should create the component and close menu on navigation', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    const component = fixture.componentInstance;
+
+    // Manually open the menu
+    component.menuOpen.set(true);
+    expect(component.menuOpen()).toBe(true);
+
+    // Emit NavigationEnd event
+    routerEvents$.next(new NavigationEnd(1, '/old', '/new'));
+
+    // The menu should now be closed
+    expect(component.menuOpen()).toBe(false);
   });
 });

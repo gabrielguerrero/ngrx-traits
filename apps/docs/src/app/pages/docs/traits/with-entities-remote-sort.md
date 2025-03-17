@@ -19,10 +19,11 @@ Useful in cases where you want to further change the state before manually calli
 
 ## Examples
 
+### Implement remote sort for a list of entities
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection,
+  collection:"products",
 });
 
 export const store = signalStore(
@@ -44,6 +45,67 @@ export const store = signalStore(
   }),
 );
 ```
+To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in github):
+```html
+<product-sort-dropdown
+  [sort]="store.productsSort()"
+  (sortChange)="store.sortProductsEntities({ sort: $event })"
+/>
+... show products list
+```
+
+## Mixing with other remote store features
+You can mix this feature with other remote store features like withEntitiesRemoteFilter, withEntitiesRemoteFilter, etc.
+
+
+```typescript
+const productsStoreFeature = signalStoreFeature(
+  withEntities({
+    entity: productsEntity,
+    collection: productsCollection,
+  }),
+  withCallStatus({
+    initialValue: 'loading',
+    collection: productsCollection,
+    errorType: type<string>(),
+  }),
+  withEntitiesRemoteFilter({
+    entity: productsEntity,
+    collection: productsCollection,
+    defaultFilter: { search: '' },
+  }),
+  withEntitiesRemotePagination({
+    entity: productsEntity,
+    collection: productsCollection,
+    pageSize: 10,
+  }),
+  withEntitiesRemoteSort({
+    entity: productsEntity,
+    collection: productsCollection,
+    defaultSort: { field: 'name', direction: 'asc' },
+  }),
+  withEntitiesLoadingCall(
+    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+      collection: productsCollection,
+      fetchEntities: async () => {
+        const res = await lastValueFrom(
+          inject(ProductService).getProducts({
+            search: productsFilter().search,
+            skip: productsPagedRequest().startIndex,
+            take: productsPagedRequest().size,
+            sortAscending: productsSort().direction === 'asc',
+            sortColumn: productsSort().field,
+          }),
+        );
+        return { entities: res.resultList, total: res.total };
+      },
+    }),
+  ),
+);
+```
+To know more how it mixes and works with other local store features, check [Working with Entities](/docs/getting-started/working-with-entities) section.
+
+## API Reference
 
 | Property    | Description                          | Value          |
 | ----------- | ------------------------------------ | -------------- |

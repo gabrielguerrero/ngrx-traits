@@ -50,21 +50,3 @@ npm i
 ```bash
 npm test
 ```
-
-## Build Library
-
-```bash
-npm build
-```
-
-## Start Examples App
-
-```bash
-npm start
-```
-
-## Start Docs App
-
-```bash
-npm start-docs
-```

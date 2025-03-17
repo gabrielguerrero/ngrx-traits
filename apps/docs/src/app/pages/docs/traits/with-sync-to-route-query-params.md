@@ -16,7 +16,7 @@ import { withSyncToRouteQueryParams } from '@ngrx-traits/signals';
 ```
 
 ## Examples
-
+### Sync the store with the route query params
 ```typescript
     const Store = signalStore(
       withState({

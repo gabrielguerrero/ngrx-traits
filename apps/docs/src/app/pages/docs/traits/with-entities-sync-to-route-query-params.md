@@ -18,6 +18,7 @@ import { withEntitiesSyncToRouteQueryParams } from '@ngrx-traits/signals';
 ```
 
 ## Examples
+### Syncing entities filter, pagination, sort and single selection to route query params
 
 ```typescript
 export const ProductsRemoteStore = signalStore(

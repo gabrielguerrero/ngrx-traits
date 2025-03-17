@@ -2,8 +2,6 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, model } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { getRouterLinks } from '../../utils/router';
-
 @Component({
   selector: 'docs-side-navigation',
   standalone: true,
@@ -20,13 +18,23 @@ import { getRouterLinks } from '../../utils/router';
             <ul class="ml-1">
               @for (link of section.links; track link) {
                 <li class="text-zinc-600 dark:text-zinc-300 text-sm">
-                  <a
-                    class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
-                    [routerLink]="link.link"
-                    routerLinkActive="text-sm font-medium text-[#629ef8] "
-                  >
-                    {{ link.name }}
-                  </a>
+                  @if (link.external) {
+                    <a
+                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      [href]="link.link"
+                      routerLinkActive="text-sm font-medium text-blue-400 "
+                    >
+                      {{ link.name }}
+                    </a>
+                  } @else {
+                    <a
+                      class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      [routerLink]="link.link"
+                      routerLinkActive="text-sm font-medium text-[#629ef8] "
+                    >
+                      {{ link.name }}
+                    </a>
+                  }
                 </li>
               }
             </ul>
@@ -47,24 +55,43 @@ import { getRouterLinks } from '../../utils/router';
             <ul class="ml-1">
               @for (link of section.links; track link) {
                 <li class="text-zinc-600 dark:text-zinc-300 text-sm">
-                  <a
-                    class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
-                    [routerLink]="link.link"
-                    routerLinkActive="text-sm font-medium text-blue-400 "
-                  >
-                    {{ link.name }}
-                  </a>
+                  @if (link.external) {
+                    <a
+                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      [href]="link.link"
+                      routerLinkActive="text-sm font-medium text-blue-400 "
+                    >
+                      {{ link.name }}
+                    </a>
+                  } @else {
+                    <a
+                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      [routerLink]="link.link"
+                      routerLinkActive="text-sm font-medium text-blue-400 "
+                    >
+                      {{ link.name }}
+                    </a>
+                  }
                 </li>
               }
             </ul>
           </div>
         }
+        <h2 class=" mb-2 inline-block text-xl font-medium app-title-color">
+          <a
+            class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+            routerLink="/docs/other/support"
+            routerLinkActive="font-medium text-[#629ef8] "
+          >
+            Support
+          </a>
+        </h2>
       </div>
     </ng-template>
     @if (menuOpen()) {
       <div class="fixed inset-0 z-10 bg-black/50" (click)="menuOpen.set(false)">
         <div
-          class="h-full w-85 max-w-full bg-white px-10 shadow-xl"
+          class="h-full w-85 max-w-full bg-white px-10 shadow-xl bg-white dark:bg-gray-900"
           (click)="$event.stopPropagation()"
         >
           <ng-container [ngTemplateOutlet]="content" />
@@ -87,39 +114,63 @@ export class SideNavigationComponent {
         {
           link: './getting-started/what-is-ngrx-traits',
           name: 'What is Ngrx Traits?',
-          order: 1,
         },
         {
           link: './getting-started/installation',
           name: 'Installation',
-          order: 2,
         },
         {
           link: './getting-started/start-coding',
           name: 'Start Coding',
-          order: 3,
+        },
+        {
+          link: './getting-started/working-with-entities',
+          name: 'Working with Entities',
+        },
+        {
+          link: 'https://stackblitz.com/github/gabrielguerrero/ngrx-traits-signals-playground?file=src%2Fapp%2Fproduct-list-detail%2Fproduct-local.store.ts',
+          name: 'Playground',
+          external: true,
+        },
+        {
+          link: 'https://github.com/gabrielguerrero/ngrx-traits/tree/main/apps/example-app/src/app/examples/signals',
+          name: 'Examples',
+          external: true,
+        },
+        {
+          link: './getting-started/articles-and-videos',
+          name: 'Articles and Videos',
         },
       ],
     },
-  ];
+  ] as Section[];
   storeFeatures = [
     {
       title: 'Call Backend',
       links: [
         {
-          link: './traits/withCallStatus',
-          name: 'withCallStatus',
-          order: 1,
-        },
-        {
-          link: './traits/withCalls',
+          link: './traits/with-calls',
           name: 'withCalls',
-          order: 2,
         },
         {
-          link: './traits/withEntitiesLoadingCall',
+          link: './traits/with-call-status',
+          name: 'withCallStatus',
+        },
+        {
+          link: './traits/with-entities-loading-call',
           name: 'withEntitiesLoadingCall',
-          order: 5,
+        },
+        {
+          link: './traits/with-call-status-map',
+          name: 'withCallStatusMap',
+        },
+        {
+          link: './traits/with-entities-calls',
+          name: 'withEntitiesCalls',
+        },
+        {
+          link: './traits/with-all-call-status',
+          name: 'withAllCallStatus',
         },
       ],
     },
@@ -127,19 +178,16 @@ export class SideNavigationComponent {
       title: 'Entities Filtering',
       links: [
         {
-          link: './traits/withEntitiesLocalFilter',
+          link: './traits/with-entities-local-filter',
           name: 'withEntitiesLocalFilter',
-          order: 3,
         },
         {
-          link: './traits/withEntitiesRemoteFilter',
+          link: './traits/with-entities-remote-filter',
           name: 'withEntitiesRemoteFilter',
-          order: 4,
         },
         {
-          link: './traits/withEntitiesHybridFilter',
+          link: './traits/with-entities-hybrid-filter',
           name: 'withEntitiesHybridFilter',
-          order: 4,
         },
       ],
     },
@@ -147,19 +195,16 @@ export class SideNavigationComponent {
       title: 'Entities Pagination',
       links: [
         {
-          link: './traits/withEntitiesLocalPagination',
+          link: './traits/with-entities-local-pagination',
           name: 'withEntitiesLocalPagination',
-          order: 6,
         },
         {
-          link: './traits/withEntitiesRemotePagination',
+          link: './traits/with-entities-remote-pagination',
           name: 'withEntitiesRemotePagination',
-          order: 7,
         },
         {
-          link: './traits/withEntitiesRemoteScrollPagination',
+          link: './traits/with-entities-remote-scroll-pagination',
           name: 'withEntitiesRemoteScrollPagination',
-          order: 8,
         },
       ],
     },
@@ -167,14 +212,12 @@ export class SideNavigationComponent {
       title: 'Entities Selection',
       links: [
         {
-          link: './traits/withEntitiesSingleSelection',
+          link: './traits/with-entities-single-selection',
           name: 'withEntitiesSingleSelection',
-          order: 9,
         },
         {
-          link: './traits/withEntitiesMultiSelection',
+          link: './traits/with-entities-multi-selection',
           name: 'withEntitiesMultiSelection',
-          order: 10,
         },
       ],
     },
@@ -182,14 +225,12 @@ export class SideNavigationComponent {
       title: 'Entities Sorting',
       links: [
         {
-          link: './traits/withEntitiesLocalSort',
+          link: './traits/with-entities-local-sort',
           name: 'withEntitiesLocalSort',
-          order: 11,
         },
         {
-          link: './traits/withEntitiesRemoteSort',
+          link: './traits/with-entities-remote-sort',
           name: 'withEntitiesRemoteSort',
-          order: 12,
         },
       ],
     },
@@ -197,24 +238,20 @@ export class SideNavigationComponent {
       title: 'Sync State To Url and Web Storage',
       links: [
         {
-          link: './traits/withSyncToWebStorage',
+          link: './traits/with-sync-to-web-storage',
           name: 'withSyncToWebStorage',
-          order: 15,
         },
         {
-          link: './traits/withRouteParams',
+          link: './traits/with-route-params',
           name: 'withRouteParams',
-          order: 16,
         },
         {
-          link: './traits/withEntitiesSyncToRouteQueryParams',
+          link: './traits/with-entities-sync-to-route-query-params',
           name: 'withEntitiesSyncToRouteQueryParams',
-          order: 17,
         },
         {
-          link: './traits/withSyncToRouteQueryParams',
+          link: './traits/with-sync-to-route-query-params',
           name: 'withSyncToRouteQueryParams',
-          order: 18,
         },
       ],
     },
@@ -222,18 +259,16 @@ export class SideNavigationComponent {
       title: 'Others',
       links: [
         {
-          link: './traits/withStateLogger',
-          name: 'withStateLogger',
-          order: 14,
+          link: './traits/with-logger',
+          name: 'withLogger',
         },
         {
-          link: './traits/withFeatureFactory',
+          link: './traits/with-feature-factory',
           name: 'withFeatureFactory',
-          order: 15,
         },
       ],
     },
-  ];
+  ] as Section[];
 }
 
 interface Section {
@@ -243,6 +278,6 @@ interface Section {
 
 interface Link {
   link: string;
+  external?: boolean;
   name: string;
-  order: number;
 }

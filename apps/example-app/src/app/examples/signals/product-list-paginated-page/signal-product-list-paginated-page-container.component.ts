@@ -25,7 +25,7 @@ import { ProductsLocalStore } from './product.store';
           (searchProductChange)="filter($event)"
         ></product-search-form>
         @if (store.isProductsLoading()) {
-          <mat-spinner></mat-spinner>
+          <mat-spinner />
         } @else {
           <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
             <div>

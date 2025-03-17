@@ -25,18 +25,18 @@ or a hasMore param set[Collection]Result({entities, hasMore}) that you can set t
 **Requires** withEntities and withCallStatus to be present in the store.
 
 ## Examples
+In this example we have a list of products and we want the to get more pages while you scroll.
 
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection
+  collection: "products"
 });
 
 export const store = signalStore(
   // required withEntities and withCallStatus
   withEntities(entityConfig),
   withCallStatus({ prop: collection, initialValue: 'loading' }),
-
   withEntitiesRemoteScrollPagination({
     ...entityConfig,
     pageSize: 5,
@@ -59,36 +59,11 @@ export const store = signalStore(
         )
     },
   }),
-// withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
-//   onInit: async () => {
-//     effect(() => {
-//       if (isProductsLoading()) {
-//         inject(ProductService)
-//             .getProducts({
-//                take: productsPagedRequest().size,
-//                skip: productsPagedRequest().startIndex,
-//              })
-//           .pipe(
-//             takeUntilDestroyed(),
-//             tap((res) =>
-//                 // total is not required, you can use hasMore or none see docs
-//                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
-//             ),
-//             catchError((error) => {
-//               setProductsError(error);
-//               return EMPTY;
-//             }),
-//           )
-//           .subscribe();
-//       }
-//     });
-//   },
 );
 
 
 ```
-
+In your component you will need a data source if using angular cdk scroll directive 
 ```typescript
  // in your component add
  store = inject(ProductsRemoteStore);
@@ -96,8 +71,77 @@ export const store = signalStore(
 // pass the dataSource to your cdkVirtualFor
 ```
 
+Then in your template:
+```html
+<cdk-virtual-scroll-viewport
+itemSize="42"
+class="fact-scroll-viewport"
+minBufferPx="200"
+maxBufferPx="200"
+>
+<mat-list>
+  <mat-list-item
+    *cdkVirtualFor="let item of dataSource; trackBy: trackByFn"
+  >{{ item.name }}</mat-list-item
+  >
+</mat-list>
+</cdk-virtual-scroll-viewport>
+```
 
 
+## Mixing with other remote store features
+You can mix this feature with other remote store features like withEntitiesRemoteSort, withEntitiesRemoteFilter, etc.
+
+
+```typescript
+const productsStoreFeature = signalStoreFeature(
+  withEntities({
+    entity: productsEntity,
+    collection: productsCollection,
+  }),
+  withCallStatus({
+    initialValue: 'loading',
+    collection: productsCollection,
+    errorType: type<string>(),
+  }),
+  withEntitiesRemoteFilter({
+    entity: productsEntity,
+    collection: productsCollection,
+    defaultFilter: { search: '' },
+  }),
+  withEntitiesRemoteScrollPagination({
+    ...entityConfig,
+    pageSize: 5,
+    pagesToCache: 2,
+  }),
+  withEntitiesRemoteSort({
+    entity: productsEntity,
+    collection: productsCollection,
+    defaultSort: { field: 'name', direction: 'asc' },
+  }),
+  withEntitiesLoadingCall(
+    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+      collection: productsCollection,
+      fetchEntities: async () => {
+        const res = await lastValueFrom(
+          inject(ProductService).getProducts({
+            search: productsFilter().search,
+            skip: productsPagedRequest().startIndex,
+            take: productsPagedRequest().size,
+            sortAscending: productsSort().direction === 'asc',
+            sortColumn: productsSort().field,
+          }),
+        );
+        return { entities: res.resultList, total: res.total };
+      },
+    }),
+  ),
+);
+```
+To know more how it mixes and works with other local store features, check [Working with Entities](/docs/getting-started/working-with-entities) section.
+
+
+## API Reference
 | Property        | Description                                        | Value                                        |
 |-----------------|----------------------------------------------------|----------------------------------------------|
 | entity          | The entity type                                    | `type<T>()`                                  |
