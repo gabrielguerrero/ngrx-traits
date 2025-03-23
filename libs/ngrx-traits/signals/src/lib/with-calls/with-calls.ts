@@ -151,7 +151,7 @@ export function withCalls<
           ? Parameters<Calls[K]['call']> extends undefined[]
             ? () => void
             : {
-                (...param: Parameters<Calls[K]['call']>): void;
+                (param: Parameters<Calls[K]['call']>[0]): void;
                 (
                   param:
                     | Observable<Parameters<Calls[K]['call']>[0]>
