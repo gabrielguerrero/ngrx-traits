@@ -73,13 +73,10 @@ export type CallConfig<
    * A function with condition that determines whether the call should be skipped.
    * The function accepts the  call parameter and must return a boolean | Signal<boolean> | Observable<boolean>.
    */
-  skipWhen?:
-    | Call<NoInfer<Param>, boolean>
-    | (() => boolean)
-    | ((
-        param: NoInfer<Param>,
-        previousResult: NoInfer<Result> | undefined,
-      ) => boolean);
+  skipWhen?: (
+    param: NoInfer<Param>,
+    previousResult: NoInfer<Result> | undefined,
+  ) => boolean | Promise<boolean> | Observable<boolean>;
 
   /**
    * Reactively execute the call with the provided params.

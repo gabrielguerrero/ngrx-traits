@@ -600,16 +600,17 @@ describe('withCalls', () => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
-              call: () => apiResponse.pipe(first()),
+              call: ({ id }: { id: string }) => apiResponse.pipe(first()),
               mapPipe: 'exhaustMap',
-              skipWhen: (param, previousResult) => previousResult === 'test',
+              skipWhen: ({ id }, previousResult) =>
+                id.length > 0 && previousResult === 'test',
             }),
           })),
         );
         const store = new Store();
         expect(store.isTestCallLoading()).toBeFalsy();
 
-        store.testCall();
+        store.testCall({ id: 'ss' });
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
