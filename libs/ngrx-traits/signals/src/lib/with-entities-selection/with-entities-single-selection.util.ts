@@ -27,8 +27,8 @@ export function getEntitiesSingleSelectionKeys(config?: {
       ? `deselect${capitalizedProp}Entity`
       : 'deselectEntity',
     toggleEntityKey: collection
-      ? `toggle${capitalizedProp}Entity`
-      : 'toggleEntity',
+      ? `toggleSelect${capitalizedProp}Entity`
+      : 'toggleSelectEntity',
   };
 }
 
