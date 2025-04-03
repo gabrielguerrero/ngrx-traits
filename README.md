@@ -2,7 +2,7 @@
 <h1 align="center">NGRX Traits</h1>
 
 <p align="center">
-<di<img src="apps/docs/public/ngrx-traits/logo_color_transparent.PNG" width="120px" height="120px" alt="ngrx-traits logo"/>
+<img src="apps/docs/public/ngrx-traits/logo_color_transparent.PNG" width="120px" height="120px" alt="ngrx-traits logo"/>
   
   <br>
   <em>NGRX Traits is a library that provides a set of prebuilt functions for ngrx and ngrx/signals, that will allow you to easily
