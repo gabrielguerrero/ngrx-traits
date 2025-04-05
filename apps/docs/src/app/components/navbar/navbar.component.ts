@@ -1,6 +1,14 @@
-import { ChangeDetectionStrategy, Component, model } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  model,
+  OnInit,
+} from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import '@docsearch/css';
+import '@docsearch/css';
+import docsearch from '@docsearch/js';
 import {
   bootstrapDiscord,
   bootstrapGithub,
@@ -82,14 +90,33 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
           <ng-icon class="text-lg" name="bootstrapGithub" />
           <span class="hidden font-medium sm:inline">GitHub</span>
         </a>
+        <div id="docsearch" data-theme="dark"></div>
       </div>
     </nav>
   </header>`,
-  styles: ``,
+  styles: `
+    ::ng-deep #docsearch {
+      .DocSearch-Button {
+        position: unset;
+        border: 1px solid #d4d4d8;
+        width: 150px !important;
+      }
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnInit {
   readonly menuOpen = model(false);
+  private readonly appId = import.meta.env['VITE_DOC_SEARCH_APP_ID'];
+  private readonly apiKey = import.meta.env['VITE_DOC_SEARCH_API_KEY'];
+  ngOnInit() {
+    docsearch({
+      container: '#docsearch',
+      appId: this.appId,
+      indexName: 'ngrx-traits',
+      apiKey: this.apiKey,
+    });
+  }
 
   toggle(): void {
     this.menuOpen.update((open) => !open);
