@@ -8,7 +8,6 @@ import {
   Signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ObservableCall } from '@ngrx-traits/signals';
 import {
   patchState,
   signalStoreFeature,
@@ -51,6 +50,7 @@ import {
   CallStatus,
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
+import { ObservableCall } from '../with-calls/with-calls.model';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import {

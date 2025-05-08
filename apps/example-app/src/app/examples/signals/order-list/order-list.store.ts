@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import {
   withCallStatus,
+  withEntitiesCalls,
   withEntitiesLoadingCall,
   withEntitiesMultiSelection,
 } from '@ngrx-traits/signals';
@@ -8,7 +9,6 @@ import { signalStore, type, withMethods } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
-import { withEntitiesCalls } from '../../../../../../../libs/ngrx-traits/signals/src/lib/with-entities-calls/with-entities-calls';
 import { OrderDetail, OrderSummary } from '../../models';
 import { OrderService } from '../../services/order.service';
 

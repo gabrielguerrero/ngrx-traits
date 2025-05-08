@@ -1,5 +1,4 @@
 import { Signal } from '@angular/core';
-import { CallConfig } from '@ngrx-traits/signals';
 import { Observable } from 'rxjs';
 
 type ObservableCall<Param = any, Result = any> = (
