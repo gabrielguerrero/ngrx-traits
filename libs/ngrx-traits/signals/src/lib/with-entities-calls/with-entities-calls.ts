@@ -392,6 +392,11 @@ export function withEntitiesCalls<
                                     call.mapError?.(error, params)) ||
                                   error;
                                 setError(id, e);
+                                console.error(
+                                  `Call ${callName} fail `,
+                                  { params },
+                                  e,
+                                );
                                 isCallConfig(call) &&
                                   call.onError &&
                                   call.onError(e, params);

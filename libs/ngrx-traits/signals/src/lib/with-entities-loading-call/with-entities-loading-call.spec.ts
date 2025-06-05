@@ -265,6 +265,8 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setError and onError if fetchEntities call fails ', fakeAsync(() => {
+        const consoleError = jest.spyOn(console, 'error');
+        consoleError.mockReset();
         const onSuccess = jest.fn();
         const onError = jest.fn();
         TestBed.runInInjectionContext(() => {
@@ -290,6 +292,7 @@ describe('withEntitiesLoadingCall', () => {
           expect(store.error()).toEqual(new Error('fail'));
           expect(onError).toHaveBeenCalledWith(new Error('fail'));
           expect(onSuccess).not.toHaveBeenCalled();
+          expect(consoleError).toHaveBeenCalledTimes(1);
         });
       }));
 

@@ -287,6 +287,11 @@ export function withCalls<
                                 call.mapError?.(error, params)) ||
                               error;
                             setError(e);
+                            console.error(
+                              `Call ${callName} fail `,
+                              { params },
+                              e,
+                            );
                             isCallConfig(call) &&
                               call.onError &&
                               call.onError(e, params);

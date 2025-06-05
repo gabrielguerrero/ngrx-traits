@@ -418,6 +418,8 @@ describe('withCalls', () => {
   });
 
   it('returning an observable should update to error state when it errors', async () => {
+    const consoleError = jest.spyOn(console, 'error');
+    consoleError.mockReset();
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       expect(store.isTestCallLoading()).toBeFalsy();
@@ -434,6 +436,7 @@ describe('withCalls', () => {
       expect(store.testCallResult()).toBe('test');
 
       expect(apiResponse.observed).toBe(false);
+      expect(consoleError).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -774,12 +777,15 @@ describe('withCalls', () => {
       });
     });
     it('Fail on a call should set status return error ', async () => {
+      const consoleError = jest.spyOn(console, 'error');
+      consoleError.mockReset();
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         expect(store.privateIsTestCallLoading()).toBeFalsy();
         store.privateTestCall({ ok: false });
         expect(store.privateTestCallError()).toEqual(new Error('fail'));
         expect(store.privateTestCallResult()).toBe(undefined);
+        expect(consoleError).toHaveBeenCalledTimes(1);
       });
     });
 
