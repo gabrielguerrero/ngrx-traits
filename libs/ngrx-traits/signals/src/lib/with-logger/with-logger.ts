@@ -61,7 +61,8 @@ export function withLogger<Input extends SignalStoreFeatureResult>({
                   if (!keys || keys.includes(key)) {
                     if (isSignal(store[key])) {
                       acc[key] = store[key]();
-                    } else {
+                    } else if (typeof store[key] != 'function') {
+                      // if not signal only log values that are not methods
                       acc[key] = store[key];
                     }
                   }

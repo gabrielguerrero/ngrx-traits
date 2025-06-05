@@ -175,6 +175,8 @@ describe('withEntitiesCalls', () => {
   });
 
   it('Fail on a call should set status return error ', async () => {
+    const consoleError = jest.spyOn(console, 'error');
+    consoleError.mockReset();
     TestBed.runInInjectionContext(() => {
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<{
@@ -214,6 +216,7 @@ describe('withEntitiesCalls', () => {
         );
         expect(store.loadProductDetailErrors()).toEqual([new Error('fail')]);
         expect(store.entityMap()[product.id].detail).toBe(undefined);
+        expect(consoleError).toHaveBeenCalledTimes(1);
       });
     });
   });

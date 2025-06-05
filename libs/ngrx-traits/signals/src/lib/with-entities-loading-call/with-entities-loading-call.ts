@@ -2,6 +2,7 @@ import {
   computed,
   EnvironmentInjector,
   inject,
+  isDevMode,
   runInInjectionContext,
   Signal,
 } from '@angular/core';
@@ -256,6 +257,7 @@ export function withEntitiesLoadingCall<
               catchError((error: unknown) => {
                 const e = mapError ? mapError(error) : error;
                 setError(e);
+                console.error(`${collection ?? ''} fetchEntities fail `, e);
                 if (onError) onError(e as Error);
                 return of();
               }),
