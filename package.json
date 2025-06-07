@@ -5,6 +5,7 @@
   "scripts": {
     "postinstall": "node ./decorate-angular-cli.js",
     "nx": "nx",
+    "msw": "msw",
     "start": "nx serve",
     "start-docs": "nx serve docs",
     "test": "nx affected:test",
@@ -59,7 +60,7 @@
     "marked-highlight": "^2.0.1",
     "marked-mangle": "^1.1.7",
     "mermaid": "^10.2.4",
-    "msw": "^0.39.2",
+    "msw": "0.39.2",
     "prismjs": "^1.29.0",
     "rxjs": "7.8.1",
     "tslib": "^2.3.0",
