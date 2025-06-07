@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
+  cacheRxCall,
   callConfig,
   withCalls,
   withCallStatus,
@@ -12,6 +13,7 @@ import {
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
+  withLogger,
   withSyncToWebStorage,
 } from '@ngrx-traits/signals';
 import {
@@ -27,9 +29,8 @@ import {
   updateEntity,
   withEntities,
 } from '@ngrx/signals/entities';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, of } from 'rxjs';
 
-import { withLogger } from '../../../../../../../libs/ngrx-traits/signals/src/lib/with-logger/with-logger';
 import { Product, ProductOrder } from '../../models';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
@@ -124,49 +125,65 @@ export const ProductsShopStore = signalStore(
   productsStoreFeature,
   orderItemsStoreFeature,
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    (
+      { productsPagedRequest, productsFilter, productsSort },
+      service = inject(ProductService),
+    ) => ({
       collection: productsCollection,
       fetchEntities: async () => {
-        const res = await lastValueFrom(
-          inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-            sortAscending: productsSort().direction === 'asc',
-            sortColumn: productsSort().field,
-          }),
-        );
+        const query = {
+          search: productsFilter().search,
+          skip: productsPagedRequest().startIndex,
+          take: productsPagedRequest().size,
+          sortAscending: productsSort().direction === 'asc',
+          sortColumn: productsSort().field,
+        };
+        const source = cacheRxCall({
+          key: ['products', query],
+          call: service.getProducts(query),
+          maxCacheSize: 5,
+        });
+        const res = await lastValueFrom(source);
         return { entities: res.resultList, total: res.total };
       },
       mapError: (error) => (error as Error).message,
     }),
   ),
-  withCalls(({ orderItemsEntities }, snackBar = inject(MatSnackBar)) => ({
-    loadProductDetail: ({ id }: { id: string }) =>
-      inject(ProductService).getProductDetail(id),
-
-    checkout: callConfig({
-      call: () =>
-        inject(OrderService).checkout(
-          ...orderItemsEntities().map((p) => ({
-            productId: p.id,
-            quantity: p.quantity!,
-          })),
-        ),
-      resultProp: 'orderNumber',
-      onSuccess: (orderId) => {
-        snackBar.open(`Order number: ${orderId}`, 'Close', {
-          duration: 5000,
-        });
-      },
-      mapError: (error) => (error as Error).message,
-      onError: (error) => {
-        snackBar.open(error, 'Close', {
-          duration: 5000,
-        });
-      },
+  withCalls(
+    (
+      { orderItemsEntities },
+      snackBar = inject(MatSnackBar),
+      service = inject(ProductService),
+    ) => ({
+      loadProductDetail: ({ id }: { id: string }) =>
+        cacheRxCall({
+          key: ['products', id],
+          call: service.getProductDetail(id),
+          maxCacheSize: 3,
+        }),
+      checkout: callConfig({
+        call: () =>
+          inject(OrderService).checkout(
+            ...orderItemsEntities().map((p) => ({
+              productId: p.id,
+              quantity: p.quantity!,
+            })),
+          ),
+        resultProp: 'orderNumber',
+        onSuccess: (orderId) => {
+          snackBar.open(`Order number: ${orderId}`, 'Close', {
+            duration: 5000,
+          });
+        },
+        mapError: (error) => (error as Error).message,
+        onError: (error) => {
+          snackBar.open(error, 'Close', {
+            duration: 5000,
+          });
+        },
+      }),
     }),
-  })),
+  ),
   withMethods(
     ({ productsEntitySelected, orderItemsIdsSelected, ...state }) => ({
       addProductToBasket: () => {
