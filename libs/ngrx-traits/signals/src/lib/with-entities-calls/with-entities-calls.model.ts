@@ -96,15 +96,15 @@ export type EntityCallConfig<
    * To override this behavior, define a skipWhen with your own rule or skipWhen: () => false
    * to always execute on any value.
    */
-  callWith?: Param extends Record<string, any> | string | number | boolean
-    ?
+  callWith?: Param extends undefined
+    ? Signal<boolean> | Observable<boolean> | (() => boolean) | boolean
+    :
         | NoInfer<Param>
         | null
         | undefined
         | Signal<NoInfer<Param | null | undefined>>
         | Observable<NoInfer<Param | null | undefined>>
-        | (() => NoInfer<Param> | null | undefined)
-    : Signal<boolean> | Observable<boolean> | (() => boolean) | boolean;
+        | (() => NoInfer<Param> | null | undefined);
 };
 
 export type NamedEntitiesCallsStatusComputed<
