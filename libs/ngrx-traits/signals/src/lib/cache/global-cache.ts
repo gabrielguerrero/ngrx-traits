@@ -41,7 +41,7 @@ export function cacheCall<T>({
   maxCacheSize?: number;
   skip?: boolean;
   cacheStore?: CacheStore;
-}) {
+}): Promise<T> {
   const cs = cacheStore ?? getGlobalCache();
   const exp = expires ?? Infinity;
   const keys = hashKey(key);
@@ -83,7 +83,7 @@ export function cacheRxCall<T>({
   maxCacheSize?: number;
   skip?: boolean;
   cacheStore?: CacheStore;
-}) {
+}): Observable<T> {
   const cs = cacheStore ?? getGlobalCache();
   const exp = expires ?? Infinity;
   const keys = hashKey(key);
