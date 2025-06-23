@@ -16,6 +16,8 @@ import {
   NamedEntityState,
   SelectEntityId,
 } from '@ngrx/signals/entities';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -125,21 +127,29 @@ export function withEntitiesLocalSort<
       withEventHandler(),
       withMethods((state: Record<string, Signal<unknown>>) => {
         return {
-          [sortEntitiesKey]: ({
-            sort: newSort,
-          }: { sort?: Sort<Entity> } = {}) => {
-            const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
-            patchState(state as WritableStateSource<object>, {
-              [sortKey]: sort,
-              [idsKey]: (config?.sortFunction
-                ? config.sortFunction(state[entitiesKey]() as Entity[], sort)
-                : sortData(state[entitiesKey]() as Entity[], sort)
-              ).map((entity) =>
-                config.selectId ? config.selectId(entity) : (entity as any).id,
-              ),
-            });
-            broadcast(state, entitiesLocalSortChanged({ sort }));
-          },
+          [sortEntitiesKey]: rxMethod<{ sort?: Sort<Entity> }>(
+            pipe(
+              tap((options) => {
+                const newSort = options?.sort;
+                const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
+                patchState(state as WritableStateSource<object>, {
+                  [sortKey]: sort,
+                  [idsKey]: (config?.sortFunction
+                    ? config.sortFunction(
+                        state[entitiesKey]() as Entity[],
+                        sort,
+                      )
+                    : sortData(state[entitiesKey]() as Entity[], sort)
+                  ).map((entity) =>
+                    config.selectId
+                      ? config.selectId(entity)
+                      : (entity as any).id,
+                  ),
+                });
+                broadcast(state, entitiesLocalSortChanged({ sort }));
+              }),
+            ),
+          ),
         };
       }),
       withEventHandler((state: Record<string, unknown>) => {

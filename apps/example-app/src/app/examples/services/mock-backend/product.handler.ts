@@ -1,7 +1,7 @@
 import { sortData } from '@ngrx-traits/common';
 import { rest } from 'msw';
 
-import { Product, ProductDetail } from '../../models';
+import { Category, Product, ProductDetail } from '../../models';
 import { getRandomInteger } from '../../utils/form-utils';
 
 export const productHandlers = [
@@ -36,6 +36,7 @@ export const productHandlers = [
         search: req.url.searchParams.get('search'),
         sortColumn: req.url.searchParams.get('sortColumn'),
         sortAscending: req.url.searchParams.get('sortAscending'),
+        category: req.url.searchParams.get('category') as Category,
         skip: req.url.searchParams.get('skip'),
         take: req.url.searchParams.get('take'),
       };
@@ -45,6 +46,18 @@ export const productHandlers = [
             ? entity.name.toLowerCase().includes(options?.search.toLowerCase())
             : false;
         });
+
+      if (options?.category) {
+        const description =
+          options.category === 'snes'
+            ? 'Super Nintendo Game'
+            : options.category === 'gamecube'
+              ? 'GameCube Game'
+              : '';
+        result = mockProducts.filter((entity) => {
+          return options?.category ? entity.description === description : false;
+        });
+      }
       const total = result.length;
       if (options?.skip || options?.take) {
         const skip = +(options?.skip ?? 0);

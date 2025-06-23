@@ -1,4 +1,5 @@
 import { Signal } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export type EntitiesSingleSelectionState = {
   idSelected: string | number | undefined;
@@ -15,19 +16,36 @@ export type NamedEntitiesSingleSelectionComputed<
 > = {
   [K in Collection as `${K}EntitySelected`]: Signal<Entity | undefined>;
 };
+type EntitySelectOptions = { id: string | number } | undefined;
 export type EntitiesSingleSelectionMethods = {
-  selectEntity: (options: { id: string | number }) => void;
+  selectEntity: (
+    options:
+      | EntitySelectOptions
+      | Observable<EntitySelectOptions>
+      | Signal<EntitySelectOptions>,
+  ) => void;
   deselectEntity: () => void;
-  toggleSelectEntity: (options: { id: string | number }) => void;
+  toggleSelectEntity: (
+    options:
+      | EntitySelectOptions
+      | Observable<EntitySelectOptions>
+      | Signal<EntitySelectOptions>,
+  ) => void;
 };
 export type NamedEntitiesSingleSelectionMethods<Collection extends string> = {
-  [K in Collection as `select${Capitalize<string & K>}Entity`]: (options: {
-    id: string | number;
-  }) => void;
+  [K in Collection as `select${Capitalize<string & K>}Entity`]: (
+    options:
+      | EntitySelectOptions
+      | Observable<EntitySelectOptions>
+      | Signal<EntitySelectOptions>,
+  ) => void;
 } & {
   [K in Collection as `deselect${Capitalize<string & K>}Entity`]: () => void;
 } & {
-  [K in Collection as `toggleSelect${Capitalize<string & K>}Entity`]: (options: {
-    id: string | number;
-  }) => void;
+  [K in Collection as `toggleSelect${Capitalize<string & K>}Entity`]: (
+    options:
+      | EntitySelectOptions
+      | Observable<EntitySelectOptions>
+      | Signal<EntitySelectOptions>,
+  ) => void;
 };

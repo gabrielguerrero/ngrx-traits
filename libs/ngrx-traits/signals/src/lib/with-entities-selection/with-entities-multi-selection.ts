@@ -16,6 +16,8 @@ import {
   EntityProps,
   NamedEntityProps,
 } from '@ngrx/signals/entities';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys, toMap } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -204,22 +206,32 @@ export function withEntitiesMultiSelection<
         const idsArray = state[idsKey] as Signal<EntityId[]>;
 
         return {
-          [selectEntitiesKey]: (
-            options: { id: string | number } | { ids: (string | number)[] },
-          ) => {
-            const ids = 'id' in options ? [options.id] : options.ids;
-            const idsMap = ids.reduce(
-              (acc, id) => {
-                acc[id] = true;
-                return acc;
-              },
-              {} as Record<string | number, boolean>,
-            );
+          [selectEntitiesKey]: rxMethod<
+            { clearSelectionBeforeSelect?: boolean } & (
+              | { id: string | number }
+              | { ids: (string | number)[] }
+            )
+          >(
+            pipe(
+              tap((options) => {
+                if (options.clearSelectionBeforeSelect) {
+                  clearEntitiesSelection(state, selectedIdsMapKey);
+                }
+                const ids = 'id' in options ? [options.id] : options.ids;
+                const idsMap = ids.reduce(
+                  (acc, id) => {
+                    acc[id] = true;
+                    return acc;
+                  },
+                  {} as Record<string | number, boolean>,
+                );
 
-            patchState(state as WritableStateSource<object>, {
-              [selectedIdsMapKey]: { ...selectedIdsMap(), ...idsMap },
-            });
-          },
+                patchState(state as WritableStateSource<object>, {
+                  [selectedIdsMapKey]: { ...selectedIdsMap(), ...idsMap },
+                });
+              }),
+            ),
+          ),
           [deselectEntitiesKey]: (
             options: { id: string | number } | { ids: (string | number)[] },
           ) => {

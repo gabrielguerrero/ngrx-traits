@@ -5,6 +5,14 @@ export interface Product {
   price: number;
   categoryId?: string;
 }
+export type Category =
+  | 'snes'
+  | 'nes'
+  | 'gamecube'
+  | 'n64'
+  | 'wii'
+  | 'wiiu'
+  | 'switch';
 export interface ProductOrder extends Product {
   quantity?: number;
 }
