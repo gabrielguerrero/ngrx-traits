@@ -1,4 +1,5 @@
 import { Signal } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export type EntitiesMultiSelectionState = {
   idsSelectedMap: Record<string | number, boolean>;
@@ -23,30 +24,39 @@ export type NamedEntitiesMultiSelectionComputed<
     'all' | 'none' | 'some'
   >;
 };
+type EntitySelectOptions =
+  | { id: string | number }
+  | { ids: (string | number)[] };
 export type EntitiesMultiSelectionMethods = {
   selectEntities: (
-    options: { id: string | number } | { ids: (string | number)[] },
+    options:
+      | (EntitySelectOptions & { clearSelectionBeforeSelect?: boolean })
+      | Observable<
+          EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }
+        >
+      | Signal<EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }>,
   ) => void;
-  deselectEntities: (
-    options: { id: string | number } | { ids: (string | number)[] },
-  ) => void;
-  toggleSelectEntities: (
-    options: { id: string | number } | { ids: (string | number)[] },
-  ) => void;
+  deselectEntities: (options: EntitySelectOptions) => void;
+  toggleSelectEntities: (options: EntitySelectOptions) => void;
   toggleSelectAllEntities: () => void;
   clearEntitiesSelection: () => void;
 };
 export type NamedEntitiesMultiSelectionMethods<Collection extends string> = {
   [K in Collection as `select${Capitalize<string & K>}Entities`]: (
-    options: { id: string | number } | { ids: (string | number)[] },
+    options:
+      | (EntitySelectOptions & { clearSelectionBeforeSelect?: boolean })
+      | Observable<
+          EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }
+        >
+      | Signal<EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }>,
   ) => void;
 } & {
   [K in Collection as `deselect${Capitalize<string & K>}Entities`]: (
-    options: { id: string | number } | { ids: (string | number)[] },
+    options: EntitySelectOptions,
   ) => void;
 } & {
   [K in Collection as `toggleSelect${Capitalize<string & K>}Entities`]: (
-    options: { id: string | number } | { ids: (string | number)[] },
+    options: EntitySelectOptions,
   ) => void;
 } & {
   [K in Collection as `toggleSelectAll${Capitalize<

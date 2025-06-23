@@ -1,20 +1,14 @@
+import { Signal } from '@angular/core';
+import { Observable } from 'rxjs';
+
+import { FilterOptions } from './with-entities-local-filter.model';
+
 export type EntitiesRemoteFilterMethods<Filter> = {
   filterEntities: (
     options:
-      | {
-          filter: Filter;
-          debounce?: number;
-          patch?: false | undefined;
-          forceLoad?: boolean;
-          skipLoadingCall?: boolean;
-        }
-      | {
-          filter: Partial<Filter>;
-          debounce?: number;
-          patch: true;
-          forceLoad?: boolean;
-          skipLoadingCall?: boolean;
-        },
+      | (FilterOptions<Filter> & { skipLoadingCall?: boolean })
+      | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
+      | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,
   ) => void;
   resetEntitiesFilter: (options?: {
     debounce?: number;
@@ -28,20 +22,9 @@ export type NamedEntitiesRemoteFilterMethods<
 > = {
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: (
     options:
-      | {
-          filter: Filter;
-          debounce?: number;
-          patch?: false | undefined;
-          forceLoad?: boolean;
-          skipLoadingCall?: boolean;
-        }
-      | {
-          filter: Partial<Filter>;
-          debounce?: number;
-          patch: true;
-          forceLoad?: boolean;
-          skipLoadingCall?: boolean;
-        },
+      | (FilterOptions<Filter> & { skipLoadingCall?: boolean })
+      | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
+      | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,
   ) => void;
 } & {
   [K in Collection as `reset${Capitalize<string & K>}Filter`]: (options?: {

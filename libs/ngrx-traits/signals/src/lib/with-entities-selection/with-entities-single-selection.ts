@@ -10,12 +10,14 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 import {
-  EntityProps,
   EntityMap,
+  EntityProps,
   EntityState,
   NamedEntityProps,
   NamedEntityState,
 } from '@ngrx/signals/entities';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -154,17 +156,34 @@ export function withEntitiesSingleSelection<
           });
         };
         return {
-          [selectEntityKey]: ({ id }: { id: string | number }) => {
-            patchState(state as WritableStateSource<object>, {
-              [selectedIdKey]: entityMap()[id] ? id : undefined,
-            });
-          },
+          [selectEntityKey]: rxMethod<{ id: string | number } | undefined>(
+            pipe(
+              tap((item) => {
+                if (!item) {
+                  deselectEntity();
+                  return;
+                }
+                patchState(state as WritableStateSource<object>, {
+                  [selectedIdKey]: entityMap()[item.id] ? item.id : undefined,
+                });
+              }),
+            ),
+          ),
           [deselectEntityKey]: deselectEntity,
-          [toggleEntityKey]: ({ id }: { id: string | number }) => {
-            patchState(state as WritableStateSource<object>, {
-              [selectedIdKey]: selectedId() === id ? undefined : id,
-            });
-          },
+          [toggleEntityKey]: rxMethod<{ id: string | number } | undefined>(
+            pipe(
+              tap((item) => {
+                if (!item) {
+                  deselectEntity();
+                  return;
+                }
+                patchState(state as WritableStateSource<object>, {
+                  [selectedIdKey]:
+                    selectedId() === item.id ? undefined : item.id,
+                });
+              }),
+            ),
+          ),
         };
       }),
       withEventHandler((state) => {

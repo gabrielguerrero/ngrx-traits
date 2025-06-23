@@ -1,9 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { callConfig, withCalls } from '@ngrx-traits/signals';
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { of, pipe, tap } from 'rxjs';
+import { signalStore } from '@ngrx/signals';
 
 import { withInputBindings } from './with-input-bindings';
 
@@ -32,16 +29,18 @@ describe('withInputBindings', () => {
   );
 
   it('should initialize state with inputs', () => {
-    const store = new Store();
-    expect(store.pageIndex()).toBe(0);
-    expect(store.length()).toBe(0);
-    expect(store.pageSize()).toBe(10);
-    expect(store.pageSizeOptions()).toEqual([5, 10, 20]);
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      expect(store.pageIndex()).toBe(0);
+      expect(store.length()).toBe(0);
+      expect(store.pageSize()).toBe(10);
+      expect(store.pageSizeOptions()).toEqual([5, 10, 20]);
+    });
   });
 
   it('should pass components inputs to the store and any updates', () => {
-    const store = new Store();
     TestBed.runInInjectionContext(() => {
+      const store = new Store();
       const component = new PaginatorComponent(store);
       TestBed.flushEffects();
       expect(store.pageIndex()).toBe(3);

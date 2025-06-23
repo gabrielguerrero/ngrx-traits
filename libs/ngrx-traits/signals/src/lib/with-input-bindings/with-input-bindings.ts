@@ -1,4 +1,4 @@
-import { computed, Signal } from '@angular/core';
+import { computed, isSignal, Signal } from '@angular/core';
 import {
   patchState,
   signalStoreFeature,
@@ -63,23 +63,31 @@ export function withInputBindings<
   Inputs extends RecordSignals<Object> = RecordSignals<Object>,
 >(inputs: Object) {
   return signalStoreFeature(
+    withState({ _inputsInitialized: false }),
     withState(inputs),
-    withMethods((store) => ({
-      bindInputs: (inputs: Inputs) => {
-        const combined = computed((): Object => {
-          return Object.entries(inputs).reduce((acc, [key, s]) => {
-            acc[key] = (s as Signal<unknown>)();
-            return acc;
-          }, {} as any);
-        });
-        return rxMethod<Object>(
-          pipe(
-            tap((values) => {
-              patchState(store, { ...values });
-            }),
-          ),
-        )(combined);
-      },
-    })),
+    withMethods((store) => {
+      const setValues = rxMethod<Object>(
+        pipe(
+          tap((values) => {
+            patchState(store, { ...values });
+          }),
+        ),
+      );
+      return {
+        bindInputs: (inputs: Inputs) => {
+          const combined = computed((): Object => {
+            return Object.entries(inputs).reduce((acc, [key, s]) => {
+              if (isSignal(s)) {
+                acc[key] = (s as Signal<unknown>)();
+              }
+              return acc;
+            }, {} as any);
+          });
+          const methodRef = setValues(combined);
+          patchState(store, { _inputsInitialized: true } as any);
+          return methodRef;
+        },
+      };
+    }),
   );
 }
