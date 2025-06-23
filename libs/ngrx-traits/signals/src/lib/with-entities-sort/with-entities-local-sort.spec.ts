@@ -35,47 +35,49 @@ const mockProducts = mockProductsOld.map(
 describe('withEntitiesLocalSort', () => {
   const entity = type<ProductWithReleaseDate>();
   it('should sort entities and store sort', () => {
-    const Store = signalStore(
-      { protectedState: false },
-      withEntities({
-        entity,
-      }),
-      withEntitiesLocalSort({
-        entity,
-        defaultSort: { field: 'name', direction: 'asc' },
-      }),
-    );
-    const store = new Store();
-    patchState(store, setAllEntities(mockProducts));
-    expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
-    // check default sort
-    store.sortEntities();
-    expect(
-      store
-        .entities()
-        .map((e) => e.name)
-        .slice(0, 5),
-    ).toEqual([
-      '1080° Avalanche',
-      'Animal Crossing',
-      'Arkanoid: Doh it Again',
-      'Battalion Wars',
-      'BattleClash',
-    ]);
-    // sort by price
-    store.sortEntities({
-      sort: { field: 'price', direction: 'desc' },
-    });
-    expect(
-      store
-        .entities()
-        .map((e) => e.price)
-        .slice(0, 5),
-    ).toEqual([178, 175, 172, 169, 166]);
-    expect(store.entities().length).toEqual(mockProducts.length);
-    expect(store.entitiesSort()).toEqual({
-      field: 'price',
-      direction: 'desc',
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false, providedIn: 'root' },
+        withEntities({
+          entity,
+        }),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      store.sortEntities();
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+      // sort by price
+      store.sortEntities({
+        sort: { field: 'price', direction: 'desc' },
+      });
+      expect(
+        store
+          .entities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.entities().length).toEqual(mockProducts.length);
+      expect(store.entitiesSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
     });
   });
 
@@ -99,37 +101,39 @@ describe('withEntitiesLocalSort', () => {
         defaultSort: { field: 'name', direction: 'asc' },
       }),
     );
-    const store = new Store();
-    patchState(store, setAllEntities(mockProductsCustom, config));
-    expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
-    // check default sort
-    store.sortEntities();
-    expect(
-      store
-        .entities()
-        .map((e) => e.name)
-        .slice(0, 5),
-    ).toEqual([
-      '1080° Avalanche',
-      'Animal Crossing',
-      'Arkanoid: Doh it Again',
-      'Battalion Wars',
-      'BattleClash',
-    ]);
-    // sort by price
-    store.sortEntities({
-      sort: { field: 'price', direction: 'desc' },
-    });
-    expect(
-      store
-        .entities()
-        .map((e) => e.price)
-        .slice(0, 5),
-    ).toEqual([178, 175, 172, 169, 166]);
-    expect(store.entities().length).toEqual(mockProducts.length);
-    expect(store.entitiesSort()).toEqual({
-      field: 'price',
-      direction: 'desc',
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProductsCustom, config));
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      store.sortEntities();
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+      // sort by price
+      store.sortEntities({
+        sort: { field: 'price', direction: 'desc' },
+      });
+      expect(
+        store
+          .entities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.entities().length).toEqual(mockProducts.length);
+      expect(store.entitiesSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
     });
   });
 
@@ -147,37 +151,39 @@ describe('withEntitiesLocalSort', () => {
         defaultSort: { field: 'name', direction: 'asc' },
       }),
     );
-    const store = new Store();
-    patchState(store, setAllEntities(mockProducts, { collection }));
-    expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
-    // check default sort
-    store.sortProductsEntities();
-    expect(
-      store
-        .productsEntities()
-        .map((e) => e.name)
-        .slice(0, 5),
-    ).toEqual([
-      '1080° Avalanche',
-      'Animal Crossing',
-      'Arkanoid: Doh it Again',
-      'Battalion Wars',
-      'BattleClash',
-    ]);
-    // sort by price
-    store.sortProductsEntities({
-      sort: { field: 'price', direction: 'desc' },
-    });
-    expect(
-      store
-        .productsEntities()
-        .map((e) => e.price)
-        .slice(0, 5),
-    ).toEqual([178, 175, 172, 169, 166]);
-    expect(store.productsEntities().length).toEqual(mockProducts.length);
-    expect(store.productsSort()).toEqual({
-      field: 'price',
-      direction: 'desc',
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts, { collection }));
+      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      store.sortProductsEntities();
+      expect(
+        store
+          .productsEntities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+      // sort by price
+      store.sortProductsEntities({
+        sort: { field: 'price', direction: 'desc' },
+      });
+      expect(
+        store
+          .productsEntities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.productsEntities().length).toEqual(mockProducts.length);
+      expect(store.productsSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
     });
   });
 
@@ -202,37 +208,41 @@ describe('withEntitiesLocalSort', () => {
         defaultSort: { field: 'name', direction: 'asc' },
       }),
     );
-    const store = new Store();
-    patchState(store, setAllEntities(mockProductsCustom, config));
-    expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
-    // check default sort
-    store.sortProductsEntities();
-    expect(
-      store
-        .productsEntities()
-        .map((e) => e.name)
-        .slice(0, 5),
-    ).toEqual([
-      '1080° Avalanche',
-      'Animal Crossing',
-      'Arkanoid: Doh it Again',
-      'Battalion Wars',
-      'BattleClash',
-    ]);
-    // sort by price
-    store.sortProductsEntities({
-      sort: { field: 'price', direction: 'desc' },
-    });
-    expect(
-      store
-        .productsEntities()
-        .map((e) => e.price)
-        .slice(0, 5),
-    ).toEqual([178, 175, 172, 169, 166]);
-    expect(store.productsEntities().length).toEqual(mockProductsCustom.length);
-    expect(store.productsSort()).toEqual({
-      field: 'price',
-      direction: 'desc',
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProductsCustom, config));
+      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      store.sortProductsEntities();
+      expect(
+        store
+          .productsEntities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+      // sort by price
+      store.sortProductsEntities({
+        sort: { field: 'price', direction: 'desc' },
+      });
+      expect(
+        store
+          .productsEntities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.productsEntities().length).toEqual(
+        mockProductsCustom.length,
+      );
+      expect(store.productsSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
     });
   });
 
@@ -545,46 +555,48 @@ describe('withEntitiesLocalSort', () => {
         defaultSort: { field: 'releaseDate', direction: 'desc' },
       }),
     );
-    const store = new Store();
-    patchState(store, setAllEntities(mockProducts));
-    expect(store.entitiesSort()).toEqual({
-      field: 'releaseDate',
-      direction: 'desc',
-    });
-    // check default sort
-    store.sortEntities();
-    expect(
-      store
-        .entities()
-        .map((e) => e.releaseDate.toDateString())
-        .slice(0, 5),
-    ).toEqual([
-      'Fri Jun 28 2137',
-      'Thu Jun 28 2136',
-      'Tue Jun 28 2135',
-      'Mon Jun 28 2134',
-      'Sun Jun 28 2133',
-    ]);
-    // sort by price
-    store.sortEntities({
-      sort: { field: 'releaseDate', direction: 'asc' },
-    });
-    expect(
-      store
-        .entities()
-        .map((e) => e.releaseDate.toDateString())
-        .slice(0, 5),
-    ).toEqual([
-      'Tue Jun 28 2016',
-      'Wed Jun 28 2017',
-      'Thu Jun 28 2018',
-      'Fri Jun 28 2019',
-      'Sun Jun 28 2020',
-    ]);
-    expect(store.entities().length).toEqual(mockProducts.length);
-    expect(store.entitiesSort()).toEqual({
-      field: 'releaseDate',
-      direction: 'asc',
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      expect(store.entitiesSort()).toEqual({
+        field: 'releaseDate',
+        direction: 'desc',
+      });
+      // check default sort
+      store.sortEntities();
+      expect(
+        store
+          .entities()
+          .map((e) => e.releaseDate.toDateString())
+          .slice(0, 5),
+      ).toEqual([
+        'Fri Jun 28 2137',
+        'Thu Jun 28 2136',
+        'Tue Jun 28 2135',
+        'Mon Jun 28 2134',
+        'Sun Jun 28 2133',
+      ]);
+      // sort by price
+      store.sortEntities({
+        sort: { field: 'releaseDate', direction: 'asc' },
+      });
+      expect(
+        store
+          .entities()
+          .map((e) => e.releaseDate.toDateString())
+          .slice(0, 5),
+      ).toEqual([
+        'Tue Jun 28 2016',
+        'Wed Jun 28 2017',
+        'Thu Jun 28 2018',
+        'Fri Jun 28 2019',
+        'Sun Jun 28 2020',
+      ]);
+      expect(store.entities().length).toEqual(mockProducts.length);
+      expect(store.entitiesSort()).toEqual({
+        field: 'releaseDate',
+        direction: 'asc',
+      });
     });
   });
 
@@ -612,46 +624,48 @@ describe('withEntitiesLocalSort', () => {
         },
       }),
     );
-    const store = new Store();
-    patchState(store, setAllEntities(mockProducts));
-    expect(store.entitiesSort()).toEqual({
-      field: 'sortBySecondWordInName',
-      direction: 'desc',
-    });
-    // check default sort
-    store.sortEntities();
-    expect(
-      store
-        .entities()
-        .map((e) => e.name)
-        .slice(0, 5),
-    ).toEqual([
-      'Pokémon XD: Gale of Darkness',
-      'Wario World',
-      "Wario's Woods",
-      'Battalion Wars',
-      'Uniracers',
-    ]);
-    // sort by price
-    store.sortEntities({
-      sort: { field: 'sortBySecondWordInName', direction: 'asc' },
-    });
-    expect(
-      store
-        .entities()
-        .map((e) => e.name)
-        .slice(0, 5),
-    ).toEqual([
-      'Mario & Wario',
-      'Tetris & Dr. Mario',
-      'Tetris 2',
-      'Pikmin 2',
-      'Kirby Air Ride',
-    ]);
-    expect(store.entities().length).toEqual(mockProducts.length);
-    expect(store.entitiesSort()).toEqual({
-      field: 'sortBySecondWordInName',
-      direction: 'asc',
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      expect(store.entitiesSort()).toEqual({
+        field: 'sortBySecondWordInName',
+        direction: 'desc',
+      });
+      // check default sort
+      store.sortEntities();
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        'Pokémon XD: Gale of Darkness',
+        'Wario World',
+        "Wario's Woods",
+        'Battalion Wars',
+        'Uniracers',
+      ]);
+      // sort by price
+      store.sortEntities({
+        sort: { field: 'sortBySecondWordInName', direction: 'asc' },
+      });
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        'Mario & Wario',
+        'Tetris & Dr. Mario',
+        'Tetris 2',
+        'Pikmin 2',
+        'Kirby Air Ride',
+      ]);
+      expect(store.entities().length).toEqual(mockProducts.length);
+      expect(store.entitiesSort()).toEqual({
+        field: 'sortBySecondWordInName',
+        direction: 'asc',
+      });
     });
   });
 });

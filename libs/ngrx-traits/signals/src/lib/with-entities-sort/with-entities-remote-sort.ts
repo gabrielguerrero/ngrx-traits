@@ -10,6 +10,8 @@ import {
 } from '@ngrx/signals';
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import { EntityProps, NamedEntityProps } from '@ngrx/signals/entities';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, tap } from 'rxjs';
 
 import {
   CallStatusMethods,
@@ -168,20 +170,23 @@ export function withEntitiesRemoteSort<
       withMethods((state: Record<string, Signal<unknown>>) => {
         const setLoading = state[setLoadingKey] as () => void;
         return {
-          [sortEntitiesKey]: ({
-            sort: newSort,
-            skipLoadingCall,
-          }: {
+          [sortEntitiesKey]: rxMethod<{
             sort?: Sort<Entity>;
             skipLoadingCall?: boolean;
-          } = {}) => {
-            const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
-            patchState(state as WritableStateSource<object>, {
-              [sortKey]: sort,
-            });
-            broadcast(state, entitiesRemoteSortChanged({ sort }));
-            if (!skipLoadingCall) setLoading();
-          },
+          }>(
+            pipe(
+              tap((options) => {
+                const newSort = options?.sort;
+                const skipLoadingCall = options?.skipLoadingCall;
+                const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
+                patchState(state as WritableStateSource<object>, {
+                  [sortKey]: sort,
+                });
+                broadcast(state, entitiesRemoteSortChanged({ sort }));
+                if (!skipLoadingCall) setLoading();
+              }),
+            ),
+          ),
         };
       }),
     );

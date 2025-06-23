@@ -1,3 +1,4 @@
+import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
@@ -16,42 +17,50 @@ describe('withEntitiesSingleSelection', () => {
     );
 
     it('selectEntity should select the entity', () => {
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts));
-      store.selectEntity({ id: mockProducts[4].id });
-      expect(store.entitySelected()).toEqual(mockProducts[4]);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntity({ id: mockProducts[4].id });
+        expect(store.entitySelected()).toEqual(mockProducts[4]);
+      });
     });
 
     it('defaultSelectedId should select the entity', () => {
-      const Store = signalStore(
-        { protectedState: false },
-        withState({ myDefault: { id: mockProducts[4].id } }),
-        withEntities({ entity }),
-        withEntitiesSingleSelection(({ myDefault }) => ({
-          entity,
-          defaultSelectedId: myDefault().id,
-        })),
-      );
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts));
-      expect(store.entitySelected()).toEqual(mockProducts[4]);
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({ myDefault: { id: mockProducts[4].id } }),
+          withEntities({ entity }),
+          withEntitiesSingleSelection(({ myDefault }) => ({
+            entity,
+            defaultSelectedId: myDefault().id,
+          })),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        expect(store.entitySelected()).toEqual(mockProducts[4]);
+      });
     });
 
     it('deselectEntity should deselect the entity', () => {
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts));
-      store.selectEntity({ id: mockProducts[4].id });
-      store.deselectEntity();
-      expect(store.entitySelected()).toEqual(undefined);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntity({ id: mockProducts[4].id });
+        store.deselectEntity();
+        expect(store.entitySelected()).toEqual(undefined);
+      });
     });
 
     it('toggleEntity should toggle selection of the entity', () => {
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts));
-      store.toggleSelectEntity({ id: mockProducts[4].id });
-      expect(store.entitySelected()).toEqual(mockProducts[4]);
-      store.toggleSelectEntity({ id: mockProducts[4].id });
-      expect(store.entitySelected()).toEqual(undefined);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.toggleSelectEntity({ id: mockProducts[4].id });
+        expect(store.entitySelected()).toEqual(mockProducts[4]);
+        store.toggleSelectEntity({ id: mockProducts[4].id });
+        expect(store.entitySelected()).toEqual(undefined);
+      });
     });
   });
 
@@ -63,27 +72,43 @@ describe('withEntitiesSingleSelection', () => {
       withEntitiesSingleSelection({ entity, collection }),
     );
     it('selectEntity should select the entity', () => {
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts, { collection }));
-      store.selectProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductsEntity({ id: mockProducts[4].id });
+        expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
+      });
+    });
+
+    it('selectEntity with undefined should deselect the entity', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductsEntity({ id: mockProducts[4].id });
+        store.selectProductsEntity(undefined);
+        expect(store.productsEntitySelected()).toEqual(undefined);
+      });
     });
 
     it('deselectEntity should deselect the entity', () => {
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts, { collection }));
-      store.selectProductsEntity({ id: mockProducts[4].id });
-      store.deselectProductsEntity();
-      expect(store.productsEntitySelected()).toEqual(undefined);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductsEntity({ id: mockProducts[4].id });
+        store.deselectProductsEntity();
+        expect(store.productsEntitySelected()).toEqual(undefined);
+      });
     });
 
     it('toggleEntity should toggle selection of the entity', () => {
-      const store = new Store();
-      patchState(store, setAllEntities(mockProducts, { collection }));
-      store.toggleSelectProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
-      store.toggleSelectProductsEntity({ id: mockProducts[4].id });
-      expect(store.productsEntitySelected()).toEqual(undefined);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.toggleSelectProductsEntity({ id: mockProducts[4].id });
+        expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
+        store.toggleSelectProductsEntity({ id: mockProducts[4].id });
+        expect(store.productsEntitySelected()).toEqual(undefined);
+      });
     });
   });
 });
