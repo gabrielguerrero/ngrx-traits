@@ -17,7 +17,7 @@ import type {
   NamedEntityState,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, tap } from 'rxjs';
+import { map, pipe, tap } from 'rxjs';
 
 import {
   CallStatusMethods,
@@ -192,14 +192,27 @@ export function withEntitiesRemoteFilter<
         const setLoading = state[setLoadingKey] as () => void;
         const filter = state[filterKey] as Signal<Filter>;
 
-        const filterEntities = rxMethod<{
-          filter: Filter;
-          debounce?: number;
-          patch?: boolean;
-          forceLoad?: boolean;
-          skipLoadingCall?: boolean;
-        }>(
+        const filterEntities = rxMethod<
+          | {
+              filter: Filter;
+              debounce?: number;
+              patch?: boolean;
+              forceLoad?: boolean;
+              skipLoadingCall?: boolean;
+            }
+          | undefined
+        >(
           pipe(
+            map(
+              (options) =>
+                // if no options are provided, we use the default filter
+                // and forceLoad
+                options ?? {
+                  filter: filter(),
+                  debounce: config.defaultDebounce,
+                  forceLoad: true,
+                },
+            ),
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
               patchState(state as WritableStateSource<any>, {

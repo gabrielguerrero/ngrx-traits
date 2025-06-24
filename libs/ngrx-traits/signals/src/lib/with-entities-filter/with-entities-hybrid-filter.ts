@@ -20,7 +20,7 @@ import {
   SelectEntityId,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, tap } from 'rxjs';
+import { map, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys, insertIf } from '../util';
 import {
@@ -222,14 +222,27 @@ export function withEntitiesHybridFilter<
         // the ids array of the state with the filtered ids array, and the state.entities depends on it,
         // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
         const entities = computed(() => Object.values(entitiesMap()));
-        const filterEntities = rxMethod<{
-          filter: Filter;
-          debounce?: number;
-          patch?: boolean;
-          forceLoad?: boolean;
-          skipLoadingCall?: boolean;
-        }>(
+        const filterEntities = rxMethod<
+          | {
+              filter: Filter;
+              debounce?: number;
+              patch?: boolean;
+              forceLoad?: boolean;
+              skipLoadingCall?: boolean;
+            }
+          | undefined
+        >(
           pipe(
+            map(
+              (options) =>
+                // if no options are provided, we use the default filter
+                // and forceLoad
+                options ?? {
+                  filter: filter(),
+                  debounce: config.defaultDebounce,
+                  forceLoad: true,
+                },
+            ),
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
               const isRemote = config.isRemoteFilter(value.filter, filter());
