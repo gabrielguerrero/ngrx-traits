@@ -26,7 +26,7 @@ export type FilterOptions<Filter> =
     };
 export type EntitiesFilterMethods<Filter> = {
   filterEntities: (
-    options:
+    options?:
       | FilterOptions<Filter>
       | Observable<FilterOptions<Filter>>
       | Signal<FilterOptions<Filter>>,

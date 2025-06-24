@@ -5,7 +5,7 @@ import { FilterOptions } from './with-entities-local-filter.model';
 
 export type EntitiesRemoteFilterMethods<Filter> = {
   filterEntities: (
-    options:
+    options?:
       | (FilterOptions<Filter> & { skipLoadingCall?: boolean })
       | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
       | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,

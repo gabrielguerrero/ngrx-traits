@@ -20,7 +20,7 @@ import {
   SelectEntityId,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, tap } from 'rxjs';
+import { map, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -161,13 +161,26 @@ export function withEntitiesLocalFilter<
         // the ids array of the state with the filtered ids array, and the state.entities depends on it,
         // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
         const entities = computed(() => Object.values(entitiesMap()));
-        const filterEntities = rxMethod<{
-          filter: Filter;
-          debounce?: number;
-          patch?: boolean;
-          forceLoad?: boolean;
-        }>(
+        const filterEntities = rxMethod<
+          | {
+              filter: Filter;
+              debounce?: number;
+              patch?: boolean;
+              forceLoad?: boolean;
+            }
+          | undefined
+        >(
           pipe(
+            map(
+              (options) =>
+                // if no options are provided, we use the default filter
+                // and forceLoad
+                options ?? {
+                  filter: filter(),
+                  debounce: 0,
+                  forceLoad: true,
+                },
+            ),
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
               const newEntities = entities().filter((entity) => {
