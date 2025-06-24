@@ -64,6 +64,42 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
+  it('should filter without params should reapply filter', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      expect(store.entities().length).toEqual(mockProducts.length);
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar2' },
+        debounce: 0,
+      });
+      tick(400);
+      patchState(store, setAllEntities(mockProducts));
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      store.filterEntities();
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+          categoryId: 'snes',
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+          categoryId: 'gamecube',
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entitiesFilter.search()).toEqual('zero');
+    });
+  }));
+
   it('should allow to set default filter from previous state', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
