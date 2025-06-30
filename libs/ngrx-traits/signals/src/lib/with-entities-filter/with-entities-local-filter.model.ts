@@ -35,7 +35,7 @@ export type EntitiesFilterMethods<Filter> = {
 };
 export type NamedEntitiesFilterMethods<Collection extends string, Filter> = {
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: (
-    options:
+    options?:
       | FilterOptions<Filter>
       | Observable<FilterOptions<Filter>>
       | Signal<FilterOptions<Filter>>,
