@@ -21,7 +21,7 @@ export type NamedEntitiesRemoteFilterMethods<
   Filter,
 > = {
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: (
-    options:
+    options?:
       | (FilterOptions<Filter> & { skipLoadingCall?: boolean })
       | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
       | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,
