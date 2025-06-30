@@ -36,6 +36,16 @@ describe('withCallStatusMap', () => {
     expect(store.areAllTestLoaded()).toEqual(false);
   });
 
+  it('check callStatus has the right state when setLoading and  setLoaded is used', () => {
+    const store = new Store();
+    expect(store.testCallStatus()['1'] === 'loading').toEqual(false);
+    store.setTestLoading('1');
+    expect(store.testCallStatus()['1'] === 'loading').toEqual(true);
+    expect(store.testCallStatus()['1'] === 'loaded').toEqual(false);
+    store.setTestLoaded('1');
+    expect(store.testCallStatus()['1'] === 'loaded').toEqual(true);
+  });
+
   it('errors should return all the failed calls ', () => {
     const store = new Store();
     expect(store.testErrors()).toBeUndefined();

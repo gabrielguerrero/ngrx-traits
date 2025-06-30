@@ -3,7 +3,7 @@ import { Signal } from '@angular/core';
 import { CallStatus } from '../with-call-status/with-call-status.model';
 
 export type NamedCallStatusMapState<Prop extends string> = {
-  [K in Prop as `${K}CallStatus`]: CallStatus;
+  [K in Prop as `${K}CallStatus`]: Record<string | number, CallStatus>;
 };
 
 export type NamedCallStatusMapComputed<Prop extends string, Error = unknown> = {
