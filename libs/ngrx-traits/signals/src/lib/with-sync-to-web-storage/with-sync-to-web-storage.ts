@@ -15,6 +15,8 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 
+import { combineFunctionsInObject } from '../util';
+
 /**
  * Sync the state of the store to the web storage
  * @param key - the key to use in the web storage
@@ -88,67 +90,70 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
     withState({}),
     withMethods((store) => {
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-      return {
-        saveToStorage() {
-          const state = filterState
-            ? filterState(getState(store))
-            : getState(store);
-          if (storageType === 'local') {
-            window.localStorage.setItem(key, JSON.stringify(state));
-            window.localStorage.setItem(
-              key + '-date',
-              new Date().toISOString(),
-            );
-          } else {
-            window.sessionStorage.setItem(key, JSON.stringify(state));
-            window.sessionStorage.setItem(
-              key + '-date',
-              new Date().toISOString(),
-            );
-          }
-        },
-        loadFromStorage(): boolean {
-          if (!isBrowser) {
-            return false;
-          }
-          let stateJson =
-            storageType === 'local'
-              ? window.localStorage.getItem(key)
-              : window.sessionStorage.getItem(key);
-          if (!stateJson) {
-            return false;
-          }
-          if (expires) {
-            const dateStr =
+      return combineFunctionsInObject(
+        {
+          saveToStorage() {
+            const state = filterState
+              ? filterState(getState(store))
+              : getState(store);
+            if (storageType === 'local') {
+              window.localStorage.setItem(key, JSON.stringify(state));
+              window.localStorage.setItem(
+                key + '-date',
+                new Date().toISOString(),
+              );
+            } else {
+              window.sessionStorage.setItem(key, JSON.stringify(state));
+              window.sessionStorage.setItem(
+                key + '-date',
+                new Date().toISOString(),
+              );
+            }
+          },
+          loadFromStorage(): boolean {
+            if (!isBrowser) {
+              return false;
+            }
+            let stateJson =
               storageType === 'local'
-                ? window.localStorage.getItem(key + '-date')
-                : window.sessionStorage.getItem(key + '-date');
-            if (dateStr == null) {
+                ? window.localStorage.getItem(key)
+                : window.sessionStorage.getItem(key);
+            if (!stateJson) {
               return false;
             }
-            const date = new Date(dateStr);
-            if (new Date().getTime() - date.getTime() > expires) {
-              isDevMode() &&
-                console.warn(`${key} ${storageType} web storage expired`);
-              return false;
+            if (expires) {
+              const dateStr =
+                storageType === 'local'
+                  ? window.localStorage.getItem(key + '-date')
+                  : window.sessionStorage.getItem(key + '-date');
+              if (dateStr == null) {
+                return false;
+              }
+              const date = new Date(dateStr);
+              if (new Date().getTime() - date.getTime() > expires) {
+                isDevMode() &&
+                  console.warn(`${key} ${storageType} web storage expired`);
+                return false;
+              }
             }
-          }
-          patchState(store, JSON.parse(stateJson));
-          onRestore?.(
-            store as Prettify<
-              StateSignals<Input['state']> &
-                Input['props'] &
-                Input['methods'] &
-                WritableStateSource<Prettify<Input['state']>>
-            >,
-          );
-          return true;
+            patchState(store, JSON.parse(stateJson));
+            onRestore?.(
+              store as Prettify<
+                StateSignals<Input['state']> &
+                  Input['props'] &
+                  Input['methods'] &
+                  WritableStateSource<Prettify<Input['state']>>
+              >,
+            );
+            return true;
+          },
+          clearFromStore() {
+            if (storageType === 'local') window.localStorage.removeItem(key);
+            else window.sessionStorage.removeItem(key);
+          },
         },
-        clearFromStore() {
-          if (storageType === 'local') window.localStorage.removeItem(key);
-          else window.sessionStorage.removeItem(key);
-        },
-      };
+        store,
+      );
     }),
     withHooks(({ loadFromStorage, saveToStorage, ...store }) => ({
       onInit() {

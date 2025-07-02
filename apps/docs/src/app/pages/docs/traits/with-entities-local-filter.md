@@ -57,6 +57,7 @@ The second way is where there is no submit button, and the filter is connected t
     placeholder="Search"
     (input)="store.filterUsersEmtities({ filter:{ search: $event.target.value }, patch: true })"
 ```
+If you manually changed the entities and want to reapply the filter you can call the filter entities method without any param to reapply the last filter
 
 ### Mixing with other local store features
 You can mix this feature with other local store features like withEntitiesLocalSort, withEntitiesLocalPagination, etc. 

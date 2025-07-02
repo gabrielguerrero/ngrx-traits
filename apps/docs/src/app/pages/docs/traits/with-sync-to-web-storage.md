@@ -70,6 +70,57 @@ const store = signalStore(
   }),
 );
 ```
+
+### Splitting the state in multiple store keys
+You can add withSyncToWebStorage multiple times with different keys, this can be useful if you are creating your own store features and each has a withSyncToWebStorage, or you need to split the state in two keys.
+
+```typescript
+import { signalStoreFeature } from '@ngrx/signals';
+
+// two custom store features, each with its own withSyncToWebStorage and key
+function withProductsList() {
+  const productsEntityConfig = entityConfig({
+    entity: type<Product>(),
+    collection: 'products',
+  });
+  return signalStoreFeature(
+    // following are not required, just an example it can have anything
+    withEntities(productsEntityConfig),
+    withCallStatus(productsEntityConfig),
+    withSyncToWebStorage({
+      key: 'my-products',
+      type: 'session',
+      restoreOnInit: true,
+      saveStateChangesAfterMs: 300,
+      expires: 1000 * 60 * 60 * 12, // 12 hours
+    }),
+  );
+}
+function withOrderList() {
+  const ordersEntityConfig = entityConfig({
+    entity: type<Order>(),
+    collection: 'orders',
+  });
+  return signalStoreFeature(
+    // following are not required, just an example it can have anything
+    withEntities(ordersEntityConfig),
+    withCallStatus(ordersEntityConfig),
+    withSyncToWebStorage({
+      key: 'my-orders',
+      type: 'session',
+      restoreOnInit: true,
+      saveStateChangesAfterMs: 300,
+      expires: 1000 * 60 * 60 * 12, // 12 hours
+    }),
+  );
+}
+const store = signalStore(
+  // using then will store each slice of state in its 
+  // own store key
+  withProductsList(),
+  withOrderList()
+  );
+```
 ## API Reference
 
 This trait receives and object to allow specific configurations:

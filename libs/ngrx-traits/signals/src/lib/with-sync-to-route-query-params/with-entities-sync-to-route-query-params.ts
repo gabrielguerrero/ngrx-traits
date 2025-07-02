@@ -107,6 +107,7 @@ export function withEntitiesSyncToRouteQueryParams<
   prefix?: string | false;
   onQueryParamsLoaded?: (store: StoreSource<Input>) => void;
   defaultDebounce?: number;
+  restoreOnInit?: boolean;
 }): SignalStoreFeature<
   Input &
     (Collection extends ''
@@ -122,7 +123,13 @@ export function withEntitiesSyncToRouteQueryParams<
             NamedCallStatusComputed<Collection, Error>;
           methods: NamedCallStatusMethods<Collection, Error>;
         }),
-  EmptyFeatureResult
+  {
+    state: {};
+    props: {};
+    methods: {
+      loadFromQueryParams: () => void;
+    };
+  }
 > {
   const mappers = [
     getQueryMapperForEntitiesPagination(config),
@@ -146,13 +153,14 @@ export function withEntitiesSyncToRouteQueryParams<
             getQueryMapperWithPrefix({ prefix: prefixString, mapper }),
           )
         : mappers,
+      restoreOnInit: config?.restoreOnInit ?? true,
     }),
     withHooks((store) => {
       return {
         onInit: () => {
           if (config?.onQueryParamsLoaded) {
-            const loading = store[loadingKey] as unknown as  Signal<boolean>;
-            const loaded = store[loadedKey] as unknown as  Signal<boolean>;
+            const loading = store[loadingKey] as unknown as Signal<boolean>;
+            const loaded = store[loadedKey] as unknown as Signal<boolean>;
             const loaded$ = toObservable(loaded);
             toObservable(loading)
               .pipe(

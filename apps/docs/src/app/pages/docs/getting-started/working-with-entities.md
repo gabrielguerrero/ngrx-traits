@@ -114,11 +114,7 @@ export const Store = signalStore(
         patchState(store, setAllEntities(res.resultList, productsEntityConfig));
         // force resort and refilter
         store.sortProductsEntities();
-        store.filterProductsEntities({
-          filter: store.productsFilter(),
-          debounce: 0,
-          forceLoad: true,
-        });
+        store.filterProductsEntities();
       },
     }),
   })),
