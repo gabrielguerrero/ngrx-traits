@@ -1,20 +1,18 @@
-import { computed, inject } from '@angular/core';
+import { computed, inject, Injector } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
-  EmptyFeatureResult,
-  Prettify,
   SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
-  StateSignals,
   type,
   withHooks,
+  withMethods,
   withState,
-  WritableStateSource,
 } from '@ngrx/signals';
 import { debounce, first, timer } from 'rxjs';
 
+import { combineFunctionsInObject } from '../util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import { QueryMapper } from './with-sync-to-route-query-params.util';
 
@@ -63,25 +61,51 @@ export function withSyncToRouteQueryParams<
 >(config: {
   mappers: Mappers;
   defaultDebounce?: number;
-}): SignalStoreFeature<Input, EmptyFeatureResult> {
+  restoreOnInit?: boolean;
+}): SignalStoreFeature<
+  Input,
+  {
+    state: {};
+    props: {};
+    methods: {
+      loadFromQueryParams: () => void;
+    };
+  }
+> {
   return signalStoreFeature(
     type<Input>(),
     withState({}),
-    withHooks((store: Record<string, any>) => {
+    withMethods((store) => {
+      const injector = inject(Injector);
+      return combineFunctionsInObject(
+        {
+          loadFromQueryParams: () => {
+            const activatedRoute = injector.get(ActivatedRoute);
+            activatedRoute.queryParams
+              .pipe(first())
+              .subscribe((queryParams) => {
+                const queryMappers = config.mappers;
+                queryMappers.forEach((mapper) => {
+                  mapper.queryParamsToState(
+                    queryParams as Params,
+                    store as any,
+                  );
+                });
+              });
+          },
+        },
+        store,
+      );
+    }),
+    withHooks((store) => {
       const router = inject(Router);
 
       return {
         onInit: () => {
+          if (config.restoreOnInit ?? true) {
+            store.loadFromQueryParams();
+          }
           const activatedRoute = inject(ActivatedRoute);
-          activatedRoute.queryParams
-            .pipe(first(), takeUntilDestroyed())
-            .subscribe((queryParams) => {
-              const queryMappers = config.mappers;
-              queryMappers.forEach((mapper) => {
-                mapper.queryParamsToState(queryParams as Params, store as any);
-              });
-            });
-
           const changesSignals = config.mappers
             .map((mapper) => mapper.stateToQueryParams(store as any))
             .filter((mapper) => !!mapper);
@@ -108,5 +132,5 @@ export function withSyncToRouteQueryParams<
         },
       };
     }),
-  );
+  ) as any;
 }

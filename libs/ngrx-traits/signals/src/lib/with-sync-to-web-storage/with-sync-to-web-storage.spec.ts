@@ -1,5 +1,9 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { withCallStatus, withSyncToWebStorage } from '@ngrx-traits/signals';
+import {
+  withCallStatus,
+  withEntitiesSingleSelection,
+  withSyncToWebStorage,
+} from '@ngrx-traits/signals';
 import { patchState, signalStore, type } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
@@ -151,6 +155,51 @@ describe('withSyncToWebStorage', () => {
       tick();
       expect(store.entities().length).toEqual(2);
       expect(store.isLoaded()).toBe(true);
+    });
+  }));
+
+  it('should restore and save state from store on init if there is more than one withSyncToWebStorage ', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      // we store split in two keys
+      window.localStorage.setItem(
+        'test',
+        `{"entityMap":{"0":{"name":"Super Mario World","id":"0","description":"Super Nintendo Game","price":10},"1":{"name":"F-Zero","id":"1","description":"Super Nintendo Game","price":12}},"ids":["0","1"],"callStatus":"loaded"}`,
+      );
+      window.localStorage.setItem('test2', `{"idSelected":"1"}`);
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withEntitiesSingleSelection({ entity }),
+        withCallStatus(),
+        withSyncToWebStorage({
+          key: 'test',
+          type: 'local',
+          restoreOnInit: true,
+          saveStateChangesAfterMs: 0,
+          filterState: ({ ids, entityMap, callStatus }) => ({
+            ids,
+            entityMap,
+            callStatus,
+          }),
+        }),
+        withSyncToWebStorage({
+          key: 'test2',
+          type: 'local',
+          restoreOnInit: true,
+          saveStateChangesAfterMs: 0,
+          filterState: ({ idSelected }) => ({ idSelected }),
+        }),
+      );
+      const store = new Store();
+      TestBed.flushEffects();
+      tick();
+      expect(store.entities().length).toEqual(2);
+      expect(store.isLoaded()).toBe(true);
+      expect(store.entitySelected()?.id).toEqual('1');
+      store.selectEntity({ id: '0' });
+      store.saveToStorage();
+      tick();
+      expect(getFromStorage('test2')).toEqual({ idSelected: '0' });
     });
   }));
 

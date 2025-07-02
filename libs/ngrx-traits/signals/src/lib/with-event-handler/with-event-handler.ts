@@ -8,6 +8,11 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 
+import {
+  combineFunctions,
+  combineFunctionsInObject,
+  OverridableFunction,
+} from '../util';
 import { Event, EventCreator, EventType } from './with-event-handler.model';
 
 const ON_EVENT = '__onEvent';
@@ -69,24 +74,22 @@ export function withEventHandler<Input extends SignalStoreFeatureResult>(
   ) => EventHandlersTypes<any>[],
 ): SignalStoreFeature<Input, Input> {
   return signalStoreFeature(
-    withMethods((store: Record<string | symbol, unknown>) => {
+    withMethods((store) => {
       const handlersArray = eventHandlerFactory?.(store as any);
-      const newHandler = handlersArray
+      const eventHandler = handlersArray
         ? (event: Event) => {
             handlersArray.forEach((h) => {
               h.types.includes(event.type) && h.handlers(event);
             });
           }
         : undefined;
-      const onEvent = combineFunctions(
-        store[ON_EVENT] as OverridableFunction,
-        newHandler,
-      );
-      return !store[ON_EVENT]
-        ? {
-            [ON_EVENT]: onEvent,
-          }
-        : ({} as any);
+
+      return combineFunctionsInObject(
+        {
+          [ON_EVENT]: eventHandler,
+        },
+        store,
+      ) as any;
     }),
   ) as any;
 }
@@ -125,31 +128,4 @@ export function onEvent<
     (creator) => creator.type,
   ) as unknown as ExtractEventTypes<Creators>;
   return { handlers, types };
-}
-
-export type OverridableFunction = {
-  (...args: any[]): void;
-  impl?: (...args: unknown[]) => void;
-};
-
-function combineFunctions(
-  previous?: OverridableFunction,
-  next?: (...args: any[]) => void,
-): OverridableFunction {
-  if (previous && !next) {
-    return previous;
-  }
-  const previousImplementation = previous?.impl;
-  const fun: OverridableFunction =
-    previous ??
-    ((...args: any[]) => {
-      fun.impl?.(...args);
-    });
-  fun.impl = next
-    ? (...args: any[]) => {
-        previousImplementation?.(...args);
-        next(...args);
-      }
-    : undefined;
-  return fun;
 }

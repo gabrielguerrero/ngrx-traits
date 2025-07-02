@@ -953,4 +953,32 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       queryParamsHandling: 'merge',
     });
   }));
+
+  it('should not restore state from query params on init  if restoreOnInit is false', () => {
+    const Store = signalStore(
+      localStoreFeature(),
+      withEntitiesSyncToRouteQueryParams({ entity, restoreOnInit: false }),
+    );
+    const { store } = init({
+      Store,
+      queryParams: {
+        filter: JSON.stringify({ search: 'foo', foo: 'bar' }),
+        sortBy: 'description',
+        sortDirection: 'desc',
+      },
+    });
+    expect(store.entitiesFilter()).not.toEqual({ search: 'foo', foo: 'bar' });
+
+    expect(store.entitiesSort()).not.toEqual({
+      field: 'description',
+      direction: 'desc',
+    });
+    store.loadFromQueryParams();
+    expect(store.entitiesFilter()).toEqual({ search: 'foo', foo: 'bar' });
+
+    expect(store.entitiesSort()).toEqual({
+      field: 'description',
+      direction: 'desc',
+    });
+  });
 });
