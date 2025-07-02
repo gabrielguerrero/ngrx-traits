@@ -45,6 +45,7 @@ To use you generally need either a sort dropdown if is a list or a table where c
 />
 ... show products list
 ```
+If you manually changed the entities and want to reapply the sort you can call the sort entities method without any param to reapply the last sort
 
 ### Mixing with other local store features
 You can mix this feature with other local store features like withEntitiesLocalFilter, withEntitiesLocalPagination, etc.

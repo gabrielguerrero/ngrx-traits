@@ -81,6 +81,61 @@ describe('withSyncToRouteQueryParams', () => {
     });
   }));
 
+  it('should not restore state from query params on init  if restoreOnInit is false', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        test: 'test',
+        foo: 'foo',
+        bar: false,
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: (query, store) => {
+              patchState(store, {
+                test: query.test,
+                foo: query.foo,
+                bar: query.bar === 'true',
+              });
+            },
+            stateToQueryParams: (store) =>
+              computed(() => ({
+                test: store.test(),
+                foo: store.foo(),
+                bar: store.bar().toString(),
+              })),
+          },
+        ],
+        restoreOnInit: false,
+      }),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        Store,
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: of({
+              test: 'test2',
+              foo: 'foo2',
+              bar: 'true',
+            }),
+          }),
+        },
+      ],
+    });
+    const store = TestBed.inject(Store);
+    expect(store.test()).toBe('test');
+    expect(store.foo()).toBe('foo');
+    expect(store.bar()).toBe(false);
+    store.loadFromQueryParams();
+    expect(store.test()).toBe('test2');
+    expect(store.foo()).toBe('foo2');
+    expect(store.bar()).toBe(true);
+  });
+
   it('store should be synced with url query params with custom debounce', fakeAsync(() => {
     const { store } = init({ debounce: 1000 });
 
