@@ -50,7 +50,9 @@ export function debounceFilterPipe<Filter>(
         forceLoad?: boolean;
         skipLoadingCall?: boolean;
       }) =>
-        value?.forceLoad ? of({}) : timer(value.debounce ?? defaultDebounce),
+        value?.forceLoad || (value.debounce ?? defaultDebounce) == 0
+          ? of({})
+          : timer(value.debounce ?? defaultDebounce),
     ),
     concatMap((payload) =>
       payload.patch
