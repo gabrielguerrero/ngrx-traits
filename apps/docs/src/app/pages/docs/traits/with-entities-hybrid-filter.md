@@ -62,19 +62,19 @@ export const store = signalStore(
 We can use it in our template like 
   
   ```html
-  <mat-select #category placeholder="Category" (change)="store.filterProductsEmtities({ filter:{ categoryId: $event.target.value }, partial: true})">
+  <mat-select #category placeholder="Category" (change)="store.filterProductsEntities({ filter:{ categoryId: $event.target.value }, partial: true})">
       <mat-option value="snes">SNES</mat-option>
       <mat-option value="nes">NES</mat-option>
   </mat-select>
-  <input #searchControl type="text" placeholder="Search" (input)="store.filterProductsEmtities({ filter:{ search: $event.target.value }, partial: true})">
+  <input #searchControl type="text" placeholder="Search" (input)="store.filterProductsEntities({ filter:{ search: $event.target.value }, partial: true})">
 
 ... render list of products
 ```
 ### Using filter method
 Once you have your store defined you can use the generated filter[Collection]Entities method, ui for the filter is generally some sort of form with one or more field or controls of different kind, you should make your filter object represent those controls, after that, the filter is either connected to a button like 'Apply' , that on press will submit the entire form. In this case be sure to set the debounce to 0, so that the filter is applied immediately.
 ```html
-<form (submit)="store.filterProductsEmtities({ filter:{ search: searchControl.value, role: roleControl.value }})">
-    <mat-select #roleControl placeholder="Role" (change)="store.filterProductsEmtities({ filter:{ role: $event.target.value }, debounce:0})">
+<form (submit)="store.filterProductsEntities({ filter:{ search: searchControl.value, role: roleControl.value }})">
+    <mat-select #roleControl placeholder="Role" (change)="store.filterProductsEntities({ filter:{ role: $event.target.value }, debounce:0})">
         <mat-option value="admin">Admin</mat-option>
         <mat-option value="user">User</mat-option>
     </mat-select>
@@ -87,7 +87,7 @@ The second way is where there is no submit button, and the filter is connected t
 <input
     type="text"
     placeholder="Search"
-    (input)="store.filterProductsEmtities({ filter:{ search: $event.target.value }, patch: true })"
+    (input)="store.filterProductsEntities({ filter:{ search: $event.target.value }, patch: true })"
 ```
 
 ### Mixing with other local store features
