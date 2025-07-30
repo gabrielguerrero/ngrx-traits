@@ -1,19 +1,20 @@
-import { createAction, createFeatureSelector } from '@ngrx/store';
+import { TestBed } from '@angular/core/testing';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
-import { addFilterEntitiesTrait } from '../filter-entities/filter-entities.trait';
-import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { createAction, createFeatureSelector } from '@ngrx/store';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
+
 import {
   addEntitiesPaginationTrait,
   EntitiesPaginationState,
 } from '../entities-pagination';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { TestBed } from '@angular/core/testing';
-import { provideMockStore } from '@ngrx/store/testing';
 import { FilterEntitiesState } from '../filter-entities';
+import { addFilterEntitiesTrait } from '../filter-entities/filter-entities.trait';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { addResetEntitiesStateTrait } from './reset.trait';
 
 export interface TestState
@@ -34,7 +35,7 @@ describe('addReset Trait', () => {
       addEntitiesPaginationTrait<Todo>(),
       addResetEntitiesStateTrait({
         resetOn: [globalReset],
-      })
+      }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -42,7 +43,7 @@ describe('addReset Trait', () => {
     TestBed.configureTestingModule({
       providers: [
         traits.effects[1],
-        provideMockActions(() => actions$),
+        provideMockActions(() => actions$!),
         provideMockStore(),
       ],
     });
@@ -55,7 +56,7 @@ describe('addReset Trait', () => {
         initWithRemoteFilterWithPagination();
       let result = reducer(
         initialState,
-        actions.loadProductsSuccess({ entities: [] })
+        actions.loadProductsSuccess({ entities: [] }),
       );
       result = reducer(result, actions.resetProductsState());
       expect(result).toEqual(initialState);
@@ -65,7 +66,7 @@ describe('addReset Trait', () => {
         initWithRemoteFilterWithPagination();
       let result = reducer(
         initialState,
-        actions.loadProductsSuccess({ entities: [] })
+        actions.loadProductsSuccess({ entities: [] }),
       );
       result = reducer(result, globalReset());
       expect(result).toEqual(initialState);

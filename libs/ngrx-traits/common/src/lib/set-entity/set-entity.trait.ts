@@ -3,15 +3,15 @@ import {
   createTraitFactory,
   TraitActionsFactoryConfig,
 } from '@ngrx-traits/core';
+import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
 import { createAction, createReducer, on } from '@ngrx/store';
+import { ActionCreatorProps } from '@ngrx/store';
 
 import {
   SetEntityActions,
   SetEntitySelectors,
   SetEntityState,
 } from './set-entity.model';
-import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
-import { ActionCreatorProps } from '@ngrx/store/src/models';
 
 type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
 
@@ -50,7 +50,7 @@ export function addSetEntityTrait<
   J extends string,
   Payload extends Record<J, any> | undefined = undefined,
   Entity = RecordEntity<Payload>,
-  State extends SetEntityState<Entity, J>= SetEntityState<Entity, J>
+  State extends SetEntityState<Entity, J> = SetEntityState<Entity, J>,
 >({
   entityName,
   actionProps,
@@ -66,7 +66,7 @@ export function addSetEntityTrait<
     actions: ({ actionsGroupKey }: TraitActionsFactoryConfig) => {
       const setEntity = createAction(
         `${actionsGroupKey} Set ${capitalizedName}`,
-        actionProps as any
+        actionProps as any,
       );
 
       return {
@@ -92,8 +92,8 @@ export function addSetEntityTrait<
           (state: any, action: any) => ({
             ...state,
             [entityName]: action[entityName],
-          })
-        )
+          }),
+        ),
       );
     },
   });

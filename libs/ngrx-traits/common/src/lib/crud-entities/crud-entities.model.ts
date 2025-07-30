@@ -1,6 +1,6 @@
-import { Predicate, Update } from '@ngrx/entity/src/models';
+import { Predicate, Update } from '@ngrx/entity';
 import { ActionCreator } from '@ngrx/store';
-import { Action } from '@ngrx/store/src/models';
+import { Action } from '@ngrx/store';
 
 import { LoadEntitiesState } from '../load-entities/load-entities.model';
 

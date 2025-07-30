@@ -1,23 +1,24 @@
-import { Actions } from '@ngrx/effects';
-import { createFeatureSelector } from '@ngrx/store';
 import { TestBed } from '@angular/core/testing';
-import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
+import { toMap } from '@ngrx-traits/core';
+import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { createFeatureSelector } from '@ngrx/store';
+import { provideMockStore } from '@ngrx/store/testing';
+
+import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
 import {
   addEntitiesPaginationTrait,
   EntitiesPaginationState,
 } from '../entities-pagination';
-import { addSortEntitiesTrait, SortEntitiesState } from '../sort-entities';
-import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
-import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
 import {
   addFilterEntitiesTrait,
   FilterEntitiesState,
 } from '../filter-entities';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
+import { addSortEntitiesTrait, SortEntitiesState } from '../sort-entities';
 import { SelectEntitiesState } from './select-entities.model';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { provideMockStore } from '@ngrx/store/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { toMap } from '@ngrx-traits/core';
 import { addSelectEntitiesTrait } from './select-entities.trait';
 
 describe('addSelectEntities trait', () => {
@@ -56,14 +57,14 @@ describe('addSelectEntities trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
-      addSelectEntitiesTrait<Todo>()
+      addSelectEntitiesTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
     });
 
     TestBed.configureTestingModule({
-      providers: [provideMockStore(), provideMockActions(() => actions$)],
+      providers: [provideMockStore(), provideMockActions(() => actions$!)],
     });
 
     const initialState = traits.initialState;
@@ -88,7 +89,7 @@ describe('addSelectEntities trait', () => {
         remote: true,
       }),
       addSelectEntitiesTrait<Todo>(),
-      addCrudEntitiesTrait<Todo>()
+      addCrudEntitiesTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector2,
@@ -98,7 +99,7 @@ describe('addSelectEntities trait', () => {
       providers: [
         provideMockStore(),
         traits.effects[0],
-        provideMockActions(() => actions$),
+        provideMockActions(() => actions$!),
       ],
     });
 
@@ -118,26 +119,26 @@ describe('addSelectEntities trait', () => {
     it('selectEntitiesIdsSelectedMap should return selected ids in a dictionary by id ', () => {
       const { selectors, state } = init();
       expect(selectors.selectEntitiesIdsSelectedMap.projector(state)).toEqual(
-        {}
+        {},
       );
       expect(
         selectors.selectEntitiesIdsSelectedMap.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
-        })
+        }),
       ).toEqual({ 3: true, 4: true, 7: true });
     });
 
     it('selectEntitiesIdsSelectedList should return selected ids in an array ', () => {
       const { selectors, state } = init();
       expect(selectors.selectEntitiesIdsSelectedList.projector(state)).toEqual(
-        []
+        [],
       );
       expect(
         selectors.selectEntitiesIdsSelectedList.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
-        })
+        }),
       ).toEqual(['3', '4', '7']);
     });
 
@@ -148,7 +149,7 @@ describe('addSelectEntities trait', () => {
         selectors.selectEntitiesSelectedMap.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
-        })
+        }),
       ).toEqual({
         3: { id: 3, content: '3' },
         4: { id: 4, content: '4' },
@@ -163,7 +164,7 @@ describe('addSelectEntities trait', () => {
         selectors.selectEntitiesSelectedList.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
-        })
+        }),
       ).toEqual([
         { id: 3, content: '3' },
         { id: 4, content: '4' },
@@ -177,7 +178,7 @@ describe('addSelectEntities trait', () => {
         selectors.selectTotalSelectedEntities.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
-        })
+        }),
       ).toEqual(3);
     });
 
@@ -186,20 +187,20 @@ describe('addSelectEntities trait', () => {
       expect(
         selectors.isAllEntitiesSelected.projector({
           ...state,
-        })
+        }),
       ).toEqual('none');
       expect(
         selectors.isAllEntitiesSelected.projector({
           ...state,
           selectedIds: { 3: true, 4: true, 7: true },
-        })
+        }),
       ).toEqual('some');
 
       expect(
         selectors.isAllEntitiesSelected.projector({
           ...state,
           selectedIds: toMap(state.ids),
-        })
+        }),
       ).toEqual('all');
     });
   });
@@ -248,7 +249,7 @@ describe('addSelectEntities trait', () => {
       let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
-        actions.loadEntitiesSuccess({ entities: [{ id: 3, content: '3' }] })
+        actions.loadEntitiesSuccess({ entities: [{ id: 3, content: '3' }] }),
       );
       expect(result.selectedIds).toEqual({});
     });
@@ -259,7 +260,7 @@ describe('addSelectEntities trait', () => {
       let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
-        actions.filterEntities({ filters: { content: '2' } })
+        actions.filterEntities({ filters: { content: '2' } }),
       );
       expect(result.selectedIds).toEqual({});
     });
@@ -270,7 +271,7 @@ describe('addSelectEntities trait', () => {
       let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
-        actions.sortEntities({ active: 'id', direction: 'asc' })
+        actions.sortEntities({ active: 'id', direction: 'asc' }),
       );
       expect(result.selectedIds).toEqual({});
     });
@@ -307,7 +308,7 @@ describe('addSelectEntities trait', () => {
       let result = reducer(state, actions.selectEntities({ id: 3 }));
       result = reducer(
         result,
-        actions.updateEntities({ id: 3, changes: { id: 11, content: '11' } })
+        actions.updateEntities({ id: 3, changes: { id: 11, content: '11' } }),
       );
       expect(result.selectedIds).toEqual({ 11: true });
     });
