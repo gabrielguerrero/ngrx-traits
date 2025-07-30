@@ -17,6 +17,7 @@ import {
   withHooks,
   withMethods,
   withState,
+  WritableStateSource,
 } from '@ngrx/signals';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
@@ -162,8 +163,8 @@ export function withCalls<
     };
   }
 > {
-  return withFeatureFactory((store: StoreSource<Input>) => {
-    const calls = callsFactory(store);
+  return withFeatureFactory((store) => {
+    const calls = callsFactory(store as StoreSource<Input>);
     const callsState = Object.entries(calls).reduce(
       (acc, [callName, call]) => {
         const { callStatusKey } = getWithCallStatusKeys({ prop: callName });
@@ -235,15 +236,15 @@ export function withCalls<
               const setLoading = () =>
                 patchState(store, {
                   [callStatusKey]: 'loading',
-                } as any);
+                } as WritableStateSource<Input['state']>);
               const setLoaded = () =>
                 patchState(store, {
                   [callStatusKey]: 'loaded',
-                } as any);
+                } as WritableStateSource<Input['state']>);
               const setError = (error: unknown) =>
                 patchState(store, {
                   [callStatusKey]: { error },
-                } as any);
+                } as WritableStateSource<Input['state']>);
 
               const callFn = getCallFn(callName, call);
               const skipWhenFn = isCallConfig(call)

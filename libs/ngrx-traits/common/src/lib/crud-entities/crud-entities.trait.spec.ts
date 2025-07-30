@@ -1,22 +1,23 @@
 import { TestBed } from '@angular/core/testing';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { ChangeType, CrudEntitiesState } from './crud-entities.model';
-import { addCrudEntitiesTrait } from './crud-entities.trait';
+import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { createFeatureSelector } from '@ngrx/store';
+import { provideMockStore } from '@ngrx/store/testing';
+
+import {
+  addEntitiesPaginationTrait,
+  EntitiesPaginationState,
+} from '../entities-pagination';
 import {
   addFilterEntitiesTrait,
   FilterEntitiesState,
 } from '../filter-entities';
 import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
 import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import {
-  addEntitiesPaginationTrait,
-  EntitiesPaginationState,
-} from '../entities-pagination';
 import { addSortEntitiesTrait, SortEntitiesState } from '../sort-entities';
-import { Actions } from '@ngrx/effects';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { createFeatureSelector } from '@ngrx/store';
-import { provideMockStore } from '@ngrx/store/testing';
+import { ChangeType, CrudEntitiesState } from './crud-entities.model';
+import { addCrudEntitiesTrait } from './crud-entities.trait';
 
 describe('addCrud trait', () => {
   let actions$: Actions;
@@ -38,14 +39,14 @@ describe('addCrud trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
-      addCrudEntitiesTrait<Todo>({ storeChanges })
+      addCrudEntitiesTrait<Todo>({ storeChanges }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
     });
 
     TestBed.configureTestingModule({
-      providers: [provideMockStore(), provideMockActions(() => actions$)],
+      providers: [provideMockStore(), provideMockActions(() => actions$!)],
     });
     return { ...traits };
   }
@@ -60,7 +61,7 @@ describe('addCrud trait', () => {
         remote: true,
       }),
       addLoadEntitiesTrait<Todo>(),
-      addCrudEntitiesTrait<Todo>()
+      addCrudEntitiesTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector2,
@@ -70,7 +71,7 @@ describe('addCrud trait', () => {
       providers: [
         provideMockStore(),
         traits.effects[0],
-        provideMockActions(() => actions$),
+        provideMockActions(() => actions$!),
       ],
     });
     return { ...traits, effects: TestBed.inject(traits.effects[0]) };
@@ -125,7 +126,7 @@ describe('addCrud trait', () => {
     it('selectFilteredEntitiesChangesList should filter unnecessary changes and has entities added in result ', () => {
       const { selectors, state } = initWithTestState();
       expect(
-        selectors.selectFilteredEntitiesChangesList.projector(state)
+        selectors.selectFilteredEntitiesChangesList.projector(state),
       ).toEqual([
         {
           entity: state.entities[2],
@@ -172,7 +173,7 @@ describe('addCrud trait', () => {
       const { reducer, actions, initialState } = init();
       const state = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       expect(state.entities).toEqual({ 1: { id: 1, content: 'one' } });
       expect(state.changes).toEqual([
@@ -186,8 +187,8 @@ describe('addCrud trait', () => {
         initialState,
         actions.addEntities(
           { id: 1, content: 'one' },
-          { id: 2, content: 'two' }
-        )
+          { id: 2, content: 'two' },
+        ),
       );
       expect(state.entities).toEqual({
         1: { id: 1, content: 'one' },
@@ -207,8 +208,8 @@ describe('addCrud trait', () => {
         initialState,
         actions.addEntities(
           { id: 1, content: 'one' },
-          { id: 2, content: 'two' }
-        )
+          { id: 2, content: 'two' },
+        ),
       );
       expect(state.entities).toEqual({
         1: { id: 1, content: 'one' },
@@ -238,13 +239,13 @@ describe('addCrud trait', () => {
           initialState,
           actions.addEntities(
             { id: 1, content: 'one' },
-            { id: 2, content: 'two' }
-          )
+            { id: 2, content: 'two' },
+          ),
         );
 
         state = reducer(
           state,
-          actions.upsertEntities({ id: 1, content: 'one-updated' })
+          actions.upsertEntities({ id: 1, content: 'one-updated' }),
         );
 
         expect(state.changes).toEqual([
@@ -281,13 +282,13 @@ describe('addCrud trait', () => {
           initialState,
           actions.addEntities(
             { id: 1, content: 'one' },
-            { id: 2, content: 'two' }
-          )
+            { id: 2, content: 'two' },
+          ),
         );
 
         state = reducer(
           state,
-          actions.upsertEntities({ id: 3, content: 'new' })
+          actions.upsertEntities({ id: 3, content: 'new' }),
         );
 
         expect(state.changes).toEqual([
@@ -324,16 +325,16 @@ describe('addCrud trait', () => {
           initialState,
           actions.addEntities(
             { id: 1, content: 'one' },
-            { id: 2, content: 'two' }
-          )
+            { id: 2, content: 'two' },
+          ),
         );
 
         state = reducer(
           state,
           actions.upsertEntities(
             { id: 1, content: 'one-updated' },
-            { id: 3, content: 'new' }
-          )
+            { id: 3, content: 'new' },
+          ),
         );
 
         expect(state.changes).toEqual([
@@ -371,7 +372,7 @@ describe('addCrud trait', () => {
       const { reducer, actions, initialState } = init();
       let state = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       state = reducer(state, actions.removeEntities(1));
       expect(state.entities).toEqual({});
@@ -387,8 +388,8 @@ describe('addCrud trait', () => {
         initialState,
         actions.addEntities(
           { id: 1, content: 'one' },
-          { id: 2, content: 'two' }
-        )
+          { id: 2, content: 'two' },
+        ),
       );
       state = reducer(state, actions.removeEntities(1, 2));
       expect(state.entities).toEqual({});
@@ -406,8 +407,8 @@ describe('addCrud trait', () => {
         initialState,
         actions.addEntities(
           { id: 1, content: 'one' },
-          { id: 2, content: 'two' }
-        )
+          { id: 2, content: 'two' },
+        ),
       );
       state = reducer(state, actions.removeAllEntities());
       expect(state.entities).toEqual({});
@@ -423,11 +424,11 @@ describe('addCrud trait', () => {
       const { reducer, actions, initialState } = init();
       let state = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       state = reducer(
         state,
-        actions.updateEntities({ id: 1, changes: { content: 'uno' } })
+        actions.updateEntities({ id: 1, changes: { content: 'uno' } }),
       );
       expect(state.entities).toEqual({ 1: { id: 1, content: 'uno' } });
       expect(state.changes).toEqual([
@@ -442,15 +443,15 @@ describe('addCrud trait', () => {
         initialState,
         actions.addEntities(
           { id: 1, content: 'one' },
-          { id: 2, content: 'two' }
-        )
+          { id: 2, content: 'two' },
+        ),
       );
       state = reducer(
         state,
         actions.updateEntities(
           { id: 1, changes: { content: 'uno' } },
-          { id: 2, changes: { content: 'dos' } }
-        )
+          { id: 2, changes: { content: 'dos' } },
+        ),
       );
       expect(state.entities).toEqual({
         1: { id: 1, content: 'uno' },
@@ -470,11 +471,11 @@ describe('addCrud trait', () => {
       });
       let state = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       state = reducer(
         state,
-        actions.updateEntities({ id: 1, changes: { content: 'uno' } })
+        actions.updateEntities({ id: 1, changes: { content: 'uno' } }),
       );
       expect(state.entities).toEqual({ 1: { id: 1, content: 'uno' } });
       expect(state.changes).toEqual([
@@ -495,11 +496,11 @@ describe('addCrud trait', () => {
       const { reducer, actions, initialState } = init();
       let state = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       state = reducer(
         state,
-        actions.updateEntities({ id: 1, changes: { id: 2, content: 'dos' } })
+        actions.updateEntities({ id: 1, changes: { id: 2, content: 'dos' } }),
       );
       expect(state.entities).toEqual({ 2: { id: 2, content: 'dos' } });
       expect(state.changes).toEqual([
@@ -512,7 +513,7 @@ describe('addCrud trait', () => {
       const { actions, reducer, initialState } = init();
       let result = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       result = reducer(result, actions.clearEntitiesChanges());
       expect(result.changes).toEqual([]);
@@ -522,11 +523,11 @@ describe('addCrud trait', () => {
       const { actions, reducer, initialState } = init();
       let result = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       result = reducer(
         result,
-        actions.loadEntitiesSuccess({ entities: [{ id: 1, content: 'one' }] })
+        actions.loadEntitiesSuccess({ entities: [{ id: 1, content: 'one' }] }),
       );
       expect(result.changes).toEqual([]);
     });
@@ -536,11 +537,11 @@ describe('addCrud trait', () => {
         initPaginatedWithFilteringAndSorting();
       let result = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       result = reducer(
         result,
-        actions.filterEntities({ filters: { content: '1' } })
+        actions.filterEntities({ filters: { content: '1' } }),
       );
       expect(result.changes).toEqual([]);
     });
@@ -550,11 +551,11 @@ describe('addCrud trait', () => {
         initPaginatedWithFilteringAndSorting();
       let result = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       result = reducer(
         result,
-        actions.sortEntities({ active: 'id', direction: 'desc' })
+        actions.sortEntities({ active: 'id', direction: 'desc' }),
       );
       expect(result.changes).toEqual([]);
     });
@@ -564,7 +565,7 @@ describe('addCrud trait', () => {
         initPaginatedWithFilteringAndSorting();
       let result = reducer(
         initialState,
-        actions.addEntities({ id: 1, content: 'one' })
+        actions.addEntities({ id: 1, content: 'one' }),
       );
       result = reducer(result, actions.loadEntitiesPageSuccess());
       expect(result.changes).toEqual([]);

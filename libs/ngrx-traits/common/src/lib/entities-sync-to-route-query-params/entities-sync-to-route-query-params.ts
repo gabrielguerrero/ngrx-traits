@@ -8,7 +8,7 @@ import {
 import { createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import { createAction, createReducer, on, props } from '@ngrx/store';
-import { Action, ActionCreator } from '@ngrx/store/src/models';
+import { Action, ActionCreator } from '@ngrx/store';
 import { delay, map, mapTo, tap } from 'rxjs/operators';
 
 import {

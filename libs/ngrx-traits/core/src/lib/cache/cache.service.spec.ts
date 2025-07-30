@@ -1,19 +1,20 @@
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { cache } from './cache.service';
+import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { TestBed } from '@angular/core/testing';
-import * as CacheActions from './cache.actions';
-import * as CacheSelectors from './cache.selectors';
-import { cacheReducer, initialState } from './cache.reducer';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
+
+import * as CacheActions from './cache.actions';
+import { cacheReducer, initialState } from './cache.reducer';
+import * as CacheSelectors from './cache.selectors';
+import { cache } from './cache.service';
 
 describe('CacheService', () => {
   let actions$: Actions;
   function init() {
     TestBed.configureTestingModule({
       providers: [
-        provideMockActions(() => actions$),
+        provideMockActions(() => actions$!),
         provideMockStore({ initialState: {} }),
       ],
     });
@@ -45,7 +46,7 @@ describe('CacheService', () => {
     expect(store.dispatch).toHaveBeenCalledWith(
       CacheActions.hitCache({
         key,
-      })
+      }),
     );
   });
 
@@ -67,7 +68,7 @@ describe('CacheService', () => {
         key,
         date: expect.anything(),
         value: [{ a: 2, b: '3' }],
-      })
+      }),
     );
   });
 
@@ -95,7 +96,7 @@ describe('CacheService', () => {
         key,
         date: expect.anything(),
         value: [{ a: 2, b: '3' }],
-      })
+      }),
     );
   });
 
@@ -126,7 +127,7 @@ describe('CacheService', () => {
         key,
         date: expect.anything(),
         value: [{ a: 2, b: '3' }],
-      })
+      }),
     );
   });
 });

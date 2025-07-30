@@ -4,7 +4,7 @@ import {
   CdkVirtualForOf,
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
-import { CommonModule } from '@angular/common';
+
 import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -23,7 +23,6 @@ import { ProductsBranchStore } from './products-branch.store';
   selector: 'products-branch-list',
   standalone: true,
   imports: [
-    CommonModule,
     MatList,
     MatListItem,
     MatButton,
@@ -34,8 +33,8 @@ import { ProductsBranchStore } from './products-branch.store';
     MatProgressSpinner,
     CdkVirtualScrollViewport,
     CdkFixedSizeVirtualScroll,
-    CdkVirtualForOf,
-  ],
+    CdkVirtualForOf
+],
   template: `
     <div class="grid grid-rows-[auto_1fr]">
       <form class="p-8 pb-0">

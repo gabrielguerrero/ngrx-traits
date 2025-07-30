@@ -1,13 +1,9 @@
-import { Injectable } from '@angular/core';
-import { createTraitFactory, insertIf } from '@ngrx-traits/core';
-import { TraitActionsFactoryConfig } from '@ngrx-traits/core';
-import { TraitEffect } from '@ngrx-traits/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { createAction, createReducer, on, Store } from '@ngrx/store';
-import { Action, ActionCreator } from '@ngrx/store/src/models';
-import { mapTo } from 'rxjs/operators';
-
-import { GenericActionCreator } from '../load-entities';
+import {
+  createTraitFactory,
+  insertIf,
+  TraitActionsFactoryConfig,
+} from '@ngrx-traits/core';
+import { ActionCreator, createAction, createReducer, on } from '@ngrx/store';
 
 /**
  * Generates the ngrx code needed to reset the current state to the initial state.

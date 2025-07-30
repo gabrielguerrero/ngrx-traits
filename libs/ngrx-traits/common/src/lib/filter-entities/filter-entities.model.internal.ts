@@ -1,4 +1,4 @@
-import { Action, ActionCreator } from '@ngrx/store/src/models';
+import { Action, ActionCreator } from '@ngrx/store';
 
 import { FilterEntitiesActions } from './filter-entities.model';
 

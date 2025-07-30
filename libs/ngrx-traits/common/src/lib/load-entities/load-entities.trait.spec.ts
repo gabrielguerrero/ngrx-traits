@@ -1,15 +1,16 @@
 import { TestBed } from '@angular/core/testing';
-import { EntitiesPaginationState } from '../entities-pagination';
-import { addLoadEntitiesTrait } from './load-entities.trait';
-import { createAction, createFeatureSelector } from '@ngrx/store';
-import { addEntitiesPaginationTrait } from '../entities-pagination/entities-pagination.trait';
-import { Actions } from '@ngrx/effects';
-import { LoadEntitiesState } from './load-entities.model';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { addFilterEntitiesTrait } from '../filter-entities/filter-entities.trait';
+import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { createFeatureSelector } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+
+import { EntitiesPaginationState } from '../entities-pagination';
+import { addEntitiesPaginationTrait } from '../entities-pagination/entities-pagination.trait';
 import { FilterEntitiesState } from '../filter-entities';
+import { addFilterEntitiesTrait } from '../filter-entities/filter-entities.trait';
+import { LoadEntitiesState } from './load-entities.model';
+import { addLoadEntitiesTrait } from './load-entities.trait';
 
 export interface Todo {
   id: number;
@@ -37,14 +38,14 @@ describe('addLoadEntitiesTrait Trait', () => {
     const featureSelector = createFeatureSelector<TestState>('test');
     const traits = createEntityFeatureFactory(
       { entityName: 'todo' },
-      addLoadEntitiesTrait<Todo>()
+      addLoadEntitiesTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
     });
 
     TestBed.configureTestingModule({
-      providers: [provideMockActions(() => actions$), provideMockStore()],
+      providers: [provideMockActions(() => actions$!), provideMockStore()],
     });
     const mockStore = TestBed.inject(MockStore);
     return { ...traits, mockStore };
@@ -55,7 +56,7 @@ describe('addLoadEntitiesTrait Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
-      addEntitiesPaginationTrait<Todo>()
+      addEntitiesPaginationTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -63,7 +64,7 @@ describe('addLoadEntitiesTrait Trait', () => {
     TestBed.configureTestingModule({
       providers: [
         traits.effects[0],
-        provideMockActions(() => actions$),
+        provideMockActions(() => actions$!),
         provideMockStore(),
       ],
     });
@@ -80,7 +81,7 @@ describe('addLoadEntitiesTrait Trait', () => {
         defaultFilter: filter,
         filterFn: (filter: TodoFilter, todo: Todo) =>
           (filter?.content && todo.content?.includes(filter.content)) || false,
-      })
+      }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -88,7 +89,7 @@ describe('addLoadEntitiesTrait Trait', () => {
 
     const state = traits.reducer(
       traits.initialState,
-      traits.actions.loadEntitiesSuccess({ entities: data })
+      traits.actions.loadEntitiesSuccess({ entities: data }),
     );
     return {
       ...traits,
@@ -101,7 +102,7 @@ describe('addLoadEntitiesTrait Trait', () => {
       const { actions, reducer, initialState } = init();
       const result = reducer(
         initialState,
-        actions.loadTodosFail({ error: '' })
+        actions.loadTodosFail({ error: '' }),
       );
       expect(result).toEqual({ ...initialState, status: 'fail' });
     });
@@ -119,7 +120,7 @@ describe('addLoadEntitiesTrait Trait', () => {
         actions.loadTodosSuccess({
           entities: [{ id: 0 }, { id: 1 }],
           total: 2,
-        })
+        }),
       );
       expect(result).toEqual({
         ...initialState,
@@ -138,7 +139,7 @@ describe('addLoadEntitiesTrait Trait', () => {
         actions.loadEntitiesSuccess({
           entities: [{ id: 0 }, { id: 1 }],
           total: 2,
-        })
+        }),
       );
 
       expect(result).not.toEqual({
@@ -157,19 +158,19 @@ describe('addLoadEntitiesTrait Trait', () => {
         selectors.isTodosLoading.projector({
           ...initialState,
           status: 'loading',
-        })
+        }),
       ).toBe(true);
       expect(
         selectors.isTodosLoading.projector({
           ...initialState,
           status: 'fail',
-        })
+        }),
       ).toBe(false);
       expect(
         selectors.isTodosLoading.projector({
           ...initialState,
           status: 'success',
-        })
+        }),
       ).toBe(false);
     });
 
@@ -179,19 +180,19 @@ describe('addLoadEntitiesTrait Trait', () => {
         selectors.isTodosLoadingFail.projector({
           ...initialState,
           status: 'loading',
-        })
+        }),
       ).toBe(false);
       expect(
         selectors.isTodosLoadingFail.projector({
           ...initialState,
           status: 'fail',
-        })
+        }),
       ).toBe(true);
       expect(
         selectors.isTodosLoadingFail.projector({
           ...initialState,
           status: 'success',
-        })
+        }),
       ).toBe(false);
     });
 
@@ -201,19 +202,19 @@ describe('addLoadEntitiesTrait Trait', () => {
         selectors.isTodosLoadingSuccess.projector({
           ...initialState,
           status: 'loading',
-        })
+        }),
       ).toBe(false);
       expect(
         selectors.isTodosLoadingSuccess.projector({
           ...initialState,
           status: 'fail',
-        })
+        }),
       ).toBe(false);
       expect(
         selectors.isTodosLoadingSuccess.projector({
           ...initialState,
           status: 'success',
-        })
+        }),
       ).toBe(true);
     });
   });
@@ -224,7 +225,7 @@ describe('addLoadEntitiesTrait Trait', () => {
         { id: 0, content: 'Do unit test' },
         { id: 1, content: 'e2e' },
       ],
-      { content: 'e2e' }
+      { content: 'e2e' },
     );
 
     it('check selectEntitiesList returns filtered data ', () => {

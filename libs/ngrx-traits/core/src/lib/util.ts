@@ -1,10 +1,10 @@
-import { ReducerTypes } from '@ngrx/store/src/reducer_creator';
-import { ActionCreator } from '@ngrx/store/src/models';
+import { ActionCreator } from '@ngrx/store';
 import { ActionType } from '@ngrx/store';
+import { ReducerTypes } from '@ngrx/store';
 
 export function insertIf<State>(
   condition: any,
-  getElement: () => ReducerTypes<State, ActionCreator[]>
+  getElement: () => ReducerTypes<State, ActionCreator[]>,
 ): ReducerTypes<State, ActionCreator[]>[] {
   return condition ? [getElement()] : [];
 }
@@ -37,7 +37,7 @@ export function camelCaseToSentence(text: string) {
 export function setPropertyReducer<State, P extends keyof State>(
   sourceReducer: (state: State, action: ActionType<any>) => State,
   property: P,
-  propertyReducer: (state: State[P], action: ActionType<any>) => State[P]
+  propertyReducer: (state: State[P], action: ActionType<any>) => State[P],
 ): (state: State, action: ActionType<any>) => State {
   return function reducer(state: State, action: ActionType<any>): State {
     const sourceState = sourceReducer(state, action);
@@ -66,14 +66,14 @@ export function setPropertiesReducer<State, P extends keyof State>(
   sourceReducer: (state: State, action: ActionType<any>) => State,
   propertiesReducers: {
     [key in P]: (state: State[P], action: ActionType<any>) => State[P];
-  }
+  },
 ): (state: State, action: ActionType<any>) => State {
   return function reducer(state: State, action: ActionType<any>): State {
     const newState = { ...sourceReducer(state, action) };
     for (const property in propertiesReducers) {
       newState[property as P] = propertiesReducers[property](
         newState[property],
-        action
+        action,
       );
     }
     return newState;
@@ -87,7 +87,7 @@ export function setPropertiesReducer<State, P extends keyof State>(
  */
 export function joinReducers<State>(
   firstReducer: (state: State, action: ActionType<any>) => State,
-  secondReducer: (state: any, action: ActionType<any>) => any
+  secondReducer: (state: any, action: ActionType<any>) => any,
 ): (state: State, action: ActionType<any>) => State {
   return function reducer(state: State, action: ActionType<any>): State {
     const sourceState = firstReducer(state, action);
