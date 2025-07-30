@@ -1,4 +1,5 @@
-import 'jest-preset-angular/setup-jest';
+import 'zone.js';
+import 'zone.js/testing';
 
 import { getTestBed } from '@angular/core/testing';
 import {
@@ -10,5 +11,5 @@ getTestBed().resetTestEnvironment();
 getTestBed().initTestEnvironment(
   BrowserDynamicTestingModule,
   platformBrowserDynamicTesting(),
-  { teardown: { destroyAfterEach: false } }
+  { teardown: { destroyAfterEach: false } },
 );

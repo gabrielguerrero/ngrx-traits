@@ -11,11 +11,11 @@ import {
   type,
   withHooks,
   withMethods,
-  withState,
   WritableStateSource,
 } from '@ngrx/signals';
 
 import { combineFunctionsInObject } from '../util';
+import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 
 /**
  * Sync the state of the store to the web storage
@@ -87,8 +87,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
 > {
   return signalStoreFeature(
     type<Input>(),
-    withState({}),
-    withMethods((store) => {
+    withMethods((store: WritableStateSource<Input['state']>) => {
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
       return combineFunctionsInObject(
         {
@@ -137,14 +136,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
               }
             }
             patchState(store, JSON.parse(stateJson));
-            onRestore?.(
-              store as Prettify<
-                StateSignals<Input['state']> &
-                  Input['props'] &
-                  Input['methods'] &
-                  WritableStateSource<Prettify<Input['state']>>
-              >,
-            );
+            onRestore?.(store as StoreSource<Input>);
             return true;
           },
           clearFromStore() {
@@ -161,7 +153,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
 
         if (saveStateChangesAfterMs) {
           effect(() => {
-            getState(store); // we call this just so this effect is triggered when the state changes
+            getState(store as any); // we call this just so this effect is triggered when the state changes
             const timeout = setTimeout(() => {
               saveToStorage();
             }, saveStateChangesAfterMs);

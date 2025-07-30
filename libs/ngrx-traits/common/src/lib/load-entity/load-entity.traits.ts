@@ -1,10 +1,10 @@
-import { ActionCreatorProps } from '@ngrx/store/src/models';
 import { capitalize, createTraitFactory } from '@ngrx-traits/core';
+import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
+import { ActionCreatorProps } from '@ngrx/store';
 import { createReducer, on } from '@ngrx/store';
 
 import { addAsyncActionTrait } from '../async-action/async-action.trait';
 import { LoadEntitySelectors, LoadEntityState } from './load-entity.model';
-import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
 
 type RecordEntity<T> = T extends Record<string, infer J> ? J : never;
 
@@ -58,7 +58,7 @@ export function addLoadEntityTraits<
   Response extends Record<J, any> | undefined = undefined,
   Failure extends object | undefined = undefined,
   Entity = RecordEntity<Response>,
-  State extends LoadEntityState<any,string> = LoadEntityState<Entity, J>
+  State extends LoadEntityState<any, string> = LoadEntityState<Entity, J>,
 >({
   entityName,
   actionProps,
@@ -104,8 +104,8 @@ export function addLoadEntityTraits<
             (state: any, action: any) => ({
               ...state,
               [entityName]: action[entityName],
-            })
-          )
+            }),
+          ),
         );
       },
     }),

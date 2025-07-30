@@ -1,3 +1,30 @@
+import { Injectable, Injector } from '@angular/core';
+import { fakeAsync, tick } from '@angular/core/testing';
+import { createServiceFactory } from '@ngneat/spectator/jest';
+import {
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+} from '@ngrx-traits/common';
+import {
+  buildLocalTraits,
+  createEntityFeatureFactory,
+  EntityFeatureFactory,
+  LocalTraitsConfig,
+  TraitEffect,
+  TraitsLocalStore,
+} from '@ngrx-traits/core';
+import {
+  Actions,
+  createEffect,
+  EffectsModule,
+  EffectSources,
+  ofType,
+} from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { ReducerManager } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { of } from 'rxjs/internal/observable/of';
+import { mapTo } from 'rxjs/operators';
 import {
   anything,
   deepEqual,
@@ -8,41 +35,14 @@ import {
   verify,
   when,
 } from 'ts-mockito';
-import { Injectable, Injector } from '@angular/core';
-import { ReducerManager } from '@ngrx/store';
-import {
-  Actions,
-  createEffect,
-  EffectsModule,
-  EffectSources,
-  ofType,
-} from '@ngrx/effects';
-import {
-  buildLocalTraits,
-  createEntityFeatureFactory,
-  EntityFeatureFactory,
-  LocalTraitsConfig,
-  TraitEffect,
-  TraitsLocalStore,
-} from '@ngrx-traits/core';
 
-import { of } from 'rxjs/internal/observable/of';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { createServiceFactory } from '@ngneat/spectator/jest';
-import { fakeAsync, tick } from '@angular/core/testing';
-import {
-  addFilterEntitiesTrait,
-  addLoadEntitiesTrait,
-} from '@ngrx-traits/common';
 import { Todo, TodoFilter } from './load-entities/load-entities.trait.spec';
-import { mapTo } from 'rxjs/operators';
 
 describe('trait-local-store', () => {
   const traitsFactory = createEntityFeatureFactory(
     { entityName: 'entity', entitiesName: 'entities' },
     addLoadEntitiesTrait<Todo>(),
-    addFilterEntitiesTrait<Todo, TodoFilter>()
+    addFilterEntitiesTrait<Todo, TodoFilter>(),
   );
 
   @Injectable()
@@ -53,8 +53,8 @@ describe('trait-local-store', () => {
         mapTo(
           this.localActions.loadEntitiesSuccess({
             entities: [{ id: 1, content: 'Test' }],
-          })
-        )
+          }),
+        ),
       );
     });
 
@@ -69,7 +69,7 @@ describe('trait-local-store', () => {
   describe('buildLocalTraits', () => {
     function buildLocalTraitsMock<
       State,
-      F extends EntityFeatureFactory<any, any>
+      F extends EntityFeatureFactory<any, any>,
     >(componentName: string, traitFactory: F, localEffect: TraitEffect) {
       const reducerManagerMock = mock(ReducerManager);
       const effectSourcesMock = mock(EffectSources);
@@ -81,16 +81,16 @@ describe('trait-local-store', () => {
       const injectorMock = spy(injector);
 
       when(injectorMock.get(ReducerManager)).thenReturn(
-        instance(reducerManagerMock)
+        instance(reducerManagerMock),
       );
       when(injectorMock.get(EffectSources)).thenReturn(
-        instance(effectSourcesMock)
+        instance(effectSourcesMock),
       );
 
       const traits = buildLocalTraits<State, F>(
         instance(injectorMock),
         componentName,
-        traitFactory
+        traitFactory,
       );
       traits.addEffects(localEffect);
       return {
@@ -108,7 +108,7 @@ describe('trait-local-store', () => {
 
       verify(effectSourcesMock.addEffects(anything())).twice();
       verify(
-        reducerManagerMock.addReducer(match(/test_.+/), anything())
+        reducerManagerMock.addReducer(match(/test_.+/), anything()),
       ).once();
       expect(traits.actions.filterEntities).toBeTruthy();
       expect(traits.selectors.selectEntitiesFilter).toBeTruthy();
@@ -120,7 +120,7 @@ describe('trait-local-store', () => {
 
       verify(effectSourcesMock.addEffects(anything())).twice();
       verify(
-        reducerManagerMock.addReducer(match(/test_.+/), anything())
+        reducerManagerMock.addReducer(match(/test_.+/), anything()),
       ).once();
       expect(traits.actions.filterEntities).toBeTruthy();
       expect(traits.selectors.selectEntitiesFilter).toBeTruthy();
@@ -130,11 +130,11 @@ describe('trait-local-store', () => {
       const { traits, storeMock, reducerManagerMock } = buildLocalTraitsMock(
         'test',
         traitsFactory,
-        todoTraitLocalMock
+        todoTraitLocalMock,
       );
       traits.destroy();
       verify(
-        storeMock.dispatch(deepEqual({ type: match(/\[test_.*Destroyed/) }))
+        storeMock.dispatch(deepEqual({ type: match(/\[test_.*Destroyed/) })),
       ).once();
       tick();
       verify(reducerManagerMock.removeReducer(match(/test_.*/))).once();
@@ -162,7 +162,7 @@ describe('trait-local-store', () => {
       service: TestTrailLocalStore,
       imports: [EffectsModule.forRoot()],
       providers: [
-        provideMockActions(() => actions$),
+        provideMockActions(() => actions$!),
         provideMockStore({ initialState: {} }),
       ],
     });
@@ -171,7 +171,7 @@ describe('trait-local-store', () => {
       const localStore = createService();
       expect(localStore.service.localActions.filterEntities).toBeTruthy();
       expect(
-        localStore.service.traits.selectors.selectEntitiesFilter
+        localStore.service.traits.selectors.selectEntitiesFilter,
       ).toBeTruthy();
     });
   });

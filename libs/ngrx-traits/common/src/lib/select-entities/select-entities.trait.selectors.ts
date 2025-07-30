@@ -1,25 +1,26 @@
+import { Dictionary } from '@ngrx/entity';
 import { createSelector } from '@ngrx/store';
-import { selectTotalSelectedEntities } from './select-entities.utils';
+
+import { LoadEntitiesSelectors, LoadEntitiesState } from '../load-entities';
 import {
   SelectEntitiesSelectors,
   SelectEntitiesState,
 } from './select-entities.model';
-import { LoadEntitiesSelectors, LoadEntitiesState } from '../load-entities';
-import { Dictionary } from '@ngrx/entity/src/models';
+import { selectTotalSelectedEntities } from './select-entities.utils';
 
 export function createSelectEntitiesTraitSelectors<Entity>(
-  previousSelectors: LoadEntitiesSelectors<Entity>
+  previousSelectors: LoadEntitiesSelectors<Entity>,
 ): SelectEntitiesSelectors<Entity> {
   const { selectEntitiesMap, selectEntitiesTotal } = previousSelectors;
 
   function selectEntitiesIdsSelectedMap(
-    state: LoadEntitiesState<Entity> & SelectEntitiesState
+    state: LoadEntitiesState<Entity> & SelectEntitiesState,
   ) {
     return state.selectedIds;
   }
   const selectEntitiesIdsSelectedList = createSelector(
     selectEntitiesIdsSelectedMap,
-    (ids: Dictionary<boolean>) => Object.keys(ids)
+    (ids: Dictionary<boolean>) => Object.keys(ids),
   );
   const selectEntitiesSelectedMap = createSelector(
     selectEntitiesIdsSelectedList,
@@ -28,12 +29,12 @@ export function createSelectEntitiesTraitSelectors<Entity>(
       selectedIds.reduce((acum: { [id: string]: Entity | undefined }, id) => {
         acum[id] = entities[id];
         return acum;
-      }, {})
+      }, {}),
   );
   const selectEntitiesSelectedList = createSelector(
     selectEntitiesIdsSelectedList,
     selectEntitiesMap,
-    (selectedIds, entities) => selectedIds.map((id) => entities[id]!)
+    (selectedIds, entities) => selectedIds.map((id) => entities[id]!),
   );
 
   const isAllEntitiesSelected = createSelector(
@@ -44,8 +45,8 @@ export function createSelectEntitiesTraitSelectors<Entity>(
       totalSelected > 0 && totalSelected === total
         ? 'all'
         : totalSelected === 0
-        ? 'none'
-        : 'some'
+          ? 'none'
+          : 'some',
   );
 
   return {

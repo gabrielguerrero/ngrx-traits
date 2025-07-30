@@ -16,14 +16,64 @@
         "linter": "eslint"
       },
       "component": {
-        "style": "scss"
+        "style": "scss",
+        "type": "component"
+      },
+      "directive": {
+        "type": "directive"
+      },
+      "service": {
+        "type": "service"
+      },
+      "scam": {
+        "type": "component"
+      },
+      "scam-directive": {
+        "type": "directive"
+      },
+      "guard": {
+        "typeSeparator": "."
+      },
+      "interceptor": {
+        "typeSeparator": "."
+      },
+      "module": {
+        "typeSeparator": "."
+      },
+      "pipe": {
+        "typeSeparator": "."
+      },
+      "resolver": {
+        "typeSeparator": "."
       }
     },
     "@schematics/angular": {
       "component": {
         "inlineStyle": true,
         "inlineTemplate": true,
-        "changeDetection": "OnPush"
+        "changeDetection": "OnPush",
+        "type": "component"
+      },
+      "directive": {
+        "type": "directive"
+      },
+      "service": {
+        "type": "service"
+      },
+      "guard": {
+        "typeSeparator": "."
+      },
+      "interceptor": {
+        "typeSeparator": "."
+      },
+      "module": {
+        "typeSeparator": "."
+      },
+      "pipe": {
+        "typeSeparator": "."
+      },
+      "resolver": {
+        "typeSeparator": "."
       }
     },
     "@ngneat/spectator:spectator-component": {
@@ -71,6 +121,5 @@
   },
   "parallel": 1,
   "useInferencePlugins": false,
-  "defaultBase": "main",
-  "useLegacyCache": true
+  "defaultBase": "main"
 }

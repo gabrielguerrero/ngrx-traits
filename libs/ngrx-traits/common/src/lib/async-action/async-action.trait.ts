@@ -1,16 +1,17 @@
-import { createAction, createReducer, on } from '@ngrx/store';
-import { ActionCreatorProps } from '@ngrx/store/src/models';
 import { camelCaseToSentence, createTraitFactory } from '@ngrx-traits/core';
+import {
+  TraitActionsFactoryConfig,
+  TraitInitialStateFactoryConfig,
+} from '@ngrx-traits/core';
+import { createAction, createReducer, on } from '@ngrx/store';
+import { ActionCreatorProps } from '@ngrx/store';
+
 import {
   ActionCreatorWithOptionalProps,
   AsyncActionActions,
   AsyncActionSelectors,
   AsyncActionState,
 } from './async-action.model';
-import {
-  TraitActionsFactoryConfig,
-  TraitInitialStateFactoryConfig,
-} from '@ngrx-traits/core';
 
 /**
  * Generates the typical ngrx code need to make a async action with
@@ -63,7 +64,7 @@ export function addAsyncActionTrait<
   J extends string,
   Request extends object | undefined = undefined,
   Response extends object | undefined = undefined,
-  Failure extends object | undefined = undefined
+  Failure extends object | undefined = undefined,
 >({
   name,
   actionProps,
@@ -103,26 +104,26 @@ export function addAsyncActionTrait<
         request: (actionProps
           ? createAction(
               `${actionsGroupKey} ${nameAsSentence}`,
-              actionProps as any
+              actionProps as any,
             )
           : createAction(
-              `${actionsGroupKey} ${nameAsSentence}`
+              `${actionsGroupKey} ${nameAsSentence}`,
             )) as ActionCreatorWithOptionalProps<Request>,
         requestSuccess: (actionSuccessProps
           ? createAction(
               `${actionsGroupKey} ${nameAsSentence} Success`,
-              actionSuccessProps as any
+              actionSuccessProps as any,
             )
           : createAction(
-              `${actionsGroupKey} ${nameAsSentence} Success`
+              `${actionsGroupKey} ${nameAsSentence} Success`,
             )) as ActionCreatorWithOptionalProps<Response>,
         requestFail: (actionFailProps
           ? createAction(
               `${actionsGroupKey} ${nameAsSentence} Failure`,
-              actionFailProps as any
+              actionFailProps as any,
             )
           : createAction(
-              `${actionsGroupKey} ${nameAsSentence} Failure`
+              `${actionsGroupKey} ${nameAsSentence} Failure`,
             )) as ActionCreatorWithOptionalProps<Failure>,
       };
       return {
@@ -169,7 +170,7 @@ export function addAsyncActionTrait<
         on(internalActions.requestSuccess, (state: any) => ({
           ...state,
           [`${name}Status`]: 'success',
-        }))
+        })),
       );
     },
   });

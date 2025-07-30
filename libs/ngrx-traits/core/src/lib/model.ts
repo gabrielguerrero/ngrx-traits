@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 import { Type } from '@angular/core';
 import { Action, ActionType, MemoizedSelector } from '@ngrx/store';
-import {
-  ActionCreator,
-  Selector,
-  SelectorWithProps,
-} from '@ngrx/store/src/models';
+import { ActionCreator, Selector, SelectorWithProps } from '@ngrx/store';
 
 import { TraitEffect } from './trait-effect';
 
