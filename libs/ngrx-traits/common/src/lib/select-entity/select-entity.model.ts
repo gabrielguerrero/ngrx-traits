@@ -1,6 +1,6 @@
 import { KeyedConfig } from '@ngrx-traits/core';
 import { Action } from '@ngrx/store';
-import { ActionCreator } from '@ngrx/store/src/models';
+import { ActionCreator } from '@ngrx/store';
 
 import { LoadEntitiesState } from '../load-entities/load-entities.model';
 

@@ -1,7 +1,7 @@
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { PageInfoModel } from '@ngrx-traits/common';
 import { ActionCreator, Selector, Store } from '@ngrx/store';
-import { Action } from '@ngrx/store/src/models';
+import { Action } from '@ngrx/store';
 import { Observable, Subscription, withLatestFrom } from 'rxjs';
 import { filter } from 'rxjs/operators';
 

@@ -176,8 +176,8 @@ export function withEntitiesCalls<
     };
   }
 > {
-  return withFeatureFactory((store: StoreSource<Input>) => {
-    const calls = config.calls(store);
+  return withFeatureFactory((store) => {
+    const calls = config.calls(store as StoreSource<Input>);
     const callsState = Object.entries(calls).reduce(
       (acc, [callName]) => {
         const { callStatusKey } = getWithEntitiesCallKeys({

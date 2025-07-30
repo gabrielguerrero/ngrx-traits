@@ -1,3 +1,13 @@
+import { insertIf } from '@ngrx-traits/core';
+import { Update } from '@ngrx/entity';
+import { createReducer, on } from '@ngrx/store';
+
+import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
+import {
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../entities-pagination/entities-pagination.model';
+import { FilterEntitiesActions } from '../filter-entities';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -8,22 +18,13 @@ import {
   SortEntitiesKeyedConfig,
 } from '../sort-entities/sort-entities.model';
 import {
-  SelectEntitiesMutators,
   SelectEntitiesActions,
+  SelectEntitiesMutators,
   SelectEntitiesState,
 } from './select-entities.model';
-import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
-import { Update } from '@ngrx/entity/src/models';
-import { insertIf } from '@ngrx-traits/core';
-import { createReducer, on } from '@ngrx/store';
-import {
-  EntitiesPaginationActions,
-  EntitiesPaginationKeyedConfig,
-} from '../entities-pagination/entities-pagination.model';
-import { FilterEntitiesActions } from '../filter-entities';
 
 export function createSelectEntitiesInitialState<Entity>(
-  previousInitialState: any
+  previousInitialState: any,
 ): LoadEntitiesState<Entity> & SelectEntitiesState {
   return {
     ...previousInitialState,
@@ -33,7 +34,7 @@ export function createSelectEntitiesInitialState<Entity>(
 
 export function createSelectEntitiesTraitReducer<
   Entity,
-  S extends LoadEntitiesState<Entity> & SelectEntitiesState
+  S extends LoadEntitiesState<Entity> & SelectEntitiesState,
 >(
   initialState: S,
   allActions: SelectEntitiesActions &
@@ -45,14 +46,14 @@ export function createSelectEntitiesTraitReducer<
   allMutators: SelectEntitiesMutators<Entity>,
   allConfigs: LoadEntitiesKeyedConfig<Entity> &
     EntitiesPaginationKeyedConfig &
-    SortEntitiesKeyedConfig<Entity>
+    SortEntitiesKeyedConfig<Entity>,
 ) {
   const { adapter } = allConfigs.loadEntities!;
   const sortRemote = allConfigs.sort?.remote;
   const paginationCacheType = allConfigs.pagination?.cacheType;
 
   function updateSelectedIdsChanged<
-    S extends LoadEntitiesState<Entity> & SelectEntitiesState
+    S extends LoadEntitiesState<Entity> & SelectEntitiesState,
   >(state: S, updates: Update<Entity>[]) {
     const changedIds = updates.reduce((acc, updated) => {
       const id = adapter.selectId(updated.changes as Entity);
@@ -79,16 +80,16 @@ export function createSelectEntitiesTraitReducer<
   return createReducer(
     initialState,
     on(allActions.selectEntities, (state, { id }) =>
-      allMutators.selectEntities(id, state)
+      allMutators.selectEntities(id, state),
     ),
     on(allActions.deselectEntities, (state, { id }) =>
-      allMutators.deselectEntities(id, state)
+      allMutators.deselectEntities(id, state),
     ),
     on(allActions.toggleSelectEntities, (state, { id }) =>
-      allMutators.toggleSelectEntities(id, state)
+      allMutators.toggleSelectEntities(id, state),
     ),
     on(allActions.toggleSelectAllEntities, (state) =>
-      allMutators.toggleSelectAllEntities(state)
+      allMutators.toggleSelectAllEntities(state),
     ),
     ...insertIf<S>(allActions.removeEntities, () =>
       on(allActions.removeEntities, (state, { keys }) => {
@@ -97,42 +98,42 @@ export function createSelectEntitiesTraitReducer<
           delete selectedIds[v];
         });
         return { ...state, selectedIds };
-      })
+      }),
     ),
     ...insertIf<S>(allActions.updateEntities, () =>
       on(allActions.updateEntities, (state, { updates }) =>
-        updateSelectedIdsChanged(state, updates)
-      )
+        updateSelectedIdsChanged(state, updates),
+      ),
     ),
     on(allActions.clearEntitiesSelection, (state) =>
-      allMutators.clearEntitiesSelection(state)
+      allMutators.clearEntitiesSelection(state),
     ),
     ...insertIf<S>(allActions.removeAllEntities, () =>
       on(allActions.removeAllEntities, (state) =>
-        allMutators.clearEntitiesSelection(state)
-      )
+        allMutators.clearEntitiesSelection(state),
+      ),
     ),
     ...insertIf<S>(sortRemote, () =>
       on(allActions.sortEntities, (state) =>
-        allMutators.clearEntitiesSelection(state)
-      )
+        allMutators.clearEntitiesSelection(state),
+      ),
     ),
     ...insertIf<S>(allActions.filterEntities, () =>
       on(allActions.filterEntities, (state) =>
-        allMutators.clearEntitiesSelection(state)
-      )
+        allMutators.clearEntitiesSelection(state),
+      ),
     ),
     ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) =>
-        allMutators.clearEntitiesSelection(state)
-      )
+        allMutators.clearEntitiesSelection(state),
+      ),
     ),
     ...insertIf<S>(
       !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
         on(allActions.loadEntitiesPageSuccess, (state) =>
-          allMutators.clearEntitiesSelection(state)
-        )
-    )
+          allMutators.clearEntitiesSelection(state),
+        ),
+    ),
   );
 }

@@ -4,6 +4,7 @@
   "projectType": "application",
   "sourceRoot": "apps/example-app/src",
   "prefix": "ngrx-traits",
+  "tags": [],
   "targets": {
     "build": {
       "executor": "@angular-devkit/build-angular:browser-esbuild",
@@ -72,7 +73,8 @@
       "defaultConfiguration": "development",
       "options": {
         "host": "127.0.0.1"
-      }
+      },
+      "continuous": true
     },
     "extract-i18n": {
       "executor": "@angular-devkit/build-angular:extract-i18n",
@@ -98,6 +100,5 @@
         "passWithNoTests": true
       }
     }
-  },
-  "tags": []
+  }
 }
