@@ -6,12 +6,12 @@ order: 4
 # withEntitiesHybridFilter
 
 Generates necessary state and methods to do remote and local filtering of entities in the store,
-the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
+the generated filter[Collection]Entities method will filter the entities by calling set[Collection]Loading() if the isRemoteFilter returns true
 and if false will call the filterFn to filter the entities locally.
 
-For the remote case you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params. filter[collection]Entities
-is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.
+For the remote case you should either create an effect that listens to [Collection]Loading can call the api with the [Collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [Collection]Filter params. filter[Collection]Entities
+is debounced by default, you can change the debounce by using the debounce option filter[Collection]Entities or changing the defaultDebounce prop in the config.
 
 
 **Requires** withEntities and withCallStatus to be present before this function.
@@ -26,8 +26,8 @@ import { withEntitiesHybridFilter } from '@ngrx-traits/signals';
 
 ## Examples
 
-### Filtering a list of entities locally based on a search term  but remotelly based on a category
-We a Products list that shows all the products for a category, there is a category dropdown that should reload the list when the category changes, There is also search box that filters locally the rendered list by name and other props.
+### Filtering a list of entities locally based on a search term but remotely based on a category
+We have a Products list that shows all the products for a category, there is a category dropdown that should reload the list when the category changes, There is also search box that filters locally the rendered list by name and other props.
 
 ```typescript
 const entityConfig = entityConfig({
@@ -52,7 +52,7 @@ export const store = signalStore(
     ...entityConfig,
     fetchEntities: ({ productsFilter }) => {
       return inject(ProductService).getProducts({
-        catehoryID: productsFilter().categoryId,
+        categoryId: productsFilter().categoryId,
       });
     },
   }),
@@ -91,7 +91,7 @@ The second way is where there is no submit button, and the filter is connected t
 ```
 
 ### Mixing with other local store features
-You can mix this feature with other local store features like withEntitiesLocalSort, withEntitiesLocalPagination, etc., of the remote ones dont mix it with  withEntitiesRemotePagination or withEntitiesRemoteScrollPagination, because then the local filter will not have the full list to filter from.
+You can mix this feature with other local store features like withEntitiesLocalSort, withEntitiesLocalPagination, etc., of the remote ones don't mix it with  withEntitiesRemotePagination or withEntitiesRemoteScrollPagination, because then the local filter will not have the full list to filter from.
 
 
 ```typescript
@@ -125,7 +125,7 @@ export const ProductsLocalStore = signalStore(
     ...entityConfig,
     fetchEntities: ({ productsFilter }) => {
       return inject(ProductService).getProducts({
-        catehoryID: productsFilter().categoryId,
+        categoryId: productsFilter().categoryId,
       });
     },
   }),

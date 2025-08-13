@@ -65,7 +65,7 @@ import {
 
 /**
  * Generates a onInit hook that fetches entities from a remote source
- * when the [collection]Loading is true, by calling the fetchEntities function
+ * when the [Collection]Loading is true, by calling the fetchEntities function
  * and if successful, it will call set[Collection]Loaded and also set the entities
  * to the store using the setAllEntities method or the setEntitiesPagedResult method
  * if it exists (comes from withEntitiesRemotePagination),
@@ -107,7 +107,7 @@ import {
  *   }),
  *   // now we add the withEntitiesLoadingCall, in this case any time the filter,
  *   // pagination or sort changes they call set[Collection]Loading() which then
- *   // triggers the onInit effect that checks if [collection]Loading(), if true
+ *   // triggers the onInit effect that checks if [Collection]Loading(), if true
  *   // then calls fetchEntities function
  *   withEntitiesLoadingCall({
  *     collection,

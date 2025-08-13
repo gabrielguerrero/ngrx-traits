@@ -54,15 +54,15 @@ import {
 
 /**
  * Generates necessary state and methods to do remote and local filtering of entities in the store,
- * the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
+ * the generated filter[Collection]Entities method will filter the entities by calling set[Collection]Loading() if the isRemoteFilter returns true
  * and if false will call the filterFn to filter the entities locally.
  *
- * For the remote case you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
- * or use withEntitiesLoadingCall to call the api with the [collection]Filter params. filter[collection]Entities
- * is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.
+ * For the remote case you should either create an effect that listens to [Collection]Loading can call the api with the [Collection]Filter params
+ * or use withEntitiesLoadingCall to call the api with the [Collection]Filter params. filter[Collection]Entities
+ * is debounced by default, you can change the debounce by using the debounce option filter[Collection]Entities or changing the defaultDebounce prop in the config.
  *
- * In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
- * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
+ * In case you dont want filter[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[Collection]Entities.
+ * Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.
  *
  * Requires withEntities and withCallStatus to be present before this function.
  * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object

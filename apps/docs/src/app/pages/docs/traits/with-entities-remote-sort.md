@@ -5,15 +5,15 @@ order: 12
 
 # withEntitiesRemoteSort
 
-Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
-and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
+Generates state, signals, and methods to sort entities remotely. When the sort method sort[Collection]Entities is called it will store the sort
+and call set[Collection]Loading, and you should either create an effect that listens to [Collection]Loading
+and call the api with the [Collection]Sort params and use either setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status and set errors is needed.
-or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]Sort params which handles setting
 the result and errors automatically.
 
-In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
+In case you don't want sort[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.
 
 **Requires** withEntities and withCallStatus to be present before this function.
 
@@ -45,7 +45,7 @@ export const store = signalStore(
   }),
 );
 ```
-To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in github):
+To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in GitHub):
 ```html
 <product-sort-dropdown
   [sort]="store.productsSort()"

@@ -19,4 +19,4 @@ Set of prebuilt Custom Store Features that solve common problems that normally n
 
 `npm i @ngrx-traits/signals --save`
 
-For more documentation go to our [github page](https://github.com/gabrielguerrero/ngrx-traits/blob/main/docs/signals.md)
+For more documentation go to our [GitHub page](https://github.com/gabrielguerrero/ngrx-traits/blob/main/docs/signals.md)

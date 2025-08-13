@@ -27,7 +27,7 @@ Devcontainers setup on your machine is based on the same configuration for Githu
 Docker setup is mandatory.
 
 Devcontainers, as open standard, is supporterd by different IDE.
-If VSCode is your favourite choise, please remember to install [Dev Containers Extensions](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
+If VSCode is your favourite choice, please remember to install [Dev Containers Extensions](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers).
 
 ### Manual setup
 

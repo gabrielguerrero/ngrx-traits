@@ -66,7 +66,7 @@ export const ProductsLocalStore = signalStore(
       // call load the product detail when a product is selected
       callWith: productsEntitySelected,
       // productsEntitySelected is of type Signal<Product | undefined> so it can be pass directly to callWith
-      // because it matches the type the call parameter, but you can use a function as bellow if it doesnt
+      // because it matches the type the call parameter, but you can use a function as bellow if it doesn't
       // callWith: () =>
       //   productsEntitySelected()
       //     ? { id: productsEntitySelected()!.id }

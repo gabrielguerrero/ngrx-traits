@@ -7,7 +7,7 @@ order: 1
 
 Generates necessary state, computed and methods for call progress
 related to an entity,  this allows parallel calls for different entities, the calls
-will have a unique id (generally the entity Id) which is use to have a status per id.
+will have a unique id (generally the entity Id) which is used to have a status per id.
 The results by default get merged into the entities state.
 
 ## Import

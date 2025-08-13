@@ -66,9 +66,9 @@ import {
  *
  * When the page changes, it will try to load the current page from cache if it's not present,
  * it will call set[Collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+ * and call the api with the [Collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually
- * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+ * or use withEntitiesLoadingCall to call the api with the [Collection]PagedRequest params which handles setting
  * the result and errors automatically. Requires withEntities and withCallStatus to be used.
  *
  * The generated set[Collection]Result method will append the entities to the cache of entities,

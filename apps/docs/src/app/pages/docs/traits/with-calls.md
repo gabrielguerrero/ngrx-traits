@@ -128,7 +128,7 @@ export const ProductsLocalStore = signalStore(
       // call load the product detail when a product is selected
       callWith: productsEntitySelected,
       // productsEntitySelected is of type Signal<Product | undefined> so it can be pass directly to callWith
-      // because it matches the type the call parameter, but you can use a function as bellow if it doesnt
+      // because it matches the type the call parameter, but you can use a function as bellow if it doesn't
       // callWith: () =>
       //   productsEntitySelected()
       //     ? { id: productsEntitySelected()!.id }
@@ -178,7 +178,7 @@ export const ProductsLocalStore = signalStore(
 
 ### Using withCall prop to trigger an initial call
 You can use withCall prop to get your call executed on init, is a shorter than writing a 
-withHook to cal them
+withHooks to call them
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
@@ -201,7 +201,7 @@ const store = signalStore(
           setAllEntities(res.resultList, productsEntityConfig),
         );
       },
-      // for calls with no params pasing true will execute the call
+      // for calls with no params passing true will execute the call
       withCall: true
     }),
   })),

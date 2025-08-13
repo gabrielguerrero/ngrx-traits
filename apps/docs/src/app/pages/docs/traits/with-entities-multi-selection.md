@@ -48,7 +48,7 @@ Use it in a template like:
       </mat-selection-list>
 ```
 ### Mixing with other local store features
-You can mix this feature with other local or remote features like withEntitiesLocalSort, withEntitiesLocalPagination, etc, can be use with remote features but if using it in remote pagination be aware the toggleAll could not work as intended because all the rows are not loaded at the same time.
+You can mix this feature with other local or remote features like withEntitiesLocalSort, withEntitiesLocalPagination, etc, can be used with remote features but if using it in remote pagination be aware the toggleAll could not work as intended because all the rows are not loaded at the same time.
 
 ```typescript
 const productsEntityConfig = entityConfig({

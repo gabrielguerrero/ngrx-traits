@@ -3,7 +3,7 @@ name: withEntitiesLocalFilter
 order: 3
 ---
 
-Generates necessary state, computed and methods for locally filtering entities in the store, the generated filter[collenction]Entities method will filter the entities based on the filter function and is debounced by default.
+Generates necessary state, computed and methods for locally filtering entities in the store, the generated filter[Collection]Entities method will filter the entities based on the filter function and is debounced by default.
 
 Requires withEntities to be used.
 
@@ -102,13 +102,13 @@ To know more how it mixes and works with other local store features, check [Work
 ## API Reference
 
 
-| Property        | Description                                                       | Value                                        |
-| --------------- | ----------------------------------------------------------------- | -------------------------------------------- |
-| entity          | The entity type                                                   | `type<T>()`                                  |
-| collection      | The name of the collection. Optional                              | string                                       |
+| Property        | Description                                                      | Value                                        |
+| --------------- | ---------------------------------------------------------------- | -------------------------------------------- |
+| entity          | The entity type                                                  | `type<T>()`                                  |
+| collection      | The name of the collection. Optional                             | string                                       |
 | defaultFilter   | The initial filter. Type is inferred based on this initial value. | `FilterType`                                 |
-| filterFn        | Callback to filter entitiyes                                      | `(entity: T, filter: FilterType )=> boolean` |
-| defaultDebounce | Debounce time for each call to the filter                         | `(entity: T, filter: FilterType )=> boolean` |
+| filterFn        | Callback to filter entities                                      | `(entity: T, filter: FilterType )=> boolean` |
+| defaultDebounce | Debounce time for each call to the filter                        | `(entity: T, filter: FilterType )=> boolean` |
 
 ## State
 

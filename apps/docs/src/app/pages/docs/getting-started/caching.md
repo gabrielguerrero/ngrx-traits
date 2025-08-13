@@ -41,7 +41,7 @@ cacheCall and cacheRxCall provide the following params
 - `key`: this is either a string or an array of string or objects, the objects are transform to string in the cache and can be used to create dynamic keys.
 - `call`: this is either a function that returns a promise in the case of cacheCall or an Observable for cacheRxCall, the result of the call is what will be cached.
 - `expires` (milliseconds): This optional property sets an expiration time for cached values. Once the specified time in milliseconds has passed, the cached value will be invalidated, and the source will be re-executed on the next request. If expires is not provided, the cached value will never be invalidated automatically.
-- `maxCacheSize` (number): This optional property allows you to define a maximum number of key-value pairs the cache will store. When the cache reaches this limit, it employs a least recently used (LRU) eviction strategy. Keys that are accessed more frequently (more hits) will be retained, while those with fewer hits will be removed to make space for new entries.
+- `maxCacheSize` (number): This optional property allows you to define a maximum number of key-value pairs the cache will store. When the cache reaches this limit, it employs the least recently used (LRU) eviction strategy. Keys that are accessed more frequently (more hits) will be retained, while those with fewer hits will be removed to make space for new entries.
 
 ## Examples
 
@@ -79,7 +79,7 @@ withCalls(
 ```
 
 ### Caching a result a maximum of 5 keys
-The following example will cache up to 5 key value pairs, when the cache reaches its limit, it employs a least recently used (LRU) eviction strategy. Keys that are accessed more frequently (more hits) will be retained, while those with fewer hits will be removed to make space for new entries.
+The following example will cache up to 5 key value pairs, when the cache reaches its limit, it employs the least recently used (LRU) eviction strategy. Keys that are accessed more frequently (more hits) will be retained, while those with fewer hits will be removed to make space for new entries.
 ```ts
 withCalls(
   (

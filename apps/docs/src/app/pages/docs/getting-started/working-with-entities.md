@@ -14,7 +14,7 @@ There are multiple ways to load entities, ranging from a more manual approach to
 
 You should only need this approach if you are dealing with complex loading logic that cannot be easily handled by the `withCalls` and `withEntitiesLoading` store features.
 
-With `withCallStatus`, we manage the loading state manually by using status-related signals such as `isLoading`, `isLoaded`, and `error`, along with their corresponding setters: `setLoading`, `setLoaded`, and `setError` added byy `withCallStatus`. In this example we will use a `withHook` but they could be use in a withMethod as well.
+With `withCallStatus`, we manage the loading state manually by using status-related signals such as `isLoading`, `isLoaded`, and `error`, along with their corresponding setters: `setLoading`, `setLoaded`, and `setError` added by `withCallStatus`.
 
 ```typescript
 const productEntityConfig = entityConfig({

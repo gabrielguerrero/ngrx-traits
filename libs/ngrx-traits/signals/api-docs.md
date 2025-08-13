@@ -43,31 +43,31 @@ and the paramsSelectId to return with param prop represents the entityId .
 The call can be skipped based on the result of the previous call, to skip a call return undefined or false.</p></dd>
 <dt><a href="#withEntitiesHybridFilter">withEntitiesHybridFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state and methods to do remote and local filtering of entities in the store,
-the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
+the generated filter[Collection]Entities method will filter the entities by calling set[Collection]Loading() if the isRemoteFilter returns true
 and if false will call the filterFn to filter the entities locally.</p>
-<p>For the remote case you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params. filter[collection]Entities
-is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
-<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>For the remote case you should either create an effect that listens to [Collection]Loading can call the api with the [Collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [Collection]Filter params. filter[Collection]Entities
+is debounced by default, you can change the debounce by using the debounce option filter[Collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLocalFilter">withEntitiesLocalFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for locally filtering entities in the store,
-the generated filter[collenction]Entities method will filter the entities based on the filter function
+the generated filter[Collection]Entities method will filter the entities based on the filter function
 and is debounced by default.</p>
 <p>Requires withEntities to be used.</p></dd>
 <dt><a href="#withEntitiesRemoteFilter">withEntitiesRemoteFilter(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remotely filtering entities in the store,
-the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
-and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params.
-filter[collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
-<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+the generated filter[Collection]Entities method will filter the entities by calling set[Collection]Loading()
+and you should either create an effect that listens to [Collection]Loading can call the api with the [Collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [Collection]Filter params.
+filter[Collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[Collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEntitiesLoadingCall">withEntitiesLoadingCall(config)</a></dt>
 <dd><p>Generates a onInit hook that fetches entities from a remote source
-when the [collection]Loading is true, by calling the fetchEntities function
+when the [Collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
 to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
@@ -78,14 +78,14 @@ if an error occurs it will set the error to the store using set[Collection]Error
 <p>Requires withEntities to be present in the store.</p></dd>
 <dt><a href="#withEntitiesRemotePagination">withEntitiesRemotePagination(configFactory)</a></dt>
 <dd><p>Generates necessary state, computed and methods for remote pagination of entities in the store.
-Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
-it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+Call load[Collection]Page to change the page, it will try to load the new page from cache if it's not present,
+it will call set[Collection]Loading(), and you should either create an effect that listens to [Collection]Loading
+and call the api with the [Collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually,
-or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]PagedRequest params which handles setting
 the result and errors automatically.</p>
-<p>In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>In case you dont want load[Collection]Page to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[Collection]Page.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
 If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p></dd>
@@ -96,9 +96,9 @@ allows going to the next and previous page because you dont know the total numbe
 probably because the data is top big and partitioned in multiple nodes.</p>
 <p>When the page changes, it will try to load the current page from cache if it's not present,
 it will call set[Collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+and call the api with the [Collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
-or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]PagedRequest params which handles setting
 the result and errors automatically. Requires withEntities and withCallStatus to be used.</p>
 <p>The generated set[Collection]Result method will append the entities to the cache of entities,
 it requires either just set of requested entities set[Collection]Result({ entities }) in which case it will assume there is no more result if you set less entities
@@ -117,14 +117,14 @@ correctly in using remote pagination, because they cant select all the data.</p>
 <dd><p>Generates necessary state, computed and methods for sorting locally entities in the store.</p>
 <p>Requires withEntities to be present before this function</p></dd>
 <dt><a href="#withEntitiesRemoteSort">withEntitiesRemoteSort(configFactory)</a></dt>
-<dd><p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
-and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
+<dd><p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[Collection]Entities is called it will store the sort
+and call set[Collection]Loading, and you should either create an effect that listens to [Collection]Loading
+and call the api with the [Collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status  and set errors is needed.
-or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]Sort params which handles setting
 the result and errors automatically.</p>
-<p>In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>In case you dont want sort[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p></dd>
 <dt><a href="#withEventHandler">withEventHandler(eventHandlerFactory)</a></dt>
 <dd></dd>
@@ -511,13 +511,13 @@ export const OrderStore = signalStore(
 
 ## withEntitiesHybridFilter(configFactory)
 <p>Generates necessary state and methods to do remote and local filtering of entities in the store,
-the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading() if the isRemoteFilter returns true
+the generated filter[Collection]Entities method will filter the entities by calling set[Collection]Loading() if the isRemoteFilter returns true
 and if false will call the filterFn to filter the entities locally.</p>
-<p>For the remote case you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params. filter[collection]Entities
-is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
-<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>For the remote case you should either create an effect that listens to [Collection]Loading can call the api with the [Collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [Collection]Filter params. filter[Collection]Entities
+is debounced by default, you can change the debounce by using the debounce option filter[Collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
@@ -602,7 +602,7 @@ export const store = signalStore(
 
 ## withEntitiesLocalFilter(configFactory)
 <p>Generates necessary state, computed and methods for locally filtering entities in the store,
-the generated filter[collenction]Entities method will filter the entities based on the filter function
+the generated filter[Collection]Entities method will filter the entities based on the filter function
 and is debounced by default.</p>
 <p>Requires withEntities to be used.</p>
 
@@ -647,12 +647,12 @@ const store = signalStore(
 
 ## withEntitiesRemoteFilter(configFactory)
 <p>Generates necessary state, computed and methods for remotely filtering entities in the store,
-the generated filter[collection]Entities method will filter the entities by calling set[collection]Loading()
-and you should either create an effect that listens to [collection]Loading can call the api with the [collection]Filter params
-or use withEntitiesLoadingCall to call the api with the [collection]Filter params.
-filter[collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[collection]Entities or changing the defaultDebounce prop in the config.</p>
-<p>In case you dont want filter[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+the generated filter[Collection]Entities method will filter the entities by calling set[Collection]Loading()
+and you should either create an effect that listens to [Collection]Loading can call the api with the [Collection]Filter params
+or use withEntitiesLoadingCall to call the api with the [Collection]Filter params.
+filter[Collection]Entities is debounced by default, you can change the debounce by using the debounce option filter[Collection]Entities or changing the defaultDebounce prop in the config.</p>
+<p>In case you dont want filter[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to filter[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
@@ -727,7 +727,7 @@ export const store = signalStore(
 
 ## withEntitiesLoadingCall(config)
 <p>Generates a onInit hook that fetches entities from a remote source
-when the [collection]Loading is true, by calling the fetchEntities function
+when the [Collection]Loading is true, by calling the fetchEntities function
 and if successful, it will call set[Collection]Loaded and also set the entities
 to the store using the setAllEntities method or the setEntitiesPagedResult method
 if it exists (comes from withEntitiesRemotePagination),
@@ -772,7 +772,7 @@ export const ProductsRemoteStore = signalStore(
   }),
   // now we add the withEntitiesLoadingCall, in this case any time the filter,
   // pagination or sort changes they call set[Collection]Loading() which then
-  // triggers the onInit effect that checks if [collection]Loading(), if true
+  // triggers the onInit effect that checks if [Collection]Loading(), if true
   // then calls fetchEntities function
   withEntitiesLoadingCall({
     collection,
@@ -835,14 +835,14 @@ export const ProductsLocalStore = signalStore(
 
 ## withEntitiesRemotePagination(configFactory)
 <p>Generates necessary state, computed and methods for remote pagination of entities in the store.
-Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
-it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+Call load[Collection]Page to change the page, it will try to load the new page from cache if it's not present,
+it will call set[Collection]Loading(), and you should either create an effect that listens to [Collection]Loading
+and call the api with the [Collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually,
-or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]PagedRequest params which handles setting
 the result and errors automatically.</p>
-<p>In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>In case you dont want load[Collection]Page to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[Collection]Page.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
 If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.</p>
 <p>Requires withEntities and withCallStatus to be present in the store.</p>
@@ -938,9 +938,9 @@ allows going to the next and previous page because you dont know the total numbe
 probably because the data is top big and partitioned in multiple nodes.</p>
 <p>When the page changes, it will try to load the current page from cache if it's not present,
 it will call set[Collection]Loading(), and you should either create an effect that listens to is[Collection]Loading
-and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+and call the api with the [Collection]PagedRequest params and use set[Collection]Result to set the result
 and changing the status errors manually
-or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]PagedRequest params which handles setting
 the result and errors automatically. Requires withEntities and withCallStatus to be used.</p>
 <p>The generated set[Collection]Result method will append the entities to the cache of entities,
 it requires either just set of requested entities set[Collection]Result({ entities }) in which case it will assume there is no more result if you set less entities
@@ -1151,14 +1151,14 @@ store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sort
 <a name="withEntitiesRemoteSort"></a>
 
 ## withEntitiesRemoteSort(configFactory)
-<p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[collection]Entities is called it will store the sort
-and call set[Collection]Loading, and you should either create an effect that listens to [collection]Loading
-and call the api with the [collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
+<p>Generates state, signals, and methods to sort entities remotely. When the sort method sort[Collection]Entities is called it will store the sort
+and call set[Collection]Loading, and you should either create an effect that listens to [Collection]Loading
+and call the api with the [Collection]Sort params and use wither setAllEntities if is not paginated or set[Collection]Result if is paginated
 with the sorted result that come from the backend, plus changing the status  and set errors is needed.
-or use withEntitiesLoadingCall to call the api with the [collection]Sort params which handles setting
+or use withEntitiesLoadingCall to call the api with the [Collection]Sort params which handles setting
 the result and errors automatically.</p>
-<p>In case you dont want sort[collection]Entities to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[collection]Entities.
-Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.</p>
+<p>In case you dont want sort[Collection]Entities to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to sort[Collection]Entities.
+Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.</p>
 <p>Requires withEntities and withCallStatus to be present before this function.</p>
 
 **Kind**: global function  
@@ -1376,7 +1376,7 @@ function withCustomFeature(config: { fooValue: string }) {
 const Store = signalStore(
       withState({ foo: 'foo' }),
       // 👇use previous state to configure custom feature
-      withFeatureFactory(({ foo }) => withCustomFeature({ fooV: foo() })),
+      withFeatureFactory(({ foo }) => withCustomFeature({ fooValue: foo() })),
       // you can also use a signalStoreFeature inside withFeatureFactory
       withFeatureFactory(({ foo }) =>
         signalStoreFeature(

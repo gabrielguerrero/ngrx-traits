@@ -20,7 +20,7 @@ import { withCallStatusMap } from '@ngrx-traits/signals';
 
 ## Usage
 
-Use this when the you need a special way to call you backend that is not handle by [withEntitiesCall](/docs/traits/withEntitiesCalls)
+Use this when you need a special way to call you backend that is not handle by [withEntitiesCall](/docs/traits/withEntitiesCalls)
 
 ### Minimal use case
 ```typescript

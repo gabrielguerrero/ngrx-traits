@@ -20,7 +20,7 @@ import { withAllCallStatus } from '@ngrx-traits/signals';
 ## Usage
 
 This will help you when you need to do a lot of calls to load your components
-and you want to track that if any of the calls are loading , or to handle all the errors of any of the calls in one place, reducing the need to have an onError prop per calls in the store, it supports
+and you want to track whether any of the calls are loading, or to handle all the errors of any of the calls in one place, reducing the need to have an onError prop per calls in the store, it supports
 withCalls, withEntitiesCall, withCallStatus and withCallStatusMap, as long as withAllCallStatus is before all of them in the store definition. 
 
 ### Global isLoading
@@ -62,7 +62,7 @@ In the template
 ```
 
 ### Store error handler
-Sometimes we will like to have a generic error handler for all the calls in the store, for that you can create a custom store feature similar to: 
+Sometimes we would like to have a generic error handler for all the calls in the store, for that you can create a custom store feature similar to: 
 
 
 ```typescript

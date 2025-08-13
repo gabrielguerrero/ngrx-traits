@@ -214,7 +214,7 @@ export const ProductsLocalStore = signalStore(
 );
 ```
 
-You create a entityConfig like shown above using as const, and the you need to spread it to all withEntities* that you are using
+You create an entityConfig like shown above using as const, and then you need to spread it to all withEntities* that you are using
 
 ## Next Steps
 [Working with Entities](/docs/getting-started/working-with-entities), here you will learn how to work with entities in ngrx-traits.

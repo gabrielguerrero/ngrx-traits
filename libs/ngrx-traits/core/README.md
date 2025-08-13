@@ -23,4 +23,4 @@ NGRX Traits is a library to help you compose and reuse a set ngrx actions, selec
 
 `npm i @ngrx-traits/{core,common} --save`
 
-For more documentation go to our [github page](https://github.com/gabrielguerrero/ngrx-traits)
+For more documentation go to our [GitHub page](https://github.com/gabrielguerrero/ngrx-traits)
