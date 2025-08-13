@@ -45,10 +45,13 @@ describe('withEntitiesHybridFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+
+        expect(store.entities().length).toEqual(mockProducts.length);
+        tick(400);
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'snes' },
         });
-        expect(store.entities().length).toEqual(mockProducts.length);
         tick(400);
         expect(store.entities().length).toEqual(2);
         expect(store.entities()).toEqual([
@@ -134,6 +137,8 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'snes' },
         });
@@ -198,6 +203,8 @@ describe('withEntitiesHybridFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'snes' },
           debounce: 1000,
@@ -275,6 +282,8 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'snes' },
         });
@@ -300,6 +309,8 @@ describe('withEntitiesHybridFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
         store.filterEntities({
           filter: { search: 'zero' },
           patch: true,
@@ -337,6 +348,8 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
         store.selectEntity({ id: mockProducts[0].id });
         store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
         store.loadEntitiesPage({ pageIndex: 3 });
@@ -391,6 +404,8 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
         store.selectEntity({ id: mockProducts[0].id });
         store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
         expect(store.entitySelected()).toEqual(mockProducts[0]);
@@ -438,6 +453,8 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
+        store.setProductsLoaded();
+        tick(400);
         store.loadProductsPage({ pageIndex: 3 });
         expect(store.productsCurrentPage().pageIndex).toEqual(3);
 
@@ -499,6 +516,8 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           patchState(store, setAllEntities(mockProductsCustom, config));
+          store.setLoaded();
+          tick(400);
           store.filterEntities({
             filter: { search: 'zero', categoryId: 'snes' },
           });
@@ -550,6 +569,8 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           patchState(store, setAllEntities(mockProductsCustom, config));
+          store.setProductsLoaded();
+          tick(400);
           store.filterProductsEntities({
             filter: { search: 'zero', categoryId: 'snes' },
           });

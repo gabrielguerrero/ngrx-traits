@@ -245,12 +245,12 @@ export function withEntitiesHybridFilter<
             ),
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
-              const isRemote = config.isRemoteFilter(value.filter, filter());
+              const isRemote = config.isRemoteFilter(value.filter, filter()) || !isLoaded();
 
               patchState(state as WritableStateSource<any>, {
                 [filterKey]: value.filter,
               });
-              if (!isRemote) {
+              if (!isRemote || value?.forceLoad) {
                 const newEntities = entities().filter((entity) => {
                   return filterFn(entity, value.filter);
                 });
