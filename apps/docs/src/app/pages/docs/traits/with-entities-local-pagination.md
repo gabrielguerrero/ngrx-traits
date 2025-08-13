@@ -3,6 +3,8 @@ name: withEntitiesLocalPagination
 order: 6
 ---
 
+# withEntitiesLocalPagination
+
 Generates necessary state, computed and methods for local pagination of entities in the store.
 
 Requires withEntities to be present in the store.

@@ -3,6 +3,8 @@ name: withEntitiesMultiSelection
 order: 10
 ---
 
+# withEntitiesMultiSelection
+
 Generates necessary state, computed and methods for multi selection of entities. Warning: isAll[Collection]Selected and toggleSelectAll[Collection] wont work correctly in using remote pagination, because they cant select all the data.
 
 Requires withEntities to be present in the store.

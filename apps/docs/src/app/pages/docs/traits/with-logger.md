@@ -3,6 +3,8 @@ name: withLogger
 order: 14
 ---
 
+# withLogger
+
 Log the state signals and computed signals of the store on every change, with the option to provide a filter function to log only the necessary signals.
 
 ## Import

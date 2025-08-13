@@ -3,6 +3,8 @@ name: withEntitiesSingleSelection
 order: 9
 ---
 
+# withEntitiesSingleSelection
+
 Generates necessary state, computed and methods for single selection of entities.
 
 Requires withEntities to be present in the store.

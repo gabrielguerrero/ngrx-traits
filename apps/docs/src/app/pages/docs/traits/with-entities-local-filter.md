@@ -3,6 +3,8 @@ name: withEntitiesLocalFilter
 order: 3
 ---
 
+# withEntitiesLocalFilter
+
 Generates necessary state, computed and methods for locally filtering entities in the store, the generated filter[Collection]Entities method will filter the entities based on the filter function and is debounced by default.
 
 Requires withEntities to be used.

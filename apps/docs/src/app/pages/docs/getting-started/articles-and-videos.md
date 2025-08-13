@@ -7,6 +7,8 @@ As many of you know, @ngrx/signals is now finally stable and production-ready. T
 
 ---
 
+# Articles and Videos
+
 ##  [Implementing Infinite Scroll using @ngrx-traits/signals and Angular CDK](https://medium.com/@gabrieldavidguerrero/implementing-infinite-scroll-using-ngrx-traits-signals-and-angular-cdk-090651035726)
 
 Infinite scrolling is probably one of the most complex kinds of pagination you can do in apps. It is often used in mobile apps, mainly…

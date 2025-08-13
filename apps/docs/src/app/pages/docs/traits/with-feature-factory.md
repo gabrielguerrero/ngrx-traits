@@ -3,6 +3,8 @@ name: withFeatureFactory
 order: 15
 ---
 
+# withFeatureFactory
+
 This store feature allows access to the store's state, methods, computed signals, to store features that don't have a config factory that
 can access the store. This can be useful for creating store features that need to access the store's state, methods, computed signals, etc. or to wrap store
 features that don't have a config factory that can access the store.
