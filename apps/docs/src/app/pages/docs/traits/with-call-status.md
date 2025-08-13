@@ -19,7 +19,7 @@ import { withCallStatus } from '@ngrx-traits/signals';
 
 ## Usage
 
-Use this when the you need a special way to call you backend that is not handle by [withCalls](/docs/traits/withCalls)
+Use this when you need a special way to call you backend that is not handled by [withCalls](/docs/traits/withCalls)
 
 ### Minimal use case
 The following generates a callStatus signal, and getters isLoading isLoaded error, and computed
@@ -83,7 +83,7 @@ export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
   withCallStatus({ prop: collection, initialValue: 'loading' }),
-  // withEntitiesLoading will Call the fecth function when the status is set to loading
+  // withEntitiesLoading will Call the fetch function when the status is set to loading
   // in this case it will happen on init because the initial value is loading
   withEntitiesLoadingCall({
     collection,

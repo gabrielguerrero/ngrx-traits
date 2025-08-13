@@ -37,7 +37,7 @@ const store = signalStore(
 );
 ```
 
-To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in github):
+To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in GitHub):
 ```html
 <users-sort-dropdown
   [sort]="store.usersSort()"

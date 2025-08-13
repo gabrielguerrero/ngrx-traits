@@ -54,7 +54,7 @@ const store = signalStore(
 );
 ```
 
-### Only restore data from web storage if its not older than 12 hours
+### Only restore data from web storage if it's not older than 12 hours
 ```typescript
 const store = signalStore(
   // following are not required, just an example it can have anything
@@ -130,7 +130,7 @@ This trait receives and object to allow specific configurations:
 | key                     | Key to use when storing in session or local storage                        | string                   |
 | type                    | Type or storage to use                                                     | 'session'                | 'local'                                                                  |
 | restoreOnInit           | Auto restore the state from the storage when the store is initialized      | boolean. Default: true   |
-| saveStateChangesAfterMs | Miliseconds after which the state is saved to storage when is changed      | number. Default: 300     |
+| saveStateChangesAfterMs | Milliseconds after which the state is saved to storage when it changes     | number. Default: 300     |
 | filterState             | Optional function to filter the state signals that will be sync to storage | ({state1}) => ({state1}) |
 | expires                 | If the data is older than the time in milliseconds it wont be restored     | number                   |
 

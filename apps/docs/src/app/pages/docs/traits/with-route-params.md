@@ -37,7 +37,7 @@ No state signals are generated.
 Generates a computed signals, per prop returned by the mapParams function.
 
 ```typescript
-// for  withRouteParams(({ id , foor}) => ({ id, foo: +foo }))
+// for  withRouteParams(({ id , foo }) => ({ id, foo: +foo }))
 {
   id: string;
   foo: number;

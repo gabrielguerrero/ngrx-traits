@@ -59,15 +59,15 @@ import {
 
 /**
  * Generates necessary state, computed and methods for remote pagination of entities in the store.
- * Call load[collection]Page to change the page, it will try to load the new page from cache if it's not present,
- * it will call set[collection]Loading(), and you should either create an effect that listens to [collection]Loading
- * and call the api with the [collection]PagedRequest params and use set[Collection]Result to set the result
+ * Call load[Collection]Page to change the page, it will try to load the new page from cache if it's not present,
+ * it will call set[Collection]Loading(), and you should either create an effect that listens to [Collection]Loading
+ * and call the api with the [Collection]PagedRequest params and use set[Collection]Result to set the result
  * and changing the status errors manually,
- * or use withEntitiesLoadingCall to call the api with the [collection]PagedRequest params which handles setting
+ * or use withEntitiesLoadingCall to call the api with the [Collection]PagedRequest params which handles setting
  * the result and errors automatically.
  *
- * In case you dont want load[collection]Page to call set[collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[collection]Page.
- * Useful in cases where you want to further change the state before manually calling set[collection]Loading() to trigger a fetch of entities.
+ * In case you dont want load[Collection]Page to call set[Collection]Loading() (which triggers a fetchEntities), you can pass skipLoadingCall: true to load[Collection]Page.
+ * Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.
  *
  * This will keep at least the provided (pagesToCache) pages in memory, so previous pages could be removed from the cache.
  * If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPagination instead.

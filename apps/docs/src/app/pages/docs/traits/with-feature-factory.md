@@ -64,7 +64,7 @@ function withCustomFeature(config: { fooValue: string }) {
 const Store = signalStore(
   withState({ foo: 'foo' }),
 // 👇use previous state to configure custom feature
-  withFeatureFactory(({ foo }) => withCustomFeature({ fooV: foo() })),
+  withFeatureFactory(({ foo }) => withCustomFeature({ fooValue: foo() })),
 // you can also use a signalStoreFeature inside withFeatureFactory
   withFeatureFactory(({ foo }) =>
       signalStoreFeature(
