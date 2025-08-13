@@ -3,6 +3,8 @@ name: withSyncToWebStorage
 order: 15
 ---
 
+# withSyncToWebStorage
+
 Sync the state of the store to the web storage
 
 **Kind**: global function

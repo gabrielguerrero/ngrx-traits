@@ -3,6 +3,8 @@ name: withEntitiesLocalSort
 order: 11
 ---
 
+# withEntitiesLocalSort
+
 Generates necessary state, computed and methods for sorting locally entities in the store.
 
 Requires withEntities to be present in the store.

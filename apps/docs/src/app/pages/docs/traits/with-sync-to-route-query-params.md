@@ -3,6 +3,8 @@ name: withSyncToRouteQueryParams
 order: 18
 ---
 
+# withSyncToRouteQueryParams
+
 Syncs the route query params with the store and back. On init it will load
 the query params once and set them in the store using the mapper.queryParamsToState, after that
 and change on the store will be reflected in the query params using the mapper.stateToQueryParams
