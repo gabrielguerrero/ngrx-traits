@@ -2,16 +2,17 @@
   "name": "@ngrx-traits/signals",
   "version": "0.0.0-development",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "build": "ng-packagr -p package.json"
   },
   "peerDependencies": {
-    "@angular/core": "^19.0.0",
-    "@ngrx/signals": "^19.0.0",
+    "@angular/core": "^20.0.0",
+    "@ngrx/signals": "^20.0.0",
     "rxjs": "^7.8.1"
   },
   "optionalDependencies": {
-    "@angular/cdk": "^19.0.0"
+    "@angular/cdk": "^20.0.0"
   },
   "sideEffects": false,
   "repository": {
