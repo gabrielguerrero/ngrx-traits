@@ -46,6 +46,7 @@ import { filter } from 'rxjs/operators';
 
 import { getWithEntitiesKeys, insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
+import { NamedCallStatusMapState } from '../with-call-status-map/with-call-status-map.model';
 import {
   CallStatus,
   NamedCallStatusState,
@@ -152,7 +153,7 @@ export function withEntitiesCalls<
           methods: {};
         }),
   {
-    state: NamedCallStatusState<keyof Calls & string>;
+    state: NamedCallStatusMapState<keyof Calls & string>;
     props: NamedEntitiesCallsStatusComputed<Calls>;
     methods: NamedEntitiesCallsStatusMethods<Entity, Calls> & {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any

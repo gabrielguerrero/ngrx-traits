@@ -108,31 +108,43 @@ describe('withEntitiesCalls', () => {
         },
       };
       expect(store.isLoadProductDetailLoading(product.id)).toBeFalsy();
+      expect(store.loadProductDetailCallStatus()[product.id] === 'init');
       store.loadProductDetail({ entity: product, is: 'test' });
       expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
+      expect(store.loadProductDetailCallStatus()[product.id] === 'loading');
       apiResponse.next(productWithDetail);
       expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
+      expect(store.loadProductDetailCallStatus()[product.id] === 'loaded');
       expect(store.entityMap()[product.id]).toEqual(productWithDetail);
 
       expect(store.isLoadProductDetail2Loading(product2.id)).toBeFalsy();
+      expect(store.loadProductDetail2CallStatus()[product.id] === 'init');
       store.loadProductDetail2({ entity: product2, b: 'test' });
       expect(store.isLoadProductDetail2Loading(product2.id)).toBeTruthy();
+      expect(store.loadProductDetail2CallStatus()[product.id] === 'loading');
       apiResponse2.next(productWithDetail2);
       expect(store.isLoadProductDetail2Loaded(product2.id)).toBeTruthy();
+      expect(store.loadProductDetail2CallStatus()[product.id] === 'loaded');
       expect(store.entityMap()[product2.id]).toEqual(productWithDetail2);
 
       expect(store.isLoadProductDetail3Loading(product3.id)).toBeFalsy();
+      expect(store.loadProductDetail3CallStatus()[product.id] === 'init');
       store.loadProductDetail3(product3);
       expect(store.isLoadProductDetail3Loading(product3.id)).toBeTruthy();
+      expect(store.loadProductDetail3CallStatus()[product.id] === 'loading');
       apiResponse3.next(productWithDetail3);
       expect(store.isLoadProductDetail3Loaded(product3.id)).toBeTruthy();
+      expect(store.loadProductDetail3CallStatus()[product.id] === 'loaded');
       expect(store.entityMap()[product3.id]).toEqual(productWithDetail3);
 
       expect(store.isLoadProductDetail4Loading(product4.id)).toBeFalsy();
+      expect(store.loadProductDetail4CallStatus()[product.id] === 'init');
       store.loadProductDetail4(product4.id);
       expect(store.isLoadProductDetail4Loading(product4.id)).toBeTruthy();
+      expect(store.loadProductDetail4CallStatus()[product.id] === 'loading');
       apiResponse4.next(productWithDetail4);
       expect(store.isLoadProductDetail4Loaded(product4.id)).toBeTruthy();
+      expect(store.loadProductDetail4CallStatus()[product.id] === 'loaded');
       expect(store.entityMap()[product4.id]).toEqual(productWithDetail4);
     });
   });
