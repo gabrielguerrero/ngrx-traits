@@ -160,4 +160,67 @@ describe('withLogger', () => {
       'color: green',
     );
   });
+
+  it('should sort properties alphabetically when no filter is defined', () => {
+    jest.resetAllMocks();
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ zebra: 1, apple: 2, banana: 3 })),
+      withComputed(({ zebra, apple }) => ({
+        computed1: computed(() => zebra() + apple()),
+      })),
+      withLogger({ name: 'Store' }),
+    );
+
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    TestBed.inject(Store);
+    TestBed.flushEffects();
+
+    // Extract the logged object to check key order
+    const loggedObject = consoleLog.mock.calls[0][1];
+    const keys = Object.keys(loggedObject);
+
+    // Keys should be sorted alphabetically
+    expect(keys).toEqual(['apple', 'banana', 'computed1', 'zebra']);
+    expect(loggedObject).toEqual({
+      apple: 2,
+      banana: 3,
+      computed1: 3,
+      zebra: 1,
+    });
+  });
+
+  it('should not sort properties when array filter is used', () => {
+    jest.resetAllMocks();
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ zebra: 1, apple: 2, banana: 3 })),
+      withComputed(({ zebra, apple }) => ({
+        computed1: computed(() => zebra() + apple()),
+      })),
+      withLogger({
+        name: 'Store',
+        filter: ['zebra', 'apple'],
+      }),
+    );
+
+    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    TestBed.inject(Store);
+    TestBed.flushEffects();
+
+    // Extract the logged object to check key order
+    const loggedObject = consoleLog.mock.calls[0][1];
+    const keys = Object.keys(loggedObject);
+
+    // Keys should maintain the original order from the filter array
+    expect(keys).toEqual(['zebra', 'apple']);
+    expect(loggedObject).toEqual({
+      zebra: 1,
+      apple: 2,
+    });
+  });
 });
