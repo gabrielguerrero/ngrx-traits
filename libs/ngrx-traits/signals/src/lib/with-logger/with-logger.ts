@@ -54,9 +54,9 @@ export function withLogger<Input extends SignalStoreFeatureResult>({
     type<Input>(),
     withHooks({
       onInit(store) {
-        function evaluateSignals(source: any, keys?: string[]) {
+        function evaluateSignals(source: any, keys?: string[], sort?: boolean) {
           return typeof source === 'object'
-            ? Object.keys(source).reduce(
+            ? (sort ? Object.keys(source).sort() : Object.keys(source)).reduce(
                 (acc, key) => {
                   if (!keys || keys.includes(key)) {
                     if (isSignal(store[key])) {
@@ -75,7 +75,7 @@ export function withLogger<Input extends SignalStoreFeatureResult>({
 
         const signalsComputed = computed(() => {
           return !filter
-            ? evaluateSignals(store)
+            ? evaluateSignals(store, undefined, true)
             : typeof filter === 'function'
               ? evaluateSignals(
                   filter(
@@ -88,7 +88,6 @@ export function withLogger<Input extends SignalStoreFeatureResult>({
         effect(() => {
           const state = signalsComputed();
           console.log(`${name} store changed: `, state);
-
           if (showDiff && lastState)
             deepDiff(`${name} store changes diff :`, lastState, state);
           lastState = state;
