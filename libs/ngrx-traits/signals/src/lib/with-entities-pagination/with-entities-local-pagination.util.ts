@@ -9,10 +9,8 @@ import {
   props,
 } from '../with-event-handler/with-event-handler.util';
 import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
-import {
-  EntitiesPaginationLocalMethods,
-  EntitiesPaginationLocalState,
-} from './with-entities-local-pagination.model';
+import { EntitiesPaginationLocalState } from './with-entities-local-pagination.model';
+import { EntitiesPaginationRemoteMethods } from './with-entities-remote-pagination.model';
 
 export function getWithEntitiesLocalPaginationKeys(config?: {
   collection?: string;
@@ -46,6 +44,7 @@ export function getWithEntitiesLocalPaginationEvents(config?: {
 
 export function getQueryMapperForEntitiesPagination(config?: {
   collection?: string;
+  skipLoadingCall?: boolean;
 }): QueryMapper<{
   page: string;
 }> {
@@ -61,7 +60,7 @@ export function getQueryMapperForEntitiesPagination(config?: {
       if (page) {
         const loadEntitiesPage = store[
           loadEntitiesPageKey
-        ] as EntitiesPaginationLocalMethods['loadEntitiesPage'];
+        ] as EntitiesPaginationRemoteMethods<unknown>['loadEntitiesPage'];
         const loading = store[loadingKey] as Signal<boolean>;
         const loaded = store[loadedKey] as Signal<boolean>;
         const loaded$ = toObservable(loaded);
@@ -75,6 +74,7 @@ export function getQueryMapperForEntitiesPagination(config?: {
           .subscribe(() => {
             loadEntitiesPage({
               pageIndex: +page - 1,
+              skipLoadingCall: config?.skipLoadingCall,
             });
           });
       }

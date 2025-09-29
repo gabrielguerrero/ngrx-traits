@@ -93,6 +93,7 @@ export function getWithEntitiesLocalSortEvents(config?: {
 }
 export function getQueryMapperForEntitiesSort(config?: {
   collection?: string;
+  skipLoadingCall?: boolean;
 }): QueryMapper<{
   sortBy: string;
   sortDirection: string;
@@ -109,6 +110,7 @@ export function getQueryMapperForEntitiesSort(config?: {
         ] as EntitiesRemoteSortMethods<unknown>['sortEntities'];
         sortEntities({
           sort: { field: sortBy, direction: sortDirection as 'asc' | 'desc' },
+          skipLoadingCall: config?.skipLoadingCall,
         });
       }
     },

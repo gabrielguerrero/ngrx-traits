@@ -71,14 +71,15 @@ export const ProductsRemoteStore = signalStore(
 ## API Reference
 
 
-| Property            | Description                                                                        | Value                                        |
-|---------------------|------------------------------------------------------------------------------------|----------------------------------------------|
-| entity              | The entity type                                                                    | `type<T>()`                                  |
-| collection          | The name of the collection. Optional                                               | string                                       |
-| prefix              | Prefix for the url query params to avoid conflicts with query param                | string. Default to the collection value      |
-| filterMapper        | Configure how the entities filter is serialize to and from the query params        | FilterQueryMapper<Filter>                    |
-| onQueryParamsLoaded | Callback to execute something else when the query params are loaded from the store | `(store) => void`                            |
-| defaultDebounce     | Debounce time for each call to the filter                                          | `(entity: T, filter: FilterType )=> boolean` |
+| Property            | Description                                                                                                                                       | Value                                        |
+|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| entity              | The entity type                                                                                                                                   | `type<T>()`                                  |
+| collection          | The name of the collection. Optional                                                                                                              | string                                       |
+| prefix              | Prefix for the url query params to avoid conflicts with query param                                                                               | string. Default to the collection value      |
+| filterMapper        | Configure how the entities filter is serialize to and from the query params                                                                       | FilterQueryMapper<Filter>                    |
+| onQueryParamsLoaded | Callback to execute something else when the query params are loaded from the store                                                                | `(store) => void`                            |
+| defaultDebounce     | Debounce time for syncing store changes back to the route query params                                                                            | number (milliseconds)                        |
+| skipLoadingCall     | When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default: false | boolean                                      |
 
 ## State
 
