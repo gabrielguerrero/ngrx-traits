@@ -88,6 +88,7 @@ export type FilterQueryMapper<Filter, T extends Params = Params> = {
 export function getQueryMapperForEntitiesFilter<Filter>(config?: {
   collection?: string;
   filterMapper?: FilterQueryMapper<Filter>;
+  skipLoadingCall?: boolean;
 }): QueryMapper<
   typeof config extends { filterMapper: FilterQueryMapper<infer T> }
     ? T
@@ -109,6 +110,7 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
         filterEntities({
           filter,
           forceLoad: true,
+          skipLoadingCall: config?.skipLoadingCall,
         });
       }
     },

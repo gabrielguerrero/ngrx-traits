@@ -1,12 +1,9 @@
-import { Signal } from '@angular/core';
+import { DeepSignal } from '@ngrx/signals';
 
 import {
-  EntitiesPaginationLocalMethods,
-  NamedEntitiesPaginationLocalMethods,
   NamedSetEntitiesResult,
   SetEntitiesResult,
 } from './with-entities-local-pagination.model';
-import { DeepSignal } from '@ngrx/signals';
 
 export type PaginationState = {
   currentPage: number;

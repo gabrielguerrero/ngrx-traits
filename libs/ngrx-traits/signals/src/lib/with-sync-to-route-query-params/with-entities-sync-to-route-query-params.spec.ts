@@ -981,4 +981,113 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       direction: 'desc',
     });
   });
+
+  describe('skipLoadingCall parameter', () => {
+    it('should pass skipLoadingCall to filterEntities when loading from query params', fakeAsync(() => {
+      const fetchEntitiesSpy = jest.fn(() => of({ entities: mockProducts.slice(0, 10), total: 10 }));
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: fetchEntitiesSpy,
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity, skipLoadingCall: true }),
+      );
+      init({
+        Store,
+        queryParams: { filter: JSON.stringify({ search: 'test', foo: 'bar' }) },
+      });
+      TestBed.flushEffects();
+      tick(400);
+      // With skipLoadingCall: true, the fetchEntities should not be called
+      expect(fetchEntitiesSpy).not.toHaveBeenCalled();
+    }));
+
+    it('should pass skipLoadingCall to sortEntities when loading from query params', fakeAsync(() => {
+      const fetchEntitiesSpy = jest.fn(() => of({ entities: mockProducts.slice(0, 10), total: 10 }));
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: fetchEntitiesSpy,
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity, skipLoadingCall: true }),
+      );
+      init({
+        Store,
+        queryParams: { sortBy: 'description', sortDirection: 'desc' },
+      });
+      TestBed.flushEffects();
+      tick(400);
+      // With skipLoadingCall: true, the fetchEntities should not be called
+      expect(fetchEntitiesSpy).not.toHaveBeenCalled();
+    }));
+
+    it('should pass skipLoadingCall to loadEntitiesPage when loading from query params', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const fetchEntitiesSpy = jest.fn(() =>
+        load.pipe(
+          filter(Boolean),
+          map(() => ({ entities: mockProducts.slice(0, 10), total: 40 })),
+        )
+      );
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemotePagination({ entity, pageSize: 10 }),
+        withEntitiesLoadingCall({
+          fetchEntities: fetchEntitiesSpy,
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity, skipLoadingCall: true }),
+      );
+      init({
+        Store,
+        queryParams: { page: '2' },
+      });
+      TestBed.flushEffects();
+      load.next(true);
+      tick(400);
+      // With skipLoadingCall: true, the fetchEntities should only be called once (initial load)
+      expect(fetchEntitiesSpy).toHaveBeenCalledTimes(1);
+    }));
+
+    it('should call fetchEntities when skipLoadingCall is false (default)', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const fetchEntitiesSpy = jest.fn(() =>
+        load.pipe(
+          filter(Boolean),
+          map(() => ({ entities: mockProducts.slice(0, 10), total: 10 })),
+        )
+      );
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: fetchEntitiesSpy,
+        }),
+        withEntitiesSyncToRouteQueryParams({ entity, skipLoadingCall: false }),
+      );
+      init({
+        Store,
+        queryParams: { filter: JSON.stringify({ search: 'test', foo: 'bar' }) },
+      });
+      TestBed.flushEffects();
+      load.next(true);
+      tick(400);
+      // With skipLoadingCall: false, the fetchEntities should be called
+      expect(fetchEntitiesSpy).toHaveBeenCalled();
+    }));
+  });
 });

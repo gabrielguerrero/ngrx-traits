@@ -48,6 +48,7 @@ import { QueryMapper } from './with-sync-to-route-query-params.util';
  * @param config.prefix The prefix to use for the query params. If set to false, the prefix will be disabled.
  * @param config.onQueryParamsLoaded A function to be called when the query params are loaded into the store, (only gets called once).
  * @param config.defaultDebounce The default debounce time to use sync the store changes back to the route query params.
+ * @param config.skipLoadingCall When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default is false.
  *
  * @example
  * export const ProductsRemoteStore = signalStore(
@@ -108,6 +109,7 @@ export function withEntitiesSyncToRouteQueryParams<
   onQueryParamsLoaded?: (store: StoreSource<Input>) => void;
   defaultDebounce?: number;
   restoreOnInit?: boolean;
+  skipLoadingCall?: boolean;
 }): SignalStoreFeature<
   Input &
     (Collection extends ''
@@ -132,9 +134,19 @@ export function withEntitiesSyncToRouteQueryParams<
   }
 > {
   const mappers = [
-    getQueryMapperForEntitiesPagination(config),
-    getQueryMapperForEntitiesSort(config),
-    getQueryMapperForEntitiesFilter(config),
+    getQueryMapperForEntitiesPagination({
+      collection: config?.collection,
+      skipLoadingCall: config?.skipLoadingCall ?? false,
+    }),
+    getQueryMapperForEntitiesSort({
+      collection: config?.collection,
+      skipLoadingCall: config?.skipLoadingCall ?? false,
+    }),
+    getQueryMapperForEntitiesFilter({
+      collection: config?.collection,
+      filterMapper: config?.filterMapper,
+      skipLoadingCall: config?.skipLoadingCall ?? false,
+    }),
     getQueryMapperForSingleSelection(config),
   ];
   const prefixString =
