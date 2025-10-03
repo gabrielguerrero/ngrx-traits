@@ -65,6 +65,8 @@ export function debounceFilterPipe<Filter>(
     distinctUntilChanged(
       (previous, current) =>
         !current?.forceLoad &&
+        !current.skipLoadingCall &&
+        !previous?.skipLoadingCall &&
         JSON.stringify(previous?.filter) === JSON.stringify(current?.filter),
     ),
   );

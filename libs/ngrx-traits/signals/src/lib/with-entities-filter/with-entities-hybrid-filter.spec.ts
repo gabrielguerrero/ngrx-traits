@@ -5,7 +5,7 @@ import {
   setAllEntities,
   withEntities,
 } from '@ngrx/signals/entities';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import {
   withCallStatus,
@@ -970,6 +970,93 @@ describe('withEntitiesHybridFilter', () => {
           search: 'zero',
           categoryId: 'gamecube',
         });
+      });
+    }));
+
+    it('should pass through second filter call when skipLoadingCall is true on first', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const apiResponse$ = new Subject<Partial<Product[]>>();
+        let response: Product[] = [];
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({
+            entity,
+            collection,
+          }),
+          withCallStatus({
+            collection,
+            initialValue: 'init',
+          }),
+          withEntitiesHybridFilter({
+            entity,
+            collection,
+            defaultFilter: { search: 'test', categoryId: 'gamecube' },
+            isRemoteFilter: (newFilter, oldFilter) =>
+              newFilter.categoryId !== oldFilter.categoryId,
+            filterFn: (entity, filter) =>
+              filter?.search
+                ? entity.name
+                    .toLowerCase()
+                    .includes(filter.search.toLowerCase())
+                : true,
+          }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: ({ productsFilter }) => {
+              let result = [...mockProducts];
+              if (productsFilter()?.categoryId) {
+                result = mockProducts.filter(
+                  (entity) =>
+                    entity.categoryId === productsFilter()?.categoryId,
+                );
+              }
+              response = result;
+              return apiResponse$;
+            },
+          }),
+        );
+        const store = new Store();
+        TestBed.flushEffects();
+
+        // First call should pass should not call backend because of skipLoadingCall
+        store.filterProductsEntities({
+          filter: { search: 'zero', categoryId: 'gamecube' },
+          skipLoadingCall: true, // this will store the value but not call the backend, and should not count for distinctUntilChange
+        });
+        tick(400);
+        expect(store.isProductsLoading()).toEqual(false);
+        tick(400);
+        expect(store.productsEntities().length).toEqual(0);
+
+        // Second call with same filter should be pass through because previous call did not count for distinctUntilChange
+        store.filterProductsEntities({
+          filter: { search: 'zero', categoryId: 'gamecube' },
+        });
+        tick(400);
+        expect(store.isProductsLoading()).toEqual(true);
+        apiResponse$.next(response);
+        tick(400);
+        expect(store.productsEntities().length).toEqual(1);
+
+        // Third call with same filter should be filtered out
+        store.filterProductsEntities({
+          filter: { search: 'zero', categoryId: 'gamecube' },
+        });
+        tick(400);
+        expect(store.isProductsLoading()).toEqual(false);
+        tick(400);
+        // Entities should remain the same (call was filtered out)
+        expect(store.productsEntities().length).toEqual(1);
+
+        // Next call should passthrough because filter changed
+        store.filterProductsEntities({
+          filter: { search: 'mario', categoryId: 'snes' },
+        });
+        tick(400);
+        expect(store.isProductsLoading()).toEqual(true);
+        apiResponse$.next(response);
+        tick(400);
+        expect(store.productsEntities().length).toEqual(11);
       });
     }));
   });

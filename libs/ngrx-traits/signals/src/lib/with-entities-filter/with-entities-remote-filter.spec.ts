@@ -7,7 +7,7 @@ import {
 } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import {
   withCallStatus,
@@ -390,6 +390,87 @@ describe('withEntitiesRemoteFilter', () => {
       ]);
       expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
       expect(store.productsFilter.search()).toEqual('zero');
+    });
+  }));
+
+  it('should pass through second filter call when skipLoadingCall is true on first', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const apiResponse$ = new Subject<Partial<Product[]>>();
+      let response: Product[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({
+          entity,
+        }),
+        withCallStatus({ initialValue: 'init' }),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: 'test', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesFilter }) => {
+            let result = [...mockProducts];
+            if (entitiesFilter()?.search) {
+              result = mockProducts.filter((entity) =>
+                entitiesFilter()?.search
+                  ? entity.name
+                      .toLowerCase()
+                      .includes(entitiesFilter()?.search.toLowerCase())
+                  : false,
+              );
+            }
+            response = result;
+            return apiResponse$;
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.flushEffects();
+
+      console.log('first');
+      // First call should pass should not call backend because of skipLoadingCall
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+        skipLoadingCall: true, // this will store the value but not call the backend, and should not count for distinctUntilChange
+      });
+      tick(400);
+      expect(store.isLoading()).toEqual(false);
+      tick(400);
+      expect(store.entities().length).toEqual(0);
+
+      console.log('second');
+      // Second call with same filter should be pass through because previous call did not count for distinctUntilChange
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+      });
+      tick(400);
+      expect(store.isLoading()).toEqual(true);
+      apiResponse$.next(response);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.isLoaded()).toEqual(true);
+
+      console.log('thrid');
+      // Third call with same filter should be filtered out
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+      });
+      tick(400);
+      expect(store.isLoading()).toEqual(false);
+      tick(400);
+      // Entities should remain the same (call was filtered out)
+      expect(store.entities().length).toEqual(2);
+
+      console.log('fourth');
+      // Next call should passthrough because filter changed
+      store.filterEntities({
+        filter: { search: 'mario', foo: 'snes' },
+      });
+      tick(400);
+      expect(store.isLoading()).toEqual(true);
+      apiResponse$.next(response);
+      tick(400);
+      expect(store.entities().length).toEqual(23);
     });
   }));
 });

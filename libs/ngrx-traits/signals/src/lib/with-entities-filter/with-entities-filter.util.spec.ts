@@ -1,6 +1,4 @@
 import { Signal, signal } from '@angular/core';
-import { of, pipe, timer } from 'rxjs';
-import { concatMap, debounce, distinctUntilChanged } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 
 import { debounceFilterPipe } from './with-entities-filter.util';
@@ -207,6 +205,51 @@ describe('debounceFilterPipe', () => {
       expectObservable(result$).toBe('(ab)|', {
         a: { filter: { id: 1 }, debounce: 0 },
         b: { filter: { id: 2 }, debounce: 0 },
+      });
+    });
+  });
+
+  describe('with callStatus signal', () => {
+    it('should allow second value to pass through when skipLoadingCall is true', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        mockSignal = signal({ search: 'initial' });
+
+        const source$ = hot('-a------b--d|', {
+          a: { filter: { search: 'test' }, skipLoadingCall: true },
+          b: { filter: { search: 'test' } }, // same filter should pass because skipLoading skips distinctUntilChange
+          c: { filter: { search: 'test' } }, // skip because identical to 'b'
+          d: { filter: { search: 'test2' } }, // should pass because is different from  'c'
+        });
+
+        const result$ = source$.pipe(debounceFilterPipe(mockSignal, 1));
+
+        // When callStatus is 'init', first value passes through
+        // Second value also passes since it's different
+        expectObservable(result$).toBe('--a------b--(d|)', {
+          a: { filter: { search: 'test' }, skipLoadingCall: true },
+          b: { filter: { search: 'test' } },
+          d: { filter: { search: 'test2' } },
+        });
+      });
+    });
+
+    it('should work normally when skipLoading is false', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        mockSignal = signal({ search: 'initial' });
+
+        const source$ = hot('-a---b----------c---d|', {
+          a: { filter: { search: 'test' } },
+          b: { filter: { search: 'test' } }, // Identical to 'a', should be distinct
+          c: { filter: { search: 'another' } }, // Different, should emit
+          d: { filter: { search: 'another' } }, // Identical to 'c', should be distinct
+        });
+
+        const result$ = source$.pipe(debounceFilterPipe(mockSignal, 10));
+
+        expectObservable(result$).toBe('---------------a-----(c|)', {
+          a: { filter: { search: 'test' } },
+          c: { filter: { search: 'another' } },
+        });
       });
     });
   });
