@@ -73,6 +73,49 @@ const store = signalStore(
 );
 ```
 
+### Using valueMapper for custom transformation
+You can use `valueMapper` to provide custom bidirectional transformation between the store state and the storage value. This is useful when you want to store only specific properties or transform the data before saving.
+
+For example, in a form where you only want to persist certain nested fields:
+
+```typescript
+const store = signalStore(
+  withState({
+    userProfile: {
+      userName: '',
+      email: '',
+      preferences: { theme: 'light', notifications: true },
+      tempData: null, // This won't be saved
+    }
+  }),
+
+  withSyncToWebStorage({
+    key: 'user-form',
+    type: 'local',
+    restoreOnInit: true,
+    saveStateChangesAfterMs: 500,
+    // Only save and restore userName and email from userProfile, not preferences or tempData
+    valueMapper: {
+      stateToStorageValue: (store) => ({
+        userName: store.userProfile().userName,
+        email: store.userProfile().email,
+      }),
+      storageValueToState: (savedData, store) => {
+        patchState(store, {
+          userProfile: {
+            ...store.userProfile(),
+            userName: savedData.userName,
+            email: savedData.email,
+          }
+        });
+      },
+    },
+  }),
+);
+```
+
+**Note:** `valueMapper` and `filterState` are mutually exclusive - you can only use one or the other, not both.
+
 ### Splitting the state in multiple store keys
 You can add withSyncToWebStorage multiple times with different keys, this can be useful if you are creating your own store features and each has a withSyncToWebStorage, or you need to split the state in two keys.
 
@@ -125,16 +168,25 @@ const store = signalStore(
 ```
 ## API Reference
 
-This trait receives and object to allow specific configurations:
+This trait receives an object to allow specific configurations:
 
-| Property                | Description                                                                | Value                    |
-|-------------------------|----------------------------------------------------------------------------|--------------------------|
-| key                     | Key to use when storing in session or local storage                        | string                   |
-| type                    | Type or storage to use                                                     | 'session'                | 'local'                                                                  |
-| restoreOnInit           | Auto restore the state from the storage when the store is initialized      | boolean. Default: true   |
-| saveStateChangesAfterMs | Milliseconds after which the state is saved to storage when it changes     | number. Default: 300     |
-| filterState             | Optional function to filter the state signals that will be sync to storage | ({state1}) => ({state1}) |
-| expires                 | If the data is older than the time in milliseconds it wont be restored     | number                   |
+| Property                | Description                                                                                          | Value                                                  |
+|-------------------------|------------------------------------------------------------------------------------------------------|--------------------------------------------------------|
+| key                     | Key to use when storing in session or local storage                                                  | string                                                 |
+| type                    | Type of storage to use                                                                               | 'session' \| 'local'                                   |
+| restoreOnInit           | Auto restore the state from the storage when the store is initialized                                | boolean. Default: true                                 |
+| saveStateChangesAfterMs | Milliseconds after which the state is saved to storage when it changes                               | number. Default: 500                                   |
+| filterState             | Optional function to filter the state signals that will be synced to storage (mutually exclusive with valueMapper) | ({state1}) => ({state1})                               |
+| valueMapper             | Optional custom transformation between store state and storage value (mutually exclusive with filterState) | StorageValueMapper<T, Store>                           |
+| expires                 | If the data is older than the time in milliseconds it won't be restored                              | number                                                 |
+| onRestore               | Optional callback after the state is restored from storage                                           | (store) => void                                        |
+
+### StorageValueMapper<T, Store>
+
+| Property              | Description                                           | Type                           |
+|-----------------------|-------------------------------------------------------|--------------------------------|
+| stateToStorageValue   | Function to transform store state to storage value   | (store: Store) => T \| undefined \| null |
+| storageValueToState   | Function to transform storage value back to state    | (value: T, store: Store) => void        |
 
 ## State
 No extra state generated

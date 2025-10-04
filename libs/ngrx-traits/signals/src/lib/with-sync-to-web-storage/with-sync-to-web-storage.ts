@@ -16,6 +16,8 @@ import {
 } from '@ngrx/signals';
 
 import { combineFunctionsInObject } from '../util';
+import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
+import { StorageValueMapper } from './with-sync-to-web-storage.util';
 
 /**
  * Sync the state of the store to the web storage
@@ -23,13 +25,14 @@ import { combineFunctionsInObject } from '../util';
  * @param type - 'session' or 'local' storage
  * @param saveStateChangesAfterMs - save the state to the storage after this many milliseconds, 0 to disable
  * @param restoreOnInit - restore the state from the storage on init
- * @param filterState - filter the state before saving to the storage
+ * @param filterState - filter the state before saving to the storage (mutually exclusive with valueMapper)
+ * @param valueMapper - custom transformation between store state and storage value (mutually exclusive with filterState)
  * @param onRestore - callback after the state is restored from the storage
  * @param expires - storage will not be loaded if is older than this many milliseconds
  *
  * @example
+ * // Example 1: Using filterState to save specific state properties
  * const store = signalStore(
- *  // following are not required, just an example it can have anything
  *  withEntities({ entity, collection }),
  *  withCallStatus({ prop: collection, initialValue: 'loading' }),
  *
@@ -55,25 +58,23 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   type: storageType,
   saveStateChangesAfterMs = 500,
   restoreOnInit = true,
-  filterState,
   onRestore,
   expires,
+  ...rest
 }: {
   key: string;
   type: 'session' | 'local';
   restoreOnInit?: boolean;
   saveStateChangesAfterMs?: number;
-  filterState?: (state: Input['state']) => Partial<Input['state']>;
   expires?: number;
-  onRestore?: (
-    store: Prettify<
-      StateSignals<Input['state']> &
-        Input['props'] &
-        Input['methods'] &
-        WritableStateSource<Prettify<Input['state']>>
-    >,
-  ) => void;
-}): SignalStoreFeature<
+  onRestore?: (store: StoreSource<Input>) => void;
+} & (
+  | {
+      filterState: (state: Input['state']) => Partial<Input['state']>;
+    }
+  | { valueMapper: StorageValueMapper<any, StoreSource<Input>> }
+  | {}
+)): SignalStoreFeature<
   Input,
   {
     state: {};
@@ -90,12 +91,16 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
     withState({}),
     withMethods((store) => {
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+      const filterState = (rest as any).filterState;
+      const valueMapper = (rest as any).valueMapper;
       return combineFunctionsInObject(
         {
           saveToStorage() {
             const state = filterState
               ? filterState(getState(store))
-              : getState(store);
+              : valueMapper
+                ? valueMapper.stateToStorageValue(store)
+                : getState(store);
             if (storageType === 'local') {
               window.localStorage.setItem(key, JSON.stringify(state));
               window.localStorage.setItem(
@@ -136,7 +141,9 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
                 return false;
               }
             }
-            patchState(store, JSON.parse(stateJson));
+            if (valueMapper) {
+              valueMapper.storageValueToState(JSON.parse(stateJson), store);
+            } else patchState(store, JSON.parse(stateJson));
             onRestore?.(
               store as Prettify<
                 StateSignals<Input['state']> &
