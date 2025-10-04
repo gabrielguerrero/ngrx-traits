@@ -4,7 +4,7 @@ import {
   withEntitiesSingleSelection,
   withSyncToWebStorage,
 } from '@ngrx-traits/signals';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import { mockProducts } from '../test.mocks';
@@ -363,6 +363,293 @@ describe('withSyncToWebStorage', () => {
         expect(store.isLoaded()).toBe(true);
       });
     });
+  });
+
+  describe('valueMapper', () => {
+    it('should save and load to local storage using valueMapper', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({
+            userProfile: {
+              userName: '',
+              email: '',
+              preferences: { theme: 'light', notifications: true },
+              tempData: null as string | null,
+            },
+          }),
+          withSyncToWebStorage({
+            key: 'test',
+            type: 'local',
+            restoreOnInit: false,
+            saveStateChangesAfterMs: 0,
+            // Only save userName and email from userProfile
+            valueMapper: {
+              stateToStorageValue: (store) => ({
+                userName: store.userProfile().userName,
+                email: store.userProfile().email,
+              }),
+              storageValueToState: (savedData, store) => {
+                patchState(store, {
+                  userProfile: {
+                    ...store.userProfile(),
+                    userName: savedData.userName,
+                    email: savedData.email,
+                  },
+                });
+              },
+            },
+          }),
+        );
+        const store = new Store();
+        store.clearFromStore();
+        TestBed.flushEffects();
+
+        // Set initial state
+        patchState(store, {
+          userProfile: {
+            userName: 'John Doe',
+            email: 'john@example.com',
+            preferences: { theme: 'dark', notifications: false },
+            tempData: 'should not be saved',
+          },
+        });
+        store.saveToStorage();
+
+        // Verify only userName and email were saved
+        const savedData = getFromStorage('test');
+        expect(savedData).toEqual({
+          userName: 'John Doe',
+          email: 'john@example.com',
+        });
+        expect(savedData.preferences).toBeUndefined();
+        expect(savedData.tempData).toBeUndefined();
+
+        // Clear userName and email, change other fields
+        patchState(store, {
+          userProfile: {
+            userName: '',
+            email: '',
+            preferences: { theme: 'light', notifications: true },
+            tempData: 'different data',
+          },
+        });
+        expect(store.userProfile().userName).toBe('');
+        expect(store.userProfile().email).toBe('');
+
+        // Restore from storage
+        store.loadFromStorage();
+        expect(store.userProfile().userName).toBe('John Doe');
+        expect(store.userProfile().email).toBe('john@example.com');
+        // Verify preferences and tempData were not restored
+        expect(store.userProfile().preferences).toEqual({
+          theme: 'light',
+          notifications: true,
+        });
+        expect(store.userProfile().tempData).toBe('different data');
+      });
+    });
+
+    it('should save and load to session storage using valueMapper', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({
+            userProfile: {
+              userName: '',
+              email: '',
+              preferences: { theme: 'light', notifications: true },
+              tempData: null as string | null,
+            },
+          }),
+          withSyncToWebStorage({
+            key: 'test',
+            type: 'session',
+            restoreOnInit: false,
+            saveStateChangesAfterMs: 0,
+            valueMapper: {
+              stateToStorageValue: (store) => ({
+                userName: store.userProfile().userName,
+                email: store.userProfile().email,
+              }),
+              storageValueToState: (savedData, store) => {
+                patchState(store, {
+                  userProfile: {
+                    ...store.userProfile(),
+                    userName: savedData.userName,
+                    email: savedData.email,
+                  },
+                });
+              },
+            },
+          }),
+        );
+        const store = new Store();
+        store.clearFromStore();
+        TestBed.flushEffects();
+
+        patchState(store, {
+          userProfile: {
+            userName: 'Jane Smith',
+            email: 'jane@example.com',
+            preferences: { theme: 'dark', notifications: false },
+            tempData: 'session data',
+          },
+        });
+        store.saveToStorage();
+
+        // Verify saved to session storage
+        const savedData = JSON.parse(
+          window.sessionStorage.getItem('test') || '{}',
+        );
+        expect(savedData).toEqual({
+          userName: 'Jane Smith',
+          email: 'jane@example.com',
+        });
+
+        // Clear and reload
+        patchState(store, {
+          userProfile: {
+            userName: '',
+            email: '',
+            preferences: { theme: 'light', notifications: true },
+            tempData: null,
+          },
+        });
+        store.loadFromStorage();
+        expect(store.userProfile().userName).toBe('Jane Smith');
+        expect(store.userProfile().email).toBe('jane@example.com');
+      });
+    });
+
+    it('should call onRestore after valueMapper transforms state', () => {
+      const onRestore = jest.fn();
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({
+            userProfile: {
+              userName: '',
+              email: '',
+              preferences: { theme: 'light', notifications: true },
+              tempData: null as string | null,
+            },
+          }),
+          withSyncToWebStorage({
+            key: 'test',
+            type: 'local',
+            restoreOnInit: false,
+            saveStateChangesAfterMs: 0,
+            onRestore,
+            valueMapper: {
+              stateToStorageValue: (store) => ({
+                userName: store.userProfile().userName,
+                email: store.userProfile().email,
+              }),
+              storageValueToState: (savedData, store) => {
+                patchState(store, {
+                  userProfile: {
+                    ...store.userProfile(),
+                    userName: savedData.userName,
+                    email: savedData.email,
+                  },
+                });
+              },
+            },
+          }),
+        );
+        const store = new Store();
+        store.clearFromStore();
+        TestBed.flushEffects();
+
+        patchState(store, {
+          userProfile: {
+            userName: 'Test User',
+            email: 'test@example.com',
+            preferences: { theme: 'dark', notifications: true },
+            tempData: 'test',
+          },
+        });
+        store.saveToStorage();
+
+        patchState(store, {
+          userProfile: {
+            userName: '',
+            email: '',
+            preferences: { theme: 'light', notifications: false },
+            tempData: null,
+          },
+        });
+        store.loadFromStorage();
+
+        expect(onRestore).toHaveBeenCalled();
+        expect(store.userProfile().userName).toBe('Test User');
+        expect(store.userProfile().email).toBe('test@example.com');
+      });
+    });
+
+    it('should auto-save with valueMapper after state changes', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({
+            userProfile: {
+              userName: '',
+              email: '',
+              preferences: { theme: 'light', notifications: true },
+              tempData: null as string | null,
+            },
+          }),
+          withSyncToWebStorage({
+            key: 'test',
+            type: 'local',
+            restoreOnInit: false,
+            saveStateChangesAfterMs: 1000,
+            valueMapper: {
+              stateToStorageValue: (store) => ({
+                userName: store.userProfile().userName,
+                email: store.userProfile().email,
+              }),
+              storageValueToState: (savedData, store) => {
+                patchState(store, {
+                  userProfile: {
+                    ...store.userProfile(),
+                    userName: savedData.userName,
+                    email: savedData.email,
+                  },
+                });
+              },
+            },
+          }),
+        );
+        const store = new Store();
+        store.clearFromStore();
+        TestBed.flushEffects();
+
+        patchState(store, {
+          userProfile: {
+            userName: 'Auto Save',
+            email: 'autosave@example.com',
+            preferences: { theme: 'dark', notifications: false },
+            tempData: 'temp',
+          },
+        });
+
+        // Should not be saved yet
+        let state = getFromStorage('test');
+        expect(state).toBe(undefined);
+
+        // Wait for auto-save
+        tick(1500);
+        state = getFromStorage('test');
+        expect(state).toEqual({
+          userName: 'Auto Save',
+          email: 'autosave@example.com',
+        });
+        expect(state.preferences).toBeUndefined();
+        expect(state.tempData).toBeUndefined();
+      });
+    }));
   });
 });
 function getFromStorage(key: string) {
