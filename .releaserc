@@ -1,7 +1,11 @@
 {
   "branches": ['+([0-9])?(.{+([0-9]),x}).x', "main", "next", {"name": "beta", "prerelease": true}, {"name": "rc", "prerelease": true}],
   "plugins": [
-      "@semantic-release/commit-analyzer",
+      ["@semantic-release/commit-analyzer", {
+        "releaseRules": [
+          {"type": "refactor", "release": "patch"}
+        ]
+      }],
       "@semantic-release/release-notes-generator",
       ["@semantic-release/exec", {
         "publishCmd": "nx run-many --all --target=release --versionNumber=${nextRelease.version}"

@@ -89,6 +89,7 @@ import { StorageValueMapper } from './with-sync-to-web-storage.util';
  *  store.saveToStorage();
  *  store.loadFromStorage();
  *  store.clearFromStore();
+ *
  */
 export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   key,
