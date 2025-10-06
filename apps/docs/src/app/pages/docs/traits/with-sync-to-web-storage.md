@@ -95,12 +95,12 @@ const store = signalStore(
     restoreOnInit: true,
     saveStateChangesAfterMs: 500,
     // Only save and restore userName and email from userProfile, not preferences or tempData
-    valueMapper: {
-      stateToStorageValue: (store) => ({
+    valueMapper: (store) => ({
+      stateToStorageValue: () => ({
         userName: store.userProfile().userName,
         email: store.userProfile().email,
       }),
-      storageValueToState: (savedData, store) => {
+      storageValueToState: (savedData) => {
         patchState(store, {
           userProfile: {
             ...store.userProfile(),
@@ -109,7 +109,7 @@ const store = signalStore(
           }
         });
       },
-    },
+    }),
   }),
 );
 ```
@@ -183,10 +183,19 @@ This trait receives an object to allow specific configurations:
 
 ### StorageValueMapper<T, Store>
 
+The `valueMapper` is a factory function that receives the store and returns an object with two methods:
+
+```typescript
+valueMapper: (store: Store) => {
+  stateToStorageValue: () => T | undefined | null;
+  storageValueToState: (value: T) => void;
+}
+```
+
 | Property              | Description                                           | Type                           |
 |-----------------------|-------------------------------------------------------|--------------------------------|
-| stateToStorageValue   | Function to transform store state to storage value   | (store: Store) => T \| undefined \| null |
-| storageValueToState   | Function to transform storage value back to state    | (value: T, store: Store) => void        |
+| stateToStorageValue   | Function to transform store state to storage value   | () => T \| undefined \| null |
+| storageValueToState   | Function to transform storage value back to state    | (value: T) => void        |
 
 ## State
 No extra state generated

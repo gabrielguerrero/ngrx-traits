@@ -48,6 +48,43 @@ import { StorageValueMapper } from './with-sync-to-web-storage.util';
  *     }),
  *  }),
  *  );
+ *
+ * @example
+ * // Example 2: Using valueMapper for custom transformation
+ * const store = signalStore(
+ *  withState({
+ *    userProfile: {
+ *      userName: '',
+ *      email: '',
+ *      preferences: { theme: 'light', notifications: true },
+ *      tempData: null,
+ *    }
+ *  }),
+ *
+ *  withSyncToWebStorage({
+ *      key: 'user-form',
+ *      type: 'local',
+ *      restoreOnInit: true,
+ *      saveStateChangesAfterMs: 500,
+ *      // Custom mapper to store only userName and email
+ *      valueMapper: (store) => ({
+ *        stateToStorageValue: () => ({
+ *          userName: store.userProfile().userName,
+ *          email: store.userProfile().email,
+ *        }),
+ *        storageValueToState: (savedData) => {
+ *          patchState(store, {
+ *            userProfile: {
+ *              ...store.userProfile(),
+ *              userName: savedData.userName,
+ *              email: savedData.email,
+ *            }
+ *          });
+ *        },
+ *      }),
+ *  }),
+ *  );
+ *
  *  // generates the following methods
  *  store.saveToStorage();
  *  store.loadFromStorage();
@@ -92,14 +129,14 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
     withMethods((store) => {
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
       const filterState = (rest as any).filterState;
-      const valueMapper = (rest as any).valueMapper;
+      const valueMapper = (rest as any).valueMapper?.(store);
       return combineFunctionsInObject(
         {
           saveToStorage() {
             const state = filterState
               ? filterState(getState(store))
               : valueMapper
-                ? valueMapper.stateToStorageValue(store)
+                ? valueMapper.stateToStorageValue()
                 : getState(store);
             if (storageType === 'local') {
               window.localStorage.setItem(key, JSON.stringify(state));
@@ -142,7 +179,7 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
               }
             }
             if (valueMapper) {
-              valueMapper.storageValueToState(JSON.parse(stateJson), store);
+              valueMapper.storageValueToState(JSON.parse(stateJson));
             } else patchState(store, JSON.parse(stateJson));
             onRestore?.(
               store as Prettify<

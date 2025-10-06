@@ -384,12 +384,12 @@ describe('withSyncToWebStorage', () => {
             restoreOnInit: false,
             saveStateChangesAfterMs: 0,
             // Only save userName and email from userProfile
-            valueMapper: {
-              stateToStorageValue: (store) => ({
+            valueMapper: (store) => ({
+              stateToStorageValue: () => ({
                 userName: store.userProfile().userName,
                 email: store.userProfile().email,
               }),
-              storageValueToState: (savedData, store) => {
+              storageValueToState: (savedData) => {
                 patchState(store, {
                   userProfile: {
                     ...store.userProfile(),
@@ -398,7 +398,7 @@ describe('withSyncToWebStorage', () => {
                   },
                 });
               },
-            },
+            }),
           }),
         );
         const store = new Store();
@@ -467,12 +467,12 @@ describe('withSyncToWebStorage', () => {
             type: 'session',
             restoreOnInit: false,
             saveStateChangesAfterMs: 0,
-            valueMapper: {
-              stateToStorageValue: (store) => ({
+            valueMapper: (store) => ({
+              stateToStorageValue: () => ({
                 userName: store.userProfile().userName,
                 email: store.userProfile().email,
               }),
-              storageValueToState: (savedData, store) => {
+              storageValueToState: (savedData) => {
                 patchState(store, {
                   userProfile: {
                     ...store.userProfile(),
@@ -481,7 +481,7 @@ describe('withSyncToWebStorage', () => {
                   },
                 });
               },
-            },
+            }),
           }),
         );
         const store = new Store();
@@ -541,12 +541,12 @@ describe('withSyncToWebStorage', () => {
             restoreOnInit: false,
             saveStateChangesAfterMs: 0,
             onRestore,
-            valueMapper: {
-              stateToStorageValue: (store) => ({
+            valueMapper: (store) => ({
+              stateToStorageValue: () => ({
                 userName: store.userProfile().userName,
                 email: store.userProfile().email,
               }),
-              storageValueToState: (savedData, store) => {
+              storageValueToState: (savedData) => {
                 patchState(store, {
                   userProfile: {
                     ...store.userProfile(),
@@ -555,7 +555,7 @@ describe('withSyncToWebStorage', () => {
                   },
                 });
               },
-            },
+            }),
           }),
         );
         const store = new Store();
@@ -605,12 +605,12 @@ describe('withSyncToWebStorage', () => {
             type: 'local',
             restoreOnInit: false,
             saveStateChangesAfterMs: 1000,
-            valueMapper: {
-              stateToStorageValue: (store) => ({
+            valueMapper: (store) => ({
+              stateToStorageValue: () => ({
                 userName: store.userProfile().userName,
                 email: store.userProfile().email,
               }),
-              storageValueToState: (savedData, store) => {
+              storageValueToState: (savedData) => {
                 patchState(store, {
                   userProfile: {
                     ...store.userProfile(),
@@ -619,7 +619,7 @@ describe('withSyncToWebStorage', () => {
                   },
                 });
               },
-            },
+            }),
           }),
         );
         const store = new Store();
