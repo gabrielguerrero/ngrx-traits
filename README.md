@@ -1,4 +1,3 @@
-
 <h1 align="center">NGRX Traits</h1>
 
 <p align="center">
