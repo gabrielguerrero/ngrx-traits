@@ -13,7 +13,6 @@ type RecordSignals<T extends object> = {
 };
 
 /**
- * @experimental
  * Binds component inputs to the store, so that the store is updated with the latest values of the inputs.
  * @param inputs
  *
