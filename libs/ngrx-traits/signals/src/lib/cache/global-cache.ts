@@ -23,7 +23,6 @@ export function getGlobalCache() {
 }
 
 /**
- * @experimental
  * Return the cached results of the key if available, otherwise return the value of source and cache it
  * @param options
  */
@@ -65,7 +64,6 @@ export function cacheCall<T>({
 }
 
 /**
- * @experimental
  * Return the cached results of the key if available, otherwise return the value of source and cache it
  * @param options
  */

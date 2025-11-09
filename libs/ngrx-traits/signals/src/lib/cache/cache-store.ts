@@ -14,9 +14,6 @@ import {
   setCacheValue,
 } from './cache.utils';
 
-/**
- * @experimental
- */
 @Inject({})
 export class CacheStore implements OnDestroy {
   cacheState: CacheState = {};
