@@ -146,7 +146,9 @@ it will log the value of the signal. If showDiff is true it will log the diff of
 <dd><p>Log the state of the store on every change</p></dd>
 <dt><a href="#withRouteParams">withRouteParams(mapParams)</a></dt>
 <dd><p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
-to an object, this will create a computed for each prop return by the mapParams function</p></dd>
+to an object, this will create a computed for each prop return by the mapParams function</p>
+<p>Requires the store to be provided in a routed component, since this feature consumes from Angular's ActivatedRoute. 
+Providing it in root or in a route-level factory is not sufficient.</p></dd>
 <dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams()</a></dt>
 <dd><p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
@@ -1520,6 +1522,9 @@ const Store = signalStore(
 ## withRouteParams(mapParams)
 <p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
 to an object, this will create a computed for each prop return by the mapParams function</p>
+
+**Usage Notes:** the store to be provided in a routed component, since this feature consumes from Angular's ActivatedRoute. 
+Providing it in root or in a route-level factory is not sufficient.
 
 **Kind**: global function  
 
