@@ -7,6 +7,9 @@ order: 16
 This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
 to an object, this will create a computed for each prop return by the mapParams function
 
+**Usage Notes:** The store to be provided in a routed component, since this feature consumes from Angular's ActivatedRoute. 
+Providing it in root or in a route-level factory is not sufficient.
+
 ## Examples
 ### Transform url params into store props
 ```typescript
