@@ -1,3 +1,4 @@
+import { Product, ProductFilter } from '@example-api/shared/models';
 import {
   addAsyncActionTrait,
   addEntitiesPaginationTrait,
@@ -9,8 +10,6 @@ import {
 } from '@ngrx-traits/common';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
 import { props } from '@ngrx/store';
-
-import { Product, ProductFilter } from '../../../../models';
 
 export const productFeature = createEntityFeatureFactory(
   { entityName: 'product' },

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ProductDetail } from '@example-api/shared/models';
 import { addLoadEntityTraits } from '@ngrx-traits/common';
 import {
   createTraitFactory,
@@ -10,7 +11,6 @@ import { props } from '@ngrx/store';
 import { of } from 'rxjs';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 
-import { ProductDetail } from '../../../../models';
 import { ProductService } from '../../../../services/product.service';
 
 export function addLoadProductDetailTraits() {

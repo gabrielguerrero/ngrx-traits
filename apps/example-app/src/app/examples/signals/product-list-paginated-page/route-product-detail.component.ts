@@ -6,8 +6,10 @@ import {
   input,
   OnInit,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterLink } from '@angular/router';
 import { callConfig, withCalls, withRouteParams } from '@ngrx-traits/signals';
 import { signalStore, withHooks } from '@ngrx/signals';
 
@@ -39,9 +41,16 @@ const ProductDetailStore = signalStore(
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [MatCardModule, MatProgressSpinnerModule, CurrencyPipe],
+  imports: [
+    MatCardModule,
+    MatProgressSpinnerModule,
+    CurrencyPipe,
+    MatButtonModule,
+    RouterLink,
+  ],
   providers: [ProductDetailStore],
   template: `
+    <a mat-raised-button routerLink="/signals" class="mb-4">Back to Examples</a>
     @if (store.loadProductDetailResult(); as result) {
       <mat-card>
         <mat-card-header>

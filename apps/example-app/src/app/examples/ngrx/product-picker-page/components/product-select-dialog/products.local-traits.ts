@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Product, ProductFilter } from '@example-api/shared/models';
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -14,7 +15,6 @@ import { createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { Product, ProductFilter } from '../../../../models';
 import { ProductService } from '../../../../services/product.service';
 
 const productFeatureFactory = createEntityFeatureFactory(

@@ -17,12 +17,12 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { Branch } from '@example-api/shared/models';
 import { createSelector, Store } from '@ngrx/store';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { SearchOptionsComponent } from '../../../../components/search-options/search-options.component';
-import { Branch } from '../../../../models';
 import { BranchLocalTraits } from './store.local-traits';
 
 @Component({

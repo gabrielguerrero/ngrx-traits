@@ -7,9 +7,8 @@ import {
 } from '@angular/core';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { Product } from '@example-api/shared/models';
 import { Sort } from '@ngrx-traits/common';
-
-import { Product } from '../../models';
 
 @Component({
   selector: 'product-list',

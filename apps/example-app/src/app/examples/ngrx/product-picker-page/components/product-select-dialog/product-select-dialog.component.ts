@@ -3,12 +3,12 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Product, ProductFilter } from '@example-api/shared/models';
 import { Sort } from '@ngrx-traits/common';
 import { createSelector, Store } from '@ngrx/store';
 
 import { ProductListComponent } from '../../../../components/product-list/product-list.component';
 import { ProductSearchFormComponent } from '../../../../components/product-search-form/product-search-form.component';
-import { Product, ProductFilter } from '../../../../models';
 import { ProductsLocalTraits } from './products.local-traits';
 
 @Component({

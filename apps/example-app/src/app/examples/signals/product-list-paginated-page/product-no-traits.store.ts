@@ -1,5 +1,6 @@
 import { computed, effect, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Product } from '@example-api/shared/models';
 import {
   patchState,
   signalStore,
@@ -10,11 +11,9 @@ import {
   withState,
 } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { EMPTY, pipe, tap } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { EMPTY, tap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
-import { Product } from '../../models';
 import { ProductService } from '../../services/product.service';
 
 /**

@@ -4,17 +4,18 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
+import { Product, ProductFilter } from '@example-api/shared/models';
 import { Sort } from '@ngrx-traits/common';
 
 import { ProductDetailComponent } from '../../components/product-detail/product-detail.component';
 import { ProductListComponent } from '../../components/product-list/product-list.component';
 import { ProductSearchFormComponent } from '../../components/product-search-form/product-search-form.component';
-import { Product, ProductFilter } from '../../models';
 import { ProductsLocalStore } from './product.store';
 
 @Component({
   selector: 'ngrx-traits-product-list-example-container',
   template: `
+    <a mat-raised-button routerLink="/signals" class="mb-4">Back to Examples</a>
     <mat-card>
       <mat-card-header>
         <mat-card-title>Product List</mat-card-title>

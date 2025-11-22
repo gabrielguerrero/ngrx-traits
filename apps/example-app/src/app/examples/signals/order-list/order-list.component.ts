@@ -1,16 +1,20 @@
 import { Component, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
 import { MatList, MatListItem } from '@angular/material/list';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { RouterLink } from '@angular/router';
 
 import { OrderStore } from './order-list.store';
 
 @Component({
   selector: 'order-list',
   standalone: true,
-  template: ` <mat-card>
-    <mat-card-content>
+  template: `
+    <a mat-raised-button routerLink="/signals" class="mb-4">Back to Examples</a>
+    <mat-card>
+      <mat-card-content>
       <mat-list role="list">
         @for (order of store.ordersEntities(); track order.id) {
           <mat-list-item
@@ -53,7 +57,8 @@ import { OrderStore } from './order-list.store';
         }
       </mat-list>
     </mat-card-content>
-  </mat-card>`,
+    </mat-card>
+  `,
   styleUrls: ['./order-list.component.scss'],
   providers: [OrderStore],
   imports: [
@@ -63,6 +68,8 @@ import { OrderStore } from './order-list.store';
     MatCardContent,
     MatCard,
     MatProgressSpinner,
+    MatButton,
+    RouterLink,
   ],
 })
 export class OrderListComponent {

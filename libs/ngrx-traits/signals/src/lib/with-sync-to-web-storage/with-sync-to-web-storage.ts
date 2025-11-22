@@ -132,6 +132,13 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
       return combineFunctionsInObject(
         {
           saveToStorage() {
+            if (!isBrowser) {
+              isDevMode() &&
+                console.warn(
+                  `${key} saveToStorage skipped - not running in browser`,
+                );
+              return;
+            }
             const state = filterState
               ? filterState(getState(store))
               : valueMapper
@@ -184,6 +191,13 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
             return true;
           },
           clearFromStore() {
+            if (!isBrowser) {
+              isDevMode() &&
+                console.warn(
+                  `${key} clearFromStore skipped - not running in browser`,
+                );
+              return;
+            }
             if (storageType === 'local') window.localStorage.removeItem(key);
             else window.sessionStorage.removeItem(key);
           },

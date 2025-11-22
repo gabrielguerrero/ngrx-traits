@@ -1,8 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'ngrx-traits-root',
-  standalone: false,
+  standalone: true,
+  imports: [RouterOutlet],
   template: `<router-outlet />`,
   styleUrls: ['./app.component.scss'],
 })
