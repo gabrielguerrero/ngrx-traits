@@ -239,7 +239,7 @@ export class SideNavigationComponent {
       ],
     },
     {
-      title: 'Sync State To Url and Web Storage',
+      title: 'Sync State To Url, Web Storage and SSR',
       links: [
         {
           link: './traits/with-sync-to-web-storage',
@@ -256,6 +256,10 @@ export class SideNavigationComponent {
         {
           link: './traits/with-sync-to-route-query-params',
           name: 'withSyncToRouteQueryParams',
+        },
+        {
+          link: './traits/with-server-state-transfer',
+          name: 'withServerStateTransfer',
         },
       ],
     },

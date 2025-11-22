@@ -48,7 +48,7 @@ export function withAllCallStatus() {
       ),
       callsErrors: computed(() =>
         _allCallStatus()
-          .map((callStatus) => callStatus.error())
+          .map((callStatus) => callStatus.error?.())
           .filter(Boolean),
       ),
     })),

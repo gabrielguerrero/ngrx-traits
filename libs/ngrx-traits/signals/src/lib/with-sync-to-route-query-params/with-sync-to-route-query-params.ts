@@ -1,5 +1,5 @@
 import { computed, inject, Injector } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   SignalStoreFeature,
@@ -10,7 +10,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { debounce, first, timer } from 'rxjs';
+import { debounce, defaultIfEmpty, take, timer } from 'rxjs';
 
 import { combineFunctionsInObject } from '../util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
@@ -82,7 +82,10 @@ export function withSyncToRouteQueryParams<
           loadFromQueryParams: () => {
             const activatedRoute = injector.get(ActivatedRoute);
             activatedRoute.queryParams
-              .pipe(first())
+              .pipe(
+                take(1),
+                defaultIfEmpty({}), // Provide default empty object if observable completes without emitting
+              )
               .subscribe((queryParams) => {
                 const queryMappers = config.mappers;
                 queryMappers.forEach((mapper) => {
@@ -105,6 +108,7 @@ export function withSyncToRouteQueryParams<
           if (config.restoreOnInit ?? true) {
             store.loadFromQueryParams();
           }
+
           const activatedRoute = inject(ActivatedRoute);
           const changesSignals = config.mappers
             .map((mapper) => mapper.stateToQueryParams(store as any))

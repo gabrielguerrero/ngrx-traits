@@ -37,6 +37,13 @@ import { RouterLink } from '@angular/router';
               filtering and detail view
             </div>
           </mat-list-item>
+          <mat-list-item [routerLink]="'product-list-ssr'">
+            <div matListItemTitle><b>SSR Product List</b></div>
+            <div matListItemLine>
+              Example with SSR state hydration using withServerStateTransfer.
+              URL params pre-hydrate from server
+            </div>
+          </mat-list-item>
           <mat-list-item [routerLink]="'products-shop'" style="height: 90px;">
             <div matListItemTitle>
               <b

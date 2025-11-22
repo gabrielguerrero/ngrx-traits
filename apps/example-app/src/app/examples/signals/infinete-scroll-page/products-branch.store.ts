@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { Branch } from '@example-api/shared/models';
 import {
   withCallStatus,
   withEntitiesLoadingCall,
@@ -9,13 +10,9 @@ import { signalStore, signalStoreFeature, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
 import { lastValueFrom } from 'rxjs';
 
-import { Branch, Product } from '../../models';
 import { BranchService } from '../../services/branch.service';
-import { ProductService } from '../../services/product.service';
 
 const entity = type<Branch>();
-const entity2 = type<Product>();
-const collection = 'products';
 export const ProductsBranchStore = signalStore(
   signalStoreFeature(
     withEntities({

@@ -11,10 +11,50 @@ Sync the state of the store to the web storage
 
 ## Import
 
-Import the withCalls trait from `@ngrx-traits/signals`.
+Import the withSyncToWebStorage custom store feature from `@ngrx-traits/signals`.
 
 ```ts
 import { withSyncToWebStorage } from '@ngrx-traits/signals';
+```
+
+## Important: Feature Ordering
+
+**To avoid unnecessary backend calls after state restoration**, ensure you add `withSyncToWebStorage` **after** state declarations but **before** any initialization calls that fetch data from the backend. This allows you to check if data is already loaded before making API calls.
+
+```typescript
+// ✅ Correct order
+signalStore(
+  withEntities({ entity }),
+  withCallStatus({ prop: 'products', initialValue: 'loading' }),
+
+  // Add withSyncToWebStorage BEFORE loading calls
+  withSyncToWebStorage({
+    key: 'my-state',
+    type: 'local',
+  }),
+
+  // Loading call comes LAST
+  withEntitiesLoadingCall({
+    fetchEntities: () => inject(Service).getProducts()
+  })
+)
+
+// ❌ Incorrect order - will make unnecessary backend call
+signalStore(
+  withEntities({ entity }),
+  withCallStatus({ prop: 'products', initialValue: 'loading' }),
+
+  // Loading call runs first
+  withEntitiesLoadingCall({
+    fetchEntities: () => inject(Service).getProducts()
+  }),
+
+  // Storage restoration happens too late
+  withSyncToWebStorage({
+    key: 'my-state',
+    type: 'local',
+  })
+)
 ```
 
 ## Examples

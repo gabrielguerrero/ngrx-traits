@@ -1,9 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import {
+  BranchDetail,
+  BranchResponse,
+  Product,
+} from '@example-api/shared/models';
 import { Observable } from 'rxjs';
 import { delay, map } from 'rxjs/operators';
-
-import { BranchDetail, BranchResponse, Product } from '../models';
 
 @Injectable({ providedIn: 'root' })
 export class BranchService {
@@ -17,14 +20,14 @@ export class BranchService {
     take?: number | undefined;
   }): Observable<BranchResponse> {
     return this.httpClient
-      .get<BranchResponse>('/branches', {
+      .get<BranchResponse>('/api/branches', {
         params: { ...options, search: options?.search ?? '' },
       })
       .pipe(delay(500));
   }
   getBranchDetails(id: number) {
     return this.httpClient
-      .get<BranchDetail>('/branches/' + id)
+      .get<BranchDetail>('/api/branches/' + id)
       .pipe(delay(500));
   }
 

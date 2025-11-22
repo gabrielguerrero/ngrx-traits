@@ -19,9 +19,10 @@ export class CacheStore implements OnDestroy {
   cacheState: CacheState = {};
   skipAllCache = false;
   private intervalCancelKey: any;
+  private isBrowser = typeof window !== 'undefined';
 
   constructor({ clearExpiredEvery }: { clearExpiredEvery: number }) {
-    if (clearExpiredEvery > 0) {
+    if (this.isBrowser && clearExpiredEvery > 0) {
       this.intervalCancelKey = setInterval(
         () => deleteExpiredOrInvalidCache(this.cacheState),
         clearExpiredEvery,
@@ -30,6 +31,9 @@ export class CacheStore implements OnDestroy {
   }
 
   get({ key }: { key: CacheKey }) {
+    if (!this.isBrowser) {
+      return undefined;
+    }
     const keys = hashKey(key);
     const cache = getCacheEntry(this.cacheState, keys);
     const exp = cache?.expires ?? Infinity;
@@ -48,6 +52,9 @@ export class CacheStore implements OnDestroy {
     expires?: number;
     maxCacheSize?: number;
   }) {
+    if (!this.isBrowser) {
+      return;
+    }
     const exp = expires ?? Infinity;
     const keys = hashKey(key);
     if (typeof valueOrFn === 'function') {
@@ -72,18 +79,30 @@ export class CacheStore implements OnDestroy {
   }
 
   invalidate({ key }: { key: CacheKey }) {
+    if (!this.isBrowser) {
+      return;
+    }
     return invalidateCache(this.cacheState, hashKey(key));
   }
 
   delete({ key }: { key: CacheKey }) {
+    if (!this.isBrowser) {
+      return;
+    }
     return deleteCache(this.cacheState, hashKey(key));
   }
 
   setSkipCacheForAllCalls(skipAllCache: boolean) {
+    if (!this.isBrowser) {
+      return;
+    }
     this.skipAllCache = skipAllCache;
   }
 
   clear() {
+    if (!this.isBrowser) {
+      return;
+    }
     clearCache(this.cacheState);
   }
 

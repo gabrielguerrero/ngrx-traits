@@ -1,4 +1,5 @@
 import { inject } from '@angular/core';
+import { OrderDetail, OrderSummary } from '@example-api/shared/models';
 import {
   withCallStatus,
   withEntitiesCalls,
@@ -9,7 +10,6 @@ import { signalStore, type, withMethods } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
 import { map } from 'rxjs/operators';
 
-import { OrderDetail, OrderSummary } from '../../models';
 import { OrderService } from '../../services/order.service';
 
 const orderEntity = entityConfig({

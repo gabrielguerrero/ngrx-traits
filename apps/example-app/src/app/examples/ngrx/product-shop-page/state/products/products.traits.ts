@@ -1,3 +1,4 @@
+import { Product, ProductFilter } from '@example-api/shared/models';
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -6,7 +7,6 @@ import {
 } from '@ngrx-traits/common';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
 
-import { Product, ProductFilter } from '../../../../models';
 import { addLoadProductDetailTraits } from './load-product.trait';
 
 export const productFeature = createEntityFeatureFactory(

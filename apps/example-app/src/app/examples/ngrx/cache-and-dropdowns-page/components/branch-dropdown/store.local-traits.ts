@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Branch, BranchFilter } from '@example-api/shared/models';
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -13,7 +14,6 @@ import { createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 
-import { Branch, BranchFilter } from '../../../../models';
 import { BranchService } from '../../../../services/branch.service';
 
 export const storeCacheKeys = {
