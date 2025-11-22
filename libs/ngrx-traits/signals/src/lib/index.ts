@@ -26,6 +26,8 @@ export * from './with-call-status-map/with-call-status-map';
 export * from './with-call-status-map/with-call-status-map.model';
 export * from './with-calls/call-config';
 export * from './with-sync-to-web-storage/with-sync-to-web-storage';
+export * from './with-server-state-transfer/with-server-state-transfer';
+export * from './with-server-state-transfer/with-server-state-transfer.util';
 export * from './with-sync-to-route-query-params/with-entities-sync-to-route-query-params';
 export * from './with-sync-to-route-query-params/with-sync-to-route-query-params';
 export * from './with-sync-to-route-query-params/with-sync-to-route-query-params.util';

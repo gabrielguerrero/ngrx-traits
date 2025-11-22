@@ -1,6 +1,7 @@
 import { computed, Signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { concatMap, first } from 'rxjs';
+import { concatMap, take } from 'rxjs';
+import { filter, startWith } from 'rxjs/operators';
 
 import { capitalize } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -56,8 +57,16 @@ export function getQueryMapperForSingleSelection(config?: {
 
         toObservable(loading)
           .pipe(
-            first((v) => v),
-            concatMap(() => loaded$.pipe(first((v) => v))),
+            startWith(loading()),
+            filter((v) => v), // wait until loading becomes true
+            take(1),
+            concatMap(() =>
+              loaded$.pipe(
+                startWith(loaded()),
+                filter((v) => v), // wait until loaded becomes true
+                take(1),
+              ),
+            ),
             takeUntilDestroyed(),
           )
           .subscribe(() => {

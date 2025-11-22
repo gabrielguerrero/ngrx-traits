@@ -1,3 +1,4 @@
+import { ProductOrder } from '@example-api/shared/models';
 import {
   addAsyncActionTrait,
   addCrudEntitiesTrait,
@@ -9,7 +10,6 @@ import {
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
 import { props } from '@ngrx/store';
 
-import { ProductOrder } from '../../../../models';
 import { addLoadProductDetailTraits } from '../products/load-product.trait';
 
 export const productOrdersFeature = createEntityFeatureFactory(

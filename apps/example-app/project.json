@@ -7,13 +7,14 @@
   "tags": [],
   "targets": {
     "build": {
-      "executor": "@angular-devkit/build-angular:browser-esbuild",
+      "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/apps/example-app",
         "index": "apps/example-app/src/index.html",
-        "main": "apps/example-app/src/main.ts",
-        "polyfills": "apps/example-app/src/polyfills.ts",
+        "browser": "apps/example-app/src/main.ts",
+        "server": "apps/example-app/src/main.server.ts",
+        "polyfills": ["apps/example-app/src/polyfills.ts"],
         "tsConfig": "apps/example-app/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
@@ -25,7 +26,11 @@
           "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
           "apps/example-app/src/styles.scss"
         ],
-        "scripts": []
+        "scripts": [],
+        "ssr": {
+          "entry": "apps/example-app/src/server.ts"
+        },
+        "prerender": false
       },
       "configurations": {
         "production": {
@@ -50,12 +55,9 @@
           "outputHashing": "all"
         },
         "development": {
-          "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
+          "sourceMap": true
         }
       },
       "defaultConfiguration": "production"
@@ -72,7 +74,8 @@
       },
       "defaultConfiguration": "development",
       "options": {
-        "host": "127.0.0.1"
+        "host": "127.0.0.1",
+        "proxyConfig": "apps/example-app/proxy.conf.json"
       },
       "continuous": true
     },

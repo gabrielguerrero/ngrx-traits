@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@angular/core';
+import { Department, DepartmentFilter } from '@example-api/shared/models';
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -15,7 +16,6 @@ import { concatLatestFrom } from '@ngrx/operators';
 import { of } from 'rxjs';
 import { catchError, exhaustMap, map } from 'rxjs/operators';
 
-import { Department, DepartmentFilter } from '../../../../models';
 import { BranchService } from '../../../../services/branch.service';
 import { storeCacheKeys } from '../branch-dropdown/store.local-traits';
 

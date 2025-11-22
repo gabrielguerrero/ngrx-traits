@@ -1,0 +1,130 @@
+import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterLink } from '@angular/router';
+import { Product, ProductFilter } from '@example-api/shared/models';
+import { Sort } from '@ngrx-traits/common';
+
+import { ProductDetailComponent } from '../../components/product-detail/product-detail.component';
+import { ProductListComponent } from '../../components/product-list/product-list.component';
+import { ProductSearchFormComponent } from '../../components/product-search-form/product-search-form.component';
+import { ProductsSSRStore } from './product.store';
+
+@Component({
+  selector: 'ngrx-traits-product-list-ssr-example',
+  template: `
+    <a mat-raised-button routerLink="/signals" class="mb-4">Back to Examples</a>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Product List (SSR with State Transfer)</mat-card-title>
+        <mat-card-subtitle>
+          This example demonstrates SSR with state hydration using
+          withServerStateTransfer. Try navigating to this page with URL params
+          like ?search=mario&page=1
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <product-search-form
+          [searchProduct]="store.productsFilter()"
+          (searchProductChange)="filter($event)"
+        ></product-search-form>
+        @if (store.isProductsLoading()) {
+          <mat-spinner />
+        } @else {
+          <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
+            <div>
+              <product-list
+                [list]="store.productsCurrentPage().entities"
+                [selectedProduct]="store.productsEntitySelected()"
+                [selectedSort]="{
+                  active: $any(store.productsSort().field),
+                  direction: store.productsSort().direction
+                }"
+                (selectProduct)="select($event)"
+                (sort)="sort($event)"
+              ></product-list>
+
+              <mat-paginator
+                [pageSizeOptions]="[5, 10, 25, 100]"
+                [length]="store.productsCurrentPage.total()"
+                [pageSize]="store.productsCurrentPage().pageSize"
+                [pageIndex]="store.productsCurrentPage().pageIndex"
+                (page)="store.loadProductsPage($event)"
+              ></mat-paginator>
+            </div>
+
+            @if (store.isLoadProductDetailLoading()) {
+              <mat-spinner />
+            } @else if (store.isLoadProductDetailLoaded()) {
+              <product-detail [product]="store.productDetail()!" />
+            } @else {
+              <div class="content-center"><h2>Please Select a product</h2></div>
+            }
+          </div>
+        }
+      </mat-card-content>
+      <mat-card-actions [align]="'end'">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="
+            !store.productsEntitySelected() || store.isCheckoutLoading()
+          "
+          (click)="checkout()"
+        >
+          @if (store.isCheckoutLoading()) {
+            <mat-spinner [diameter]="20"></mat-spinner>
+          }
+          <span>CHECKOUT</span>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  `,
+  styles: [
+    `
+      mat-card-content > mat-spinner {
+        margin: 10px auto;
+      }
+      mat-card-actions mat-spinner {
+        display: inline-block;
+        margin-right: 5px;
+      }
+    `,
+  ],
+  standalone: true,
+  imports: [
+    MatCardModule,
+    ProductSearchFormComponent,
+    MatProgressSpinnerModule,
+    ProductListComponent,
+    MatPaginatorModule,
+    MatButtonModule,
+    ProductDetailComponent,
+    RouterLink,
+  ],
+  providers: [ProductsSSRStore],
+})
+export class ProductListSSRPageComponent {
+  store = inject(ProductsSSRStore);
+
+  select({ id }: Product) {
+    this.store.selectProductsEntity({ id });
+  }
+
+  checkout() {
+    this.store.checkout();
+  }
+
+  filter(filter: ProductFilter | undefined) {
+    filter && this.store.filterProductsEntities({ filter });
+  }
+
+  sort(sort: Sort<Product>) {
+    this.store.sortProductsEntities({
+      sort: { field: sort.active as string, direction: sort.direction },
+    });
+  }
+}

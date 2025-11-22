@@ -11,9 +11,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { Product } from '@example-api/shared/models';
 import { first } from 'rxjs/operators';
 
-import { Product } from '../../../../models';
 import { ProductSelectDialogComponent } from '../product-select-dialog/product-select-dialog.component';
 
 @Component({

@@ -2,8 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-import { ProductDetail } from '../../models';
+import { ProductDetail } from '@example-api/shared/models';
 
 @Component({
   selector: 'product-detail',
@@ -19,7 +18,7 @@ import { ProductDetail } from '../../models';
               {{ product().releaseDate }}</mat-card-subtitle
             >
           </mat-card-header>
-          <img mat-card-image src="/{{ product().image }}" />
+          <img mat-card-image src="{{ product().image }}" />
           <mat-card-content>
             <p>{{ product().description }}</p>
           </mat-card-content>

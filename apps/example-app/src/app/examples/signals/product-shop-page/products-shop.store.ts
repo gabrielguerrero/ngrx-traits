@@ -1,5 +1,6 @@
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Product, ProductOrder } from '@example-api/shared/models';
 import {
   cacheRxCall,
   callConfig,
@@ -31,7 +32,6 @@ import {
 } from '@ngrx/signals/entities';
 import { lastValueFrom, of } from 'rxjs';
 
-import { Product, ProductOrder } from '../../models';
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';
 
