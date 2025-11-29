@@ -150,7 +150,7 @@ describe('withEntitiesRemoteSort', () => {
   }));
 
   it('with collection should sort entities and store sort', fakeAsync(() => {
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       withEntities({
         entity,
@@ -164,12 +164,12 @@ describe('withEntitiesRemoteSort', () => {
       }),
       withEntitiesLoadingCall({
         collection,
-        fetchEntities: ({ productsSort }) => {
+        fetchEntities: ({ productEntitiesSort }) => {
           let result = [...mockProducts];
-          if (productsSort()?.field) {
+          if (productEntitiesSort()?.field) {
             result = sortData(result, {
-              field: productsSort()?.field as any,
-              direction: productsSort().direction,
+              field: productEntitiesSort()?.field as any,
+              direction: productEntitiesSort().direction,
             });
           }
 
@@ -182,10 +182,10 @@ describe('withEntitiesRemoteSort', () => {
       TestBed.flushEffects();
       tick();
       // check default sort
-      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.name)
           .slice(0, 5),
       ).toEqual([
@@ -195,18 +195,18 @@ describe('withEntitiesRemoteSort', () => {
         'Battalion Wars',
         'BattleClash',
       ]);
-      store.sortProductsEntities({
+      store.sortProductEntities({
         sort: { field: 'price', direction: 'desc' },
       });
       tick();
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.price)
           .slice(0, 5),
       ).toEqual([178, 175, 172, 169, 166]);
-      expect(store.productsEntities().length).toEqual(mockProducts.length);
-      expect(store.productsSort()).toEqual({
+      expect(store.productEntities().length).toEqual(mockProducts.length);
+      expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
       });
@@ -214,7 +214,7 @@ describe('withEntitiesRemoteSort', () => {
   }));
 
   it('should set default sort using config factory', fakeAsync(() => {
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       withState({
         myDefault: { field: 'name', direction: 'asc' } as Sort<Product>,
@@ -231,12 +231,12 @@ describe('withEntitiesRemoteSort', () => {
       })),
       withEntitiesLoadingCall({
         collection,
-        fetchEntities: ({ productsSort }) => {
+        fetchEntities: ({ productEntitiesSort }) => {
           let result = [...mockProducts];
-          if (productsSort()?.field) {
+          if (productEntitiesSort()?.field) {
             result = sortData(result, {
-              field: productsSort()?.field as any,
-              direction: productsSort().direction,
+              field: productEntitiesSort()?.field as any,
+              direction: productEntitiesSort().direction,
             });
           }
 
@@ -249,10 +249,10 @@ describe('withEntitiesRemoteSort', () => {
       TestBed.flushEffects();
       tick();
       // check default sort
-      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.name)
           .slice(0, 5),
       ).toEqual([

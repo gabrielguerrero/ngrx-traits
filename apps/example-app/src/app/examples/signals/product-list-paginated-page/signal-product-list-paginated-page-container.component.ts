@@ -22,32 +22,32 @@ import { ProductsLocalStore } from './product.store';
       </mat-card-header>
       <mat-card-content>
         <product-search-form
-          [searchProduct]="store.productsFilter()"
+          [searchProduct]="store.productEntitiesFilter()"
           (searchProductChange)="filter($event)"
         ></product-search-form>
-        @if (store.isProductsLoading()) {
+        @if (store.isProductEntitiesLoading()) {
           <mat-spinner />
         } @else {
           <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
             <div>
               <product-list
-                [list]="store.productsCurrentPage().entities"
-                [selectedProduct]="store.productsEntitySelected()"
+                [list]="store.productEntitiesCurrentPage().entities"
+                [selectedProduct]="store.productEntitySelected()"
                 [selectedSort]="{
-                  active: $any(store.productsSort().field),
-                  direction: store.productsSort().direction
+                  active: $any(store.productEntitiesSort().field),
+                  direction: store.productEntitiesSort().direction
                 }"
                 (selectProduct)="select($event)"
                 (sort)="sort($event)"
               ></product-list>
 
-              <!-- [selectedSort]="store.productsSort()" -->
+              <!-- [selectedSort]="store.productEntitiesSort()" -->
               <mat-paginator
                 [pageSizeOptions]="[5, 10, 25, 100]"
-                [length]="store.productsCurrentPage.total()"
-                [pageSize]="store.productsCurrentPage().pageSize"
-                [pageIndex]="store.productsCurrentPage().pageIndex"
-                (page)="store.loadProductsPage($event)"
+                [length]="store.productEntitiesCurrentPage.total()"
+                [pageSize]="store.productEntitiesCurrentPage().pageSize"
+                [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+                (page)="store.loadProductEntitiesPage($event)"
               ></mat-paginator>
             </div>
 
@@ -69,7 +69,7 @@ import { ProductsLocalStore } from './product.store';
           color="primary"
           type="submit"
           [disabled]="
-            !store.productsEntitySelected() || store.isCheckoutLoading()
+            !store.productEntitySelected() || store.isCheckoutLoading()
           "
           (click)="checkout()"
         >
@@ -109,7 +109,7 @@ export class SignalProductListPaginatedPageContainerComponent {
   store = inject(ProductsLocalStore);
 
   select({ id }: Product) {
-    this.store.selectProductsEntity({ id });
+    this.store.selectProductEntity({ id });
   }
 
   checkout() {
@@ -117,11 +117,11 @@ export class SignalProductListPaginatedPageContainerComponent {
   }
 
   filter(filter: ProductFilter | undefined) {
-    filter && this.store.filterProductsEntities({ filter });
+    filter && this.store.filterProductEntities({ filter });
   }
 
   sort(sort: Sort<Product>) {
-    this.store.sortProductsEntities({
+    this.store.sortProductEntities({
       sort: { field: sort.active as string, direction: sort.direction },
     });
   }

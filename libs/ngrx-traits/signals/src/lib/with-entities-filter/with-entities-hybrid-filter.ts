@@ -76,19 +76,19 @@ import {
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = 'product';
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // requires withEntities and withCallStatus to be used
  *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   withCallStatus({ collection, initialValue: 'loading' }),
  *   withEntitiesHybridFilter({
  *     entity,
  *     collection,
  *     defaultFilter: { name: '' , category: ''},
  *     filterFn: (entity, filter) =>
  *        (!filter.name || entity.name.toLowerCase().includes(filter.name.toLowerCase()))
- *     // in this case the filter will call setProductsLoading() if the category changes, othewise
+ *     // in this case the filter will call setProductEntitiesLoading() if the category changes, othewise
  *     // it will filter the entities locally using filterFn
  *     isRemoteFilter: (previous, current) => {
  *          return previous.category !== current.category;
@@ -98,32 +98,32 @@ import {
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productsFilter }) => {
+ *     fetchEntities: ({ productEntitiesFilter }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           category: productsFilter().category,
+ *           category: productEntitiesFilter().category,
  *         })
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, ...state }) => ({
+ * // withHooks(({ productEntitiesCallStatus, setProductEntitiesError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (isProductsLoading()) {
+ * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //              .getProducts({
- * //                  category: productsFilter().category,
+ * //                  category: productEntitiesFilter().category,
  * //               })
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setAllEntities(res.resultList, { collection: 'products' }),
+ * //                 setAllEntities(res.resultList, { collection: 'product' }),
  * //               ),
  * //             ),
  * //             catchError((error) => {
- * //               setProductsError(error);
+ * //               setProductEntitiesError(error);
  * //               return EMPTY;
  * //             }),
  * //           )
@@ -133,10 +133,10 @@ import {
  * //   },
  *  })),
  * // generates the following signals
- *  store.productsFilter // { search: string , category: string }
+ *  store.productEntitiesFilter // { search: string , category: string }
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- *  store.resetProductsFilter  // () => void
+ *  store.filterProductEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
+ *  store.resetProductEntitiesFilter  // () => void
  */
 export function withEntitiesHybridFilter<
   Input extends SignalStoreFeatureResult,
@@ -170,7 +170,7 @@ export function withEntitiesHybridFilter<
       : {
           state: NamedEntityState<Entity, Collection>;
           props: NamedEntityProps<Entity, Collection>;
-          methods: NamedCallStatusMethods<Collection>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`>;
         }),
   Collection extends ''
     ? {
@@ -189,7 +189,7 @@ export function withEntitiesHybridFilter<
     const filterFn = config.filterFn;
     const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
     const { setLoadingKey, loadedKey } = getWithCallStatusKeys({
-      prop: config.collection,
+      collection: config.collection,
     });
     const {
       filterKey,
@@ -245,7 +245,8 @@ export function withEntitiesHybridFilter<
             ),
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
-              const isRemote = config.isRemoteFilter(value.filter, filter()) || !isLoaded();
+              const isRemote =
+                config.isRemoteFilter(value.filter, filter()) || !isLoaded();
 
               patchState(state as WritableStateSource<any>, {
                 [filterKey]: value.filter,
@@ -276,7 +277,7 @@ export function withEntitiesHybridFilter<
       }),
       withHooks((state: Record<string, unknown>) => {
         const { loadedKey } = getWithCallStatusKeys({
-          prop: config?.collection,
+          collection: config?.collection,
         });
         const loaded = state[loadedKey] as Signal<boolean>;
         const filter = state[filterKey] as Signal<Filter>;

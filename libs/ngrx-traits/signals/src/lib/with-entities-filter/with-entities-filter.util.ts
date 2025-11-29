@@ -21,18 +21,18 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    filterKey: collection ? `_${config.collection}Filter` : '_entitiesFilter',
+    filterKey: collection ? `_${config.collection}EntitiesFilter` : '_entitiesFilter',
     computedFilterKey: collection
-      ? `${config.collection}Filter`
+      ? `${config.collection}EntitiesFilter`
       : 'entitiesFilter',
     filterEntitiesKey: collection
       ? `filter${capitalizedProp}Entities`
       : 'filterEntities',
     isEntitiesFilterChangedKey: collection
-      ? `is${capitalizedProp}FilterChanged`
+      ? `is${capitalizedProp}EntitiesFilterChanged`
       : 'isEntitiesFilterChanged',
     resetEntitiesFilterKey: collection
-      ? `reset${capitalizedProp}Filter`
+      ? `reset${capitalizedProp}EntitiesFilter`
       : 'resetEntitiesFilter',
   };
 }

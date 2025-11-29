@@ -71,7 +71,7 @@ export { sortData };
  *   }),
  * );
  * // generates the following signals
- * store.productsSort - the current sort applied to the products
+ * store.productEntitiesSort - the current sort applied to the products
  * // generates the following methods
  * store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
  */
@@ -159,7 +159,7 @@ export function withEntitiesLocalSort<
       }),
       withHooks((state: Record<string, unknown>) => {
         const { loadedKey } = getWithCallStatusKeys({
-          prop: config?.collection,
+          collection: config?.collection,
         });
         const loaded = state[loadedKey] as Signal<boolean> | undefined;
         return {

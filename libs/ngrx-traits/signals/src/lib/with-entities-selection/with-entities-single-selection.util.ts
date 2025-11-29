@@ -41,7 +41,7 @@ export function getQueryMapperForSingleSelection(config?: {
   const { selectedIdKey, selectEntityKey } =
     getEntitiesSingleSelectionKeys(config);
   const { loadingKey, loadedKey } = getWithCallStatusKeys({
-    prop: config?.collection,
+    collection: config?.collection,
   });
   return {
     queryParamsToState: (query, store) => {

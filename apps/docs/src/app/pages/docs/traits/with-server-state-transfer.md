@@ -155,7 +155,7 @@ Real-world example combining entities, filtering, pagination, sorting, and SSR s
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 
 export const ProductsSSRStore = signalStore(

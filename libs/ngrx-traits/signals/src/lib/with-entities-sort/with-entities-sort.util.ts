@@ -4,7 +4,7 @@ export function getWithEntitiesSortKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    sortKey: collection ? `${config.collection}Sort` : 'entitiesSort',
+    sortKey: collection ? `${config.collection}EntitiesSort` : 'entitiesSort',
     sortEntitiesKey: collection
       ? `sort${capitalizedProp}Entities`
       : 'sortEntities',

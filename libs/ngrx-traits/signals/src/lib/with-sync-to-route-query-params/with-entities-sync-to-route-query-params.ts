@@ -71,14 +71,14 @@ import { QueryMapper } from './with-sync-to-route-query-params.util';
  *   }),
  *   withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+ *     fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           search: productsFilter().name,
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
- *           sortColumn: productsSort().field,
- *           sortAscending: productsSort().direction === 'asc',
+ *           search: productEntitiesFilter().name,
+ *           take: productEntitiesPagedRequest().size,
+ *           skip: productEntitiesPagedRequest().startIndex,
+ *           sortColumn: productEntitiesSort().field,
+ *           sortAscending: productEntitiesSort().direction === 'asc',
  *         })
  *         .pipe(
  *           map((d) => ({
@@ -120,10 +120,10 @@ export function withEntitiesSyncToRouteQueryParams<
         }
       : {
           state: NamedEntityState<Entity, Collection> &
-            NamedCallStatusState<Collection>;
+            NamedCallStatusState<`${Collection}Entities`>;
           props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<Collection, Error>;
-          methods: NamedCallStatusMethods<Collection, Error>;
+            NamedCallStatusComputed<`${Collection}Entities`, Error>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`, Error>;
         }),
   {
     state: {};
@@ -153,7 +153,7 @@ export function withEntitiesSyncToRouteQueryParams<
     config?.prefix === false ? undefined : config?.prefix ?? config?.collection;
 
   const { loadingKey, loadedKey } = getWithCallStatusKeys({
-    prop: config?.collection,
+    collection: config?.collection,
   });
 
   return signalStoreFeature(

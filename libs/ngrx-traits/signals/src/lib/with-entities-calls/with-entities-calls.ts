@@ -80,7 +80,7 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  * @example
  * const orderEntity = entityConfig({
  *   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
- *   collection: 'orders',
+ *   collection: 'order',
  * });
  * export const OrderStore = signalStore(
  *   withEntities(orderEntity),

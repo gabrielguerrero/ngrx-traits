@@ -22,25 +22,25 @@ import { ProductsShopStore } from '../../products-shop.store';
         <mat-card-content>
           <product-search-form
             class="m-2"
-            [searchProduct]="store.productsFilter()"
+            [searchProduct]="store.productEntitiesFilter()"
             (searchProductChange)="filter($event)"
           />
-          @if (store.productsCurrentPage().isLoading) {
+          @if (store.productEntitiesCurrentPage().isLoading) {
             <mat-spinner />
           } @else {
             <product-list
-              [list]="store.productsCurrentPage().entities"
-              [selectedProduct]="store.productsEntitySelected()"
+              [list]="store.productEntitiesCurrentPage().entities"
+              [selectedProduct]="store.productEntitySelected()"
               (selectProduct)="select($event)"
               [selectedSort]="materialSort()"
               (sort)="sort($event)"
             />
             <mat-paginator
               [pageSizeOptions]="[5, 10, 25, 100]"
-              [length]="store.productsCurrentPage().total"
-              [pageSize]="store.productsCurrentPage().pageSize"
-              [pageIndex]="store.productsCurrentPage().pageIndex"
-              (page)="store.loadProductsPage($event)"
+              [length]="store.productEntitiesCurrentPage().total"
+              [pageSize]="store.productEntitiesCurrentPage().pageSize"
+              [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+              (page)="store.loadProductEntitiesPage($event)"
             />
           }
         </mat-card-content>
@@ -49,7 +49,7 @@ import { ProductsShopStore } from '../../products-shop.store';
             mat-raised-button
             color="primary"
             type="submit"
-            [disabled]="!store.productsEntitySelected()"
+            [disabled]="!store.productEntitySelected()"
             (click)="store.addProductToBasket()"
           >
             <span>ADD TO BASKET</span>
@@ -92,21 +92,21 @@ export class ProductShopTabComponent {
 
   materialSort = computed(() => {
     return {
-      active: this.store.productsSort().field as keyof Product,
-      direction: this.store.productsSort().direction,
+      active: this.store.productEntitiesSort().field as keyof Product,
+      direction: this.store.productEntitiesSort().direction,
     };
   });
   select({ id }: Product) {
-    this.store.selectProductsEntity({ id });
+    this.store.selectProductEntity({ id });
     this.store.loadProductDetail({ id });
   }
 
   filter(filter: ProductFilter | undefined) {
-    filter && this.store.filterProductsEntities({ filter });
+    filter && this.store.filterProductEntities({ filter });
   }
 
   sort(sort: Sort<Product>) {
-    this.store.sortProductsEntities({
+    this.store.sortProductEntities({
       sort: { field: sort.active, direction: sort.direction },
     });
     console.log({ sort });

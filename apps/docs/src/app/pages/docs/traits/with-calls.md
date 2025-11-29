@@ -33,7 +33,7 @@ Use in the template like
 ```html
 <mat-list>
   @for (
-      product of store.productsEntities; track product.id
+      product of store.productEntities(); track product.id
     ) {
     <mat-list-item
       (click)="store.loadProductDetail({ id: product.id })"
@@ -52,7 +52,7 @@ Use in the template like
 ### Renaming the property where results are stored
 ```typescript
 const store = signalStore(
-  withCalls(({ productsSelectedEntity }) => ({
+  withCalls((store) => ({
     loadProductDetail: callConfig({
       call: ({ id }: { id: string }) => inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
@@ -65,11 +65,11 @@ If you want to store entities you should probably check first [withEntitiesLoadi
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 const store = signalStore(
   withEntities(productsEntityConfig),
-  withCalls(({ productsSelectedEntity }) => ({
+  withCalls((store) => ({
     loadProducts: callConfig({
       call: () => inject(ProductService).getProducts(),
       storeResult: false,
@@ -112,26 +112,26 @@ You can achieve this in a few ways some I show commented bellow, the most compac
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities(productsEntityConfig),
   withEntitiesSingleSelection(productsEntityConfig),
-  // 👆 adds signal productsEntitySelected()
-  //    and method selectProductsEntity({ id: string | number })
-  withCalls(({ productsEntitySelected }) => ({
+  // 👆 adds signal productEntitySelected()
+  //    and method selectProductEntity({ id: string | number })
+  withCalls(({ productEntitySelected }) => ({
     loadProductDetail: callConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
       // call load the product detail when a product is selected
-      callWith: productsEntitySelected,
-      // productsEntitySelected is of type Signal<Product | undefined> so it can be pass directly to callWith
+      callWith: productEntitySelected,
+      // productEntitySelected is of type Signal<Product | undefined> so it can be pass directly to callWith
       // because it matches the type the call parameter, but you can use a function as bellow if it doesn't
       // callWith: () =>
-      //   productsEntitySelected()
-      //     ? { id: productsEntitySelected()!.id }
+      //   productEntitySelected()
+      //     ? { id: productEntitySelected()!.id }
       //     : undefined, // if no product is selected, skip call
     }),
   })),
@@ -139,7 +139,7 @@ export const ProductsLocalStore = signalStore(
   // withHooks((store) => {
   //   return {
   //     onInit() {
-  //       toObservable(store.productsEntitySelected)
+  //       toObservable(store.productEntitySelected)
   //         .pipe(filter((v) => !!v))
   //         .subscribe((v) => {
   //           store.loadProductDetail({ id: v!.id });
@@ -155,7 +155,7 @@ Another good use case of callWith is to chain calls like bellow. Notice we use t
 
 ```typescript
 export const ProductsLocalStore = signalStore(
-  withCalls(({ productsEntitySelected }) => ({
+  withCalls(({ productEntitySelected }) => ({
     loadOrderDetail: callConfig({
       call: ({ orderId }: { orderId: string }) =>
         inject(OrderService).getOrderDetail(orderId),
@@ -182,7 +182,7 @@ withHooks to call them
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 const store = signalStore(
   withEntities(productsEntityConfig),

@@ -9,11 +9,11 @@ import {
   withState,
 } from '@ngrx/signals';
 
+import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import {
   broadcast,
   withEventHandler,
 } from '../with-event-handler/with-event-handler';
-import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
   FeatureConfigFactory,
@@ -46,24 +46,92 @@ import {
  * prop or collection is required
  * @example
  * const store = signalStore(
- *  withCallStatus({ prop: 'users', })
+ *  withCallStatus({ collection: 'user', })
  *  // other valid configurations
  *  // withCallStatus()
- *  // withCallStatus({ collection: 'users', initialValue: 'loading' , errorType: type<string>()})
+ *  // withCallStatus({ collection: 'user', initialValue: 'loading' , errorType: type<string>()})
  *  )
  *
  *  // generates the following signals
- *  store.usersCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
+ *  store.userEntitiesCallStatus // 'init' | 'loading' | 'loaded' | { error: unknown }
  *  // generates the following computed signals
- *  store.isUsersLoading // boolean
- *  store.isUsersLoaded // boolean
- *  store.usersError // unknown | null
+ *  store.isUserEntitiesLoading // boolean
+ *  store.isUserEntitiesLoaded // boolean
+ *  store.userEntitiesError // unknown | null
  *  // generates the following methods
- *  store.setUsersLoading // () => void
- *  store.setUsersLoaded // () => void
- *  store.setUsersError // (error?: unknown) => void
+ *  store.setUserEntitiesLoading // () => void
+ *  store.setUserEntitiesLoaded // () => void
+ *  store.setUserEntitiesError // (error?: unknown) => void
  */
 
+// Overload for collection param
+export function withCallStatus<
+  Input extends SignalStoreFeatureResult,
+  Prop extends string,
+  Error = unknown,
+>(
+  configFactory: FeatureConfigFactory<
+    Input,
+    {
+      collection: Prop;
+      initialValue?: CallStatus;
+      errorType?: Error;
+    }
+  >,
+): SignalStoreFeature<
+  Input & { state: {}; props: {}; methods: {} },
+  {
+    state: NamedCallStatusState<`${Prop}Entities`>;
+    props: NamedCallStatusComputed<`${Prop}Entities`, Error>;
+    methods: NamedCallStatusMethods<`${Prop}Entities`, Error>;
+  }
+>;
+
+// Overload for prop param
+export function withCallStatus<
+  Input extends SignalStoreFeatureResult,
+  Prop extends string,
+  Error = unknown,
+>(
+  configFactory: FeatureConfigFactory<
+    Input,
+    {
+      prop: Prop;
+      initialValue?: CallStatus;
+      errorType?: Error;
+    }
+  >,
+): SignalStoreFeature<
+  Input & { state: {}; props: {}; methods: {} },
+  {
+    state: NamedCallStatusState<Prop>;
+    props: NamedCallStatusComputed<Prop, Error>;
+    methods: NamedCallStatusMethods<Prop, Error>;
+  }
+>;
+
+// Overload for no params
+export function withCallStatus<
+  Input extends SignalStoreFeatureResult,
+  Error = unknown,
+>(
+  configFactory?: FeatureConfigFactory<
+    Input,
+    {
+      initialValue?: CallStatus;
+      errorType?: Error;
+    }
+  >,
+): SignalStoreFeature<
+  Input & { state: {}; props: {}; methods: {} },
+  {
+    state: CallStatusState;
+    props: CallStatusComputed<Error>;
+    methods: CallStatusMethods<Error>;
+  }
+>;
+
+// Implementation
 export function withCallStatus<
   Input extends SignalStoreFeatureResult,
   Prop extends string = '',
@@ -78,24 +146,16 @@ export function withCallStatus<
       errorType?: Error;
     }
   > = {},
-): SignalStoreFeature<
-  Input & { state: {}; props: {}; methods: {} },
-  Prop extends ''
-    ? {
-        state: CallStatusState;
-        props: CallStatusComputed<Error>;
-        methods: CallStatusMethods<Error>;
-      }
-    : {
-        state: NamedCallStatusState<Prop>;
-        props: NamedCallStatusComputed<Prop, Error>;
-        methods: NamedCallStatusMethods<Prop, Error>;
-      }
-> {
+): any {
   return withFeatureFactory((store: StoreSource<Input>) => {
     const config = getFeatureConfig(configFactory, store);
 
+    const isCollection = 'collection' in config;
     const prop = 'prop' in config ? config.prop : config.collection;
+    const keysResult = getWithCallStatusKeys({
+      ...(isCollection ? { collection: prop } : { prop }),
+    });
+
     const {
       callStatusKey,
       errorKey,
@@ -104,7 +164,7 @@ export function withCallStatus<
       setLoadingKey,
       setLoadedKey,
       setErrorKey,
-    } = getWithCallStatusKeys({ prop });
+    } = keysResult as any;
 
     const { callLoaded, callLoading, callError } = getWithCallStatusEvents({
       prop,

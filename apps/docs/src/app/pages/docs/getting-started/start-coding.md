@@ -126,26 +126,26 @@ store = inject(ProductsLocalStore);
 
 Most store features support a collection param that allows you have custom names in the generated signals and methods for example:
 
-```typescript 
+```typescript
   const entity = type<Product>();
-const collection = 'products';
+const collection = 'product';
 export const ProductsLocalStore = signalStore(
   withEntities({ entity, collection }),
   withCallStatus({ collection, initialValue: 'loading' }),
-  // 👆 adds signals isProductsLoading(), isProductsLoaded(), productsError()
-  // and methods setProductsLoading() setProductsLoaded(), setProductsError(error)
+  // 👆 adds signals isProductEntitiesLoading(), isProductEntitiesLoaded(), productEntitiesError()
+  // and methods setProductEntitiesLoading() setProductEntitiesLoaded(), setProductEntitiesError(error)
   withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
-  // 👆 adds signal productsCurrentPage()
-  // and method loadProductsPage({pageIndex: number})"
-  withHooks(({ setProductsLoaded, setProductsError, ...store }) => ({
+  // 👆 adds signal productEntitiesCurrentPage()
+  // and method loadProductEntitiesPage({pageIndex: number})"
+  withHooks(({ setProductEntitiesLoaded, setProductEntitiesError, ...store }) => ({
     onInit: async () => {
       const productService = inject(ProductService);
       try {
         const res = await lastValueFrom(productService.getProducts());
         patchState(store, setAllEntities(res.resultList));
-        setProductsLoaded();
+        setProductEntitiesLoaded();
       } catch (e) {
-        setProductsError(e);
+        setProductEntitiesError(e);
       }
     }
   })),
@@ -164,14 +164,14 @@ it will call the fetchEntities, when the entities status it set to loading, and 
 ```typescript
 const entity = type<Product>();
 ****
-const collection = "products";
+const collection = "product";
 export const ProductsLocalStore = signalStore(
   withEntities({ entity, collection }),
   withCallStatus({ collection, initialValue: "loading" }),
   withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
   // 👇 replaces withHook, will store entities result, change the status and handle errors
   withEntitiesLoadingCall({
-    **** entity,
+    entity,
     collection,
     fetchEntities: () =>
       inject(ProductService)
@@ -192,7 +192,7 @@ By default, the withEntities expect the Entity to have an id prop, but you can c
 ```typescript
 const entityConfig = entityConfig({
   entity: type<ProductCustom>(),
-  collection: 'products',
+  collection: 'product',
   selectId: (entity) => entity.productId,
 });
 

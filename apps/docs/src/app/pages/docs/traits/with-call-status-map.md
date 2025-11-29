@@ -32,7 +32,7 @@ const store = signalStore(withCallStatusMap());
 ```typescript
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
 
 export const ProductsRemoteStore = signalStore(

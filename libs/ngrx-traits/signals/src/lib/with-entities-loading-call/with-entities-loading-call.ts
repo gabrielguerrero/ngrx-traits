@@ -1,12 +1,9 @@
 import {
-  computed,
   EnvironmentInjector,
   inject,
-  isDevMode,
   runInInjectionContext,
   Signal,
 } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import {
   EmptyFeatureResult,
   patchState,
@@ -111,14 +108,14 @@ import {
  *   // then calls fetchEntities function
  *   withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+ *     fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           search: productsFilter().name,
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
- *           sortColumn: productsSort().field,
- *           sortAscending: productsSort().direction === 'asc',
+ *           search: productEntitiesFilter().name,
+ *           take: productEntitiesPagedRequest().size,
+ *           skip: productEntitiesPagedRequest().startIndex,
+ *           sortColumn: productEntitiesSort().field,
+ *           sortAscending: productEntitiesSort().direction === 'asc',
  *         })
  *         .pipe(
  *           map((d) => ({
@@ -184,10 +181,10 @@ export function withEntitiesLoadingCall<
         }
       : {
           state: NamedEntityState<Entity, Collection> &
-            NamedCallStatusState<Collection>;
+            NamedCallStatusState<`${Collection}Entities`>;
           props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<Collection, Error>;
-          methods: NamedCallStatusMethods<Collection, Error>;
+            NamedCallStatusComputed<`${Collection}Entities`, Error>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`, Error>;
         }),
   EmptyFeatureResult
 > {
@@ -206,7 +203,7 @@ export function withEntitiesLoadingCall<
         selectId,
       } = getFeatureConfig(config, _store);
       const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
-        prop: collection,
+        collection,
       });
       const { setEntitiesPagedResultKey } = getWithEntitiesRemotePaginationKeys(
         {

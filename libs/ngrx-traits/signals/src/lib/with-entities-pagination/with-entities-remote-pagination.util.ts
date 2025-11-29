@@ -11,19 +11,19 @@ export function getWithEntitiesRemotePaginationKeys(config?: {
   const capitalizedProp = collection && capitalize(collection);
   return {
     paginationKey: collection
-      ? `${config.collection}Pagination`
+      ? `${config.collection}EntitiesPagination`
       : 'entitiesPagination',
     entitiesCurrentPageKey: collection
-      ? `${config.collection}CurrentPage`
+      ? `${config.collection}EntitiesCurrentPage`
       : 'entitiesCurrentPage',
     entitiesPagedRequestKey: collection
-      ? `${config.collection}PagedRequest`
+      ? `${config.collection}EntitiesPagedRequest`
       : 'entitiesPagedRequest',
     loadEntitiesPageKey: collection
-      ? `load${capitalizedProp}Page`
+      ? `load${capitalizedProp}EntitiesPage`
       : 'loadEntitiesPage',
     setEntitiesPagedResultKey: collection
-      ? `set${capitalizedProp}PagedResult`
+      ? `set${capitalizedProp}EntitiesPagedResult`
       : 'setEntitiesPagedResult',
   };
 }

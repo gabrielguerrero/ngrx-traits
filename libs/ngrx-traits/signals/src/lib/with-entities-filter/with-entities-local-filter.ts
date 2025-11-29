@@ -80,7 +80,7 @@ import {
  *  );
  *
  * // generates the following signals
- *  store.productsFilter // { search: string }
+ *  store.productEntitiesFilter // { search: string }
  *  // generates the following methods
  *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
  *  store.resetProductsFilter  // () => void
@@ -212,7 +212,7 @@ export function withEntitiesLocalFilter<
       }),
       withHooks((state: Record<string, unknown>) => {
         const { loadedKey } = getWithCallStatusKeys({
-          prop: config?.collection,
+          collection: config?.collection,
         });
         const loaded = state[loadedKey] as Signal<boolean> | undefined;
         const filter = state[filterKey] as Signal<Filter>;

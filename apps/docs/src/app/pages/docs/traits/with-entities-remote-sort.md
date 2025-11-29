@@ -36,10 +36,10 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productsSort }) => {
+    fetchEntities: ({ productEntitiesSort }) => {
       return inject(ProductService).getProducts({
-        sortColumn: productsSort().field,
-        sortAscending: productsSort().direction === 'asc',
+        sortColumn: productEntitiesSort().field,
+        sortAscending: productEntitiesSort().direction === 'asc',
       });
     },
   }),
@@ -48,8 +48,8 @@ export const store = signalStore(
 To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in GitHub):
 ```html
 <product-sort-dropdown
-  [sort]="store.productsSort()"
-  (sortChange)="store.sortProductsEntities({ sort: $event })"
+  [sort]="store.productEntitiesSort()"
+  (sortChange)="store.sortProductEntities({ sort: $event })"
 />
 ... show products list
 ```
@@ -85,16 +85,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-            sortAscending: productsSort().direction === 'asc',
-            sortColumn: productsSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };
@@ -142,5 +142,5 @@ sortEntities: (options?: { sort: Sort<Entity>;  skipLoadingCall?:boolean}) => vo
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-sortProductsEntities: (options: { sort: Sort<Entity>;  skipLoadingCall?:boolean}) => void;
+sortProductEntities: (options: { sort: Sort<Entity>;  skipLoadingCall?:boolean}) => void;
 ```

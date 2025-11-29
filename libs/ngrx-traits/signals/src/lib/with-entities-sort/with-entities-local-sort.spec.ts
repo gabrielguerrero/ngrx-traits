@@ -138,7 +138,7 @@ describe('withEntitiesLocalSort', () => {
   });
 
   it('with collection should sort entities and store sort', () => {
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       { protectedState: false },
       withEntities({
@@ -154,12 +154,12 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
-      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
-      store.sortProductsEntities();
+      store.sortProductEntities();
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.name)
           .slice(0, 5),
       ).toEqual([
@@ -170,17 +170,17 @@ describe('withEntitiesLocalSort', () => {
         'BattleClash',
       ]);
       // sort by price
-      store.sortProductsEntities({
+      store.sortProductEntities({
         sort: { field: 'price', direction: 'desc' },
       });
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.price)
           .slice(0, 5),
       ).toEqual([178, 175, 172, 169, 166]);
-      expect(store.productsEntities().length).toEqual(mockProducts.length);
-      expect(store.productsSort()).toEqual({
+      expect(store.productEntities().length).toEqual(mockProducts.length);
+      expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
       });
@@ -193,7 +193,7 @@ describe('withEntitiesLocalSort', () => {
     };
     const config = entityConfig({
       entity: type<ProductCustom>(),
-      collection: 'products',
+      collection: 'product',
       selectId: (e) => e.productId,
     });
     const mockProductsCustom = mockProducts.map(({ id, ...p }) => ({
@@ -211,12 +211,12 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProductsCustom, config));
-      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
-      store.sortProductsEntities();
+      store.sortProductEntities();
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.name)
           .slice(0, 5),
       ).toEqual([
@@ -227,19 +227,19 @@ describe('withEntitiesLocalSort', () => {
         'BattleClash',
       ]);
       // sort by price
-      store.sortProductsEntities({
+      store.sortProductEntities({
         sort: { field: 'price', direction: 'desc' },
       });
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.price)
           .slice(0, 5),
       ).toEqual([178, 175, 172, 169, 166]);
-      expect(store.productsEntities().length).toEqual(
+      expect(store.productEntities().length).toEqual(
         mockProductsCustom.length,
       );
-      expect(store.productsSort()).toEqual({
+      expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
       });
@@ -381,7 +381,7 @@ describe('withEntitiesLocalSort', () => {
 
   it('with collection should sort entities using default when withCallStatus loaded', () => {
     TestBed.runInInjectionContext(() => {
-      const collection = 'products';
+      const collection = 'product';
       const Store = signalStore(
         { protectedState: false },
         withEntities({
@@ -397,13 +397,13 @@ describe('withEntitiesLocalSort', () => {
       );
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
-      store.setProductsLoaded();
+      store.setProductEntitiesLoaded();
       TestBed.flushEffects();
-      expect(store.productsSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       expect(
         store
-          .productsEntities()
+          .productEntities()
           .map((e) => e.name)
           .slice(0, 5),
       ).toEqual([

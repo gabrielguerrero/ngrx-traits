@@ -26,7 +26,7 @@ In this example we have a list of users and we want to filter them based on a se
 ```typescript
 const entity = entityConfig({
     entity: type<T>(),
-    collection: 'users'
+    collection: 'user'
 })
 
 const store = signalStore(
@@ -43,8 +43,8 @@ const store = signalStore(
 ### Using filter method
 Once you have your store defined you can use the generated filter[Collection]Entities method, ui for the filter is generally some sort of form with one or more field or controls of different kind, you should make your filter object represent those controls, after that, the filter is either connected to a button like 'Apply' , that on press will submit the entire form. In this case be sure to set the debounce to 0, so that the filter is applied immediately. 
 ```html
-<form (submit)="store.filterUsersEntities({ filter:{ search: searchControl.value, role: role.value }})">
-    <mat-select #role placeholder="Role" (change)="store.filterUsersEntities({ filter:{ role: $event.target.value }, debounce:0})">
+<form (submit)="store.filterUserEntities({ filter:{ search: searchControl.value, role: role.value }})">
+    <mat-select #role placeholder="Role" (change)="store.filterUserEntities({ filter:{ role: $event.target.value }, debounce:0})">
         <mat-option value="admin">Admin</mat-option>
         <mat-option value="user">User</mat-option>
     </mat-select>
@@ -57,7 +57,7 @@ The second way is where there is no submit button, and the filter is connected t
 <input
     type="text"
     placeholder="Search"
-    (input)="store.filterUsersEntities({ filter:{ search: $event.target.value }, patch: true })"
+    (input)="store.filterUserEntities({ filter:{ search: $event.target.value }, patch: true })"
 ```
 If you manually changed the entities and want to reapply the filter you can call the filter entities method without any param to reapply the last filter
 
@@ -67,7 +67,7 @@ You can mix this feature with other local store features like withEntitiesLocalS
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
@@ -156,6 +156,6 @@ resetFilter:() => void;
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-filterUsers: ({filter: FilterType, debounce?:number, patch?:boolean, forceLoad:boolean }) => void;
-resetUsersFilter:() => void;
+filterUserEntities: ({filter: FilterType, debounce?:number, patch?:boolean, forceLoad:boolean }) => void;
+resetUserEntitiesFilter:() => void;
 ```

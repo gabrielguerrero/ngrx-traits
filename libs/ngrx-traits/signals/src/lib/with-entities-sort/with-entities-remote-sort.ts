@@ -60,12 +60,12 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = 'product';
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities and withCallStatus
  *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   withCallStatus({ collection, initialValue: 'loading' }),
  *
  *   withEntitiesRemoteSort({
  *     entity,
@@ -76,34 +76,34 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productsSort }) => {
+ *     fetchEntities: ({ productEntitiesSort }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           sortColumn: productsSort().field,
- *           sortAscending: productsSort().direction === 'asc',
+ *           sortColumn: productEntitiesSort().field,
+ *           sortAscending: productEntitiesSort().direction === 'asc',
  *         })
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsSort, productsLoading, setProductsError, ...state }) => ({
+ * // withHooks(({ productEntitiesSort, isProductEntitiesLoading, setProductEntitiesError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (isProductsLoading()) {
+ * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
- * //                 sortColumn: productsSort().field,
- * //                 sortAscending: productsSort().direction === 'asc',
+ * //                 sortColumn: productEntitiesSort().field,
+ * //                 sortAscending: productEntitiesSort().direction === 'asc',
  * //              })
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setAllEntities(res.resultList, { collection: 'products' }),
+ * //                 setAllEntities(res.resultList, { collection: 'product' }),
  * //               ),
  * //             ),
  * //             catchError((error) => {
- * //               setProductsError(error);
+ * //               setProductEntitiesError(error);
  * //               return EMPTY;
  * //             }),
  * //           )
@@ -114,9 +114,9 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  *  })),
  *
  * // generate the following signals
- * store.productsSort // the current sort
+ * store.productEntitiesSort // the current sort
  * // and the following methods
- * store.sortProductsEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
+ * store.sortProductEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
  */
 export function withEntitiesRemoteSort<
   Input extends SignalStoreFeatureResult,
@@ -142,7 +142,7 @@ export function withEntitiesRemoteSort<
       : {
           state: NamedEntityState<Entity, Collection>;
           props: NamedEntityProps<Entity, Collection>;
-          methods: NamedCallStatusMethods<Collection>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`>;
         }),
   Collection extends ''
     ? {
@@ -159,7 +159,7 @@ export function withEntitiesRemoteSort<
   return withFeatureFactory((store: StoreSource<Input>) => {
     const { defaultSort, ...config } = getFeatureConfig(configFactory, store);
     const { setLoadingKey } = getWithCallStatusKeys({
-      prop: config.collection,
+      collection: config.collection,
     });
     const { sortKey, sortEntitiesKey } = getWithEntitiesSortKeys(config);
     const { entitiesRemoteSortChanged } =

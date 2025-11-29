@@ -43,14 +43,14 @@ export const ProductsRemoteStore = signalStore(
   }),
   withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+    fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
       return inject(ProductService)
         .getProducts({
-          search: productsFilter().name,
-          take: productsPagedRequest().size,
-          skip: productsPagedRequest().startIndex,
-          sortColumn: productsSort().field,
-          sortAscending: productsSort().direction === 'asc',
+          search: productEntitiesFilter().name,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
+          sortColumn: productEntitiesSort().field,
+          sortAscending: productEntitiesSort().direction === 'asc',
         })
         .pipe(
           map((d) => ({
