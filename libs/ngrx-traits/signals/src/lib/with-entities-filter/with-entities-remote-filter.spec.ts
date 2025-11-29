@@ -22,7 +22,7 @@ import { Product } from '../test.model';
 
 describe('withEntitiesRemoteFilter', () => {
   const entity = type<Product>();
-  const collection = 'products';
+  const collection = 'product';
   const Store = signalStore(
     { protectedState: false },
     withEntities({
@@ -345,14 +345,14 @@ describe('withEntitiesRemoteFilter', () => {
         }),
         withEntitiesLoadingCall({
           collection,
-          fetchEntities: ({ productsFilter }) => {
+          fetchEntities: ({ productFilter }) => {
             let result = [...mockProducts];
-            if (productsFilter()?.search) {
+            if (productFilter()?.search) {
               result = mockProducts.filter((entity) =>
-                productsFilter()?.search
+                productFilter()?.search
                   ? entity.name
                       .toLowerCase()
-                      .includes(productsFilter()?.search.toLowerCase())
+                      .includes(productFilter()?.search.toLowerCase())
                   : false,
               );
             }
@@ -362,17 +362,17 @@ describe('withEntitiesRemoteFilter', () => {
       );
       const store = new Store();
       TestBed.flushEffects();
-      store.loadProductsPage({ pageIndex: 3 });
+      store.loadProductPage({ pageIndex: 3 });
       tick(400);
-      expect(store.productsCurrentPage().pageIndex).toEqual(3);
+      expect(store.productCurrentPage().pageIndex).toEqual(3);
 
-      store.filterProductsEntities({
+      store.filterProductEntities({
         filter: { search: 'zero' },
         patch: true,
       });
       tick(400);
-      expect(store.productsEntities().length).toEqual(2);
-      expect(store.productsEntities()).toEqual([
+      expect(store.productEntities().length).toEqual(2);
+      expect(store.productEntities()).toEqual([
         {
           description: 'Super Nintendo Game',
           id: '1',
@@ -388,8 +388,8 @@ describe('withEntitiesRemoteFilter', () => {
           categoryId: 'gamecube',
         },
       ]);
-      expect(store.productsFilter()).toEqual({ search: 'zero', foo: 'bar' });
-      expect(store.productsFilter.search()).toEqual('zero');
+      expect(store.productFilter()).toEqual({ search: 'zero', foo: 'bar' });
+      expect(store.productFilter.search()).toEqual('zero');
     });
   }));
 

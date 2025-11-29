@@ -26,7 +26,7 @@ import { withEntitiesMultiSelection } from '@ngrx-traits/signals';
 
 const entity = entityConfig({
     entity: type<Product>(),
-    collection: 'products'
+    collection: 'product'
 })
 
 const store = signalStore(
@@ -38,11 +38,11 @@ const store = signalStore(
 Use it in a template like:
 ```html
      <mat-selection-list [multiple]="true">
-        @for (item of store.entities(); track item.id) {
+        @for (item of store.productEntities(); track item.id) {
           <mat-list-option
             [value]="item.id"
-            [selected]="!!store.productsIdsSelectedMap()[item.id]"
-            (click)="store.toggleSelectProductsEntities({ id: item.id})"
+            [selected]="!!store.productIdsSelectedMap()[item.id]"
+            (click)="store.toggleSelectProductEntities({ id: item.id})"
           >
             {{ item.label }}
           </mat-list-option>
@@ -55,7 +55,7 @@ You can mix this feature with other local or remote features like withEntitiesLo
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
@@ -126,8 +126,8 @@ isAllEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 If collection provided, the following computed signals are generated, example: **users**
 
 ```typescript
-usersEntitiesSelected: Signal<Entity[]>;
-isAllUsersSelected: Signal<'all' | 'none' | 'some'>;
+userEntitiesSelected: Signal<Entity[]>;
+isAllUserEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 ```
 
 ## Methods
@@ -144,8 +144,8 @@ toggleSelectAllEntities: ({id:string | number} | {ids: (string | number[])}) => 
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-selectUsers: ({id:string | number} | {ids: (string | number[])}) => void;
-deselectUsers: ({id:string | number} | {ids: (string | number[])}) => void;
-toggleSelectUsers: ({id:string | number} | {ids: (string | number[])}) => void;
-toggleSelectAllUsers: ({id:string | number} | {ids: (string | number[])}) => void;
+selectUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
+deselectUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
+toggleSelectUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
+toggleSelectAllUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
 ```

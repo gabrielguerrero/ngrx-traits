@@ -19,18 +19,18 @@ import { SmartProductDetailComponent } from '../smart-product-detail/smart-produ
         </mat-card-header>
         <mat-card-content>
           <product-basket
-            [list]="store.orderItemsEntities()"
-            [isAllSelectedForRemove]="store.isAllOrderItemsSelected()"
-            [selectedForRemoveIds]="store.orderItemsIdsSelectedMap()"
+            [list]="store.orderItemEntities()"
+            [isAllSelectedForRemove]="store.isAllOrderItemEntitiesSelected()"
+            [selectedForRemoveIds]="store.orderItemIdsSelectedMap()"
             (updateProduct)="store.updateProductInBasket($event)"
             (toggleSelectForRemove)="
-              store.toggleSelectOrderItemsEntities($event)
+              store.toggleSelectOrderItemEntities($event)
             "
             (toggleAllSelectForRemove)="
-              store.toggleSelectAllOrderItemsEntities()
+              store.toggleSelectAllOrderItemEntities()
             "
-            [selectedProduct]="store.productsEntitySelected()"
-            (selectProduct)="store.selectProductsEntity($event)"
+            [selectedProduct]="store.productEntitySelected()"
+            (selectProduct)="store.selectProductEntity($event)"
             (sort)="sortBasket($event)"
           ></product-basket>
         </mat-card-content>
@@ -39,7 +39,7 @@ import { SmartProductDetailComponent } from '../smart-product-detail/smart-produ
             mat-stroked-button
             color="primary"
             type="submit"
-            [disabled]="store.isAllOrderItemsSelected() === 'none'"
+            [disabled]="store.isAllOrderItemEntitiesSelected() === 'none'"
             (click)="store.removeProductsFromBasket()"
           >
             REMOVE
@@ -49,7 +49,7 @@ import { SmartProductDetailComponent } from '../smart-product-detail/smart-produ
             color="primary"
             type="submit"
             [disabled]="
-              !store.orderItemsEntities().length || store.isCheckoutLoading()
+              !store.orderItemEntities().length || store.isCheckoutLoading()
             "
             (click)="store.checkout()"
           >
@@ -60,10 +60,8 @@ import { SmartProductDetailComponent } from '../smart-product-detail/smart-produ
           </button>
         </mat-card-actions>
       </mat-card>
-      @if (store.productsEntitySelected()) {
-        <smart-product-detail
-          [productId]="store.productsEntitySelected()!.id"
-        />
+      @if (store.productEntitySelected()) {
+        <smart-product-detail [productId]="store.productEntitySelected()!.id" />
       }
     </div>
   `,
@@ -91,7 +89,7 @@ export class ProductBasketTabComponent {
   store = inject(ProductsShopStore);
 
   sortBasket(sort: Sort<Product>) {
-    this.store.sortOrderItemsEntities({
+    this.store.sortOrderItemEntities({
       sort: { field: sort.active, direction: sort.direction },
     });
   }

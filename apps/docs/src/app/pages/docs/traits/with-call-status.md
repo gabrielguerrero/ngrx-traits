@@ -28,8 +28,8 @@ setLoading setLoaded and setError
 const store = signalStore(withCallStatus());
 ```
 ### Using prop or collection to rename generated
-The following generates a usersCallStatus signal, and getters isUsersLoading isUsersLoaded usersError, and computed
-setUsersLoading setUsersLoaded and setUsersError
+The following generates a userEntitiesCallStatus signal, and getters isUserEntitiesLoading isUsersLoaded usersError, and computed
+setUserEntitiesLoading setUsersLoaded and setUsersError
 ```typescript
 const store = signalStore(withCallStatus({ prop: 'users' }));
 ```
@@ -37,7 +37,7 @@ Prop and collection are aliases they cause the same effect, collection is there 
 
 ### Typing error
 ```typescript
-const store = signalStore(withCallStatus({ collection: 'users', initialValue: 'loading', errorType: type<string>() }));
+const store = signalStore(withCallStatus({ collection: 'user', initialValue: 'loading', errorType: type<string>() }));
 ```
 
 ### Using withCallStatus and withMethods to call backend
@@ -52,20 +52,20 @@ export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
   withCallStatus({ collection, initialValue: 'loading' }),
-  withMethods(({setProductsLoading, setProductsLoaded, setProductsError, ...store}) => ({
+  withMethods(({setProductEntitiesLoading, setProductEntitiesLoaded, setProductEntitiesError, ...store}) => ({
     loadProducts: rxMethod(pipe(switchMap(() => {
-      setProductsLoading()
+      setProductEntitiesLoading()
       return inject(ProductService)
         .getProducts()
         .pipe(
           tap((res) =>
             patchState(
               store,
-              setAllEntities(res.resultList, { collection: 'products' }),
+              setAllEntities(res.resultList, { collection: 'product' }),
             ),
           ),
           catchError((error) => {
-            setProductsError(error);
+            setProductEntitiesError(error);
             return EMPTY;
           }));
     })))
@@ -141,9 +141,9 @@ error: Signal<unknown | null>;
 If collection provided, the following computed signals are generated, example: **users**
 
 ```typescript
-isUsersLoading: Signal<boolean>;
-isUsersLoaded: Signal<boolean>;
-usersError: Signal<unknown | null>;
+isUserEntitiesLoading: Signal<boolean>;
+isUserEntitiesLoaded: Signal<boolean>;
+userEntitiesError: Signal<unknown | null>;
 ```
 
 ## Methods
@@ -159,7 +159,7 @@ setError:(error?: unknown) => void;
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-setUsersLoading: () => void;
-setUsersLoaded:() => void;
-setUsersError:(error?: unknown) => void;
+setUserEntitiesLoading: () => void;
+setUserEntitiesLoaded:() => void;
+setUserEntitiesError:(error?: unknown) => void;
 ```

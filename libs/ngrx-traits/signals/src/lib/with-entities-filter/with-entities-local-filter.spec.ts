@@ -480,7 +480,7 @@ describe('withEntitiesLocalFilter', () => {
       const config = entityConfig({
         entity: type<ProductCustom>(),
         selectId: (entity) => entity.productId,
-        collection: 'products',
+        collection: 'product',
       });
       const Store = signalStore(
         { protectedState: false },
@@ -500,13 +500,13 @@ describe('withEntitiesLocalFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProductsCustom, config));
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'zero', foo: 'bar2' },
         });
-        expect(store.productsEntities().length).toEqual(mockProducts.length);
+        expect(store.productEntities().length).toEqual(mockProducts.length);
         tick(400);
-        expect(store.productsEntities().length).toEqual(2);
-        expect(store.productsEntities()).toEqual([
+        expect(store.productEntities().length).toEqual(2);
+        expect(store.productEntities()).toEqual([
           {
             description: 'Super Nintendo Game',
             productId: '1',

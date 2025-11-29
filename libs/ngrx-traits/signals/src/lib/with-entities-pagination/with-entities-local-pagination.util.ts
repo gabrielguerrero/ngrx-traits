@@ -52,7 +52,7 @@ export function getQueryMapperForEntitiesPagination(config?: {
   const { loadEntitiesPageKey, paginationKey } =
     getWithEntitiesLocalPaginationKeys(config);
   const { loadingKey, loadedKey } = getWithCallStatusKeys({
-    prop: config?.collection,
+    collection: config?.collection,
   });
   return {
     queryParamsToState: (query, store) => {

@@ -31,7 +31,7 @@ import { OrderStore } from './order-list.store';
       <mat-card-content>
         <table
           mat-table
-          [dataSource]="store.ordersEntities()"
+          [dataSource]="store.orderEntities()"
           class="mat-elevation-z8"
           multiTemplateDataRows
         >
@@ -122,7 +122,7 @@ import { OrderStore } from './order-list.store';
               <button mat-icon-button (click)="store.toggleShowDetail(order)">
                 <mat-icon>
                   {{
-                    store.ordersIdsSelectedMap()[order.id]
+                    store.orderIdsSelectedMap()[order.id]
                       ? 'expand_less'
                       : 'expand_more'
                   }}
@@ -140,7 +140,7 @@ import { OrderStore } from './order-list.store';
               <div
                 class="example-element-detail-wrapper "
                 [class.example-element-detail-wrapper-expanded]="
-                  store.ordersIdsSelectedMap()[order.id]
+                  store.orderIdsSelectedMap()[order.id]
                 "
               >
                 @if (store.isLoadOrderDetailLoaded(order)) {
@@ -201,7 +201,7 @@ import { OrderStore } from './order-list.store';
             *matRowDef="let order; columns: displayedColumns"
             class="example-element-row"
             [class.example-expanded-row]="
-              store.ordersIdsSelectedMap()[order.id]
+              store.orderIdsSelectedMap()[order.id]
             "
           ></tr>
           <tr

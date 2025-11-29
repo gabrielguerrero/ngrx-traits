@@ -66,4 +66,44 @@ describe('withCallStatus', () => {
     store.setTestError({ message: 'error' });
     expect(store.testError()).toEqual({ message: 'error' });
   });
+
+  describe('withCallStatus with collection param', () => {
+    it('generates Entities-suffixed methods for collection param', () => {
+      const Store = signalStore(withCallStatus({ collection: 'pet' }));
+      const store = new Store();
+
+      expect(store.isPetEntitiesLoading()).toBe(false);
+      store.setPetEntitiesLoading();
+      expect(store.isPetEntitiesLoading()).toBe(true);
+
+      store.setPetEntitiesLoaded();
+      expect(store.isPetEntitiesLoaded()).toBe(true);
+
+      expect(store.petEntitiesError()).toEqual(undefined);
+      store.setPetEntitiesError({ message: 'error' });
+      expect(store.petEntitiesError()).toEqual({ message: 'error' });
+    });
+
+    it('does NOT add Entities suffix when using prop param', () => {
+      const Store = signalStore(withCallStatus({ prop: 'user' }));
+      const store = new Store();
+
+      expect(store.isUserLoading).toBeDefined();
+      expect((store as any).isUserEntitiesLoading).toBeUndefined();
+      expect((store as any).setUserEntitiesLoading).toBeUndefined();
+    });
+
+    it('collection param with errorType works', () => {
+      const Store = signalStore(
+        withCallStatus({
+          collection: 'data',
+          errorType: type<string>(),
+        }),
+      );
+      const store = new Store();
+
+      store.setDataEntitiesError('Not found');
+      expect(store.dataEntitiesError()).toBe('Not found');
+    });
+  });
 });

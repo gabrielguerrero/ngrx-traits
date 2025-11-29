@@ -1,5 +1,5 @@
 
-# Caching (experimental)
+# Caching 
  This feature allows you to easily implement caching for calls that return an observable or a promise.
 
 ## Basic example 
@@ -117,7 +117,7 @@ A good use case for maxCacheSize is caching search results. Search queries often
 ```typescript
 const productsEntity = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 const productsStoreFeature = signalStoreFeature(
   withEntities(productsEntity),
@@ -135,15 +135,15 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productPagedRequest, productFilter, productSort }) => ({
       ...productsEntity,
       fetchEntities: async () => {
         const query = {
-          search: productsFilter().search,
-          skip: productsPagedRequest().startIndex,
-          take: productsPagedRequest().size,
-          sortAscending: productsSort().direction === 'asc',
-          sortColumn: productsSort().field,
+          search: productFilter().search,
+          skip: productPagedRequest().startIndex,
+          take: productPagedRequest().size,
+          sortAscending: productSort().direction === 'asc',
+          sortColumn: productSort().field,
         };
         // we use cacheCall to show the case where service.getProducts(query) 
         // returns a promise

@@ -27,7 +27,7 @@ import { ProductService } from '../../services/product.service';
 
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
@@ -58,13 +58,13 @@ export const ProductsLocalStore = signalStore(
         .pipe(map((d) => d.resultList));
     },
   }),
-  withCalls(({ productsEntitySelected }) => ({
+  withCalls(({ productEntitySelected }) => ({
     loadProductDetail: callConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
       resultProp: 'productDetail',
       // call load the product detail when a product is selected
-      callWith: productsEntitySelected,
+      callWith: productEntitySelected,
       // productsEntitySelected is of type Signal<Product | undefined> so it can be pass directly to callWith
       // because it matches the type the call parameter, but you can use a function as bellow if it doesn't
       // callWith: () =>

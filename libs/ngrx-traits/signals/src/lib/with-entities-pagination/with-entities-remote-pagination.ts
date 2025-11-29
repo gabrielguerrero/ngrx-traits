@@ -100,11 +100,11 @@ import {
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productsPagedRequest }) => {
+ *     fetchEntities: ({ productPagedRequest }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
+ *           take: productPagedRequest().size,
+ *           skip: productPagedRequest().startIndex,
  *         }).pipe(
  *           map((d) => ({
  *             entities: d.resultList,
@@ -120,8 +120,8 @@ import {
  * //       if (isProductsLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
- * //                take: productsPagedRequest().size,
- * //                skip: productsPagedRequest().startIndex,
+ * //                take: productPagedRequest().size,
+ * //                skip: productPagedRequest().startIndex,
  * //              })
  * //           .pipe(
  * //             takeUntilDestroyed(),
@@ -145,7 +145,7 @@ import {
  *   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  *  // generates the following computed signals
  *  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productsPagedRequest // { startIndex: number, size: number, page: number }
+ *  store.productPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
  *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
  *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
@@ -177,8 +177,8 @@ export function withEntitiesRemotePagination<
       : {
           state: NamedEntityState<Entity, Collection>;
           props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<Collection>;
-          methods: NamedCallStatusMethods<Collection>;
+            NamedCallStatusComputed<`${Collection}Entities`>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`>;
         }),
   Collection extends ''
     ? {
@@ -200,7 +200,7 @@ export function withEntitiesRemotePagination<
       ...config
     } = getFeatureConfig(configFactory, store);
     const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
-      prop: config.collection,
+      collection: config.collection,
     });
     const { entitiesKey } = getWithEntitiesKeys(config);
 

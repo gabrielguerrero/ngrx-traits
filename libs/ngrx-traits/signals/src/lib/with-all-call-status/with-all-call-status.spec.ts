@@ -26,9 +26,9 @@ describe('withAllCallStatus', () => {
       apiResponse.next('test response');
       expect(store.isAnyCallLoading()).toEqual(false);
 
-      store.setTestLoading();
+      store.setTestEntitiesLoading();
       expect(store.isAnyCallLoading()).toEqual(true);
-      store.setTestLoaded();
+      store.setTestEntitiesLoaded();
       expect(store.isAnyCallLoading()).toEqual(false);
     });
   });
@@ -53,12 +53,12 @@ describe('withAllCallStatus', () => {
       apiResponse.error(new Error('fail'));
       expect(store.callsErrors()[0]).toEqual(new Error('fail'));
 
-      store.setTest2Error(new Error('fail2'));
+      store.setTest2EntitiesError(new Error('fail2'));
       expect(store.isAnyCallLoading()).toEqual(false);
       expect(store.callsErrors()[0]).toEqual(new Error('fail'));
       expect(store.callsErrors()[1]).toEqual(new Error('fail2'));
 
-      store.setTest2Loaded();
+      store.setTest2EntitiesLoaded();
       apiResponse = new Subject<string>();
       store.testCall({ id: '1' });
       apiResponse.next('test response');
