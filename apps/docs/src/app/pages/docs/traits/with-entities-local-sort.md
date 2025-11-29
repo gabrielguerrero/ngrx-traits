@@ -27,7 +27,7 @@ import { withEntitiesLocalSort } from '@ngrx-traits/signals';
 ```typescript
 const entity = entityConfig({
     entity: type<T>(),
-    collection: 'users'
+    collection: 'user'
 })
 
 const store = signalStore(
@@ -42,8 +42,8 @@ const store = signalStore(
 To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in GitHub):
 ```html
 <users-sort-dropdown
-  [sort]="store.usersSort()"
-  (sortChange)="store.sortUsersEntities({ sort: $event })"
+  [sort]="store.userSort()"
+  (sortChange)="store.sortUserEntities({ sort: $event })"
 />
 ... show products list
 ```
@@ -55,7 +55,7 @@ You can mix this feature with other local store features like withEntitiesLocalF
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
@@ -123,5 +123,5 @@ sortEntities: ({sort: { field: string; pageSize: direction: 'asc' | 'desc' | ''}
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-sortUsers: ({sort: { field: string; pageSize: direction: 'asc' | 'desc' | ''}}) => void;
+sortUserEntities: ({sort: { field: string; pageSize: direction: 'asc' | 'desc' | ''}}) => void;
 ```

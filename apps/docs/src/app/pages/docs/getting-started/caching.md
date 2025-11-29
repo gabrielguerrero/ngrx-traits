@@ -121,7 +121,7 @@ A good use case for maxCacheSize is caching search results. Search queries often
 ```typescript
 const productsEntity = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 const productsStoreFeature = signalStoreFeature(
   withEntities(productsEntity),
@@ -139,15 +139,15 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       ...productsEntity,
       fetchEntities: async () => {
         const query = {
-          search: productsFilter().search,
-          skip: productsPagedRequest().startIndex,
-          take: productsPagedRequest().size,
-          sortAscending: productsSort().direction === 'asc',
-          sortColumn: productsSort().field,
+          search: productEntitiesFilter().search,
+          skip: productEntitiesPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          sortAscending: productEntitiesSort().direction === 'asc',
+          sortColumn: productEntitiesSort().field,
         };
         // we use cacheCall to show the case where service.getProducts(query) 
         // returns a promise

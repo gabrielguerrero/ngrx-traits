@@ -23,7 +23,7 @@ describe('withEntitiesHybridFilter', () => {
   type Filter = { search: string; categoryId: string };
   describe('local filter', () => {
     const entity = type<Product>();
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       { protectedState: false },
       withEntities({
@@ -453,18 +453,18 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.setProductsLoaded();
+        store.setProductEntitiesLoaded();
         tick(400);
-        store.loadProductsPage({ pageIndex: 3 });
-        expect(store.productsCurrentPage().pageIndex).toEqual(3);
+        store.loadProductEntitiesPage({ pageIndex: 3 });
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
 
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'zero' },
           patch: true,
         });
         tick(400);
-        expect(store.productsEntities().length).toEqual(2);
-        expect(store.productsEntities()).toEqual([
+        expect(store.productEntities().length).toEqual(2);
+        expect(store.productEntities()).toEqual([
           {
             description: 'Super Nintendo Game',
             id: '1',
@@ -480,11 +480,11 @@ describe('withEntitiesHybridFilter', () => {
             categoryId: 'gamecube',
           },
         ]);
-        expect(store.productsFilter()).toEqual({
+        expect(store.productEntitiesFilter()).toEqual({
           search: 'zero',
           categoryId: 'snes',
         });
-        expect(store.productsFilter.search()).toEqual('zero');
+        expect(store.productEntitiesFilter.search()).toEqual('zero');
       });
     }));
 
@@ -546,7 +546,7 @@ describe('withEntitiesHybridFilter', () => {
         const config = entityConfig({
           entity: type<ProductCustom>(),
           selectId: (entity) => entity.productId,
-          collection: 'products',
+          collection: 'product',
         });
         const Store = signalStore(
           { protectedState: false },
@@ -569,15 +569,15 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           patchState(store, setAllEntities(mockProductsCustom, config));
-          store.setProductsLoaded();
+          store.setProductEntitiesLoaded();
           tick(400);
-          store.filterProductsEntities({
+          store.filterProductEntities({
             filter: { search: 'zero', categoryId: 'snes' },
           });
-          expect(store.productsEntities().length).toEqual(mockProducts.length);
+          expect(store.productEntities().length).toEqual(mockProducts.length);
           tick(400);
-          expect(store.productsEntities().length).toEqual(2);
-          expect(store.productsEntities()).toEqual([
+          expect(store.productEntities().length).toEqual(2);
+          expect(store.productEntities()).toEqual([
             {
               description: 'Super Nintendo Game',
               productId: '1',
@@ -600,7 +600,7 @@ describe('withEntitiesHybridFilter', () => {
 
   describe('remote filter', () => {
     const entity = type<Product>();
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       withEntities({
         entity,
@@ -924,21 +924,21 @@ describe('withEntitiesHybridFilter', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productsFilter }) => {
+            fetchEntities: ({ productEntitiesFilter }) => {
               let result = [...mockProducts];
-              if (productsFilter()?.search) {
+              if (productEntitiesFilter()?.search) {
                 result = mockProducts.filter((entity) =>
-                  productsFilter()?.search
+                  productEntitiesFilter()?.search
                     ? entity.name
                         .toLowerCase()
-                        .includes(productsFilter()?.search.toLowerCase())
+                        .includes(productEntitiesFilter()?.search.toLowerCase())
                     : false,
                 );
               }
-              if (productsFilter()?.categoryId) {
+              if (productEntitiesFilter()?.categoryId) {
                 result = result.filter(
                   (entity) =>
-                    entity.categoryId === productsFilter()?.categoryId,
+                    entity.categoryId === productEntitiesFilter()?.categoryId,
                 );
               }
               return of({ entities: result, total: result.length });
@@ -947,17 +947,17 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         TestBed.flushEffects();
-        store.loadProductsPage({ pageIndex: 3 });
+        store.loadProductEntitiesPage({ pageIndex: 3 });
         tick(400);
-        expect(store.productsCurrentPage().pageIndex).toEqual(3);
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
 
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
           patch: true,
         });
         tick(400);
-        expect(store.productsEntities().length).toEqual(1);
-        expect(store.productsEntities()).toEqual([
+        expect(store.productEntities().length).toEqual(1);
+        expect(store.productEntities()).toEqual([
           {
             description: 'GameCube Game',
             id: '80',
@@ -966,7 +966,7 @@ describe('withEntitiesHybridFilter', () => {
             categoryId: 'gamecube',
           },
         ]);
-        expect(store.productsFilter()).toEqual({
+        expect(store.productEntitiesFilter()).toEqual({
           search: 'zero',
           categoryId: 'gamecube',
         });
@@ -1002,12 +1002,12 @@ describe('withEntitiesHybridFilter', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productsFilter }) => {
+            fetchEntities: ({ productEntitiesFilter }) => {
               let result = [...mockProducts];
-              if (productsFilter()?.categoryId) {
+              if (productEntitiesFilter()?.categoryId) {
                 result = mockProducts.filter(
                   (entity) =>
-                    entity.categoryId === productsFilter()?.categoryId,
+                    entity.categoryId === productEntitiesFilter()?.categoryId,
                 );
               }
               response = result;
@@ -1019,44 +1019,44 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.flushEffects();
 
         // First call should pass should not call backend because of skipLoadingCall
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
           skipLoadingCall: true, // this will store the value but not call the backend, and should not count for distinctUntilChange
         });
         tick(400);
-        expect(store.isProductsLoading()).toEqual(false);
+        expect(store.isProductEntitiesLoading()).toEqual(false);
         tick(400);
-        expect(store.productsEntities().length).toEqual(0);
+        expect(store.productEntities().length).toEqual(0);
 
         // Second call with same filter should be pass through because previous call did not count for distinctUntilChange
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
         });
         tick(400);
-        expect(store.isProductsLoading()).toEqual(true);
+        expect(store.isProductEntitiesLoading()).toEqual(true);
         apiResponse$.next(response);
         tick(400);
-        expect(store.productsEntities().length).toEqual(1);
+        expect(store.productEntities().length).toEqual(1);
 
         // Third call with same filter should be filtered out
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
         });
         tick(400);
-        expect(store.isProductsLoading()).toEqual(false);
+        expect(store.isProductEntitiesLoading()).toEqual(false);
         tick(400);
         // Entities should remain the same (call was filtered out)
-        expect(store.productsEntities().length).toEqual(1);
+        expect(store.productEntities().length).toEqual(1);
 
         // Next call should passthrough because filter changed
-        store.filterProductsEntities({
+        store.filterProductEntities({
           filter: { search: 'mario', categoryId: 'snes' },
         });
         tick(400);
-        expect(store.isProductsLoading()).toEqual(true);
+        expect(store.isProductEntitiesLoading()).toEqual(true);
         apiResponse$.next(response);
         tick(400);
-        expect(store.productsEntities().length).toEqual(11);
+        expect(store.productEntities().length).toEqual(11);
       });
     }));
   });

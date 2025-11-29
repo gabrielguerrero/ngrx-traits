@@ -26,6 +26,7 @@ import {
 } from '@ngrx/signals';
 import {
   addEntities,
+  entityConfig,
   removeEntities,
   updateEntity,
   withEntities,
@@ -47,75 +48,62 @@ import { ProductService } from '../../services/product.service';
  * features using signalStoreFeature, for this case we did two groups,
  * productsStoreFeature and orderItemsStoreFeature.
  */
-const productsEntity = type<Product>();
-const productsCollection = 'products';
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 const productsStoreFeature = signalStoreFeature(
-  withEntities({
-    entity: productsEntity,
-    collection: productsCollection,
-  }),
+  withEntities(productEntityConfig),
   withCallStatus({
+    ...productEntityConfig,
     initialValue: 'loading',
-    collection: productsCollection,
     errorType: type<string>(),
   }),
   withEntitiesRemoteFilter({
-    entity: productsEntity,
-    collection: productsCollection,
+    ...productEntityConfig,
     defaultFilter: { search: '' },
   }),
   withEntitiesRemotePagination({
-    entity: productsEntity,
-    collection: productsCollection,
+    ...productEntityConfig,
     pageSize: 10,
   }),
   withEntitiesRemoteSort({
-    entity: productsEntity,
-    collection: productsCollection,
+    ...productEntityConfig,
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesSingleSelection({
-    entity: productsEntity,
-    collection: productsCollection,
-  }),
+  withEntitiesSingleSelection(productEntityConfig),
 );
 
-const orderEntity = type<ProductOrder>();
-const orderItemsCollection = 'orderItems';
+const orderItemEntityConfig = entityConfig({
+  entity: type<ProductOrder>(),
+  collection: 'orderItem',
+});
 const orderItemsStoreFeature = signalStoreFeature(
-  withEntities({
-    entity: orderEntity,
-    collection: orderItemsCollection,
-  }),
+  withEntities(orderItemEntityConfig),
   withEntitiesLocalSort({
-    entity: orderEntity,
-    collection: orderItemsCollection,
+    ...orderItemEntityConfig,
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesMultiSelection({
-    entity: orderEntity,
-    collection: orderItemsCollection,
-  }),
+  withEntitiesMultiSelection(orderItemEntityConfig),
   withEntitiesLocalPagination({
+    ...orderItemEntityConfig,
     pageSize: 10,
-    entity: orderEntity,
-    collection: orderItemsCollection,
   }),
   withLogger({
-    name: 'orderItemsStore',
+    name: 'orderItemStore',
     showDiff: true,
-    // filter: ({ orderItemsEntityMap, orderItemsIds }) => ({
-    //   orderItemsEntityMap,
-    //   orderItemsIds,
+    // filter: ({ orderItemEntityMap, orderItemIds }) => ({
+    //   orderItemEntityMap,
+    //   orderItemIds,
     // }),
-    filter: ['orderItemsIdsSelected'],
+    filter: ['orderItemIdsSelected'],
   }),
   withSyncToWebStorage({
     key: 'orderItems',
     type: 'session',
-    filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
-      orderItemsEntityMap,
-      orderItemsIds,
+    filterState: ({ orderItemEntityMap, orderItemIds }) => ({
+      orderItemEntityMap,
+      orderItemIds,
     }),
   }),
 );
@@ -126,17 +114,17 @@ export const ProductsShopStore = signalStore(
   orderItemsStoreFeature,
   withEntitiesLoadingCall(
     (
-      { productsPagedRequest, productsFilter, productsSort },
+      { productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort },
       service = inject(ProductService),
     ) => ({
-      collection: productsCollection,
+      ...productEntityConfig,
       fetchEntities: async () => {
         const query = {
-          search: productsFilter().search,
-          skip: productsPagedRequest().startIndex,
-          take: productsPagedRequest().size,
-          sortAscending: productsSort().direction === 'asc',
-          sortColumn: productsSort().field,
+          search: productEntitiesFilter().search,
+          skip: productEntitiesPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          sortAscending: productEntitiesSort().direction === 'asc',
+          sortColumn: productEntitiesSort().field,
         };
         const source = cacheRxCall({
           key: ['products', query],
@@ -151,7 +139,7 @@ export const ProductsShopStore = signalStore(
   ),
   withCalls(
     (
-      { orderItemsEntities },
+      { orderItemEntities },
       snackBar = inject(MatSnackBar),
       service = inject(ProductService),
     ) => ({
@@ -164,7 +152,7 @@ export const ProductsShopStore = signalStore(
       checkout: callConfig({
         call: () =>
           inject(OrderService).checkout(
-            ...orderItemsEntities().map((p) => ({
+            ...orderItemEntities().map((p) => ({
               productId: p.id,
               quantity: p.quantity!,
             })),
@@ -184,40 +172,32 @@ export const ProductsShopStore = signalStore(
       }),
     }),
   ),
-  withMethods(
-    ({ productsEntitySelected, orderItemsIdsSelected, ...state }) => ({
-      addProductToBasket: () => {
-        const product = productsEntitySelected();
-        if (product) {
-          patchState(
-            state,
-            addEntities([{ ...product, quantity: 1 } as ProductOrder], {
-              collection: orderItemsCollection,
-            }),
-          );
-        }
-      },
-      updateProductInBasket: ({ id, quantity }: ProductOrder) => {
+  withMethods(({ productEntitySelected, orderItemIdsSelected, ...state }) => ({
+    addProductToBasket: () => {
+      const product = productEntitySelected();
+      if (product) {
         patchState(
           state,
-          updateEntity(
-            { id, changes: { quantity } },
-            {
-              collection: orderItemsCollection,
-            },
+          addEntities(
+            [{ ...product, quantity: 1 } as ProductOrder],
+            orderItemEntityConfig,
           ),
         );
-      },
-      removeProductsFromBasket: () => {
-        if (orderItemsIdsSelected().length) {
-          patchState(
-            state,
-            removeEntities(orderItemsIdsSelected(), {
-              collection: orderItemsCollection,
-            }),
-          );
-        }
-      },
-    }),
-  ),
+      }
+    },
+    updateProductInBasket: ({ id, quantity }: ProductOrder) => {
+      patchState(
+        state,
+        updateEntity({ id, changes: { quantity } }, orderItemEntityConfig),
+      );
+    },
+    removeProductsFromBasket: () => {
+      if (orderItemIdsSelected().length) {
+        patchState(
+          state,
+          removeEntities(orderItemIdsSelected(), orderItemEntityConfig),
+        );
+      }
+    },
+  })),
 );

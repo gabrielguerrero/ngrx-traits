@@ -27,7 +27,7 @@ In this example we have a list of users and we want to paginate them, we will us
 ```typescript
 const entity = entityConfig({
     entity: type<T>(),
-    collection: 'users'
+    collection: 'user'
 })
 
 const store = signalStore(
@@ -59,7 +59,7 @@ You can mix this feature with other local store features like withEntitiesLocalS
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },

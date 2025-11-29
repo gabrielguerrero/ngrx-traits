@@ -13,7 +13,7 @@ import { Product } from '../test.model';
 
 describe('withEntitiesLoadingCall', () => {
   const entity = type<Product>();
-  const collection = 'products';
+  const collection = 'product';
   describe('using config as object', () => {
     describe('without collection setLoading should call fetch entities', () => {
       it('should setAllEntities if fetchEntities returns an Entity[] ', fakeAsync(() => {
@@ -346,10 +346,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(mockProducts);
+          expect(store.productEntities()).toEqual(mockProducts);
         });
       }));
 
@@ -371,10 +371,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(mockProducts);
+          expect(store.productEntities()).toEqual(mockProducts);
         });
       }));
 
@@ -393,12 +393,12 @@ describe('withEntitiesLoadingCall', () => {
             }),
             withEntitiesLoadingCall({
               collection,
-              fetchEntities: ({ productsPagedRequest }) => {
+              fetchEntities: ({ productEntitiesPagedRequest }) => {
                 let result = [...mockProducts];
                 const total = result.length;
                 const options = {
-                  skip: productsPagedRequest()?.startIndex,
-                  take: productsPagedRequest()?.size,
+                  skip: productEntitiesPagedRequest()?.startIndex,
+                  take: productEntitiesPagedRequest()?.size,
                 };
                 if (options?.skip || options?.take) {
                   const skip = +(options?.skip ?? 0);
@@ -411,10 +411,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(mockProducts.slice(0, 30));
+          expect(store.productEntities()).toEqual(mockProducts.slice(0, 30));
         });
       }));
 
@@ -439,12 +439,12 @@ describe('withEntitiesLoadingCall', () => {
             }),
             withEntitiesLoadingCall({
               ...config,
-              fetchEntities: ({ productsPagedRequest }) => {
+              fetchEntities: ({ productEntitiesPagedRequest }) => {
                 let result = [...mockProductsCustom];
                 const total = result.length;
                 const options = {
-                  skip: productsPagedRequest()?.startIndex,
-                  take: productsPagedRequest()?.size,
+                  skip: productEntitiesPagedRequest()?.startIndex,
+                  take: productEntitiesPagedRequest()?.size,
                 };
                 if (options?.skip || options?.take) {
                   const skip = +(options?.skip ?? 0);
@@ -457,10 +457,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(
+          expect(store.productEntities()).toEqual(
             mockProductsCustom.slice(0, 30),
           );
         });
@@ -662,10 +662,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(mockProducts);
+          expect(store.productEntities()).toEqual(mockProducts);
         });
       }));
 
@@ -687,10 +687,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(mockProducts);
+          expect(store.productEntities()).toEqual(mockProducts);
         });
       }));
 
@@ -707,14 +707,14 @@ describe('withEntitiesLoadingCall', () => {
               collection,
               pageSize: 10,
             }),
-            withEntitiesLoadingCall(({ productsPagedRequest }) => ({
+            withEntitiesLoadingCall(({ productEntitiesPagedRequest }) => ({
               collection,
               fetchEntities: () => {
                 let result = [...mockProducts];
                 const total = result.length;
                 const options = {
-                  skip: productsPagedRequest()?.startIndex,
-                  take: productsPagedRequest()?.size,
+                  skip: productEntitiesPagedRequest()?.startIndex,
+                  take: productEntitiesPagedRequest()?.size,
                 };
                 if (options?.skip || options?.take) {
                   const skip = +(options?.skip ?? 0);
@@ -727,10 +727,10 @@ describe('withEntitiesLoadingCall', () => {
           );
           const store = new Store();
           TestBed.flushEffects();
-          expect(store.productsEntities()).toEqual([]);
-          store.setProductsLoading();
+          expect(store.productEntities()).toEqual([]);
+          store.setProductEntitiesLoading();
           tick();
-          expect(store.productsEntities()).toEqual(mockProducts.slice(0, 30));
+          expect(store.productEntities()).toEqual(mockProducts.slice(0, 30));
         });
       }));
     });

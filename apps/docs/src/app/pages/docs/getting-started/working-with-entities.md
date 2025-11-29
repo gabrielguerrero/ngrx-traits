@@ -19,29 +19,29 @@ With `withCallStatus`, we manage the loading state manually by using status-rela
 ```typescript
 const productEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 
 export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
   withEntities(productEntityConfig),
   withCallStatus({ ...productEntityConfig, initialValue: 'loading' }),
-  // 👆 adds signals isProductsLoading(), isProductsLoaded(), productsError()
-  // and methods setProductsLoading() setProductsLoaded(), setProductsError(error)
-  withMethods(({setProductsLoading, setProductsLoaded, setProductsError, ...store}) => ({
+  // 👆 adds signals isProductEntitiesLoading(), isProductEntitiesLoaded(), productEntitiesError()
+  // and methods setProductEntitiesLoading() setProductEntitiesLoaded(), setProductEntitiesError(error)
+  withMethods(({setProductEntitiesLoading, setProductEntitiesLoaded, setProductEntitiesError, ...store}) => ({
     loadProducts: rxMethod(pipe(switchMap(() => {
-      setProductsLoading()
+      setProductEntitiesLoading()
       return inject(ProductService)
         .getProducts()
         .pipe(
           tap((res) =>
             patchState(
               store,
-              setAllEntities(res.resultList, { collection: 'products' }),
+              setAllEntities(res.resultList, { collection: 'product' }),
             ),
           ),
           catchError((error) => {
-            setProductsError(error);
+            setProductEntitiesError(error);
             return EMPTY;
           }));
     })))
@@ -58,7 +58,7 @@ In contrast, when using `withEntitiesLoadingCall`, this process is handled autom
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 const store = signalStore(
   withEntities(productsEntityConfig),
@@ -88,7 +88,7 @@ This example is included mainly for completeness. However, in most cases, you sh
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const Store = signalStore(
   { providedIn: 'root' },
@@ -113,8 +113,8 @@ export const Store = signalStore(
       onSuccess: (res) => {
         patchState(store, setAllEntities(res.resultList, productsEntityConfig));
         // force resort and refilter
-        store.sortProductsEntities();
-        store.filterProductsEntities();
+        store.sortProductEntities();
+        store.filterProductEntities();
       },
     }),
   })),
@@ -130,7 +130,7 @@ Let's first look at an example, followed by an explanation of how it works.
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
@@ -148,7 +148,7 @@ export const ProductsLocalStore = signalStore(
 
 ### Interaction between withCallStatus, withEntitiesLoading, and other withEntities* store features
 
-`withEntitiesLoadingCall` is reactive—it listens to the `isProductsLoading()` signal (or `isLoading()` if no collection prop is defined in the `entityConfig`). This signal is added by `withCallStatus`, and when it is `true`, `fetchEntities` is called.
+`withEntitiesLoadingCall` is reactive—it listens to the `isProductEntitiesLoading()` signal (or `isLoading()` if no collection prop is defined in the `entityConfig`). This signal is added by `withCallStatus`, and when it is `true`, `fetchEntities` is called.
 
 Since in our previous example `withCallStatus` sets the `initialValue` to `'loading'`, the entities will be fetched immediately when the store initializes.
 
@@ -157,11 +157,11 @@ Since in our previous example `withCallStatus` sets the `initialValue` to `'load
 Unlike `withCalls`, which manages its own loading state, `withEntitiesLoadingCall` relies on `withCallStatus` because `callStatus` acts as a communication API between all other `withEntities*` store features.
 
 For example:
-- `withEntitiesRemoteFilter` calls `setProductsLoading()` (or `setLoading()` if no collection) when `filterEntities` is executed, ensuring `fetchEntities` is triggered with the updated filter parameters.
-- `withEntitiesRemotePagination` calls `setProductsLoading()` when more pages need to be loaded.
+- `withEntitiesRemoteFilter` calls `setProductEntitiesLoading()` (or `setLoading()` if no collection) when `filterEntities` is executed, ensuring `fetchEntities` is triggered with the updated filter parameters.
+- `withEntitiesRemotePagination` calls `setProductEntitiesLoading()` when more pages need to be loaded.
 - `withEntitiesRemoteSort` does the same when sorting is required.
 
-In contrast, `withEntitiesLocalFilter` and `withEntitiesLocalSort` do not trigger a new fetch. Instead, they reapply filtering and sorting every time `isProductsLoaded` is `true`.
+In contrast, `withEntitiesLocalFilter` and `withEntitiesLocalSort` do not trigger a new fetch. Instead, they reapply filtering and sorting every time `isProductEntitiesLoaded` is `true`.
 
 Below, you can see a few examples illustrating these interactions.
 
@@ -173,7 +173,7 @@ Notice that in `fetchEntities`, you only need to return either an array of entit
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
@@ -242,16 +242,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-            sortAscending: productsSort().direction === 'asc',
-            sortColumn: productsSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };

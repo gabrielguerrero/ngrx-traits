@@ -29,37 +29,38 @@ import { withEntitiesLoadingCall } from '@ngrx-traits/signals';
 Example using withEntitiesLoadingCall with the withEntitiesRemote\* store features
 
 ```typescript
+const productsEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withEntities(productsEntityConfig),
+  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
   withEntitiesRemoteFilter({
-    entity,
-    collection,
+    ...productsEntityConfig,
     defaultFilter: { name: '' },
   }),
   withEntitiesRemotePagination({
-    entity,
-    collection,
+    ...productsEntityConfig,
     pageSize: 5,
     pagesToCache: 2,
   }),
   withEntitiesRemoteSort({
-    entity,
-    collection,
+    ...productsEntityConfig,
     defaultSort: { field: 'name', direction: 'asc' },
   }),
 
   withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter, productsPagedRequest, productsSort }) => {
+    fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
       return inject(ProductService)
         .getProducts({
-          search: productsFilter().name,
-          take: productsPagedRequest().size,
-          skip: productsPagedRequest().startIndex,
-          sortColumn: productsSort().field,
-          sortAscending: productsSort().direction === 'asc',
+          search: productEntitiesFilter().name,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
+          sortColumn: productEntitiesSort().field,
+          sortAscending: productEntitiesSort().direction === 'asc',
         })
         .pipe(
           map((d) => ({
@@ -74,28 +75,29 @@ export const ProductsRemoteStore = signalStore(
 Example using withEntitiesLoadingCall to with the withEntitiesLocal\* store features
 
 ```typescript
+const productsEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: 'loading' }),
+  withEntities(productsEntityConfig),
+  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
   withEntitiesLocalPagination({
-    entity,
-    collection,
+    ...productsEntityConfig,
     pageSize: 5,
   }),
   withEntitiesLocalFilter({
-    entity,
-    collection,
+    ...productsEntityConfig,
     defaultFilter: { search: '' },
     filterFn: (entity, filter) => !filter?.search || entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
   withEntitiesLocalSort({
-    entity,
-    collection,
+    ...productsEntityConfig,
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall({
-    collection,
+    ...productsEntityConfig,
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()

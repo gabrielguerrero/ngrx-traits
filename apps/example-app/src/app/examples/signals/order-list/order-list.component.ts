@@ -16,7 +16,7 @@ import { OrderStore } from './order-list.store';
     <mat-card>
       <mat-card-content>
       <mat-list role="list">
-        @for (order of store.ordersEntities(); track order.id) {
+        @for (order of store.orderEntities(); track order.id) {
           <mat-list-item
             role="listitem"
             (click)="store.toggleShowDetail(order)"
@@ -25,7 +25,7 @@ import { OrderStore } from './order-list.store';
             <div class="flex gap-4">
               <mat-icon class="expand-icon">
                 {{
-                  store.ordersIdsSelectedMap()[order.id]
+                  store.orderIdsSelectedMap()[order.id]
                     ? 'expand_more'
                     : 'chevron_right'
                 }}
@@ -39,7 +39,7 @@ import { OrderStore } from './order-list.store';
           </mat-list-item>
 
           <!-- Expanded Section (Order Details) -->
-          @if (store.ordersIdsSelectedMap()[order.id]) {
+          @if (store.orderIdsSelectedMap()[order.id]) {
             @if (store.isLoadOrderDetailLoaded(order.id)) {
               <div class="expanded-content ml-12">
                 <mat-list dense>

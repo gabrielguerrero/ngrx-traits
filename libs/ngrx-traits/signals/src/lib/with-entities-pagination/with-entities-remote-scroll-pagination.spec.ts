@@ -304,7 +304,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
   it('with collection should append entities when using load more ', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const collection = 'products';
+      const collection = 'product';
       const Store = signalStore(
         withEntities({ entity, collection }),
         withCallStatus({ collection }),
@@ -316,12 +316,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
         withEntitiesLoadingCall({
           collection,
-          fetchEntities: ({ productsPagedRequest }) => {
+          fetchEntities: ({ productEntitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: productsPagedRequest()?.startIndex,
-              take: productsPagedRequest()?.size,
+              skip: productEntitiesPagedRequest()?.startIndex,
+              take: productEntitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -335,31 +335,31 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
       const store = new Store();
       TestBed.flushEffects();
-      expect(store.productsEntities()).toEqual([]);
-      store.setProductsLoading();
+      expect(store.productEntities()).toEqual([]);
+      store.setProductEntitiesLoading();
       tick();
       // check the first load
-      expect(store.productsEntities().length).toEqual(10);
-      expect(store.productsEntities()).toEqual(mockProducts.slice(0, 10));
-      expect(store.productsPagination().hasMore).toEqual(true);
-      expect(store.productsPagination().pageSize).toEqual(10);
+      expect(store.productEntities().length).toEqual(10);
+      expect(store.productEntities()).toEqual(mockProducts.slice(0, 10));
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      expect(store.productEntitiesPagination().pageSize).toEqual(10);
 
-      store.loadMoreProducts();
+      store.loadMoreProductEntities();
       tick();
       // check the second load
-      expect(store.productsEntities().length).toEqual(20);
-      expect(store.productsEntities()).toEqual(mockProducts.slice(0, 20));
-      expect(store.productsPagination().hasMore).toEqual(true);
-      store.loadMoreProducts();
+      expect(store.productEntities().length).toEqual(20);
+      expect(store.productEntities()).toEqual(mockProducts.slice(0, 20));
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      store.loadMoreProductEntities();
       tick();
-      expect(store.productsEntities().length).toEqual(25);
-      expect(store.productsEntities()).toEqual(mockProducts.slice(0, 25));
-      expect(store.productsPagination().hasMore).toEqual(false);
+      expect(store.productEntities().length).toEqual(25);
+      expect(store.productEntities()).toEqual(mockProducts.slice(0, 25));
+      expect(store.productEntitiesPagination().hasMore).toEqual(false);
     });
   }));
 
   it('with collection should append entities with custom id when using load more ', fakeAsync(() => {
-    const collection = 'products';
+    const collection = 'product';
     type ProductCustom = Omit<Product, 'id'> & { productId: string };
     const config = entityConfig({
       entity: type<ProductCustom>(),
@@ -381,12 +381,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
         withEntitiesLoadingCall({
           ...config,
-          fetchEntities: ({ productsPagedRequest }) => {
+          fetchEntities: ({ productEntitiesPagedRequest }) => {
             let result = [...mockProductsCustom.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: productsPagedRequest()?.startIndex,
-              take: productsPagedRequest()?.size,
+              skip: productEntitiesPagedRequest()?.startIndex,
+              take: productEntitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -400,26 +400,26 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
       const store = new Store();
       TestBed.flushEffects();
-      expect(store.productsEntities()).toEqual([]);
-      store.setProductsLoading();
+      expect(store.productEntities()).toEqual([]);
+      store.setProductEntitiesLoading();
       tick();
       // check the first load
-      expect(store.productsEntities().length).toEqual(10);
-      expect(store.productsEntities()).toEqual(mockProductsCustom.slice(0, 10));
-      expect(store.productsPagination().hasMore).toEqual(true);
-      expect(store.productsPagination().pageSize).toEqual(10);
+      expect(store.productEntities().length).toEqual(10);
+      expect(store.productEntities()).toEqual(mockProductsCustom.slice(0, 10));
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      expect(store.productEntitiesPagination().pageSize).toEqual(10);
 
-      store.loadMoreProducts();
+      store.loadMoreProductEntities();
       tick();
       // check the second load
-      expect(store.productsEntities().length).toEqual(20);
-      expect(store.productsEntities()).toEqual(mockProductsCustom.slice(0, 20));
-      expect(store.productsPagination().hasMore).toEqual(true);
-      store.loadMoreProducts();
+      expect(store.productEntities().length).toEqual(20);
+      expect(store.productEntities()).toEqual(mockProductsCustom.slice(0, 20));
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      store.loadMoreProductEntities();
       tick();
-      expect(store.productsEntities().length).toEqual(25);
-      expect(store.productsEntities()).toEqual(mockProductsCustom.slice(0, 25));
-      expect(store.productsPagination().hasMore).toEqual(false);
+      expect(store.productEntities().length).toEqual(25);
+      expect(store.productEntities()).toEqual(mockProductsCustom.slice(0, 25));
+      expect(store.productEntitiesPagination().hasMore).toEqual(false);
     });
   }));
   it('using next and previous entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
@@ -817,7 +817,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
     it('with collection dataSource result should return all results while iterated', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
-        const collection = 'products';
+        const collection = 'product';
         const Store = signalStore(
           withEntities({ entity, collection }),
           withCallStatus({ collection }),
@@ -829,12 +829,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productsPagedRequest }) => {
+            fetchEntities: ({ productEntitiesPagedRequest }) => {
               let result = [...mockProducts.slice(0, 25)];
               const total = result.length;
               const options = {
-                skip: productsPagedRequest()?.startIndex,
-                take: productsPagedRequest()?.size,
+                skip: productEntitiesPagedRequest()?.startIndex,
+                take: productEntitiesPagedRequest()?.size,
               };
               if (options?.skip || options?.take) {
                 const skip = +(options?.skip ?? 0);
@@ -858,8 +858,8 @@ describe('withEntitiesRemoteScrollPagination', () => {
           end: 10,
         });
 
-        expect(store.productsEntities()).toEqual([]);
-        store.setProductsLoading();
+        expect(store.productEntities()).toEqual([]);
+        store.setProductEntitiesLoading();
         tick(400);
         const list$ = dataSource.connect({ viewChange: collectionViewer });
         let entities: Product[] = [];

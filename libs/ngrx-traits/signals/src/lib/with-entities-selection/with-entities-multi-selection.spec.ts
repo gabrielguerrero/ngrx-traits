@@ -118,7 +118,7 @@ describe('withEntitiesMultiSelection', () => {
   });
 
   describe('with collection', () => {
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity, collection }),
@@ -128,11 +128,11 @@ describe('withEntitiesMultiSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.selectProductsEntities({
+        store.selectProductEntities({
           ids: [mockProducts[4].id, mockProducts[8].id],
         });
-        expect(store.productsIdsSelected()).toEqual(['4', '8']);
-        expect(store.productsEntitiesSelected()).toEqual([
+        expect(store.productIdsSelected()).toEqual(['4', '8']);
+        expect(store.productEntitiesSelected()).toEqual([
           mockProducts[4],
           mockProducts[8],
         ]);
@@ -153,8 +153,8 @@ describe('withEntitiesMultiSelection', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        expect(store.productsIdsSelected()).toEqual(['4', '8']);
-        expect(store.productsEntitiesSelected()).toEqual([
+        expect(store.productIdsSelected()).toEqual(['4', '8']);
+        expect(store.productEntitiesSelected()).toEqual([
           mockProducts[4],
           mockProducts[8],
         ]);
@@ -165,14 +165,14 @@ describe('withEntitiesMultiSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.selectProductsEntities({
+        store.selectProductEntities({
           ids: [mockProducts[4].id, mockProducts[8].id],
         });
-        store.deselectProductsEntities({
+        store.deselectProductEntities({
           ids: [mockProducts[4].id, mockProducts[8].id],
         });
-        expect(store.productsEntitiesSelected()).toEqual([]);
-        expect(store.productsIdsSelected()).toEqual([]);
+        expect(store.productEntitiesSelected()).toEqual([]);
+        expect(store.productIdsSelected()).toEqual([]);
       });
     });
 
@@ -180,12 +180,12 @@ describe('withEntitiesMultiSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.toggleSelectProductsEntities({ id: mockProducts[4].id });
-        expect(store.productsEntitiesSelected()).toEqual([mockProducts[4]]);
-        expect(store.productsIdsSelected()).toEqual(['4']);
-        store.toggleSelectProductsEntities({ id: mockProducts[4].id });
-        expect(store.productsEntitiesSelected()).toEqual([]);
-        expect(store.productsIdsSelected()).toEqual([]);
+        store.toggleSelectProductEntities({ id: mockProducts[4].id });
+        expect(store.productEntitiesSelected()).toEqual([mockProducts[4]]);
+        expect(store.productIdsSelected()).toEqual(['4']);
+        store.toggleSelectProductEntities({ id: mockProducts[4].id });
+        expect(store.productEntitiesSelected()).toEqual([]);
+        expect(store.productIdsSelected()).toEqual([]);
       });
     });
 
@@ -193,16 +193,16 @@ describe('withEntitiesMultiSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.toggleSelectAllProductsEntities();
-        expect(store.isAllProductsSelected()).toEqual('all');
-        store.toggleSelectAllProductsEntities();
-        expect(store.isAllProductsSelected()).toEqual('none');
-        store.toggleSelectProductsEntities({
+        store.toggleSelectAllProductEntities();
+        expect(store.isAllProductEntitiesSelected()).toEqual('all');
+        store.toggleSelectAllProductEntities();
+        expect(store.isAllProductEntitiesSelected()).toEqual('none');
+        store.toggleSelectProductEntities({
           ids: mockProducts.map((p) => p.id),
         });
-        expect(store.isAllProductsSelected()).toEqual('all');
-        store.toggleSelectProductsEntities({ id: mockProducts[4].id });
-        expect(store.isAllProductsSelected()).toEqual('some');
+        expect(store.isAllProductEntitiesSelected()).toEqual('all');
+        store.toggleSelectProductEntities({ id: mockProducts[4].id });
+        expect(store.isAllProductEntitiesSelected()).toEqual('some');
       });
     });
 
@@ -210,18 +210,18 @@ describe('withEntitiesMultiSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.toggleSelectAllProductsEntities();
-        expect(store.isAllProductsSelected()).toEqual('all');
-        store.clearProductsSelection();
-        expect(store.isAllProductsSelected()).toEqual('none');
-        store.toggleSelectProductsEntities({
+        store.toggleSelectAllProductEntities();
+        expect(store.isAllProductEntitiesSelected()).toEqual('all');
+        store.clearProductSelection();
+        expect(store.isAllProductEntitiesSelected()).toEqual('none');
+        store.toggleSelectProductEntities({
           ids: mockProducts.map((p) => p.id),
         });
-        expect(store.isAllProductsSelected()).toEqual('all');
-        store.toggleSelectProductsEntities({ id: mockProducts[4].id });
-        expect(store.isAllProductsSelected()).toEqual('some');
-        store.clearProductsSelection();
-        expect(store.isAllProductsSelected()).toEqual('none');
+        expect(store.isAllProductEntitiesSelected()).toEqual('all');
+        store.toggleSelectProductEntities({ id: mockProducts[4].id });
+        expect(store.isAllProductEntitiesSelected()).toEqual('some');
+        store.clearProductSelection();
+        expect(store.isAllProductEntitiesSelected()).toEqual('none');
       });
     });
   });
