@@ -27,7 +27,7 @@ export type NamedEntitiesRemoteFilterMethods<
       | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,
   ) => void;
 } & {
-  [K in Collection as `reset${Capitalize<string & K>}Filter`]: (options?: {
+  [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: (options?: {
     debounce?: number;
     forceLoad?: boolean;
     skipLoadingCall?: boolean;

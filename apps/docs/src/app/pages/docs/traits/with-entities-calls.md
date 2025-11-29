@@ -80,7 +80,7 @@ import { macPrefix } from 'iron-webcrypto';
 
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
 export const OrderStore = signalStore(
   withEntities(orderEntity),
@@ -116,7 +116,7 @@ export const OrderStore = signalStore(
 We can now use this store in the template like this:
 ```html
 <mat-list role="list">
-  @for (order of store.ordersEntities(); track order.id) {
+  @for (order of store.orderEntities(); track order.id) {
     <mat-list-item
       (click)="store.toggleShowDetail(order)"
     >
@@ -126,7 +126,7 @@ We can now use this store in the template like this:
     </mat-list-item>
 
     <!-- Expanded Section (Order Details) -->
-    @if (store.ordersIdsSelectedMap()[order.id]) {
+    @if (store.orderIdsSelectedMap()[order.id]) {
       @if (store.isLoadOrderDetailLoaded(order.id)) {
         <div class="expanded-content ml-12">
           <mat-list dense>
@@ -150,7 +150,7 @@ In this case you want to do an operation that changes part of the entity, like c
 ```typescript
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
 export const OrderStore = signalStore(
   withEntities(orderEntity),
@@ -216,7 +216,7 @@ The main difference here is that we return undefined in the call to delete the e
 ```typescript
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
 export const OrderStore = signalStore(
   withEntities(orderEntity),
@@ -278,7 +278,7 @@ Generates the following signals for each call defined within the trait
 ```typescript
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
  withEntitiesCalls({
     ...orderEntity,

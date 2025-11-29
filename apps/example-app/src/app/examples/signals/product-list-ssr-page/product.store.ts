@@ -28,7 +28,7 @@ import { ProductService } from '../../services/product.service';
 
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 
 export const ProductsSSRStore = signalStore(
@@ -52,7 +52,7 @@ export const ProductsSSRStore = signalStore(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesSingleSelection(productsEntityConfig),
-  withCalls(({ productsEntitySelected }) => ({
+  withCalls(({ productEntitySelected }) => ({
     loadProductDetail: callConfig({
       call: ({ id }: { id: string }) =>
         inject(ProductService).getProductDetail(id),
@@ -62,7 +62,7 @@ export const ProductsSSRStore = signalStore(
       skipWhen: (param, previousResult) =>
         !param || (!!previousResult && previousResult.id === param?.id),
       // call when selected product changes
-      callWith: productsEntitySelected,
+      callWith: productEntitySelected,
     }),
     checkout: () => inject(OrderService).checkout(),
   })),

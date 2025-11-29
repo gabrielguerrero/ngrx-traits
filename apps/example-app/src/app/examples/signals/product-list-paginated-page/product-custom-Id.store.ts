@@ -20,7 +20,7 @@ import { ProductService } from '../../services/product.service';
 type ProductCustom = Omit<Product, 'id'> & { productId: string };
 const config = entityConfig({
   entity: type<ProductCustom>(),
-  collection: 'products',
+  collection: 'product',
   selectId: (entity) => entity.productId,
 });
 
@@ -48,10 +48,10 @@ export const ProductsLocalStore = signalStore(
   }),
   withEntitiesLoadingCall({
     ...config,
-    fetchEntities: ({ productsFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService)
         .getProducts({
-          search: productsFilter().search,
+          search: productEntitiesFilter().search,
         })
         .pipe(
           map((d) =>

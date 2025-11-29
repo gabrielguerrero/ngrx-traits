@@ -17,7 +17,7 @@ export type EntitiesScrollPaginationState = {
   pagination: ScrollPaginationState;
 };
 export type NamedEntitiesScrollPaginationState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: ScrollPaginationState;
+  [K in Collection as `${K}EntitiesPagination`]: ScrollPaginationState;
 };
 export type EntitiesScrollPaginationComputed<Entity> = {
   entitiesCurrentPage: DeepSignal<{
@@ -37,12 +37,12 @@ export type NamedEntitiesScrollPaginationComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}PagedRequest`]: DeepSignal<{
+  [K in Collection as `${K}EntitiesPagedRequest`]: DeepSignal<{
     startIndex: number;
     size: number;
   }>;
 } & {
-  [K in Collection as `${K}CurrentPage`]: DeepSignal<{
+  [K in Collection as `${K}EntitiesCurrentPage`]: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     pageSize: number;
@@ -86,11 +86,11 @@ export type NamedEntitiesScrollPaginationMethods<
       entities: Entity[];
     }
 > & {
-  [K in Collection as `loadMore${Capitalize<string & K>}`]: () => void;
+  [K in Collection as `loadMore${Capitalize<string & K>}Entities`]: () => void;
 } & {
-  [K in Collection as `load${Capitalize<string & K>}NextPage`]: () => void;
+  [K in Collection as `load${Capitalize<string & K>}EntitiesNextPage`]: () => void;
 } & {
-  [K in Collection as `load${Capitalize<string & K>}PreviousPage`]: () => void;
+  [K in Collection as `load${Capitalize<string & K>}EntitiesPreviousPage`]: () => void;
 } & {
-  [K in Collection as `load${Capitalize<string & K>}FirstPage`]: () => void;
+  [K in Collection as `load${Capitalize<string & K>}EntitiesFirstPage`]: () => void;
 };

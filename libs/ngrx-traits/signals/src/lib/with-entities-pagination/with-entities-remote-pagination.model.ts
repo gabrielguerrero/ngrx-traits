@@ -20,7 +20,7 @@ export type EntitiesPaginationRemoteState = {
   entitiesPagination: PaginationState;
 };
 export type NamedEntitiesPaginationRemoteState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: PaginationState;
+  [K in Collection as `${K}EntitiesPagination`]: PaginationState;
 };
 export type EntitiesPaginationRemoteComputed<Entity> = {
   entitiesCurrentPage: DeepSignal<{
@@ -43,13 +43,13 @@ export type NamedEntitiesPaginationRemoteComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}PagedRequest`]: DeepSignal<{
+  [K in Collection as `${K}EntitiesPagedRequest`]: DeepSignal<{
     startIndex: number;
     size: number;
     page: number;
   }>;
 } & {
-  [K in Collection as `${K}CurrentPage`]: DeepSignal<{
+  [K in Collection as `${K}EntitiesCurrentPage`]: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;
@@ -73,7 +73,7 @@ export type NamedEntitiesPaginationRemoteMethods<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `load${Capitalize<string & K>}Page`]: (options: {
+  [K in Collection as `load${Capitalize<string & K>}EntitiesPage`]: (options: {
     pageIndex: number;
     pageSize?: number;
     skipLoadingCall?: boolean;

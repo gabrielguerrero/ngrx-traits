@@ -20,7 +20,7 @@ import { ProductService } from '../../services/product.service';
  * Example of the store for the product list page but without using any of the ngrx-traits/signals methods, for comparation of code saved.
  */
 const productStore = signalStore(
-  withEntities({ entity: type<Product>(), collection: 'products' }),
+  withEntities({ entity: type<Product>(), collection: 'product' }),
   withState<{
     productsStatus: 'init' | 'loading' | 'loaded' | { error: unknown };
     productsFilter: { name: string };
@@ -61,7 +61,7 @@ const productStore = signalStore(
               tap((res) =>
                 patchState(
                   state,
-                  setAllEntities(res.resultList, { collection: 'products' }),
+                  setAllEntities(res.resultList, { collection: 'product' }),
                 ),
               ),
               catchError((error) => {

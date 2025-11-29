@@ -30,11 +30,11 @@ import { ProductsShopStore } from './products-shop.store';
       >
         Basket
         <mat-icon
-          [matBadge]="store.orderItemsEntities().length"
+          [matBadge]="store.orderItemEntities().length"
           matBadgeColor="warn"
           matBadgeOverlap="false"
           matBadgeSize="small"
-          [matBadgeHidden]="store.orderItemsEntities().length === 0"
+          [matBadgeHidden]="store.orderItemEntities().length === 0"
           >shopping_cart</mat-icon
         >
       </a>

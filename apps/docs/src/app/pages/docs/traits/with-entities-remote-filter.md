@@ -27,7 +27,7 @@ import { withEntitiesRemoteFilter } from '@ngrx-traits/signals';
 ## Examples
 
 ### Filtering a list of entities based on a search term
-In this example we have a list of products and we want to filter them based on a search term, we will use the defaultFilter prop to set the initial filter, and the filterFn to filter the entities based on the search term. The generated `filterProductsEntities` will store the filter and  call `setProductsLoading()` which triggers the `fetchEntities` function, notice we access the filter value in the `fetchEntities` function using the `productsFilter()` signal.
+In this example we have a list of products and we want to filter them based on a search term, we will use the defaultFilter prop to set the initial filter, and the filterFn to filter the entities based on the search term. The generated `filterProductEntities` will store the filter and  call `setProductEntitiesLoading()` which triggers the `fetchEntities` function, notice we access the filter value in the `fetchEntities` function using the `productEntitiesFilter()` signal.
 
 ```typescript
 const entityConfig = entityConfig({
@@ -44,9 +44,9 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productsFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService).getProducts({
-        search: productsFilter().name,
+        search: productEntitiesFilter().name,
       });
     },
   }),
@@ -56,8 +56,8 @@ export const store = signalStore(
 ### Using filter method
 Once you have your store defined you can use the generated filter[Collection]Entities method, ui for the filter is generally some sort of form with one or more field or controls of different kind, you should make your filter object represent those controls, after that, the filter is either connected to a button like 'Apply' , that on press will submit the entire form. In this case be sure to set the debounce to 0, so that the filter is applied immediately.
 ```html
-<form (submit)="store.filterProductsEntities({ filter:{ search: searchControl.value, role: role.value }})">
-    <mat-select #role placeholder="Role" (change)="store.filterProductsEntities({ filter:{ role: $event.target.value }, debounce:0})">
+<form (submit)="store.filterProductEntities({ filter:{ search: searchControl.value, role: role.value }})">
+    <mat-select #role placeholder="Role" (change)="store.filterProductEntities({ filter:{ role: $event.target.value }, debounce:0})">
         <mat-option value="admin">Admin</mat-option>
         <mat-option value="user">User</mat-option>
     </mat-select>
@@ -70,7 +70,7 @@ The second way is where there is no submit button, and the filter is connected t
 <input
     type="text"
     placeholder="Search"
-    (input)="store.filterProductsEntities({ filter:{ search: $event.target.value }, patch: true })"
+    (input)="store.filterProductEntities({ filter:{ search: $event.target.value }, patch: true })"
 ```
 
 ### Mixing with other remote store features
@@ -104,16 +104,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-            sortAscending: productsSort().direction === 'asc',
-            sortColumn: productsSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };
@@ -140,10 +140,10 @@ Generates the following signals
 filter: Signal<FilterType>;
 ```
 
-If collection provided, the following signals are generated, example: **users**
+If collection provided, the following signals are generated, example: **user**
 
 ```typescript
-usersFilter: Signal<FilterType>;
+userFilter: Signal<FilterType>;
 ```
 
 ## Computed
@@ -154,10 +154,10 @@ Generates the following computed signals
 isFilterChanged: Signal<boolean>;
 ```
 
-If collection provided, the following computed signals are generated, example: **users**
+If collection provided, the following computed signals are generated, example: **user**
 
 ```typescript
-isUsersFilterChanged: Signal<boolean>;
+isUserFilterChanged: Signal<boolean>;
 ```
 
 ## Methods
@@ -176,6 +176,6 @@ resetFilter:() => void;
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-filterUsers: ({filter: FilterType, debounce?:number, patch?:boolean, forceLoad:boolean }) => void;
-resetUsersFilter:() => void;
+filterUserEntities: ({filter: FilterType, debounce?:number, patch?:boolean, forceLoad:boolean }) => void;
+resetUserEntitiesFilter:() => void;
 ```

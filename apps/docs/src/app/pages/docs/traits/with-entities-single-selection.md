@@ -26,7 +26,7 @@ import { withEntitiesSingleSelection } from '@ngrx-traits/signals';
 
 const entity = entityConfig({
     entity: type<Product>(),
-    collection: "products"
+    collection: "product"
 })
 
 const store = signalStore(
@@ -39,8 +39,8 @@ To use it in your template:
 <mat-list>
   @for (product of store.productsEntities(); track product.id) {
     <mat-list-item
-      [class.selected]="store.productsEntitySelected() === product"
-      (click)="store.selectProductsEntity(product)"
+      [class.selected]="store.productEntitySelected() === product"
+      (click)="store.selectProductEntity(product)"
     ><span matListItemTitle
     >#{{ product.id }} {{ product.name }}</span
     >
@@ -56,7 +56,7 @@ You can mix this feature with other local or remote features like withEntitiesLo
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
-  collection: 'products',
+  collection: 'product',
 });
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },

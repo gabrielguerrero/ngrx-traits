@@ -166,7 +166,7 @@ import { signalStoreFeature } from '@ngrx/signals';
 function withProductsList() {
   const productsEntityConfig = entityConfig({
     entity: type<Product>(),
-    collection: 'products',
+    collection: 'product',
   });
   return signalStoreFeature(
     // following are not required, just an example it can have anything
@@ -184,7 +184,7 @@ function withProductsList() {
 function withOrderList() {
   const ordersEntityConfig = entityConfig({
     entity: type<Order>(),
-    collection: 'orders',
+    collection: 'order',
   });
   return signalStoreFeature(
     // following are not required, just an example it can have anything
