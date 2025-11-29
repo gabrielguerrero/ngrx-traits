@@ -13,7 +13,7 @@ export type EntitiesSortState<Entity> = {
   entitiesSort: Sort<Entity>;
 };
 export type NamedEntitiesSortState<Entity, Collection extends string> = {
-  [K in Collection as `${K}Sort`]: Sort<Entity>;
+  [K in Collection as `${K}EntitiesSort`]: Sort<Entity>;
 };
 export type EntitiesSortMethods<Entity> = {
   sortEntities: (

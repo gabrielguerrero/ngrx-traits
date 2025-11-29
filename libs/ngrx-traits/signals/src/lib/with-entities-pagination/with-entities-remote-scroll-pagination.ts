@@ -85,12 +85,12 @@ import {
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = 'product';
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities and withCallStatus
  *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   withCallStatus({ collection, initialValue: 'loading' }),
  *
  *   withEntitiesRemoteScrollPagination({
  *     entity,
@@ -102,11 +102,11 @@ import {
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productsPagedRequest }) => {
+ *     fetchEntities: ({ productPagedRequest }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           take: productsPagedRequest().size,
- *           skip: productsPagedRequest().startIndex,
+ *           take: productPagedRequest().size,
+ *           skip: productPagedRequest().startIndex,
  *         }).pipe(
  *           map((d) => ({
  *             entities: d.resultList,
@@ -116,23 +116,23 @@ import {
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
+ * // withHooks(({ productEntitiesCallStatus, setProductEntitiesError, setProductPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (isProductsLoading()) {
+ * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
- * //                take: productsPagedRequest().size,
- * //                skip: productsPagedRequest().startIndex,
+ * //                take: productPagedRequest().size,
+ * //                skip: productPagedRequest().startIndex,
  * //              })
  * //           .pipe(
  * //             takeUntilDestroyed(),
  * //             tap((res) =>
  * //                 // total is not required, you can use hasMore or none see docs
- * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
+ * //                 setProductPagedResult({ entities: res.resultList, total: res.total } )
  * //             ),
  * //             catchError((error) => {
- * //               setProductsError(error);
+ * //               setProductEntitiesError(error);
  * //               return EMPTY;
  * //             }),
  * //           )
@@ -144,18 +144,18 @@ import {
  *
  *  // in your component add
  *  store = inject(ProductsRemoteStore);
- *  dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
+ *  dataSource = getInfiniteScrollDataSource(store, { collection: 'product' }) // pass this to your cdkVirtualFor see examples section
  *   // generates the following signals
- *   store.productsPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
+ *   store.productEntitiesPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  *  // generates the following computed signals
- *  store.productsCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productsPagedRequest // { startIndex: number, size: number }
+ *  store.productEntitiesCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productEntitiesPagedRequest // { startIndex: number, size: number }
  *  // generates the following methods
- *  store.loadProductsNextPage() // loads next page
- *  store.loadProductsPreviousPage() // loads previous page
- *  store.loadProductsFirstPage() // loads first page
- *  store.loadMoreProducts() // loads more entities (used for infinite scroll datasource)
- *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.loadProductEntitiesNextPage() // loads next page
+ *  store.loadProductEntitiesPreviousPage() // loads previous page
+ *  store.loadProductEntitiesFirstPage() // loads first page
+ *  store.loadMoreProductEntities() // loads more entities (used for infinite scroll datasource)
+ *  store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Input extends SignalStoreFeatureResult,
@@ -183,8 +183,8 @@ export function withEntitiesRemoteScrollPagination<
       : {
           state: NamedEntityState<Entity, Collection>;
           props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<Collection>;
-          methods: NamedCallStatusMethods<Collection>;
+            NamedCallStatusComputed<`${Collection}Entities`>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`>;
         }),
   Collection extends ''
     ? {
@@ -205,7 +205,7 @@ export function withEntitiesRemoteScrollPagination<
       ...config
     } = getFeatureConfig(configFactory, store);
     const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
-      prop: config.collection,
+      collection: config.collection,
     });
     const { entitiesKey } = getWithEntitiesKeys(config);
 

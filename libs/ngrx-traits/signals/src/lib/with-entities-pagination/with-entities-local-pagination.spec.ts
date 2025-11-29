@@ -164,7 +164,7 @@ describe('withEntitiesLocalPagination', () => {
   });
 
   it('with collection entitiesCurrentPage should split entities in the correct pages', () => {
-    const collection = 'products';
+    const collection = 'product';
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity, collection }),
@@ -177,43 +177,43 @@ describe('withEntitiesLocalPagination', () => {
       setAllEntities(mockProducts.slice(0, 25), { collection }),
     );
     // check the first page
-    expect(store.productsCurrentPage().entities.length).toEqual(10);
-    expect(store.productsCurrentPage().entities).toEqual(
+    expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
+    expect(store.productEntitiesCurrentPage().entities).toEqual(
       mockProducts.slice(0, 10),
     );
-    expect(store.productsCurrentPage().pageIndex).toEqual(0);
-    expect(store.productsCurrentPage().pageSize).toEqual(10);
-    expect(store.productsCurrentPage().pagesCount).toEqual(3);
-    expect(store.productsCurrentPage().total).toEqual(25);
-    expect(store.productsCurrentPage().hasPrevious).toEqual(false);
-    expect(store.productsCurrentPage().hasNext).toEqual(true);
+    expect(store.productEntitiesCurrentPage().pageIndex).toEqual(0);
+    expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+    expect(store.productEntitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.productEntitiesCurrentPage().total).toEqual(25);
+    expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(false);
+    expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
 
-    store.loadProductsPage({ pageIndex: 1 });
+    store.loadProductEntitiesPage({ pageIndex: 1 });
     // check the second page
-    expect(store.productsCurrentPage().entities.length).toEqual(10);
-    expect(store.productsCurrentPage().entities).toEqual(
+    expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
+    expect(store.productEntitiesCurrentPage().entities).toEqual(
       mockProducts.slice(10, 20),
     );
-    expect(store.productsCurrentPage().pageIndex).toEqual(1);
-    expect(store.productsCurrentPage().pageSize).toEqual(10);
-    expect(store.productsCurrentPage().pagesCount).toEqual(3);
-    expect(store.productsCurrentPage().total).toEqual(25);
-    expect(store.productsCurrentPage().hasPrevious).toEqual(true);
-    expect(store.productsCurrentPage().hasNext).toEqual(true);
+    expect(store.productEntitiesCurrentPage().pageIndex).toEqual(1);
+    expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+    expect(store.productEntitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.productEntitiesCurrentPage().total).toEqual(25);
+    expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
+    expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
 
-    store.loadProductsPage({ pageIndex: 2 });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
 
     // check the third page
-    expect(store.productsCurrentPage().entities.length).toEqual(5);
-    expect(store.productsCurrentPage().entities).toEqual(
+    expect(store.productEntitiesCurrentPage().entities.length).toEqual(5);
+    expect(store.productEntitiesCurrentPage().entities).toEqual(
       mockProducts.slice(20, 25),
     );
-    expect(store.productsCurrentPage().pageIndex).toEqual(2);
-    expect(store.productsCurrentPage().pageSize).toEqual(10);
-    expect(store.productsCurrentPage().pagesCount).toEqual(3);
-    expect(store.productsCurrentPage().total).toEqual(25);
-    expect(store.productsCurrentPage().hasPrevious).toEqual(true);
-    expect(store.productsCurrentPage().hasNext).toEqual(false);
+    expect(store.productEntitiesCurrentPage().pageIndex).toEqual(2);
+    expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+    expect(store.productEntitiesCurrentPage().pagesCount).toEqual(3);
+    expect(store.productEntitiesCurrentPage().total).toEqual(25);
+    expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
+    expect(store.productEntitiesCurrentPage().hasNext).toEqual(false);
   });
 
   it('should resetPage when filter is executed', fakeAsync(() => {

@@ -31,7 +31,7 @@ export function getEntitiesMultiSelectionKeys(config?: {
       ? `clear${capitalizedProp}Selection`
       : 'clearEntitiesSelection',
     isAllEntitiesSelectedKey: collection
-      ? `isAll${capitalizedProp}Selected`
+      ? `isAll${capitalizedProp}EntitiesSelected`
       : 'isAllEntitiesSelected',
   };
 }

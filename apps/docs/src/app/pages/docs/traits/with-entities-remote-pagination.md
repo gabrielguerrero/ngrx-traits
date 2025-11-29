@@ -30,7 +30,7 @@ In this example we have a list of products and we want to paginate them, we will
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection: 'products'
+  collection: 'product'
 });
 
 export const store = signalStore(
@@ -43,11 +43,11 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productsPagedRequest }) => {
+    fetchEntities: ({ productEntitiesPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productsPagedRequest().size,
-          skip: productsPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
         })
         .pipe(
           map((d) => ({
@@ -62,15 +62,15 @@ export const store = signalStore(
 Now we use it in a component, the generated usersCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
 
 ```html
-@for (user of store.productsCurrentPage.entities(); track user.id){
+@for (user of store.productEntitiesCurrentPage.entities(); track user.id){
   {{ user.name }}
 }
 <mat-paginator
   [pageSizeOptions]="[5, 10, 25, 100]"
-  [length]="store.productsCurrentPage.total()"
-  [pageSize]="store.productsCurrentPage.pageSize()"
-  [pageIndex]="store.productsCurrentPage.pageIndex()"
-  (page)="store.loadProductsPage($event)"
+  [length]="store.productEntitiesCurrentPage.total()"
+  [pageSize]="store.productEntitiesCurrentPage.pageSize()"
+  [pageIndex]="store.productEntitiesCurrentPage.pageIndex()"
+  (page)="store.loadProductEntitiesPage($event)"
 ></mat-paginator>
 ```
 
@@ -105,16 +105,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-            sortAscending: productsSort().direction === 'asc',
-            sortColumn: productsSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };
@@ -180,7 +180,7 @@ If collection provided, the following methods are generated, example: **users**
 
 ```typescript
 // loads the page and sets the requestPage to the pageIndex
-loadUsersPage: (options:{ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) => void;
+loadUserPage: (options:{ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) => void;
 // appends the entities to the cache of entities sets the total
-setUsersPagedResult:(entities: User[], total: number) => void;
+setUserPagedResult:(entities: User[], total: number) => void;
 ```

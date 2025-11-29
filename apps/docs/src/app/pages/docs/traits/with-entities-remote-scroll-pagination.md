@@ -30,7 +30,7 @@ In this example we have a list of products and we want the to get more pages whi
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection: "products"
+  collection: "product"
 });
 
 export const store = signalStore(
@@ -46,11 +46,11 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
      ...entityConfig,
-    fetchEntities: ({ productsPagedRequest }) => {
+    fetchEntities: ({ productEntitiesPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productsPagedRequest().size,
-          skip: productsPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
         }).pipe(
           map((d) => ({
             entities: d.resultList,
@@ -67,7 +67,7 @@ In your component you will need a data source if using angular cdk scroll direct
 ```typescript
  // in your component add
  store = inject(ProductsRemoteStore);
- dataSource = getInfiniteScrollDataSource(store, { collection: 'products' }) // pass this to your cdkVirtualFor see examples section
+ dataSource = getInfiniteScrollDataSource(store, { collection: 'product' }) // pass this to your cdkVirtualFor see examples section
 // pass the dataSource to your cdkVirtualFor
 ```
 
@@ -120,16 +120,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productsPagedRequest, productsFilter, productsSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productsFilter().search,
-            skip: productsPagedRequest().startIndex,
-            take: productsPagedRequest().size,
-            sortAscending: productsSort().direction === 'asc',
-            sortColumn: productsSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };
@@ -174,11 +174,11 @@ entitiesCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: num
 entitiesPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
 ```
 
-If collection provided, the following computed signals are generated, example: **users**
+If collection provided, the following computed signals are generated, example: **user**
 
 ```typescript
-usersCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
-usersPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
+userCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
+userPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
 ```
 
 ## Methods
@@ -196,15 +196,15 @@ store.loadMoreEntities()
 setEntitiesPagedResult:(entities: User[], total?: number, hasMore?: boolean) => void;
 ```
 
-If collection provided, the following methods are generated, example: **users**
+If collection provided, the following methods are generated, example: **user**
 
 ```typescript
 // loads the page and sets the requestPage to the pageIndex
-loadUsersNextPage: () => void;
+loadUserNextPage: () => void;
 // loads previous page
-loadUsersPreviousPage: () => void;
+loadUserPreviousPage: () => void;
 // loads more entities (used for infinite scroll datasource)
-store.loadMoreUsers()
+store.loadMoreUser()
 // appends the entities to the cache of entities sets the total
 setUsersPagedResult:(entities: User[], total?: number, hasMore?: boolean) => void;
 ```

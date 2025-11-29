@@ -14,7 +14,7 @@ import { OrderService } from '../../services/order.service';
 
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
 export const OrderStore = signalStore(
   withEntities(orderEntity),
@@ -52,7 +52,7 @@ export const OrderStore = signalStore(
   }),
   withMethods((store) => ({
     toggleShowDetail(order: OrderSummary) {
-      store.toggleSelectOrdersEntities(order);
+      store.toggleSelectOrderEntities(order);
       // only load the order detail if it is not loaded yet, this can be avoided by using the skipWhen option in the call
       if (!store.isLoadOrderDetailLoaded(order)) {
         store.loadOrderDetail(order);

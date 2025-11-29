@@ -24,7 +24,7 @@ import { sortData } from '../with-entities-sort/with-entities-local-sort.util';
 
 describe('withEntitiesSyncToRouteQueryParams', () => {
   const entity = type<Product>();
-  const collection = 'products';
+  const collection = 'product';
 
   const remoteStoreFeature = ({ load }: { load?: Subject<boolean> } = {}) => {
     return signalStoreFeature(
@@ -164,7 +164,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
   const localCollectionStoreFeature2 = ({
     load,
   }: { load?: Subject<boolean> } = {}) => {
-    const collection = 'orders';
+    const collection = 'order';
     return signalStoreFeature(
       signalStoreFeature(
         withEntities({ entity, collection }),
@@ -752,41 +752,41 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     const { store, router } = init({
       Store,
       queryParams: {
-        'products-page': '2',
-        'products-filter': JSON.stringify({ search: '', foo: 'bar' }),
-        'products-sortBy': 'description',
-        'products-sortDirection': 'desc',
-        'products-selectedId': '2',
+        'product-page': '2',
+        'product-filter': JSON.stringify({ search: '', foo: 'bar' }),
+        'product-sortBy': 'description',
+        'product-sortDirection': 'desc',
+        'product-selectedId': '2',
       },
     });
     TestBed.flushEffects();
     load.next(true);
     tick(400);
-    expect(store.productsFilter()).toEqual({ search: '', foo: 'bar' });
-    expect(store.productsSort()).toEqual({
+    expect(store.productEntitiesFilter()).toEqual({ search: '', foo: 'bar' });
+    expect(store.productEntitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
-    expect(store.productsIdSelected()).toEqual('2');
-    expect(store.productsPagination().currentPage).toEqual(1);
+    expect(store.productIdSelected()).toEqual('2');
+    expect(store.productEntitiesPagination().currentPage).toEqual(1);
     // Act
-    store.filterProductsEntities({
+    store.filterProductEntities({
       filter: { search: 'a', foo: 'bar2' },
       forceLoad: true,
     });
-    store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } });
-    store.selectProductsEntity({ id: '35' });
-    store.loadProductsPage({ pageIndex: 2 });
+    store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
+    store.selectProductEntity({ id: '35' });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
-        'products-page': '3',
-        'products-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
-        'products-sortBy': 'name',
-        'products-sortDirection': 'asc',
-        'products-selectedId': '35',
+        'product-page': '3',
+        'product-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
+        'product-sortBy': 'name',
+        'product-sortDirection': 'asc',
+        'product-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
     });
@@ -813,13 +813,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     load.next(true);
     tick(400);
     // Act
-    store.filterProductsEntities({
+    store.filterProductEntities({
       filter: { search: 'a', foo: 'bar2' },
       forceLoad: true,
     });
-    store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } });
-    store.selectProductsEntity({ id: '35' });
-    store.loadProductsPage({ pageIndex: 2 });
+    store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
+    store.selectProductEntity({ id: '35' });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
@@ -875,68 +875,68 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       localCollectionStoreFeature({ load }),
       withEntitiesSyncToRouteQueryParams({ entity, collection }),
       localCollectionStoreFeature2({ load: load2 }),
-      withEntitiesSyncToRouteQueryParams({ entity, collection: 'orders' }),
+      withEntitiesSyncToRouteQueryParams({ entity, collection: 'order' }),
     );
     const { store, router } = init({
       Store,
       queryParams: {
-        'products-page': '2',
-        'products-filter': JSON.stringify({ search: '', foo: 'bar' }),
-        'products-sortBy': 'description',
-        'products-sortDirection': 'desc',
-        'products-selectedId': '2',
-        'orders-page': '2',
-        'orders-filter': JSON.stringify({ search: '', foo: 'bar2' }),
-        'orders-sortBy': 'description',
-        'orders-sortDirection': 'desc',
-        'orders-selectedId': '2',
+        'product-page': '2',
+        'product-filter': JSON.stringify({ search: '', foo: 'bar' }),
+        'product-sortBy': 'description',
+        'product-sortDirection': 'desc',
+        'product-selectedId': '2',
+        'order-page': '2',
+        'order-filter': JSON.stringify({ search: '', foo: 'bar2' }),
+        'order-sortBy': 'description',
+        'order-sortDirection': 'desc',
+        'order-selectedId': '2',
       },
     });
     TestBed.flushEffects();
     load.next(true);
     load2.next(true);
     tick(400);
-    expect(store.productsFilter()).toEqual({ search: '', foo: 'bar' });
-    expect(store.productsSort()).toEqual({
+    expect(store.productEntitiesFilter()).toEqual({ search: '', foo: 'bar' });
+    expect(store.productEntitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
-    expect(store.productsIdSelected()).toEqual('2');
-    expect(store.productsPagination().currentPage).toEqual(1);
+    expect(store.productIdSelected()).toEqual('2');
+    expect(store.productEntitiesPagination().currentPage).toEqual(1);
 
-    expect(store.ordersFilter()).toEqual({ search: '', foo: 'bar2' });
-    expect(store.ordersSort()).toEqual({
+    expect(store.orderEntitiesFilter()).toEqual({ search: '', foo: 'bar2' });
+    expect(store.orderEntitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
-    expect(store.ordersIdSelected()).toEqual('2');
-    expect(store.ordersPagination().currentPage).toEqual(1);
+    expect(store.orderIdSelected()).toEqual('2');
+    expect(store.orderEntitiesPagination().currentPage).toEqual(1);
     // Act
-    store.filterProductsEntities({
+    store.filterProductEntities({
       filter: { search: 'a', foo: 'bar2' },
       forceLoad: true,
     });
-    store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } });
-    store.selectProductsEntity({ id: '35' });
-    store.loadProductsPage({ pageIndex: 2 });
+    store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
+    store.selectProductEntity({ id: '35' });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
 
-    store.filterOrdersEntities({
+    store.filterOrderEntities({
       filter: { search: 'a', foo: 'bar2' },
       forceLoad: true,
     });
-    store.sortOrdersEntities({ sort: { field: 'name', direction: 'asc' } });
-    store.selectOrdersEntity({ id: '35' });
-    store.loadOrdersPage({ pageIndex: 2 });
+    store.sortOrderEntities({ sort: { field: 'name', direction: 'asc' } });
+    store.selectOrderEntity({ id: '35' });
+    store.loadOrderEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
-        'products-page': '3',
-        'products-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
-        'products-sortBy': 'name',
-        'products-sortDirection': 'asc',
-        'products-selectedId': '35',
+        'product-page': '3',
+        'product-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
+        'product-sortBy': 'name',
+        'product-sortDirection': 'asc',
+        'product-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
     });
@@ -944,11 +944,11 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
-        'orders-page': '3',
-        'orders-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
-        'orders-sortBy': 'name',
-        'orders-sortDirection': 'asc',
-        'orders-selectedId': '35',
+        'order-page': '3',
+        'order-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
+        'order-sortBy': 'name',
+        'order-sortDirection': 'asc',
+        'order-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
     });
