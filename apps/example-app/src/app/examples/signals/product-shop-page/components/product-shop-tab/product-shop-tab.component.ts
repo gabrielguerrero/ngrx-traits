@@ -22,14 +22,14 @@ import { ProductsShopStore } from '../../products-shop.store';
         <mat-card-content>
           <product-search-form
             class="m-2"
-            [searchProduct]="store.productFilter()"
+            [searchProduct]="store.productEntitiesFilter()"
             (searchProductChange)="filter($event)"
           />
-          @if (store.productCurrentPage().isLoading) {
+          @if (store.productEntitiesCurrentPage().isLoading) {
             <mat-spinner />
           } @else {
             <product-list
-              [list]="store.productCurrentPage().entities"
+              [list]="store.productEntitiesCurrentPage().entities"
               [selectedProduct]="store.productEntitySelected()"
               (selectProduct)="select($event)"
               [selectedSort]="materialSort()"
@@ -37,10 +37,10 @@ import { ProductsShopStore } from '../../products-shop.store';
             />
             <mat-paginator
               [pageSizeOptions]="[5, 10, 25, 100]"
-              [length]="store.productCurrentPage().total"
-              [pageSize]="store.productCurrentPage().pageSize"
-              [pageIndex]="store.productCurrentPage().pageIndex"
-              (page)="store.loadProductPage($event)"
+              [length]="store.productEntitiesCurrentPage().total"
+              [pageSize]="store.productEntitiesCurrentPage().pageSize"
+              [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+              (page)="store.loadProductEntitiesPage($event)"
             />
           }
         </mat-card-content>
@@ -92,8 +92,8 @@ export class ProductShopTabComponent {
 
   materialSort = computed(() => {
     return {
-      active: this.store.productSort().field as keyof Product,
-      direction: this.store.productSort().direction,
+      active: this.store.productEntitiesSort().field as keyof Product,
+      direction: this.store.productEntitiesSort().direction,
     };
   });
   select({ id }: Product) {

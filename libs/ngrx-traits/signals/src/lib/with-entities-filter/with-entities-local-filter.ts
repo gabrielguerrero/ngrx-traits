@@ -80,7 +80,7 @@ import {
  *  );
  *
  * // generates the following signals
- *  store.productFilter // { search: string }
+ *  store.productEntitiesFilter // { search: string }
  *  // generates the following methods
  *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
  *  store.resetProductsFilter  // () => void

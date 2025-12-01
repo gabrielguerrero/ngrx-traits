@@ -50,9 +50,9 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService).getProducts({
-        categoryId: productFilter().categoryId,
+        categoryId: productEntitiesFilter().categoryId,
       });
     },
   }),
@@ -123,9 +123,9 @@ export const ProductsLocalStore = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService).getProducts({
-        categoryId: productFilter().categoryId,
+        categoryId: productEntitiesFilter().categoryId,
       });
     },
   }),

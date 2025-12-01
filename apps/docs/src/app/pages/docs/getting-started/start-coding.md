@@ -135,8 +135,8 @@ export const ProductsLocalStore = signalStore(
   // 👆 adds signals isProductEntitiesLoading(), isProductEntitiesLoaded(), productEntitiesError()
   // and methods setProductEntitiesLoading() setProductEntitiesLoaded(), setProductEntitiesError(error)
   withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
-  // 👆 adds signal productCurrentPage()
-  // and method loadProductPage({pageIndex: number})"
+  // 👆 adds signal productEntitiesCurrentPage()
+  // and method loadProductEntitiesPage({pageIndex: number})"
   withHooks(({ setProductEntitiesLoaded, setProductEntitiesError, ...store }) => ({
     onInit: async () => {
       const productService = inject(ProductService);

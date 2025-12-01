@@ -20,13 +20,13 @@ export function getWithEntitiesLocalPaginationKeys(config?: {
   const capitalizedProp = collection && capitalize(collection);
   return {
     paginationKey: collection
-      ? `${config.collection}Pagination`
+      ? `${config.collection}EntitiesPagination`
       : 'entitiesPagination',
     entitiesCurrentPageKey: collection
-      ? `${config.collection}CurrentPage`
+      ? `${config.collection}EntitiesCurrentPage`
       : 'entitiesCurrentPage',
     loadEntitiesPageKey: collection
-      ? `load${capitalizedProp}Page`
+      ? `load${capitalizedProp}EntitiesPage`
       : 'loadEntitiesPage',
   };
 }

@@ -43,11 +43,11 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productPagedRequest }) => {
+    fetchEntities: ({ productEntitiesPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productPagedRequest().size,
-          skip: productPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
         })
         .pipe(
           map((d) => ({
@@ -62,15 +62,15 @@ export const store = signalStore(
 Now we use it in a component, the generated usersCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
 
 ```html
-@for (user of store.productCurrentPage.entities(); track user.id){
+@for (user of store.productEntitiesCurrentPage.entities(); track user.id){
   {{ user.name }}
 }
 <mat-paginator
   [pageSizeOptions]="[5, 10, 25, 100]"
-  [length]="store.productCurrentPage.total()"
-  [pageSize]="store.productCurrentPage.pageSize()"
-  [pageIndex]="store.productCurrentPage.pageIndex()"
-  (page)="store.loadProductPage($event)"
+  [length]="store.productEntitiesCurrentPage.total()"
+  [pageSize]="store.productEntitiesCurrentPage.pageSize()"
+  [pageIndex]="store.productEntitiesCurrentPage.pageIndex()"
+  (page)="store.loadProductEntitiesPage($event)"
 ></mat-paginator>
 ```
 
@@ -105,16 +105,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productPagedRequest, productFilter, productSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productFilter().search,
-            skip: productPagedRequest().startIndex,
-            take: productPagedRequest().size,
-            sortAscending: productSort().direction === 'asc',
-            sortColumn: productSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };

@@ -46,11 +46,11 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
      ...entityConfig,
-    fetchEntities: ({ productPagedRequest }) => {
+    fetchEntities: ({ productEntitiesPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productPagedRequest().size,
-          skip: productPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
         }).pipe(
           map((d) => ({
             entities: d.resultList,
@@ -120,16 +120,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productPagedRequest, productFilter, productSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productFilter().search,
-            skip: productPagedRequest().startIndex,
-            take: productPagedRequest().size,
-            sortAscending: productSort().direction === 'asc',
-            sortColumn: productSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };

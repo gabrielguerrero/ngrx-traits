@@ -455,8 +455,8 @@ describe('withEntitiesHybridFilter', () => {
         patchState(store, setAllEntities(mockProducts, { collection }));
         store.setProductEntitiesLoaded();
         tick(400);
-        store.loadProductPage({ pageIndex: 3 });
-        expect(store.productCurrentPage().pageIndex).toEqual(3);
+        store.loadProductEntitiesPage({ pageIndex: 3 });
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
 
         store.filterProductEntities({
           filter: { search: 'zero' },
@@ -480,11 +480,11 @@ describe('withEntitiesHybridFilter', () => {
             categoryId: 'gamecube',
           },
         ]);
-        expect(store.productFilter()).toEqual({
+        expect(store.productEntitiesFilter()).toEqual({
           search: 'zero',
           categoryId: 'snes',
         });
-        expect(store.productFilter.search()).toEqual('zero');
+        expect(store.productEntitiesFilter.search()).toEqual('zero');
       });
     }));
 
@@ -924,21 +924,21 @@ describe('withEntitiesHybridFilter', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productFilter }) => {
+            fetchEntities: ({ productEntitiesFilter }) => {
               let result = [...mockProducts];
-              if (productFilter()?.search) {
+              if (productEntitiesFilter()?.search) {
                 result = mockProducts.filter((entity) =>
-                  productFilter()?.search
+                  productEntitiesFilter()?.search
                     ? entity.name
                         .toLowerCase()
-                        .includes(productFilter()?.search.toLowerCase())
+                        .includes(productEntitiesFilter()?.search.toLowerCase())
                     : false,
                 );
               }
-              if (productFilter()?.categoryId) {
+              if (productEntitiesFilter()?.categoryId) {
                 result = result.filter(
                   (entity) =>
-                    entity.categoryId === productFilter()?.categoryId,
+                    entity.categoryId === productEntitiesFilter()?.categoryId,
                 );
               }
               return of({ entities: result, total: result.length });
@@ -947,9 +947,9 @@ describe('withEntitiesHybridFilter', () => {
         );
         const store = new Store();
         TestBed.flushEffects();
-        store.loadProductPage({ pageIndex: 3 });
+        store.loadProductEntitiesPage({ pageIndex: 3 });
         tick(400);
-        expect(store.productCurrentPage().pageIndex).toEqual(3);
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
 
         store.filterProductEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
@@ -966,7 +966,7 @@ describe('withEntitiesHybridFilter', () => {
             categoryId: 'gamecube',
           },
         ]);
-        expect(store.productFilter()).toEqual({
+        expect(store.productEntitiesFilter()).toEqual({
           search: 'zero',
           categoryId: 'gamecube',
         });
@@ -1002,12 +1002,12 @@ describe('withEntitiesHybridFilter', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productFilter }) => {
+            fetchEntities: ({ productEntitiesFilter }) => {
               let result = [...mockProducts];
-              if (productFilter()?.categoryId) {
+              if (productEntitiesFilter()?.categoryId) {
                 result = mockProducts.filter(
                   (entity) =>
-                    entity.categoryId === productFilter()?.categoryId,
+                    entity.categoryId === productEntitiesFilter()?.categoryId,
                 );
               }
               response = result;

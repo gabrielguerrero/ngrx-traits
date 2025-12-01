@@ -316,12 +316,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
         withEntitiesLoadingCall({
           collection,
-          fetchEntities: ({ productPagedRequest }) => {
+          fetchEntities: ({ productEntitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: productPagedRequest()?.startIndex,
-              take: productPagedRequest()?.size,
+              skip: productEntitiesPagedRequest()?.startIndex,
+              take: productEntitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -341,20 +341,20 @@ describe('withEntitiesRemoteScrollPagination', () => {
       // check the first load
       expect(store.productEntities().length).toEqual(10);
       expect(store.productEntities()).toEqual(mockProducts.slice(0, 10));
-      expect(store.productPagination().hasMore).toEqual(true);
-      expect(store.productPagination().pageSize).toEqual(10);
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      expect(store.productEntitiesPagination().pageSize).toEqual(10);
 
-      store.loadMoreProduct();
+      store.loadMoreProductEntities();
       tick();
       // check the second load
       expect(store.productEntities().length).toEqual(20);
       expect(store.productEntities()).toEqual(mockProducts.slice(0, 20));
-      expect(store.productPagination().hasMore).toEqual(true);
-      store.loadMoreProduct();
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      store.loadMoreProductEntities();
       tick();
       expect(store.productEntities().length).toEqual(25);
       expect(store.productEntities()).toEqual(mockProducts.slice(0, 25));
-      expect(store.productPagination().hasMore).toEqual(false);
+      expect(store.productEntitiesPagination().hasMore).toEqual(false);
     });
   }));
 
@@ -381,12 +381,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
         withEntitiesLoadingCall({
           ...config,
-          fetchEntities: ({ productPagedRequest }) => {
+          fetchEntities: ({ productEntitiesPagedRequest }) => {
             let result = [...mockProductsCustom.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: productPagedRequest()?.startIndex,
-              take: productPagedRequest()?.size,
+              skip: productEntitiesPagedRequest()?.startIndex,
+              take: productEntitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -406,20 +406,20 @@ describe('withEntitiesRemoteScrollPagination', () => {
       // check the first load
       expect(store.productEntities().length).toEqual(10);
       expect(store.productEntities()).toEqual(mockProductsCustom.slice(0, 10));
-      expect(store.productPagination().hasMore).toEqual(true);
-      expect(store.productPagination().pageSize).toEqual(10);
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      expect(store.productEntitiesPagination().pageSize).toEqual(10);
 
-      store.loadMoreProduct();
+      store.loadMoreProductEntities();
       tick();
       // check the second load
       expect(store.productEntities().length).toEqual(20);
       expect(store.productEntities()).toEqual(mockProductsCustom.slice(0, 20));
-      expect(store.productPagination().hasMore).toEqual(true);
-      store.loadMoreProduct();
+      expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      store.loadMoreProductEntities();
       tick();
       expect(store.productEntities().length).toEqual(25);
       expect(store.productEntities()).toEqual(mockProductsCustom.slice(0, 25));
-      expect(store.productPagination().hasMore).toEqual(false);
+      expect(store.productEntitiesPagination().hasMore).toEqual(false);
     });
   }));
   it('using next and previous entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
@@ -829,12 +829,12 @@ describe('withEntitiesRemoteScrollPagination', () => {
           }),
           withEntitiesLoadingCall({
             collection,
-            fetchEntities: ({ productPagedRequest }) => {
+            fetchEntities: ({ productEntitiesPagedRequest }) => {
               let result = [...mockProducts.slice(0, 25)];
               const total = result.length;
               const options = {
-                skip: productPagedRequest()?.startIndex,
-                take: productPagedRequest()?.size,
+                skip: productEntitiesPagedRequest()?.startIndex,
+                take: productEntitiesPagedRequest()?.size,
               };
               if (options?.skip || options?.take) {
                 const skip = +(options?.skip ?? 0);

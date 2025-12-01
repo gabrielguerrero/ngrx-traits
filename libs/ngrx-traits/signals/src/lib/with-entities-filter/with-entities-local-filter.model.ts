@@ -8,8 +8,8 @@ export type EntitiesFilterComputed<Filter> = {
 };
 
 export type NamedEntitiesFilterComputed<Collection extends string, Filter> = {
-  [K in Collection as `is${Capitalize<string & K>}FilterChanged`]: Signal<boolean>;
-} & { [K in Collection as `${K}Filter`]: DeepSignal<Filter> };
+  [K in Collection as `is${Capitalize<string & K>}EntitiesFilterChanged`]: Signal<boolean>;
+} & { [K in Collection as `${K}EntitiesFilter`]: DeepSignal<Filter> };
 
 export type FilterOptions<Filter> =
   | {
@@ -41,5 +41,5 @@ export type NamedEntitiesFilterMethods<Collection extends string, Filter> = {
       | Signal<FilterOptions<Filter>>,
   ) => void;
 } & {
-  [K in Collection as `reset${Capitalize<string & K>}Filter`]: () => void;
+  [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: () => void;
 };

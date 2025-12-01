@@ -762,13 +762,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     TestBed.flushEffects();
     load.next(true);
     tick(400);
-    expect(store.productFilter()).toEqual({ search: '', foo: 'bar' });
-    expect(store.productSort()).toEqual({
+    expect(store.productEntitiesFilter()).toEqual({ search: '', foo: 'bar' });
+    expect(store.productEntitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
     expect(store.productIdSelected()).toEqual('2');
-    expect(store.productPagination().currentPage).toEqual(1);
+    expect(store.productEntitiesPagination().currentPage).toEqual(1);
     // Act
     store.filterProductEntities({
       filter: { search: 'a', foo: 'bar2' },
@@ -776,7 +776,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     });
     store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
     store.selectProductEntity({ id: '35' });
-    store.loadProductPage({ pageIndex: 2 });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
     expect(router.navigate).toBeCalledWith([], {
@@ -819,7 +819,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     });
     store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
     store.selectProductEntity({ id: '35' });
-    store.loadProductPage({ pageIndex: 2 });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
     expect(router.navigate).toBeCalledWith([], {
@@ -896,21 +896,21 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     load.next(true);
     load2.next(true);
     tick(400);
-    expect(store.productFilter()).toEqual({ search: '', foo: 'bar' });
-    expect(store.productSort()).toEqual({
+    expect(store.productEntitiesFilter()).toEqual({ search: '', foo: 'bar' });
+    expect(store.productEntitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
     expect(store.productIdSelected()).toEqual('2');
-    expect(store.productPagination().currentPage).toEqual(1);
+    expect(store.productEntitiesPagination().currentPage).toEqual(1);
 
-    expect(store.orderFilter()).toEqual({ search: '', foo: 'bar2' });
-    expect(store.orderSort()).toEqual({
+    expect(store.orderEntitiesFilter()).toEqual({ search: '', foo: 'bar2' });
+    expect(store.orderEntitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
     expect(store.orderIdSelected()).toEqual('2');
-    expect(store.orderPagination().currentPage).toEqual(1);
+    expect(store.orderEntitiesPagination().currentPage).toEqual(1);
     // Act
     store.filterProductEntities({
       filter: { search: 'a', foo: 'bar2' },
@@ -918,7 +918,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     });
     store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
     store.selectProductEntity({ id: '35' });
-    store.loadProductPage({ pageIndex: 2 });
+    store.loadProductEntitiesPage({ pageIndex: 2 });
 
     store.filterOrderEntities({
       filter: { search: 'a', foo: 'bar2' },
@@ -926,7 +926,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     });
     store.sortOrderEntities({ sort: { field: 'name', direction: 'asc' } });
     store.selectOrderEntity({ id: '35' });
-    store.loadOrderPage({ pageIndex: 2 });
+    store.loadOrderEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
     expect(router.navigate).toBeCalledWith([], {

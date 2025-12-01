@@ -114,17 +114,17 @@ export const ProductsShopStore = signalStore(
   orderItemsStoreFeature,
   withEntitiesLoadingCall(
     (
-      { productPagedRequest, productFilter, productSort },
+      { productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort },
       service = inject(ProductService),
     ) => ({
       ...productEntityConfig,
       fetchEntities: async () => {
         const query = {
-          search: productFilter().search,
-          skip: productPagedRequest().startIndex,
-          take: productPagedRequest().size,
-          sortAscending: productSort().direction === 'asc',
-          sortColumn: productSort().field,
+          search: productEntitiesFilter().search,
+          skip: productEntitiesPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          sortAscending: productEntitiesSort().direction === 'asc',
+          sortColumn: productEntitiesSort().field,
         };
         const source = cacheRxCall({
           key: ['products', query],

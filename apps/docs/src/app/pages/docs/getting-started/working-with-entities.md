@@ -242,16 +242,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productPagedRequest, productFilter, productSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productFilter().search,
-            skip: productPagedRequest().startIndex,
-            take: productPagedRequest().size,
-            sortAscending: productSort().direction === 'asc',
-            sortColumn: productSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };

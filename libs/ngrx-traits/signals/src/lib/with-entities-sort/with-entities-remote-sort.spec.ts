@@ -164,12 +164,12 @@ describe('withEntitiesRemoteSort', () => {
       }),
       withEntitiesLoadingCall({
         collection,
-        fetchEntities: ({ productSort }) => {
+        fetchEntities: ({ productEntitiesSort }) => {
           let result = [...mockProducts];
-          if (productSort()?.field) {
+          if (productEntitiesSort()?.field) {
             result = sortData(result, {
-              field: productSort()?.field as any,
-              direction: productSort().direction,
+              field: productEntitiesSort()?.field as any,
+              direction: productEntitiesSort().direction,
             });
           }
 
@@ -182,7 +182,7 @@ describe('withEntitiesRemoteSort', () => {
       TestBed.flushEffects();
       tick();
       // check default sort
-      expect(store.productSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       expect(
         store
           .productEntities()
@@ -206,7 +206,7 @@ describe('withEntitiesRemoteSort', () => {
           .slice(0, 5),
       ).toEqual([178, 175, 172, 169, 166]);
       expect(store.productEntities().length).toEqual(mockProducts.length);
-      expect(store.productSort()).toEqual({
+      expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
       });
@@ -231,12 +231,12 @@ describe('withEntitiesRemoteSort', () => {
       })),
       withEntitiesLoadingCall({
         collection,
-        fetchEntities: ({ productSort }) => {
+        fetchEntities: ({ productEntitiesSort }) => {
           let result = [...mockProducts];
-          if (productSort()?.field) {
+          if (productEntitiesSort()?.field) {
             result = sortData(result, {
-              field: productSort()?.field as any,
-              direction: productSort().direction,
+              field: productEntitiesSort()?.field as any,
+              direction: productEntitiesSort().direction,
             });
           }
 
@@ -249,7 +249,7 @@ describe('withEntitiesRemoteSort', () => {
       TestBed.flushEffects();
       tick();
       // check default sort
-      expect(store.productSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       expect(
         store
           .productEntities()

@@ -98,10 +98,10 @@ import {
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productFilter }) => {
+ *     fetchEntities: ({ productEntitiesFilter }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           category: productFilter().category,
+ *           category: productEntitiesFilter().category,
  *         })
  *     },
  *   }),
@@ -112,7 +112,7 @@ import {
  * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //              .getProducts({
- * //                  category: productFilter().category,
+ * //                  category: productEntitiesFilter().category,
  * //               })
  * //           .pipe(
  * //             takeUntilDestroyed(),
@@ -133,10 +133,10 @@ import {
  * //   },
  *  })),
  * // generates the following signals
- *  store.productFilter // { search: string , category: string }
+ *  store.productEntitiesFilter // { search: string , category: string }
  *  // generates the following methods
  *  store.filterProductEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- *  store.resetProductFilter  // () => void
+ *  store.resetProductEntitiesFilter  // () => void
  */
 export function withEntitiesHybridFilter<
   Input extends SignalStoreFeatureResult,

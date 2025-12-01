@@ -393,12 +393,12 @@ describe('withEntitiesLoadingCall', () => {
             }),
             withEntitiesLoadingCall({
               collection,
-              fetchEntities: ({ productPagedRequest }) => {
+              fetchEntities: ({ productEntitiesPagedRequest }) => {
                 let result = [...mockProducts];
                 const total = result.length;
                 const options = {
-                  skip: productPagedRequest()?.startIndex,
-                  take: productPagedRequest()?.size,
+                  skip: productEntitiesPagedRequest()?.startIndex,
+                  take: productEntitiesPagedRequest()?.size,
                 };
                 if (options?.skip || options?.take) {
                   const skip = +(options?.skip ?? 0);
@@ -439,12 +439,12 @@ describe('withEntitiesLoadingCall', () => {
             }),
             withEntitiesLoadingCall({
               ...config,
-              fetchEntities: ({ productPagedRequest }) => {
+              fetchEntities: ({ productEntitiesPagedRequest }) => {
                 let result = [...mockProductsCustom];
                 const total = result.length;
                 const options = {
-                  skip: productPagedRequest()?.startIndex,
-                  take: productPagedRequest()?.size,
+                  skip: productEntitiesPagedRequest()?.startIndex,
+                  take: productEntitiesPagedRequest()?.size,
                 };
                 if (options?.skip || options?.take) {
                   const skip = +(options?.skip ?? 0);
@@ -707,14 +707,14 @@ describe('withEntitiesLoadingCall', () => {
               collection,
               pageSize: 10,
             }),
-            withEntitiesLoadingCall(({ productPagedRequest }) => ({
+            withEntitiesLoadingCall(({ productEntitiesPagedRequest }) => ({
               collection,
               fetchEntities: () => {
                 let result = [...mockProducts];
                 const total = result.length;
                 const options = {
-                  skip: productPagedRequest()?.startIndex,
-                  take: productPagedRequest()?.size,
+                  skip: productEntitiesPagedRequest()?.startIndex,
+                  take: productEntitiesPagedRequest()?.size,
                 };
                 if (options?.skip || options?.take) {
                   const skip = +(options?.skip ?? 0);

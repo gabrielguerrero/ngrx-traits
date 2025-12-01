@@ -27,7 +27,7 @@ import { withEntitiesRemoteFilter } from '@ngrx-traits/signals';
 ## Examples
 
 ### Filtering a list of entities based on a search term
-In this example we have a list of products and we want to filter them based on a search term, we will use the defaultFilter prop to set the initial filter, and the filterFn to filter the entities based on the search term. The generated `filterProductEntities` will store the filter and  call `setProductEntitiesLoading()` which triggers the `fetchEntities` function, notice we access the filter value in the `fetchEntities` function using the `productFilter()` signal.
+In this example we have a list of products and we want to filter them based on a search term, we will use the defaultFilter prop to set the initial filter, and the filterFn to filter the entities based on the search term. The generated `filterProductEntities` will store the filter and  call `setProductEntitiesLoading()` which triggers the `fetchEntities` function, notice we access the filter value in the `fetchEntities` function using the `productEntitiesFilter()` signal.
 
 ```typescript
 const entityConfig = entityConfig({
@@ -44,9 +44,9 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService).getProducts({
-        search: productFilter().name,
+        search: productEntitiesFilter().name,
       });
     },
   }),
@@ -104,16 +104,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productPagedRequest, productFilter, productSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productFilter().search,
-            skip: productPagedRequest().startIndex,
-            take: productPagedRequest().size,
-            sortAscending: productSort().direction === 'asc',
-            sortColumn: productSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };

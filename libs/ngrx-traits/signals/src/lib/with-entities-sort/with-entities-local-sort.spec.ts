@@ -154,7 +154,7 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
-      expect(store.productSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       store.sortProductEntities();
       expect(
@@ -180,7 +180,7 @@ describe('withEntitiesLocalSort', () => {
           .slice(0, 5),
       ).toEqual([178, 175, 172, 169, 166]);
       expect(store.productEntities().length).toEqual(mockProducts.length);
-      expect(store.productSort()).toEqual({
+      expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
       });
@@ -211,7 +211,7 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProductsCustom, config));
-      expect(store.productSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       store.sortProductEntities();
       expect(
@@ -239,7 +239,7 @@ describe('withEntitiesLocalSort', () => {
       expect(store.productEntities().length).toEqual(
         mockProductsCustom.length,
       );
-      expect(store.productSort()).toEqual({
+      expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
       });
@@ -399,7 +399,7 @@ describe('withEntitiesLocalSort', () => {
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.setProductEntitiesLoaded();
       TestBed.flushEffects();
-      expect(store.productSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       expect(
         store

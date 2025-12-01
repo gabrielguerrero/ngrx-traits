@@ -7,7 +7,7 @@ export type EntitiesPaginationLocalState = {
   };
 };
 export type NamedEntitiesPaginationLocalState<Collection extends string> = {
-  [K in Collection as `${K}Pagination`]: {
+  [K in Collection as `${K}EntitiesPagination`]: {
     currentPage: number;
     pageSize: number;
   };
@@ -27,7 +27,7 @@ export type NamedEntitiesPaginationLocalComputed<
   Entity,
   Collection extends string,
 > = {
-  [K in Collection as `${K}CurrentPage`]: DeepSignal<{
+  [K in Collection as `${K}EntitiesCurrentPage`]: DeepSignal<{
     entities: Entity[];
     pageIndex: number;
     total: number | undefined;
@@ -41,7 +41,7 @@ export type EntitiesPaginationLocalMethods = {
   loadEntitiesPage: (options: { pageIndex: number; pageSize?: number }) => void;
 };
 export type NamedEntitiesPaginationLocalMethods<Collection extends string> = {
-  [K in Collection as `load${Capitalize<string & K>}Page`]: (options: {
+  [K in Collection as `load${Capitalize<string & K>}EntitiesPage`]: (options: {
     pageIndex: number;
     pageSize?: number;
   }) => void;
@@ -51,7 +51,7 @@ export type SetEntitiesResult<ResultParam> = {
   setEntitiesPagedResult: (result: ResultParam) => void;
 };
 export type NamedSetEntitiesResult<Collection extends string, ResultParam> = {
-  [K in Collection as `set${Capitalize<string & K>}PagedResult`]: (
+  [K in Collection as `set${Capitalize<string & K>}EntitiesPagedResult`]: (
     result: ResultParam,
   ) => void;
 };

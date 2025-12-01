@@ -71,7 +71,7 @@ export { sortData };
  *   }),
  * );
  * // generates the following signals
- * store.productSort - the current sort applied to the products
+ * store.productEntitiesSort - the current sort applied to the products
  * // generates the following methods
  * store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
  */

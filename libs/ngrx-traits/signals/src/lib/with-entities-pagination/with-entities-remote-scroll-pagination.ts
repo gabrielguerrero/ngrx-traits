@@ -146,16 +146,16 @@ import {
  *  store = inject(ProductsRemoteStore);
  *  dataSource = getInfiniteScrollDataSource(store, { collection: 'product' }) // pass this to your cdkVirtualFor see examples section
  *   // generates the following signals
- *   store.productPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
+ *   store.productEntitiesPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  *  // generates the following computed signals
- *  store.productCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- *  store.productPagedRequest // { startIndex: number, size: number }
+ *  store.productEntitiesCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productEntitiesPagedRequest // { startIndex: number, size: number }
  *  // generates the following methods
- *  store.loadProductNextPage() // loads next page
- *  store.loadProductPreviousPage() // loads previous page
- *  store.loadProductFirstPage() // loads first page
- *  store.loadMoreProduct() // loads more entities (used for infinite scroll datasource)
- *  store.setProductPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.loadProductEntitiesNextPage() // loads next page
+ *  store.loadProductEntitiesPreviousPage() // loads previous page
+ *  store.loadProductEntitiesFirstPage() // loads first page
+ *  store.loadMoreProductEntities() // loads more entities (used for infinite scroll datasource)
+ *  store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemoteScrollPagination<
   Input extends SignalStoreFeatureResult,

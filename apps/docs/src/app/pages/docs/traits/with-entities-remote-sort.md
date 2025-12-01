@@ -36,10 +36,10 @@ export const store = signalStore(
   }),
   withEntitiesLoadingCall({
     ...entityConfig,
-    fetchEntities: ({ productSort }) => {
+    fetchEntities: ({ productEntitiesSort }) => {
       return inject(ProductService).getProducts({
-        sortColumn: productSort().field,
-        sortAscending: productSort().direction === 'asc',
+        sortColumn: productEntitiesSort().field,
+        sortAscending: productEntitiesSort().direction === 'asc',
       });
     },
   }),
@@ -48,7 +48,7 @@ export const store = signalStore(
 To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in GitHub):
 ```html
 <product-sort-dropdown
-  [sort]="store.productSort()"
+  [sort]="store.productEntitiesSort()"
   (sortChange)="store.sortProductEntities({ sort: $event })"
 />
 ... show products list
@@ -85,16 +85,16 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productPagedRequest, productFilter, productSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
-            search: productFilter().search,
-            skip: productPagedRequest().startIndex,
-            take: productPagedRequest().size,
-            sortAscending: productSort().direction === 'asc',
-            sortColumn: productSort().field,
+            search: productEntitiesFilter().search,
+            skip: productEntitiesPagedRequest().startIndex,
+            take: productEntitiesPagedRequest().size,
+            sortAscending: productEntitiesSort().direction === 'asc',
+            sortColumn: productEntitiesSort().field,
           }),
         );
         return { entities: res.resultList, total: res.total };

@@ -7,27 +7,27 @@ export function getWithEntitiesInfinitePaginationKeys(config?: {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    paginationKey: collection ? `${config.collection}Pagination` : 'pagination',
+    paginationKey: collection ? `${config.collection}EntitiesPagination` : 'pagination',
     entitiesCurrentPageKey: collection
-      ? `${config.collection}CurrentPage`
+      ? `${config.collection}EntitiesCurrentPage`
       : 'entitiesCurrentPage',
     entitiesPagedRequestKey: collection
-      ? `${config.collection}PagedRequest`
+      ? `${config.collection}EntitiesPagedRequest`
       : 'entitiesPagedRequest',
     loadMoreEntitiesKey: collection
-      ? `loadMore${capitalizedProp}`
+      ? `loadMore${capitalizedProp}Entities`
       : 'loadMoreEntities',
     loadEntitiesNextPageKey: collection
-      ? `load${capitalizedProp}NextPage`
+      ? `load${capitalizedProp}EntitiesNextPage`
       : 'loadEntitiesNextPage',
     loadEntitiesPreviousPageKey: collection
-      ? `load${capitalizedProp}PreviousPage`
+      ? `load${capitalizedProp}EntitiesPreviousPage`
       : 'loadEntitiesPreviousPage',
     loadEntitiesFirstPageKey: collection
-      ? `load${capitalizedProp}FirstPage`
+      ? `load${capitalizedProp}EntitiesFirstPage`
       : 'loadEntitiesFirstPage',
     setEntitiesPagedResultKey: collection
-      ? `set${capitalizedProp}PagedResult`
+      ? `set${capitalizedProp}EntitiesPagedResult`
       : 'setEntitiesPagedResult',
   };
 }

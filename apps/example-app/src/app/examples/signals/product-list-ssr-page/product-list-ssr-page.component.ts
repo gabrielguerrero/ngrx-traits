@@ -27,7 +27,7 @@ import { ProductsSSRStore } from './product.store';
       </mat-card-header>
       <mat-card-content>
         <product-search-form
-          [searchProduct]="store.productFilter()"
+          [searchProduct]="store.productEntitiesFilter()"
           (searchProductChange)="filter($event)"
         ></product-search-form>
         @if (store.isProductEntitiesLoading()) {
@@ -36,11 +36,11 @@ import { ProductsSSRStore } from './product.store';
           <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
             <div>
               <product-list
-                [list]="store.productCurrentPage().entities"
+                [list]="store.productEntitiesCurrentPage().entities"
                 [selectedProduct]="store.productEntitySelected()"
                 [selectedSort]="{
-                  active: $any(store.productSort().field),
-                  direction: store.productSort().direction
+                  active: $any(store.productEntitiesSort().field),
+                  direction: store.productEntitiesSort().direction
                 }"
                 (selectProduct)="select($event)"
                 (sort)="sort($event)"
@@ -48,10 +48,10 @@ import { ProductsSSRStore } from './product.store';
 
               <mat-paginator
                 [pageSizeOptions]="[5, 10, 25, 100]"
-                [length]="store.productCurrentPage.total()"
-                [pageSize]="store.productCurrentPage().pageSize"
-                [pageIndex]="store.productCurrentPage().pageIndex"
-                (page)="store.loadProductPage($event)"
+                [length]="store.productEntitiesCurrentPage.total()"
+                [pageSize]="store.productEntitiesCurrentPage().pageSize"
+                [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+                (page)="store.loadProductEntitiesPage($event)"
               ></mat-paginator>
             </div>
 

@@ -135,15 +135,15 @@ const productsStoreFeature = signalStoreFeature(
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productPagedRequest, productFilter, productSort }) => ({
+    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
       ...productsEntity,
       fetchEntities: async () => {
         const query = {
-          search: productFilter().search,
-          skip: productPagedRequest().startIndex,
-          take: productPagedRequest().size,
-          sortAscending: productSort().direction === 'asc',
-          sortColumn: productSort().field,
+          search: productEntitiesFilter().search,
+          skip: productEntitiesPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          sortAscending: productEntitiesSort().direction === 'asc',
+          sortColumn: productEntitiesSort().field,
         };
         // we use cacheCall to show the case where service.getProducts(query) 
         // returns a promise

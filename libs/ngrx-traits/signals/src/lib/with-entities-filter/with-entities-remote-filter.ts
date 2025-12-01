@@ -82,21 +82,21 @@ import {
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productFilter }) => {
+ *     fetchEntities: ({ productEntitiesFilter }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           search: productFilter().name,
+ *           search: productEntitiesFilter().name,
  *         })
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ isProductEntitiesLoading, productFilter, setProductEntitiesError, ...state }) => ({
+ * // withHooks(({ isProductEntitiesLoading, productEntitiesFilter, setProductEntitiesError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //              .getProducts({
- * //                 search: productFilter().name,
+ * //                 search: productEntitiesFilter().name,
  * //               })
  * //           .pipe(
  * //             takeUntilDestroyed(),
@@ -117,10 +117,10 @@ import {
  * //   },
  *  })),
  * // generates the following signals
- *  store.productFilter // { search: string }
+ *  store.productEntitiesFilter // { search: string }
  *  // generates the following methods
  *  store.filterProductEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- *  store.resetProductFilter  // () => void
+ *  store.resetProductEntitiesFilter  // () => void
  */
 export function withEntitiesRemoteFilter<
   Input extends SignalStoreFeatureResult,

@@ -76,23 +76,23 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  *   // the api call, or do it manually as shown after
  *    withEntitiesLoadingCall({
  *     collection,
- *     fetchEntities: ({ productSort }) => {
+ *     fetchEntities: ({ productEntitiesSort }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           sortColumn: productSort().field,
- *           sortAscending: productSort().direction === 'asc',
+ *           sortColumn: productEntitiesSort().field,
+ *           sortAscending: productEntitiesSort().direction === 'asc',
  *         })
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productSort, isProductEntitiesLoading, setProductEntitiesError, ...state }) => ({
+ * // withHooks(({ productEntitiesSort, isProductEntitiesLoading, setProductEntitiesError, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
  * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
- * //                 sortColumn: productSort().field,
- * //                 sortAscending: productSort().direction === 'asc',
+ * //                 sortColumn: productEntitiesSort().field,
+ * //                 sortAscending: productEntitiesSort().direction === 'asc',
  * //              })
  * //           .pipe(
  * //             takeUntilDestroyed(),
@@ -114,7 +114,7 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  *  })),
  *
  * // generate the following signals
- * store.productSort // the current sort
+ * store.productEntitiesSort // the current sort
  * // and the following methods
  * store.sortProductEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
  */

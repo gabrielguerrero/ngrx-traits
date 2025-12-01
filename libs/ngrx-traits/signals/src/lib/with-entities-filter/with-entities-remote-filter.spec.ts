@@ -345,14 +345,14 @@ describe('withEntitiesRemoteFilter', () => {
         }),
         withEntitiesLoadingCall({
           collection,
-          fetchEntities: ({ productFilter }) => {
+          fetchEntities: ({ productEntitiesFilter }) => {
             let result = [...mockProducts];
-            if (productFilter()?.search) {
+            if (productEntitiesFilter()?.search) {
               result = mockProducts.filter((entity) =>
-                productFilter()?.search
+                productEntitiesFilter()?.search
                   ? entity.name
                       .toLowerCase()
-                      .includes(productFilter()?.search.toLowerCase())
+                      .includes(productEntitiesFilter()?.search.toLowerCase())
                   : false,
               );
             }
@@ -362,9 +362,9 @@ describe('withEntitiesRemoteFilter', () => {
       );
       const store = new Store();
       TestBed.flushEffects();
-      store.loadProductPage({ pageIndex: 3 });
+      store.loadProductEntitiesPage({ pageIndex: 3 });
       tick(400);
-      expect(store.productCurrentPage().pageIndex).toEqual(3);
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
 
       store.filterProductEntities({
         filter: { search: 'zero' },
@@ -388,8 +388,8 @@ describe('withEntitiesRemoteFilter', () => {
           categoryId: 'gamecube',
         },
       ]);
-      expect(store.productFilter()).toEqual({ search: 'zero', foo: 'bar' });
-      expect(store.productFilter.search()).toEqual('zero');
+      expect(store.productEntitiesFilter()).toEqual({ search: 'zero', foo: 'bar' });
+      expect(store.productEntitiesFilter.search()).toEqual('zero');
     });
   }));
 

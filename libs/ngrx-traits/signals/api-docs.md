@@ -594,10 +594,10 @@ export const store = signalStore(
 //   },
  })),
 // generates the following signals
- store.productFilter // { search: string , category: string }
+ store.productEntitiesFilter // { search: string , category: string }
  // generates the following methods
  store.filterProductEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- store.resetProductFilter  // () => void
+ store.resetProductEntitiesFilter  // () => void
 ```
 <a name="withEntitiesLocalFilter"></a>
 
@@ -639,10 +639,10 @@ const store = signalStore(
  );
 
 // generates the following signals
- store.productFilter // { search: string }
+ store.productEntitiesFilter // { search: string }
  // generates the following methods
  store.filterProductEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
- store.resetProductFilter  // () => void
+ store.resetProductEntitiesFilter  // () => void
 ```
 <a name="withEntitiesRemoteFilter"></a>
 
@@ -777,14 +777,14 @@ export const ProductsRemoteStore = signalStore(
   // then calls fetchEntities function
   withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter, productPagedRequest, productsSort }) => {
+    fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
       return inject(ProductService)
         .getProducts({
-          search: productsFilter().name,
-          take: productPagedRequest().size,
-          skip: productPagedRequest().startIndex,
-          sortColumn: productsSort().field,
-          sortAscending: productsSort().direction === 'asc',
+          search: productEntitiesFilter().name,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
+          sortColumn: productEntitiesSort().field,
+          sortAscending: productEntitiesSort().direction === 'asc',
         })
         .pipe(
           map((d) => ({
@@ -826,11 +826,11 @@ export const ProductsLocalStore = signalStore(
   }),
 
   // generates the following signals
-  store.productPagination // { currentPage: 0, pageSize: 5 }
+  store.productEntitiesPagination // { currentPage: 0, pageSize: 5 }
   // generates the following computed signals
-  store.productCurrentPage // { entities: Product[], pageIndex: 0, total: 10, pageSize: 5, pagesCount: 2, hasPrevious: false, hasNext: true }
+  store.productEntitiesCurrentPage // { entities: Product[], pageIndex: 0, total: 10, pageSize: 5, pagesCount: 2, hasPrevious: false, hasNext: true }
   // generates the following methods
-  store.loadProductPage // ({ pageIndex: number }) => void
+  store.loadProductEntitiesPage // ({ pageIndex: number }) => void
 ```
 <a name="withEntitiesRemotePagination"></a>
 
@@ -880,11 +880,11 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productPagedRequest }) => {
+    fetchEntities: ({ productEntitiesPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productPagedRequest().size,
-          skip: productPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
         }).pipe(
           map((d) => ({
             entities: d.resultList,
@@ -900,8 +900,8 @@ export const store = signalStore(
 //       if (isProductsLoading()) {
 //         inject(ProductService)
 //             .getProducts({
-//                take: productPagedRequest().size,
-//                skip: productPagedRequest().startIndex,
+//                take: productEntitiesPagedRequest().size,
+//                skip: productEntitiesPagedRequest().startIndex,
 //              })
 //           .pipe(
 //             takeUntilDestroyed(),
@@ -922,13 +922,13 @@ export const store = signalStore(
 //   },
  })),
   // generates the following signals
-  store.productPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+  store.productEntitiesPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
- store.productCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- store.productPagedRequest // { startIndex: number, size: number, page: number }
+ store.productEntitiesCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ store.productEntitiesPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
- store.loadProductPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
- store.setProductPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ store.loadProductEntitiesPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
+ store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesRemoteScrollPagination"></a>
 
@@ -979,11 +979,11 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productPagedRequest }) => {
+    fetchEntities: ({ productEntitiesPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productPagedRequest().size,
-          skip: productPagedRequest().startIndex,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
         }).pipe(
           map((d) => ({
             entities: d.resultList,
@@ -999,8 +999,8 @@ export const store = signalStore(
 //       if (isProductsLoading()) {
 //         inject(ProductService)
 //             .getProducts({
-//                take: productPagedRequest().size,
-//                skip: productPagedRequest().startIndex,
+//                take: productEntitiesPagedRequest().size,
+//                skip: productEntitiesPagedRequest().startIndex,
 //              })
 //           .pipe(
 //             takeUntilDestroyed(),
@@ -1026,12 +1026,12 @@ export const store = signalStore(
   store.productsPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  // generates the following computed signals
  store.productsCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- store.productPagedRequest // { startIndex: number, size: number }
+ store.productEntitiesPagedRequest // { startIndex: number, size: number }
  // generates the following methods
  store.loadProductsNextPage() // loads next page
  store.loadProductsPreviousPage() // loads previous page
  store.loadProductsFirstPage() // loads first page
- store.loadMoreProducts() // loads more entities (used for infinite scroll datasource)
+ store.loadMoreProductEntities() // loads more entities (used for infinite scroll datasource)
  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesMultiSelection"></a>
@@ -1584,14 +1584,14 @@ export const ProductsRemoteStore = signalStore(
   }),
   withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter, productPagedRequest, productsSort }) => {
+    fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
       return inject(ProductService)
         .getProducts({
-          search: productsFilter().name,
-          take: productPagedRequest().size,
-          skip: productPagedRequest().startIndex,
-          sortColumn: productsSort().field,
-          sortAscending: productsSort().direction === 'asc',
+          search: productEntitiesFilter().name,
+          take: productEntitiesPagedRequest().size,
+          skip: productEntitiesPagedRequest().startIndex,
+          sortColumn: productEntitiesSort().field,
+          sortAscending: productEntitiesSort().direction === 'asc',
         })
         .pipe(
           map((d) => ({

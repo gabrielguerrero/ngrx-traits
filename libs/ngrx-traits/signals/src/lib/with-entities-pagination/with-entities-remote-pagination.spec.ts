@@ -446,8 +446,8 @@ describe('withEntitiesRemotePagination', () => {
           ({
             isProductEntitiesLoading,
             setProductEntitiesLoaded,
-            productPagedRequest,
-            setProductPagedResult,
+            productEntitiesPagedRequest,
+            setProductEntitiesPagedResult,
           }) => ({
             onInit: () => {
               const fetchEntities = ({
@@ -478,9 +478,9 @@ describe('withEntitiesRemotePagination', () => {
                 if (isProductEntitiesLoading()) {
                   untracked(() => {
                     fetchEntities({
-                      entitiesPagedRequest: productPagedRequest,
+                      entitiesPagedRequest: productEntitiesPagedRequest,
                     }).subscribe((result) => {
-                      setProductPagedResult(result);
+                      setProductEntitiesPagedResult(result);
                       setProductEntitiesLoaded();
                     });
                   });
@@ -498,10 +498,10 @@ describe('withEntitiesRemotePagination', () => {
       jest.spyOn(store, 'setProductEntitiesLoading');
       tick();
       // basic check for the first page
-      expect(store.productCurrentPage().entities.length).toEqual(10);
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
 
       // load a page not in cache
-      store.loadProductPage({ pageIndex: 7 });
+      store.loadProductEntitiesPage({ pageIndex: 7 });
       tick();
       expect(fetchEntitiesSpy).toHaveBeenCalledWith({
         startIndex: 70,
@@ -510,16 +510,16 @@ describe('withEntitiesRemotePagination', () => {
       });
       // check the page
 
-      expect(store.productCurrentPage().entities.length).toEqual(10);
-      expect(store.productCurrentPage().entities).toEqual(
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
         mockProducts.slice(70, 80),
       );
-      expect(store.productCurrentPage().pageIndex).toEqual(7);
-      expect(store.productCurrentPage().pageSize).toEqual(10);
-      expect(store.productCurrentPage().pagesCount).toEqual(13);
-      expect(store.productCurrentPage().total).toEqual(mockProducts.length);
-      expect(store.productCurrentPage().hasPrevious).toEqual(true);
-      expect(store.productCurrentPage().hasNext).toEqual(true);
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(7);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.productEntitiesCurrentPage().pagesCount).toEqual(13);
+      expect(store.productEntitiesCurrentPage().total).toEqual(mockProducts.length);
+      expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
     });
   }));
 
@@ -545,8 +545,8 @@ describe('withEntitiesRemotePagination', () => {
           ({
             isProductEntitiesLoading,
             setProductEntitiesLoaded,
-            productPagedRequest,
-            setProductPagedResult,
+            productEntitiesPagedRequest,
+            setProductEntitiesPagedResult,
           }) => ({
             onInit: () => {
               const fetchEntities = ({
@@ -577,9 +577,9 @@ describe('withEntitiesRemotePagination', () => {
                 if (isProductEntitiesLoading()) {
                   untracked(() => {
                     fetchEntities({
-                      entitiesPagedRequest: productPagedRequest,
+                      entitiesPagedRequest: productEntitiesPagedRequest,
                     }).subscribe((result) => {
-                      setProductPagedResult(result);
+                      setProductEntitiesPagedResult(result);
                       setProductEntitiesLoaded();
                     });
                   });
@@ -597,10 +597,10 @@ describe('withEntitiesRemotePagination', () => {
       jest.spyOn(store, 'setProductEntitiesLoading');
       tick();
       // basic check for the first page
-      expect(store.productCurrentPage().entities.length).toEqual(10);
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
 
       // load a page not in cache
-      store.loadProductPage({ pageIndex: 7 });
+      store.loadProductEntitiesPage({ pageIndex: 7 });
       tick();
       expect(fetchEntitiesSpy).toHaveBeenCalledWith({
         startIndex: 70,
@@ -609,18 +609,18 @@ describe('withEntitiesRemotePagination', () => {
       });
       // check the page
 
-      expect(store.productCurrentPage().entities.length).toEqual(10);
-      expect(store.productCurrentPage().entities).toEqual(
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
         mockProductsCustom.slice(70, 80),
       );
-      expect(store.productCurrentPage().pageIndex).toEqual(7);
-      expect(store.productCurrentPage().pageSize).toEqual(10);
-      expect(store.productCurrentPage().pagesCount).toEqual(13);
-      expect(store.productCurrentPage().total).toEqual(
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(7);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.productEntitiesCurrentPage().pagesCount).toEqual(13);
+      expect(store.productEntitiesCurrentPage().total).toEqual(
         mockProductsCustom.length,
       );
-      expect(store.productCurrentPage().hasPrevious).toEqual(true);
-      expect(store.productCurrentPage().hasNext).toEqual(true);
+      expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
     });
   }));
 
@@ -633,12 +633,12 @@ describe('withEntitiesRemotePagination', () => {
         withEntitiesRemotePagination({ entity, collection, pageSize: 10 }),
         withEntitiesLoadingCall({
           collection,
-          fetchEntities: ({ productPagedRequest }) => {
+          fetchEntities: ({ productEntitiesPagedRequest }) => {
             let result = [...mockProducts.slice(0, 25)];
             const total = result.length;
             const options = {
-              skip: productPagedRequest()?.startIndex,
-              take: productPagedRequest()?.size,
+              skip: productEntitiesPagedRequest()?.startIndex,
+              take: productEntitiesPagedRequest()?.size,
             };
             if (options?.skip || options?.take) {
               const skip = +(options?.skip ?? 0);
@@ -657,43 +657,43 @@ describe('withEntitiesRemotePagination', () => {
       tick();
 
       // check the first page
-      expect(store.productCurrentPage().entities.length).toEqual(10);
-      expect(store.productCurrentPage().entities).toEqual(
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
         mockProducts.slice(0, 10),
       );
-      expect(store.productCurrentPage().pageIndex).toEqual(0);
-      expect(store.productCurrentPage().pageSize).toEqual(10);
-      expect(store.productCurrentPage().pagesCount).toEqual(3);
-      expect(store.productCurrentPage().total).toEqual(25);
-      expect(store.productCurrentPage().hasPrevious).toEqual(false);
-      expect(store.productCurrentPage().hasNext).toEqual(true);
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.productEntitiesCurrentPage().pagesCount).toEqual(3);
+      expect(store.productEntitiesCurrentPage().total).toEqual(25);
+      expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(false);
+      expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
 
-      store.loadProductPage({ pageIndex: 1 });
+      store.loadProductEntitiesPage({ pageIndex: 1 });
       // check the second page
-      expect(store.productCurrentPage().entities.length).toEqual(10);
-      expect(store.productCurrentPage().entities).toEqual(
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
         mockProducts.slice(10, 20),
       );
-      expect(store.productCurrentPage().pageIndex).toEqual(1);
-      expect(store.productCurrentPage().pageSize).toEqual(10);
-      expect(store.productCurrentPage().pagesCount).toEqual(3);
-      expect(store.productCurrentPage().total).toEqual(25);
-      expect(store.productCurrentPage().hasPrevious).toEqual(true);
-      expect(store.productCurrentPage().hasNext).toEqual(true);
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(1);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.productEntitiesCurrentPage().pagesCount).toEqual(3);
+      expect(store.productEntitiesCurrentPage().total).toEqual(25);
+      expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
 
-      store.loadProductPage({ pageIndex: 2 });
+      store.loadProductEntitiesPage({ pageIndex: 2 });
       tick();
       // check the third page
-      expect(store.productCurrentPage().entities.length).toEqual(5);
-      expect(store.productCurrentPage().entities).toEqual(
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(5);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
         mockProducts.slice(20, 25),
       );
-      expect(store.productCurrentPage().pageIndex).toEqual(2);
-      expect(store.productCurrentPage().pageSize).toEqual(10);
-      expect(store.productCurrentPage().pagesCount).toEqual(3);
-      expect(store.productCurrentPage().total).toEqual(25);
-      expect(store.productCurrentPage().hasPrevious).toEqual(true);
-      expect(store.productCurrentPage().hasNext).toEqual(false);
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(2);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
+      expect(store.productEntitiesCurrentPage().pagesCount).toEqual(3);
+      expect(store.productEntitiesCurrentPage().total).toEqual(25);
+      expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
+      expect(store.productEntitiesCurrentPage().hasNext).toEqual(false);
     });
   }));
 
