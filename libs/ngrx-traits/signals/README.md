@@ -20,3 +20,16 @@ Set of prebuilt Custom Store Features that solve common problems that normally n
 `npm i @ngrx-traits/signals --save`
 
 For more documentation go to our [GitHub page](https://github.com/gabrielguerrero/ngrx-traits/blob/main/docs/signals.md)
+
+## Migration Guide (v20.0.0)
+
+Version 20.0.0 introduces a new naming convention for trait-generated properties. All properties now include the `Entities` suffix for consistency:
+- `productFilter` → `productEntitiesFilter`
+- `isProductsLoading` → `isProductsEntitiesLoading`
+
+**Automatic migration:**
+```bash
+ng update @ngrx-traits/signals --migrate-only
+```
+
+See [MIGRATION_GUIDE.md](./MIGRATION_GUIDE.md) for details.

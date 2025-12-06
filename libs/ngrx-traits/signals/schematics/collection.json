@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "rename-collection": {
+      "description": "Rename @ngrx-traits/signals collection from plural to singular form",
+      "factory": "./rename-collection",
+      "schema": "./rename-collection/schema.json"
+    }
+  }
+}
