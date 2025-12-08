@@ -1,17 +1,16 @@
 /**
- * Migration entry point for version 20.0.0
- * Targeted migration - only modifies files using stores with collection param
+ * Schematic wrapper for v20 migration
+ * Run with: ng generate @ngrx-traits/signals:migrate-entities-suffix
  */
 
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { analyzeStores } from './targeted/store-analyzer';
-import { resolveDependencies } from './targeted/dependency-resolver';
-import {
-  transformTypeScriptFile,
-  transformHtmlFile,
-} from './targeted/targeted-transformer';
 
-export default function migrate(_options: any): Rule {
+// Import from compiled migrations (they're in sibling directory at runtime)
+const { analyzeStores } = require('../../migrations/update-20-0-0/targeted/store-analyzer');
+const { resolveDependencies } = require('../../migrations/update-20-0-0/targeted/dependency-resolver');
+const { transformTypeScriptFile, transformHtmlFile } = require('../../migrations/update-20-0-0/targeted/targeted-transformer');
+
+export default function migrateEntitiesSuffix(): Rule {
   return (tree: Tree, context: SchematicContext) => {
     context.logger.info('Scanning for @ngrx-traits/signals stores with collection param...\n');
 

@@ -5,6 +5,10 @@
       "description": "Rename @ngrx-traits/signals collection from plural to singular form",
       "factory": "./rename-collection",
       "schema": "./rename-collection/schema.json"
+    },
+    "migrate-entities-suffix": {
+      "description": "Migrate to Entities suffix naming convention (v20 migration)",
+      "factory": "./migrate-entities-suffix"
     }
   }
 }
