@@ -1,16 +1,33 @@
 /**
- * Store Analyzer - Phase 1: Find stores with collection param
+ * Store Analyzer - Phase 1: Find stores and custom features with collection param
  */
 
 import * as ts from 'typescript';
 import { Tree } from '@angular-devkit/schematics';
-import { StoreInfo, BREAKING_FEATURES } from './types';
+import { StoreInfo, CustomFeatureInfo, BREAKING_FEATURES } from './types';
+
+export interface AnalysisResult {
+  stores: StoreInfo[];
+  customFeatures: CustomFeatureInfo[];
+}
 
 /**
- * Analyze all TS files to find stores using collection param
+ * Analyze all TS files to find stores and custom features using collection param
  */
 export function analyzeStores(tree: Tree): StoreInfo[] {
+  const result = analyzeAll(tree);
+  return result.stores;
+}
+
+/**
+ * Analyze all TS files to find both stores and custom signalStoreFeature functions
+ */
+export function analyzeAll(tree: Tree): AnalysisResult {
   const stores: StoreInfo[] = [];
+  const customFeatures: CustomFeatureInfo[] = [];
+
+  // First pass: find all custom features and their collections
+  const featureCollections = new Map<string, string[]>(); // functionName -> collections
 
   tree.visit((filePath) => {
     if (
@@ -26,22 +43,123 @@ export function analyzeStores(tree: Tree): StoreInfo[] {
 
     const text = content.toString('utf-8');
 
-    // Quick check - must have @ngrx-traits/signals import
-    if (!text.includes('@ngrx-traits/signals')) return;
+    // Quick check - must have @ngrx-traits/signals or signalStoreFeature
+    if (!text.includes('@ngrx-traits/signals') && !text.includes('signalStoreFeature')) return;
 
-    const storeInfo = analyzeFile(text, filePath);
+    // Find custom features
+    const features = findCustomFeatures(text, filePath);
+    for (const feature of features) {
+      if (feature.collections.length > 0) {
+        customFeatures.push(feature);
+        featureCollections.set(feature.functionName, feature.collections);
+      }
+    }
+  });
+
+  // Second pass: find stores (including those using custom features)
+  tree.visit((filePath) => {
+    if (
+      !filePath.endsWith('.ts') ||
+      filePath.includes('node_modules') ||
+      filePath.includes('.spec.ts')
+    ) {
+      return;
+    }
+
+    const content = tree.read(filePath);
+    if (!content) return;
+
+    const text = content.toString('utf-8');
+
+    // Quick check - must have signalStore
+    if (!text.includes('signalStore')) return;
+
+    const storeInfo = analyzeFile(text, filePath, featureCollections);
     if (storeInfo && storeInfo.collections.length > 0) {
       stores.push(storeInfo);
     }
   });
 
-  return stores;
+  return { stores, customFeatures };
+}
+
+/**
+ * Find custom signalStoreFeature functions that contain collections
+ */
+function findCustomFeatures(content: string, filePath: string): CustomFeatureInfo[] {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    content,
+    ts.ScriptTarget.Latest,
+    true
+  );
+
+  const features: CustomFeatureInfo[] = [];
+
+  function visit(node: ts.Node) {
+    // Find exported function that returns signalStoreFeature
+    if (ts.isFunctionDeclaration(node) && node.name) {
+      const funcName = node.name.text;
+      const collections = new Set<string>();
+
+      // Check if function body contains signalStoreFeature call
+      if (node.body) {
+        findSignalStoreFeatureCollections(node.body, sourceFile, collections);
+      }
+
+      if (collections.size > 0) {
+        features.push({
+          filePath,
+          functionName: funcName,
+          collections: Array.from(collections),
+        });
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return features;
+}
+
+/**
+ * Find collections inside signalStoreFeature calls within a function body
+ */
+function findSignalStoreFeatureCollections(
+  node: ts.Node,
+  sourceFile: ts.SourceFile,
+  collections: Set<string>
+): void {
+  if (ts.isCallExpression(node)) {
+    const funcName = node.expression.getText(sourceFile);
+
+    if (funcName === 'signalStoreFeature') {
+      // Extract collections from signalStoreFeature arguments
+      for (const arg of node.arguments) {
+        if (ts.isCallExpression(arg)) {
+          const innerFuncName = arg.expression.getText(sourceFile);
+          if (BREAKING_FEATURES.includes(innerFuncName as any)) {
+            extractCollectionFromFeatureCall(arg, sourceFile, collections);
+          }
+        }
+      }
+    }
+  }
+
+  ts.forEachChild(node, (child) =>
+    findSignalStoreFeatureCollections(child, sourceFile, collections)
+  );
 }
 
 /**
  * Analyze a single file for store definitions with collections
  */
-function analyzeFile(content: string, filePath: string): StoreInfo | null {
+function analyzeFile(
+  content: string,
+  filePath: string,
+  featureCollections: Map<string, string[]> = new Map()
+): StoreInfo | null {
   const sourceFile = ts.createSourceFile(
     filePath,
     content,
@@ -68,7 +186,7 @@ function analyzeFile(content: string, filePath: string): StoreInfo | null {
           if (callText === 'signalStore') {
             storeName = decl.name.text;
             // Analyze signalStore arguments for breaking features with collection
-            extractCollections(decl.initializer, sourceFile, collections);
+            extractCollections(decl.initializer, sourceFile, collections, featureCollections);
           }
         }
       }
@@ -96,7 +214,8 @@ function analyzeFile(content: string, filePath: string): StoreInfo | null {
 function extractCollections(
   callExpr: ts.CallExpression,
   sourceFile: ts.SourceFile,
-  collections: Set<string>
+  collections: Set<string>,
+  featureCollections: Map<string, string[]> = new Map()
 ): void {
   for (const arg of callExpr.arguments) {
     if (ts.isCallExpression(arg)) {
@@ -106,12 +225,19 @@ function extractCollections(
       if (BREAKING_FEATURES.includes(funcName as any)) {
         extractCollectionFromFeatureCall(arg, sourceFile, collections);
       }
+
+      // Check if it's a custom feature function we've identified
+      if (featureCollections.has(funcName)) {
+        const featureColls = featureCollections.get(funcName)!;
+        featureColls.forEach((c) => collections.add(c));
+      }
     }
   }
 }
 
 /**
  * Extract collection name from feature call like withCallStatus({ collection: 'product' })
+ * Also handles: withCallStatus(resourcesEntityConfig) where resourcesEntityConfig is a variable
  */
 function extractCollectionFromFeatureCall(
   callExpr: ts.CallExpression,
@@ -119,6 +245,15 @@ function extractCollectionFromFeatureCall(
   collections: Set<string>
 ): void {
   for (const arg of callExpr.arguments) {
+    // Handle direct variable reference: withCallStatus(resourcesEntityConfig)
+    if (ts.isIdentifier(arg)) {
+      const collectionFromVar = findCollectionInVariable(arg.text, sourceFile);
+      if (collectionFromVar) {
+        collections.add(collectionFromVar);
+      }
+    }
+
+    // Handle object literal: withCallStatus({ collection: 'product' })
     if (ts.isObjectLiteralExpression(arg)) {
       for (const prop of arg.properties) {
         if (ts.isPropertyAssignment(prop)) {

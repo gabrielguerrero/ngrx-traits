@@ -4,7 +4,7 @@
 
 import * as ts from 'typescript';
 import { Tree } from '@angular-devkit/schematics';
-import { StoreInfo, ConsumerInfo, MigrationScope } from './types';
+import { StoreInfo, CustomFeatureInfo, ConsumerInfo, MigrationScope } from './types';
 import * as path from 'path';
 
 /**
@@ -12,11 +12,18 @@ import * as path from 'path';
  */
 export function resolveDependencies(
   tree: Tree,
-  stores: StoreInfo[]
+  stores: StoreInfo[],
+  customFeatures: CustomFeatureInfo[] = []
 ): MigrationScope {
   const consumers = new Map<string, ConsumerInfo[]>();
   const allFiles = new Set<string>();
   const collections = new Set<string>();
+
+  // Add custom feature files and their collections
+  for (const feature of customFeatures) {
+    allFiles.add(feature.filePath);
+    feature.collections.forEach((c) => collections.add(c));
+  }
 
   // Add store files and their collections
   for (const store of stores) {
@@ -62,7 +69,7 @@ export function resolveDependencies(
     }
   });
 
-  return { stores, consumers, collections, allFiles };
+  return { stores, customFeatures, consumers, collections, allFiles };
 }
 
 /**

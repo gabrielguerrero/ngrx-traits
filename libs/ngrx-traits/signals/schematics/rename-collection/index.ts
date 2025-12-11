@@ -244,6 +244,10 @@ function generateRenamePatterns(
       replacement: () => `${newName}IdsSelected`,
     },
     {
+      pattern: new RegExp(`isAll${oldCapital}Selected`, 'g'),
+      replacement: () => `isAll${newCapital}EntitiesSelected`,
+    },
+    {
       pattern: new RegExp(`isAll${oldCapital}EntitiesSelected`, 'g'),
       replacement: () => `isAll${newCapital}EntitiesSelected`,
     },
@@ -365,13 +369,14 @@ export default function renameCollection(
   options: RenameCollectionOptions,
 ): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    const {
+    let {
       oldName,
       newName,
       path: targetPath = 'src',
       skipGitCheck = false,
     } = options;
 
+    newName = newName ? newName : oldName;
     context.logger.info(
       `🔄 Renaming collection '${oldName}' to '${newName}'...\n`,
     );

@@ -8,6 +8,12 @@ export interface StoreInfo {
   collections: string[];
 }
 
+export interface CustomFeatureInfo {
+  filePath: string;
+  functionName: string;
+  collections: string[];
+}
+
 export interface ConsumerInfo {
   filePath: string;
   templatePath?: string;
@@ -15,6 +21,7 @@ export interface ConsumerInfo {
 
 export interface MigrationScope {
   stores: StoreInfo[];
+  customFeatures: CustomFeatureInfo[];
   consumers: Map<string, ConsumerInfo[]>;
   collections: Set<string>;
   allFiles: Set<string>;
@@ -36,11 +43,16 @@ export const BREAKING_FEATURES = [
   'withCallStatus',
   'withEntitiesLocalFilter',
   'withEntitiesRemoteFilter',
+  'withEntitiesHybridFilter',
   'withEntitiesLocalSort',
   'withEntitiesRemoteSort',
   'withEntitiesLocalPagination',
   'withEntitiesRemotePagination',
   'withEntitiesRemoteScrollPagination',
+  'withEntitiesLoadingCall',
+  'withEntitiesCalls',
+  'withEntitiesSingleSelection',
+  'withEntitiesMultiSelection',
 ] as const;
 
 export type BreakingFeature = (typeof BREAKING_FEATURES)[number];

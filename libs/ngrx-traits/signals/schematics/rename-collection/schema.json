@@ -6,19 +6,12 @@
   "properties": {
     "oldName": {
       "type": "string",
-      "description": "Old collection name (e.g., 'products')",
-      "$default": {
-        "$source": "argv",
-        "index": 1
-      }
+      "description": "Old collection name (e.g., 'products')"
     },
     "newName": {
       "type": "string",
       "description": "New collection name (e.g., 'product')",
-      "$default": {
-        "$source": "argv",
-        "index": 0
-      }
+      "default": ""
     },
     "path": {
       "type": "string",
@@ -31,5 +24,5 @@
       "default": false
     }
   },
-  "required": ["oldName", "newName"]
+  "required": ["oldName"]
 }

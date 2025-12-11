@@ -4,7 +4,7 @@
  */
 
 import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
-import { analyzeStores } from './targeted/store-analyzer';
+import { analyzeAll } from './targeted/store-analyzer';
 import { resolveDependencies } from './targeted/dependency-resolver';
 import {
   transformTypeScriptFile,
@@ -13,24 +13,34 @@ import {
 
 export default function migrate(_options: any): Rule {
   return (tree: Tree, context: SchematicContext) => {
-    context.logger.info('Scanning for @ngrx-traits/signals stores with collection param...\n');
+    context.logger.info('Scanning for @ngrx-traits/signals stores and custom features with collection param...\n');
 
-    // Phase 1: Find stores with collection param
-    const stores = analyzeStores(tree);
+    // Phase 1: Find stores and custom features with collection param
+    const { stores, customFeatures } = analyzeAll(tree);
 
-    if (stores.length === 0) {
-      context.logger.info('No stores with collection param found. Nothing to migrate.');
+    if (stores.length === 0 && customFeatures.length === 0) {
+      context.logger.info('No stores or custom features with collection param found. Nothing to migrate.');
       return;
     }
 
-    context.logger.info(`Found ${stores.length} store(s) with collection param:\n`);
-    for (const store of stores) {
-      context.logger.info(`  ${store.storeName} (${store.filePath})`);
-      context.logger.info(`    Collections: ${store.collections.join(', ')}`);
+    if (customFeatures.length > 0) {
+      context.logger.info(`Found ${customFeatures.length} custom feature(s) with collection param:\n`);
+      for (const feature of customFeatures) {
+        context.logger.info(`  ${feature.functionName} (${feature.filePath})`);
+        context.logger.info(`    Collections: ${feature.collections.join(', ')}`);
+      }
+    }
+
+    if (stores.length > 0) {
+      context.logger.info(`Found ${stores.length} store(s) with collection param:\n`);
+      for (const store of stores) {
+        context.logger.info(`  ${store.storeName} (${store.filePath})`);
+        context.logger.info(`    Collections: ${store.collections.join(', ')}`);
+      }
     }
 
     // Phase 2: Resolve dependencies (consumers + templates)
-    const scope = resolveDependencies(tree, stores);
+    const scope = resolveDependencies(tree, stores, customFeatures);
 
     context.logger.info(`\nFiles to migrate: ${scope.allFiles.size}`);
     context.logger.info(`Collections to rename: ${Array.from(scope.collections).join(', ')}\n`);
