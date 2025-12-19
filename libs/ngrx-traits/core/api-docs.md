@@ -389,18 +389,17 @@ it will return the cache value without calling again source</p>
 | options.expires | <p>time to expire the cache valued, if not present is infinite</p> |
 | options.maxCacheSize | <p>max number of keys to store , only works if last key is variable</p> |
 
-**Example**
-
+**Example**  
 ```js
 // cache for 3 min
 loadStores$ = createEffect(() => {
   return this.actions$.pipe(
     ofType(ProductStoreActions.loadStores),
     exhaustMap(() =>
-      cacheCall({
+      cache({
         key: ['stores'],
         store: this.store,
-        result: this.storeService.getStores(),
+        source: this.storeService.getStores(),
         expire: 1000 * 60 * 3 // optional param , cache forever if not present
       }).pipe(
         map((res) => ProductStoreActions.loadStoresSuccess({ entities: res })),
@@ -410,42 +409,29 @@ loadStores$ = createEffect(() => {
   );
 });
 // cache top 10, for 3 mins
-loadDepartments$ = createEffect(() => {
+  loadDepartments$ = createEffect(() => {
   return this.actions$.pipe(
     ofType(this.localActions.loadDepartments),
     concatLatestFrom(() =>
       this.store.select(this.localSelectors.selectDepartmentsFilter)
     ),
     exhaustMap(([_, filters]) =>
-      cacheCall({
-          key: ['stores', 'departments', { storeId: filters!.storeId
-        },
-        store
-:
-  this.store,
-    call
-:
-  this.storeService.getStoreDepartments(filters
-  !
-.
-  storeId
-),
-  expires: 1000 * 60 * 3,
-    maxCacheSize
-:
-  10,
-}).
-  pipe(
-    map((res) =>
-      this.localActions.loadDepartmentsSuccess({
-        entities: res,
-      })
-    ),
-    catchError(() => of(this.localActions.loadDepartmentsFail()))
-  )
-)
-)
-  ;
+      cache({
+        key: ['stores','departments',{ storeId: filters!.storeId },
+        store: this.store,
+        source: this.storeService.getStoreDepartments(filters!.storeId),
+        expires: 1000 * 60 * 3,
+        maxCacheSize: 10,
+      }).pipe(
+        map((res) =>
+          this.localActions.loadDepartmentsSuccess({
+            entities: res,
+          })
+        ),
+        catchError(() => of(this.localActions.loadDepartmentsFail()))
+      )
+    )
+  );
 });
 ```
 <a name="buildLocalTraits"></a>
