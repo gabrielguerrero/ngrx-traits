@@ -8,13 +8,17 @@ on:
     branches: [ main, next, beta, rc, '*.x' ]
   pull_request:
     branches: '*'
-
+permissions:
+  contents: write # to be able to publish a GitHub release
+  issues: write # to be able to comment on released issues
+  pull-requests: write # to be able to comment on released pull requests
+  id-token: write # to enable use of OIDC for trusted publishing and npm provenance
 jobs:
   quality:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20]
+        node-version: [24]
     steps:
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
@@ -30,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20]
+        node-version: [24]
     # only allows semantic release on main, next, beta, rc, and 1*x branches, github doesnt do regex matching so we have to manually when we are over version 20
     if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/rc' || (startsWith(github.ref, 'refs/heads/1') && endsWith(github.ref, '.x')) }}
     needs: [quality]

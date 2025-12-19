@@ -1,5 +1,11 @@
 {
-  "branches": ['+([0-9])?(.{+([0-9]),x}).x', "main", "next", {"name": "beta", "prerelease": true}, {"name": "rc", "prerelease": true}],
+  "branches": [
+    "+([0-9])?(.{+([0-9]),x}).x",
+    {"name": "main", "channel": "latest"},
+    {"name": "next", "channel": "next"},
+    {"name": "beta", "prerelease": true, "channel": "beta"},
+    {"name": "rc", "prerelease": true, "channel": "rc"}
+  ],
   "plugins": [
       ["@semantic-release/commit-analyzer", {
         "releaseRules": [
@@ -8,7 +14,7 @@
       }],
       "@semantic-release/release-notes-generator",
       ["@semantic-release/exec", {
-        "publishCmd": "nx run-many --all --target=release --versionNumber=${nextRelease.version}"
+        "publishCmd": "nx run-many --all --target=release --versionNumber=${nextRelease.version} --tag=${nextRelease.channel}"
        }],
       "@semantic-release/github"
     ]
