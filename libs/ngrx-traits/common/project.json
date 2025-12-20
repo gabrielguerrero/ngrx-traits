@@ -44,7 +44,7 @@
       "options": {
         "commands": [
           {
-            "command": "npm version {args.versionNumber} && jq --arg version \"{args.versionNumber}\" '.peerDependencies.\"@ngrx-traits/core\"=$version' package.json > tmp && mv tmp package.json && npm publish --access public --tag {args.tag} --verbose",
+            "command": "npm version {args.versionNumber} && jq --arg version \"{args.versionNumber}\" '.peerDependencies.\"@ngrx-traits/core\"=$version' package.json > tmp && mv tmp package.json &&  NODE_AUTH_TOKEN=\"\" npm publish --access public --tag {args.tag} --provenance --verbose",
             "forwardAllArgs": false
           }
         ],
