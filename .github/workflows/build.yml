@@ -8,11 +8,13 @@ on:
     branches: [ main, next, beta, rc, '*.x' ]
   pull_request:
     branches: '*'
+
 permissions:
   contents: write # to be able to publish a GitHub release
   issues: write # to be able to comment on released issues
   pull-requests: write # to be able to comment on released pull requests
   id-token: write # to enable use of OIDC for trusted publishing and npm provenance
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -20,9 +22,9 @@ jobs:
       matrix:
         node-version: [24]
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
@@ -39,9 +41,9 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' || github.ref == 'refs/heads/beta' || github.ref == 'refs/heads/rc' || (startsWith(github.ref, 'refs/heads/1') && endsWith(github.ref, '.x')) }}
     needs: [quality]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'

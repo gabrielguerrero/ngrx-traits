@@ -17,6 +17,6 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/gabrielguerrero/ngrx-traits.git"
+    "url": "git+https://github.com/gabrielguerrero/ngrx-traits.git"
   }
 }
