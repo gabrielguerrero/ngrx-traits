@@ -44,7 +44,7 @@
       "options": {
         "commands": [
           {
-            "command": "npm version {args.versionNumber} &&  NODE_AUTH_TOKEN=\"\" npm publish --access public --tag {args.tag} --provenance --verbose",
+            "command": "npm version {args.versionNumber} &&  npm publish --access public --tag {args.tag} --provenance --verbose",
             "forwardAllArgs": false
           }
         ],
