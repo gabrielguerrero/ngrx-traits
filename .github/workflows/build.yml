@@ -48,9 +48,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-      - run: npm install -g npm@latest
       - run: npm ci --legacy-peer-deps
       - run: npm run build
+      - run: npm install -g npm@latest
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
