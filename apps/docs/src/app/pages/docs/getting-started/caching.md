@@ -1,5 +1,5 @@
 
-# Caching (experimental)
+# Caching
  This feature allows you to easily implement caching for calls that return an observable or a promise.
 
 ## Basic example 
