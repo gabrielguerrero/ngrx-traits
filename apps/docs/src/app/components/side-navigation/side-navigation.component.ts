@@ -129,7 +129,7 @@ export class SideNavigationComponent {
         },
         {
           link: './getting-started/caching',
-          name: 'Caching (experimental)',
+          name: 'Caching',
         },
         {
           link: 'https://stackblitz.com/github/gabrielguerrero/ngrx-traits-signals-playground?file=src%2Fapp%2Fproduct-list-detail%2Fproduct-local.store.ts',
