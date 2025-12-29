@@ -53,7 +53,7 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  * @param configFactory.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = "product";
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // Required withEntities and withCallStatus
@@ -67,9 +67,9 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  *  );
  *
  *  // generates the following signals
- *  store.productsIdSelected // string | number | undefined
+ *  store.productIdSelected // string | number | undefined
  *  // generates the following computed signals
- *  store.productsEntitySelected // Entity | undefined
+ *  store.productEntitySelected // Entity | undefined
  *  // generates the following methods
  *  store.selectProductEntity // (config: { id: string | number }) => void
  *  store.deselectProductEntity // (config: { id: string | number }) => void

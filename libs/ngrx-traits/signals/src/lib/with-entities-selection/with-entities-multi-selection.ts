@@ -56,7 +56,7 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = "product";
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   withEntities({ entity, collection }),
@@ -64,10 +64,10 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  *   );
  *
  * // generates the following signals
- * store.productsIdsSelectedMap // Record<string | number, boolean>;
+ * store.productIdsSelectedMap // Record<string | number, boolean>;
  * // generates the following computed signals
- * store.productsEntitiesSelected // Entity[];
- * store.isAllProductsSelected // 'all' | 'none' | 'some';
+ * store.productEntitiesSelected // Entity[];
+ * store.isAllProductEntitiesSelected // 'all' | 'none' | 'some';
  * // generates the following methods
  * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
  * store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;

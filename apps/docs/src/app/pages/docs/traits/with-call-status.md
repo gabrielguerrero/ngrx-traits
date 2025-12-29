@@ -27,13 +27,19 @@ setLoading setLoaded and setError
 ```typescript
 const store = signalStore(withCallStatus());
 ```
-### Using prop or collection to rename generated
-The following generates a userEntitiesCallStatus signal, and getters isUserEntitiesLoading isUsersLoaded usersError, and computed
-setUserEntitiesLoading setUsersLoaded and setUsersError
+### Using prop to rename generated code
+The following generates a userCallStatus signal, and getters isUserLoading isUserLoaded userError, and computed
+setUserLoading setUserLoaded and setUserError
 ```typescript
-const store = signalStore(withCallStatus({ prop: 'users' }));
+const store = signalStore(withCallStatus({ prop: 'user' }));
 ```
-Prop and collection are aliases they cause the same effect, collection is there just so it can be use more easily combined with withEntities* store features
+
+### Using collection to rename generated code
+The following generates a userEntitiesCallStatus signal, and getters isUserEntitiesLoading isUserEntitiesLoaded userEntitiesError, and computed
+setUserEntitiesLoading setUserEntitiesLoaded and setUserEntitiesError
+```typescript
+const store = signalStore(withCallStatus({ collection: 'user' }));
+```
 
 ### Typing error
 ```typescript
@@ -46,7 +52,7 @@ const store = signalStore(withCallStatus({ collection: 'user', initialValue: 'lo
 import { withEntities } from '@ngrx/signals/entities';
 
 const entity = type<Product>();
-const collection = 'products';
+const collection = 'product';
 
 export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
@@ -77,7 +83,7 @@ export const ProductsRemoteStore = signalStore(
 ```typescript
 
 const entity = type<Product>();
-const collection = 'products';
+const collection = 'product';
 
 export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },

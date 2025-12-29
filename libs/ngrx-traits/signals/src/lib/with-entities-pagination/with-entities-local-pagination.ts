@@ -52,7 +52,7 @@ import {
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = "product";
  * export const ProductsLocalStore = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities
@@ -64,11 +64,11 @@ import {
  *   }),
  *
  *   // generates the following signals
- *   store.productsPagination // { currentPage: 0, pageSize: 5 }
+ *   store.productEntitiesPagination // { currentPage: 0, pageSize: 5 }
  *   // generates the following computed signals
- *   store.productsCurrentPage // { entities: Product[], pageIndex: 0, total: 10, pageSize: 5, pagesCount: 2, hasPrevious: false, hasNext: true }
+ *   store.productEntitiesCurrentPage // { entities: Product[], pageIndex: 0, total: 10, pageSize: 5, pagesCount: 2, hasPrevious: false, hasNext: true }
  *   // generates the following methods
- *   store.loadProductsPage // ({ pageIndex: number }) => void
+ *   store.loadProductEntitiesPage // ({ pageIndex: number }) => void
  */
 
 export function withEntitiesLocalPagination<

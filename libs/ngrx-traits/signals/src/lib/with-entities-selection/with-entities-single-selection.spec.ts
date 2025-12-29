@@ -65,7 +65,7 @@ describe('withEntitiesSingleSelection', () => {
   });
 
   describe('with collection', () => {
-    const collection = 'products';
+    const collection = "product";
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity, collection }),
@@ -75,8 +75,8 @@ describe('withEntitiesSingleSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.selectProductsEntity({ id: mockProducts[4].id });
-        expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
+        store.selectProductEntity({ id: mockProducts[4].id });
+        expect(store.productEntitySelected()).toEqual(mockProducts[4]);
       });
     });
 
@@ -84,9 +84,9 @@ describe('withEntitiesSingleSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.selectProductsEntity({ id: mockProducts[4].id });
-        store.selectProductsEntity(undefined);
-        expect(store.productsEntitySelected()).toEqual(undefined);
+        store.selectProductEntity({ id: mockProducts[4].id });
+        store.selectProductEntity(undefined);
+        expect(store.productEntitySelected()).toEqual(undefined);
       });
     });
 
@@ -94,9 +94,9 @@ describe('withEntitiesSingleSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.selectProductsEntity({ id: mockProducts[4].id });
-        store.deselectProductsEntity();
-        expect(store.productsEntitySelected()).toEqual(undefined);
+        store.selectProductEntity({ id: mockProducts[4].id });
+        store.deselectProductEntity();
+        expect(store.productEntitySelected()).toEqual(undefined);
       });
     });
 
@@ -104,10 +104,10 @@ describe('withEntitiesSingleSelection', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts, { collection }));
-        store.toggleSelectProductsEntity({ id: mockProducts[4].id });
-        expect(store.productsEntitySelected()).toEqual(mockProducts[4]);
-        store.toggleSelectProductsEntity({ id: mockProducts[4].id });
-        expect(store.productsEntitySelected()).toEqual(undefined);
+        store.toggleSelectProductEntity({ id: mockProducts[4].id });
+        expect(store.productEntitySelected()).toEqual(mockProducts[4]);
+        store.toggleSelectProductEntity({ id: mockProducts[4].id });
+        expect(store.productEntitySelected()).toEqual(undefined);
       });
     });
   });

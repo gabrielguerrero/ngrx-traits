@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "../dist/libs/ngrx-traits/signals/migrations",
+    "rootDir": "../libs/ngrx-traits/signals/src/migrations",
+    "module": "commonjs",
+    "target": "es2020",
+    "types": ["node"],
+    "moduleResolution": "node"
+  },
+  "include": ["../libs/ngrx-traits/signals/src/migrations/**/*"],
+  "exclude": ["../libs/ngrx-traits/signals/src/migrations/**/*.spec.ts", "../libs/ngrx-traits/signals/src/migrations/**/__tests__"]
+}

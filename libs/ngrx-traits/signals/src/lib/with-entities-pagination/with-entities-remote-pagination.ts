@@ -83,7 +83,7 @@ import {
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = "product";
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities and withCallStatus
@@ -114,10 +114,10 @@ import {
  *     },
  *   }),
  * // withEntitiesLoadingCall is the same as doing the following:
- * // withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
+ * // withHooks(({ productsLoading, setProductEntitiesError, setProductEntitiesPagedResult, ...state }) => ({
  * //   onInit: async () => {
  * //     effect(() => {
- * //       if (isProductsLoading()) {
+ * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //             .getProducts({
  * //                take: productPagedRequest().size,
@@ -128,11 +128,11 @@ import {
  * //             tap((res) =>
  * //               patchState(
  * //                 state,
- * //                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
+ * //                 setProductEntitiesPagedResult({ entities: res.resultList, total: res.total } ),
  * //               ),
  * //             ),
  * //             catchError((error) => {
- * //               setProductsError(error);
+ * //               setProductEntitiesError(error);
  * //               return EMPTY;
  * //             }),
  * //           )
@@ -142,13 +142,13 @@ import {
  * //   },
  *  })),
  *   // generates the following signals
- *   store.productsPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
+ *   store.productEntitiesPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  *  // generates the following computed signals
- *  store.productsCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ *  store.productEntitiesCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  *  store.productPagedRequest // { startIndex: number, size: number, page: number }
  *  // generates the following methods
- *  store.loadProductsPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
- *  store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ *  store.loadProductEntitiesPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
+ *  store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
 export function withEntitiesRemotePagination<
   Input extends SignalStoreFeatureResult,
