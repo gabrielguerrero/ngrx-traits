@@ -96,8 +96,8 @@ import { getWithCallKeys } from './with-calls.util';
  *       },
  *       callWith: () =>
  *       // reactively call  with the selected product id, if undefined is return, the call is skip by default
- *        productsEntitySelected()
- *            ? { id: productsEntitySelected()!.id }
+ *        productEntitySelected()
+ *            ? { id: productEntitySelected()!.id }
  *            : undefined,
  *     }),
  *     checkout: () =>

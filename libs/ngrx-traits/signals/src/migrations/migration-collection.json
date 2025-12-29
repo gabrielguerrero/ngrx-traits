@@ -1,0 +1,9 @@
+{
+  "schematics": {
+    "update-21-0-0": {
+      "version": "21.0.0",
+      "description": "Migrate to Entities suffix naming convention",
+      "factory": "./update-21-0-0"
+    }
+  }
+}

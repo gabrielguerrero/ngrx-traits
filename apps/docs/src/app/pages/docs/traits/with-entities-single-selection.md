@@ -37,7 +37,7 @@ const store = signalStore(
 To use it in your template:
 ```html
 <mat-list>
-  @for (product of store.productsEntities(); track product.id) {
+  @for (product of store.productEntities(); track product.id) {
     <mat-list-item
       [class.selected]="store.productEntitySelected() === product"
       (click)="store.selectProductEntity(product)"

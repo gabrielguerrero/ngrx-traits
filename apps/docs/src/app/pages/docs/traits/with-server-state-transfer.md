@@ -136,13 +136,13 @@ const store = signalStore(
 
   withServerStateTransfer({
     key: 'products-state',
-    filterState: ({ productsEntityMap, productsIds }) => ({
-      productsEntityMap,
-      productsIds,
+    filterState: ({ productEntityMap, productIds }) => ({
+      productEntityMap,
+      productIds,
     }),
     onRestore: (store) => {
       // Custom logic after restoration, e.g., set loaded status
-      patchState(store, { productsCallStatus: 'loaded' });
+      patchState(store, { productEntitiesCallStatus: 'loaded' });
     },
   }),
 );

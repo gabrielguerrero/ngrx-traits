@@ -6,7 +6,7 @@
   "tags": [],
   "projectType": "library",
   "targets": {
-    "build": {
+    "build-package": {
       "executor": "@nx/angular:package",
       "outputs": ["{workspaceRoot}/dist/{projectRoot}"],
       "options": {
@@ -21,6 +21,43 @@
         }
       },
       "defaultConfiguration": "production"
+    },
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "nx run ngrx-traits-signals:build-package",
+          "nx run ngrx-traits-signals:build-migrations",
+          "nx run ngrx-traits-signals:build-schematics",
+          "nx run ngrx-traits-signals:copy-schematic-assets"
+        ],
+        "parallel": false
+      }
+    },
+    "build-migrations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tools/tsconfig.migration.json"
+      }
+    },
+    "build-schematics": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p tools/tsconfig.schematics.json"
+      }
+    },
+    "copy-schematic-assets": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "mkdir -p dist/libs/ngrx-traits/signals/migrations && cp libs/ngrx-traits/signals/src/migrations/migration-collection.json dist/libs/ngrx-traits/signals/migrations/",
+          "mkdir -p dist/libs/ngrx-traits/signals/schematics && cp libs/ngrx-traits/signals/schematics/collection.json dist/libs/ngrx-traits/signals/schematics/",
+          "mkdir -p dist/libs/ngrx-traits/signals/schematics/rename-collection && cp libs/ngrx-traits/signals/schematics/rename-collection/schema.json dist/libs/ngrx-traits/signals/schematics/rename-collection/",
+          "echo '{\"type\":\"commonjs\"}' > dist/libs/ngrx-traits/signals/migrations/package.json",
+          "echo '{\"type\":\"commonjs\"}' > dist/libs/ngrx-traits/signals/schematics/package.json"
+        ],
+        "parallel": false
+      }
     },
     "test": {
       "executor": "@nx/jest:jest",

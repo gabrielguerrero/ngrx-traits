@@ -60,7 +60,7 @@ export { sortData };
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = "product";
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   withEntities({ entity, collection }),
@@ -73,7 +73,7 @@ export { sortData };
  * // generates the following signals
  * store.productEntitiesSort - the current sort applied to the products
  * // generates the following methods
- * store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
+ * store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
  */
 
 export function withEntitiesLocalSort<

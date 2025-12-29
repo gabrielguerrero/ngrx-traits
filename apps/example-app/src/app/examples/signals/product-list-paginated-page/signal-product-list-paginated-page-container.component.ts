@@ -122,7 +122,7 @@ export class SignalProductListPaginatedPageContainerComponent {
 
   sort(sort: Sort<Product>) {
     this.store.sortProductEntities({
-      sort: { field: sort.active as string, direction: sort.direction },
+      sort: { field: sort.active, direction: sort.direction },
     });
   }
 }

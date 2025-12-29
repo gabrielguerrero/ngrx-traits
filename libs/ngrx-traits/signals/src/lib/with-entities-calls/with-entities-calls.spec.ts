@@ -22,7 +22,7 @@ describe('withEntitiesCalls', () => {
   const onError = jest.fn();
 
   const entity = type<ProductDetail>();
-  const collection = 'products';
+  const collection = "product";
   const productDetail = {
     image: 'https://example.com/image.jpg',
     maker: 'Nintendo',
@@ -264,7 +264,7 @@ describe('withEntitiesCalls', () => {
       expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
       apiResponse.next({ detail: productDetail });
       expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
-      expect(store.productsEntityMap()[product.id].detail).toEqual(
+      expect(store.productEntityMap()[product.id].detail).toEqual(
         productDetail,
       );
     });
