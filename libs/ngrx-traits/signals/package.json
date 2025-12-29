@@ -15,6 +15,10 @@
     "@angular/cdk": "^21.0.0"
   },
   "sideEffects": false,
+  "ng-update": {
+    "migrations": "./migrations/migration-collection.json"
+  },
+  "schematics": "./schematics/collection.json",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gabrielguerrero/ngrx-traits.git"

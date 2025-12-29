@@ -236,7 +236,7 @@ describe('withEntitiesMultiSelection', () => {
         patchState(store, setAllEntities(mockProducts, { collection }));
         store.toggleSelectAllProductEntities();
         expect(store.isAllProductEntitiesSelected()).toEqual('all');
-        store.clearProductSelection();
+        store.clearProductEntitiesSelection();
         expect(store.isAllProductEntitiesSelected()).toEqual('none');
         store.toggleSelectProductEntities({
           ids: mockProducts.map((p) => p.id),
@@ -244,7 +244,7 @@ describe('withEntitiesMultiSelection', () => {
         expect(store.isAllProductEntitiesSelected()).toEqual('all');
         store.toggleSelectProductEntities({ id: mockProducts[4].id });
         expect(store.isAllProductEntitiesSelected()).toEqual('some');
-        store.clearProductSelection();
+        store.clearProductEntitiesSelection();
         expect(store.isAllProductEntitiesSelected()).toEqual('none');
       });
     });

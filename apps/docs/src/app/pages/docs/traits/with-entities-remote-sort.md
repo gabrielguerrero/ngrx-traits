@@ -23,7 +23,7 @@ Useful in cases where you want to further change the state before manually calli
 ```typescript
 const entityConfig = entityConfig({
   entity: type<T>(),
-  collection:"products",
+  collection: "product",
 });
 
 export const store = signalStore(

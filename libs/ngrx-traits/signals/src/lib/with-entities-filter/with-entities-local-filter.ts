@@ -63,7 +63,7 @@ import {
  *
  * @example
  * const entity = type<Product>();
- * const collection = 'products';
+ * const collection = 'product';
  * const store = signalStore(
  *   { providedIn: 'root' },
  *   // requires withEntities to be used
@@ -82,8 +82,8 @@ import {
  * // generates the following signals
  *  store.productEntitiesFilter // { search: string }
  *  // generates the following methods
- *  store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
- *  store.resetProductsFilter  // () => void
+ *  store.filterProductEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean }) => void
+ *  store.resetProductEntitiesFilter  // () => void
  */
 export function withEntitiesLocalFilter<
   Input extends SignalStoreFeatureResult,

@@ -77,6 +77,38 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
             </ul>
           </div>
         }
+        @for (section of utils; track section.title) {
+          <div class="ml-4">
+            <h2
+              class="text-md mb-2 font-semibold text-zinc-600 dark:text-white"
+            >
+              {{ section.title }}
+            </h2>
+            <ul class="ml-1">
+              @for (link of section.links; track link) {
+                <li class="text-zinc-600 dark:text-zinc-300 text-sm">
+                  @if (link.external) {
+                    <a
+                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      [href]="link.link"
+                      routerLinkActive="text-sm font-medium text-blue-400 "
+                    >
+                      {{ link.name }}
+                    </a>
+                  } @else {
+                    <a
+                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      [routerLink]="link.link"
+                      routerLinkActive="text-sm font-medium text-blue-400 "
+                    >
+                      {{ link.name }}
+                    </a>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        }
         <h2 class=" mb-2 inline-block text-xl font-medium app-title-color">
           <a
             class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
@@ -144,6 +176,10 @@ export class SideNavigationComponent {
         {
           link: './getting-started/articles-and-videos',
           name: 'Articles and Videos',
+        },
+        {
+          link: './getting-started/migrating-to-v21',
+          name: 'Migrating to v21',
         },
       ],
     },
@@ -273,6 +309,18 @@ export class SideNavigationComponent {
         {
           link: './traits/with-feature-factory',
           name: 'withFeatureFactory',
+        },
+      ],
+    },
+  ] as Section[];
+
+  readonly utils = [
+    {
+      title: 'Utils',
+      links: [
+        {
+          link: './utils/rename-collection',
+          name: 'Rename Collection Schematic',
         },
       ],
     },

@@ -9,6 +9,14 @@ See <code>createReducer</code>.</p></dd>
 ## Functions
 
 <dl>
+<dt><a href="#combineFunctionsInObject">combineFunctionsInObject(param, store)</a></dt>
+<dd><p>Combines the implementation of a function defined in the store with
+a new implementation of the same type
+the resulting call will execute both functions when called,</p></dd>
+<dt><a href="#cacheCall">cacheCall(options)</a></dt>
+<dd><p>Return the cached results of the key if available, otherwise return the value of source and cache it</p></dd>
+<dt><a href="#cacheRxCall">cacheRxCall(options)</a></dt>
+<dd><p>Return the cached results of the key if available, otherwise return the value of source and cache it</p></dd>
 <dt><a href="#withAllCallStatus">withAllCallStatus()</a></dt>
 <dd><p>Adds methods to the store to track the status of all calls in the store</p></dd>
 <dt><a href="#withCallStatusMap">withCallStatusMap(configFactory)</a></dt>
@@ -136,19 +144,17 @@ Useful in cases where you want to further change the state before manually calli
 can access the store. This can be useful for creating store features that need to access the store's state, methods, computed signals, etc. or to wrap store
 features that don't have a config factory that can access the store.</p></dd>
 <dt><a href="#withInputBindings">withInputBindings(inputs)</a></dt>
-<dd></dd>
+<dd><p>Binds component inputs to the store, so that the store is updated with the latest values of the inputs.</p></dd>
 <dt><a href="#withLogger">withLogger(name, filter, showDiff)</a></dt>
 <dd><p>Log the state of the store on every change, optionally filter the signals to log
 the filter prop can receive an array with the names of the props to filter, or you can provide a function
 which receives the store as an argument and should return the object to log, if any of the props in the object is a signal
 it will log the value of the signal. If showDiff is true it will log the diff of the state on every change.</p></dd>
-<dt><del><a href="#withStateLogger">withStateLogger(name, filterState)</a></del></dt>
-<dd><p>Log the state of the store on every change</p></dd>
-<dt><a href="#withRouteParams">withRouteParams(mapParams)</a></dt>
-<dd><p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
-to an object, this will create a computed for each prop return by the mapParams function</p>
-<p>Requires the store to be provided in a routed component, since this feature consumes from Angular's ActivatedRoute. 
-Providing it in root or in a route-level factory is not sufficient.</p></dd>
+<dt><a href="#extractRouteParams">extractRouteParams()</a></dt>
+<dd><p>Recursively extracts route parameters from the current route and all its children.
+Parameters from deeper child routes take precedence over parent route parameters.</p></dd>
+<dt><a href="#withServerStateTransfer">withServerStateTransfer(key, filterState, valueMapper, onRestore)</a></dt>
+<dd><p>Sync the state of the store using Angular's TransferState API for SSR</p></dd>
 <dt><a href="#withEntitiesSyncToRouteQueryParams">withEntitiesSyncToRouteQueryParams()</a></dt>
 <dd><p>Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
@@ -158,7 +164,7 @@ when is not provided the filter will use JSON.stringify to serialize the filter 
 <dd><p>Syncs the route query params with the store and back. On init it will load
 the query params once and set them in the store using the mapper.queryParamsToState, after that
 and change on the store will be reflected in the query params using the mapper.stateToQueryParams</p></dd>
-<dt><a href="#withSyncToWebStorage">withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore, expires)</a></dt>
+<dt><a href="#withSyncToWebStorage">withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, valueMapper, onRestore, expires)</a></dt>
 <dd><p>Sync the state of the store to the web storage</p></dd>
 </dl>
 
@@ -169,6 +175,42 @@ and change on the store will be reflected in the query params using the mapper.s
 See <code>createReducer</code>.</p>
 
 **Kind**: global constant  
+<a name="combineFunctionsInObject"></a>
+
+## combineFunctionsInObject(param, store)
+<p>Combines the implementation of a function defined in the store with
+a new implementation of the same type
+the resulting call will execute both functions when called,</p>
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| param | 
+| store | 
+
+<a name="cacheCall"></a>
+
+## cacheCall(options)
+<p>Return the cached results of the key if available, otherwise return the value of source and cache it</p>
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| options | 
+
+<a name="cacheRxCall"></a>
+
+## cacheRxCall(options)
+<p>Return the cached results of the key if available, otherwise return the value of source and cache it</p>
+
+**Kind**: global function  
+
+| Param |
+| --- |
+| options | 
+
 <a name="withAllCallStatus"></a>
 
 ## withAllCallStatus()
@@ -287,7 +329,7 @@ export const Store = signalStore(
 **Example**  
 ```js
 const store = signalStore(
- withCallStatus({ prop: 'users', })
+ withCallStatus({ collection: 'user', })
  // other valid configurations
  // withCallStatus()
  // withCallStatus({ collection: 'user', initialValue: 'loading' , errorType: type<string>()})
@@ -298,7 +340,7 @@ const store = signalStore(
  // generates the following computed signals
  store.isUserEntitiesLoading // boolean
  store.isUserEntitiesLoaded // boolean
- store.usersError // unknown | null
+ store.userEntitiesError // unknown | null
  // generates the following methods
  store.setUserEntitiesLoading // () => void
  store.setUserEntitiesLoaded // () => void
@@ -328,7 +370,7 @@ const store = signalStore(
 <a name="typedCallConfig"></a>
 
 ## ~~typedCallConfig(config)~~
-***Deprecated***
+***renamed to callConfig()***
 
 <p>Call configuration object for withCalls</p>
 
@@ -391,8 +433,8 @@ withCalls(({ productsSelectedEntity }) => ({
       },
       callWith: () =>
       // reactively call  with the selected product id, if undefined is return, the call is skip by default
-       productsEntitySelected()
-           ? { id: productsEntitySelected()!.id }
+       productEntitySelected()
+           ? { id: productEntitySelected()!.id }
            : undefined,
     }),
     checkout: () =>
@@ -464,7 +506,7 @@ The call can be skipped based on the result of the previous call, to skip a call
 ```js
 const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
-  collection: 'orders',
+  collection: 'order',
 });
 export const OrderStore = signalStore(
   withEntities(orderEntity),
@@ -543,14 +585,14 @@ export const store = signalStore(
   { providedIn: 'root' },
   // requires withEntities and withCallStatus to be used
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
   withEntitiesHybridFilter({
     entity,
     collection,
     defaultFilter: { name: '' , category: ''},
     filterFn: (entity, filter) =>
        (!filter.name || entity.name.toLowerCase().includes(filter.name.toLowerCase()))
-    // in this case the filter will call setProductsLoading() if the category changes, othewise
+    // in this case the filter will call setProductEntitiesLoading() if the category changes, othewise
     // it will filter the entities locally using filterFn
     isRemoteFilter: (previous, current) => {
          return previous.category !== current.category;
@@ -560,21 +602,21 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService)
         .getProducts({
-          category: productsFilter().category,
+          category: productEntitiesFilter().category,
         })
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, ...state }) => ({
+// withHooks(({ productEntitiesCallStatus, setProductEntitiesError, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
 //       if (isProductEntitiesLoading()) {
 //         inject(ProductService)
 //              .getProducts({
-//                  category: productsFilter().category,
+//                  category: productEntitiesFilter().category,
 //               })
 //           .pipe(
 //             takeUntilDestroyed(),
@@ -583,7 +625,6 @@ export const store = signalStore(
 //                 state,
 //                 setAllEntities(res.resultList, { collection: 'product' }),
 //               ),
-//               setProductEntitiesLoaded();
 //             ),
 //             catchError((error) => {
 //               setProductEntitiesError(error);
@@ -671,11 +712,11 @@ Useful in cases where you want to further change the state before manually calli
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'products';
+const collection = 'product';
 export const store = signalStore(
   // requires withEntities and withCallStatus to be used
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
 
   withEntitiesRemoteFilter({
     entity,
@@ -686,21 +727,21 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsFilter }) => {
+    fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService)
         .getProducts({
-          search: productsFilter().name,
+          search: productEntitiesFilter().name,
         })
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productEntitiesLoading, setProductEntitiesError, ...state }) => ({
+// withHooks(({ isProductEntitiesLoading, productEntitiesFilter, setProductEntitiesError, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
 //       if (isProductEntitiesLoading()) {
 //         inject(ProductService)
 //              .getProducts({
-//                 search: productsFilter().name,
+//                 search: productEntitiesFilter().name,
 //               })
 //           .pipe(
 //             takeUntilDestroyed(),
@@ -721,10 +762,10 @@ export const store = signalStore(
 //   },
  })),
 // generates the following signals
- store.productsFilter // { search: string }
+ store.productEntitiesFilter // { search: string }
  // generates the following methods
- store.filterProductsEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- store.resetProductsFilter  // () => void
+ store.filterProductEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
+ store.resetProductEntitiesFilter  // () => void
 ```
 <a name="withEntitiesLoadingCall"></a>
 
@@ -816,7 +857,7 @@ export const ProductsRemoteStore = signalStore(
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'product';
+const collection = "product";
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   // required withEntities
@@ -865,7 +906,7 @@ If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPa
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'products';
+const collection = "product";
 export const store = signalStore(
   { providedIn: 'root' },
   // required withEntities and withCallStatus
@@ -882,11 +923,11 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productEntitiesPagedRequest }) => {
+    fetchEntities: ({ productPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productEntitiesPagedRequest().size,
-          skip: productEntitiesPagedRequest().startIndex,
+          take: productPagedRequest().size,
+          skip: productPagedRequest().startIndex,
         }).pipe(
           map((d) => ({
             entities: d.resultList,
@@ -896,25 +937,25 @@ export const store = signalStore(
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
+// withHooks(({ productsLoading, setProductEntitiesError, setProductEntitiesPagedResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
-//       if (isProductsLoading()) {
+//       if (isProductEntitiesLoading()) {
 //         inject(ProductService)
 //             .getProducts({
-//                take: productEntitiesPagedRequest().size,
-//                skip: productEntitiesPagedRequest().startIndex,
+//                take: productPagedRequest().size,
+//                skip: productPagedRequest().startIndex,
 //              })
 //           .pipe(
 //             takeUntilDestroyed(),
 //             tap((res) =>
 //               patchState(
 //                 state,
-//                 setProductsPagedResult({ entities: res.resultList, total: res.total } ),
+//                 setProductEntitiesPagedResult({ entities: res.resultList, total: res.total } ),
 //               ),
 //             ),
 //             catchError((error) => {
-//               setProductsError(error);
+//               setProductEntitiesError(error);
 //               return EMPTY;
 //             }),
 //           )
@@ -927,7 +968,7 @@ export const store = signalStore(
   store.productEntitiesPagination // { currentPage: number, requestPage: number, pageSize: 5, total: number, pagesToCache: number, cache: { start: number, end: number } } used internally
  // generates the following computed signals
  store.productEntitiesCurrentPage // { entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
- store.productEntitiesPagedRequest // { startIndex: number, size: number, page: number }
+ store.productPagedRequest // { startIndex: number, size: number, page: number }
  // generates the following methods
  store.loadProductEntitiesPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
  store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
@@ -964,12 +1005,12 @@ or a hasMore param set[Collection]Result({entities, hasMore}) that you can set t
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'products';
+const collection = 'product';
 export const store = signalStore(
   { providedIn: 'root' },
   // required withEntities and withCallStatus
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
 
   withEntitiesRemoteScrollPagination({
     entity,
@@ -981,11 +1022,11 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productEntitiesPagedRequest }) => {
+    fetchEntities: ({ productPagedRequest }) => {
       return inject(ProductService)
         .getProducts({
-          take: productEntitiesPagedRequest().size,
-          skip: productEntitiesPagedRequest().startIndex,
+          take: productPagedRequest().size,
+          skip: productPagedRequest().startIndex,
         }).pipe(
           map((d) => ({
             entities: d.resultList,
@@ -995,23 +1036,23 @@ export const store = signalStore(
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsLoading, setProductsError, setProductsPagedResult, ...state }) => ({
+// withHooks(({ productEntitiesCallStatus, setProductEntitiesError, setProductPagedResult, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
-//       if (isProductsLoading()) {
+//       if (isProductEntitiesLoading()) {
 //         inject(ProductService)
 //             .getProducts({
-//                take: productEntitiesPagedRequest().size,
-//                skip: productEntitiesPagedRequest().startIndex,
+//                take: productPagedRequest().size,
+//                skip: productPagedRequest().startIndex,
 //              })
 //           .pipe(
 //             takeUntilDestroyed(),
 //             tap((res) =>
 //                 // total is not required, you can use hasMore or none see docs
-//                 setProductsPagedResult({ entities: res.resultList, total: res.total } )
+//                 setProductPagedResult({ entities: res.resultList, total: res.total } )
 //             ),
 //             catchError((error) => {
-//               setProductsError(error);
+//               setProductEntitiesError(error);
 //               return EMPTY;
 //             }),
 //           )
@@ -1025,16 +1066,16 @@ export const store = signalStore(
  store = inject(ProductsRemoteStore);
  dataSource = getInfiniteScrollDataSource(store, { collection: 'product' }) // pass this to your cdkVirtualFor see examples section
   // generates the following signals
-  store.productsPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
+  store.productEntitiesPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  // generates the following computed signals
- store.productsCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
+ store.productEntitiesCurrentPage // {  entities: Entity[], pageIndex: number, total: number, pageSize: number,  hasPrevious: boolean, hasNext: boolean, isLoading: boolean }
  store.productEntitiesPagedRequest // { startIndex: number, size: number }
  // generates the following methods
- store.loadProductsNextPage() // loads next page
- store.loadProductsPreviousPage() // loads previous page
- store.loadProductsFirstPage() // loads first page
+ store.loadProductEntitiesNextPage() // loads next page
+ store.loadProductEntitiesPreviousPage() // loads previous page
+ store.loadProductEntitiesFirstPage() // loads first page
  store.loadMoreProductEntities() // loads more entities (used for infinite scroll datasource)
- store.setProductsPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
+ store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
 ```
 <a name="withEntitiesMultiSelection"></a>
 
@@ -1057,7 +1098,7 @@ correctly in using remote pagination, because they cant select all the data.</p>
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'product';
+const collection = "product";
 export const store = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
@@ -1068,12 +1109,12 @@ export const store = signalStore(
 store.productIdsSelectedMap // Record<string | number, boolean>;
 // generates the following computed signals
 store.productEntitiesSelected // Entity[];
-store.isAllProductSelected // 'all' | 'none' | 'some';
+store.isAllProductEntitiesSelected // 'all' | 'none' | 'some';
 // generates the following methods
-store.selectProductEntities // (config: { id: string | number } | { ids: (string | number)[] }) => void;
-store.deselectProductEntities // (config: { id: string | number } | { ids: (string | number)[] }) => void;
-store.toggleSelectProductEntities // (config: { id: string | number } | { ids: (string | number)[] }) => void;
-store.toggleSelectAllProductEntities // () => void;
+store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+store.toggleSelectAllProducts // () => void;
 ```
 <a name="withEntitiesSingleSelection"></a>
 
@@ -1094,7 +1135,7 @@ store.toggleSelectAllProductEntities // () => void;
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'products';
+const collection = "product";
 export const store = signalStore(
   { providedIn: 'root' },
   // Required withEntities and withCallStatus
@@ -1108,9 +1149,9 @@ export const store = signalStore(
  );
 
  // generates the following signals
- store.productsIdSelected // string | number | undefined
+ store.productIdSelected // string | number | undefined
  // generates the following computed signals
- store.productsEntitySelected // Entity | undefined
+ store.productEntitySelected // Entity | undefined
  // generates the following methods
  store.selectProductEntity // (config: { id: string | number }) => void
  store.deselectProductEntity // (config: { id: string | number }) => void
@@ -1136,7 +1177,7 @@ export const store = signalStore(
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'products';
+const collection = "product";
 export const store = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
@@ -1147,9 +1188,9 @@ export const store = signalStore(
   }),
 );
 // generates the following signals
-store.productsSort - the current sort applied to the products
+store.productEntitiesSort - the current sort applied to the products
 // generates the following methods
-store.sortProductsEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
+store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } }) - sorts the products entities
 ```
 <a name="withEntitiesRemoteSort"></a>
 
@@ -1176,12 +1217,12 @@ Useful in cases where you want to further change the state before manually calli
 **Example**  
 ```js
 const entity = type<Product>();
-const collection = 'products';
+const collection = 'product';
 export const store = signalStore(
   { providedIn: 'root' },
   // required withEntities and withCallStatus
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
 
   withEntitiesRemoteSort({
     entity,
@@ -1192,23 +1233,23 @@ export const store = signalStore(
   // the api call, or do it manually as shown after
    withEntitiesLoadingCall({
     collection,
-    fetchEntities: ({ productsSort }) => {
+    fetchEntities: ({ productEntitiesSort }) => {
       return inject(ProductService)
         .getProducts({
-          sortColumn: productsSort().field,
-          sortAscending: productsSort().direction === 'asc',
+          sortColumn: productEntitiesSort().field,
+          sortAscending: productEntitiesSort().direction === 'asc',
         })
     },
   }),
 // withEntitiesLoadingCall is the same as doing the following:
-// withHooks(({ productsSort, productsLoading, setProductsError, ...state }) => ({
+// withHooks(({ productEntitiesSort, isProductEntitiesLoading, setProductEntitiesError, ...state }) => ({
 //   onInit: async () => {
 //     effect(() => {
-//       if (isProductsLoading()) {
+//       if (isProductEntitiesLoading()) {
 //         inject(ProductService)
 //             .getProducts({
-//                 sortColumn: productsSort().field,
-//                 sortAscending: productsSort().direction === 'asc',
+//                 sortColumn: productEntitiesSort().field,
+//                 sortAscending: productEntitiesSort().direction === 'asc',
 //              })
 //           .pipe(
 //             takeUntilDestroyed(),
@@ -1219,7 +1260,7 @@ export const store = signalStore(
 //               ),
 //             ),
 //             catchError((error) => {
-//               setProductsError(error);
+//               setProductEntitiesError(error);
 //               return EMPTY;
 //             }),
 //           )
@@ -1230,9 +1271,9 @@ export const store = signalStore(
  })),
 
 // generate the following signals
-store.productsSort // the current sort
+store.productEntitiesSort // the current sort
 // and the following methods
-store.sortProductsEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
+store.sortProductEntities // (options: { sort: Sort<Entity>; , skipLoadingCall?:boolean}) => void;
 ```
 <a name="withEventHandler"></a>
 
@@ -1423,8 +1464,9 @@ const Store = signalStore(
 <a name="withInputBindings"></a>
 
 ## withInputBindings(inputs)
+<p>Binds component inputs to the store, so that the store is updated with the latest values of the inputs.</p>
+
 **Kind**: global function  
-**Experimental**: Binds component inputs to the store, so that the store is updated with the latest values of the inputs.  
 
 | Param |
 | --- |
@@ -1504,50 +1546,77 @@ const Store = signalStore(
     }),
   );
 ```
-<a name="withStateLogger"></a>
+<a name="extractRouteParams"></a>
 
-## ~~withStateLogger(name, filterState)~~
-***Deprecated***
+## extractRouteParams()
+<p>Recursively extracts route parameters from the current route and all its children.
+Parameters from deeper child routes take precedence over parent route parameters.</p>
 
-<p>Log the state of the store on every change</p>
+**Kind**: global function  
+<a name="withServerStateTransfer"></a>
+
+## withServerStateTransfer(key, filterState, valueMapper, onRestore)
+<p>Sync the state of the store using Angular's TransferState API for SSR</p>
 
 **Kind**: global function  
 
 | Param | Description |
 | --- | --- |
-| name | <p>The name of the store to log</p> |
-| filterState | <p>optional filter the state before logging</p> |
-
-<a name="withRouteParams"></a>
-
-## withRouteParams(mapParams)
-<p>This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
-to an object, this will create a computed for each prop return by the mapParams function</p>
-
-**Usage Notes:** the store to be provided in a routed component, since this feature consumes from Angular's ActivatedRoute. 
-Providing it in root or in a route-level factory is not sufficient.
-
-**Kind**: global function  
-
-| Param | Description |
-| --- | --- |
-| mapParams | <p>A function to transform the params before they are stored.</p> |
+| key | <p>the key to use in the TransferState</p> |
+| filterState | <p>filter the state before saving to TransferState (mutually exclusive with valueMapper)</p> |
+| valueMapper | <p>custom transformation between store state and transfer value (mutually exclusive with filterState)</p> |
+| onRestore | <p>callback after the state is restored from TransferState</p> |
 
 **Example**  
 ```js
-// example route  /products/:id/
-const ProductDetailStore = signalStore(
-  withRouteParams(({ id }) => ({ id })),
-  withCalls(() => ({
-    loadProductDetail: (id: string) =>
-      inject(ProductService).getProductDetail(id),
-  })),
-  withHooks(({ loadProductDetail, id }) => ({
-    onInit: () => {
-      loadProductDetail(id());
-    },
-  })),
-);
+// Example 1: Using filterState to transfer specific state properties
+const store = signalStore(
+ withEntities({ entity, collection }),
+ withCallStatus({ prop: collection, initialValue: 'loading' }),
+
+ withServerStateTransfer({
+     key: 'my-state',
+     // optionally, filter the state before transferring
+     filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+      orderItemsEntityMap,
+      orderItemsIds,
+    }),
+ }),
+ );
+```
+**Example**  
+```js
+// Example 2: Using valueMapper for custom transformation
+const store = signalStore(
+ withState({
+   userProfile: {
+     userName: '',
+     email: '',
+     preferences: { theme: 'light', notifications: true },
+     tempData: null,
+   }
+ }),
+
+ withServerStateTransfer({
+     key: 'user-profile',
+     // Custom mapper to transfer only userName and email
+     valueMapper: (store) => ({
+       stateToTransferValue: () => ({
+         userName: store.userProfile().userName,
+         email: store.userProfile().email,
+       }),
+       transferValueToState: (savedData) => {
+         patchState(store, {
+           userProfile: {
+             ...store.userProfile(),
+             userName: savedData.userName,
+             email: savedData.email,
+           }
+         });
+       },
+     }),
+ }),
+ );
 ```
 <a name="withEntitiesSyncToRouteQueryParams"></a>
 
@@ -1566,6 +1635,7 @@ when is not provided the filter will use JSON.stringify to serialize the filter 
 | config.prefix | <p>The prefix to use for the query params. If set to false, the prefix will be disabled.</p> |
 | config.onQueryParamsLoaded | <p>A function to be called when the query params are loaded into the store, (only gets called once).</p> |
 | config.defaultDebounce | <p>The default debounce time to use sync the store changes back to the route query params.</p> |
+| config.skipLoadingCall | <p>When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default is false.</p> |
 
 **Example**  
 ```js
@@ -1661,7 +1731,7 @@ const Store = signalStore(
 ```
 <a name="withSyncToWebStorage"></a>
 
-## withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, onRestore, expires)
+## withSyncToWebStorage(key, type, saveStateChangesAfterMs, restoreOnInit, filterState, valueMapper, onRestore, expires)
 <p>Sync the state of the store to the web storage</p>
 
 **Kind**: global function  
@@ -1672,14 +1742,15 @@ const Store = signalStore(
 | type | <p>'session' or 'local' storage</p> |
 | saveStateChangesAfterMs | <p>save the state to the storage after this many milliseconds, 0 to disable</p> |
 | restoreOnInit | <p>restore the state from the storage on init</p> |
-| filterState | <p>filter the state before saving to the storage</p> |
+| filterState | <p>filter the state before saving to the storage (mutually exclusive with valueMapper)</p> |
+| valueMapper | <p>custom transformation between store state and storage value (mutually exclusive with filterState)</p> |
 | onRestore | <p>callback after the state is restored from the storage</p> |
 | expires | <p>storage will not be loaded if is older than this many milliseconds</p> |
 
 **Example**  
 ```js
+// Example 1: Using filterState to save specific state properties
 const store = signalStore(
- // following are not required, just an example it can have anything
  withEntities({ entity, collection }),
  withCallStatus({ prop: collection, initialValue: 'loading' }),
 
@@ -1695,6 +1766,44 @@ const store = signalStore(
     }),
  }),
  );
+```
+**Example**  
+```js
+// Example 2: Using valueMapper for custom transformation
+const store = signalStore(
+ withState({
+   userProfile: {
+     userName: '',
+     email: '',
+     preferences: { theme: 'light', notifications: true },
+     tempData: null,
+   }
+ }),
+
+ withSyncToWebStorage({
+     key: 'user-form',
+     type: 'local',
+     restoreOnInit: true,
+     saveStateChangesAfterMs: 500,
+     // Custom mapper to store only userName and email
+     valueMapper: (store) => ({
+       stateToStorageValue: () => ({
+         userName: store.userProfile().userName,
+         email: store.userProfile().email,
+       }),
+       storageValueToState: (savedData) => {
+         patchState(store, {
+           userProfile: {
+             ...store.userProfile(),
+             userName: savedData.userName,
+             email: savedData.email,
+           }
+         });
+       },
+     }),
+ }),
+ );
+
  // generates the following methods
  store.saveToStorage();
  store.loadFromStorage();
