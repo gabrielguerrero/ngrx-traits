@@ -63,5 +63,5 @@ export type NamedEntitiesMultiSelectionMethods<Collection extends string> = {
     string & K
   >}Entities`]: () => void;
 } & {
-  [K in Collection as `clear${Capitalize<string & K>}Selection`]: () => void;
+  [K in Collection as `clear${Capitalize<string & K>}EntitiesSelection`]: () => void;
 };

@@ -28,7 +28,7 @@ export function getEntitiesMultiSelectionKeys(config?: {
       ? `toggleSelectAll${capitalizedProp}Entities`
       : 'toggleSelectAllEntities',
     clearEntitiesSelectionKey: collection
-      ? `clear${capitalizedProp}Selection`
+      ? `clear${capitalizedProp}EntitiesSelection`
       : 'clearEntitiesSelection',
     isAllEntitiesSelectedKey: collection
       ? `isAll${capitalizedProp}EntitiesSelected`

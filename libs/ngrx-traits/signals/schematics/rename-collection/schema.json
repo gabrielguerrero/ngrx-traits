@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "schematics-rename-collection",
+  "title": "Rename @ngrx-traits/signals collection",
+  "type": "object",
+  "properties": {
+    "oldName": {
+      "type": "string",
+      "description": "Old collection name (e.g., 'products')"
+    },
+    "newName": {
+      "type": "string",
+      "description": "New collection name (e.g., 'product')",
+      "default": ""
+    },
+    "path": {
+      "type": "string",
+      "description": "Path to project or folder to refactor",
+      "default": "src"
+    },
+    "skipGitCheck": {
+      "type": "boolean",
+      "description": "Skip git status check",
+      "default": false
+    }
+  },
+  "required": ["oldName"]
+}

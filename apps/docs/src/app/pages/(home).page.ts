@@ -45,18 +45,6 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
                   </button>
                 </a>
               </div>
-              <!--              <div class="flex justify-center ">-->
-              <!--                <a href="/docs/other/sponsor">-->
-              <!--                  <button-->
-              <!--                    type="button"-->
-              <!--                    class="flex gap-2 p-4 bg-black rounded-lg border-gray-200 border font-bold backdrop-opacity-70 "-->
-              <!--                  >-->
-              <!--                    <span class="text-blue-500 hover:text-[#C81FC7FF]"-->
-              <!--                      >Sponsor Ngrx Traits</span-->
-              <!--                    >-->
-              <!--                  </button>-->
-              <!--                </a>-->
-              <!--              </div>-->
             </div>
           </div>
         </section>
@@ -69,19 +57,6 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
           <div class="wave"></div>
           <div class="wave"></div>
         </div>
-
-        <!--        <nav-->
-        <!--          class="footer flex gap-4 text-2xl relative h-14 items-center tw-gri"-->
-        <!--        >-->
-        <!--          <a-->
-        <!--            routerLink="/"-->
-        <!--            routerLinkActive="text-orange-400"-->
-        <!--            class="scroll-down text-gray-200"-->
-        <!--            [routerLinkActiveOptions]="{ exact: true }"-->
-        <!--            >About</a-->
-        <!--          >-->
-
-        <!--        </nav>-->
       </div>
     </div>`,
   styleUrls: ['./index.page.css'],
