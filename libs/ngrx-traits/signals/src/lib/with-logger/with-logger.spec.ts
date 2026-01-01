@@ -25,14 +25,14 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
       prop3: 3,
     });
     patchState(store, { prop1: 2 });
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
       prop3: 4,
@@ -57,13 +57,13 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
     });
     patchState(store, { prop1: 2 });
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
     });
@@ -87,13 +87,13 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
     });
     patchState(store, { prop1: 2 });
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
     });
@@ -117,13 +117,13 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
     });
     patchState(store, { prop1: 2 });
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
     });
@@ -148,13 +148,17 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', { prop3: 3 });
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+      prop3: 3,
+    });
     patchState(store, { prop1: 2 });
     jest.resetAllMocks();
     TestBed.flushEffects();
-    expect(consoleLog).toBeCalledWith('Store store changed: ', { prop3: 4 });
-    expect(consoleLog).toBeCalledWith('Store store changes diff :');
-    expect(consoleLog).toBeCalledWith(
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+      prop3: 4,
+    });
+    expect(consoleLog).toHaveBeenCalledWith('Store store changes diff :');
+    expect(consoleLog).toHaveBeenCalledWith(
       '%c- prop3: 3\n' + '%c+ prop3: 4',
       'color: red',
       'color: green',
