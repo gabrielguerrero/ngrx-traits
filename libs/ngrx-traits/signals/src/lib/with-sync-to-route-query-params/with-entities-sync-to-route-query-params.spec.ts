@@ -253,7 +253,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         forceLoad: true,
       });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
@@ -294,7 +294,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         forceLoad: true,
       });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
@@ -350,7 +350,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         forceLoad: true,
       });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           search: 'foo3',
@@ -390,7 +390,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         sort: { field: 'name', direction: 'asc' },
       });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           sortBy: 'name',
@@ -430,7 +430,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         sort: { field: 'name', direction: 'asc' },
       });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           sortBy: 'name',
@@ -489,7 +489,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       tick(400);
       store.selectEntity({ id: '3' });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           selectedId: '3',
@@ -547,7 +547,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       tick(400);
       store.loadEntitiesPage({ pageIndex: 2 });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
@@ -588,7 +588,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
 
       store.loadEntitiesPage({ pageIndex: 2 });
       tick(400);
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
@@ -628,7 +628,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     store.loadEntitiesPage({ pageIndex: 2 });
     tick(10000);
     // Assert
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
@@ -686,7 +686,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     load.next(true);
     tick(400);
     // Assert
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
@@ -729,7 +729,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     store.loadEntitiesPage({ pageIndex: 2 });
     tick(400);
     // Assert
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'p-page': '3',
@@ -779,7 +779,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     store.loadProductsPage({ pageIndex: 2 });
     tick(400);
     // Assert
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'products-page': '3',
@@ -822,7 +822,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     store.loadProductsPage({ pageIndex: 2 });
     tick(400);
     // Assert
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
@@ -864,7 +864,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     tick(400);
 
     // Assert
-    expect(queryLoaded).toBeCalledWith({ search: 'a', foo: 'bar' }, '35');
+    expect(queryLoaded).toHaveBeenCalledWith({ search: 'a', foo: 'bar' }, '35');
   }));
 
   it('multiple collections should be supported', fakeAsync(() => {
@@ -929,7 +929,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     store.loadOrdersPage({ pageIndex: 2 });
     tick(400);
     // Assert
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'products-page': '3',
@@ -941,7 +941,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       queryParamsHandling: 'merge',
     });
 
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'orders-page': '3',
@@ -984,7 +984,9 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
 
   describe('skipLoadingCall parameter', () => {
     it('should pass skipLoadingCall to filterEntities when loading from query params', fakeAsync(() => {
-      const fetchEntitiesSpy = jest.fn(() => of({ entities: mockProducts.slice(0, 10), total: 10 }));
+      const fetchEntitiesSpy = jest.fn(() =>
+        of({ entities: mockProducts.slice(0, 10), total: 10 }),
+      );
       const Store = signalStore(
         withEntities({ entity }),
         withCallStatus(),
@@ -1008,7 +1010,9 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     }));
 
     it('should pass skipLoadingCall to sortEntities when loading from query params', fakeAsync(() => {
-      const fetchEntitiesSpy = jest.fn(() => of({ entities: mockProducts.slice(0, 10), total: 10 }));
+      const fetchEntitiesSpy = jest.fn(() =>
+        of({ entities: mockProducts.slice(0, 10), total: 10 }),
+      );
       const Store = signalStore(
         withEntities({ entity }),
         withCallStatus(),
@@ -1037,7 +1041,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         load.pipe(
           filter(Boolean),
           map(() => ({ entities: mockProducts.slice(0, 10), total: 40 })),
-        )
+        ),
       );
       const Store = signalStore(
         withEntities({ entity }),
@@ -1065,7 +1069,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         load.pipe(
           filter(Boolean),
           map(() => ({ entities: mockProducts.slice(0, 10), total: 10 })),
-        )
+        ),
       );
       const Store = signalStore(
         withEntities({ entity }),

@@ -1,3 +1,7 @@
+---
+name: Caching
+order: 4
+---
 
 # Caching
  This feature allows you to easily implement caching for calls that return an observable or a promise.
