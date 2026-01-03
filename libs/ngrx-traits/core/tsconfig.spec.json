@@ -4,6 +4,9 @@
     "outDir": "../../../dist/out-tsc",
     "module": "commonjs",
     "types": ["jest", "node"],
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "target": "es2016"
   },
   "files": ["src/test-setup.ts"],

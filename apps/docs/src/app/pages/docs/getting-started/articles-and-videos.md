@@ -1,3 +1,8 @@
+---
+name: Articles and Videos
+order: 5
+---
+
 ## [@ngrx-traits/signals Release 18: Support for @ngrx/signals 18, Sync State to Routes, Web Storage…](https://medium.com/@gabrieldavidguerrero/ngrx-traits-signals-release-18-support-for-ngrx-signals-18-sync-state-to-routes-and-web-storage-238eb5da00dc)
 
 As many of you know, @ngrx/signals is now finally stable and production-ready. This is a fantastic achievement of the NgRx team, and it's now…

@@ -10,6 +10,7 @@ export default {
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
         stringifyContentPathRegex: '\\.(html|svg)$',
+        useESM: true,
       },
     ],
   },

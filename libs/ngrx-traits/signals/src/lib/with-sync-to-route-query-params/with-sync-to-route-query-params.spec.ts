@@ -74,7 +74,7 @@ describe('withSyncToRouteQueryParams', () => {
     });
     TestBed.flushEffects();
     tick(400);
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: { test: 'test3', foo: 'foo3', bar: 'false' },
       queryParamsHandling: 'merge',
@@ -149,7 +149,7 @@ describe('withSyncToRouteQueryParams', () => {
     });
     TestBed.flushEffects();
     tick(1100);
-    expect(router.navigate).toBeCalledWith([], {
+    expect(router.navigate).toHaveBeenCalledWith([], {
       relativeTo: expect.anything(),
       queryParams: { test: 'test3', foo: 'foo3', bar: 'false' },
       queryParamsHandling: 'merge',

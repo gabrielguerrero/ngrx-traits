@@ -102,7 +102,7 @@ describe('withSyncToWebStorage', () => {
       store.loadFromStorage();
       expect(store.entities()).toEqual(mockProducts);
       expect(store.isLoading()).toBe(true); // it keeps the current value because it was filtered
-      expect(onRestore).toBeCalled();
+      expect(onRestore).toHaveBeenCalled();
     });
   });
 

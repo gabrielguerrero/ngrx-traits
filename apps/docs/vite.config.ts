@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       analog({
+        content: {
+          highlighter: 'prism',
+        },
         ssr: true,
         prerender: {
           routes: async () => [

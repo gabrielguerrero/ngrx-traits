@@ -1,18 +1,19 @@
-import { Actions } from '@ngrx/effects';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { addLoadEntitiesTrait } from '../load-entities';
-import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
-import { addFilterEntitiesTrait } from '../filter-entities';
 import { TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
+import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { addEntitiesPaginationTrait } from '../entities-pagination';
-import { addSortEntitiesTrait } from '../sort-entities';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
+
+import { addEntitiesPaginationTrait } from '../entities-pagination';
+import { addFilterEntitiesTrait } from '../filter-entities';
+import { addLoadEntitiesTrait } from '../load-entities';
+import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
+import { addSortEntitiesTrait } from '../sort-entities';
 import { addEntitiesSyncToRouteQueryParams } from './entities-sync-to-route-query-params';
-import { RouterTestingModule } from '@angular/router/testing';
-import { ActivatedRoute, Router } from '@angular/router';
 
 describe('addEntitiesSyncToRouteQueryParams', () => {
   let actions$: Actions;
@@ -46,7 +47,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
         cacheType: remote ? 'partial' : 'full',
         pageSize: 20,
       }),
-      addEntitiesSyncToRouteQueryParams()
+      addEntitiesSyncToRouteQueryParams(),
     )({
       actionsGroupKey: 'test',
       featureSelector: 'test',
@@ -79,13 +80,13 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const { reducer, initialState, actions } = initWithFilterAndPagination();
       let state = reducer(
         initialState,
-        actions.loadEntitiesSuccess({ entities: todos })
+        actions.loadEntitiesSuccess({ entities: todos }),
       );
       state = reducer(
         state,
         (actions as any)['setEntitiesRouteQueryParams']({
           params: { content: '1', extra: '2' },
-        })
+        }),
       );
       expect(state.filters).toEqual({ content: '1', extra: '2' });
     });
@@ -94,13 +95,13 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const { reducer, initialState, actions } = initWithFilterAndPagination();
       let state = reducer(
         initialState,
-        actions.loadEntitiesSuccess({ entities: todos })
+        actions.loadEntitiesSuccess({ entities: todos }),
       );
       state = reducer(
         state,
         (actions as any)['setEntitiesRouteQueryParams']({
           params: { sortActive: 'content', sortDirection: 'asc' },
-        })
+        }),
       );
       expect(state.sort.current).toEqual({
         active: 'content',
@@ -112,13 +113,13 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const { reducer, initialState, actions } = initWithFilterAndPagination();
       let state = reducer(
         initialState,
-        actions.loadEntitiesSuccess({ entities: todos })
+        actions.loadEntitiesSuccess({ entities: todos }),
       );
       state = reducer(
         state,
         (actions as any)['setEntitiesRouteQueryParams']({
           params: { page: '2' },
-        })
+        }),
       );
       expect(state.pagination.currentPage).toEqual(2);
     });
@@ -130,7 +131,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       actions$ = of(
         (actions as any)['setEntitiesRouteQueryParams']({
           params: { page: '2' },
-        })
+        }),
       );
       const result = await effects.setUrlParams$.pipe(first()).toPromise();
       expect(result).toEqual(actions.loadEntities());
@@ -148,7 +149,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
             sortActive: 'id',
             sortDirection: 'asc',
           },
-        })
+        }),
       );
     });
 
@@ -158,7 +159,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const router = TestBed.inject(Router);
       jest.spyOn(router, 'navigate');
       await effects.onFilter$.toPromise();
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: { content: 'hello' },
         queryParamsHandling: 'merge',
@@ -171,7 +172,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const router = TestBed.inject(Router);
       jest.spyOn(router, 'navigate');
       await effects.onSort$.toPromise();
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: { sortActive: 'id', sortDirection: 'desc' },
         queryParamsHandling: 'merge',
@@ -184,7 +185,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const router = TestBed.inject(Router);
       jest.spyOn(router, 'navigate');
       await effects.onPaginate$.toPromise();
-      expect(router.navigate).toBeCalledWith([], {
+      expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
         queryParams: { page: 3 },
         queryParamsHandling: 'merge',
