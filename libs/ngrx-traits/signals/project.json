@@ -54,7 +54,10 @@
           "mkdir -p dist/libs/ngrx-traits/signals/schematics && cp libs/ngrx-traits/signals/schematics/collection.json dist/libs/ngrx-traits/signals/schematics/",
           "mkdir -p dist/libs/ngrx-traits/signals/schematics/rename-collection && cp libs/ngrx-traits/signals/schematics/rename-collection/schema.json dist/libs/ngrx-traits/signals/schematics/rename-collection/",
           "echo '{\"type\":\"commonjs\"}' > dist/libs/ngrx-traits/signals/migrations/package.json",
-          "echo '{\"type\":\"commonjs\"}' > dist/libs/ngrx-traits/signals/schematics/package.json"
+          "echo '{\"type\":\"commonjs\"}' > dist/libs/ngrx-traits/signals/schematics/package.json",
+          "echo '' >> dist/libs/ngrx-traits/signals/.npmignore",
+          "echo '!schematics/package.json' >> dist/libs/ngrx-traits/signals/.npmignore",
+          "echo '!migrations/package.json' >> dist/libs/ngrx-traits/signals/.npmignore"
         ],
         "parallel": false
       }
