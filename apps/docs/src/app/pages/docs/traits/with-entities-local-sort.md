@@ -49,6 +49,32 @@ To use you generally need either a sort dropdown if is a list or a table where c
 ```
 If you manually changed the entities and want to reapply the sort you can call the sort entities method without any param to reapply the last sort
 
+### Using with Angular Material / CDK Table
+
+The `sortEntities` method also accepts `CdkSort<Entity>` format, allowing you to pass Material table sort events directly:
+
+```typescript
+// CdkSort format uses 'active' instead of 'field'
+type CdkSort<Entity> = {
+  active: keyof Entity | string;
+  direction: 'asc' | 'desc' | '';
+};
+```
+
+This enables direct integration with `MatSort`:
+
+```html
+<table mat-table matSort
+  [matSortActive]="materialSort().field"
+  [matSortDirection]="materialSort().direction"
+  (matSortChange)="store.sortUserEntities({ sort: $event })">
+  <ng-container matColumnDef="name">
+    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+  </ng-container>
+  ...
+</table>
+```
+
 ### Mixing with other local store features
 You can mix this feature with other local store features like withEntitiesLocalFilter, withEntitiesLocalPagination, etc.
 
@@ -117,11 +143,11 @@ usersSort: Signal<{ field: string; pageSize: direction: 'asc' | 'desc' | '' }>;
 Generates the following methods
 
 ```typescript
-sortEntities: ({sort: { field: string; pageSize: direction: 'asc' | 'desc' | ''}}) => void;
+sortEntities: (options?: { sort: Sort<Entity> | CdkSort<Entity> }) => void;
 ```
 
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-sortUserEntities: ({sort: { field: string; pageSize: direction: 'asc' | 'desc' | ''}}) => void;
+sortUserEntities: (options?: { sort: Sort<Entity> | CdkSort<Entity> }) => void;
 ```

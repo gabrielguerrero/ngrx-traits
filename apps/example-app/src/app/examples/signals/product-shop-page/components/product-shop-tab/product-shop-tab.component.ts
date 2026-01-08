@@ -33,7 +33,7 @@ import { ProductsShopStore } from '../../products-shop.store';
               [selectedProduct]="store.productEntitySelected()"
               (selectProduct)="select($event)"
               [selectedSort]="materialSort()"
-              (sort)="sort($event)"
+              (sort)="store.sortProductEntities({ sort: $event })"
             />
             <mat-paginator
               [pageSizeOptions]="[5, 10, 25, 100]"
@@ -103,12 +103,5 @@ export class ProductShopTabComponent {
 
   filter(filter: ProductFilter | undefined) {
     filter && this.store.filterProductEntities({ filter });
-  }
-
-  sort(sort: Sort<Product>) {
-    this.store.sortProductEntities({
-      sort: { field: sort.active, direction: sort.direction },
-    });
-    console.log({ sort });
   }
 }
