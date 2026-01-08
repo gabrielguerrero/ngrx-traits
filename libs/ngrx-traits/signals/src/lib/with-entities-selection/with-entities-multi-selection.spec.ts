@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+import {
+  entityConfig,
+  setAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
 
 import { withEntitiesMultiSelection } from '../index';
 import { mockProducts } from '../test.mocks';
-import { Product } from '../test.model';
+import { Product, Product2 } from '../test.model';
 
 describe('withEntitiesMultiSelection', () => {
   const entity = type<Product>();
@@ -25,6 +29,26 @@ describe('withEntitiesMultiSelection', () => {
           mockProducts[4],
           mockProducts[8],
         ]);
+      });
+    });
+
+    it('selectEntities should select the entity with cumstom selectId', () => {
+      TestBed.runInInjectionContext(() => {
+        const productEntityConfig = entityConfig({
+          entity: type<Product2>(),
+          selectId: (entity) => +entity.id,
+        });
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities(productEntityConfig),
+          withEntitiesMultiSelection(productEntityConfig),
+        );
+        const store = new Store();
+        const entities = mockProducts.map((v) => ({ ...v, id: +v.id }));
+        patchState(store, setAllEntities(entities, productEntityConfig));
+        store.selectEntities({ ids: [entities[4].id, entities[8].id] });
+        expect(store.idsSelected()).toEqual([4, 8]);
+        expect(store.entitiesSelected()).toEqual([entities[4], entities[8]]);
       });
     });
 
