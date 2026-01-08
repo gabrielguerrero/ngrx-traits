@@ -9,7 +9,11 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
+import {
+  EntityState,
+  NamedEntityState,
+  SelectEntityId,
+} from '@ngrx/signals/entities';
 import {
   EntityId,
   EntityMap,
@@ -85,6 +89,7 @@ export function withEntitiesMultiSelection<
     {
       entity: Entity;
       collection?: Collection;
+      selectId?: SelectEntityId<Entity>;
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
       defaultSelectedIds?: (string | number)[];
@@ -149,7 +154,11 @@ export function withEntitiesMultiSelection<
         const selectedIdsArray = computed(() =>
           Object.entries(selectedIdsMap()).reduce(
             (aux, [id, selected]) => {
-              if (selected && entityMap()[id]) {
+              const entity = entityMap()[id];
+              if (selected && entity) {
+                const id = config.selectId
+                  ? config.selectId(entity)
+                  : (entity as any).id;
                 aux.push(id);
               }
               return aux;
