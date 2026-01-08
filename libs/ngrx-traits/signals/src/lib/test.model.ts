@@ -5,6 +5,9 @@ export interface Product {
   price: number;
   categoryId: 'snes' | 'nes' | 'wii' | 'wiiu' | 'switch' | 'gamecube';
 }
+export interface Product2 extends Omit<Product, 'id'> {
+  id: number;
+}
 export interface ProductOrder extends Product {
   quantity?: number;
 }
