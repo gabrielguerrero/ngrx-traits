@@ -28,7 +28,7 @@ import {
   getFeatureConfig,
   StoreSource,
 } from '../with-feature-factory/with-feature-factory.model';
-import { Sort } from './with-entities-local-sort.model';
+import { CdkSort, Sort } from './with-entities-local-sort.model';
 import {
   EntitiesSortState,
   NamedEntitiesSortState,
@@ -171,12 +171,17 @@ export function withEntitiesRemoteSort<
         const setLoading = state[setLoadingKey] as () => void;
         return {
           [sortEntitiesKey]: rxMethod<{
-            sort?: Sort<Entity>;
+            sort?: Sort<Entity> | CdkSort<Entity>;
             skipLoadingCall?: boolean;
           }>(
             pipe(
               tap((options) => {
-                const newSort = options?.sort;
+                let newSort = options?.sort;
+                if (newSort && 'active' in newSort)
+                  newSort = {
+                    field: newSort.active,
+                    direction: newSort.direction,
+                  };
                 const skipLoadingCall = options?.skipLoadingCall;
                 const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
                 patchState(state as WritableStateSource<object>, {

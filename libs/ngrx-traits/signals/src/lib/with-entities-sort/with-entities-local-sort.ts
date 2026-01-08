@@ -34,6 +34,7 @@ import {
   StoreSource,
 } from '../with-feature-factory/with-feature-factory.model';
 import {
+  CdkSort,
   EntitiesSortMethods,
   EntitiesSortState,
   NamedEntitiesSortMethods,
@@ -127,10 +128,17 @@ export function withEntitiesLocalSort<
       withEventHandler(),
       withMethods((state: Record<string, Signal<unknown>>) => {
         return {
-          [sortEntitiesKey]: rxMethod<{ sort?: Sort<Entity> }>(
+          [sortEntitiesKey]: rxMethod<{
+            sort?: Sort<Entity> | CdkSort<Entity>;
+          }>(
             pipe(
               tap((options) => {
-                const newSort = options?.sort;
+                let newSort = options?.sort;
+                if (newSort && 'active' in newSort)
+                  newSort = {
+                    field: newSort.active,
+                    direction: newSort.direction,
+                  };
                 const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
                 patchState(state as WritableStateSource<object>, {
                   [sortKey]: sort,

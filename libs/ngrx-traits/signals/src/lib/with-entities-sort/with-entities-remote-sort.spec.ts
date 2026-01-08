@@ -74,6 +74,23 @@ describe('withEntitiesRemoteSort', () => {
         field: 'price',
         direction: 'desc',
       });
+      // sort using cdk sort event
+      store.sortEntities({
+        sort: { field: 'name', direction: 'asc' },
+      });
+      tick();
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
     });
   }));
 
@@ -182,7 +199,10 @@ describe('withEntitiesRemoteSort', () => {
       TestBed.flushEffects();
       tick();
       // check default sort
-      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({
+        field: 'name',
+        direction: 'asc',
+      });
       expect(
         store
           .productEntities()
@@ -210,6 +230,24 @@ describe('withEntitiesRemoteSort', () => {
         field: 'price',
         direction: 'desc',
       });
+
+      // sort using cdk sort event
+      store.sortProductEntities({
+        sort: { field: 'name', direction: 'asc' },
+      });
+      tick();
+      expect(
+        store
+          .productEntities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
     });
   }));
 
@@ -249,7 +287,10 @@ describe('withEntitiesRemoteSort', () => {
       TestBed.flushEffects();
       tick();
       // check default sort
-      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({
+        field: 'name',
+        direction: 'asc',
+      });
       expect(
         store
           .productEntities()
