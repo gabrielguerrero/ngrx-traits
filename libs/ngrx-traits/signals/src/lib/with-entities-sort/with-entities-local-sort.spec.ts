@@ -78,6 +78,23 @@ describe('withEntitiesLocalSort', () => {
         field: 'price',
         direction: 'desc',
       });
+
+      // sort using cdk sort event
+      store.sortEntities({
+        sort: { active: 'name', direction: 'asc' },
+      });
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
     });
   });
 
@@ -154,7 +171,10 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
-      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({
+        field: 'name',
+        direction: 'asc',
+      });
       // check default sort
       store.sortProductEntities();
       expect(
@@ -184,6 +204,23 @@ describe('withEntitiesLocalSort', () => {
         field: 'price',
         direction: 'desc',
       });
+
+      // sort using cdk sort event
+      store.sortProductEntities({
+        sort: { active: 'name', direction: 'asc' },
+      });
+      expect(
+        store
+          .productEntities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
     });
   });
 
@@ -211,7 +248,10 @@ describe('withEntitiesLocalSort', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProductsCustom, config));
-      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({
+        field: 'name',
+        direction: 'asc',
+      });
       // check default sort
       store.sortProductEntities();
       expect(
@@ -236,9 +276,7 @@ describe('withEntitiesLocalSort', () => {
           .map((e) => e.price)
           .slice(0, 5),
       ).toEqual([178, 175, 172, 169, 166]);
-      expect(store.productEntities().length).toEqual(
-        mockProductsCustom.length,
-      );
+      expect(store.productEntities().length).toEqual(mockProductsCustom.length);
       expect(store.productEntitiesSort()).toEqual({
         field: 'price',
         direction: 'desc',
@@ -399,7 +437,10 @@ describe('withEntitiesLocalSort', () => {
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.setProductEntitiesLoaded();
       TestBed.flushEffects();
-      expect(store.productEntitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      expect(store.productEntitiesSort()).toEqual({
+        field: 'name',
+        direction: 'asc',
+      });
       // check default sort
       expect(
         store
