@@ -319,6 +319,10 @@ export class SideNavigationComponent {
       title: 'Utils',
       links: [
         {
+          link: './utils/extract-store-feature-output',
+          name: 'ExtractStoreFeatureOutput',
+        },
+        {
           link: './utils/rename-collection',
           name: 'Rename Collection Schematic',
         },

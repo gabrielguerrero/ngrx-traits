@@ -1,5 +1,6 @@
 import {
   Prettify,
+  SignalStoreFeature,
   SignalStoreFeatureResult,
   StateSignals,
   WritableStateSource,
@@ -23,3 +24,7 @@ export function getFeatureConfig<
 >(config: FeatureConfigFactory<Input, Config>, store: StoreSource<Input>) {
   return typeof config === 'function' ? config(store) : config;
 }
+export type ExtractStoreFeatureOutput<Result extends () => SignalStoreFeature> =
+  ReturnType<Result> extends SignalStoreFeature<any, infer Output>
+    ? Output
+    : never;
