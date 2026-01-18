@@ -34,6 +34,7 @@ export * from './with-sync-to-route-query-params/with-sync-to-route-query-params
 export * from './with-route-params/with-route-params';
 export * from './with-input-bindings/with-input-bindings';
 export * from './with-feature-factory/with-feature-factory';
+export * from './with-feature-factory/with-feature-factory.model';
 export * from './with-all-call-status/with-all-call-status';
 export * from './with-all-call-status/with-all-call-status.util';
 export * from './with-entities-calls/with-entities-calls';
