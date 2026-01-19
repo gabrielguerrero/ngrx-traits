@@ -22,6 +22,8 @@ When using traits with a `collection` parameter, generated property names now in
 
 ## Automatic Migration
 
+> This migration requires at least version 21 of angular and @ngrx/signals, so please be sure you have migrated then before executing this command 
+
 Run the automatic migration schematic:
 
 ```bash
