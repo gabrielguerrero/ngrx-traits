@@ -1,9 +1,12 @@
 ---
-name: withRouteParams 
+name: withRouteParams (Deprecated)
 order: 16
 ---
 
 # withRouteParams
+
+> **Deprecated:** Use [withRoute](./with-route) instead, which also supports `queryParams`.
+
 This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
 to an object, this will create a computed for each prop return by the mapParams function
 

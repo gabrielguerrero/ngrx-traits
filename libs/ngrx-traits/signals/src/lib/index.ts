@@ -31,6 +31,7 @@ export * from './with-server-state-transfer/with-server-state-transfer.util';
 export * from './with-sync-to-route-query-params/with-entities-sync-to-route-query-params';
 export * from './with-sync-to-route-query-params/with-sync-to-route-query-params';
 export * from './with-sync-to-route-query-params/with-sync-to-route-query-params.util';
+export * from './with-route/with-route';
 export * from './with-route-params/with-route-params';
 export * from './with-input-bindings/with-input-bindings';
 export * from './with-feature-factory/with-feature-factory';

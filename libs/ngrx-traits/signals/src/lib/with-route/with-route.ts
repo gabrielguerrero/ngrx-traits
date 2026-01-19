@@ -11,29 +11,32 @@ import { signalStoreFeature, withComputed } from '@ngrx/signals';
 import { filter, map, startWith } from 'rxjs/operators';
 
 /**
- * @deprecated use withRoute instead
- * This store feature provides access to the route params. The mapParams receives the route params object, use it to transform it
- * to an object, this will create a computed for each prop return by the mapParams function
- * @param mapParams A function to transform the params before they are stored.
+ * Store feature that provides access to route params, query params, and route data.
+ * Creates a computed signal for each property returned by the mapParams function.
+ *
+ * @param mapParams Function receiving `{ params, queryParams, data }` and returning an object.
  *
  * @example
- *
- * // example route  /products/:id/
- * const ProductDetailStore = signalStore(
- *   withRouteParams(({ id }) => ({ id })),
- *   withCalls(() => ({
- *     loadProductDetail: (id: string) =>
- *       inject(ProductService).getProductDetail(id),
+ * // Combined params, queryParams and data
+ * const Store = signalStore(
+ *   withRoute(({ params, queryParams, data }) => ({
+ *     id: params['id'] as string,
+ *     tab: queryParams['tab'] as string,
+ *     title: data?.['title'] as string,
  *   })),
- *   withHooks(({ loadProductDetail, id }) => ({
- *     onInit: () => {
- *       loadProductDetail(id());
- *     },
+ *   withHooks(({ id, tab, title }) => ({
+ *     onInit: () => console.log(`Product ID: ${id()}, tab: ${tab()}, title:${title()}` ),
  *   })),
  * );
  */
-export function withRouteParams<T extends Record<string, any>>(
-  mapParams: (params: Params, data?: any) => T,
+export function withRoute<T extends Record<string, any>>(
+  mapParams: (options: {
+    params: Params;
+    queryParams: Params;
+    data?: {
+      [key: string | symbol]: any;
+    };
+  }) => T,
 ) {
   return signalStoreFeature(
     withComputed(() => {
@@ -67,8 +70,15 @@ export function withRouteParams<T extends Record<string, any>>(
       const dataSignal = activatedRoute.data
         ? toSignal(activatedRoute.data)
         : undefined;
+      const queryParamSignal = activatedRoute.queryParams
+        ? toSignal(activatedRoute.queryParams)
+        : undefined;
       const params = computed(() =>
-        mapParams(paramsSignal() ?? directParamsSignal() ?? {}, dataSignal?.()),
+        mapParams({
+          params: paramsSignal() ?? directParamsSignal() ?? {},
+          data: dataSignal?.(),
+          queryParams: queryParamSignal?.() ?? {},
+        }),
       );
       const computedParams = {} as any;
       Object.keys(params()).forEach((key) => {
