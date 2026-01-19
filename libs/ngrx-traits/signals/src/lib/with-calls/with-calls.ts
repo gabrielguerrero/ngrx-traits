@@ -227,7 +227,7 @@ export function withCalls<
                     ? call.resultProp
                     : `${callName}Result`,
               });
-              // TODO: fix as any
+
               const mapPipe =
                 isCallConfig(call) && call.mapPipe
                   ? mapPipes[call.mapPipe]

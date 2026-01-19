@@ -1,29 +1,23 @@
 import { CurrencyPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { callConfig, withCalls, withRouteParams } from '@ngrx-traits/signals';
-import { signalStore, withHooks } from '@ngrx/signals';
+import { callConfig, withCalls, withRoute } from '@ngrx-traits/signals';
+import { signalStore } from '@ngrx/signals';
 
 import { ProductService } from '../../services/product.service';
 
 const ProductDetailStore = signalStore(
-  withRouteParams(({ id }) => ({ id: id as string })),
+  withRoute(({ params }) => ({ id: params.id as string })),
   withCalls(({ id }) => ({
     loadProductDetail: callConfig({
       call: (id: string) => inject(ProductService).getProductDetail(id),
       callWith: id(),
     }),
   })),
-  // This is the same as the above withCalls
+  // The code bellow will need to be added if we did not had the callWith: id() in loadProductDetail
   // withHooks(({ loadProductDetail, id }) => ({
   //   onInit: () => {
   //     loadProductDetail(id());

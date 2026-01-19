@@ -286,6 +286,10 @@ export class SideNavigationComponent {
           name: 'withRouteParams',
         },
         {
+          link: './traits/with-route',
+          name: 'withRoute',
+        },
+        {
           link: './traits/with-entities-sync-to-route-query-params',
           name: 'withEntitiesSyncToRouteQueryParams',
         },
