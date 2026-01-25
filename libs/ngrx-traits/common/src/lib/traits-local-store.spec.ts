@@ -1,6 +1,5 @@
 import { Injectable, Injector } from '@angular/core';
-import { fakeAsync, tick } from '@angular/core/testing';
-import { createServiceFactory } from '@ngneat/spectator/jest';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -158,21 +157,21 @@ describe('trait-local-store', () => {
     }
     let actions$: Actions;
 
-    const createService = createServiceFactory({
-      service: TestTrailLocalStore,
-      imports: [EffectsModule.forRoot()],
-      providers: [
-        provideMockActions(() => actions$!),
-        provideMockStore({ initialState: {} }),
-      ],
+    beforeEach(() => {
+      TestBed.configureTestingModule({
+        imports: [EffectsModule.forRoot()],
+        providers: [
+          TestTrailLocalStore,
+          provideMockActions(() => actions$!),
+          provideMockStore({ initialState: {} }),
+        ],
+      });
     });
 
     it('should create TraitsLocalStore instance with  traits', () => {
-      const localStore = createService();
-      expect(localStore.service.localActions.filterEntities).toBeTruthy();
-      expect(
-        localStore.service.traits.selectors.selectEntitiesFilter,
-      ).toBeTruthy();
+      const localStore = TestBed.inject(TestTrailLocalStore);
+      expect(localStore.localActions.filterEntities).toBeTruthy();
+      expect(localStore.traits.selectors.selectEntitiesFilter).toBeTruthy();
     });
   });
 });

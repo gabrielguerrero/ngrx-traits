@@ -42,6 +42,7 @@ import {
   tap,
   timer,
 } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 import { insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
@@ -312,7 +313,9 @@ export function withCalls<
                         if (isDevMode() && value)
                           console.warn(`Call ${callName} is skip`);
                       }),
-                      first((v) => !v),
+                      // first((v) => !v),
+                      filter((v) => !v),
+                      take(1),
                       map(() => params),
                       process$,
                     );

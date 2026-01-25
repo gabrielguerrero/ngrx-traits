@@ -18,11 +18,11 @@ type ProductDetail = Product & {
   detail?: { maker: string; releaseDate: string; image: string };
 };
 describe('withEntitiesCalls', () => {
-  const onSuccess = jest.fn();
-  const onError = jest.fn();
+  const onSuccess = vi.fn();
+  const onError = vi.fn();
 
   const entity = type<ProductDetail>();
-  const collection = "product";
+  const collection = 'product';
   const productDetail = {
     image: 'https://example.com/image.jpg',
     maker: 'Nintendo',
@@ -187,8 +187,8 @@ describe('withEntitiesCalls', () => {
   });
 
   it('Fail on a call should set status return error ', async () => {
-    const consoleError = jest.spyOn(console, 'error');
-    consoleError.mockReset();
+    const consoleError = vi.spyOn(console, 'error');
+    consoleError.mockClear();
     TestBed.runInInjectionContext(() => {
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<{
@@ -407,7 +407,7 @@ describe('withEntitiesCalls', () => {
   });
 
   it('check onSuccess receives params', async () => {
-    const onSuccess = jest.fn();
+    const onSuccess = vi.fn();
     TestBed.runInInjectionContext(() => {
       let apiResponse = new Subject<Partial<ProductDetail>>();
       const Store = signalStore(
@@ -551,9 +551,10 @@ describe('withEntitiesCalls', () => {
 
   describe('skipWhen function', () => {
     it('returning true in skipWhen should skip call ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const Store = signalStore(
@@ -592,11 +593,12 @@ describe('withEntitiesCalls', () => {
     });
 
     it('returning true in skipWhen should skip call using previousResult ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       const apiResponse = new Subject<Partial<ProductDetail>>();
-      TestBed.runInInjectionContext(async () => {
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           { protectedState: false },
           withState({ foo: 'bar' }),
@@ -608,7 +610,7 @@ describe('withEntitiesCalls', () => {
                 call: (entity: ProductDetail) => {
                   return apiResponse.pipe(first());
                 },
-                skipWhen: (param, previousResult) => previousResult?.detail,
+                skipWhen: (param, previousResult) => !!previousResult?.detail,
                 onSuccess: (result, param, previousResult) => {
                   onSuccess(result, param, previousResult);
                 },
@@ -622,6 +624,7 @@ describe('withEntitiesCalls', () => {
 
         const product = mockProducts[0];
 
+        // first call should not be skipped
         expect(store.isLoadProductDetailLoading(product.id)).toBeFalsy();
         store.loadProductDetail(product);
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
@@ -632,21 +635,28 @@ describe('withEntitiesCalls', () => {
           'EntityCall loadProductDetail is skip',
         );
 
+        // second call should be skipped
         store.loadProductDetail(product);
         expect(store.isLoadProductDetailLoading(product.id)).toBeFalsy();
-        apiResponse.next({ detail: productDetail });
-        expect(store.isLoadProductDetailLoaded(product.id)).toBeFalsy();
+        apiResponse.next({
+          detail: { ...productDetail, releaseDate: '23123' },
+        }); // this should never be stored
+        expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).not.toBeUndefined();
+        expect(store.entityMap()[product.id].detail).toEqual(productDetail);
+        await Promise.resolve(true);
         expect(consoleWarn).toHaveBeenCalledWith(
           'EntityCall loadProductDetail is skip',
         );
       });
+      consoleWarn.mockRestore();
     });
 
     it('returning false in skipWhen should make the  call ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const Store = signalStore(
@@ -682,9 +692,10 @@ describe('withEntitiesCalls', () => {
     });
 
     it('returning an Observable with true in skipWhen should skip call', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const Store = signalStore(
@@ -722,9 +733,10 @@ describe('withEntitiesCalls', () => {
       });
     });
     it('returning an Observable with false in skipWhen should run call ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const Store = signalStore(
@@ -761,10 +773,11 @@ describe('withEntitiesCalls', () => {
     });
 
     it('returning a Promise with true in skipWhen should skip call', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(() => {
+      consoleWarn.mockClear();
+      await TestBed.runInInjectionContext(async () => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const Store = signalStore(
           { protectedState: false },
@@ -795,16 +808,18 @@ describe('withEntitiesCalls', () => {
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeFalsy();
         expect(store.entityMap()[product.id].detail).toBeUndefined();
+        await Promise.resolve(true);
         expect(consoleWarn).toHaveBeenCalledWith(
           'EntityCall loadProductDetail is skip',
         );
       });
+      consoleWarn.mockRestore();
     });
     it('returning a Promise with false in skipWhen should run call ', fakeAsync(() => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         let v = entityCallConfig({
@@ -1070,7 +1085,7 @@ describe('withEntitiesCalls', () => {
                 call: ({ id }: { id: string }) => {
                   return apiResponse.pipe(first());
                 },
-                paramsSelectId: ({ id }) => id,
+                paramsSelectId: (param) => param?.id,
                 callWith: idSignal,
                 onSuccess,
                 onError,
@@ -1115,7 +1130,7 @@ describe('withEntitiesCalls', () => {
                 call: ({ id }: { id: string }) => {
                   return apiResponse.pipe(first());
                 },
-                paramsSelectId: ({ id }) => id,
+                paramsSelectId: (param) => param?.id,
                 callWith: id$,
                 onSuccess,
                 onError,
@@ -1142,7 +1157,7 @@ describe('withEntitiesCalls', () => {
 
     it('should run call everytime there is new undefined values when callWith is a signal  and  skipWhen is defined that allows them', async () => {
       const product = mockProducts[0];
-      const fn = jest.fn();
+      const fn = vi.fn();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const idSignal = signal<{ id: string } | undefined>({ id: product.id });
@@ -1183,7 +1198,7 @@ describe('withEntitiesCalls', () => {
 
     it('should run call everytime there is new undefined values when callWith is a function  and  skipWhen is defined that allows them', async () => {
       const product = mockProducts[0];
-      const fn = jest.fn();
+      const fn = vi.fn();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const idSignal = signal<{ id: string } | undefined>({ id: product.id });
@@ -1225,7 +1240,7 @@ describe('withEntitiesCalls', () => {
 
     it('should run call everytime there is new undefined values when callWith is a observable  and  skipWhen is defined that allows them', async () => {
       const product = mockProducts[0];
-      const fn = jest.fn();
+      const fn = vi.fn();
       TestBed.runInInjectionContext(() => {
         const apiResponse = new Subject<Partial<ProductDetail>>();
         const id$ = new BehaviorSubject<{ id: string } | undefined>({
@@ -1351,9 +1366,10 @@ describe('withEntitiesCalls', () => {
   });
 
   it('Ensure call throws error is no id is provided', async () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {
-      /* Empty */
-    });
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
     TestBed.runInInjectionContext(() => {
       const apiResponse = new Subject<Partial<ProductDetail>>();
 
@@ -1364,7 +1380,7 @@ describe('withEntitiesCalls', () => {
         withEntitiesCalls({
           entity,
           calls: () => ({
-            loadProductDetail: (op: { foo: string }) => {
+            loadProductDetail: (_op: { foo: string }) => {
               return apiResponse;
             },
           }),
@@ -1378,13 +1394,14 @@ describe('withEntitiesCalls', () => {
           `The id could not be found in loadProductDetail params. Make sure the params of the call is of type  Entity | {entity: Entity} or provide a paramsSelectId function in the call config`,
         ),
       );
-      consoleError.mockReset();
     });
+
+    consoleError.mockRestore();
   });
 
   it('multiple calls with the same id should be discarded till the fist is process', async () => {
     const product = mockProducts[0];
-    const fn = jest.fn();
+    const fn = vi.fn();
     TestBed.runInInjectionContext(() => {
       const apiResponse = new Subject<Partial<ProductDetail>>();
       const Store = signalStore(

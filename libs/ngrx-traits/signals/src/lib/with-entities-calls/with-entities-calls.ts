@@ -40,7 +40,9 @@ import {
   Observable,
   of,
   pipe,
+  take,
   tap,
+  throwError,
 } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -336,7 +338,7 @@ export function withEntitiesCalls<
                             `The id could not be found in ${callName} params. Make sure the params of the call is of type  Entity | {entity: Entity} or provide a paramsSelectId function in the call config`,
                           );
                           console.error(error);
-                          throw error;
+                          return throwError(() => error);
                         }
                         setLoading(id);
                         // Set to track which values are currently being processed
@@ -410,6 +412,8 @@ export function withEntitiesCalls<
                           },
                         );
                       }),
+                      // Catch errors from the id check (throwError)
+                      catchError(() => of()),
                     );
 
                     if (typeof skip === 'boolean') {
@@ -418,13 +422,14 @@ export function withEntitiesCalls<
                       return skip ? of() : of(params).pipe(process$);
                     }
                     // skip is a promise or observable
-
                     return from(skip).pipe(
                       tap((value) => {
                         if (isDevMode() && value)
                           console.warn(`EntityCall ${callName} is skip`);
                       }),
-                      first((v) => !v),
+                      // first((v) => !v),
+                      filter((v) => !v),
+                      take(1),
                       map(() => params),
                       process$,
                     );

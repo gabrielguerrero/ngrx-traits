@@ -22,8 +22,8 @@ import { callConfig, withCalls } from '../index';
 describe('withCalls', () => {
   let apiResponse = new Subject<string>();
   let privateApiResponse = new Subject<string>();
-  const onSuccess = jest.fn();
-  const onError = jest.fn();
+  const onSuccess = vi.fn();
+  const onError = vi.fn();
   const Store = signalStore(
     { protectedState: false },
     withState({ foo: 'bar' }),
@@ -323,7 +323,7 @@ describe('withCalls', () => {
     });
 
     it('check onSuccess receives params', async () => {
-      const onSuccess = jest.fn();
+      const onSuccess = vi.fn();
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withState({ foo: 'bar' }),
@@ -418,8 +418,8 @@ describe('withCalls', () => {
   });
 
   it('returning an observable should update to error state when it errors', async () => {
-    const consoleError = jest.spyOn(console, 'error');
-    consoleError.mockReset();
+    const consoleError = vi.spyOn(console, 'error');
+    consoleError.mockClear();
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       expect(store.isTestCallLoading()).toBeFalsy();
@@ -442,7 +442,7 @@ describe('withCalls', () => {
 
   it('returning a promise should output when value returns', async () => {
     let response: Promise<string>;
-    TestBed.runInInjectionContext(async () => {
+    await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
           testCall: () => {
@@ -464,11 +464,13 @@ describe('withCalls', () => {
     });
   });
 
-  it("should warn in dev mode if no callConfig is used when using an observable that doesn't complete within 100ms", () => {
-    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+  it("should warn in dev mode if no callConfig is used when using an observable that doesn't complete within 100ms", async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* Empty */
     });
-    TestBed.runInInjectionContext(async () => {
+    consoleWarn.mockClear();
+    let apiResponse = new Subject<string>();
+    await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
           testCall: () => apiResponse,
@@ -486,13 +488,16 @@ describe('withCalls', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(consoleWarn).toHaveBeenCalledTimes(1);
     });
+    consoleWarn.mockRestore();
   });
 
-  it("should warn in dev mode if a mapPipe has not been set when using an observable that doesn't complete within 100ms", () => {
-    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+  it("should warn in dev mode if a mapPipe has not been set when using an observable that doesn't complete within 100ms", async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* Empty */
     });
-    TestBed.runInInjectionContext(async () => {
+    consoleWarn.mockClear();
+    let apiResponse = new Subject<string>();
+    await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
           testCall: callConfig({
@@ -512,13 +517,16 @@ describe('withCalls', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(consoleWarn).toHaveBeenCalledTimes(1);
     });
+    consoleWarn.mockRestore();
   });
 
-  it("should not warn in dev mode if a mapPipe has been set when using an observable that doesn't complete within 100ms", () => {
-    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+  it("should not warn in dev mode if a mapPipe has been set when using an observable that doesn't complete within 100ms", async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* Empty */
     });
-    TestBed.runInInjectionContext(async () => {
+    consoleWarn.mockClear();
+    let apiResponse = new Subject<string>();
+    await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
           testCall: callConfig({
@@ -539,13 +547,16 @@ describe('withCalls', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(consoleWarn).not.toHaveBeenCalledTimes(1);
     });
+    consoleWarn.mockRestore();
   });
 
-  it("should not warn in dev mode if a mapPipe has been explicitly set to exhaustMap when using an observable that doesn't complete within 100ms", () => {
-    const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+  it("should not warn in dev mode if a mapPipe has been explicitly set to exhaustMap when using an observable that doesn't complete within 100ms", async () => {
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
       /* Empty */
     });
-    TestBed.runInInjectionContext(async () => {
+    consoleWarn.mockClear();
+    let apiResponse = new Subject<string>();
+    await TestBed.runInInjectionContext(async () => {
       const Store = signalStore(
         withCalls(() => ({
           testCall: callConfig({
@@ -566,13 +577,15 @@ describe('withCalls', () => {
       await new Promise((resolve) => setTimeout(resolve, 100));
       expect(consoleWarn).not.toHaveBeenCalledTimes(1);
     });
+    consoleWarn.mockRestore();
   });
   describe('skipWhen function', () => {
     it('returning true in skipWhen should skip call ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      consoleWarn.mockClear();
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -593,13 +606,16 @@ describe('withCalls', () => {
         expect(store.testCallCallStatus()).toEqual('init');
         expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
       });
+      consoleWarn.mockRestore();
     });
 
     it('returning true in skipWhen should skip call using previousResult ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      consoleWarn.mockClear();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -610,30 +626,35 @@ describe('withCalls', () => {
             }),
           })),
         );
+        // first call shoukld pass
         const store = new Store();
         expect(store.isTestCallLoading()).toBeFalsy();
-
+        apiResponse.next('test');
         store.testCall({ id: 'ss' });
-        expect(store.isTestCallLoading()).toBeFalsy();
+        expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect(store.testCallResult()).toEqual('test');
         expect(consoleWarn).not.toHaveBeenCalledWith('Call testCall is skip');
 
+        // second call should skip because previous result is test
+        store.testCall({ id: 'ss2' });
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
-        expect(store.isTestCallLoaded()).toBeFalsy();
-        expect(store.testCallResult()).toBeUndefined();
-        expect(store.testCallCallStatus()).toEqual('init');
+        expect(store.isTestCallLoaded()).toBeTruthy();
+        expect(store.testCallResult()).toEqual('test');
         expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
       });
+      consoleWarn.mockRestore();
     });
 
     it('returning false in skipWhen should make call ', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      consoleWarn.mockClear();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -653,12 +674,14 @@ describe('withCalls', () => {
         expect(store.testCallResult()).toEqual('test');
         expect(consoleWarn).not.toHaveBeenCalled();
       });
+      consoleWarn.mockRestore();
     });
 
     it('returning an Observable with true in skipWhen should skip call', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           withCalls(() => ({
@@ -683,10 +706,10 @@ describe('withCalls', () => {
     });
 
     it('returning an Observable with false in skipWhen should run call', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      jest.resetAllMocks();
+      consoleWarn.mockClear();
       let apiResponse = new Subject<string>();
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -711,10 +734,11 @@ describe('withCalls', () => {
     });
 
     it('returning a Promise with true in skipWhen should skip call', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      consoleWarn.mockClear();
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -733,15 +757,19 @@ describe('withCalls', () => {
         expect(store.isTestCallLoaded()).toBeFalsy();
         expect(store.testCallResult()).toBeUndefined();
         expect(store.testCallCallStatus()).toEqual('init');
+        await Promise.resolve(true); // force to wait till microtask are done
         expect(consoleWarn).toHaveBeenCalledWith('Call testCall is skip');
       });
+      consoleWarn.mockRestore();
     });
 
     it('returning a Promise with false in skipWhen should run call', async () => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
-      TestBed.runInInjectionContext(async () => {
+      consoleWarn.mockClear();
+      let apiResponse = new Subject<string>();
+      await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
             testCall: callConfig({
@@ -755,12 +783,13 @@ describe('withCalls', () => {
         expect(store.isTestCallLoading()).toBeFalsy();
 
         store.testCall();
-        expect(store.isTestCallLoading()).toBeTruthy();
+        await expect.poll(() => store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
         expect(store.testCallResult()).toEqual('test');
         expect(consoleWarn).not.toHaveBeenCalled();
       });
+      consoleWarn.mockRestore();
     });
   });
 
@@ -777,8 +806,8 @@ describe('withCalls', () => {
       });
     });
     it('Fail on a call should set status return error ', async () => {
-      const consoleError = jest.spyOn(console, 'error');
-      consoleError.mockReset();
+      const consoleError = vi.spyOn(console, 'error');
+      consoleError.mockClear();
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         expect(store.privateIsTestCallLoading()).toBeFalsy();
@@ -824,7 +853,7 @@ describe('withCalls', () => {
   describe('withCalls with mapPipe', () => {
     it('when withCall has mapPipe = switchMap should only process last call', fakeAsync(() => {
       let aux = 0;
-      const call = jest.fn().mockImplementation(() => {
+      const call = vi.fn().mockImplementation(() => {
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -854,7 +883,7 @@ describe('withCalls', () => {
 
     it('when withCall has mapPipe= exhaustMap should only process first call', fakeAsync(() => {
       let aux = 0;
-      const call = jest.fn().mockImplementation(() => {
+      const call = vi.fn().mockImplementation(() => {
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -884,7 +913,7 @@ describe('withCalls', () => {
 
     it('when withCall has mapPipe = concatMap should process all calls in sequence', fakeAsync(() => {
       let aux = 0;
-      const call = jest.fn().mockImplementation(() => {
+      const call = vi.fn().mockImplementation(() => {
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -922,7 +951,7 @@ describe('withCalls', () => {
   describe('when using callWith', () => {
     it('should run call on init when call has no params and callWith = true', async () => {
       let apiResponse = new Subject<string>();
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
@@ -947,7 +976,7 @@ describe('withCalls', () => {
 
     it('should not run call on init when call has no params and callWith = false', async () => {
       let apiResponse = new Subject<string>();
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
           withCalls(() => ({
@@ -971,7 +1000,7 @@ describe('withCalls', () => {
     });
 
     it('should run on init when call has params and callWith = { id: "1" }', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
@@ -996,7 +1025,7 @@ describe('withCalls', () => {
     });
 
     it('should not run on init when call has params and callWith = undefined', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const Store = signalStore(
@@ -1021,7 +1050,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new values if callWith is a signal and call has params', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const idSignal = signal({ id: '1' });
@@ -1056,7 +1085,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new truthy values if callWith is a observable and call params', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const id$ = new BehaviorSubject({ id: '1' });
@@ -1091,7 +1120,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new truthy values if callWith is a function and call has params', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const idSignal = signal({ id: '1' });
@@ -1126,7 +1155,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new values if callWith is a signal and call has no params', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const loadingSignal = signal(true);
@@ -1169,7 +1198,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new values if callWith is a signal and call has no params', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const id$ = new BehaviorSubject(true);
@@ -1212,7 +1241,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new values if callWith is a function and call has no params', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const loadingSignal = signal(true);
@@ -1255,7 +1284,7 @@ describe('withCalls', () => {
     });
 
     it('should not run call everytime there is new undefined values when callWith is a signal and not skipWhen is defined ', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
@@ -1290,7 +1319,7 @@ describe('withCalls', () => {
     });
 
     it('should not run call everytime there is a undefined value when callWith is a observable and skipWhen is not defined ', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const id$ = new BehaviorSubject<{ id: string } | undefined>({
@@ -1327,7 +1356,7 @@ describe('withCalls', () => {
     });
 
     it('should not run call everytime there is undefined values when callWith is a function  and not skipWhen is defined ', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
@@ -1362,7 +1391,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new undefined values when callWith is a signal  and  skipWhen is defined that allows them', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });
@@ -1398,7 +1427,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new undefined values when callWith is a observable  and  skipWhen is defined that allows them', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const id$ = new BehaviorSubject<{ id: string } | undefined>({
@@ -1436,7 +1465,7 @@ describe('withCalls', () => {
     });
 
     it('should run call everytime there is new undefined values when callWith is a function  and  skipWhen is defined that allows them', async () => {
-      const apiMockCall = jest.fn();
+      const apiMockCall = vi.fn();
       let apiResponse = new Subject<string>();
       await TestBed.runInInjectionContext(async () => {
         const idSignal = signal<{ id: string } | undefined>({ id: '1' });

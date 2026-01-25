@@ -22,12 +22,8 @@
       "defaultConfiguration": "production"
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/libs/ngrx-traits/core"],
-      "options": {
-        "jestConfig": "libs/ngrx-traits/core/jest.config.ts",
-        "passWithNoTests": true
-      }
+      "executor": "@analogjs/vitest-angular:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
     },
     "lint": {
       "executor": "@nx/linter:eslint",

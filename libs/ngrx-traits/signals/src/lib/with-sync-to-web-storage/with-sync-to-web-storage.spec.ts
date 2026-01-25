@@ -71,7 +71,7 @@ describe('withSyncToWebStorage', () => {
   });
 
   it('should save and load to local session using filtered state and onRestore be called', () => {
-    const onRestore = jest.fn();
+    const onRestore = vi.fn();
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         { protectedState: false },
@@ -205,9 +205,10 @@ describe('withSyncToWebStorage', () => {
 
   describe('expires', () => {
     it('should not load from local storage if cache is expired', fakeAsync(() => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         window.localStorage.setItem(
           'test',
@@ -270,9 +271,10 @@ describe('withSyncToWebStorage', () => {
     }));
 
     it('should not load from session storage if cache is expired', fakeAsync(() => {
-      const consoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {
+      const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {
         /* Empty */
       });
+      consoleWarn.mockClear();
       TestBed.runInInjectionContext(() => {
         window.sessionStorage.setItem(
           'test',
@@ -295,12 +297,12 @@ describe('withSyncToWebStorage', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         tick();
         expect(store.entities().length).toEqual(0);
         expect(store.isLoaded()).toBe(false);
         expect(consoleWarn).toHaveBeenCalledWith(
-          'test local web storage expired',
+          'test session web storage expired',
         );
       });
     }));
@@ -523,7 +525,7 @@ describe('withSyncToWebStorage', () => {
     });
 
     it('should call onRestore after valueMapper transforms state', () => {
-      const onRestore = jest.fn();
+      const onRestore = vi.fn();
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
           { protectedState: false },
