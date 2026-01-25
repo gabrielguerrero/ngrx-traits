@@ -252,7 +252,7 @@ describe('withEntitiesRemotePagination', () => {
 
   it('setEntitiesPagedResult should store entities', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const fetchEntitiesSpy = jest.fn();
+      const fetchEntitiesSpy = vi.fn();
       const Store = signalStore(
         withEntities({ entity }),
         withCallStatus(),
@@ -310,7 +310,7 @@ describe('withEntitiesRemotePagination', () => {
       TestBed.flushEffects();
       expect(store.entities()).toEqual([]);
       store.setLoading();
-      jest.spyOn(store, 'setLoading');
+      vi.spyOn(store, 'setLoading');
       tick();
       // basic check for the first page
       expect(store.entitiesCurrentPage().entities.length).toEqual(10);
@@ -348,7 +348,7 @@ describe('withEntitiesRemotePagination', () => {
       productId: id,
     }));
     TestBed.runInInjectionContext(() => {
-      const fetchEntitiesSpy = jest.fn();
+      const fetchEntitiesSpy = vi.fn();
       const Store = signalStore(
         withEntities(config),
         withCallStatus(),
@@ -406,7 +406,7 @@ describe('withEntitiesRemotePagination', () => {
       TestBed.flushEffects();
       expect(store.entities()).toEqual([]);
       store.setLoading();
-      jest.spyOn(store, 'setLoading');
+      vi.spyOn(store, 'setLoading');
       tick();
       // basic check for the first page
       expect(store.entitiesCurrentPage().entities.length).toEqual(10);
@@ -436,7 +436,7 @@ describe('withEntitiesRemotePagination', () => {
 
   it('setEntitiesPagedResult with collection should store entities', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
-      const fetchEntitiesSpy = jest.fn();
+      const fetchEntitiesSpy = vi.fn();
       const collection = 'product';
       const Store = signalStore(
         withEntities({ entity, collection }),
@@ -495,7 +495,7 @@ describe('withEntitiesRemotePagination', () => {
       TestBed.flushEffects();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
-      jest.spyOn(store, 'setProductEntitiesLoading');
+      vi.spyOn(store, 'setProductEntitiesLoading');
       tick();
       // basic check for the first page
       expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
@@ -536,7 +536,7 @@ describe('withEntitiesRemotePagination', () => {
       productId: id,
     }));
     TestBed.runInInjectionContext(() => {
-      const fetchEntitiesSpy = jest.fn();
+      const fetchEntitiesSpy = vi.fn();
       const Store = signalStore(
         withEntities(config),
         withCallStatus(config),
@@ -594,7 +594,7 @@ describe('withEntitiesRemotePagination', () => {
       TestBed.flushEffects();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
-      jest.spyOn(store, 'setProductEntitiesLoading');
+      vi.spyOn(store, 'setProductEntitiesLoading');
       tick();
       // basic check for the first page
       expect(store.productEntitiesCurrentPage().entities.length).toEqual(10);
@@ -700,7 +700,7 @@ describe('withEntitiesRemotePagination', () => {
   describe('loadEntitiesPage', () => {
     it('test when a requested page is not cache gets loaded', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
-        const fetchEntitiesSpy = jest.fn();
+        const fetchEntitiesSpy = vi.fn();
         const Store = signalStore(
           withEntities({ entity }),
           withCallStatus(),
@@ -728,7 +728,7 @@ describe('withEntitiesRemotePagination', () => {
         TestBed.flushEffects();
         expect(store.entities()).toEqual([]);
         store.setLoading();
-        jest.spyOn(store, 'setLoading');
+        vi.spyOn(store, 'setLoading');
         tick();
         // basic check for the first page
         expect(store.entitiesCurrentPage().entities.length).toEqual(10);
@@ -758,7 +758,7 @@ describe('withEntitiesRemotePagination', () => {
 
     it('test when a requested page is not cache doesnt get loaded if skipLoadingCall is true', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
-        const fetchEntitiesSpy = jest.fn();
+        const fetchEntitiesSpy = vi.fn();
         const Store = signalStore(
           withEntities({ entity }),
           withCallStatus(),
@@ -786,7 +786,7 @@ describe('withEntitiesRemotePagination', () => {
         TestBed.flushEffects();
         expect(store.entities()).toEqual([]);
         store.setLoading();
-        jest.spyOn(store, 'setLoading');
+        vi.spyOn(store, 'setLoading');
         tick();
         // basic check for the first page
         expect(store.entitiesCurrentPage().entities.length).toEqual(10);
@@ -824,7 +824,7 @@ describe('withEntitiesRemotePagination', () => {
 
     it('test when last page of cache gets loaded more pages are requested', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
-        const fetchEntitiesSpy = jest.fn();
+        const fetchEntitiesSpy = vi.fn();
         const Store = signalStore(
           withEntities({ entity }),
           withCallStatus(),
@@ -901,7 +901,7 @@ describe('withEntitiesRemotePagination', () => {
 
     it('test pageCache 1 renders correctly', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
-        const fetchEntitiesSpy = jest.fn();
+        const fetchEntitiesSpy = vi.fn();
         const Store = signalStore(
           withEntities({ entity }),
           withCallStatus(),

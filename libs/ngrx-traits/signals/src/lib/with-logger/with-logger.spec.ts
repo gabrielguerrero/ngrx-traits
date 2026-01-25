@@ -20,7 +20,7 @@ describe('withLogger', () => {
       withLogger({ name: 'Store' }),
     );
 
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
@@ -52,7 +52,7 @@ describe('withLogger', () => {
       }),
     );
 
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
@@ -82,7 +82,7 @@ describe('withLogger', () => {
       }),
     );
 
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
@@ -112,7 +112,7 @@ describe('withLogger', () => {
       }),
     );
 
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
@@ -142,8 +142,8 @@ describe('withLogger', () => {
         showDiff: true,
       }),
     );
-    jest.resetAllMocks();
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    vi.resetAllMocks();
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
@@ -152,7 +152,7 @@ describe('withLogger', () => {
       prop3: 3,
     });
     patchState(store, { prop1: 2 });
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     TestBed.flushEffects();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop3: 4,
@@ -166,7 +166,7 @@ describe('withLogger', () => {
   });
 
   it('should sort properties alphabetically when no filter is defined', () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     const Store = signalStore(
       { providedIn: 'root', protectedState: false },
       withState(() => ({ zebra: 1, apple: 2, banana: 3 })),
@@ -176,7 +176,7 @@ describe('withLogger', () => {
       withLogger({ name: 'Store' }),
     );
 
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     TestBed.inject(Store);
@@ -197,7 +197,7 @@ describe('withLogger', () => {
   });
 
   it('should not sort properties when array filter is used', () => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     const Store = signalStore(
       { providedIn: 'root', protectedState: false },
       withState(() => ({ zebra: 1, apple: 2, banana: 3 })),
@@ -210,7 +210,7 @@ describe('withLogger', () => {
       }),
     );
 
-    const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => {
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
       /* Empty */
     });
     TestBed.inject(Store);

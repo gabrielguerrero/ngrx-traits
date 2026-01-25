@@ -157,7 +157,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const { actions, effects } = initWithFilterAndPagination();
       actions$ = of(actions.filterEntities({ filters: { content: 'hello' } }));
       const router = TestBed.inject(Router);
-      jest.spyOn(router, 'navigate');
+      vi.spyOn(router, 'navigate');
       await effects.onFilter$.toPromise();
       expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
@@ -170,7 +170,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const { actions, effects } = initWithFilterAndPagination();
       actions$ = of(actions.sortEntities({ active: 'id', direction: 'desc' }));
       const router = TestBed.inject(Router);
-      jest.spyOn(router, 'navigate');
+      vi.spyOn(router, 'navigate');
       await effects.onSort$.toPromise();
       expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),
@@ -183,7 +183,7 @@ describe('addEntitiesSyncToRouteQueryParams', () => {
       const { actions, effects } = initWithFilterAndPagination();
       actions$ = of(actions.loadEntitiesPage({ index: 3 }));
       const router = TestBed.inject(Router);
-      jest.spyOn(router, 'navigate');
+      vi.spyOn(router, 'navigate');
       await effects.onPaginate$.toPromise();
       expect(router.navigate).toHaveBeenCalledWith([], {
         relativeTo: expect.anything(),

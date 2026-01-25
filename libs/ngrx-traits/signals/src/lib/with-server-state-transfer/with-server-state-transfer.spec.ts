@@ -1,3 +1,4 @@
+import { MockedObject } from 'vitest';
 import { makeStateKey, PLATFORM_ID, TransferState } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
@@ -12,14 +13,14 @@ describe('withServerStateTransfer', () => {
   const entity = type<Product>();
 
   describe('Server Side (SSR)', () => {
-    let mockTransferState: jest.Mocked<TransferState>;
+    let mockTransferState: MockedObject<TransferState>;
 
     beforeEach(() => {
       mockTransferState = {
-        get: jest.fn(),
-        set: jest.fn(),
-        remove: jest.fn(),
-        hasKey: jest.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        remove: vi.fn(),
+        hasKey: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({
@@ -182,14 +183,14 @@ describe('withServerStateTransfer', () => {
   });
 
   describe('Client Side (Browser)', () => {
-    let mockTransferState: jest.Mocked<TransferState>;
+    let mockTransferState: MockedObject<TransferState>;
 
     beforeEach(() => {
       mockTransferState = {
-        get: jest.fn(),
-        set: jest.fn(),
-        remove: jest.fn(),
-        hasKey: jest.fn(),
+        get: vi.fn(),
+        set: vi.fn(),
+        remove: vi.fn(),
+        hasKey: vi.fn(),
       } as any;
 
       TestBed.configureTestingModule({
@@ -252,7 +253,7 @@ describe('withServerStateTransfer', () => {
     });
 
     it('should call onRestore callback after restoration', () => {
-      const onRestore = jest.fn();
+      const onRestore = vi.fn();
       const transferredState = {
         ids: mockProducts.map((p) => p.id),
         entityMap: mockProducts.reduce(

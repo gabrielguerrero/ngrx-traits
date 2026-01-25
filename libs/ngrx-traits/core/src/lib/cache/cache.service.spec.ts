@@ -19,7 +19,7 @@ describe('CacheService', () => {
       ],
     });
     const store = TestBed.inject(MockStore);
-    jest.spyOn(store, 'dispatch');
+    vi.spyOn(store, 'dispatch');
     return {
       store,
     };
