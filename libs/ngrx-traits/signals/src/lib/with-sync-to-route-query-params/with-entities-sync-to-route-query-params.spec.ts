@@ -222,7 +222,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       ],
     });
     const router = TestBed.inject(Router);
-    jest.spyOn(router, 'navigate');
+    vi.spyOn(router, 'navigate');
     return { store: TestBed.inject(Store) as InstanceType<S>, router };
   }
 
@@ -838,7 +838,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
   it('onQueryParamsLoaded should called after query params are set in the store', fakeAsync(() => {
     // Arrange
     const load = new Subject<boolean>();
-    const queryLoaded = jest.fn();
+    const queryLoaded = vi.fn();
     const Store = signalStore(
       localStoreFeature({ load }),
       withEntitiesSyncToRouteQueryParams({
@@ -984,7 +984,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
 
   describe('skipLoadingCall parameter', () => {
     it('should pass skipLoadingCall to filterEntities when loading from query params', fakeAsync(() => {
-      const fetchEntitiesSpy = jest.fn(() =>
+      const fetchEntitiesSpy = vi.fn(() =>
         of({ entities: mockProducts.slice(0, 10), total: 10 }),
       );
       const Store = signalStore(
@@ -1010,7 +1010,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     }));
 
     it('should pass skipLoadingCall to sortEntities when loading from query params', fakeAsync(() => {
-      const fetchEntitiesSpy = jest.fn(() =>
+      const fetchEntitiesSpy = vi.fn(() =>
         of({ entities: mockProducts.slice(0, 10), total: 10 }),
       );
       const Store = signalStore(
@@ -1037,7 +1037,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
 
     it('should pass skipLoadingCall to loadEntitiesPage when loading from query params', fakeAsync(() => {
       const load = new Subject<boolean>();
-      const fetchEntitiesSpy = jest.fn(() =>
+      const fetchEntitiesSpy = vi.fn(() =>
         load.pipe(
           filter(Boolean),
           map(() => ({ entities: mockProducts.slice(0, 10), total: 40 })),
@@ -1065,7 +1065,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
 
     it('should call fetchEntities when skipLoadingCall is false (default)', fakeAsync(() => {
       const load = new Subject<boolean>();
-      const fetchEntitiesSpy = jest.fn(() =>
+      const fetchEntitiesSpy = vi.fn(() =>
         load.pipe(
           filter(Boolean),
           map(() => ({ entities: mockProducts.slice(0, 10), total: 10 })),

@@ -96,12 +96,8 @@
       "outputs": ["{options.outputFile}"]
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/apps/example-app"],
-      "options": {
-        "jestConfig": "apps/example-app/jest.config.ts",
-        "passWithNoTests": true
-      }
+      "executor": "@analogjs/vitest-angular:test",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
     }
   }
 }

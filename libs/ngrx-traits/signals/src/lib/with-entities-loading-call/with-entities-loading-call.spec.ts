@@ -43,7 +43,7 @@ describe('withEntitiesLoadingCall', () => {
         it('should mapPipe = switchMap should only process last call ', fakeAsync(() => {
           TestBed.runInInjectionContext(() => {
             let aux = 0;
-            const call = jest.fn().mockImplementation(() => {
+            const call = vi.fn().mockImplementation(() => {
               aux++;
               return of(mockProducts.slice(0, mockProducts.length - aux)).pipe(
                 delay(100),
@@ -75,7 +75,7 @@ describe('withEntitiesLoadingCall', () => {
         it('should mapPipe = exhaustMap should only process first call ', fakeAsync(() => {
           TestBed.runInInjectionContext(() => {
             let aux = 0;
-            const call = jest.fn().mockImplementation(() => {
+            const call = vi.fn().mockImplementation(() => {
               aux++;
               return of(mockProducts.slice(0, mockProducts.length - aux)).pipe(
                 delay(120),
@@ -107,7 +107,7 @@ describe('withEntitiesLoadingCall', () => {
         it('should mapPipe = concatMap should process all calls in sequence ', fakeAsync(() => {
           TestBed.runInInjectionContext(() => {
             let aux = 0;
-            const call = jest.fn().mockImplementation(() => {
+            const call = vi.fn().mockImplementation(() => {
               aux++;
               return of(mockProducts.slice(0, mockProducts.length - aux)).pipe(
                 delay(100),
@@ -235,8 +235,8 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setLoaded and onSuccess if fetchEntities call is successful', fakeAsync(() => {
-        const onSuccess = jest.fn();
-        const onError = jest.fn();
+        const onSuccess = vi.fn();
+        const onError = vi.fn();
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({
@@ -265,10 +265,10 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setError and onError if fetchEntities call fails ', fakeAsync(() => {
-        const consoleError = jest.spyOn(console, 'error');
-        consoleError.mockReset();
-        const onSuccess = jest.fn();
-        const onError = jest.fn();
+        const consoleError = vi.spyOn(console, 'error');
+        consoleError.mockClear();
+        const onSuccess = vi.fn();
+        const onError = vi.fn();
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({
@@ -297,8 +297,8 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setError and onError if fetchEntities call fails with correct type if mapError is used', fakeAsync(() => {
-        const onSuccess = jest.fn();
-        const onError = jest.fn();
+        const onSuccess = vi.fn();
+        const onError = vi.fn();
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({
@@ -554,8 +554,8 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setLoaded and onSuccess if fetchEntities call is successful', fakeAsync(() => {
-        const onSuccess = jest.fn();
-        const onError = jest.fn();
+        const onSuccess = vi.fn();
+        const onError = vi.fn();
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({
@@ -584,8 +584,8 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setError and onError if fetchEntities call fails ', fakeAsync(() => {
-        const onSuccess = jest.fn();
-        const onError = jest.fn();
+        const onSuccess = vi.fn();
+        const onError = vi.fn();
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({
@@ -613,8 +613,8 @@ describe('withEntitiesLoadingCall', () => {
       }));
 
       it('should call setError and onError if fetchEntities call fails with correct type if mapError is used', fakeAsync(() => {
-        const onSuccess = jest.fn();
-        const onError = jest.fn();
+        const onSuccess = vi.fn();
+        const onError = vi.fn();
         TestBed.runInInjectionContext(() => {
           const Store = signalStore(
             withEntities({

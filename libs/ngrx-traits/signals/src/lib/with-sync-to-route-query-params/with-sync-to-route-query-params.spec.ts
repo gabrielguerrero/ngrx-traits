@@ -65,7 +65,7 @@ describe('withSyncToRouteQueryParams', () => {
     const { store } = init();
 
     const router = TestBed.inject(Router);
-    jest.spyOn(router, 'navigate');
+    vi.spyOn(router, 'navigate');
 
     patchState(store, {
       test: 'test3',
@@ -140,7 +140,7 @@ describe('withSyncToRouteQueryParams', () => {
     const { store } = init({ debounce: 1000 });
 
     const router = TestBed.inject(Router);
-    jest.spyOn(router, 'navigate');
+    vi.spyOn(router, 'navigate');
 
     patchState(store, {
       test: 'test3',
