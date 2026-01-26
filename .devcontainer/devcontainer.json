@@ -8,7 +8,7 @@
 		}
 	  },
 	"features": {
-		"ghcr.io/devcontainers-contrib/features/nx-npm:1": {}
+		"ghcr.io/devcontainers-contrib/features/pnpm:2": {}
 	},
 	"postCreateCommand": "sh .devcontainer/hooks/postCreateCommand.sh",
 	"customizations": {

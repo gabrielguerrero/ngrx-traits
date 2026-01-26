@@ -7,5 +7,5 @@ sudo chown -R node:node .nx
 echo "Set permissions done"
 
 echo "Installing Deps"
-npm i
+pnpm install
 echo "Installing Deps done"
