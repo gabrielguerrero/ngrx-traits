@@ -34,7 +34,7 @@
     "help": "nx help",
     "semantic-release": "semantic-release --debug",
     "commit": "git-cz",
-    "acp": "git add . && npm run commit && git push",
+    "acp": "git add . && pnpm run commit && git push",
     "api-docs": "nx run-many --all --target=api-docs"
   },
   "private": true,

@@ -23,14 +23,18 @@ jobs:
         node-version: [24]
     steps:
     - uses: actions/checkout@v6
+    - name: Install pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
-#        cache: 'npm'
-    - run: npm ci --legacy-peer-deps
-    - run: npm run build
-    - run: npm run test-all
+        cache: 'pnpm'
+    - run: pnpm install
+    - run: pnpm run build
+    - run: pnpm run test-all
 
   publish:
     runs-on: ubuntu-latest
@@ -42,15 +46,18 @@ jobs:
     needs: [quality]
     steps:
       - uses: actions/checkout@v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: 'https://registry.npmjs.org'
-#          cache: 'npm'
-      - run: npm ci --legacy-peer-deps
-      - run: npm run build
-      - run: npm install -g npm@11.7.0
-      - run: npm run semantic-release
+          cache: 'pnpm'
+      - run: pnpm install
+      - run: pnpm run build
+      - run: pnpm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

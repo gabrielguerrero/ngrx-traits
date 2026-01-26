@@ -31,40 +31,40 @@ If VSCode is your favourite choice, please remember to install [Dev Containers E
 
 ### Manual setup
 
-If you go for a local configuration, please install NodeJS(lts iron)
+If you go for a local configuration, please install NodeJS(lts iron) and pnpm.
 
 After that, install globally Angular CLI:
 
 ```bash
-npm install -g @angular/cli
+pnpm add -g @angular/cli
 ```
 
 Move to the root folder of the project and install dependencies:
 
 ```bash
-npm i
+pnpm install
 ```
 
 ## Test
 
 ```bash
-npm test
+pnpm test
 ```
 
 ## Build Library
 
 ```bash
-npm build
+pnpm build
 ```
 
 ## Start Examples App
 
 ```bash
-npm start
+pnpm start
 ```
 
 ## Start Docs App
 
 ```bash
-npm start-docs
+pnpm start-docs
 ```
