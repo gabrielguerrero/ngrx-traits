@@ -10,4 +10,4 @@ ENV NODE_OPTIONS=--max-old-space-size=8192
 ARG EXTRA_NODE_VERSION="lts/hydrogen"
 RUN su node -c "source /usr/local/share/nvm/nvm.sh && nvm install ${EXTRA_NODE_VERSION}"
 
-RUN su node -c "npm install -g @angular/cli"
+RUN npm install -g pnpm && su node -c "pnpm add -g @angular/cli"
