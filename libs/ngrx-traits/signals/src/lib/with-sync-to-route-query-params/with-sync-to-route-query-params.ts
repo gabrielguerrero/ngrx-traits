@@ -1,5 +1,5 @@
 import { computed, inject, Injector } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   SignalStoreFeature,
@@ -10,7 +10,7 @@ import {
   withMethods,
   withState,
 } from '@ngrx/signals';
-import { debounce, defaultIfEmpty, take, timer } from 'rxjs';
+import { concatWith, debounce, defaultIfEmpty, NEVER, take, timer } from 'rxjs';
 
 import { combineFunctionsInObject } from '../util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
@@ -125,7 +125,11 @@ export function withSyncToRouteQueryParams<
           });
 
           toObservable(computedChanges)
-            .pipe(debounce(() => timer(config.defaultDebounce ?? 300)))
+            .pipe(
+              concatWith(NEVER),
+              debounce(() => timer(config.defaultDebounce ?? 300)),
+              takeUntilDestroyed(),
+            )
             .subscribe((queryParams) => {
               router.navigate([], {
                 relativeTo: activatedRoute,
