@@ -58,6 +58,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install
       - run: pnpm run build
+      - run: npm install -g npm@11.7.0
       - run: pnpm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
