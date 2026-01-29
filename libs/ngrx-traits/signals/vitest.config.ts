@@ -6,12 +6,15 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   root: __dirname,
   cacheDir: '../../../node_modules/.vite/ngrx-traits-signals',
-  plugins: [angular(), nxViteTsPaths()],
+  plugins: [
+    angular({ include: ['src/**/*.ts'] }),
+    nxViteTsPaths(),
+  ],
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['src/test-setup.ts'],
-    include: ['src/**/*.spec.ts'],
+    include: ['src/**/*.spec.ts', 'schematics/**/*.spec.ts'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../../coverage/libs/ngrx-traits/signals',

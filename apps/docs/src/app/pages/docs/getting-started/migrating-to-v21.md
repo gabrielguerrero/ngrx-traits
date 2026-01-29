@@ -63,7 +63,7 @@ The migration only updates files that import or use detected stores. If you have
 If your store uses an unusual pattern not detected by the analyzer, use the rename-collection schematic:
 
 ```bash
-ng g @ngrx-traits/signals:rename-collection --oldName=product --path=src/app
+ng g @ngrx-traits/signals:rename-collection --old-name=product --path=src/app
 ```
 
 ## Manual Migration
