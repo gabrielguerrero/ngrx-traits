@@ -1,6 +1,10 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { signalStore, type } from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
+import { patchState, signalStore, type } from '@ngrx/signals';
+import {
+  entityConfig,
+  setAllEntities,
+  withEntities,
+} from '@ngrx/signals/entities';
 import { delay, of, Subject, throwError } from 'rxjs';
 
 import {
@@ -261,6 +265,36 @@ describe('withEntitiesLoadingCall', () => {
           expect(store.isLoaded()).toBeTruthy();
           expect(onSuccess).toHaveBeenCalledWith(mockProducts);
           expect(onError).not.toHaveBeenCalled();
+        });
+      }));
+
+      it('should skip storing entities when storeResult is false but still call onSuccess', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const Store = signalStore(
+            withEntities({
+              entity,
+            }),
+            withCallStatus(),
+            withEntitiesLoadingCall((store) => ({
+              fetchEntities: () => {
+                return of([...mockProducts]);
+              },
+              storeResult: false,
+              onSuccess: (result) => {
+                patchState(
+                  store,
+                  setAllEntities((result as Product[]).slice(0, 2)),
+                );
+              },
+            })),
+          );
+          const store = new Store();
+          TestBed.flushEffects();
+          expect(store.entities()).toEqual([]);
+          store.setLoading();
+          tick();
+          expect(store.entities()).toEqual(mockProducts.slice(0, 2));
+          expect(store.isLoaded()).toBeTruthy();
         });
       }));
 
