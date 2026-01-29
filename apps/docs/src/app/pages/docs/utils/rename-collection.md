@@ -10,16 +10,16 @@ A schematic for renaming collection-based properties in your ngrx store and rela
 ## Usage
 
 ```bash
-ng g @ngrx-traits/signals:rename-collection --oldName=<name> [--newName=<name>] [--path=<path>]
+ng g @ngrx-traits/signals:rename-collection --old-name=<name> [--new-name=<name>] [--path=<path>]
 ```
 
 ## Parameters
 
-| Parameter     | Required | Default | Description                                         |
-| ------------- | -------- | ------- | --------------------------------------------------- |
-| `--oldName`   | Yes      | -       | Current collection name to find                     |
-| `--newName`   | No       | oldName | New collection name (defaults to oldName for v21 migration) |
-| `--path`      | No       | `src`   | Directory to search for files                       |
+| Parameter    | Required | Default | Description                                         |
+|--------------| -------- | ------- | --------------------------------------------------- |
+| `--old-name` | Yes      | -       | Current collection name to find                     |
+| `--new-name` | No       | oldName | New collection name (defaults to oldName for v21 migration) |
+| `--path`     | No       | `src`   | Directory to search for files                       |
 
 ## Example: v21 Migration Fix
 
@@ -27,7 +27,7 @@ If the automatic migration missed some files, use this schematic:
 
 ```bash
 # Adds 'Entities' suffix to 'product' collection properties
-ng g @ngrx-traits/signals:rename-collection --oldName=product --path=src/app
+ng g @ngrx-traits/signals:rename-collection --old-name=product --path=src/app
 ```
 
 This transforms:
@@ -50,7 +50,7 @@ store.productEntitiesFilter();
 Rename a collection from `product` to `item`:
 
 ```bash
-ng g @ngrx-traits/signals:rename-collection --oldName=product --newName=item --path=src/app
+ng g @ngrx-traits/signals:rename-collection --old-name=product --new-name=item --path=src/app
 ```
 
 This transforms a complex store feature with filter, pagination, sort and loading:
@@ -229,7 +229,7 @@ Files in `node_modules` and `.git` directories are automatically excluded.
 
 ```bash
 # Rename multiple collections
-ng g @ngrx-traits/signals:rename-collection --oldName=product
-ng g @ngrx-traits/signals:rename-collection --oldName=order
-ng g @ngrx-traits/signals:rename-collection --oldName=user
+ng g @ngrx-traits/signals:rename-collection --old-name=product
+ng g @ngrx-traits/signals:rename-collection --old-name=order
+ng g @ngrx-traits/signals:rename-collection --old-name=user
 ```
