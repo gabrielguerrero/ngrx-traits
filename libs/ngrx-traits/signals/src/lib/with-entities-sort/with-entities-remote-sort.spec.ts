@@ -43,7 +43,7 @@ describe('withEntitiesRemoteSort', () => {
     );
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       // check default sort
       expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
@@ -120,7 +120,7 @@ describe('withEntitiesRemoteSort', () => {
     );
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       // check default sort
       expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
@@ -196,7 +196,7 @@ describe('withEntitiesRemoteSort', () => {
     );
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       // check default sort
       expect(store.productEntitiesSort()).toEqual({
@@ -284,7 +284,7 @@ describe('withEntitiesRemoteSort', () => {
     );
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       // check default sort
       expect(store.productEntitiesSort()).toEqual({
@@ -332,7 +332,7 @@ describe('withEntitiesRemoteSort', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       expect(store.entitiesSort()).toEqual({ field: 'id', direction: 'asc' });
       expect(
@@ -404,7 +404,7 @@ describe('withEntitiesRemoteSort', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick(400);
       store.selectEntity({ id: mockProducts[0].id });
       store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
@@ -465,7 +465,7 @@ describe('withEntitiesRemoteSort', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick(400);
       store.selectEntity({ id: mockProducts[0].id });
       store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });

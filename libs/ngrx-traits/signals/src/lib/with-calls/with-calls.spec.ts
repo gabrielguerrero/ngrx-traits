@@ -115,7 +115,7 @@ describe('withCalls', () => {
       expect(store.isTestCallLoading()).toBeFalsy();
       const param = signal({ ok: true });
       store.testCall(param);
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.isTestCallLoading()).toBeTruthy();
       apiResponse.next('test');
       expect(store.isTestCallLoaded()).toBeTruthy();
@@ -124,7 +124,7 @@ describe('withCalls', () => {
 
       apiResponse = new Subject<string>();
       param.set({ ok: true });
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.isTestCallLoading()).toBeTruthy();
       apiResponse.next('test2');
       expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1067,7 +1067,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1075,7 +1075,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         idSignal.set({ id: '2' });
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1102,7 +1102,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1110,7 +1110,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         id$.next({ id: '2' });
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1137,7 +1137,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1145,7 +1145,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         idSignal.set({ id: '2' });
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1172,7 +1172,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1180,7 +1180,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledTimes(1);
 
         loadingSignal.set(false);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1188,7 +1188,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledTimes(1);
 
         loadingSignal.set(true);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test3');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1215,7 +1215,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1223,7 +1223,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledTimes(1);
 
         id$.next(false);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1231,7 +1231,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledTimes(1);
 
         id$.next(true);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test3');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1258,7 +1258,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1266,7 +1266,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledTimes(1);
 
         loadingSignal.set(false);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1274,7 +1274,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledTimes(1);
 
         loadingSignal.set(true);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test3');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1301,7 +1301,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1309,7 +1309,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1338,7 +1338,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1346,7 +1346,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         id$.next(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1373,7 +1373,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1381,7 +1381,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeFalsy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1409,7 +1409,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1417,7 +1417,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1447,7 +1447,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1455,7 +1455,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         id$.next(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1483,7 +1483,7 @@ describe('withCalls', () => {
           })),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test');
         expect(store.isTestCallLoaded()).toBeTruthy();
@@ -1491,7 +1491,7 @@ describe('withCalls', () => {
         expect(apiMockCall).toHaveBeenCalledWith({ id: '1' });
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isTestCallLoading()).toBeTruthy();
         apiResponse.next('test2');
         expect(store.isTestCallLoaded()).toBeTruthy();

@@ -35,7 +35,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -64,7 +64,7 @@ describe('withEntitiesLoadingCall', () => {
               }),
             );
             const store = new Store();
-            TestBed.flushEffects();
+            TestBed.tick();
             expect(store.entities()).toEqual([]);
             store.setLoading();
             store.setLoading();
@@ -96,7 +96,7 @@ describe('withEntitiesLoadingCall', () => {
               }),
             );
             const store = new Store();
-            TestBed.flushEffects();
+            TestBed.tick();
             expect(store.entities()).toEqual([]);
             store.setLoading();
             store.setLoading();
@@ -128,7 +128,7 @@ describe('withEntitiesLoadingCall', () => {
               }),
             );
             const store = new Store();
-            TestBed.flushEffects();
+            TestBed.tick();
             expect(store.entities()).toEqual([]);
             store.setLoading();
             store.setLoading();
@@ -160,7 +160,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -193,7 +193,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -230,7 +230,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -257,7 +257,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -289,7 +289,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -318,7 +318,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -349,7 +349,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -379,7 +379,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();
@@ -404,7 +404,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();
@@ -444,7 +444,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();
@@ -490,7 +490,7 @@ describe('withEntitiesLoadingCall', () => {
             }),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();
@@ -519,7 +519,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -542,7 +542,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -579,7 +579,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -606,7 +606,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -635,7 +635,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -665,7 +665,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.entities()).toEqual([]);
           store.setLoading();
           tick();
@@ -695,7 +695,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();
@@ -720,7 +720,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();
@@ -760,7 +760,7 @@ describe('withEntitiesLoadingCall', () => {
             })),
           );
           const store = new Store();
-          TestBed.flushEffects();
+          TestBed.tick();
           expect(store.productEntities()).toEqual([]);
           store.setProductEntitiesLoading();
           tick();

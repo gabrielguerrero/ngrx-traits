@@ -147,7 +147,7 @@ describe('withEntitiesLocalFilter', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       expect(store.entities().length).toEqual(2);
       expect(store.entities()).toEqual([
@@ -203,7 +203,7 @@ describe('withEntitiesLocalFilter', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       expect(store.entities().length).toEqual(2);
       expect(store.entities()).toEqual([

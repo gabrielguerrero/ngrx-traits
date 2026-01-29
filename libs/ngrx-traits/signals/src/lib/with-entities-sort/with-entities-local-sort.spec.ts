@@ -300,7 +300,7 @@ describe('withEntitiesLocalSort', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       expect(
@@ -337,7 +337,7 @@ describe('withEntitiesLocalSort', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       expect(
@@ -374,7 +374,7 @@ describe('withEntitiesLocalSort', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entitiesSort()).toEqual({ field: 'id', direction: 'asc' });
       expect(
         store
@@ -436,7 +436,7 @@ describe('withEntitiesLocalSort', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts, { collection }));
       store.setProductEntitiesLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.productEntitiesSort()).toEqual({
         field: 'name',
         direction: 'asc',
@@ -480,7 +480,7 @@ describe('withEntitiesLocalSort', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       expect(
@@ -552,7 +552,7 @@ describe('withEntitiesLocalSort', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       store.setLoaded();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
       // check default sort
       tick(400);

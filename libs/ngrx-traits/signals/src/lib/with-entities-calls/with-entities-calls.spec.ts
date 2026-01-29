@@ -298,7 +298,7 @@ describe('withEntitiesCalls', () => {
       const param = signal({ id: mockProducts[0].id });
       expect(store.isLoadProductDetailLoading(product.id)).toBeFalsy();
       store.loadProductDetail(param);
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
       apiResponse.next({ detail: productDetail });
       expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
@@ -308,7 +308,7 @@ describe('withEntitiesCalls', () => {
       apiResponse = new Subject<Partial<ProductDetail>>();
       const product2 = mockProducts[2];
       param.set({ id: product2.id });
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.isLoadProductDetailLoading(product2.id)).toBeTruthy();
       apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
       expect(store.isLoadProductDetailLoaded(product2.id)).toBeTruthy();
@@ -347,7 +347,7 @@ describe('withEntitiesCalls', () => {
       const param = new BehaviorSubject({ id: mockProducts[0].id });
       expect(store.isLoadProductDetailLoading(product.id)).toBeFalsy();
       store.loadProductDetail(param);
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
       apiResponse.next({ detail: productDetail });
       expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
@@ -357,7 +357,7 @@ describe('withEntitiesCalls', () => {
       apiResponse = new Subject<Partial<ProductDetail>>();
       const product2 = mockProducts[2];
       param.next({ id: product2.id });
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.isLoadProductDetailLoading(product2.id)).toBeTruthy();
       apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
       expect(store.isLoadProductDetailLoaded(product2.id)).toBeTruthy();
@@ -960,14 +960,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         idSignal.set({ id: product2.id });
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product2.id)).toBeTruthy();
         apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
         expect(store.isLoadProductDetailLoaded(product2.id)).toBeTruthy();
@@ -1005,14 +1005,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         id$.next({ id: product2.id });
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product2.id)).toBeTruthy();
         apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
         expect(store.isLoadProductDetailLoaded(product2.id)).toBeTruthy();
@@ -1050,14 +1050,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         idSignal.set({ id: product2.id });
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product2.id)).toBeTruthy();
         apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
         expect(store.isLoadProductDetailLoaded(product2.id)).toBeTruthy();
@@ -1095,14 +1095,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product2.id)).toBeFalsy();
         apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
         expect(store.isLoadProductDetailLoaded(product2.id)).toBeFalsy();
@@ -1140,14 +1140,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         id$.next(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product2.id)).toBeFalsy();
         apiResponse.next({ detail: { ...productDetail, maker: 'Sony' } });
         expect(store.isLoadProductDetailLoaded(product2.id)).toBeFalsy();
@@ -1184,14 +1184,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(fn).toHaveBeenCalledWith(undefined);
       });
     });
@@ -1226,14 +1226,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         idSignal.set(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(fn).toHaveBeenCalledWith(undefined);
       });
     });
@@ -1269,14 +1269,14 @@ describe('withEntitiesCalls', () => {
         );
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
         apiResponse.next({ detail: productDetail });
         expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
         expect(store.entityMap()[product.id].detail).toEqual(productDetail);
 
         id$.next(undefined);
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(fn).toHaveBeenCalledWith(undefined);
       });
     });

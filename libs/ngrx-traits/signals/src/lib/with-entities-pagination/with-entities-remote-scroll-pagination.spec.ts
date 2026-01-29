@@ -49,7 +49,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
       const store = new Store();
 
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -104,7 +104,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
       const store = new Store();
 
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -167,7 +167,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
       const store = new Store();
 
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -223,7 +223,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -278,7 +278,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -334,7 +334,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
       tick();
@@ -399,7 +399,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
       tick();
@@ -451,7 +451,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -579,7 +579,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       // first fill cache
       tick();
       expect(store.entities().length).toEqual(30);
@@ -641,7 +641,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       // first fill cache
       tick();
       expect(store.entities().length).toEqual(30);
@@ -706,7 +706,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       // first fill cache
       tick();
       expect(store.entities().length).toEqual(30);
@@ -764,7 +764,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
         );
 
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         const dataSource = getInfiniteScrollDataSource({ store });
         const collectionViewer = new BehaviorSubject<ListRange>({
           start: 0,
@@ -847,7 +847,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
         );
 
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         const dataSource = getInfiniteScrollDataSource({
           store,
           collection,
@@ -915,7 +915,7 @@ describe('withEntitiesRemoteScrollPagination', () => {
 
       const store = new Store();
 
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
