@@ -42,7 +42,7 @@ describe('withInputBindings', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       const component = new PaginatorComponent(store);
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.pageIndex()).toBe(3);
       expect(store.length()).toBe(100);
       expect(store.pageSize()).toBe(10);
@@ -53,7 +53,7 @@ describe('withInputBindings', () => {
       component.pageSize.set(20);
       component.pageSizeOptions.set([10, 20, 30]);
 
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.pageIndex()).toBe(5);
       expect(store.length()).toBe(200);
       expect(store.pageSize()).toBe(20);

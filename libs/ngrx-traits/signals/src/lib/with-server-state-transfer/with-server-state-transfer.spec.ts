@@ -1,8 +1,8 @@
-import { MockedObject } from 'vitest';
 import { makeStateKey, PLATFORM_ID, TransferState } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+import { MockedObject } from 'vitest';
 
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
@@ -42,11 +42,11 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, setAllEntities(mockProducts));
         store.setLoaded();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         const stateKey = makeStateKey('test-state');
         expect(mockTransferState.set).toHaveBeenCalledWith(
@@ -74,11 +74,11 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, setAllEntities(mockProducts));
         store.setLoaded();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         const stateKey = makeStateKey('test-state');
         expect(mockTransferState.set).toHaveBeenCalledWith(
@@ -128,7 +128,7 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, {
           userProfile: {
@@ -137,7 +137,7 @@ describe('withServerStateTransfer', () => {
             tempData: { foo: 'bar' } as any,
           },
         });
-        TestBed.flushEffects();
+        TestBed.tick();
 
         const stateKey = makeStateKey('test-state');
         expect(mockTransferState.set).toHaveBeenCalledWith(stateKey, {
@@ -162,16 +162,16 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, { count: 1 });
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, { count: 2 });
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, { count: 3 });
-        TestBed.flushEffects();
+        TestBed.tick();
 
         const stateKey = makeStateKey('test-state');
         expect(mockTransferState.set).toHaveBeenCalledTimes(4); // Initial + 3 updates
@@ -204,10 +204,7 @@ describe('withServerStateTransfer', () => {
     it('should restore state from TransferState on client', () => {
       const transferredState = {
         ids: mockProducts.map((p) => p.id),
-        entityMap: mockProducts.reduce(
-          (acc, p) => ({ ...acc, [p.id]: p }),
-          {},
-        ),
+        entityMap: mockProducts.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}),
       };
       mockTransferState.get.mockReturnValue(transferredState);
 
@@ -220,7 +217,7 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         expect(store.entities()).toEqual(mockProducts);
       });
@@ -229,10 +226,7 @@ describe('withServerStateTransfer', () => {
     it('should remove state from TransferState after restoration', () => {
       const transferredState = {
         ids: mockProducts.map((p) => p.id),
-        entityMap: mockProducts.reduce(
-          (acc, p) => ({ ...acc, [p.id]: p }),
-          {},
-        ),
+        entityMap: mockProducts.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}),
       };
       mockTransferState.get.mockReturnValue(transferredState);
 
@@ -245,7 +239,7 @@ describe('withServerStateTransfer', () => {
           }),
         );
         new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         const stateKey = makeStateKey('test-state');
         expect(mockTransferState.remove).toHaveBeenCalledWith(stateKey);
@@ -256,10 +250,7 @@ describe('withServerStateTransfer', () => {
       const onRestore = vi.fn();
       const transferredState = {
         ids: mockProducts.map((p) => p.id),
-        entityMap: mockProducts.reduce(
-          (acc, p) => ({ ...acc, [p.id]: p }),
-          {},
-        ),
+        entityMap: mockProducts.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}),
       };
       mockTransferState.get.mockReturnValue(transferredState);
 
@@ -273,7 +264,7 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         expect(onRestore).toHaveBeenCalledWith(store);
       });
@@ -316,7 +307,7 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         expect(store.userProfile().userName).toBe('john');
         expect(store.userProfile().email).toBe('john@example.com');
@@ -337,7 +328,7 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         expect(store.entities()).toEqual([]);
         expect(store.isLoading()).toBe(false);
@@ -357,13 +348,13 @@ describe('withServerStateTransfer', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, { count: 1 });
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, { count: 2 });
-        TestBed.flushEffects();
+        TestBed.tick();
 
         // Should not call set on client
         expect(mockTransferState.set).not.toHaveBeenCalled();

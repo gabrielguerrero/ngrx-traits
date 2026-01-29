@@ -24,14 +24,14 @@ describe('withLogger', () => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
       prop3: 3,
     });
     patchState(store, { prop1: 2 });
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
@@ -56,13 +56,13 @@ describe('withLogger', () => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
     });
     patchState(store, { prop1: 2 });
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
@@ -86,13 +86,13 @@ describe('withLogger', () => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
     });
     patchState(store, { prop1: 2 });
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
@@ -116,13 +116,13 @@ describe('withLogger', () => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 1,
       prop2: 2,
     });
     patchState(store, { prop1: 2 });
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop1: 2,
       prop2: 2,
@@ -147,13 +147,13 @@ describe('withLogger', () => {
       /* Empty */
     });
     const store = TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop3: 3,
     });
     patchState(store, { prop1: 2 });
     vi.resetAllMocks();
-    TestBed.flushEffects();
+    TestBed.tick();
     expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
       prop3: 4,
     });
@@ -180,7 +180,7 @@ describe('withLogger', () => {
       /* Empty */
     });
     TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
 
     // Extract the logged object to check key order
     const loggedObject = consoleLog.mock.calls[0][1];
@@ -214,7 +214,7 @@ describe('withLogger', () => {
       /* Empty */
     });
     TestBed.inject(Store);
-    TestBed.flushEffects();
+    TestBed.tick();
 
     // Extract the logged object to check key order
     const loggedObject = consoleLog.mock.calls[0][1];
