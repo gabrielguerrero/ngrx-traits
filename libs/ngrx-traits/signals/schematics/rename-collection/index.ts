@@ -294,6 +294,10 @@ export function generateRenamePatterns(
       pattern: new RegExp(`\\bclear${oldCapital}Selection\\b`, 'g'),
       replacement: () => `clear${newCapital}EntitiesSelection`,
     },
+    {
+      pattern: new RegExp(`\\bclear${oldCapital}EntitiesSelection\\b`, 'g'),
+      replacement: () => `clear${newCapital}EntitiesSelection`,
+    },
 
     // Collection property patterns (no word boundaries - matching inside strings)
     {
