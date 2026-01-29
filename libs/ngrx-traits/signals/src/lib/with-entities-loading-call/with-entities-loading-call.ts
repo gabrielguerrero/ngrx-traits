@@ -77,6 +77,7 @@ import {
  * @param config.mapError - A function to transform the error before setting it to the store, requires withCallStatus errorType to be set
  * @param config.onError - A function that is called when the fetchEntities fails
  * @param config.selectId - The function to use to select the id of the entity
+ * @param config.storeResult - Whether to automatically store the fetched entities in the store (default: true). When false, entities are not stored, but setLoaded and onSuccess are still called, useful when you want to handle storing in onSuccess yourself
  *
  *
  * @example
@@ -169,6 +170,7 @@ export function withEntitiesLoadingCall<
       onError?: (error: Error) => void;
       entity?: Entity;
       selectId?: SelectEntityId<Entity>;
+      storeResult?: boolean;
     }
   >,
 ): SignalStoreFeature<
@@ -201,6 +203,7 @@ export function withEntitiesLoadingCall<
         mapError,
         mapPipe: mapPipeType,
         selectId,
+        storeResult = true,
       } = getFeatureConfig(config, _store);
       const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
         collection,
@@ -226,26 +229,28 @@ export function withEntitiesLoadingCall<
               from(fetchEntities(_store)),
             ).pipe(
               map((result) => {
-                if (setEntitiesPagedResult)
-                  setEntitiesPagedResult(result as { entities: Entity[] });
-                else {
-                  const entities = Array.isArray(result)
-                    ? result
-                    : (result as { entities: Entity[] }).entities;
-                  patchState(
-                    _store as WritableStateSource<object>,
-                    collection
-                      ? setAllEntities(entities as Entity[], {
-                          collection,
-                          selectId:
-                            selectId ?? ((entity) => (entity as any).id),
-                        })
-                      : setAllEntities(entities as Entity[], {
-                          selectId:
-                            selectId ??
-                            ((entity) => (entity as any).id as string),
-                        }),
-                  );
+                if (storeResult) {
+                  if (setEntitiesPagedResult)
+                    setEntitiesPagedResult(result as { entities: Entity[] });
+                  else {
+                    const entities = Array.isArray(result)
+                      ? result
+                      : (result as { entities: Entity[] }).entities;
+                    patchState(
+                      _store as WritableStateSource<object>,
+                      collection
+                        ? setAllEntities(entities as Entity[], {
+                            collection,
+                            selectId:
+                              selectId ?? ((entity) => (entity as any).id),
+                          })
+                        : setAllEntities(entities as Entity[], {
+                            selectId:
+                              selectId ??
+                              ((entity) => (entity as any).id as string),
+                          }),
+                    );
+                  }
                 }
                 setLoaded();
                 if (onSuccess) onSuccess(result);

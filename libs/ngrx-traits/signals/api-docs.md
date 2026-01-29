@@ -789,6 +789,7 @@ if an error occurs it will set the error to the store using set[Collection]Error
 | config.mapError | <p>A function to transform the error before setting it to the store, requires withCallStatus errorType to be set</p> |
 | config.onError | <p>A function that is called when the fetchEntities fails</p> |
 | config.selectId | <p>The function to use to select the id of the entity</p> |
+| config.storeResult | <p>Whether to automatically store the fetched entities (default: true). When false, entities are not stored but setLoaded and onSuccess are still called, useful when you want to handle storing in onSuccess yourself</p> |
 
 **Example**  
 ```js
