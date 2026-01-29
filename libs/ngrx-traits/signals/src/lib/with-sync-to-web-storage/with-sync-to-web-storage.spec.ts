@@ -27,7 +27,7 @@ describe('withSyncToWebStorage', () => {
       );
       const store = new Store();
       store.clearFromStore();
-      TestBed.flushEffects();
+      TestBed.tick();
       store.setLoaded();
       patchState(store, setAllEntities(mockProducts));
       store.saveToStorage();
@@ -56,7 +56,7 @@ describe('withSyncToWebStorage', () => {
       );
       const store = new Store();
       store.clearFromStore();
-      TestBed.flushEffects();
+      TestBed.tick();
       store.setLoaded();
       patchState(store, setAllEntities(mockProducts));
       store.saveToStorage();
@@ -91,7 +91,7 @@ describe('withSyncToWebStorage', () => {
       );
       const store = new Store();
       store.clearFromStore();
-      TestBed.flushEffects();
+      TestBed.tick();
       store.setLoaded();
       patchState(store, setAllEntities(mockProducts));
       store.saveToStorage();
@@ -121,7 +121,7 @@ describe('withSyncToWebStorage', () => {
       );
       const store = new Store();
       store.clearFromStore();
-      TestBed.flushEffects();
+      TestBed.tick();
       store.setLoaded();
       patchState(store, setAllEntities(mockProducts));
       let state = getFromStorage('test');
@@ -151,7 +151,7 @@ describe('withSyncToWebStorage', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       expect(store.entities().length).toEqual(2);
       expect(store.isLoaded()).toBe(true);
@@ -191,7 +191,7 @@ describe('withSyncToWebStorage', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick();
       expect(store.entities().length).toEqual(2);
       expect(store.isLoaded()).toBe(true);
@@ -231,7 +231,7 @@ describe('withSyncToWebStorage', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         tick();
         expect(store.entities().length).toEqual(0);
         expect(store.isLoaded()).toBe(false);
@@ -263,7 +263,7 @@ describe('withSyncToWebStorage', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         tick();
         expect(store.entities().length).toEqual(2);
         expect(store.isLoaded()).toBe(true);
@@ -329,7 +329,7 @@ describe('withSyncToWebStorage', () => {
           }),
         );
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         tick();
         expect(store.entities().length).toEqual(2);
         expect(store.isLoaded()).toBe(true);
@@ -352,7 +352,7 @@ describe('withSyncToWebStorage', () => {
         );
         const store = new Store();
         store.clearFromStore();
-        TestBed.flushEffects();
+        TestBed.tick();
         store.setLoaded();
         patchState(store, setAllEntities(mockProducts));
         store.saveToStorage();
@@ -405,7 +405,7 @@ describe('withSyncToWebStorage', () => {
         );
         const store = new Store();
         store.clearFromStore();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         // Set initial state
         patchState(store, {
@@ -488,7 +488,7 @@ describe('withSyncToWebStorage', () => {
         );
         const store = new Store();
         store.clearFromStore();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, {
           userProfile: {
@@ -562,7 +562,7 @@ describe('withSyncToWebStorage', () => {
         );
         const store = new Store();
         store.clearFromStore();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, {
           userProfile: {
@@ -626,7 +626,7 @@ describe('withSyncToWebStorage', () => {
         );
         const store = new Store();
         store.clearFromStore();
-        TestBed.flushEffects();
+        TestBed.tick();
 
         patchState(store, {
           userProfile: {

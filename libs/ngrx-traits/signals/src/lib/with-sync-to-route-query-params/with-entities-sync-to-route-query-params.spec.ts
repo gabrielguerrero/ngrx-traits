@@ -452,7 +452,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { selectedId: '2' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.idSelected()).toEqual('2');
@@ -468,7 +468,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { selectedId: '2ASDASD' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.idSelected()).toBeUndefined();
@@ -484,7 +484,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { selectedId: '2' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       store.selectEntity({ id: '3' });
@@ -510,7 +510,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(1);
@@ -526,7 +526,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '9999' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(0);
@@ -542,7 +542,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       store.loadEntitiesPage({ pageIndex: 2 });
@@ -581,7 +581,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(1);
@@ -615,7 +615,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '2',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     tick(400);
     // Act
@@ -658,7 +658,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '2',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     tick(400);
     expect(store.entitiesFilter()).toEqual({ search: '', foo: 'bar' });
@@ -716,7 +716,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'p-selectedId': '2',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     tick(400);
     // Act
@@ -759,7 +759,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'product-selectedId': '2',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     tick(400);
     expect(store.productEntitiesFilter()).toEqual({ search: '', foo: 'bar' });
@@ -809,7 +809,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '2',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     tick(400);
     // Act
@@ -859,7 +859,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '35',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     tick(400);
 
@@ -892,7 +892,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'order-selectedId': '2',
       },
     });
-    TestBed.flushEffects();
+    TestBed.tick();
     load.next(true);
     load2.next(true);
     tick(400);
@@ -1003,7 +1003,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { filter: JSON.stringify({ search: 'test', foo: 'bar' }) },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       tick(400);
       // With skipLoadingCall: true, the fetchEntities should not be called
       expect(fetchEntitiesSpy).not.toHaveBeenCalled();
@@ -1029,7 +1029,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { sortBy: 'description', sortDirection: 'desc' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       tick(400);
       // With skipLoadingCall: true, the fetchEntities should not be called
       expect(fetchEntitiesSpy).not.toHaveBeenCalled();
@@ -1056,7 +1056,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       // With skipLoadingCall: true, the fetchEntities should only be called once (initial load)
@@ -1087,7 +1087,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { filter: JSON.stringify({ search: 'test', foo: 'bar' }) },
       });
-      TestBed.flushEffects();
+      TestBed.tick();
       load.next(true);
       tick(400);
       // With skipLoadingCall: false, the fetchEntities should be called

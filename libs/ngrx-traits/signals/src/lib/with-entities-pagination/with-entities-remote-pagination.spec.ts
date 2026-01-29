@@ -43,7 +43,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -117,7 +117,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -186,7 +186,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
@@ -307,7 +307,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       vi.spyOn(store, 'setLoading');
@@ -403,7 +403,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       vi.spyOn(store, 'setLoading');
@@ -492,7 +492,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
       vi.spyOn(store, 'setProductEntitiesLoading');
@@ -517,7 +517,9 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.productEntitiesCurrentPage().pageIndex).toEqual(7);
       expect(store.productEntitiesCurrentPage().pageSize).toEqual(10);
       expect(store.productEntitiesCurrentPage().pagesCount).toEqual(13);
-      expect(store.productEntitiesCurrentPage().total).toEqual(mockProducts.length);
+      expect(store.productEntitiesCurrentPage().total).toEqual(
+        mockProducts.length,
+      );
       expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(true);
       expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
     });
@@ -591,7 +593,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
       vi.spyOn(store, 'setProductEntitiesLoading');
@@ -651,7 +653,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.productEntities()).toEqual([]);
       store.setProductEntitiesLoading();
       tick();
@@ -725,7 +727,7 @@ describe('withEntitiesRemotePagination', () => {
         );
 
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.entities()).toEqual([]);
         store.setLoading();
         vi.spyOn(store, 'setLoading');
@@ -783,7 +785,7 @@ describe('withEntitiesRemotePagination', () => {
         );
 
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.entities()).toEqual([]);
         store.setLoading();
         vi.spyOn(store, 'setLoading');
@@ -853,7 +855,7 @@ describe('withEntitiesRemotePagination', () => {
         );
 
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.entities()).toEqual([]);
         store.setLoading();
         tick();
@@ -930,7 +932,7 @@ describe('withEntitiesRemotePagination', () => {
         );
 
         const store = new Store();
-        TestBed.flushEffects();
+        TestBed.tick();
         expect(store.entities()).toEqual([]);
         store.setLoading();
         tick();
@@ -1011,7 +1013,7 @@ describe('withEntitiesRemotePagination', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick(400);
       store.loadEntitiesPage({ pageIndex: 3 });
       expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
@@ -1063,7 +1065,7 @@ describe('withEntitiesRemotePagination', () => {
         }),
       );
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       tick(400);
       store.loadEntitiesPage({ pageIndex: 3 });
       expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
@@ -1106,7 +1108,7 @@ describe('withEntitiesRemotePagination', () => {
       );
 
       const store = new Store();
-      TestBed.flushEffects();
+      TestBed.tick();
       expect(store.entities()).toEqual([]);
       store.setLoading();
       tick();
