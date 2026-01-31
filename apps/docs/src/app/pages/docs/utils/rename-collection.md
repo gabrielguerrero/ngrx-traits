@@ -15,11 +15,11 @@ ng g @ngrx-traits/signals:rename-collection --old-name=<name> [--new-name=<name>
 
 ## Parameters
 
-| Parameter    | Required | Default | Description                                         |
-|--------------| -------- | ------- | --------------------------------------------------- |
-| `--old-name` | Yes      | -       | Current collection name to find                     |
-| `--new-name` | No       | oldName | New collection name (defaults to oldName for v21 migration) |
-| `--path`     | No       | `src`   | Directory to search for files                       |
+| Parameter    | Required | Default  | Description                                         |
+|--------------| -------- |----------| --------------------------------------------------- |
+| `--old-name` | Yes      | -        | Current collection name to find                     |
+| `--new-name` | No       | old-name | New collection name (defaults to oldName for v21 migration) |
+| `--path`     | No       | `src`    | Directory to search for files                       |
 
 ## Example: v21 Migration Fix
 

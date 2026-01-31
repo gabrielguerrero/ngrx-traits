@@ -27,7 +27,7 @@ When using traits with a `collection` parameter, generated property names now in
 Run the automatic migration schematic:
 
 ```bash
-ng update @ngrx-traits/signals --next
+ng update @ngrx-traits/signals
 ```
 
 This will:
