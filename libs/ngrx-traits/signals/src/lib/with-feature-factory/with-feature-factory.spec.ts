@@ -12,6 +12,7 @@ import {
 
 import { withFeatureFactory } from './with-feature-factory';
 import {
+  ExtractStoreFeatureOutput,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -92,6 +93,70 @@ describe('withFeatureFactory', () => {
       // @ts-expect-error // we expect an error here because we didn't provide the dependency
       withFeatureFactory(() => withCustomFeature2({ fooValue: 'foo' })),
     );
+  });
+
+  describe('ExtractStoreFeatureOutput', () => {
+    it('should extract state, props and methods from a zero-arg feature factory', () => {
+      function withSimpleFeature() {
+        return signalStoreFeature(
+          withState({ foo: 'foo' }),
+          withComputed(({ foo }) => ({ bar: computed(() => foo() + '!') })),
+          withMethods(({ foo }) => ({
+            baz: () => foo(),
+          })),
+        );
+      }
+
+      type Result = ExtractStoreFeatureOutput<typeof withSimpleFeature>;
+      // verify state, props and methods are accessible
+      const check: Result = {} as Result;
+      const _state: Result['state'] = {} as Result['state'];
+      const _props: Result['props'] = {} as Result['props'];
+      const _methods: Result['methods'] = {} as Result['methods'];
+      // verify specific members exist
+      const _foo: string = {} as Result['state']['foo'];
+      const _bar: Signal<string> = {} as Result['props']['bar'];
+      const _baz: () => string = {} as Result['methods']['baz'];
+      expect(true).toBe(true);
+    });
+
+    it('should extract from a feature factory with parameters', () => {
+      function withParamFeature(config: { value: string }) {
+        return signalStoreFeature(
+          withState({ param: config.value }),
+          withMethods(() => ({
+            getValue: () => config.value,
+          })),
+        );
+      }
+
+      type Result = ExtractStoreFeatureOutput<typeof withParamFeature>;
+      const _param: string = {} as Result['state']['param'];
+      const _getValue: () => string = {} as Result['methods']['getValue'];
+      expect(true).toBe(true);
+    });
+
+    it('should include input state/props/methods from features with input requirements', () => {
+      function withDependentFeature() {
+        return signalStoreFeature(
+          type<{ state: { xyz: string }; props: {}; methods: {} }>(),
+          withState({ extra: 123 }),
+        );
+      }
+
+      type Result = ExtractStoreFeatureOutput<typeof withDependentFeature>;
+      // input state should be included
+      const _xyz: string = {} as Result['state']['xyz'];
+      // output state should be included
+      const _extra: number = {} as Result['state']['extra'];
+      expect(true).toBe(true);
+    });
+
+    it('should return never for non-feature functions', () => {
+      // @ts-expect-error - a function not returning SignalStoreFeature should not be accepted
+      type Invalid = ExtractStoreFeatureOutput<() => string>;
+      expect(true).toBe(true);
+    });
   });
 
   it('should feature using FeatureConfigFactory should be callable with a config object or a factory', () => {
