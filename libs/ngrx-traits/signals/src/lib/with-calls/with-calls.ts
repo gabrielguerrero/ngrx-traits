@@ -147,7 +147,7 @@ export function withCalls<
           ? () => void
           : {
               (param: P[0]): void;
-              (param: Observable<P[0]> | Signal<P[0]>): void;
+              (param: Observable<P[0]> | (() => P[0])): void;
             }
         : Calls[K] extends CallConfig
           ? Parameters<Calls[K]['call']> extends undefined[]
@@ -157,7 +157,7 @@ export function withCalls<
                 (
                   param:
                     | Observable<Parameters<Calls[K]['call']>[0]>
-                    | Signal<Parameters<Calls[K]['call']>[0]>,
+                    | (() => Parameters<Calls[K]['call']>[0]),
                 ): void;
               }
           : never;
