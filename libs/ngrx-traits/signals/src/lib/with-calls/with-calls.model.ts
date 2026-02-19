@@ -119,6 +119,10 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
         ? R | undefined
         : D
       : never;
+export type ExtractErrorType<T extends Call | CallConfig> =
+  T extends CallConfig<any, any, any, infer E>
+    ? E
+    : unknown;      
 
 export type NamedCallsStatusComputed<
   Calls extends Record<string, Call | CallConfig>,
@@ -139,4 +143,8 @@ export type NamedCallsStatusComputed<
   >
     ? Signal<Error | undefined>
     : Signal<unknown | undefined>;
+};
+
+export type RxMethodRef = {
+    destroy: () => void;
 };

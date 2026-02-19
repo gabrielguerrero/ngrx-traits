@@ -20,7 +20,7 @@ import {
   SelectEntityId,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { map, pipe, tap } from 'rxjs';
+import { map, Observable, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -119,12 +119,12 @@ export function withEntitiesLocalFilter<
     ? {
         state: {};
         props: EntitiesFilterComputed<Filter>;
-        methods: EntitiesFilterMethods<Filter>;
+        methods: EntitiesFilterMethods<Filter, Entity>;
       }
     : {
         state: {};
         props: NamedEntitiesFilterComputed<Collection, Filter>;
-        methods: NamedEntitiesFilterMethods<Collection, Filter>;
+        methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
       }
 > {
   return withFeatureFactory((store: StoreSource<Input>) => {
@@ -132,7 +132,7 @@ export function withEntitiesLocalFilter<
       configFactory,
       store,
     );
-    const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
+    const { entityMapKey, idsKey, entitiesKey } = getWithEntitiesKeys(config);
     const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
     const {
       filterEntitiesKey,
@@ -156,6 +156,7 @@ export function withEntitiesLocalFilter<
       withMethods((state: Record<string, Signal<unknown>>) => {
         const filter = state[filterKey] as Signal<Filter>;
         const entitiesMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
+        const filteredEntities = state[entitiesKey] as Signal<Entity[]>;
         // we create a computed entities that relies on the entitiesMap instead of
         // using the computed state.entities from the withEntities , because this local filter is going to replace
         // the ids array of the state with the filtered ids array, and the state.entities depends on it,
@@ -204,7 +205,18 @@ export function withEntitiesLocalFilter<
           ),
         );
         return {
-          [filterEntitiesKey]: filterEntities,
+          [filterEntitiesKey]: (options: {
+              filter: Filter;
+              debounce?: number;
+              patch?: boolean;
+              forceLoad?: boolean;
+            }
+          | undefined) => {
+            if (options instanceof Observable || typeof options === 'function') 
+              return filterEntities(options);
+            filterEntities(options);
+            return Promise.resolve({ ok: true, value: filteredEntities });
+          },
           [resetEntitiesFilterKey]: () => {
             filterEntities({ filter: defaultFilter });
           },

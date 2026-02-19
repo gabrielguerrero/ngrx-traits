@@ -528,4 +528,19 @@ describe('withEntitiesLocalFilter', () => {
       });
     }));
   });
+
+  it('should return promise with value on success', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const result = await store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+        forceLoad: true,
+      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value().length).toEqual(2);
+      }
+    });
+  });
 });

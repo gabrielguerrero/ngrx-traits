@@ -1,4 +1,12 @@
-import { computed, effect, Signal, untracked } from '@angular/core';
+import {
+  computed,
+  effect,
+  EnvironmentInjector,
+  inject,
+  Signal,
+  untracked,
+} from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   deepComputed,
   patchState,
@@ -20,10 +28,19 @@ import {
   SelectEntityId,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { map, pipe, tap } from 'rxjs';
+import {
+  filter as filterPipe,
+  lastValueFrom,
+  map,
+  Observable,
+  pipe,
+  take,
+  tap,
+} from 'rxjs';
 
 import { getWithEntitiesKeys, insertIf } from '../util';
 import {
+  CallStatus,
   CallStatusMethods,
   NamedCallStatusMethods,
 } from '../with-call-status/with-call-status.model';
@@ -176,21 +193,22 @@ export function withEntitiesHybridFilter<
     ? {
         state: {};
         props: EntitiesFilterComputed<Filter>;
-        methods: EntitiesRemoteFilterMethods<Filter>;
+        methods: EntitiesRemoteFilterMethods<Filter, Entity>;
       }
     : {
         state: {};
         props: NamedEntitiesFilterComputed<Collection, Filter>;
-        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter>;
+        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
       }
 > {
   return withFeatureFactory((store: StoreSource<Input>) => {
     const { defaultFilter, ...config } = getFeatureConfig(configFactory, store);
     const filterFn = config.filterFn;
-    const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
-    const { setLoadingKey, loadedKey } = getWithCallStatusKeys({
-      collection: config.collection,
-    });
+    const { entityMapKey, idsKey, entitiesKey } = getWithEntitiesKeys(config);
+    const { setLoadingKey, loadedKey, callStatusKey, errorKey } =
+      getWithCallStatusKeys({
+        collection: config.collection,
+      });
     const {
       filterKey,
       filterEntitiesKey,
@@ -212,69 +230,107 @@ export function withEntitiesHybridFilter<
         };
       }),
       withEventHandler(),
-      withMethods((state: Record<string, Signal<unknown>>) => {
-        const setLoading = state[setLoadingKey] as () => void;
-        const isLoaded = state[loadedKey] as Signal<boolean>;
-        const filter = state[filterKey] as Signal<Filter>;
-        const entitiesMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
-        // we create a computed entities that relies on the entitiesMap instead of
-        // using the computed state.entities from the withEntities , because this local filter is going to replace
-        // the ids array of the state with the filtered ids array, and the state.entities depends on it,
-        // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
-        const entities = computed(() => Object.values(entitiesMap()));
-        const filterEntities = rxMethod<
-          | {
-              filter: Filter;
-              debounce?: number;
-              patch?: boolean;
-              forceLoad?: boolean;
-              skipLoadingCall?: boolean;
-            }
-          | undefined
-        >(
-          pipe(
-            map(
-              (options) =>
-                // if no options are provided, we use the default filter
-                // and forceLoad
-                options ?? {
-                  filter: filter(),
-                  debounce: config.defaultDebounce,
-                  forceLoad: true,
-                },
-            ),
-            debounceFilterPipe(filter, config.defaultDebounce),
-            tap((value) => {
-              const isRemote =
-                config.isRemoteFilter(value.filter, filter()) || !isLoaded();
-
-              patchState(state as WritableStateSource<any>, {
-                [filterKey]: value.filter,
-              });
-              if (!isRemote || value?.forceLoad) {
-                const newEntities = entities().filter((entity) => {
-                  return filterFn(entity, value.filter);
-                });
-                patchState(state as WritableStateSource<any>, {
-                  [idsKey]: newEntities.map((entity) =>
-                    config.selectId
-                      ? config.selectId(entity)
-                      : (entity as any)['id'],
-                  ),
-                });
+      withMethods(
+        (
+          state: Record<string, Signal<unknown>>,
+          environmentInjector = inject(EnvironmentInjector),
+        ) => {
+          const setLoading = state[setLoadingKey] as () => void;
+          const isLoaded = state[loadedKey] as Signal<boolean>;
+          const filter = state[filterKey] as Signal<Filter>;
+          const entitiesMap = state[entityMapKey] as Signal<EntityMap<Entity>>;
+          const filteredEntities = state[entitiesKey] as Signal<Entity[]>;
+          const callState = state[callStatusKey] as Signal<CallStatus>;
+          const error = state[errorKey] as Signal<unknown>;
+          // we create a computed entities that relies on the entitiesMap instead of
+          // using the computed state.entities from the withEntities , because this local filter is going to replace
+          // the ids array of the state with the filtered ids array, and the state.entities depends on it,
+          // so hour filter function needs the full list of entities always which will be always so we get them from entityMap
+          const entities = computed(() => Object.values(entitiesMap()));
+          const filterEntities = rxMethod<
+            | {
+                filter: Filter;
+                debounce?: number;
+                patch?: boolean;
+                forceLoad?: boolean;
+                skipLoadingCall?: boolean;
               }
-              broadcast(state, entitiesFilterChanged(value));
-              if (isRemote && !value?.skipLoadingCall) setLoading?.();
-            }),
-          ),
-        );
-        return {
-          [filterEntitiesKey]: filterEntities,
-          [resetEntitiesFilterKey]: () => {
-            filterEntities({ filter: defaultFilter });
-          },
-        };
-      }),
+            | undefined
+          >(
+            pipe(
+              map(
+                (options) =>
+                  // if no options are provided, we use the default filter
+                  // and forceLoad
+                  options ?? {
+                    filter: filter(),
+                    debounce: config.defaultDebounce,
+                    forceLoad: true,
+                  },
+              ),
+              debounceFilterPipe(filter, config.defaultDebounce),
+              tap((value) => {
+                const isRemote =
+                  config.isRemoteFilter(value.filter, filter()) || !isLoaded();
+
+                patchState(state as WritableStateSource<any>, {
+                  [filterKey]: value.filter,
+                });
+                if (!isRemote || value?.forceLoad) {
+                  const newEntities = entities().filter((entity) => {
+                    return filterFn(entity, value.filter);
+                  });
+                  patchState(state as WritableStateSource<any>, {
+                    [idsKey]: newEntities.map((entity) =>
+                      config.selectId
+                        ? config.selectId(entity)
+                        : (entity as any)['id'],
+                    ),
+                  });
+                }
+                broadcast(state, entitiesFilterChanged(value));
+                if (isRemote && !value?.skipLoadingCall) setLoading?.();
+              }),
+            ),
+          );
+          return {
+            [filterEntitiesKey]: (
+              options:
+                | {
+                    filter: Filter;
+                    debounce?: number;
+                    patch?: boolean;
+                    forceLoad?: boolean;
+                    skipLoadingCall?: boolean;
+                  }
+                | undefined,
+            ) => {
+              if (
+                options instanceof Observable ||
+                typeof options === 'function'
+              ) {
+                return filterEntities(options);
+              }
+              filterEntities(options);
+
+              return lastValueFrom(
+                toObservable(callState, { injector: environmentInjector }).pipe(
+                  filterPipe((v) => v === 'loaded' || typeof v === 'object'),
+                  take(1),
+                  map((v) =>
+                    v === 'loaded'
+                      ? { value: filteredEntities, ok: true }
+                      : { error: error, ok: false },
+                  ),
+                ),
+              );
+            },
+            [resetEntitiesFilterKey]: () => {
+              filterEntities({ filter: defaultFilter });
+            },
+          };
+        },
+      ),
       withHooks((state: Record<string, unknown>) => {
         const { loadedKey } = getWithCallStatusKeys({
           collection: config?.collection,
