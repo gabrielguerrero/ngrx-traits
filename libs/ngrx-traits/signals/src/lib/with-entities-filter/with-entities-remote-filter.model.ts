@@ -8,7 +8,7 @@ export type EntitiesRemoteFilterMethods<Filter> = {
     options?:
       | (FilterOptions<Filter> & { skipLoadingCall?: boolean })
       | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
-      | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,
+      | (() => FilterOptions<Filter>),
   ) => void;
   resetEntitiesFilter: (options?: {
     debounce?: number;
@@ -24,7 +24,7 @@ export type NamedEntitiesRemoteFilterMethods<
     options?:
       | (FilterOptions<Filter> & { skipLoadingCall?: boolean })
       | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
-      | Signal<FilterOptions<Filter> & { skipLoadingCall?: boolean }>,
+      | (() => FilterOptions<Filter>),
   ) => void;
 } & {
   [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: (options?: {

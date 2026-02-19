@@ -34,7 +34,7 @@ export type EntitiesMultiSelectionMethods = {
       | Observable<
           EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }
         >
-      | Signal<EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }>,
+      | (() => EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }),
   ) => void;
   deselectEntities: (options: EntitySelectOptions) => void;
   toggleSelectEntities: (options: EntitySelectOptions) => void;
@@ -48,7 +48,7 @@ export type NamedEntitiesMultiSelectionMethods<Collection extends string> = {
       | Observable<
           EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }
         >
-      | Signal<EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }>,
+      | (() => EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }),
   ) => void;
 } & {
   [K in Collection as `deselect${Capitalize<string & K>}Entities`]: (

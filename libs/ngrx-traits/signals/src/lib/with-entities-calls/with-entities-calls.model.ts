@@ -74,7 +74,7 @@ export type EntityCallConfig<
 
   /**
    * A function with condition that determines whether the call should be skipped.
-   * The function accepts the  call parameter and must return a boolean | Signal<boolean> | Observable<boolean>.
+   * The function accepts the  call parameter and must return a boolean | Observable<boolean>.
    */
   skipWhen?:
     | Call<NoInfer<Param>, boolean>
@@ -88,7 +88,7 @@ export type EntityCallConfig<
    * Reactively execute the call with the provided params.
    * Supports the following:
    * - A direct parameter value. Which execute the call once on init.
-   * - A `Signal` or `Observable` emitting the parameter of the call or undefined.
+   * - A function or `Observable` emitting the parameter of the call or undefined.
    * - A function returning the parameter or undefined.
    *
    * **Warning**: By default, when withCall is a function, signal
@@ -97,12 +97,11 @@ export type EntityCallConfig<
    * to always execute on any value.
    */
   callWith?: Param extends undefined
-    ? Signal<boolean> | Observable<boolean> | (() => boolean) | boolean
+    ? Observable<boolean> | (() => boolean) | boolean
     :
         | NoInfer<Param>
         | null
         | undefined
-        | Signal<NoInfer<Param | null | undefined>>
         | Observable<NoInfer<Param | null | undefined>>
         | (() => NoInfer<Param> | null | undefined);
 };

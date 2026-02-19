@@ -1,4 +1,3 @@
-import { Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { CdkSort, Sort } from './with-entities-local-sort.model';
@@ -14,10 +13,10 @@ export type EntitiesRemoteSortMethods<Entity> = {
           sort: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
         }>
-      | Signal<{
+      | (() => {
           sort: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
-        }>,
+        }),
   ) => void;
 };
 export type NamedEntitiesRemoteSortMethods<
@@ -34,9 +33,9 @@ export type NamedEntitiesRemoteSortMethods<
           sort: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
         }>
-      | Signal<{
+      | (() => {
           sort: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
-        }>,
+        }),
   ) => void;
 };
