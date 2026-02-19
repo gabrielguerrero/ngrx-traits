@@ -161,7 +161,7 @@ export function withEntitiesCalls<
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
         ? {
             (param: P[0]): void;
-            (param: Observable<P[0]> | Signal<P[0]>): void;
+            (param: Observable<P[0]> | (() => P[0])): void;
           }
         : Calls[K] extends EntityCallConfig
           ? Parameters<Calls[K]['call']> extends undefined[]
@@ -171,7 +171,7 @@ export function withEntitiesCalls<
                 (
                   param:
                     | Observable<Parameters<Calls[K]['call']>[0]>
-                    | Signal<Parameters<Calls[K]['call']>[0]>,
+                    | (() => Parameters<Calls[K]['call']>[0]),
                 ): void;
               }
           : never;

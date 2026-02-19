@@ -11,7 +11,7 @@ import { CallConfig } from './with-calls.model';
  * @param config.mapError - optional, a function that will be called to transform the error before storing it
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- * @param config.callWith - optional, reactively execute the call with the provided params return by a function or signal or observable
+ * @param config.callWith - optional, reactively execute the call with the provided params return by a function or observable
  * @param config.defaultResult - optional, A default value for the result before the call is executed
  */
 export function callConfig<
@@ -47,7 +47,7 @@ export function callConfig<
  * @param config.mapError - optional, a function that will be called to transform the error before storing it
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- * @param config.callWith - optional, reactively execute the call with the provided params return by a function or signal or observable
+ * @param config.callWith - optional, reactively execute the call with the provided params return by a function or observable
  * @param config.defaultResult - optional, A default value for the result before the call is executed
  */
 export function callConfig<
@@ -82,7 +82,7 @@ export function callConfig<
  * @param config.mapError - optional, a function that will be called to transform the error before storing it
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- * @param config.callWith - optional, reactively execute the call with the provided params return by a function or signal or observable
+ * @param config.callWith - optional, reactively execute the call with the provided params return by a function or observable
  * @param config.defaultResult - optional, A default value for the result before the call is executed
  */
 export function callConfig<
@@ -120,7 +120,7 @@ export function callConfig(config: any): any {
  * @param config.mapError - optional, a function that will be called to transform the error before storing it
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- * @param config.callWith - optional, reactively execute the call with the provided params return by a function or signal or observable
+ * @param config.callWith - optional, reactively execute the call with the provided params return by a function or observable
  * @param config.defaultResult - optional, A default value for the result before the call is executed
  */
 export function typedCallConfig<
@@ -157,7 +157,7 @@ export function typedCallConfig<
  * @param config.mapError - optional, a function that will be called to transform the error before storing it
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- * @param config.callWith - optional, reactively execute the call with the provided params return by a function or signal or observable
+ * @param config.callWith - optional, reactively execute the call with the provided params return by a function or observable
  * @param config.defaultResult - optional, A default value for the result before the call is executed
  */
 export function typedCallConfig<
@@ -193,7 +193,7 @@ export function typedCallConfig<
  * @param config.mapError - optional, a function that will be called to transform the error before storing it
  * @param config.onError - optional, a function that will be called when the call fails
  * @param config.skipWhen - optional, a function that will be called to determine if the call should be skipped
- * @param config.callWith - optional, reactively execute the call with the provided params return by a function or signal or observable
+ * @param config.callWith - optional, reactively execute the call with the provided params return by a function or observable
  * @param config.defaultResult - optional, A default value for the result before the call is executed
  */
 export function typedCallConfig<
