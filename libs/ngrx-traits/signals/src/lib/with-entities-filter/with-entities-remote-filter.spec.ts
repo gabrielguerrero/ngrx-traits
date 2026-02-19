@@ -7,7 +7,7 @@ import {
 } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import {
   withCallStatus,
@@ -476,4 +476,70 @@ describe('withEntitiesRemoteFilter', () => {
       expect(store.entities().length).toEqual(23);
     });
   }));
+
+  it('should return promise with value on success', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({ entitiesFilter }) => {
+            let result = [...mockProducts];
+            if (entitiesFilter()?.search) {
+              result = mockProducts.filter((e) =>
+                e.name
+                  .toLowerCase()
+                  .includes(entitiesFilter()!.search.toLowerCase()),
+              );
+            }
+            return of(result);
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.tick();
+      const result = await store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+        forceLoad: true,
+      });
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value().length).toEqual(2);
+      }
+    });
+  });
+
+  it('should return promise with error on failure', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({
+          fetchEntities: () => {
+            return throwError(() => new Error('fail'));
+          },
+        }),
+      );
+      const store = new Store();
+      TestBed.tick();
+      const result = await store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+        forceLoad: true,
+      });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error()).toEqual(new Error('fail'));
+      }
+    });
+  });
 });

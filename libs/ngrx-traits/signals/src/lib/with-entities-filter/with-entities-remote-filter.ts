@@ -1,4 +1,5 @@
-import { computed, Signal } from '@angular/core';
+import { computed, EnvironmentInjector, inject, Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
   deepComputed,
   patchState,
@@ -17,13 +18,24 @@ import type {
   NamedEntityState,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { map, pipe, tap } from 'rxjs';
-
 import {
+  filter as filterPipe,
+  lastValueFrom,
+  map,
+  Observable,
+  pipe,
+  take,
+  tap,
+} from 'rxjs';
+
+import { getWithEntitiesKeys } from '../util';
+import {
+  CallStatus,
   CallStatusMethods,
   NamedCallStatusMethods,
 } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
+import { Call } from '../with-calls/with-calls.model';
 import {
   broadcast,
   withEventHandler,
@@ -154,19 +166,20 @@ export function withEntitiesRemoteFilter<
     ? {
         state: {};
         props: EntitiesFilterComputed<Filter>;
-        methods: EntitiesRemoteFilterMethods<Filter>;
+        methods: EntitiesRemoteFilterMethods<Filter, Entity>;
       }
     : {
         state: {};
         props: NamedEntitiesFilterComputed<Collection, Filter>;
-        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter>;
+        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
       }
 > {
   return withFeatureFactory((store: StoreSource<Input>) => {
     const { defaultFilter, ...config } = getFeatureConfig(configFactory, store);
-    const { setLoadingKey } = getWithCallStatusKeys({
+    const { setLoadingKey, callStatusKey, errorKey } = getWithCallStatusKeys({
       collection: config.collection,
     });
+    const { entitiesKey } = getWithEntitiesKeys(config);
     const {
       filterKey,
       filterEntitiesKey,
@@ -188,48 +201,86 @@ export function withEntitiesRemoteFilter<
         };
       }),
       withEventHandler(),
-      withMethods((state: Record<string, Signal<unknown>>) => {
-        const setLoading = state[setLoadingKey] as () => void;
-        const filter = state[filterKey] as Signal<Filter>;
+      withMethods(
+        (
+          state: Record<string, Signal<unknown>>,
+          environmentInjector = inject(EnvironmentInjector),
+        ) => {
+          const setLoading = state[setLoadingKey] as () => void;
+          const filter = state[filterKey] as Signal<Filter>;
+          const entities = state[entitiesKey] as Signal<Entity[]>;
+          const callState = state[callStatusKey] as Signal<CallStatus>;
+          const error = state[errorKey] as Signal<unknown>;
 
-        const filterEntities = rxMethod<
-          | {
-              filter: Filter;
-              debounce?: number;
-              patch?: boolean;
-              forceLoad?: boolean;
-              skipLoadingCall?: boolean;
-            }
-          | undefined
-        >(
-          pipe(
-            map(
-              (options) =>
-                // if no options are provided, we use the default filter
-                // and forceLoad
-                options ?? {
-                  filter: filter(),
-                  debounce: config.defaultDebounce,
-                  forceLoad: true,
-                },
+          const filterEntities = rxMethod<
+            | {
+                filter: Filter;
+                debounce?: number;
+                patch?: boolean;
+                forceLoad?: boolean;
+                skipLoadingCall?: boolean;
+              }
+            | undefined
+          >(
+            pipe(
+              map(
+                (options) =>
+                  // if no options are provided, we use the default filter
+                  // and forceLoad
+                  options ?? {
+                    filter: filter(),
+                    debounce: config.defaultDebounce,
+                    forceLoad: true,
+                  },
+              ),
+              debounceFilterPipe(filter, config.defaultDebounce),
+              tap((value) => {
+                patchState(state as WritableStateSource<any>, {
+                  [filterKey]: value.filter,
+                });
+                broadcast(state, entitiesFilterChanged(value));
+                if (!value?.skipLoadingCall) setLoading();
+              }),
             ),
-            debounceFilterPipe(filter, config.defaultDebounce),
-            tap((value) => {
-              patchState(state as WritableStateSource<any>, {
-                [filterKey]: value.filter,
-              });
-              broadcast(state, entitiesFilterChanged(value));
-              if (!value?.skipLoadingCall) setLoading();
-            }),
-          ),
-        );
-        return {
-          [filterEntitiesKey]: filterEntities,
-          [resetEntitiesFilterKey]: () => {
-            filterEntities({ filter: defaultFilter });
-          },
-        };
-      }),
+          );
+          return {
+            [filterEntitiesKey]: (
+              options:
+                | {
+                    filter: Filter;
+                    debounce?: number;
+                    patch?: boolean;
+                    forceLoad?: boolean;
+                    skipLoadingCall?: boolean;
+                  }
+                | undefined,
+            ) => {
+              if (
+                options instanceof Observable ||
+                typeof options === 'function'
+              ) {
+                return filterEntities(options);
+              }
+              filterEntities(options);
+
+              return lastValueFrom(
+                toObservable(callState, { injector: environmentInjector }).pipe(
+                  filterPipe((v) => v === 'loaded' || typeof v === 'object'),
+                  take(1),
+                  map((v) =>
+                    v === 'loaded'
+                      ? { value: entities, ok: true }
+                      : { error: error, ok: false },
+                  ),
+                ),
+              );
+            },
+            [resetEntitiesFilterKey]: () => {
+              filterEntities({ filter: defaultFilter });
+            },
+          };
+        },
+      ),
     );
   }) as any;
 }
