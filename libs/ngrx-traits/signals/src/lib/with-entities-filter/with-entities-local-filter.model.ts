@@ -28,8 +28,8 @@ export type EntitiesFilterMethods<Filter> = {
   filterEntities: (
     options?:
       | FilterOptions<Filter>
+      | (() => FilterOptions<Filter>)
       | Observable<FilterOptions<Filter>>
-      | Signal<FilterOptions<Filter>>,
   ) => void;
   resetEntitiesFilter: () => void;
 };
@@ -37,8 +37,8 @@ export type NamedEntitiesFilterMethods<Collection extends string, Filter> = {
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: (
     options?:
       | FilterOptions<Filter>
+      | (() => FilterOptions<Filter>)
       | Observable<FilterOptions<Filter>>
-      | Signal<FilterOptions<Filter>>,
   ) => void;
 } & {
   [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: () => void;

@@ -1,4 +1,3 @@
-import { Signal } from '@angular/core';
 import { Observable } from 'rxjs';
 
 export type SortDirection = 'asc' | 'desc' | '';
@@ -26,7 +25,7 @@ export type EntitiesSortMethods<Entity> = {
     options?:
       | { sort: Sort<Entity> | CdkSort<Entity> }
       | Observable<{ sort: Sort<Entity> | CdkSort<Entity> }>
-      | Signal<{ sort: Sort<Entity> | CdkSort<Entity> }>,
+      | (() => { sort: Sort<Entity> | CdkSort<Entity> }),
   ) => void;
 };
 export type NamedEntitiesSortMethods<Entity, Collection extends string> = {
@@ -34,6 +33,6 @@ export type NamedEntitiesSortMethods<Entity, Collection extends string> = {
     options?:
       | { sort: Sort<Entity> | CdkSort<Entity> }
       | Observable<{ sort: Sort<Entity> | CdkSort<Entity> }>
-      | Signal<{ sort: Sort<Entity> | CdkSort<Entity> }>,
+      | (() => { sort: Sort<Entity> | CdkSort<Entity> }),
   ) => void;
 };
