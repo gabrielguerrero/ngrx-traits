@@ -5,7 +5,7 @@ import {
   setAllEntities,
   withEntities,
 } from '@ngrx/signals/entities';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 
 import {
   withCallStatus,
@@ -596,6 +596,22 @@ describe('withEntitiesHybridFilter', () => {
         });
       }));
     });
+
+    it('should return promise with value on success for local filter', async () => {
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        const result = await store.filterEntities({
+          filter: { search: 'zero', categoryId: 'snes' },
+          forceLoad: true,
+        });
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+          expect(result.value().length).toEqual(2);
+        }
+      });
+    });
   });
 
   describe('remote filter', () => {
@@ -1059,5 +1075,55 @@ describe('withEntitiesHybridFilter', () => {
         expect(store.productEntities().length).toEqual(11);
       });
     }));
+
+    it('should return promise with value on success', async () => {
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        TestBed.tick();
+        const result = await store.filterEntities({
+          filter: { search: 'zero', categoryId: 'gamecube' },
+          forceLoad: true,
+        });
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+          expect(result.value().length).toEqual(1);
+        }
+      });
+    });
+
+    it('should return promise with error on failure', async () => {
+      await TestBed.runInInjectionContext(async () => {
+        const FailStore = signalStore(
+          withEntities({ entity }),
+          withCallStatus({ initialValue: 'loading' }),
+          withEntitiesHybridFilter({
+            entity,
+            defaultFilter: { search: '', categoryId: 'snes' } as Filter,
+            isRemoteFilter: (previous, current) =>
+              previous.categoryId !== current.categoryId,
+            filterFn: (entity, filter) =>
+              !filter?.search ||
+              entity?.name
+                .toLowerCase()
+                .includes(filter?.search.toLowerCase()),
+          }),
+          withEntitiesLoadingCall({
+            fetchEntities: () => {
+              return throwError(() => new Error('fail'));
+            },
+          }),
+        );
+        const store = new FailStore();
+        TestBed.tick();
+        const result = await store.filterEntities({
+          filter: { search: 'zero', categoryId: 'gamecube' },
+          forceLoad: true,
+        });
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+          expect(result.error()).toEqual(new Error('fail'));
+        }
+      });
+    });
   });
 });

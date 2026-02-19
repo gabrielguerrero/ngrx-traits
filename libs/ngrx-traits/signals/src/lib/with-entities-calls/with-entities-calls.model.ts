@@ -106,6 +106,10 @@ export type EntityCallConfig<
         | (() => NoInfer<Param> | null | undefined);
 };
 
+export type ExtractEntityCallErrorType<
+  T extends EntityCall<any> | EntityCallConfig,
+> = T extends EntityCallConfig<any, any, any, infer E> ? E : unknown;
+
 export type NamedEntitiesCallsStatusComputed<
   Calls extends Record<string, EntityCall<any> | EntityCallConfig>,
 > = {

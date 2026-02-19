@@ -233,6 +233,107 @@ describe('withEntitiesCalls', () => {
     });
   });
 
+  it('should return promise with value on success', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const apiResponse = new Subject<Partial<ProductDetail>>();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' }),
+        withEntities({ entity }),
+        withEntitiesCalls({
+          entity,
+          calls: () => ({
+            loadProductDetail: entityCallConfig({
+              call: ({ id }: { id: string }) => {
+                return apiResponse;
+              },
+              paramsSelectId: ({ id }) => id,
+            }),
+          }),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const product = mockProducts[0];
+      const resultPromise = store.loadProductDetail({ id: product.id });
+      apiResponse.next({ detail: productDetail });
+      TestBed.tick();
+      const result = await resultPromise;
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value()?.detail).toEqual(productDetail);
+      }
+    });
+  });
+
+  it('should return promise with error on failure', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const apiResponse = new Subject<Partial<ProductDetail>>();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' }),
+        withEntities({ entity }),
+        withEntitiesCalls({
+          entity,
+          calls: () => ({
+            loadProductDetail: entityCallConfig({
+              call: ({ id }: { id: string }) => {
+                return apiResponse;
+              },
+              paramsSelectId: ({ id }) => id,
+            }),
+          }),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const product = mockProducts[0];
+      const resultPromise = store.loadProductDetail({ id: product.id });
+      apiResponse.error(new Error('fail'));
+      TestBed.tick();
+      const result = await resultPromise;
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error()).toEqual(new Error('fail'));
+      }
+    });
+  });
+
+  it('should return promise with mapped error when mapError is used', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const apiResponse = new Subject<Partial<ProductDetail>>();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' }),
+        withEntities({ entity }),
+        withEntitiesCalls({
+          entity,
+          calls: () => ({
+            loadProductDetail: entityCallConfig({
+              call: ({ id }: { id: string }) => {
+                return apiResponse;
+              },
+              paramsSelectId: ({ id }) => id,
+              mapError: (error, { id }) =>
+                (error as Error).message + ' ' + id,
+            }),
+          }),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const product = mockProducts[0];
+      const resultPromise = store.loadProductDetail({ id: product.id });
+      apiResponse.error(new Error('fail'));
+      TestBed.tick();
+      const result = await resultPromise;
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error()).toEqual('fail ' + product.id);
+      }
+    });
+  });
+
   it('Successful call using collection, should set status to loading and loaded ', async () => {
     TestBed.runInInjectionContext(() => {
       const apiResponse = new Subject<Partial<ProductDetail>>();
