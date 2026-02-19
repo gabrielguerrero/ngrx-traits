@@ -79,6 +79,7 @@ describe('withCalls', () => {
     });
   });
 
+
   it('Fail on a call should set status return error ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -86,6 +87,33 @@ describe('withCalls', () => {
       store.testCall({ ok: false });
       expect(store.testCallError()).toEqual(new Error('fail'));
       expect(store.testCallResult()).toBe(undefined);
+    });
+  });
+
+  it('should return promise with value on success', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const store = new Store();
+      const resultPromise = store.testCall({ ok: true });
+      apiResponse.next('test');
+      TestBed.tick();
+      const result = await resultPromise;
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value()).toBe('test');
+      }
+    });
+  });
+
+  it('should return promise with error on failure', async () => {
+    await TestBed.runInInjectionContext(async () => {
+      const store = new Store();
+      const resultPromise = store.testCall({ ok: false });
+      TestBed.tick();
+      const result = await resultPromise;
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error()).toEqual(new Error('fail'));
+      }
     });
   });
 
@@ -175,6 +203,55 @@ describe('withCalls', () => {
         expect(store.testCall2Error()).toEqual(new Error('fail'));
         expect(store.result()).toBe(undefined);
         expect(onError).toHaveBeenCalledWith(new Error('fail'), { ok: false });
+      });
+    });
+    it('should return promise with value on success', async () => {
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        const resultPromise = store.testCall2({ ok: true });
+        apiResponse.next('test');
+        TestBed.tick();
+        const result = await resultPromise;
+        expect(result.ok).toBe(true);
+        if (result.ok) {
+          expect(result.value()).toBe('test');
+        }
+      });
+    });
+    it('should return promise with error on failure', async () => {
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        const resultPromise = store.testCall2({ ok: false });
+        TestBed.tick();
+        const result = await resultPromise;
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+          expect(result.error()).toEqual(new Error('fail'));
+        }
+      });
+    });
+    it('should return promise with mapped error when mapError is used', async () => {
+      await TestBed.runInInjectionContext(async () => {
+        const Store = signalStore(
+          withState({ foo: 'bar' }),
+          withCalls(() => ({
+            testCall2: callConfig({
+              call: ({ ok }: { ok: boolean }) => {
+                return ok ? apiResponse : throwError(() => new Error('fail'));
+              },
+              mapError: (error, { ok }) => (error as Error).message + ' ' + ok,
+              resultProp: 'result',
+            }),
+          })),
+        );
+        const store = new Store();
+        const resultPromise = store.testCall2({ ok: false });
+        TestBed.tick();
+        const result = await resultPromise;
+        expect(result.ok).toBe(false);
+        if (!result.ok) {
+          expect(result.error()).toEqual('fail false');
+        }
       });
     });
     it('Fail on a call should set status return error with correct type if mapError is used ', async () => {

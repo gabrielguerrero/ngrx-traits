@@ -108,7 +108,7 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
       if (filter) {
         const filterEntities = store[
           filterEntitiesKey
-        ] as EntitiesRemoteFilterMethods<unknown>['filterEntities'];
+        ] as EntitiesRemoteFilterMethods<unknown, unknown>['filterEntities'];
         filterEntities({
           filter,
           forceLoad: true,

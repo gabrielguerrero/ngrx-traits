@@ -7,7 +7,7 @@ import {
   runInInjectionContext,
   Signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStoreFeature,
@@ -32,9 +32,9 @@ import {
   catchError,
   concatMap,
   finalize,
-  first,
   from,
   isObservable,
+  lastValueFrom,
   map,
   mergeMap,
   Observable,
@@ -53,12 +53,13 @@ import {
   CallStatus,
   NamedCallStatusState,
 } from '../with-call-status/with-call-status.model';
-import { ObservableCall } from '../with-calls/with-calls.model';
+import { ObservableCall, RxMethodRef } from '../with-calls/with-calls.model';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import {
   EntityCall,
   EntityCallConfig,
+  ExtractEntityCallErrorType,
   NamedEntitiesCallsStatusComputed,
   NamedEntitiesCallsStatusMethods,
 } from './with-entities-calls.model';
@@ -160,19 +161,29 @@ export function withEntitiesCalls<
     methods: NamedEntitiesCallsStatusMethods<Entity, Calls> & {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
         ? {
-            (param: P[0]): void;
-            (param: Observable<P[0]> | (() => P[0])): void;
+            (
+              param: P[0],
+            ): Promise<
+              | { value: Signal<Entity>; ok: true }
+              | { error: Signal<ExtractEntityCallErrorType<Calls[K]>>; ok: false }
+            >;
+            (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
           }
         : Calls[K] extends EntityCallConfig
           ? Parameters<Calls[K]['call']> extends undefined[]
             ? () => void
             : {
-                (...param: Parameters<Calls[K]['call']>): void;
+                (
+                  ...param: Parameters<Calls[K]['call']>
+                ): Promise<
+                  | { value: Signal<Entity>; ok: true }
+                  | { error: Signal<ExtractEntityCallErrorType<Calls[K]>>; ok: false }
+                >;
                 (
                   param:
                     | Observable<Parameters<Calls[K]['call']>[0]>
                     | (() => Parameters<Calls[K]['call']>[0]),
-                ): void;
+                ): RxMethodRef;
               }
           : never;
     };
@@ -304,7 +315,7 @@ export function withEntitiesCalls<
                     : undefined)
                 : undefined;
               const inFlight = new Set<number | string>();
-              acc[callNameKey] = rxMethod<unknown[]>(
+              const reactiveMethod = rxMethod<unknown>(
                 pipe(
                   mergeMap((params: any) => {
                     const id =
@@ -436,6 +447,42 @@ export function withEntitiesCalls<
                   }),
                 ),
               );
+              acc[callNameKey] = function (param?: unknown) {
+                if (
+                  typeof param === 'function' ||
+                  param instanceof Observable ||
+                  isSignal(param)
+                ) {
+                  return reactiveMethod(param as any);
+                }
+
+                reactiveMethod(param as any);
+                const id =
+                  isCallConfig(call) && call.paramsSelectId
+                    ? call.paramsSelectId(param)
+                    : typeof param === 'object' &&
+                        param !== null &&
+                        'entity' in param
+                      ? selectId((param as any).entity)
+                      : selectId(param as any);
+                const entityStatus = computed(() => callState()[id]);
+                return lastValueFrom(
+                  toObservable(entityStatus, {
+                    injector: environmentInjector,
+                  }).pipe(
+                    filter((v) => v === 'loaded' || typeof v === 'object'),
+                    take(1),
+                    map((v) =>
+                      v === 'loaded'
+                        ? { value: computed(() => entityMap()[id]), ok: true as const }
+                        : {
+                            error: computed(() => typeof v === 'object' ? v.error : undefined),
+                            ok: false as const,
+                          },
+                    ),
+                  ),
+                );
+              };
               return acc;
             },
             {} as Record<string, any>,

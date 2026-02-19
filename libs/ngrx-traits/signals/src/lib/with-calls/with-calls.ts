@@ -7,7 +7,7 @@ import {
   runInInjectionContext,
   Signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   patchState,
   signalStoreFeature,
@@ -29,6 +29,7 @@ import {
   from,
   ignoreElements,
   isObservable,
+  lastValueFrom,
   map,
   merge,
   Observable,
@@ -58,8 +59,10 @@ import {
   CallConfig,
   ExtractCallResultPropName,
   ExtractCallResultType,
+  ExtractErrorType,
   NamedCallsStatusComputed,
   ObservableCall,
+  RxMethodRef,
 } from './with-calls.model';
 import { getWithCallKeys } from './with-calls.util';
 
@@ -146,19 +149,29 @@ export function withCalls<
         ? P extends []
           ? () => void
           : {
-              (param: P[0]): void;
-              (param: Observable<P[0]> | (() => P[0])): void;
+              (
+                param: P[0],
+              ): Promise<
+                | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
+                | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
+              >;
+              (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
             }
         : Calls[K] extends CallConfig
           ? Parameters<Calls[K]['call']> extends undefined[]
             ? () => void
             : {
-                (param: Parameters<Calls[K]['call']>[0]): void;
+                (
+                  param: Parameters<Calls[K]['call']>[0],
+                ): Promise<
+                  | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
+                  | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
+                >;
                 (
                   param:
                     | Observable<Parameters<Calls[K]['call']>[0]>
                     | (() => Parameters<Calls[K]['call']>[0]),
-                ): void;
+                ): RxMethodRef;
               }
           : never;
     };
@@ -218,7 +231,7 @@ export function withCalls<
         (state, environmentInjector = inject(EnvironmentInjector)) => {
           const methods = Object.entries(calls).reduce(
             (acc, [callName, call]) => {
-              const { callStatusKey } = getWithCallStatusKeys({
+              const { callStatusKey, errorKey } = getWithCallStatusKeys({
                 prop: callName,
               });
               const { resultPropKey, callNameKey } = getWithCallKeys({
@@ -255,7 +268,7 @@ export function withCalls<
                     : undefined)
                 : undefined;
 
-              acc[callNameKey] = rxMethod<unknown[]>(
+              let reactiveMethod = rxMethod<unknown>(
                 pipe(
                   mapPipe((params) => {
                     const previousResult = isCallConfig(call)
@@ -322,6 +335,34 @@ export function withCalls<
                   }),
                 ),
               );
+              acc[callNameKey] = function (param?: unknown) {
+                if (
+                  typeof param === 'function' ||
+                  param instanceof Observable ||
+                  isSignal(param)
+                ) {
+                  return reactiveMethod(param as any);
+                }
+
+                reactiveMethod(param as any);
+                const callState = state[callStatusKey] as Signal<CallStatus>;
+                const resultSignal = state[resultPropKey] as Signal<unknown>;
+                const errorSignal = state[errorKey] as Signal<unknown>;
+                let resultPromise = lastValueFrom(
+                  toObservable(callState, {
+                    injector: environmentInjector,
+                  }).pipe(
+                    filter((v) => v === 'loaded' || typeof v === 'object'),
+                    take(1),
+                    map((v) =>
+                      v === 'loaded'
+                        ? { value: resultSignal, ok: true }
+                        : { error: errorSignal, ok: false },
+                    ),
+                  ),
+                );
+                return resultPromise;
+              };
               return acc;
             },
             {} as Record<string, any>,
