@@ -22,14 +22,14 @@ export type EntitiesSingleSelectionMethods = {
     options:
       | EntitySelectOptions
       | Observable<EntitySelectOptions>
-      | Signal<EntitySelectOptions>,
+      | (() => EntitySelectOptions),
   ) => void;
   deselectEntity: () => void;
   toggleSelectEntity: (
     options:
       | EntitySelectOptions
       | Observable<EntitySelectOptions>
-      | Signal<EntitySelectOptions>,
+      | (() => EntitySelectOptions),
   ) => void;
 };
 export type NamedEntitiesSingleSelectionMethods<Collection extends string> = {
@@ -37,7 +37,7 @@ export type NamedEntitiesSingleSelectionMethods<Collection extends string> = {
     options:
       | EntitySelectOptions
       | Observable<EntitySelectOptions>
-      | Signal<EntitySelectOptions>,
+      | (() => EntitySelectOptions),
   ) => void;
 } & {
   [K in Collection as `deselect${Capitalize<string & K>}Entity`]: () => void;
@@ -46,6 +46,6 @@ export type NamedEntitiesSingleSelectionMethods<Collection extends string> = {
     options:
       | EntitySelectOptions
       | Observable<EntitySelectOptions>
-      | Signal<EntitySelectOptions>,
+      | (() => EntitySelectOptions),
   ) => void;
 };
