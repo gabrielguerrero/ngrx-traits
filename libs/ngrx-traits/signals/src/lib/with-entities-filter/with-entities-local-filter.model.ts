@@ -15,6 +15,7 @@ export type NamedEntitiesFilterComputed<Collection extends string, Filter> = {
 } & { [K in Collection as `${K}EntitiesFilter`]: DeepSignal<Filter> };
 
 export type FilterOptions<Filter> =
+  | Filter
   | {
       filter: Filter;
       debounce?: number;
@@ -31,7 +32,10 @@ export type EntitiesFilterMethods<Filter, Entity> = {
   filterEntities: {
     (
       options?: FilterOptions<Filter>,
-    ): Promise<{ value: Signal<Entity[]>; ok: true } | { error: Signal<unknown>; ok: false }>;
+    ): Promise<
+      | { value: Signal<Entity[]>; ok: true }
+      | { error: Signal<unknown>; ok: false }
+    >;
     (
       options?:
         | (() => FilterOptions<Filter>)
@@ -48,7 +52,10 @@ export type NamedEntitiesFilterMethods<
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: {
     (
       options?: FilterOptions<Filter>,
-    ): Promise<{ value: Signal<Entity[]>; ok: true } | { error: Signal<unknown>; ok: false }>;
+    ): Promise<
+      | { value: Signal<Entity[]>; ok: true }
+      | { error: Signal<unknown>; ok: false }
+    >;
     (
       options?:
         | (() => FilterOptions<Filter>)

@@ -87,6 +87,55 @@ export type FilterQueryMapper<Filter, T extends Params = Params> = {
   filterToQueryParams: (filter: Filter) => T | undefined | null;
 };
 
+/**
+ * Normalizes FilterOptions to always return the {filter, debounce?, ...} format.
+ * Handles the case where a raw Filter object is passed directly.
+ */
+export function toFilterOptions<Filter extends Record<string, unknown>>(
+  options: Record<string, unknown>,
+  defaultFilter: Filter,
+): {
+  filter: Filter;
+  debounce?: number;
+  patch?: boolean;
+  forceLoad?: boolean;
+  skipLoadingCall?: boolean;
+} {
+  // FilterOptions requires 'filter' key - if missing, it's raw Filter
+  if (!('filter' in options)) {
+    return { filter: options } as any;
+  }
+
+  // filter value can't be null/undefined/primitive in FilterOptions
+  // (Filter extends Record<string, unknown>)
+  const filterValue = options['filter'];
+  if (
+    filterValue === null ||
+    filterValue === undefined ||
+    typeof filterValue !== 'object'
+  ) {
+    return { filter: options } as any;
+  }
+
+  // Check for FilterOptions-specific keys not present in defaultFilter
+  const defaultFilterKeys = new Set(Object.keys(defaultFilter));
+  const specificKeys = ['debounce', 'patch', 'forceLoad', 'skipLoadingCall'];
+  if (specificKeys.some((k) => k in options && !defaultFilterKeys.has(k))) {
+    return options as any; // has debounce/patch/etc → FilterOptions
+  }
+
+  // Check if filter value's keys overlap with defaultFilter keys
+  const filterValueKeys = new Set(
+    Object.keys(filterValue as Record<string, unknown>),
+  );
+  if ([...defaultFilterKeys].some((k) => filterValueKeys.has(k))) {
+    return options as any; // FilterOptions
+  }
+
+  // Default: raw Filter
+  return { filter: options } as any;
+}
+
 export function getQueryMapperForEntitiesFilter<Filter>(config?: {
   collection?: string;
   filterMapper?: FilterQueryMapper<Filter>;

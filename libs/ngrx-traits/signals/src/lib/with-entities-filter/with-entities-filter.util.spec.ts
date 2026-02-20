@@ -1,7 +1,128 @@
 import { Signal, signal } from '@angular/core';
 import { TestScheduler } from 'rxjs/testing';
 
-import { debounceFilterPipe } from './with-entities-filter.util';
+import { debounceFilterPipe, toFilterOptions } from './with-entities-filter.util';
+
+describe('toFilterOptions', () => {
+  it('should wrap raw Filter when no filter key exists', () => {
+    const defaultFilter = { search: '' };
+    const result = toFilterOptions({ search: 'hello' }, defaultFilter);
+    expect(result).toEqual({ filter: { search: 'hello' } });
+  });
+
+  it('should pass through FilterOptions with filter key', () => {
+    const defaultFilter = { search: '' };
+    const result = toFilterOptions(
+      { filter: { search: 'hello' } },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { search: 'hello' } });
+  });
+
+  it('should pass through FilterOptions with debounce', () => {
+    const defaultFilter = { search: '' };
+    const result = toFilterOptions(
+      { filter: { search: 'hello' }, debounce: 300 },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { search: 'hello' }, debounce: 300 });
+  });
+
+  it('should pass through FilterOptions with patch', () => {
+    const defaultFilter = { search: '', name: '' };
+    const result = toFilterOptions(
+      { filter: { search: 'hello' }, patch: true },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { search: 'hello' }, patch: true });
+  });
+
+  it('should pass through FilterOptions with empty filter in patch mode', () => {
+    const defaultFilter = { search: '', name: '' };
+    const result = toFilterOptions(
+      { filter: {}, patch: true },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: {}, patch: true });
+  });
+
+  it('should pass through FilterOptions with forceLoad', () => {
+    const defaultFilter = { search: '' };
+    const result = toFilterOptions(
+      { filter: { search: 'hello' }, forceLoad: true },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { search: 'hello' }, forceLoad: true });
+  });
+
+  it('should pass through FilterOptions with skipLoadingCall', () => {
+    const defaultFilter = { search: '' };
+    const result = toFilterOptions(
+      { filter: { search: 'hello' }, skipLoadingCall: true },
+      defaultFilter,
+    );
+    expect(result).toEqual({
+      filter: { search: 'hello' },
+      skipLoadingCall: true,
+    });
+  });
+
+  it('should wrap raw Filter when filter key has null value', () => {
+    const defaultFilter = { filter: '' };
+    const result = toFilterOptions({ filter: null } as any, defaultFilter);
+    expect(result).toEqual({ filter: { filter: null } });
+  });
+
+  it('should wrap raw Filter when filter key has undefined value', () => {
+    const defaultFilter = { filter: '' };
+    const result = toFilterOptions(
+      { filter: undefined } as any,
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { filter: undefined } });
+  });
+
+  it('should wrap raw Filter when Filter = {filter: string} and value is primitive', () => {
+    const defaultFilter = { filter: '' };
+    const result = toFilterOptions({ filter: 'hello' } as any, defaultFilter);
+    expect(result).toEqual({ filter: { filter: 'hello' } });
+  });
+
+  it('should wrap raw Filter when Filter = {filter: number} and value is primitive', () => {
+    const defaultFilter = { filter: 0 };
+    const result = toFilterOptions({ filter: 42 } as any, defaultFilter);
+    expect(result).toEqual({ filter: { filter: 42 } });
+  });
+
+  it('should wrap raw Filter when Filter = {filter: {name: string}} and value keys dont match defaultFilter', () => {
+    const defaultFilter = { filter: { name: '' } };
+    const result = toFilterOptions(
+      { filter: { name: 'hello' } },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { filter: { name: 'hello' } } });
+  });
+
+  it('should pass through FilterOptions when Filter = {filter: {name: string}} and value keys match defaultFilter', () => {
+    const defaultFilter = { filter: { name: '' } };
+    const result = toFilterOptions(
+      { filter: { filter: { name: 'hello' } } },
+      defaultFilter,
+    );
+    expect(result).toEqual({ filter: { filter: { name: 'hello' } } });
+  });
+
+  it('should wrap raw Filter with multiple keys', () => {
+    const defaultFilter = { search: '', category: '' };
+    const result = toFilterOptions(
+      { search: 'text', category: 'books' },
+      defaultFilter,
+    );
+    expect(result).toEqual({
+      filter: { search: 'text', category: 'books' },
+    });
+  });
+});
 
 describe('debounceFilterPipe', () => {
   let testScheduler: TestScheduler;
