@@ -38,6 +38,7 @@ import {
   debounceFilterPipe,
   getWithEntitiesFilterEvents,
   getWithEntitiesFilterKeys,
+  toFilterOptions,
 } from './with-entities-filter.util';
 import {
   EntitiesFilterComputed,
@@ -212,9 +213,9 @@ export function withEntitiesLocalFilter<
               forceLoad?: boolean;
             }
           | undefined) => {
-            if (options instanceof Observable || typeof options === 'function') 
+            if (options instanceof Observable || typeof options === 'function')
               return filterEntities(options);
-            filterEntities(options);
+            filterEntities(options ? toFilterOptions(options, defaultFilter) : undefined);
             return Promise.resolve({ ok: true, value: filteredEntities });
           },
           [resetEntitiesFilterKey]: () => {
