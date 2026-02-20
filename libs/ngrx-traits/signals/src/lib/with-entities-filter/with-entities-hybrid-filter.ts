@@ -59,6 +59,7 @@ import {
   debounceFilterPipe,
   getWithEntitiesFilterEvents,
   getWithEntitiesFilterKeys,
+  toFilterOptions,
 } from './with-entities-filter.util';
 import {
   EntitiesFilterComputed,
@@ -311,7 +312,7 @@ export function withEntitiesHybridFilter<
               ) {
                 return filterEntities(options);
               }
-              filterEntities(options);
+              filterEntities(options ? toFilterOptions(options, defaultFilter) : undefined);
 
               return lastValueFrom(
                 toObservable(callState, { injector: environmentInjector }).pipe(

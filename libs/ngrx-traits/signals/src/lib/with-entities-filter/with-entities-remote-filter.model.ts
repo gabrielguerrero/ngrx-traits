@@ -8,7 +8,10 @@ export type EntitiesRemoteFilterMethods<Filter, Entity> = {
   filterEntities: {
     (
       options?: FilterOptions<Filter> & { skipLoadingCall?: boolean },
-    ): Promise<{ value: Signal<Entity[]>; ok: true } | { error: Signal<unknown>; ok: false }>;
+    ): Promise<
+      | { value: Signal<Entity[]>; ok: true }
+      | { error: Signal<unknown>; ok: false }
+    >;
     (
       options?:
         | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
@@ -29,7 +32,10 @@ export type NamedEntitiesRemoteFilterMethods<
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: {
     (
       options?: FilterOptions<Filter> & { skipLoadingCall?: boolean },
-    ): Promise<{ value: Signal<Entity[]>; ok: true } | { error: Signal<unknown>; ok: false }>;
+    ): Promise<
+      | { value: Signal<Entity[]>; ok: true }
+      | { error: Signal<unknown>; ok: false }
+    >;
     (
       options?:
         | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
