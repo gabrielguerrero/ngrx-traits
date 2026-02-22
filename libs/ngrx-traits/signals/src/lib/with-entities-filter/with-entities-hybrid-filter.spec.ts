@@ -112,7 +112,6 @@ describe('withEntitiesHybridFilter', () => {
           search: 'zero',
           categoryId: 'snes',
         });
-        expect(store.entitiesFilter.search()).toEqual('zero');
       });
     }));
 

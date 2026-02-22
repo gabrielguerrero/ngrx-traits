@@ -112,7 +112,6 @@ describe('withEntitiesRemoteFilter', () => {
         },
       ]);
       expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
-      expect(store.entitiesFilter.search()).toEqual('zero');
     });
   }));
 

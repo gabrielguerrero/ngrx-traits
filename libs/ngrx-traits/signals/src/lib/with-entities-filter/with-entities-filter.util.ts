@@ -15,14 +15,14 @@ import {
   props,
 } from '../with-event-handler/with-event-handler.util';
 import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
+import { EntitiesFilterState } from './with-entities-local-filter.model';
 import { EntitiesRemoteFilterMethods } from './with-entities-remote-filter.model';
 
 export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    filterKey: collection ? `_${config.collection}EntitiesFilter` : '_entitiesFilter',
-    computedFilterKey: collection
+    filterKey: collection
       ? `${config.collection}EntitiesFilter`
       : 'entitiesFilter',
     filterEntitiesKey: collection
@@ -157,16 +157,18 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
       if (filter) {
         const filterEntities = store[
           filterEntitiesKey
-        ] as EntitiesRemoteFilterMethods<unknown, unknown>['filterEntities'];
+        ] as EntitiesRemoteFilterMethods<any, any>['filterEntities'];
         filterEntities({
-          filter,
+          filter: filter,
           forceLoad: true,
           skipLoadingCall: config?.skipLoadingCall,
         });
       }
     },
     stateToQueryParams: (store) => {
-      const filter = store[filterKey] as Signal<any>;
+      const filter = store[filterKey] as Signal<
+        EntitiesFilterState<any>['entitiesFilter']
+      >;
       return filter
         ? computed(() =>
             config?.filterMapper
