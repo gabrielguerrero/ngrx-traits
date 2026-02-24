@@ -17,7 +17,7 @@ import {
   SelectEntityId,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, tap } from 'rxjs';
+import { isObservable, map, Observable, pipe, tap } from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -127,37 +127,64 @@ export function withEntitiesLocalSort<
       withState({ [sortKey]: defaultSort }),
       withEventHandler(),
       withMethods((state: Record<string, Signal<unknown>>) => {
-        return {
-          [sortEntitiesKey]: rxMethod<{
-            sort?: Sort<Entity> | CdkSort<Entity>;
-          }>(
-            pipe(
-              tap((options) => {
-                let newSort = options?.sort;
-                if (newSort && 'active' in newSort)
-                  newSort = {
-                    field: newSort.active,
-                    direction: newSort.direction,
-                  };
-                const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
-                patchState(state as WritableStateSource<object>, {
-                  [sortKey]: sort,
-                  [idsKey]: (config?.sortFunction
-                    ? config.sortFunction(
-                        state[entitiesKey]() as Entity[],
-                        sort,
-                      )
-                    : sortData(state[entitiesKey]() as Entity[], sort)
-                  ).map((entity) =>
-                    config.selectId
-                      ? config.selectId(entity)
-                      : (entity as any).id,
-                  ),
-                });
-                broadcast(state, entitiesLocalSortChanged({ sort }));
-              }),
-            ),
+        const _sortEntities = rxMethod<{
+          sort?: Sort<Entity> | CdkSort<Entity>;
+        }>(
+          pipe(
+            tap((options) => {
+              let newSort = options?.sort;
+              if (newSort && 'active' in newSort)
+                newSort = {
+                  field: newSort.active,
+                  direction: newSort.direction,
+                };
+              const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
+              patchState(state as WritableStateSource<object>, {
+                [sortKey]: sort,
+                [idsKey]: (config?.sortFunction
+                  ? config.sortFunction(
+                      state[entitiesKey]() as Entity[],
+                      sort,
+                    )
+                  : sortData(state[entitiesKey]() as Entity[], sort)
+                ).map((entity) =>
+                  config.selectId
+                    ? config.selectId(entity)
+                    : (entity as any).id,
+                ),
+              });
+              broadcast(state, entitiesLocalSortChanged({ sort }));
+            }),
           ),
+        );
+        function normalizeToWrapped(
+          options: unknown,
+        ): { sort: Sort<Entity> | CdkSort<Entity> } {
+          if (
+            options &&
+            typeof options === 'object' &&
+            ('field' in options || 'active' in options)
+          ) {
+            return { sort: options as Sort<Entity> | CdkSort<Entity> };
+          }
+          return options as { sort: Sort<Entity> | CdkSort<Entity> };
+        }
+        return {
+          [sortEntitiesKey]: (options?: unknown) => {
+            if (isObservable(options)) {
+              return _sortEntities(
+                (options as Observable<unknown>).pipe(
+                  map((v) => normalizeToWrapped(v)),
+                ),
+              );
+            }
+            if (typeof options === 'function') {
+              return _sortEntities(() =>
+                normalizeToWrapped((options as () => unknown)()),
+              );
+            }
+            return _sortEntities(normalizeToWrapped(options));
+          },
         };
       }),
       withEventHandler((state: Record<string, unknown>) => {
