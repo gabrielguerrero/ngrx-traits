@@ -21,7 +21,9 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    filterKey: collection ? `_${config.collection}EntitiesFilter` : '_entitiesFilter',
+    filterKey: collection
+      ? `_${config.collection}EntitiesFilter`
+      : '_entitiesFilter',
     computedFilterKey: collection
       ? `${config.collection}EntitiesFilter`
       : 'entitiesFilter',
@@ -157,7 +159,7 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
       if (filter) {
         const filterEntities = store[
           filterEntitiesKey
-        ] as EntitiesRemoteFilterMethods<unknown, unknown>['filterEntities'];
+        ] as EntitiesRemoteFilterMethods<any, any>['filterEntities'];
         filterEntities({
           filter,
           forceLoad: true,
