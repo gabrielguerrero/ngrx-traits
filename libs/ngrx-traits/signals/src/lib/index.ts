@@ -43,3 +43,4 @@ export * from './with-entities-calls/with-entities-calls.model';
 export * from './with-entities-calls/entity-call-config';
 export * from './cache/index';
 export * from './with-form/with-form';
+export * from './with-linked-signal/with-linked-signal';

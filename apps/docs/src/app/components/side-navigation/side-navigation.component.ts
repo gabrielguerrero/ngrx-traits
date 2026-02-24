@@ -314,6 +314,14 @@ export class SideNavigationComponent {
           link: './traits/with-feature-factory',
           name: 'withFeatureFactory',
         },
+        {
+          link: './traits/with-form',
+          name: 'withForm',
+        },
+        {
+          link: './traits/with-linked-signal',
+          name: 'withLinkedSignal',
+        },
       ],
     },
   ] as Section[];
