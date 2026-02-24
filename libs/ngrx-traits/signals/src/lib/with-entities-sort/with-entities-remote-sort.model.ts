@@ -5,18 +5,27 @@ import { CdkSort, Sort } from './with-entities-local-sort.model';
 export type EntitiesRemoteSortMethods<Entity> = {
   sortEntities: (
     options?:
+      | Sort<Entity>
+      | CdkSort<Entity>
       | {
           sort: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
         }
-      | Observable<{
-          sort: Sort<Entity> | CdkSort<Entity>;
-          skipLoadingCall?: boolean;
-        }>
-      | (() => {
-          sort: Sort<Entity> | CdkSort<Entity>;
-          skipLoadingCall?: boolean;
-        }),
+      | Observable<
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | {
+              sort: Sort<Entity> | CdkSort<Entity>;
+              skipLoadingCall?: boolean;
+            }
+        >
+      | (() =>
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | {
+              sort: Sort<Entity> | CdkSort<Entity>;
+              skipLoadingCall?: boolean;
+            }),
   ) => void;
 };
 export type NamedEntitiesRemoteSortMethods<
@@ -25,17 +34,26 @@ export type NamedEntitiesRemoteSortMethods<
 > = {
   [K in Collection as `sort${Capitalize<string & K>}Entities`]: (
     options?:
+      | Sort<Entity>
+      | CdkSort<Entity>
       | {
           sort: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
         }
-      | Observable<{
-          sort: Sort<Entity> | CdkSort<Entity>;
-          skipLoadingCall?: boolean;
-        }>
-      | (() => {
-          sort: Sort<Entity> | CdkSort<Entity>;
-          skipLoadingCall?: boolean;
-        }),
+      | Observable<
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | {
+              sort: Sort<Entity> | CdkSort<Entity>;
+              skipLoadingCall?: boolean;
+            }
+        >
+      | (() =>
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | {
+              sort: Sort<Entity> | CdkSort<Entity>;
+              skipLoadingCall?: boolean;
+            }),
   ) => void;
 };

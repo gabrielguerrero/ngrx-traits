@@ -23,16 +23,34 @@ export type NamedEntitiesSortState<Entity, Collection extends string> = {
 export type EntitiesSortMethods<Entity> = {
   sortEntities: (
     options?:
+      | Sort<Entity>
+      | CdkSort<Entity>
       | { sort: Sort<Entity> | CdkSort<Entity> }
-      | Observable<{ sort: Sort<Entity> | CdkSort<Entity> }>
-      | (() => { sort: Sort<Entity> | CdkSort<Entity> }),
+      | Observable<
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | { sort: Sort<Entity> | CdkSort<Entity> }
+        >
+      | (() =>
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | { sort: Sort<Entity> | CdkSort<Entity> }),
   ) => void;
 };
 export type NamedEntitiesSortMethods<Entity, Collection extends string> = {
   [K in Collection as `sort${Capitalize<string & K>}Entities`]: (
     options?:
+      | Sort<Entity>
+      | CdkSort<Entity>
       | { sort: Sort<Entity> | CdkSort<Entity> }
-      | Observable<{ sort: Sort<Entity> | CdkSort<Entity> }>
-      | (() => { sort: Sort<Entity> | CdkSort<Entity> }),
+      | Observable<
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | { sort: Sort<Entity> | CdkSort<Entity> }
+        >
+      | (() =>
+          | Sort<Entity>
+          | CdkSort<Entity>
+          | { sort: Sort<Entity> | CdkSort<Entity> }),
   ) => void;
 };
