@@ -585,6 +585,116 @@ describe('withEntitiesLocalSort', () => {
     });
   }));
 
+  it('should sort entities when passing raw Sort directly', () => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false, providedIn: 'root' },
+        withEntities({ entity }),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.sortEntities();
+
+      // pass raw Sort directly (no { sort: ... } wrapper)
+      store.sortEntities({ field: 'price', direction: 'desc' });
+      expect(
+        store
+          .entities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.entitiesSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
+    });
+  });
+
+  it('should sort entities when passing raw CdkSort directly', () => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false, providedIn: 'root' },
+        withEntities({ entity }),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.sortEntities();
+
+      // pass raw CdkSort directly (no { sort: ... } wrapper)
+      store.sortEntities({ active: 'name', direction: 'asc' });
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+      expect(store.entitiesSort()).toEqual({
+        field: 'name',
+        direction: 'asc',
+      });
+    });
+  });
+
+  it('with collection should sort entities when passing raw Sort directly', () => {
+    const collection = 'product';
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity, collection }),
+      withEntitiesLocalSort({
+        entity,
+        collection,
+        defaultSort: { field: 'name', direction: 'asc' },
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts, { collection }));
+      store.sortProductEntities();
+
+      // pass raw Sort directly
+      store.sortProductEntities({ field: 'price', direction: 'desc' });
+      expect(
+        store
+          .productEntities()
+          .map((e) => e.price)
+          .slice(0, 5),
+      ).toEqual([178, 175, 172, 169, 166]);
+      expect(store.productEntitiesSort()).toEqual({
+        field: 'price',
+        direction: 'desc',
+      });
+
+      // pass raw CdkSort directly
+      store.sortProductEntities({ active: 'name', direction: 'asc' });
+      expect(
+        store
+          .productEntities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+    });
+  });
+
   it('should sort entities by release date', () => {
     const Store = signalStore(
       { protectedState: false },
