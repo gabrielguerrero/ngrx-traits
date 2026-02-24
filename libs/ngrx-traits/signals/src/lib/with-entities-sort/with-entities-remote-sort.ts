@@ -11,7 +11,7 @@ import {
 import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
 import { EntityProps, NamedEntityProps } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, tap } from 'rxjs';
+import { isObservable, map, Observable, pipe, tap } from 'rxjs';
 
 import {
   CallStatusMethods,
@@ -169,29 +169,62 @@ export function withEntitiesRemoteSort<
       withEventHandler(),
       withMethods((state: Record<string, Signal<unknown>>) => {
         const setLoading = state[setLoadingKey] as () => void;
-        return {
-          [sortEntitiesKey]: rxMethod<{
+        const _sortEntities = rxMethod<{
+          sort?: Sort<Entity> | CdkSort<Entity>;
+          skipLoadingCall?: boolean;
+        }>(
+          pipe(
+            tap((options) => {
+              let newSort = options?.sort;
+              if (newSort && 'active' in newSort)
+                newSort = {
+                  field: newSort.active,
+                  direction: newSort.direction,
+                };
+              const skipLoadingCall = options?.skipLoadingCall;
+              const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
+              patchState(state as WritableStateSource<object>, {
+                [sortKey]: sort,
+              });
+              broadcast(state, entitiesRemoteSortChanged({ sort }));
+              if (!skipLoadingCall) setLoading();
+            }),
+          ),
+        );
+        function normalizeToWrapped(
+          options: unknown,
+        ): {
+          sort?: Sort<Entity> | CdkSort<Entity>;
+          skipLoadingCall?: boolean;
+        } {
+          if (
+            options &&
+            typeof options === 'object' &&
+            ('field' in options || 'active' in options)
+          ) {
+            return { sort: options as Sort<Entity> | CdkSort<Entity> };
+          }
+          return options as {
             sort?: Sort<Entity> | CdkSort<Entity>;
             skipLoadingCall?: boolean;
-          }>(
-            pipe(
-              tap((options) => {
-                let newSort = options?.sort;
-                if (newSort && 'active' in newSort)
-                  newSort = {
-                    field: newSort.active,
-                    direction: newSort.direction,
-                  };
-                const skipLoadingCall = options?.skipLoadingCall;
-                const sort = newSort ?? (state[sortKey]() as Sort<Entity>);
-                patchState(state as WritableStateSource<object>, {
-                  [sortKey]: sort,
-                });
-                broadcast(state, entitiesRemoteSortChanged({ sort }));
-                if (!skipLoadingCall) setLoading();
-              }),
-            ),
-          ),
+          };
+        }
+        return {
+          [sortEntitiesKey]: (options?: unknown) => {
+            if (isObservable(options)) {
+              return _sortEntities(
+                (options as Observable<unknown>).pipe(
+                  map((v) => normalizeToWrapped(v)),
+                ),
+              );
+            }
+            if (typeof options === 'function') {
+              return _sortEntities(() =>
+                normalizeToWrapped((options as () => unknown)()),
+              );
+            }
+            return _sortEntities(normalizeToWrapped(options));
+          },
         };
       }),
     );
