@@ -229,6 +229,10 @@ export class SideNavigationComponent {
           link: './traits/with-entities-hybrid-filter',
           name: 'withEntitiesHybridFilter',
         },
+        {
+          link: './traits/with-entities-filter-form',
+          name: 'withEntitiesFilterForm',
+        },
       ],
     },
     {
@@ -319,8 +323,8 @@ export class SideNavigationComponent {
           name: 'withForm',
         },
         {
-          link: './traits/with-linked-signal',
-          name: 'withLinkedSignal',
+          link: './traits/with-delegated-signal',
+          name: 'withDelegatedSignal',
         },
       ],
     },
