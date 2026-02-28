@@ -52,9 +52,17 @@ export function getQueryMapperForSingleSelection(config?: {
         ] as EntitiesSingleSelectionMethods['selectEntity'];
 
         const loading = store[loadingKey] as Signal<boolean>;
+
+        if (!loading) {
+          // if there is no loading signal, we can select the entity immediately
+          selectEntity({
+            id: selectedId,
+          });
+          return;
+        }
+
         const loaded = store[loadedKey] as Signal<boolean>;
         const loaded$ = toObservable(loaded);
-
         toObservable(loading)
           .pipe(
             startWith(loading()),
