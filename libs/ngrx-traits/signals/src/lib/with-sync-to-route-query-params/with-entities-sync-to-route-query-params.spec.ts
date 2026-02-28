@@ -7,6 +7,7 @@ import {
   withEntitiesLocalFilter,
   withEntitiesLocalPagination,
   withEntitiesLocalSort,
+  withEntitiesMultiSelection,
   withEntitiesRemoteFilter,
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
@@ -493,6 +494,93 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           selectedId: '3',
+        }),
+        queryParamsHandling: 'merge',
+      });
+    }));
+  });
+
+  describe('entities multi selection', () => {
+    const multiSelectionStoreFeature = ({
+      load,
+    }: { load?: Subject<boolean> } = {}) => {
+      return signalStoreFeature(
+        signalStoreFeature(
+          withEntities({ entity }),
+          withCallStatus({ initialValue: 'loading' }),
+          withEntitiesLocalPagination({ entity, pageSize: 10 }),
+          withEntitiesLocalSort({
+            entity,
+            defaultSort: { field: 'name', direction: 'asc' },
+          }),
+          withEntitiesLocalFilter({
+            entity,
+            defaultFilter: { search: '', foo: 'bar' },
+            filterFn: (entity, filter) =>
+              !filter?.search ||
+              entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+          }),
+        ),
+        withEntitiesMultiSelection({ entity }),
+        withEntitiesLoadingCall({
+          fetchEntities: ({}) => {
+            const result = [...mockProducts.slice(0, 40)];
+            const total = result.length;
+            const response = { entities: result, total };
+            return load
+              ? load.pipe(
+                  filter(Boolean),
+                  map(() => response),
+                )
+              : of(response);
+          },
+        }),
+      );
+    };
+
+    it('url query params selectedIds should update store', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        multiSelectionStoreFeature({ load }),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          syncSingleSelection: false,
+          syncMultiSelection: true,
+        }),
+      );
+      const { store } = init({
+        Store,
+        queryParams: { selectedIds: '2,3' },
+      });
+      TestBed.tick();
+      load.next(true);
+      tick(400);
+      expect(store.idsSelected()).toEqual(['2', '3']);
+    }));
+
+    it('changes on idsSelected should update url query params', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        multiSelectionStoreFeature({ load }),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          syncSingleSelection: false,
+          syncMultiSelection: true,
+        }),
+      );
+      const { store, router } = init({
+        Store,
+        queryParams: {},
+      });
+      TestBed.tick();
+      load.next(true);
+      tick(400);
+      store.selectEntities({ ids: ['3', '5'] });
+      tick(400);
+      expect(router.navigate).toHaveBeenCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          selectedIds: '3,5',
         }),
         queryParamsHandling: 'merge',
       });
