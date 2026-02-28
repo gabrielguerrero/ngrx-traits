@@ -1,4 +1,12 @@
+import { computed, Signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { concatMap, take } from 'rxjs';
+import { filter, startWith } from 'rxjs/operators';
+
 import { capitalize } from '../util';
+import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
+import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
+import { EntitiesMultiSelectionMethods } from './with-entities-multi-selection.model';
 
 export function getEntitiesMultiSelectionKeys(config?: {
   collection?: string;
@@ -33,5 +41,71 @@ export function getEntitiesMultiSelectionKeys(config?: {
     isAllEntitiesSelectedKey: collection
       ? `isAll${capitalizedProp}EntitiesSelected`
       : 'isAllEntitiesSelected',
+  };
+}
+
+export function getQueryMapperForMultiSelection(config?: {
+  collection?: string;
+}): QueryMapper<{
+  selectedIds: string | undefined;
+}> {
+  const { selectedEntitiesIdsKey, selectEntitiesKey } =
+    getEntitiesMultiSelectionKeys(config);
+  const { loadingKey, loadedKey } = getWithCallStatusKeys({
+    collection: config?.collection,
+  });
+  return {
+    queryParamsToState: (query, store) => {
+      const selectedIds = query.selectedIds;
+      if (selectedIds) {
+        const selectEntities = store[
+          selectEntitiesKey
+        ] as EntitiesMultiSelectionMethods['selectEntities'];
+
+        const loading = store[loadingKey] as Signal<boolean>;
+
+        const ids = selectedIds
+          .split(',')
+          .map((id) => id.trim())
+          .filter(Boolean);
+
+        if (!loading) {
+          // if there is no loading signal, we can select the entities immediately
+          selectEntities({ ids });
+          return;
+        }
+
+        const loaded = store[loadedKey] as Signal<boolean>;
+        const loaded$ = toObservable(loaded);
+        toObservable(loading)
+          .pipe(
+            startWith(loading()),
+            filter((v) => v), // wait until loading becomes true
+            take(1),
+            concatMap(() =>
+              loaded$.pipe(
+                startWith(loaded()),
+                filter((v) => v), // wait until loaded becomes true
+                take(1),
+              ),
+            ),
+            takeUntilDestroyed(),
+          )
+          .subscribe(() => {
+            selectEntities({ ids });
+          });
+      }
+    },
+    stateToQueryParams: (store) => {
+      const selectedIds = store[selectedEntitiesIdsKey] as
+        | Signal<(string | number)[]>
+        | undefined;
+      return selectedIds
+        ? computed(() => ({
+            selectedIds:
+              selectedIds().length > 0 ? selectedIds().join(',') : undefined,
+          }))
+        : undefined;
+    },
   };
 }

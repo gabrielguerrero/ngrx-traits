@@ -122,7 +122,8 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
 export type ExtractErrorType<T extends Call | CallConfig> =
   T extends CallConfig<any, any, any, infer E>
     ? E
-    : unknown;      
+    : unknown;
+
 
 export type NamedCallsStatusComputed<
   Calls extends Record<string, Call | CallConfig>,

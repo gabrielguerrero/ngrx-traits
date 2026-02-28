@@ -30,6 +30,7 @@ import {
   getQueryMapperForEntitiesFilter,
 } from '../with-entities-filter/with-entities-filter.util';
 import { getQueryMapperForEntitiesPagination } from '../with-entities-pagination/with-entities-local-pagination.util';
+import { getQueryMapperForMultiSelection } from '../with-entities-selection/with-entities-multi-selection.util';
 import { getQueryMapperForSingleSelection } from '../with-entities-selection/with-entities-single-selection.util';
 import { getQueryMapperForEntitiesSort } from '../with-entities-sort/with-entities-local-sort.util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
@@ -109,6 +110,11 @@ export function withEntitiesSyncToRouteQueryParams<
   defaultDebounce?: number;
   restoreOnInit?: boolean;
   skipLoadingCall?: boolean;
+  syncFilter?: boolean;
+  syncPagination?: boolean;
+  syncSort?: boolean;
+  syncSingleSelection?: boolean;
+  syncMultiSelection?: boolean;
 }): SignalStoreFeature<
   Input &
     (Collection extends ''
@@ -133,20 +139,37 @@ export function withEntitiesSyncToRouteQueryParams<
   }
 > {
   const mappers = [
-    getQueryMapperForEntitiesPagination({
-      collection: config?.collection,
-      skipLoadingCall: config?.skipLoadingCall ?? false,
-    }),
-    getQueryMapperForEntitiesSort({
-      collection: config?.collection,
-      skipLoadingCall: config?.skipLoadingCall ?? false,
-    }),
-    getQueryMapperForEntitiesFilter({
-      collection: config?.collection,
-      filterMapper: config?.filterMapper,
-      skipLoadingCall: config?.skipLoadingCall ?? false,
-    }),
-    getQueryMapperForSingleSelection(config),
+    ...(config?.syncPagination !== false
+      ? [
+          getQueryMapperForEntitiesPagination({
+            collection: config?.collection,
+            skipLoadingCall: config?.skipLoadingCall ?? false,
+          }),
+        ]
+      : []),
+    ...(config?.syncSort !== false
+      ? [
+          getQueryMapperForEntitiesSort({
+            collection: config?.collection,
+            skipLoadingCall: config?.skipLoadingCall ?? false,
+          }),
+        ]
+      : []),
+    ...(config?.syncFilter !== false
+      ? [
+          getQueryMapperForEntitiesFilter({
+            collection: config?.collection,
+            filterMapper: config?.filterMapper,
+            skipLoadingCall: config?.skipLoadingCall ?? false,
+          }),
+        ]
+      : []),
+    ...(config?.syncSingleSelection !== false
+      ? [getQueryMapperForSingleSelection(config)]
+      : []),
+    ...(config?.syncMultiSelection === true
+      ? [getQueryMapperForMultiSelection(config)]
+      : []),
   ];
   const prefixString =
     config?.prefix === false ? undefined : config?.prefix ?? config?.collection;
