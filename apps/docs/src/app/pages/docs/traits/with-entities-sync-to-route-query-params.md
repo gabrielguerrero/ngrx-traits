@@ -5,7 +5,7 @@ order: 17
 
 # withEntitiesSyncToRouteQueryParams
 
-Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
+Syncs entities filter, pagination, sort, single selection and multi selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
 The prefix can be disabled by setting it to false, or changed by providing a string. The filterMapper can be used to customize how the filter object is map to a query params object,
 when is not provided the filter will use JSON.stringify to serialize the filter object.
 
@@ -68,6 +68,25 @@ export const ProductsRemoteStore = signalStore(
 );
 ```
 
+### Syncing with multi selection
+
+Use `syncMultiSelection: true`  when using `withEntitiesMultiSelection`. Selected ids are serialized as a comma-separated `selectedIds` query param.
+
+```typescript
+export const ProductsLocalStore = signalStore(
+  { providedIn: 'root' },
+  withEntities({ entity, collection }),
+  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withEntitiesMultiSelection({ entity, collection }),
+  withEntitiesLoadingCall({ ... }),
+  withEntitiesSyncToRouteQueryParams({
+    entity,
+    collection,
+    syncMultiSelection: true,
+  }),
+);
+```
+
 ## API Reference
 
 
@@ -79,7 +98,12 @@ export const ProductsRemoteStore = signalStore(
 | filterMapper        | Configure how the entities filter is serialize to and from the query params                                                                       | FilterQueryMapper<Filter>                    |
 | onQueryParamsLoaded | Callback to execute something else when the query params are loaded from the store                                                                | `(store) => void`                            |
 | defaultDebounce     | Debounce time for syncing store changes back to the route query params                                                                            | number (milliseconds)                        |
-| skipLoadingCall     | When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default: false | boolean                                      |
+| skipLoadingCall     | When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default: false    | boolean                                      |
+| syncFilter          | Sync entities filter to route query params. Default: true                                                                                         | boolean                                      |
+| syncPagination      | Sync entities pagination to route query params. Default: true                                                                                     | boolean                                      |
+| syncSort            | Sync entities sort to route query params. Default: true                                                                                           | boolean                                      |
+| syncSingleSelection | Sync single selected entity id to route query params as `selectedId`. Default: true                                                               | boolean                                      |
+| syncMultiSelection  | Sync multi selected entity ids to route query params as `selectedIds` (comma-separated). Default: false                                           | boolean                                      |
 
 ## State
 

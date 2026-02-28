@@ -19,6 +19,7 @@ describe('withEntitiesMultiSelection', () => {
       withEntities({ entity }),
       withEntitiesMultiSelection({ entity }),
     );
+
     it('selectEntities should select the entity', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
@@ -120,6 +121,56 @@ describe('withEntitiesMultiSelection', () => {
         expect(store.isAllEntitiesSelected()).toEqual('all');
         store.toggleSelectEntities({ id: mockProducts[4].id });
         expect(store.isAllEntitiesSelected()).toEqual('some');
+      });
+    });
+
+    it('selectEntities should not change state when ids are already selected', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntities({ ids: [mockProducts[4].id, mockProducts[8].id] });
+        const mapBefore = store.idsSelectedMap();
+        store.selectEntities({ ids: [mockProducts[4].id, mockProducts[8].id] });
+        expect(store.idsSelectedMap()).toBe(mapBefore);
+      });
+    });
+
+    it('selectEntities should not change state when a single id is already selected', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntities({ id: mockProducts[4].id });
+        const mapBefore = store.idsSelectedMap();
+        store.selectEntities({ id: mockProducts[4].id });
+        expect(store.idsSelectedMap()).toBe(mapBefore);
+      });
+    });
+
+    it('deselectEntities should not change state when ids are already deselected', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntities({ ids: [mockProducts[4].id, mockProducts[8].id] });
+        store.deselectEntities({
+          ids: [mockProducts[4].id, mockProducts[8].id],
+        });
+        const mapBefore = store.idsSelectedMap();
+        store.deselectEntities({
+          ids: [mockProducts[4].id, mockProducts[8].id],
+        });
+        expect(store.idsSelectedMap()).toEqual(mapBefore);
+      });
+    });
+
+    it('deselectEntities should not change state when a single id is already deselected', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntities({ id: mockProducts[4].id });
+        store.deselectEntities({ id: mockProducts[4].id });
+        const mapBefore = store.idsSelectedMap();
+        store.deselectEntities({ id: mockProducts[4].id });
+        expect(store.idsSelectedMap()).toEqual(mapBefore);
       });
     });
 
