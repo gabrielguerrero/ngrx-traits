@@ -356,8 +356,8 @@ export function withCalls<
                     take(1),
                     map((v) =>
                       v === 'loaded'
-                        ? { value: resultSignal, ok: true }
-                        : { error: errorSignal, ok: false },
+                        ? { value: resultSignal, ok: true as const }
+                        : { error: errorSignal, ok: false as const },
                     ),
                   ),
                 );
