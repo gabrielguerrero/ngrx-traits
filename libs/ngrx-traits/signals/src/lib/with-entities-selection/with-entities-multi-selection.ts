@@ -211,9 +211,27 @@ export function withEntitiesMultiSelection<
         const isAllEntitiesSelected = state[isAllEntitiesSelectedKey] as Signal<
           'all' | 'none' | 'some'
         >;
-
+        const selectedIds = state[selectedEntitiesIdsKey] as Signal<
+          (string | number)[]
+        >;
         const idsArray = state[idsKey] as Signal<EntityId[]>;
 
+        function areAllIds({
+          ids,
+          selected,
+        }: {
+          ids: (string | number)[];
+          selected: boolean;
+        }) {
+          const previoslySelectedIds = selectedIds();
+          return (
+            previoslySelectedIds === ids ||
+            (previoslySelectedIds.length === ids.length &&
+              ids.every((id) =>
+                selected ? !!selectedIdsMap()[id] : !selectedIdsMap()[id],
+              ))
+          );
+        }
         return {
           [selectEntitiesKey]: rxMethod<
             { clearSelectionBeforeSelect?: boolean } & (
@@ -223,10 +241,13 @@ export function withEntitiesMultiSelection<
           >(
             pipe(
               tap((options) => {
+                const ids = 'id' in options ? [options.id] : options.ids;
+                // protect againts cyclic resetting
+                if (areAllIds({ ids, selected: true })) return;
+
                 if (options.clearSelectionBeforeSelect) {
                   clearEntitiesSelection(state, selectedIdsMapKey);
                 }
-                const ids = 'id' in options ? [options.id] : options.ids;
                 const idsMap = ids.reduce(
                   (acc, id) => {
                     acc[id] = true;
@@ -245,6 +266,9 @@ export function withEntitiesMultiSelection<
             options: { id: string | number } | { ids: (string | number)[] },
           ) => {
             const ids = 'id' in options ? [options.id] : options.ids;
+            // protect againts cyclic resetting
+            if (areAllIds({ ids, selected: false })) return;
+            
             const idsMap = ids.reduce(
               (acc, id) => {
                 acc[id] = false;
