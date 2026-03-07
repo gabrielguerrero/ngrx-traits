@@ -1,5 +1,6 @@
 import { computed, Signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { DeepSignal } from '@ngrx/signals';
 import { concatMap, take } from 'rxjs';
 import { filter, startWith } from 'rxjs/operators';
 
@@ -48,6 +49,7 @@ export function getQueryMapperForEntitiesPagination(config?: {
   skipLoadingCall?: boolean;
 }): QueryMapper<{
   page: string;
+  pageSize: string;
 }> {
   const { loadEntitiesPageKey, paginationKey } =
     getWithEntitiesLocalPaginationKeys(config);
@@ -57,6 +59,7 @@ export function getQueryMapperForEntitiesPagination(config?: {
   return {
     queryParamsToState: (query, store) => {
       const page = query.page;
+      const pageSize = query.pageSize;
 
       if (page) {
         const loadEntitiesPage = store[
@@ -83,18 +86,20 @@ export function getQueryMapperForEntitiesPagination(config?: {
           .subscribe(() => {
             loadEntitiesPage({
               pageIndex: +page - 1,
+              pageSize: pageSize ? +pageSize : undefined,
               skipLoadingCall: config?.skipLoadingCall,
             });
           });
       }
     },
     stateToQueryParams: (store) => {
-      const pagination = store[paginationKey] as Signal<
+      const pagination = store[paginationKey] as DeepSignal<
         EntitiesPaginationLocalState['entitiesPagination']
       >;
       return pagination
         ? computed(() => ({
-            page: (pagination().currentPage + 1).toString(),
+            page: (pagination.currentPage() + 1).toString(),
+            pageSize: pagination.pageSize().toString(),
           }))
         : null;
     },

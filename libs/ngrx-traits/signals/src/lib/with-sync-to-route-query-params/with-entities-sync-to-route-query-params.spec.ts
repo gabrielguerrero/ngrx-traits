@@ -596,12 +596,29 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       );
       const { store } = init({
         Store,
-        queryParams: { page: '2' },
+        queryParams: { page: '2', pageSize: '5' },
       });
       TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(1);
+      expect(store.entitiesPagination().pageSize).toEqual(5);
+    }));
+
+    it('url query params pageSize should update store pageSize', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        localStoreFeature({ load }),
+        withEntitiesSyncToRouteQueryParams({ entity }),
+      );
+      const { store } = init({
+        Store,
+        queryParams: { page: '1', pageSize: '20' },
+      });
+      TestBed.tick();
+      load.next(true);
+      tick(400);
+      expect(store.entitiesPagination().pageSize).toEqual(20);
     }));
 
     it('url query params with invalid page not updated store', fakeAsync(() => {
@@ -612,12 +629,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       );
       const { store } = init({
         Store,
-        queryParams: { page: '9999' },
+        queryParams: { page: '9999', pageSize: '5' },
       });
       TestBed.tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(0);
+      expect(store.entitiesPagination().pageSize).toEqual(5);
     }));
 
     it('changes on entities page should update url query params', fakeAsync(() => {
@@ -639,6 +657,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
+          pageSize: '10',
         }),
         queryParamsHandling: 'merge',
       });
@@ -680,6 +699,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
+          pageSize: '10',
         }),
         queryParamsHandling: 'merge',
       });
@@ -720,6 +740,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
+        pageSize: '10',
         filter: JSON.stringify({ search: 'a', foo: 'bar2' }),
         sortBy: 'name',
         sortDirection: 'asc',
@@ -778,6 +799,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
+        pageSize: '10',
         filter: JSON.stringify({ search: 'a', foo: 'bar2' }),
         sortBy: 'name',
         sortDirection: 'asc',
@@ -821,6 +843,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'p-page': '3',
+        'p-pageSize': '10',
         'p-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
         'p-sortBy': 'name',
         'p-sortDirection': 'asc',
@@ -871,6 +894,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'product-page': '3',
+        'product-pageSize': '10',
         'product-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
         'product-sortBy': 'name',
         'product-sortDirection': 'asc',
@@ -914,6 +938,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
+        pageSize: '10',
         filter: JSON.stringify({ search: 'a', foo: 'bar2' }),
         sortBy: 'name',
         sortDirection: 'asc',
@@ -1021,6 +1046,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'product-page': '3',
+        'product-pageSize': '10',
         'product-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
         'product-sortBy': 'name',
         'product-sortDirection': 'asc',
@@ -1033,6 +1059,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'order-page': '3',
+        'order-pageSize': '10',
         'order-filter': JSON.stringify({ search: 'a', foo: 'bar2' }),
         'order-sortBy': 'name',
         'order-sortDirection': 'asc',
