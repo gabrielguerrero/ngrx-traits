@@ -31,16 +31,16 @@ export type FilterOptions<Filter> =
 export type EntitiesFilterMethods<Filter, Entity> = {
   filterEntities: {
     (
+      options?:
+        | (() => FilterOptions<Filter>)
+        | Observable<FilterOptions<Filter>>,
+    ): RxMethodRef;
+    (
       options?: FilterOptions<Filter>,
     ): Promise<
       | { value: Signal<Entity[]>; ok: true }
       | { error: Signal<unknown>; ok: false }
     >;
-    (
-      options?:
-        | (() => FilterOptions<Filter>)
-        | Observable<FilterOptions<Filter>>,
-    ): RxMethodRef;
   };
   resetEntitiesFilter: () => void;
 };
@@ -51,16 +51,16 @@ export type NamedEntitiesFilterMethods<
 > = {
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: {
     (
+      options?:
+        | (() => FilterOptions<Filter>)
+        | Observable<FilterOptions<Filter>>,
+    ): RxMethodRef;
+    (
       options?: FilterOptions<Filter>,
     ): Promise<
       | { value: Signal<Entity[]>; ok: true }
       | { error: Signal<unknown>; ok: false }
     >;
-    (
-      options?:
-        | (() => FilterOptions<Filter>)
-        | Observable<FilterOptions<Filter>>,
-    ): RxMethodRef;
   };
 } & {
   [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: () => void;

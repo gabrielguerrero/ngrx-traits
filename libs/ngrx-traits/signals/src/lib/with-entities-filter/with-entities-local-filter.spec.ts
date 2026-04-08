@@ -282,6 +282,24 @@ describe('withEntitiesLocalFilter', () => {
     });
   }));
 
+  it('should merge new filter with previous if patch true is set, and using signal parameters ', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.filterEntities(() => ({
+        filter: { search: 'zero' },
+        patch: true,
+      }));
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      store.filterEntities({
+        filter: { search: 'zero', foo: 'bar' },
+        forceLoad: true,
+      });
+    });
+  }));
+
   it(' should reset page to and selection when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
