@@ -7,16 +7,16 @@ import { FilterOptions } from './with-entities-local-filter.model';
 export type EntitiesRemoteFilterMethods<Filter, Entity> = {
   filterEntities: {
     (
+      options?:
+        | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
+        | (() => FilterOptions<Filter>),
+    ): RxMethodRef;
+    (
       options?: FilterOptions<Filter> & { skipLoadingCall?: boolean },
     ): Promise<
       | { value: Signal<Entity[]>; ok: true }
       | { error: Signal<unknown>; ok: false }
     >;
-    (
-      options?:
-        | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
-        | (() => FilterOptions<Filter>),
-    ): RxMethodRef;
   };
   resetEntitiesFilter: (options?: {
     debounce?: number;
@@ -31,16 +31,16 @@ export type NamedEntitiesRemoteFilterMethods<
 > = {
   [K in Collection as `filter${Capitalize<string & K>}Entities`]: {
     (
+      options?:
+        | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
+        | (() => FilterOptions<Filter>),
+    ): RxMethodRef;
+    (
       options?: FilterOptions<Filter> & { skipLoadingCall?: boolean },
     ): Promise<
       | { value: Signal<Entity[]>; ok: true }
       | { error: Signal<unknown>; ok: false }
     >;
-    (
-      options?:
-        | Observable<FilterOptions<Filter> & { skipLoadingCall?: boolean }>
-        | (() => FilterOptions<Filter>),
-    ): RxMethodRef;
   };
 } & {
   [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: (options?: {
