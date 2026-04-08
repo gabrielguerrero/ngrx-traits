@@ -325,6 +325,26 @@ describe('withEntitiesHybridFilter', () => {
       });
     }));
 
+    it('should merge new filter with previous if patch true is set, using signal parameters', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        tick(400);
+        store.filterEntities(() => ({
+          filter: { search: 'zero' },
+          patch: true,
+        }));
+        expect(store.entities().length).toEqual(mockProducts.length);
+        tick(400);
+        expect(store.entities().length).toEqual(2);
+        expect(store.entitiesFilter()).toEqual({
+          search: 'zero',
+          categoryId: 'snes',
+        });
+      });
+    }));
+
     it(' should reset page to and selection when filter is executed', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -1103,9 +1123,7 @@ describe('withEntitiesHybridFilter', () => {
               previous.categoryId !== current.categoryId,
             filterFn: (entity, filter) =>
               !filter?.search ||
-              entity?.name
-                .toLowerCase()
-                .includes(filter?.search.toLowerCase()),
+              entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
           }),
           withEntitiesLoadingCall({
             fetchEntities: () => {
