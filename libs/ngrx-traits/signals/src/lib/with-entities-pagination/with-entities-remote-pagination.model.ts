@@ -66,6 +66,7 @@ export type EntitiesPaginationRemoteMethods<Entity> = {
     pageIndex: number;
     pageSize?: number;
     skipLoadingCall?: boolean;
+    forceLoad?: boolean;
   }) => void;
 } & SetEntitiesResult<{ entities: Entity[]; total: number }>;
 
@@ -77,5 +78,6 @@ export type NamedEntitiesPaginationRemoteMethods<
     pageIndex: number;
     pageSize?: number;
     skipLoadingCall?: boolean;
+    forceLoad?: boolean;
   }) => void;
 } & NamedSetEntitiesResult<Collection, { entities: Entity[]; total: number }>;

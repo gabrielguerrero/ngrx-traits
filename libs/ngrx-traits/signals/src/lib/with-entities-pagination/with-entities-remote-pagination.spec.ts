@@ -1008,7 +1008,6 @@ describe('withEntitiesRemotePagination', () => {
               result = result.slice(skip, skip + take);
             }
             return Promise.resolve({ entities: result, total });
-            return Promise.resolve({ entities: result, total: result.length });
           },
         }),
       );
@@ -1019,10 +1018,24 @@ describe('withEntitiesRemotePagination', () => {
       expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
 
       store.filterEntities({
+        filter: { search: 'a' },
+        patch: true,
+      });
+      tick(400);
+      // check page reset
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.entities().length).toEqual(30);
+
+      // go back to page 3 , to be sure page changes, fixes bug #274
+      store.loadEntitiesPage({ pageIndex: 3 });
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(3);
+
+      store.filterEntities({
         filter: { search: 'zero' },
         patch: true,
       });
       tick(400);
+
       // check page reset
       expect(store.entitiesCurrentPage().pageIndex).toEqual(0);
       expect(store.entities().length).toEqual(2);

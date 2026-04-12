@@ -347,8 +347,8 @@ export function withEntitiesRemotePagination<
               distinctUntilChanged(
                 (previous, current) =>
                   !current.forceLoad &&
-                  previous.pageIndex === current.pageIndex &&
-                  previous.pageSize === current.pageSize,
+                  pagination().currentPage === current.pageIndex &&
+                  pagination().pageSize === current.pageSize,
               ),
               exhaustMap(
                 ({ pageIndex, forceLoad, pageSize, skipLoadingCall }) =>
