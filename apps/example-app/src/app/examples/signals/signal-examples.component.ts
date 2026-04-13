@@ -58,6 +58,13 @@ import { RouterLink } from '@angular/router';
               pagination, single and multi selection and more
             </div>
           </mat-list-item>
+          <mat-list-item [routerLink]="'register-user'">
+            <div matListItemTitle><b>Register User Form</b></div>
+            <div matListItemLine>
+              Example using withCalls + Angular Signal Forms for form submission
+              with async error handling
+            </div>
+          </mat-list-item>
           <mat-list-item [routerLink]="'order-list'">
             <div matListItemTitle><b>Drill-down List</b></div>
             <div matListItemLine>

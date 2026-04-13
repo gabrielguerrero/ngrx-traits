@@ -67,6 +67,13 @@ export const routes: Routes = [
           ).then((m) => m.ProductsBranchListComponent),
       },
       {
+        path: 'register-user',
+        loadComponent: () =>
+          import(
+            './examples/signals/register-user-page/register-user.component'
+          ).then((m) => m.RegisterUserComponent),
+      },
+      {
         path: 'products-shop',
         loadChildren: () =>
           import(

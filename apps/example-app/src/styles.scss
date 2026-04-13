@@ -1,5 +1,3 @@
-
-
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
 @use '@angular/material' as mat;
@@ -15,7 +13,12 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $angular-client-primary: mat.m2-define-palette(mat.$m2-teal-palette, 500);
-$angular-client-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+$angular-client-accent: mat.m2-define-palette(
+  mat.$m2-pink-palette,
+  A200,
+  A100,
+  A400
+);
 
 // The warn palette is optional (defaults to red).
 $angular-client-warn: mat.m2-define-palette(mat.$m2-red-palette);
@@ -40,7 +43,9 @@ $angular-client-theme: mat.m2-define-dark-theme(
 @tailwind components;
 @tailwind utilities;
 
-.mdc-notched-outline__notch
-{
+.mdc-notched-outline__notch {
   border-right: none;
 }
+// @view-transition {
+//   navigation: auto;
+// }
