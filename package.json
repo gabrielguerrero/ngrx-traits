@@ -52,6 +52,7 @@
     "@angular/ssr": "21.1.1",
     "@docsearch/js": "^3.9.0",
     "@docsearch/css": "^3.9.0",
+    "@js-temporal/polyfill": "^0.5.1",
     "@ng-icons/bootstrap-icons": "^29.5.1",
     "@ng-icons/core": "^29.5.1",
     "@ngrx/effects": "21.0.1",

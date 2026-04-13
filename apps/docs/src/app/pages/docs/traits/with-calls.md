@@ -208,6 +208,94 @@ const store = signalStore(
 );
 ```
 
+### Awaiting call result
+When calling a generated method with a direct param (not a Signal or Observable), it returns a Promise that resolves with the result of the call. This is useful for handling success/error in components, e.g. showing snackbars or resetting forms.
+
+The return type is:
+```typescript
+Promise<
+  | { value: Signal<ResultType>; ok: true }
+  | { error: Signal<ErrorType>; ok: false }
+>
+```
+
+Store setup with `mapError` to type the error:
+```typescript
+const RegisterUserStore = signalStore(
+  withCalls(() => ({
+    registerUser: callConfig({
+      call: (params: { name: string; email: string; password: string }) =>
+        inject(UserService).register(params),
+      mapError: (error) => {
+        return (error as HttpErrorResponse).error.message;
+      },
+    }),
+  })),
+);
+```
+
+Component usage:
+```typescript
+async onSubmit() {
+  const { name, email, password } = this.model();
+  const result = await this.store.registerUser({ name, email, password });
+  if (result.ok) {
+    this.snackBar.open('Registration successful!', 'Close', {
+      duration: 3000,
+    });
+  } else {
+    this.snackBar.open(result.error() as string, 'Close', {
+      duration: 5000,
+    });
+  }
+}
+```
+
+### Awaiting call with signal forms submit
+
+Example of how it can be use combine with signals form submit to connect server side errors to the form
+
+```ts
+protected store = inject(RegisterUserStore);
+  private snackBar = inject(MatSnackBar);
+
+  protected model = signal<RegisterData>({ ...initialValue });
+  protected registerForm = form(this.model, (path) => {
+    required(path.name);
+    required(path.email);
+    email(path.email);
+    required(path.password);
+    minLength(path.password, 6);
+    required(path.confirmPassword);
+    validate(path.confirmPassword, ({ value, valueOf }) => {
+      const password = valueOf(path.password);
+      return value() !== password
+        ? { kind: 'passwordMismatch', message: 'Passwords must match' }
+        : undefined;
+    });
+  });
+
+  async onSubmit() {
+    await submit(this.registerForm, async () => {
+      const { name, email, password, dateOfBirth } = this.model();
+
+      const result = await this.store.registerUser({ name, email, password });
+
+      if (result.ok) {
+        this.snackBar.open('Registration successful!', 'Close');
+        this.model.set({ ...initialValue });
+      } else {
+        this.snackBar.open(result.error() as string, 'Close');
+        return {
+          kind: 'server',
+          fieldTree: this.registerForm.email,
+          message: result.error() as string,
+        };
+      }
+      return undefined;
+    });
+  }
+```
 ## API Reference
 
 This trait receives and object to allow specific configurations:
@@ -251,5 +339,11 @@ getUserError: Signal<ErrorType>;
 Generates the following methods
 
 ```typescript
-getUser: (param: ParamType) => void;
+// When called with a direct param, returns a Promise with the result
+getUser: (param: ParamType) => Promise<
+  | { value: Signal<ResultType>; ok: true }
+  | { error: Signal<ErrorType>; ok: false }
+>;
+// When called with a Signal or Observable, returns an RxMethodRef
+getUser: (param: Signal<ParamType> | Observable<ParamType>) => RxMethodRef;
 ```
