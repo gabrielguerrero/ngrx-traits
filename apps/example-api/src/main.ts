@@ -96,6 +96,14 @@ app.delete('/api/orders/:id', (req, res) => {
   res.json(result);
 });
 
+app.post('/api/register', (req, res) => {
+  const body = req.body as { email: string };
+  if (body.email === 'taken@test.com') {
+    return res.status(400).json({ message: 'Email already taken' });
+  }
+  res.json({ id: crypto.randomUUID() });
+});
+
 app.listen(port, host, () => {
   console.log(`Mock API server listening on http://${host}:${port}`);
 });

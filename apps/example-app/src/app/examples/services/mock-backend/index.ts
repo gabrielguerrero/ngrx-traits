@@ -3,6 +3,7 @@ import { setupWorker } from 'msw/browser';
 import { branchesHandlers } from './branches.handler';
 import { ordersHandlers } from './orders.handler';
 import { productHandlers } from './product.handler';
+import { userHandlers } from './user.handler';
 
 let worker: ReturnType<typeof setupWorker> | undefined;
 
@@ -12,6 +13,7 @@ if (typeof window !== 'undefined') {
     ...productHandlers,
     ...branchesHandlers,
     ...ordersHandlers,
+    ...userHandlers,
   );
   worker.start({
     onUnhandledRequest: 'bypass',

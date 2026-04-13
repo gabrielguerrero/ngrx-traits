@@ -14,7 +14,7 @@ import {
 } from '@angular/material/form-field';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
 import { EffectsModule, provideEffects } from '@ngrx/effects';
 import { provideStore } from '@ngrx/store';
 import { StoreModule } from '@ngrx/store';
@@ -32,6 +32,7 @@ export const appConfig: ApplicationConfig = {
         scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       }),
+      withViewTransitions()
     ),
     provideAnimations(),
     importProvidersFrom(StoreModule.forRoot({})),

@@ -73,6 +73,34 @@ The second way is where there is no submit button, and the filter is connected t
     (input)="store.filterProductEntities({ filter:{ search: $event.target.value }, patch: true })"
 ```
 
+### Using filter with signal form submit 
+
+Example of how to use the filter combine with signal form submit 
+
+```ts
+export class DemoComponent implements OnInit {
+  store = inject(ProductStore);
+  filter = linkedSignal(this.store.productEntitiesFilter);
+  filterForm = form(this.filter);
+
+
+  submitSearch() {
+    submit(this.filterForm, async (form) => {
+      const result = await this.store.filterProductEntities({
+        filter: this.filter(),
+      });
+      if (!result.ok) {
+        return {
+          kind: 'server',
+          message: result.error() as string,
+        } satisfies TreeValidationResult;
+      }
+      return undefined;
+    });
+  }
+}
+```
+
 ### Mixing with other remote store features
 You can mix this feature with other remote store features like withEntitiesRemoteSort, withEntitiesRemotePagination, etc.
 
