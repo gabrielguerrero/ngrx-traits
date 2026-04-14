@@ -41,6 +41,9 @@ importers:
       '@angular/ssr':
         specifier: 21.1.1
         version: 21.1.1(aadc735b2b0fc32c9a198c88b67ab017)
+      '@docsearch/css':
+        specifier: ^3.9.0
+        version: 3.9.0
       '@docsearch/js':
         specifier: ^3.9.0
         version: 3.9.0(@algolia/client-search@5.47.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(search-insights@2.17.3)
