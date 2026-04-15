@@ -9,6 +9,7 @@ import {
   withEntitiesRemotePagination,
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
+  withEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
 import { signalStoreFeature, type } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
@@ -42,6 +43,7 @@ export function withProductEntities() {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(productEntityConfig),
+    withEntitiesSyncToRouteQueryParams(productEntityConfig),
     withEntitiesLoadingCall(
       (
         {

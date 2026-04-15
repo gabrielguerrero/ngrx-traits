@@ -100,7 +100,6 @@ export function withEntitiesSyncToRouteQueryParams<
   Entity,
   Filter,
   const Collection extends string = '',
-  Error = unknown,
 >(config: {
   entity: Entity;
   collection?: Collection;
@@ -115,15 +114,15 @@ export function withEntitiesSyncToRouteQueryParams<
     (Collection extends ''
       ? {
           state: EntityState<Entity> & CallStatusState;
-          props: EntityProps<Entity> & CallStatusComputed<Error>;
-          methods: CallStatusMethods<Error>;
+          props: EntityProps<Entity> & CallStatusComputed;
+          methods: CallStatusMethods;
         }
       : {
           state: NamedEntityState<Entity, Collection> &
             NamedCallStatusState<`${Collection}Entities`>;
           props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<`${Collection}Entities`, Error>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`, Error>;
+            NamedCallStatusComputed<`${Collection}Entities`>;
+          methods: NamedCallStatusMethods<`${Collection}Entities`>;
         }),
   {
     state: {};

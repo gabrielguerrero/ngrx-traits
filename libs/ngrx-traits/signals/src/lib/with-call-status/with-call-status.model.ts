@@ -4,7 +4,7 @@ export type CallStatus = 'init' | 'loading' | 'loaded' | { error: unknown };
 export type CallStatusState = {
   callStatus: CallStatus;
 };
-export type CallStatusComputed<Error = unknown> = {
+export type CallStatusComputed<Error = any> = {
   isLoading: Signal<boolean>;
 } & {
   isLoaded: Signal<boolean>;
