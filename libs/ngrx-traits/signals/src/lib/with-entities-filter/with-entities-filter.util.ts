@@ -21,7 +21,9 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    filterKey: collection ? `_${config.collection}EntitiesFilter` : '_entitiesFilter',
+    filterKey: collection
+      ? `_${config.collection}EntitiesFilter`
+      : '_entitiesFilter',
     computedFilterKey: collection
       ? `${config.collection}EntitiesFilter`
       : 'entitiesFilter',
@@ -77,7 +79,7 @@ export function getWithEntitiesFilterEvents(config?: { collection?: string }) {
   return {
     entitiesFilterChanged: createEvent(
       `${collection}.entitiesFilterChanged`,
-      props<{ filter: unknown }>(),
+      props<{ filter: unknown; skipLoadingCall?: boolean }>(),
     ),
   };
 }

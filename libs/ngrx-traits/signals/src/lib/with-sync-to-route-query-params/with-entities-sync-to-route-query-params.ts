@@ -133,25 +133,25 @@ export function withEntitiesSyncToRouteQueryParams<
   }
 > {
   const mappers = [
-    getQueryMapperForEntitiesPagination({
-      collection: config?.collection,
-      skipLoadingCall: config?.skipLoadingCall ?? false,
-    }),
     getQueryMapperForEntitiesSort({
       collection: config?.collection,
-      skipLoadingCall: config?.skipLoadingCall ?? false,
+      skipLoadingCall: true,
     }),
     getQueryMapperForEntitiesFilter({
       collection: config?.collection,
       filterMapper: config?.filterMapper,
-      skipLoadingCall: config?.skipLoadingCall ?? false,
+      skipLoadingCall: true,
+    }),
+    getQueryMapperForEntitiesPagination({
+      collection: config?.collection,
+      skipLoadingCall: true,
     }),
     getQueryMapperForSingleSelection(config),
   ];
   const prefixString =
     config?.prefix === false ? undefined : config?.prefix ?? config?.collection;
 
-  const { loadingKey, loadedKey } = getWithCallStatusKeys({
+  const { loadingKey, loadedKey, setLoadingKey } = getWithCallStatusKeys({
     collection: config?.collection,
   });
 
@@ -164,15 +164,20 @@ export function withEntitiesSyncToRouteQueryParams<
             getQueryMapperWithPrefix({ prefix: prefixString, mapper }),
           )
         : mappers,
+
       restoreOnInit: config?.restoreOnInit ?? true,
     }),
     withHooks((store) => {
       return {
         onInit: () => {
+          const setLoading = store[setLoadingKey] as unknown as () => void;
+          !config.skipLoadingCall && setLoading();
+ 
           if (config?.onQueryParamsLoaded) {
             const loading = store[loadingKey] as unknown as Signal<boolean>;
             const loaded = store[loadedKey] as unknown as Signal<boolean>;
             const loaded$ = toObservable(loaded);
+
             toObservable(loading)
               .pipe(
                 first((v) => v),

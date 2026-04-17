@@ -193,9 +193,15 @@ export function withEntitiesLocalPagination<
           [entitiesCurrentPageKey]: entitiesCurrentPage,
         };
       }),
-      withEventHandler((state) => [
-        onEvent(entitiesFilterChanged, entitiesLocalSortChanged, () => {
-          setCurrentPage(state, 0);
+      withEventHandler((state: Record<string, Signal<unknown>>) => [
+        onEvent(entitiesFilterChanged, entitiesLocalSortChanged, (event) => {
+          const pagination = state[paginationKey] as Signal<{
+            pageSize: number;
+            currentPage: number;
+          }>;
+          const page = pagination().currentPage;
+
+          if (page !== 0) setCurrentPage(state, 0);
         }),
       ]),
 

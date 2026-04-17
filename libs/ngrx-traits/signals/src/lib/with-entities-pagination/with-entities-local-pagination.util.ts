@@ -62,10 +62,18 @@ export function getQueryMapperForEntitiesPagination(config?: {
         const loadEntitiesPage = store[
           loadEntitiesPageKey
         ] as EntitiesPaginationRemoteMethods<unknown>['loadEntitiesPage'];
+        const pagination = store[paginationKey] as Signal<
+          EntitiesPaginationLocalState['entitiesPagination']
+        >;
         const loading = store[loadingKey] as Signal<boolean>;
         const loaded = store[loadedKey] as Signal<boolean>;
         const loaded$ = toObservable(loaded);
 
+        loadEntitiesPage({
+          pageIndex: +page - 1,
+          forceLoad: true,
+          skipLoadingCall: config?.skipLoadingCall,
+        });
         toObservable(loading)
           .pipe(
             startWith(loading()),
@@ -81,10 +89,12 @@ export function getQueryMapperForEntitiesPagination(config?: {
             takeUntilDestroyed(),
           )
           .subscribe(() => {
-            loadEntitiesPage({
-              pageIndex: +page - 1,
-              skipLoadingCall: config?.skipLoadingCall,
-            });
+            // this is needed in case is cleared before loading finishes
+            if (pagination().currentPage !== +page - 1)
+              loadEntitiesPage({
+                pageIndex: +page - 1,
+                skipLoadingCall: config?.skipLoadingCall,
+              });
           });
       }
     },

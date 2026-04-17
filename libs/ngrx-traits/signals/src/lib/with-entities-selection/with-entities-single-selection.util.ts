@@ -55,6 +55,9 @@ export function getQueryMapperForSingleSelection(config?: {
         const loaded = store[loadedKey] as Signal<boolean>;
         const loaded$ = toObservable(loaded);
 
+         selectEntity({
+          id: selectedId,
+        });
         toObservable(loading)
           .pipe(
             startWith(loading()),
@@ -70,6 +73,7 @@ export function getQueryMapperForSingleSelection(config?: {
             takeUntilDestroyed(),
           )
           .subscribe(() => {
+            // this is needed in case is cleared before loading finishes
             selectEntity({
               id: selectedId,
             });

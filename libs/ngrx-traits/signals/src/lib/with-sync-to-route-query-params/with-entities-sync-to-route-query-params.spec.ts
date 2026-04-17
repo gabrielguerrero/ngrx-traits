@@ -655,18 +655,19 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         filter: JSON.stringify({ search: '', foo: 'bar' }),
         sortBy: 'description',
         sortDirection: 'desc',
-        selectedId: '2',
+        selectedId: '12',
       },
     });
     TestBed.tick();
     load.next(true);
     tick(400);
+    expect(store.isLoaded()).toBe(true);
     expect(store.entitiesFilter()).toEqual({ search: '', foo: 'bar' });
     expect(store.entitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
-    expect(store.idSelected()).toEqual('2');
+    expect(store.idSelected()).toEqual('12');
     expect(store.entitiesPagination().currentPage).toEqual(1);
 
     // Act

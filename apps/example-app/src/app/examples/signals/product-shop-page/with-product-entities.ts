@@ -43,7 +43,10 @@ export function withProductEntities() {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(productEntityConfig),
-    withEntitiesSyncToRouteQueryParams(productEntityConfig),
+    withEntitiesSyncToRouteQueryParams({
+      ...productEntityConfig,
+      skipLoadingCall: true, // the initialValue: 'loading', set in withCallStatus will trigger the loading call, so we skip it here to avoid duplicate calls on init
+    }),
     withEntitiesLoadingCall(
       (
         {
