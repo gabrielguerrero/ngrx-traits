@@ -1,7 +1,6 @@
 import { computed, Signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
-  EmptyFeatureResult,
   SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
@@ -139,14 +138,6 @@ export function withEntitiesSyncToRouteQueryParams<
   }
 > {
   const mappers = [
-    ...(config?.syncPagination !== false
-      ? [
-          getQueryMapperForEntitiesPagination({
-            collection: config?.collection,
-            skipLoadingCall: config?.skipLoadingCall ?? false,
-          }),
-        ]
-      : []),
     ...(config?.syncSort !== false
       ? [
           getQueryMapperForEntitiesSort({
@@ -170,11 +161,19 @@ export function withEntitiesSyncToRouteQueryParams<
     ...(config?.syncMultiSelection === true
       ? [getQueryMapperForMultiSelection(config)]
       : []),
+    ...(config?.syncPagination !== false
+      ? [
+          getQueryMapperForEntitiesPagination({
+            collection: config?.collection,
+            skipLoadingCall: config?.skipLoadingCall ?? false,
+          }),
+        ]
+      : []),
   ];
   const prefixString =
     config?.prefix === false ? undefined : config?.prefix ?? config?.collection;
 
-  const { loadingKey, loadedKey } = getWithCallStatusKeys({
+  const { loadingKey, loadedKey, setLoadingKey } = getWithCallStatusKeys({
     collection: config?.collection,
   });
 
@@ -187,6 +186,7 @@ export function withEntitiesSyncToRouteQueryParams<
             getQueryMapperWithPrefix({ prefix: prefixString, mapper }),
           )
         : mappers,
+
       restoreOnInit: config?.restoreOnInit ?? true,
     }),
     withHooks((store) => {
@@ -196,6 +196,7 @@ export function withEntitiesSyncToRouteQueryParams<
             const loading = store[loadingKey] as unknown as Signal<boolean>;
             const loaded = store[loadedKey] as unknown as Signal<boolean>;
             const loaded$ = toObservable(loaded);
+
             toObservable(loading)
               .pipe(
                 first((v) => v),

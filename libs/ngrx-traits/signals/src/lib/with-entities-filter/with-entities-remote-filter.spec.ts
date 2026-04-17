@@ -53,7 +53,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should filter entities and store filter', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
       });
@@ -84,7 +84,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should filter without params should reapply filter', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
       });
@@ -146,7 +146,7 @@ describe('withEntitiesRemoteFilter', () => {
 
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
       });
@@ -160,7 +160,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should not filter entities is skipLoadingCall is true but should store filter', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
         skipLoadingCall: true,
@@ -195,7 +195,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should filter entities after provide debounce', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
         debounce: 1000,
@@ -235,7 +235,7 @@ describe('withEntitiesRemoteFilter', () => {
         }),
       );
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
       });
@@ -248,7 +248,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should filter entities immediately when forceLoad is true', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
         forceLoad: true,
@@ -261,7 +261,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should merge new filter with previous if patch true is set ', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities({
         filter: { search: 'zero' },
         patch: true,
@@ -276,7 +276,7 @@ describe('withEntitiesRemoteFilter', () => {
   it('should merge new filter with previous if patch true is set using signals', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.filterEntities(() => ({
         filter: { search: 'zero' },
         patch: true,
@@ -318,7 +318,7 @@ describe('withEntitiesRemoteFilter', () => {
         }),
       );
       const store = new Store();
-      TestBed.tick();
+      tick();
       tick(400);
       store.selectEntity({ id: mockProducts[0].id });
       store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
@@ -376,7 +376,7 @@ describe('withEntitiesRemoteFilter', () => {
         }),
       );
       const store = new Store();
-      TestBed.tick();
+      tick();
       store.loadProductEntitiesPage({ pageIndex: 3 });
       tick(400);
       expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
@@ -443,7 +443,7 @@ describe('withEntitiesRemoteFilter', () => {
         }),
       );
       const store = new Store();
-      TestBed.tick();
+      tick();
 
       console.log('first');
       // First call should pass should not call backend because of skipLoadingCall
@@ -517,7 +517,7 @@ describe('withEntitiesRemoteFilter', () => {
         }),
       );
       const store = new Store();
-      TestBed.tick();
+
       const result = await store.filterEntities({
         filter: { search: 'zero', foo: 'bar' },
         forceLoad: true,
@@ -546,7 +546,7 @@ describe('withEntitiesRemoteFilter', () => {
         }),
       );
       const store = new Store();
-      TestBed.tick();
+
       const result = await store.filterEntities({
         filter: { search: 'zero', foo: 'bar' },
         forceLoad: true,

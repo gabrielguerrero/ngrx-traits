@@ -255,6 +255,7 @@ export function withEntitiesHybridFilter<
                 patch?: boolean;
                 forceLoad?: boolean;
                 skipLoadingCall?: boolean;
+                _emitEvent?: boolean;
               }
             | undefined
           >(
@@ -289,7 +290,8 @@ export function withEntitiesHybridFilter<
                     ),
                   });
                 }
-                broadcast(state, entitiesFilterChanged(value));
+                if (value._emitEvent !== false)
+                  broadcast(state, entitiesFilterChanged(value));
                 if (isRemote && !value?.skipLoadingCall) setLoading?.();
               }),
             ),
@@ -312,7 +314,9 @@ export function withEntitiesHybridFilter<
               ) {
                 return filterEntities(options);
               }
-              filterEntities(options ? toFilterOptions(options, defaultFilter) : undefined);
+              filterEntities(
+                options ? toFilterOptions(options, defaultFilter) : undefined,
+              );
 
               return lastValueFrom(
                 toObservable(callState, { injector: environmentInjector }).pipe(

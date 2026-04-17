@@ -51,6 +51,7 @@ export function debounceFilterPipe<Filter>(
         patch?: boolean;
         forceLoad?: boolean;
         skipLoadingCall?: boolean;
+        _emitEvent?: boolean;
       }) =>
         value?.forceLoad || (value.debounce ?? defaultDebounce) == 0
           ? of({})
@@ -79,7 +80,7 @@ export function getWithEntitiesFilterEvents(config?: { collection?: string }) {
   return {
     entitiesFilterChanged: createEvent(
       `${collection}.entitiesFilterChanged`,
-      props<{ filter: unknown }>(),
+      props<{ filter: unknown; skipLoadingCall?: boolean }>(),
     ),
   };
 }
@@ -102,6 +103,7 @@ export function toFilterOptions<Filter extends Record<string, unknown>>(
   patch?: boolean;
   forceLoad?: boolean;
   skipLoadingCall?: boolean;
+  _emitEvent?: boolean;
 } {
   // FilterOptions requires 'filter' key - if missing, it's raw Filter
   if (!('filter' in options)) {
@@ -121,7 +123,13 @@ export function toFilterOptions<Filter extends Record<string, unknown>>(
 
   // Check for FilterOptions-specific keys not present in defaultFilter
   const defaultFilterKeys = new Set(Object.keys(defaultFilter));
-  const specificKeys = ['debounce', 'patch', 'forceLoad', 'skipLoadingCall'];
+  const specificKeys = [
+    'debounce',
+    'patch',
+    'forceLoad',
+    'skipLoadingCall',
+    '_emitEvent',
+  ];
   if (specificKeys.some((k) => k in options && !defaultFilterKeys.has(k))) {
     return options as any; // has debounce/patch/etc → FilterOptions
   }
@@ -149,6 +157,7 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
 > {
   const { filterEntitiesKey, filterKey } = getWithEntitiesFilterKeys(config);
 
+  let firstLoad = true;
   return {
     queryParamsToState: (query, store) => {
       const filter = config?.filterMapper
@@ -156,15 +165,21 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
         : query.filter
           ? JSON.parse(query.filter)
           : undefined;
+
       if (filter) {
         const filterEntities = store[
           filterEntitiesKey
         ] as EntitiesRemoteFilterMethods<any, any>['filterEntities'];
         filterEntities({
           filter,
-          forceLoad: true,
-          skipLoadingCall: config?.skipLoadingCall,
+          // we forceLoad on first load to ensure filter is set in the store, before fetching data
+          // after that it should not force load, to allow history navigation without triggering loading state
+          forceLoad: firstLoad,
+          // we only allow to skip the loading call on the first load,
+          // otherwise history navigation would not work as expected
+          skipLoadingCall: firstLoad && config?.skipLoadingCall,
         });
+        firstLoad = false;
       }
     },
     stateToQueryParams: (store) => {

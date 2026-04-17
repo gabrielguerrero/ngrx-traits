@@ -99,7 +99,7 @@ export function getQueryMapperForEntitiesSort(config?: {
   sortDirection: string;
 }> {
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
-
+  let firstLoad = true;
   return {
     queryParamsToState: (query, store) => {
       const sortBy = query.sortBy;
@@ -108,10 +108,18 @@ export function getQueryMapperForEntitiesSort(config?: {
         const sortEntities = store[
           sortEntitiesKey
         ] as EntitiesRemoteSortMethods<unknown>['sortEntities'];
-        sortEntities({
-          sort: { field: sortBy, direction: sortDirection as 'asc' | 'desc' },
-          skipLoadingCall: config?.skipLoadingCall,
-        });
+        const sort = store[sortKey] as Signal<
+          EntitiesSortState<any>['entitiesSort']
+        >;
+        if (sort().direction != sortDirection || sort().field != sortBy) {
+          sortEntities({
+            sort: { field: sortBy, direction: sortDirection as 'asc' | 'desc' },
+            // we only allow to skip the loading call on the first load,
+            // otherwise history navigation would not work as expected
+            skipLoadingCall: firstLoad && config?.skipLoadingCall,
+          });
+        }
+        firstLoad = false;
       }
     },
     stateToQueryParams: (store) => {

@@ -173,7 +173,6 @@ describe('withEntitiesHybridFilter', () => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
         store.setLoaded();
-        TestBed.tick();
         tick();
         expect(store.entities().length).toEqual(2);
         expect(store.entities()).toEqual([
@@ -236,7 +235,6 @@ describe('withEntitiesHybridFilter', () => {
         const store = new Store();
         patchState(store, setAllEntities(mockProducts));
         store.setLoaded();
-        TestBed.tick();
         tick();
         expect(store.entities().length).toEqual(2);
         expect(store.entities()).toEqual([
@@ -676,7 +674,7 @@ describe('withEntitiesHybridFilter', () => {
     it('should filter entities and store filter', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
         });
@@ -733,7 +731,7 @@ describe('withEntitiesHybridFilter', () => {
 
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'bar2' },
         });
@@ -750,7 +748,7 @@ describe('withEntitiesHybridFilter', () => {
     it('should do filter entities is skipLoadingCall is true but should store filter', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: '', categoryId: 'gamecube' },
           skipLoadingCall: true,
@@ -788,7 +786,7 @@ describe('withEntitiesHybridFilter', () => {
     it('should filter entities after provide debounce', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
           debounce: 1000,
@@ -833,7 +831,7 @@ describe('withEntitiesHybridFilter', () => {
           }),
         );
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'bar2' },
         });
@@ -846,7 +844,7 @@ describe('withEntitiesHybridFilter', () => {
     it('should filter entities immediately when forceLoad is true', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: 'zero', categoryId: 'gamecube' },
           forceLoad: true,
@@ -859,7 +857,7 @@ describe('withEntitiesHybridFilter', () => {
     it('should merge new filter with previous if patch true is set ', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.filterEntities({
           filter: { search: 'zero' },
           patch: true,
@@ -913,7 +911,7 @@ describe('withEntitiesHybridFilter', () => {
           }),
         );
         const store = new Store();
-        TestBed.tick();
+        tick();
         tick(400);
         store.selectEntity({ id: mockProducts[0].id });
         store.selectEntities({ ids: [mockProducts[2].id, mockProducts[3].id] });
@@ -982,7 +980,7 @@ describe('withEntitiesHybridFilter', () => {
           }),
         );
         const store = new Store();
-        TestBed.tick();
+        tick();
         store.loadProductEntitiesPage({ pageIndex: 3 });
         tick(400);
         expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
@@ -1052,7 +1050,7 @@ describe('withEntitiesHybridFilter', () => {
           }),
         );
         const store = new Store();
-        TestBed.tick();
+        tick();
 
         // First call should pass should not call backend because of skipLoadingCall
         store.filterProductEntities({

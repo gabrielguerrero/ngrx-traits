@@ -52,6 +52,27 @@ describe('withEntitiesSingleSelection', () => {
       });
     });
 
+    it('selectEntity with id not yet loaded should store the id and resolve entitySelected once entities arrive', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.selectEntity({ id: mockProducts[4].id });
+        expect(store.idSelected()).toEqual(mockProducts[4].id);
+        expect(store.entitySelected()).toBeUndefined();
+        patchState(store, setAllEntities(mockProducts));
+        expect(store.entitySelected()).toEqual(mockProducts[4]);
+      });
+    });
+
+    it('selectEntity with id that never arrives keeps idSelected and entitySelected undefined', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.selectEntity({ id: 'non-existent-id' });
+        expect(store.idSelected()).toEqual('non-existent-id');
+        expect(store.entitySelected()).toBeUndefined();
+      });
+    });
+
     it('toggleEntity should toggle selection of the entity', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();

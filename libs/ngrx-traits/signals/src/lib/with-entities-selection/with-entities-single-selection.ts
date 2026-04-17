@@ -164,7 +164,7 @@ export function withEntitiesSingleSelection<
                   return;
                 }
                 patchState(state as WritableStateSource<object>, {
-                  [selectedIdKey]: entityMap()[item.id] ? item.id : undefined,
+                  [selectedIdKey]: item.id,
                 });
               }),
             ),

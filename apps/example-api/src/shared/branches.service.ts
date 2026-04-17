@@ -139,19 +139,19 @@ export function searchBranches(
 
   const total = result.length;
 
-  // Apply pagination
-  if (options?.skip || options?.take) {
-    const skip = +(options?.skip ?? 0);
-    const take = +(options?.take ?? 0);
-    result = result.slice(skip, skip + take);
-  }
-
   // Apply sorting
   if (options?.sortColumn) {
     result = sortData(result, {
       active: options.sortColumn as any,
       direction: options.sortAscending === 'true' ? 'asc' : 'desc',
     });
+  }
+
+  // Apply pagination
+  if (options?.skip || options?.take) {
+    const skip = +(options?.skip ?? 0);
+    const take = +(options?.take ?? 0);
+    result = result.slice(skip, skip + take);
   }
 
   return { resultList: result, total };

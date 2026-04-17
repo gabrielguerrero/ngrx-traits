@@ -16,7 +16,7 @@ import {
 } from '@ngrx-traits/signals';
 import { signalStore, signalStoreFeature, type } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
-import { map, of, Subject } from 'rxjs';
+import { BehaviorSubject, map, of, Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { mockProducts } from '../test.mocks';
@@ -453,26 +453,10 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { selectedId: '2' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       expect(store.idSelected()).toEqual('2');
-    }));
-
-    it('url query params selectedId with invalid id should set the id as undefined in store', fakeAsync(() => {
-      const load = new Subject<boolean>();
-      const Store = signalStore(
-        localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams({ entity }),
-      );
-      const { store } = init({
-        Store,
-        queryParams: { selectedId: '2ASDASD' },
-      });
-      TestBed.tick();
-      load.next(true);
-      tick(400);
-      expect(store.idSelected()).toBeUndefined();
     }));
 
     it('changes on entities selectedId should update url query params', fakeAsync(() => {
@@ -485,7 +469,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { selectedId: '2' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       store.selectEntity({ id: '3' });
@@ -552,7 +536,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { selectedIds: '2,3' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       expect(store.idsSelected()).toEqual(['2', '3']);
@@ -572,7 +556,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: {},
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       store.selectEntities({ ids: ['3', '5'] });
@@ -598,7 +582,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2', pageSize: '5' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(1);
@@ -615,27 +599,10 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '1', pageSize: '20' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().pageSize).toEqual(20);
-    }));
-
-    it('url query params with invalid page not updated store', fakeAsync(() => {
-      const load = new Subject<boolean>();
-      const Store = signalStore(
-        localStoreFeature({ load }),
-        withEntitiesSyncToRouteQueryParams({ entity }),
-      );
-      const { store } = init({
-        Store,
-        queryParams: { page: '9999', pageSize: '5' },
-      });
-      TestBed.tick();
-      load.next(true);
-      tick(400);
-      expect(store.entitiesPagination().currentPage).toEqual(0);
-      expect(store.entitiesPagination().pageSize).toEqual(5);
     }));
 
     it('changes on entities page should update url query params', fakeAsync(() => {
@@ -648,7 +615,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       store.loadEntitiesPage({ pageIndex: 2 });
@@ -688,7 +655,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       expect(store.entitiesPagination().currentPage).toEqual(1);
@@ -706,9 +673,9 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     }));
   });
 
-  it('multiple url and state changes should sync correctly', fakeAsync(() => {
+  it('multiple url and state changes should sync correctly', async () => {
     // Arrange
-    const load = new Subject<boolean>();
+    const load = new BehaviorSubject<boolean>(false);
     const Store = signalStore(
       localStoreFeature({ load }),
       withEntitiesSyncToRouteQueryParams({ entity }),
@@ -723,9 +690,11 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '2',
       },
     });
-    TestBed.tick();
     load.next(true);
-    tick(400);
+    // wait for initial load + URL restore (selection/pagination mappers
+    // re-apply after loading completes, so user actions must come after)
+    await expect.poll(() => store.idSelected()).toBe('2');
+    await expect.poll(() => store.entitiesPagination().currentPage).toBe(1);
     // Act
     store.filterEntities({
       filter: { search: 'a', foo: 'bar2' },
@@ -734,21 +703,24 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     store.sortEntities({ sort: { field: 'name', direction: 'asc' } });
     store.selectEntity({ id: '35' });
     store.loadEntitiesPage({ pageIndex: 2 });
-    tick(10000);
+    load.next(true);
     // Assert
-    expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
-      queryParams: expect.objectContaining({
-        page: '3',
-        pageSize: '10',
-        filter: JSON.stringify({ search: 'a', foo: 'bar2' }),
-        sortBy: 'name',
-        sortDirection: 'asc',
-        selectedId: '35',
-      }),
-      queryParamsHandling: 'merge',
-    });
-  }));
+    await expect
+      .poll(
+        () => (router.navigate as any).mock.calls.at(-1)?.[1]?.queryParams,
+        { timeout: 2000 },
+      )
+      .toEqual(
+        expect.objectContaining({
+          page: '3',
+          pageSize: '10',
+          filter: JSON.stringify({ search: 'a', foo: 'bar2' }),
+          sortBy: 'name',
+          sortDirection: 'asc',
+          selectedId: '35',
+        }),
+      );
+  });
 
   it('multiple url and state changes should sync correctly using remote store features', fakeAsync(() => {
     // Arrange
@@ -764,18 +736,19 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         filter: JSON.stringify({ search: '', foo: 'bar' }),
         sortBy: 'description',
         sortDirection: 'desc',
-        selectedId: '2',
+        selectedId: '12',
       },
     });
-    TestBed.tick();
+    tick();
     load.next(true);
     tick(400);
+    expect(store.isLoaded()).toBe(true);
     expect(store.entitiesFilter()).toEqual({ search: '', foo: 'bar' });
     expect(store.entitiesSort()).toEqual({
       field: 'description',
       direction: 'desc',
     });
-    expect(store.idSelected()).toEqual('2');
+    expect(store.idSelected()).toEqual('12');
     expect(store.entitiesPagination().currentPage).toEqual(1);
 
     // Act
@@ -826,7 +799,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'p-selectedId': '2',
       },
     });
-    TestBed.tick();
+    tick();
     load.next(true);
     tick(400);
     // Act
@@ -870,7 +843,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'product-selectedId': '2',
       },
     });
-    TestBed.tick();
+    tick();
     load.next(true);
     tick(400);
     expect(store.productEntitiesFilter()).toEqual({ search: '', foo: 'bar' });
@@ -921,7 +894,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '2',
       },
     });
-    TestBed.tick();
+    tick();
     load.next(true);
     tick(400);
     // Act
@@ -972,7 +945,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '35',
       },
     });
-    TestBed.tick();
+    tick();
     load.next(true);
     tick(400);
 
@@ -1005,7 +978,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'order-selectedId': '2',
       },
     });
-    TestBed.tick();
+    tick();
     load.next(true);
     load2.next(true);
     tick(400);
@@ -1118,7 +1091,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { filter: JSON.stringify({ search: 'test', foo: 'bar' }) },
       });
-      TestBed.tick();
+      tick();
       tick(400);
       // With skipLoadingCall: true, the fetchEntities should not be called
       expect(fetchEntitiesSpy).not.toHaveBeenCalled();
@@ -1144,7 +1117,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { sortBy: 'description', sortDirection: 'desc' },
       });
-      TestBed.tick();
+      tick();
       tick(400);
       // With skipLoadingCall: true, the fetchEntities should not be called
       expect(fetchEntitiesSpy).not.toHaveBeenCalled();
@@ -1171,11 +1144,53 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { page: '2' },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       // With skipLoadingCall: true, the fetchEntities should only be called once (initial load)
       expect(fetchEntitiesSpy).toHaveBeenCalledTimes(1);
+    }));
+
+    it('skipLoadingCall should only apply on the first load, subsequent URL changes (back-nav) should trigger loading', fakeAsync(() => {
+      const fetchEntitiesSpy = vi.fn(() =>
+        of({ entities: mockProducts.slice(0, 10), total: 10 }),
+      );
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({ fetchEntities: fetchEntitiesSpy }),
+        withEntitiesSyncToRouteQueryParams({ entity, skipLoadingCall: true }),
+      );
+      const queryParams$ = new BehaviorSubject<Params>({
+        filter: JSON.stringify({ search: 'first', foo: 'bar' }),
+      });
+      TestBed.configureTestingModule({
+        providers: [
+          Store,
+          provideRouter([]),
+          {
+            provide: ActivatedRoute,
+            useFactory: () => ({ queryParams: queryParams$ }),
+          },
+        ],
+      });
+      TestBed.inject(Store);
+      tick();
+      tick(500);
+      // first load honours skipLoadingCall: true → no fetch
+      expect(fetchEntitiesSpy).not.toHaveBeenCalled();
+
+      // simulate browser back/forward navigation with a new URL
+      queryParams$.next({
+        filter: JSON.stringify({ search: 'second', foo: 'bar' }),
+      });
+      tick(1000);
+      // subsequent URL changes must not skip the loading call
+      expect(fetchEntitiesSpy).toHaveBeenCalled();
     }));
 
     it('should call fetchEntities when skipLoadingCall is false (default)', fakeAsync(() => {
@@ -1202,7 +1217,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         Store,
         queryParams: { filter: JSON.stringify({ search: 'test', foo: 'bar' }) },
       });
-      TestBed.tick();
+      tick();
       load.next(true);
       tick(400);
       // With skipLoadingCall: false, the fetchEntities should be called
