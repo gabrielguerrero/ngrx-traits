@@ -129,6 +129,7 @@ export function withEntitiesLocalSort<
       withMethods((state: Record<string, Signal<unknown>>) => {
         const _sortEntities = rxMethod<{
           sort?: Sort<Entity> | CdkSort<Entity>;
+          _emitEvent?: boolean;
         }>(
           pipe(
             tap((options) => {
@@ -142,10 +143,7 @@ export function withEntitiesLocalSort<
               patchState(state as WritableStateSource<object>, {
                 [sortKey]: sort,
                 [idsKey]: (config?.sortFunction
-                  ? config.sortFunction(
-                      state[entitiesKey]() as Entity[],
-                      sort,
-                    )
+                  ? config.sortFunction(state[entitiesKey]() as Entity[], sort)
                   : sortData(state[entitiesKey]() as Entity[], sort)
                 ).map((entity) =>
                   config.selectId
@@ -153,13 +151,14 @@ export function withEntitiesLocalSort<
                     : (entity as any).id,
                 ),
               });
-              broadcast(state, entitiesLocalSortChanged({ sort }));
+              if (options?._emitEvent !== false)
+                broadcast(state, entitiesLocalSortChanged({ sort }));
             }),
           ),
         );
-        function normalizeToWrapped(
-          options: unknown,
-        ): { sort: Sort<Entity> | CdkSort<Entity> } {
+        function normalizeToWrapped(options: unknown): {
+          sort: Sort<Entity> | CdkSort<Entity>;
+        } {
           if (
             options &&
             typeof options === 'object' &&
@@ -200,11 +199,13 @@ export function withEntitiesLocalSort<
         return {
           onInit: () => {
             if (loaded) {
-              const sortEntities = state[sortEntitiesKey] as () => void;
+              const sortEntities = state[sortEntitiesKey] as (options?: {
+                _emitEvent?: boolean;
+              }) => void;
               effect(() => {
                 if (loaded()) {
                   untracked(() => {
-                    sortEntities();
+                    sortEntities({ _emitEvent: false });
                   });
                 }
               });

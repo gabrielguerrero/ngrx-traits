@@ -11,7 +11,7 @@ export function getWithEntitiesRemoteSortEvents(config?: {
   return {
     entitiesRemoteSortChanged: createEvent(
       `${collection}.entitiesRemoteSortChanged`,
-      props<{ sort: Sort<any> }>(),
+      props<{ sort: Sort<any>; skipLoadingCall?: boolean }>(),
     ),
   };
 }

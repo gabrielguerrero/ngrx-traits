@@ -62,6 +62,26 @@ describe('withEntitiesLocalPagination', () => {
     expect(store.entitiesCurrentPage().hasNext).toEqual(false);
   });
 
+  it('loadEntitiesPage with pageIndex beyond current entities should store it verbatim and resolve the slice once entities arrive', () => {
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities({ entity }),
+      withEntitiesLocalPagination({ entity, pageSize: 10 }),
+    );
+
+    const store = new Store();
+    patchState(store, setAllEntities(mockProducts.slice(0, 5)));
+    store.loadEntitiesPage({ pageIndex: 3 });
+    expect(store.entitiesPagination().currentPage).toEqual(3);
+    expect(store.entitiesCurrentPage().entities).toEqual([]);
+
+    patchState(store, setAllEntities(mockProducts.slice(0, 45)));
+    expect(store.entitiesPagination().currentPage).toEqual(3);
+    expect(store.entitiesCurrentPage().entities).toEqual(
+      mockProducts.slice(30, 40),
+    );
+  });
+
   it('should read pageSize be able to read from state using config factory', () => {
     const Store = signalStore(
       { protectedState: false },

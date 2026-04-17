@@ -1,7 +1,4 @@
 import { computed, Signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { concatMap, take } from 'rxjs';
-import { filter, startWith } from 'rxjs/operators';
 
 import { capitalize } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -62,38 +59,12 @@ export function getQueryMapperForMultiSelection(config?: {
           selectEntitiesKey
         ] as EntitiesMultiSelectionMethods['selectEntities'];
 
-        const loading = store[loadingKey] as Signal<boolean>;
-
         const ids = selectedIds
           .split(',')
           .map((id) => id.trim())
           .filter(Boolean);
 
-        if (!loading) {
-          // if there is no loading signal, we can select the entities immediately
-          selectEntities({ ids });
-          return;
-        }
-
-        const loaded = store[loadedKey] as Signal<boolean>;
-        const loaded$ = toObservable(loaded);
-        toObservable(loading)
-          .pipe(
-            startWith(loading()),
-            filter((v) => v), // wait until loading becomes true
-            take(1),
-            concatMap(() =>
-              loaded$.pipe(
-                startWith(loaded()),
-                filter((v) => v), // wait until loaded becomes true
-                take(1),
-              ),
-            ),
-            takeUntilDestroyed(),
-          )
-          .subscribe(() => {
-            selectEntities({ ids });
-          });
+        selectEntities({ ids });
       }
     },
     stateToQueryParams: (store) => {

@@ -15,7 +15,7 @@ import { ProductsStateModule } from './state/products/products-state.module';
   selector: 'ngrx-traits-product-list-example-container',
   template: `
     @if (basket$ | async; as basket) {
-      <nav mat-tab-nav-bar>
+      <nav mat-tab-nav-bar [tabPanel]="tabPanel">
         <a
           mat-tab-link
           routerLinkActive
@@ -44,7 +44,7 @@ import { ProductsStateModule } from './state/products/products-state.module';
         </a>
       </nav>
     }
-    <router-outlet></router-outlet>
+    <mat-tab-nav-panel #tabPanel><router-outlet /></mat-tab-nav-panel>
   `,
   styles: [
     `

@@ -20,7 +20,14 @@ import {
   setAllEntities,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { distinctUntilChanged, exhaustMap, first, pipe, tap } from 'rxjs';
+import {
+  distinctUntilChanged,
+  EMPTY,
+  exhaustMap,
+  first,
+  pipe,
+  tap,
+} from 'rxjs';
 
 import { getWithEntitiesKeys } from '../util';
 import {
@@ -292,6 +299,75 @@ export function withEntitiesRemotePagination<
         const $loading = toObservable(isLoading);
         const setLoading = state[setLoadingKey] as () => void;
 
+        const loadPage = ({
+          pageIndex,
+          forceLoad,
+          pageSize,
+          skipLoadingCall,
+        }: {
+          pageIndex: number;
+          forceLoad: boolean;
+          pageSize?: number;
+          skipLoadingCall?: boolean;
+        }) => {
+
+          const size = pageSize ?? pagination().pageSize;
+          if (size !== pagination().pageSize)
+            clearEntitiesCache(state, config, size);
+          else {
+            patchState(state as WritableStateSource<object>, {
+              [paginationKey]: {
+                ...pagination(),
+                currentPage: pageIndex,
+                pageSize: size,
+                requestPage: pageIndex,
+              },
+            });
+          }
+
+          if (
+            isEntitiesInCache({
+              page: pageIndex,
+              pagination: pagination(),
+            }) &&
+            !forceLoad
+          ) {
+            if (
+              !isEntitiesInCache({
+                page: pageIndex + 1,
+                pagination: pagination(),
+              })
+            ) {
+              // preload next page
+              patchState(state as WritableStateSource<object>, {
+                [paginationKey]: {
+                  ...pagination(),
+                  currentPage: pageIndex,
+                  requestPage: pageIndex + 1,
+                },
+              });
+
+              if (!skipLoadingCall) setLoading();
+            }
+            broadcast(
+              state,
+              entitiesRemotePageChanged({
+                pageIndex: pagination().currentPage,
+                isPageInCache: true,
+              }),
+            );
+            return;
+          }
+          if (!skipLoadingCall) setLoading();
+          
+          broadcast(
+            state,
+            entitiesRemotePageChanged({
+              pageIndex: pagination().currentPage,
+              isPageInCache: false,
+            }),
+          );
+        };
         return {
           [setEntitiesPagedResultKey]: ({
             entities,
@@ -351,67 +427,30 @@ export function withEntitiesRemotePagination<
                   pagination().pageSize === current.pageSize,
               ),
               exhaustMap(
-                ({ pageIndex, forceLoad, pageSize, skipLoadingCall }) =>
-                  $loading.pipe(
+                ({ pageIndex, forceLoad, pageSize, skipLoadingCall }) => {
+                  if (forceLoad) {
+                    loadPage({
+                      pageIndex,
+                      forceLoad: true,
+                      pageSize,
+                      skipLoadingCall,
+                    });
+                    return EMPTY;
+                  }
+                  return $loading.pipe(
                     first((loading) => !loading),
-                    // the previous exhaustMap to not loading ensures the function
+                    tap(() =>
+                      loadPage({
+                        pageIndex,
+                        forceLoad: false,
+                        pageSize,
+                        skipLoadingCall,
+                      }),
+                    ),
+                    // the exhaustMap to not loading ensures the function
                     // can not be called multiple time before results are loaded, which could corrupt the cache
-                    tap(() => {
-                      const size = pageSize ?? pagination().pageSize;
-                      if (size !== pagination().pageSize)
-                        clearEntitiesCache(state, config, size);
-                      else
-                        patchState(state as WritableStateSource<object>, {
-                          [paginationKey]: {
-                            ...pagination(),
-                            currentPage: pageIndex,
-                            pageSize: size,
-                            requestPage: pageIndex,
-                          },
-                        });
-                      if (
-                        isEntitiesInCache({
-                          page: pageIndex,
-                          pagination: pagination(),
-                        }) &&
-                        !forceLoad
-                      ) {
-                        if (
-                          !isEntitiesInCache({
-                            page: pageIndex + 1,
-                            pagination: pagination(),
-                          })
-                        ) {
-                          // preload next page
-                          patchState(state as WritableStateSource<object>, {
-                            [paginationKey]: {
-                              ...pagination(),
-                              currentPage: pageIndex,
-                              requestPage: pageIndex + 1,
-                            },
-                          });
-
-                          if (!skipLoadingCall) setLoading();
-                        }
-                        broadcast(
-                          state,
-                          entitiesRemotePageChanged({
-                            pageIndex: pagination().currentPage,
-                            isPageInCache: true,
-                          }),
-                        );
-                        return;
-                      }
-                      if (!skipLoadingCall) setLoading();
-                      broadcast(
-                        state,
-                        entitiesRemotePageChanged({
-                          pageIndex: pagination().currentPage,
-                          isPageInCache: false,
-                        }),
-                      );
-                    }),
-                  ),
+                  );
+                },
               ),
             ),
           ),

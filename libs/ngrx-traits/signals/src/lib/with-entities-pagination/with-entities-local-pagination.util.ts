@@ -1,8 +1,6 @@
 import { computed, Signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { DeepSignal } from '@ngrx/signals';
-import { concatMap, take } from 'rxjs';
-import { filter, startWith } from 'rxjs/operators';
 
 import { capitalize } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -56,12 +54,19 @@ export function getQueryMapperForEntitiesPagination(config?: {
   const { loadingKey, loadedKey } = getWithCallStatusKeys({
     collection: config?.collection,
   });
+  let firstLoad = true;
   return {
     queryParamsToState: (query, store) => {
       const page = query.page;
       const pageSize = query.pageSize;
+      const pagination = store[paginationKey] as Signal<
+        EntitiesPaginationLocalState['entitiesPagination']
+      >;
 
-      if (page) {
+      if (
+        (page && +page - 1 != pagination()?.currentPage) ||
+        (pageSize && +pageSize != pagination()?.pageSize)
+      ) {
         const loadEntitiesPage = store[
           loadEntitiesPageKey
         ] as EntitiesPaginationRemoteMethods<unknown>['loadEntitiesPage'];
@@ -69,27 +74,17 @@ export function getQueryMapperForEntitiesPagination(config?: {
         const loaded = store[loadedKey] as Signal<boolean>;
         const loaded$ = toObservable(loaded);
 
-        toObservable(loading)
-          .pipe(
-            startWith(loading()),
-            filter((v) => v), // wait until loading becomes true
-            take(1),
-            concatMap(() =>
-              loaded$.pipe(
-                startWith(loaded()),
-                filter((v) => v), // wait until loaded becomes true
-                take(1),
-              ),
-            ),
-            takeUntilDestroyed(),
-          )
-          .subscribe(() => {
-            loadEntitiesPage({
-              pageIndex: +page - 1,
-              pageSize: pageSize ? +pageSize : undefined,
-              skipLoadingCall: config?.skipLoadingCall,
-            });
-          });
+        loadEntitiesPage({
+          pageIndex: +page - 1,
+          // we forceLoad on first load to ensure filter is set in the store, before fetching data
+          // after that it should not force load, to allow history navigation without triggering loading state
+          forceLoad: true,
+          pageSize: pageSize ? +pageSize : undefined,
+          // we only allow to skip the loading call on the first load,
+          // otherwise history navigation would not work as expected
+          skipLoadingCall: firstLoad && config?.skipLoadingCall,
+        });
+        firstLoad = false;
       }
     },
     stateToQueryParams: (store) => {

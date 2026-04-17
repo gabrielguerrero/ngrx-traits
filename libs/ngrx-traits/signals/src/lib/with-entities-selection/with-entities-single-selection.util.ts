@@ -1,7 +1,4 @@
 import { computed, Signal } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
-import { concatMap, take } from 'rxjs';
-import { filter, startWith } from 'rxjs/operators';
 
 import { capitalize } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
@@ -51,37 +48,9 @@ export function getQueryMapperForSingleSelection(config?: {
           selectEntityKey
         ] as EntitiesSingleSelectionMethods['selectEntity'];
 
-        const loading = store[loadingKey] as Signal<boolean>;
-
-        if (!loading) {
-          // if there is no loading signal, we can select the entity immediately
-          selectEntity({
-            id: selectedId,
-          });
-          return;
-        }
-
-        const loaded = store[loadedKey] as Signal<boolean>;
-        const loaded$ = toObservable(loaded);
-        toObservable(loading)
-          .pipe(
-            startWith(loading()),
-            filter((v) => v), // wait until loading becomes true
-            take(1),
-            concatMap(() =>
-              loaded$.pipe(
-                startWith(loaded()),
-                filter((v) => v), // wait until loaded becomes true
-                take(1),
-              ),
-            ),
-            takeUntilDestroyed(),
-          )
-          .subscribe(() => {
-            selectEntity({
-              id: selectedId,
-            });
-          });
+        selectEntity({
+          id: selectedId,
+        });
       }
     },
     stateToQueryParams: (store) => {

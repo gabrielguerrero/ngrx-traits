@@ -169,6 +169,7 @@ export function withEntitiesLocalFilter<
               debounce?: number;
               patch?: boolean;
               forceLoad?: boolean;
+              _emitEvent?: boolean;
             }
           | undefined
         >(
@@ -201,21 +202,28 @@ export function withEntitiesLocalFilter<
                   ),
                 },
               );
-              broadcast(state, entitiesFilterChanged(value));
+              if (value._emitEvent !== false)
+                broadcast(state, entitiesFilterChanged(value));
             }),
           ),
         );
         return {
-          [filterEntitiesKey]: (options: {
-              filter: Filter;
-              debounce?: number;
-              patch?: boolean;
-              forceLoad?: boolean;
-            }
-          | undefined) => {
+          [filterEntitiesKey]: (
+            options:
+              | {
+                  filter: Filter;
+                  debounce?: number;
+                  patch?: boolean;
+                  forceLoad?: boolean;
+                  _emitEvent?: boolean;
+                }
+              | undefined,
+          ) => {
             if (options instanceof Observable || typeof options === 'function')
               return filterEntities(options);
-            filterEntities(options ? toFilterOptions(options, defaultFilter) : undefined);
+            filterEntities(
+              options ? toFilterOptions(options, defaultFilter) : undefined,
+            );
             return Promise.resolve({ ok: true, value: filteredEntities });
           },
           [resetEntitiesFilterKey]: () => {
@@ -237,6 +245,7 @@ export function withEntitiesLocalFilter<
                 debounce?: number;
                 patch?: boolean;
                 forceLoad?: boolean;
+                _emitEvent?: boolean;
               }) => void;
               effect(() => {
                 if (loaded()) {
@@ -245,6 +254,7 @@ export function withEntitiesLocalFilter<
                       filter: filter(),
                       debounce: 0,
                       forceLoad: true,
+                      _emitEvent: false,
                     });
                   });
                 }
