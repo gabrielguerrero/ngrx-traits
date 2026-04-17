@@ -11,7 +11,7 @@ import { ProductsShopStore } from './products-shop.store';
   selector: 'ngrx-traits-product-list-example-container',
   template: `
     <a mat-raised-button routerLink="/signals" class="mb-4">Back to Examples</a>
-    <nav mat-tab-nav-bar>
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel">
       <a
         mat-tab-link
         routerLinkActive
@@ -39,7 +39,7 @@ import { ProductsShopStore } from './products-shop.store';
         >
       </a>
     </nav>
-    <router-outlet></router-outlet>
+    <mat-tab-nav-panel #tabPanel><router-outlet /></mat-tab-nav-panel>
   `,
   styles: [
     `

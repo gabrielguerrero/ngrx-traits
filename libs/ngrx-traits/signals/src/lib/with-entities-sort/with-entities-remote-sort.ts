@@ -186,14 +186,15 @@ export function withEntitiesRemoteSort<
               patchState(state as WritableStateSource<object>, {
                 [sortKey]: sort,
               });
-              broadcast(state, entitiesRemoteSortChanged({ sort }));
+              broadcast(
+                state,
+                entitiesRemoteSortChanged({ sort, skipLoadingCall }),
+              );
               if (!skipLoadingCall) setLoading();
             }),
           ),
         );
-        function normalizeToWrapped(
-          options: unknown,
-        ): {
+        function normalizeToWrapped(options: unknown): {
           sort?: Sort<Entity> | CdkSort<Entity>;
           skipLoadingCall?: boolean;
         } {

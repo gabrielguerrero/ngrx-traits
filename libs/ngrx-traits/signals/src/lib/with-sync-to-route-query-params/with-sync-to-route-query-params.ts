@@ -1,4 +1,10 @@
-import { computed, inject, Injector } from '@angular/core';
+import {
+  computed,
+  EnvironmentInjector,
+  inject,
+  Injector,
+  runInInjectionContext,
+} from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
@@ -62,6 +68,7 @@ export function withSyncToRouteQueryParams<
   mappers: Mappers;
   defaultDebounce?: number;
   restoreOnInit?: boolean;
+  onQueryParamsStored?: (store: StoreSource<Input>) => void;
 }): SignalStoreFeature<
   Input,
   {
@@ -72,27 +79,34 @@ export function withSyncToRouteQueryParams<
     };
   }
 > {
+  let lastPushedQueryParams: Record<string, any> | undefined;
   return signalStoreFeature(
     type<Input>(),
     withState({}),
     withMethods((store) => {
       const injector = inject(Injector);
+      const environmentInjector = inject(EnvironmentInjector);
       return combineFunctionsInObject(
         {
           loadFromQueryParams: () => {
             const activatedRoute = injector.get(ActivatedRoute);
             activatedRoute.queryParams
               .pipe(
-                take(1),
                 defaultIfEmpty({}), // Provide default empty object if observable completes without emitting
               )
               .subscribe((queryParams) => {
-                const queryMappers = config.mappers;
-                queryMappers.forEach((mapper) => {
-                  mapper.queryParamsToState(
-                    queryParams as Params,
-                    store as any,
-                  );
+                if (shallowEqualParams(lastPushedQueryParams, queryParams)) {
+                  return;
+                }
+                runInInjectionContext(environmentInjector, () => {
+                  const queryMappers = config.mappers;
+                  queryMappers.forEach((mapper) => {
+                    mapper.queryParamsToState(
+                      queryParams as Params,
+                      store as any,
+                    );
+                  });
+                  config.onQueryParamsStored?.(store);
                 });
               });
           },
@@ -131,6 +145,18 @@ export function withSyncToRouteQueryParams<
               takeUntilDestroyed(),
             )
             .subscribe((queryParams) => {
+              lastPushedQueryParams = {
+                ...(activatedRoute.snapshot?.queryParams || {}),
+                ...queryParams,
+              };
+              const keys = Object.keys(lastPushedQueryParams);
+              for (let key of keys) {
+                // undefined params will be deleted from the url so we should
+                // no store them
+                if (lastPushedQueryParams[key] === undefined) {
+                  delete lastPushedQueryParams[key];
+                }
+              }
               router.navigate([], {
                 relativeTo: activatedRoute,
                 queryParams,
@@ -141,4 +167,14 @@ export function withSyncToRouteQueryParams<
       };
     }),
   ) as any;
+}
+
+function shallowEqualParams(
+  a: Record<string, any> | undefined,
+  b: Record<string, any>,
+): boolean {
+  if (!a) return false;
+  const aKeys = Object.keys(a);
+  if (aKeys.length !== Object.keys(b).length) return false;
+  return aKeys.every((k) => a[k] === b[k]);
 }

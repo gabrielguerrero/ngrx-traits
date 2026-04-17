@@ -10,6 +10,7 @@ import {
   withEntitiesRemoteSort,
   withEntitiesSingleSelection,
   withEntitiesSyncToRouteQueryParams,
+  withLogger,
 } from '@ngrx-traits/signals';
 import { signalStoreFeature, type } from '@ngrx/signals';
 import { entityConfig, withEntities } from '@ngrx/signals/entities';
@@ -43,7 +44,9 @@ export function withProductEntities() {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(productEntityConfig),
-    withEntitiesSyncToRouteQueryParams(productEntityConfig),
+    withEntitiesSyncToRouteQueryParams({
+      ...productEntityConfig,
+    }),
     withEntitiesLoadingCall(
       (
         {
@@ -73,6 +76,7 @@ export function withProductEntities() {
         mapError: (error) => (error as Error).message,
       }),
     ),
+    withLogger({ name: 'ProductEntitiesStore' }),
   );
 }
 

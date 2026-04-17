@@ -220,6 +220,7 @@ export function withEntitiesRemoteFilter<
                 patch?: boolean;
                 forceLoad?: boolean;
                 skipLoadingCall?: boolean;
+                _emitEvent?: boolean;
               }
             | undefined
           >(
@@ -239,7 +240,8 @@ export function withEntitiesRemoteFilter<
                 patchState(state as WritableStateSource<any>, {
                   [filterKey]: value.filter,
                 });
-                broadcast(state, entitiesFilterChanged(value));
+                if (value._emitEvent !== false)
+                  broadcast(state, entitiesFilterChanged(value));
                 if (!value?.skipLoadingCall) setLoading();
               }),
             ),
@@ -262,7 +264,9 @@ export function withEntitiesRemoteFilter<
               ) {
                 return filterEntities(options);
               }
-              filterEntities(options ? toFilterOptions(options, defaultFilter) : undefined);
+              filterEntities(
+                options ? toFilterOptions(options, defaultFilter) : undefined,
+              );
 
               return lastValueFrom(
                 toObservable(callState, { injector: environmentInjector }).pipe(

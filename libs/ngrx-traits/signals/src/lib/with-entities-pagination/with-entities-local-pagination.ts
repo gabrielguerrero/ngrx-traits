@@ -137,15 +137,11 @@ export function withEntitiesLocalPagination<
       }>;
       const size = pageSize ?? pagination().pageSize;
       const startIndex = pageIndex * size;
-      const currentPage =
-        startIndex >= 0 && startIndex < entities().length
-          ? pageIndex
-          : pagination().currentPage;
 
       patchState(state as WritableStateSource<object>, {
         [paginationKey]: {
           ...pagination(),
-          currentPage,
+          currentPage: pageIndex,
           pageSize: size,
         },
       });
@@ -193,9 +189,15 @@ export function withEntitiesLocalPagination<
           [entitiesCurrentPageKey]: entitiesCurrentPage,
         };
       }),
-      withEventHandler((state) => [
+      withEventHandler((state: Record<string, Signal<unknown>>) => [
         onEvent(entitiesFilterChanged, entitiesLocalSortChanged, () => {
-          setCurrentPage(state, 0);
+          const pagination = state[paginationKey] as Signal<{
+            pageSize: number;
+            currentPage: number;
+          }>;
+          const page = pagination().currentPage;
+
+          if (page !== 0) setCurrentPage(state, 0);
         }),
       ]),
 

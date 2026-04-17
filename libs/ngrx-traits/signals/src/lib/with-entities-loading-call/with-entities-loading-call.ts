@@ -23,8 +23,10 @@ import {
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
+  asapScheduler,
   catchError,
   concatMap,
+  debounceTime,
   exhaustMap,
   first,
   from,
@@ -224,6 +226,7 @@ export function withEntitiesLoadingCall<
       const mapPipe = mapPipeType ? mapPipes[mapPipeType] : switchMap;
       const loadEntities = rxMethod<void>(
         pipe(
+          debounceTime(0, asapScheduler),
           mapPipe(() =>
             runInInjectionContext(environmentInjector, () =>
               from(fetchEntities(_store)),
