@@ -1,9 +1,9 @@
-import { computed } from '@angular/core';
+import { computed, createEnvironmentInjector, EnvironmentInjector } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { withSyncToRouteQueryParams } from '@ngrx-traits/signals';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 describe('withSyncToRouteQueryParams', () => {
   function init({ debounce }: { debounce?: number } = {}) {
@@ -134,6 +134,69 @@ describe('withSyncToRouteQueryParams', () => {
     expect(store.test()).toBe('test2');
     expect(store.foo()).toBe('foo2');
     expect(store.bar()).toBe(true);
+  });
+
+  it('should unsubscribe from queryParams when store is destroyed', () => {
+    const queryParams$ = new Subject<Record<string, string>>();
+    const queryParamsToStateSpy = vi.fn(
+      (query: Record<string, string>, store: any) => {
+        patchState(store, {
+          test: query['test'],
+          foo: query['foo'],
+          bar: query['bar'] === 'true',
+        });
+      },
+    );
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        test: 'test',
+        foo: 'foo',
+        bar: false,
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: queryParamsToStateSpy,
+            stateToQueryParams: (store: any) =>
+              computed(() => ({
+                test: store.test(),
+                foo: store.foo(),
+                bar: store.bar().toString(),
+              })),
+          },
+        ],
+        restoreOnInit: false,
+      }),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: queryParams$,
+          }),
+        },
+      ],
+    });
+
+    // Create a child EnvironmentInjector so we can destroy it without breaking TestBed
+    const parentInjector = TestBed.inject(EnvironmentInjector);
+    const childInjector = createEnvironmentInjector([Store], parentInjector);
+    const store = childInjector.get(Store);
+
+    // Call loadFromQueryParams — sets up subscription on the Subject (no emission yet)
+    store.loadFromQueryParams();
+
+    // Destroy the child injector (simulates navigating away from the route)
+    childInjector.destroy();
+
+    // Emit after destruction — should NOT call the mapper or throw NG0205
+    expect(() => {
+      queryParams$.next({ test: 'c', foo: 'd', bar: 'false' });
+    }).not.toThrow();
+    expect(queryParamsToStateSpy).not.toHaveBeenCalled();
   });
 
   it('store should be synced with url query params with custom debounce', fakeAsync(() => {

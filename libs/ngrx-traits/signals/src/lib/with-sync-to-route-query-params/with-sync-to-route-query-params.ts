@@ -1,5 +1,6 @@
 import {
   computed,
+  DestroyRef,
   EnvironmentInjector,
   inject,
   Injector,
@@ -7,15 +8,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  SignalStoreFeature,
-  signalStoreFeature,
-  SignalStoreFeatureResult,
-  type,
-  withHooks,
-  withMethods,
-  withState,
-} from '@ngrx/signals';
+import { SignalStoreFeature, signalStoreFeature, SignalStoreFeatureResult, type, withHooks, withMethods, withState } from '@ngrx/signals';
 import { concatWith, debounce, defaultIfEmpty, NEVER, take, timer } from 'rxjs';
 
 import { combineFunctionsInObject } from '../util';
@@ -86,6 +79,7 @@ export function withSyncToRouteQueryParams<
     withMethods((store) => {
       const injector = inject(Injector);
       const environmentInjector = inject(EnvironmentInjector);
+      const destroyRef = inject(DestroyRef);
       return combineFunctionsInObject(
         {
           loadFromQueryParams: () => {
@@ -93,6 +87,7 @@ export function withSyncToRouteQueryParams<
             activatedRoute.queryParams
               .pipe(
                 defaultIfEmpty({}), // Provide default empty object if observable completes without emitting
+                takeUntilDestroyed(destroyRef)
               )
               .subscribe((queryParams) => {
                 if (shallowEqualParams(lastPushedQueryParams, queryParams)) {
