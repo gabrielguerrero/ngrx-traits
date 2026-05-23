@@ -134,7 +134,7 @@
     "ng-packagr": "21.1.0",
     "ngxtension": "^7.0.2",
     "nx": "22.3.3",
-    "postcss": "^8.4.5",
+    "postcss": "^8.5.15",
     "postcss-import": "14.1.0",
     "postcss-preset-env": "7.5.0",
     "postcss-url": "10.1.3",
