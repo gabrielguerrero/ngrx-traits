@@ -99,7 +99,7 @@
     "@babel/preset-typescript": "^7.17.12",
     "@ngneat/spectator": "^19.3.0",
     "@nx/angular": "22.3.3",
-    "@nx/esbuild": "22.3.3",
+    "@nx/esbuild": "22.7.3",
     "@nx/eslint-plugin": "22.3.3",
     "@nx/js": "22.3.3",
     "@nx/node": "22.3.3",
