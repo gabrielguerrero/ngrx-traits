@@ -48,7 +48,7 @@
     "@angular/forms": "21.1.1",
     "@angular/material": "21.1.1",
     "@angular/platform-browser": "21.1.1",
-    "@angular/platform-server": "21.1.1",
+    "@angular/platform-server": "21.2.13",
     "@angular/ssr": "21.1.5",
     "@docsearch/js": "^3.9.0",
     "@docsearch/css": "^3.9.0",
