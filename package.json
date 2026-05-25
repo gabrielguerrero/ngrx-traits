@@ -124,7 +124,7 @@
     "esbuild": "^0.27.2",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
-    "glob": "^11.0.0",
+    "glob": "^13.0.6",
     "jest-marbles": "3.0.6",
     "jsdoc-babel": "^0.5.0",
     "jsdoc-to-markdown": "^9.1.3",
