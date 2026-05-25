@@ -71,7 +71,7 @@
     "prismjs": "1.30.0",
     "rxjs": "7.8.1",
     "tslib": "^2.3.0",
-    "zone.js": "0.16.0"
+    "zone.js": "0.16.2"
   },
   "devDependencies": {
     "@analogjs/platform": "2.2.0",
