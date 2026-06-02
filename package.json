@@ -102,7 +102,7 @@
     "@nx/esbuild": "22.3.3",
     "@nx/eslint-plugin": "22.3.3",
     "@nx/js": "22.3.3",
-    "@nx/node": "22.3.3",
+    "@nx/node": "22.7.5",
     "@nx/vite": "22.3.3",
     "@nx/workspace": "22.3.3",
     "@schematics/angular": "21.1.1",
