@@ -10,11 +10,12 @@ updates:
    directory: "/"
    schedule:
      interval: weekly
- - package-ecosystem: "npm"
-   directory: "/"
-   schedule:
-     interval: weekly
- - package-ecosystem: "github-actions"
-   directory: "/"
-   schedule:
-     interval: weekly
+ # # disabled settings here so it can be controlled by github ui    
+ # - package-ecosystem: "npm"
+ #   directory: "/"
+ #   schedule:
+ #     interval: weekly
+ # - package-ecosystem: "github-actions"
+ #   directory: "/"
+ #   schedule:
+ #     interval: weekly
