@@ -54,7 +54,9 @@ import {
 } from './with-entities-filter.util';
 import {
   EntitiesFilterComputed,
+  EntitiesFilterState,
   NamedEntitiesFilterComputed,
+  NamedEntitiesFilterState,
 } from './with-entities-local-filter.model';
 import {
   EntitiesRemoteFilterMethods,
@@ -165,12 +167,12 @@ export function withEntitiesRemoteFilter<
         }),
   Collection extends ''
     ? {
-        state: {};
+        state: EntitiesFilterState<Filter>;
         props: EntitiesFilterComputed<Filter>;
         methods: EntitiesRemoteFilterMethods<Filter, Entity>;
       }
     : {
-        state: {};
+        state: NamedEntitiesFilterState<Collection, Filter>;
         props: NamedEntitiesFilterComputed<Collection, Filter>;
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
       }
@@ -187,20 +189,23 @@ export function withEntitiesRemoteFilter<
       filterEntitiesKey,
       resetEntitiesFilterKey,
       isEntitiesFilterChangedKey,
-      computedFilterKey,
     } = getWithEntitiesFilterKeys(config);
     const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
 
     return signalStoreFeature(
-      withState({ [filterKey]: defaultFilter, [defaultFilterKey]: defaultFilter }),
+      withState({
+        [filterKey]: defaultFilter,
+        [defaultFilterKey]: defaultFilter,
+      }),
       withComputed((state: Record<string, Signal<unknown>>) => {
         const filter = state[filterKey] as Signal<Filter>;
         const currentDefault = state[defaultFilterKey] as Signal<Filter>;
         return {
           [isEntitiesFilterChangedKey]: computed(() => {
-            return JSON.stringify(filter()) !== JSON.stringify(currentDefault());
+            return (
+              JSON.stringify(filter()) !== JSON.stringify(currentDefault())
+            );
           }),
-          [computedFilterKey]: deepComputed(() => filter()),
         };
       }),
       withEventHandler(),
@@ -290,10 +295,18 @@ export function withEntitiesRemoteFilter<
             }) => {
               const newDefault = options?.newDefaultFilter;
               if (newDefault) {
-                patchState(state as WritableStateSource<any>, { [defaultFilterKey]: newDefault });
+                patchState(state as WritableStateSource<any>, {
+                  [defaultFilterKey]: newDefault,
+                });
               }
-              const currentDefault = newDefault ?? (state[defaultFilterKey] as Signal<Filter>)();
-              filterEntities({ filter: currentDefault, debounce: options?.debounce, forceLoad: options?.forceLoad, skipLoadingCall: options?.skipLoadingCall });
+              const currentDefault =
+                newDefault ?? (state[defaultFilterKey] as Signal<Filter>)();
+              filterEntities({
+                filter: currentDefault,
+                debounce: options?.debounce,
+                forceLoad: options?.forceLoad,
+                skipLoadingCall: options?.skipLoadingCall,
+              });
             },
           };
         },

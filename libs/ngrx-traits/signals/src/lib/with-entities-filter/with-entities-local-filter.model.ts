@@ -1,18 +1,23 @@
 import { Signal } from '@angular/core';
 import { DeepSignal } from '@ngrx/signals';
-import { RxMethod } from '@ngrx/signals/rxjs-interop';
 import { Observable } from 'rxjs';
 
 import { RxMethodRef } from '../with-calls/with-calls.model';
 
+export type EntitiesFilterState<Filter> = {
+  entitiesFilter: Filter;
+};
 export type EntitiesFilterComputed<Filter> = {
-  entitiesFilter: DeepSignal<Filter>;
   isEntitiesFilterChanged: Signal<boolean>;
+};
+
+export type NamedEntitiesFilterState<Collection extends string, Filter> = {
+  [K in Collection as `${K}EntitiesFilter`]: Filter;
 };
 
 export type NamedEntitiesFilterComputed<Collection extends string, Filter> = {
   [K in Collection as `is${Capitalize<string & K>}EntitiesFilterChanged`]: Signal<boolean>;
-} & { [K in Collection as `${K}EntitiesFilter`]: DeepSignal<Filter> };
+};
 
 export type FilterOptions<Filter> =
   | Filter
