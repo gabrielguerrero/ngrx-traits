@@ -1,6 +1,5 @@
 import { computed, effect, Signal, untracked } from '@angular/core';
 import {
-  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -181,15 +180,16 @@ export function withEntitiesLocalFilter<
           | undefined
         >(
           pipe(
-            map(
-              (options) =>
-                // if no options are provided, we use the default filter
-                // and forceLoad
-                options ?? {
-                  filter: filter(),
-                  debounce: 0,
-                  forceLoad: true,
-                },
+            map((options) =>
+              // if no options are provided, we use the default filter
+              // and forceLoad
+              options
+                ? toFilterOptions(options, defaultFilter)
+                : {
+                    filter: filter(),
+                    debounce: 0,
+                    forceLoad: true,
+                  },
             ),
             debounceFilterPipe(filter, config.defaultDebounce),
             tap((value) => {
@@ -228,9 +228,7 @@ export function withEntitiesLocalFilter<
           ) => {
             if (options instanceof Observable || typeof options === 'function')
               return filterEntities(options);
-            filterEntities(
-              options ? toFilterOptions(options, defaultFilter) : undefined,
-            );
+            filterEntities(options);
             return Promise.resolve({ ok: true, value: filteredEntities });
           },
           [resetEntitiesFilterKey]: (options?: {

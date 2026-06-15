@@ -1,7 +1,6 @@
 import { computed, EnvironmentInjector, inject, Signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -91,7 +90,7 @@ import {
  *   withEntitiesRemoteFilter({
  *     entity,
  *     collection,
- *     defaultFilter: { name: '' },
+ *     defaultFilter: { search: '' },
  *   }),
  *   // after you can use withEntitiesLoadingCall to connect the filter to
  *   // the api call, or do it manually as shown after
@@ -100,7 +99,7 @@ import {
  *     fetchEntities: ({ productEntitiesFilter }) => {
  *       return inject(ProductService)
  *         .getProducts({
- *           search: productEntitiesFilter().name,
+ *           search: productEntitiesFilter().search,
  *         })
  *     },
  *   }),
@@ -111,7 +110,7 @@ import {
  * //       if (isProductEntitiesLoading()) {
  * //         inject(ProductService)
  * //              .getProducts({
- * //                 search: productEntitiesFilter().name,
+ * //                 search: productEntitiesFilter().search,
  * //               })
  * //           .pipe(
  * //             takeUntilDestroyed(),
@@ -135,7 +134,7 @@ import {
  *  store.productEntitiesFilter // { search: string }
  *  // generates the following methods
  *  store.filterProductEntities  // (options: { filter: { search: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- *  store.resetProductEntitiesFilter  // (options?: { newDefaultFilter?: { name: string } }) => void — resets to defaultFilter or to newDefaultFilter if provided, updating the default for future resets
+ *  store.resetProductEntitiesFilter  // (options?: { newDefaultFilter?: { search: string } }) => void — resets to defaultFilter or to newDefaultFilter if provided, updating the default for future resets
  */
 export function withEntitiesRemoteFilter<
   Input extends SignalStoreFeatureResult,
@@ -232,15 +231,16 @@ export function withEntitiesRemoteFilter<
             | undefined
           >(
             pipe(
-              map(
-                (options) =>
-                  // if no options are provided, we use the default filter
-                  // and forceLoad
-                  options ?? {
-                    filter: filter(),
-                    debounce: config.defaultDebounce,
-                    forceLoad: true,
-                  },
+              map((options) =>
+                // if no options are provided, we use the default filter
+                // and forceLoad
+                options
+                  ? toFilterOptions(options, defaultFilter)
+                  : {
+                      filter: filter(),
+                      debounce: config.defaultDebounce,
+                      forceLoad: true,
+                    },
               ),
               debounceFilterPipe(filter, config.defaultDebounce),
               tap((value) => {
@@ -271,9 +271,7 @@ export function withEntitiesRemoteFilter<
               ) {
                 return filterEntities(options);
               }
-              filterEntities(
-                options ? toFilterOptions(options, defaultFilter) : undefined,
-              );
+              filterEntities(options);
 
               return lastValueFrom(
                 toObservable(callState, { injector: environmentInjector }).pipe(

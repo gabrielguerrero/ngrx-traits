@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  deepComputed,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
@@ -105,9 +104,9 @@ import {
  *   withEntitiesHybridFilter({
  *     entity,
  *     collection,
- *     defaultFilter: { name: '' , category: ''},
+ *     defaultFilter: { search: '' , category: ''},
  *     filterFn: (entity, filter) =>
- *        (!filter.name || entity.name.toLowerCase().includes(filter.name.toLowerCase()))
+ *        (!filter.search || entity.name.toLowerCase().includes(filter.search.toLowerCase()))
  *     // in this case the filter will call setProductEntitiesLoading() if the category changes, othewise
  *     // it will filter the entities locally using filterFn
  *     isRemoteFilter: (previous, current) => {
@@ -156,7 +155,7 @@ import {
  *  store.productEntitiesFilter // { search: string , category: string }
  *  // generates the following methods
  *  store.filterProductEntities  // (options: { filter: { search: string, category: string }, debounce?: number, patch?: boolean, forceLoad?: boolean, skipLoadingCall?:boolean }) => void
- *  store.resetProductEntitiesFilter  // (options?: { newDefaultFilter?: { name: string, category: string } }) => void — resets to defaultFilter or to newDefaultFilter if provided, updating the default for future resets
+ *  store.resetProductEntitiesFilter  // (options?: { newDefaultFilter?: { search: string, category: string } }) => void — resets to defaultFilter or to newDefaultFilter if provided, updating the default for future resets
  */
 export function withEntitiesHybridFilter<
   Input extends SignalStoreFeatureResult,
@@ -267,15 +266,16 @@ export function withEntitiesHybridFilter<
             | undefined
           >(
             pipe(
-              map(
-                (options) =>
-                  // if no options are provided, we use the default filter
-                  // and forceLoad
-                  options ?? {
-                    filter: filter(),
-                    debounce: config.defaultDebounce,
-                    forceLoad: true,
-                  },
+              map((options) =>
+                // if no options are provided, we use the default filter
+                // and forceLoad
+                options
+                  ? toFilterOptions(options, defaultFilter)
+                  : {
+                      filter: filter(),
+                      debounce: config.defaultDebounce,
+                      forceLoad: true,
+                    },
               ),
               debounceFilterPipe(filter, config.defaultDebounce),
               tap((value) => {
@@ -321,9 +321,7 @@ export function withEntitiesHybridFilter<
               ) {
                 return filterEntities(options);
               }
-              filterEntities(
-                options ? toFilterOptions(options, defaultFilter) : undefined,
-              );
+              filterEntities(options);
 
               return lastValueFrom(
                 toObservable(callState, { injector: environmentInjector }).pipe(

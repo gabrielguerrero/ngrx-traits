@@ -1,3 +1,4 @@
+import { computed } from '@angular/core';
 import {
   discardPeriodicTasks,
   fakeAsync,
@@ -57,6 +58,95 @@ describe('withEntitiesRemoteFilter', () => {
       store.filterEntities({
         filter: { search: 'zero', foo: 'bar2' },
       });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+          categoryId: 'snes',
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+          categoryId: 'gamecube',
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entitiesFilter.search()).toEqual('zero');
+    });
+  }));
+
+  it('should filter entities and store filter using plain object as filter', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      tick();
+      store.filterEntities({ search: 'zero', foo: 'bar2' });
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+          categoryId: 'snes',
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+          categoryId: 'gamecube',
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entitiesFilter.search()).toEqual('zero');
+    });
+  }));
+
+  it('should filter entities and store filter in a signal', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      tick();
+      store.filterEntities(
+        computed(() => ({ filter: { search: 'zero', foo: 'bar2' } })),
+      );
+      expect(store.entities().length).toEqual(mockProducts.length);
+      tick(400);
+      expect(store.entities().length).toEqual(2);
+      expect(store.entities()).toEqual([
+        {
+          description: 'Super Nintendo Game',
+          id: '1',
+          name: 'F-Zero',
+          price: 12,
+          categoryId: 'snes',
+        },
+        {
+          description: 'GameCube Game',
+          id: '80',
+          name: 'F-Zero GX',
+          price: 55,
+          categoryId: 'gamecube',
+        },
+      ]);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar2' });
+      expect(store.entitiesFilter.search()).toEqual('zero');
+    });
+  }));
+
+  it('should filter entities and store filter using plain object as filter of a signal', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      tick();
+      store.filterEntities(computed(() => ({ search: 'zero', foo: 'bar2' })));
       expect(store.entities().length).toEqual(mockProducts.length);
       tick(400);
       expect(store.entities().length).toEqual(2);
