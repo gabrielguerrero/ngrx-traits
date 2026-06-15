@@ -22,9 +22,6 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
   const capitalizedProp = collection && capitalize(collection);
   return {
     filterKey: collection
-      ? `_${config.collection}EntitiesFilter`
-      : '_entitiesFilter',
-    computedFilterKey: collection
       ? `${config.collection}EntitiesFilter`
       : 'entitiesFilter',
     filterEntitiesKey: collection
