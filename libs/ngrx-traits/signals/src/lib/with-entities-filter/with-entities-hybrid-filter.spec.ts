@@ -630,6 +630,67 @@ describe('withEntitiesHybridFilter', () => {
         }
       });
     });
+
+    describe('resetEntitiesFilter with newDefaultFilter', () => {
+      it('should set filter to newDefaultFilter and apply local filtering', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          patchState(store, setAllEntities(mockProducts));
+          store.setLoaded();
+          tick(400);
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          tick(400);
+          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'snes' });
+          expect(store.entities().length).toEqual(2);
+        });
+      }));
+
+      it('should reset to new default when called without args after newDefaultFilter set', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          patchState(store, setAllEntities(mockProducts));
+          store.setLoaded();
+          tick(400);
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          tick(400);
+          store.filterEntities({ filter: { search: 'zzzyyyy', categoryId: 'snes' }, forceLoad: true });
+          tick(400);
+          expect(store.entities().length).toEqual(0);
+          store.resetEntitiesFilter();
+          tick(400);
+          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'snes' });
+          expect(store.entities().length).toEqual(2);
+        });
+      }));
+
+      it('isEntitiesFilterChanged should be false after resetEntitiesFilter with newDefaultFilter', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          patchState(store, setAllEntities(mockProducts));
+          store.setLoaded();
+          tick(400);
+          store.filterEntities({ filter: { search: 'zero', categoryId: 'snes' }, forceLoad: true });
+          tick(400);
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          tick(400);
+          expect(store.isEntitiesFilterChanged()).toBe(false);
+        });
+      }));
+
+      it('isEntitiesFilterChanged should be true when filtering away from the new default', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          patchState(store, setAllEntities(mockProducts));
+          store.setLoaded();
+          tick(400);
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          tick(400);
+          store.filterEntities({ filter: { search: 'mario', categoryId: 'snes' }, forceLoad: true });
+          tick(400);
+          expect(store.isEntitiesFilterChanged()).toBe(true);
+        });
+      }));
+    });
   });
 
   describe('remote filter', () => {
@@ -1140,6 +1201,59 @@ describe('withEntitiesHybridFilter', () => {
           expect(result.error()).toEqual(new Error('fail'));
         }
       });
+    });
+
+    describe('resetEntitiesFilter with newDefaultFilter', () => {
+      it('should set filter to newDefaultFilter and trigger remote load', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          tick();
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          tick(400);
+          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'gamecube' });
+          expect(store.entities().length).toEqual(1);
+        });
+      }));
+
+      it('should reset to new default when called without args after newDefaultFilter set', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          tick();
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          tick(400);
+          store.filterEntities({ filter: { search: 'zzzyyyy', categoryId: 'gamecube' }, forceLoad: true });
+          tick(400);
+          expect(store.entities().length).toEqual(0);
+          store.resetEntitiesFilter();
+          tick(400);
+          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'gamecube' });
+          expect(store.entities().length).toEqual(1);
+        });
+      }));
+
+      it('isEntitiesFilterChanged should be false after resetEntitiesFilter with newDefaultFilter', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          tick();
+          store.filterEntities({ filter: { search: 'zero', categoryId: 'gamecube' }, forceLoad: true });
+          tick(400);
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          tick(400);
+          expect(store.isEntitiesFilterChanged()).toBe(false);
+        });
+      }));
+
+      it('isEntitiesFilterChanged should be true when filtering away from the new default', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const store = new Store();
+          tick();
+          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          tick(400);
+          store.filterEntities({ filter: { search: 'mario', categoryId: 'gamecube' }, forceLoad: true });
+          tick(400);
+          expect(store.isEntitiesFilterChanged()).toBe(true);
+        });
+      }));
     });
   });
 });

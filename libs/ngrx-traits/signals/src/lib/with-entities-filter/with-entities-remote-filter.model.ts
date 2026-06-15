@@ -19,6 +19,7 @@ export type EntitiesRemoteFilterMethods<Filter, Entity> = {
     >;
   };
   resetEntitiesFilter: (options?: {
+    newDefaultFilter?: Filter;
     debounce?: number;
     forceLoad?: boolean;
     skipLoadingCall?: boolean;
@@ -44,6 +45,7 @@ export type NamedEntitiesRemoteFilterMethods<
   };
 } & {
   [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: (options?: {
+    newDefaultFilter?: Filter;
     debounce?: number;
     forceLoad?: boolean;
     skipLoadingCall?: boolean;
