@@ -42,7 +42,12 @@ export type EntitiesFilterMethods<Filter, Entity> = {
       | { error: Signal<unknown>; ok: false }
     >;
   };
-  resetEntitiesFilter: () => void;
+  resetEntitiesFilter: (options?: {
+    newDefaultFilter?: Filter;
+    debounce?: number;
+    forceLoad?: boolean;
+    skipLoadingCall?: boolean;
+  }) => void;
 };
 export type NamedEntitiesFilterMethods<
   Collection extends string,
@@ -63,5 +68,10 @@ export type NamedEntitiesFilterMethods<
     >;
   };
 } & {
-  [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: () => void;
+  [K in Collection as `reset${Capitalize<string & K>}EntitiesFilter`]: (options?: {
+    newDefaultFilter?: Filter;
+    debounce?: number;
+    forceLoad?: boolean;
+    skipLoadingCall?: boolean;
+  }) => void;
 };

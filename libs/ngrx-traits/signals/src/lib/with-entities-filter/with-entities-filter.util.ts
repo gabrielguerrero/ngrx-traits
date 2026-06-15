@@ -36,6 +36,9 @@ export function getWithEntitiesFilterKeys(config?: { collection?: string }) {
     resetEntitiesFilterKey: collection
       ? `reset${capitalizedProp}EntitiesFilter`
       : 'resetEntitiesFilter',
+    defaultFilterKey: collection
+      ? `_${config.collection}EntitiesDefaultFilter`
+      : '_entitiesDefaultFilter',
   };
 }
 

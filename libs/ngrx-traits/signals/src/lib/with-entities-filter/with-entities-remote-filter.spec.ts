@@ -557,4 +557,57 @@ describe('withEntitiesRemoteFilter', () => {
       }
     });
   });
+
+  describe('resetEntitiesFilter with newDefaultFilter', () => {
+    it('should set filter to newDefaultFilter and trigger load', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        tick();
+        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        tick(400);
+        expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar' });
+        expect(store.entities().length).toEqual(2);
+      });
+    }));
+
+    it('should reset to new default when called without args after newDefaultFilter set', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        tick();
+        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        tick(400);
+        store.filterEntities({ filter: { search: 'zzzyyyy', foo: 'bar' }, forceLoad: true });
+        tick(400);
+        expect(store.entities().length).toEqual(0);
+        store.resetEntitiesFilter();
+        tick(400);
+        expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar' });
+        expect(store.entities().length).toEqual(2);
+      });
+    }));
+
+    it('isEntitiesFilterChanged should be false after resetEntitiesFilter with newDefaultFilter', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        tick();
+        store.filterEntities({ filter: { search: 'zero', foo: 'bar' }, forceLoad: true });
+        tick(400);
+        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        tick(400);
+        expect(store.isEntitiesFilterChanged()).toBe(false);
+      });
+    }));
+
+    it('isEntitiesFilterChanged should be true when filtering away from the new default', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        tick();
+        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        tick(400);
+        store.filterEntities({ filter: { search: 'mario', foo: 'bar' }, forceLoad: true });
+        tick(400);
+        expect(store.isEntitiesFilterChanged()).toBe(true);
+      });
+    }));
+  });
 });
