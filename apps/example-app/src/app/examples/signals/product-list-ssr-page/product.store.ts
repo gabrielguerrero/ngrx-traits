@@ -12,6 +12,7 @@ import {
   withEntitiesLocalSort,
   withEntitiesSingleSelection,
   withEntitiesSyncToRouteQueryParams,
+  withLinkEntitiesFilter,
   withServerStateTransfer,
 } from '@ngrx-traits/signals';
 import {
@@ -47,6 +48,7 @@ export const ProductsSSRStore = signalStore(
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
+  withLinkEntitiesFilter(productsEntityConfig),
   withEntitiesLocalSort({
     ...productsEntityConfig,
     defaultSort: { field: 'name', direction: 'asc' },
