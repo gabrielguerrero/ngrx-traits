@@ -61,7 +61,7 @@ const store = signalStore(
 );
 ```
 ### Using withCalls to load a list of Entities 
-If you want to store entities you should probably check first [withEntitiesLoadingCall](/docs/traits/withEntitiesLoadingCall) which is specially designed for this use case, but you can use withCalls as well.
+If you want to store entities you should probably check first [withEntitiesLoadingCall](/docs/traits/with-entities-loading-call) which is specially designed for this use case, but you can use withCalls as well.
 ```typescript
 const productsEntityConfig = entityConfig({
   entity: type<Product>(),
