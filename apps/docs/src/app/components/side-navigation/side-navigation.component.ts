@@ -229,6 +229,10 @@ export class SideNavigationComponent {
           link: './traits/with-entities-hybrid-filter',
           name: 'withEntitiesHybridFilter',
         },
+        {
+          link: './traits/with-link-entities-filter',
+          name: 'withLinkEntitiesFilter',
+        },
       ],
     },
     {
@@ -259,6 +263,14 @@ export class SideNavigationComponent {
           link: './traits/with-entities-multi-selection',
           name: 'withEntitiesMultiSelection',
         },
+        {
+          link: './traits/with-link-entities-single-selection',
+          name: 'withLinkEntitiesSingleSelection',
+        },
+        {
+          link: './traits/with-link-entities-multi-selection',
+          name: 'withLinkEntitiesMultiSelection',
+        },
       ],
     },
     {
@@ -271,6 +283,10 @@ export class SideNavigationComponent {
         {
           link: './traits/with-entities-remote-sort',
           name: 'withEntitiesRemoteSort',
+        },
+        {
+          link: './traits/with-link-entities-sort',
+          name: 'withLinkEntitiesSort',
         },
       ],
     },
@@ -313,6 +329,10 @@ export class SideNavigationComponent {
         {
           link: './traits/with-feature-factory',
           name: 'withFeatureFactory',
+        },
+        {
+          link: './traits/with-link',
+          name: 'withLink',
         },
       ],
     },
