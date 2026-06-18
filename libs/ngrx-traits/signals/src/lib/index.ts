@@ -45,3 +45,4 @@ export * from './with-entities-calls/entity-call-config';
 export * from './cache/index';
 export * from './with-form/with-form';
 export * from './with-delegated-signal/with-delegated-signal';
+export * from './with-link/with-link';
