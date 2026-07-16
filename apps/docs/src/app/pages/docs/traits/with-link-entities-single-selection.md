@@ -31,7 +31,7 @@ export const ProductsStore = signalStore(
 export class ProductSelectComponent {
   store = inject(ProductsStore);
 
-  // parent writes select the entity in the store,
+  // writes from the parent select the entity in the store,
   // selecting in the store updates the parent
   selectedId = model<string | number | undefined>(undefined);
   linked = this.store.linkProductIdSelected(this.selectedId);
@@ -44,9 +44,9 @@ export class ProductSelectComponent {
 export class ProductSelectComponent {
   store = inject(ProductsStore);
 
-  selectedField = form(this.store.linkProductIdSelected());
-  // linked() reads store.productIdSelected(),
+  // reads store.productIdSelected(),
   // writing selects/deselects the entity
+  selectedField = form(this.store.linkProductIdSelected());
 }
 ```
 

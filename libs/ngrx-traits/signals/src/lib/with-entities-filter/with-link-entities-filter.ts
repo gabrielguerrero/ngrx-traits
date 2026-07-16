@@ -32,7 +32,7 @@ type ExtractFilter<State, Collection extends string> = Collection extends ''
  * @param config.entity - The entity type to be used
  * @param config.collection - The optional collection name to be used
  * @param config.debounce - Debounce passed to filter[Collection]Entities on
- *   each sync; defaults to the filter feature's own default
+ *   each sync; defaults to 0 to respect signal semantics, and so user can use the signalForm field debounce
  * @param config.forceLoad - forceLoad passed to filter[Collection]Entities
  *
  * @example
@@ -63,9 +63,7 @@ export function withLinkEntitiesFilter<
   Input &
     (Collection extends ''
       ? {
-          state: EntitiesFilterState<
-            ExtractFilter<Input['state'], Collection>
-          >;
+          state: EntitiesFilterState<ExtractFilter<Input['state'], Collection>>;
           props: {};
           methods: {};
         }
@@ -95,10 +93,9 @@ export function withLinkEntitiesFilter<
     update: (value: any, store: any) => {
       (store[filterEntitiesKey] as (options: any) => void)({
         filter: value,
-        debounce: config?.debounce,
+        debounce: config?.debounce ?? 0,
         forceLoad: config?.forceLoad,
       });
     },
-    equal: (a: any, b: any) => JSON.stringify(a) === JSON.stringify(b),
   } as any) as any;
 }
