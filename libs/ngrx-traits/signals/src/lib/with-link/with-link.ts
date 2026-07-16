@@ -15,6 +15,7 @@ import {
   withMethods,
 } from '@ngrx/signals';
 
+import { capitalize } from '../util';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 
@@ -174,13 +175,15 @@ export function withLink<Input extends SignalStoreFeatureResult>(
       ? (value: any) => options.update!(value, store as any)
       : (value: any) => patchState(store as any, { [name]: value });
 
+    // untracked: set/update must never register dependencies when called
+    // inside a reactive context, matching WritableSignal semantics
     const guardedUpdate = (value: any) => {
-      if (!equal(value, source())) {
+      if (!equal(value, untracked(source))) {
         update(value);
       }
     };
 
-    const linkMethodName = `link${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+    const linkMethodName = `link${capitalize(name)}`;
 
     return signalStoreFeature(
       withMethods(() => ({
@@ -229,11 +232,14 @@ function delegatedSignal<T>(options: {
     equal: options.equal,
   });
 
+  // reuses the computed's SIGNAL node so isSignal/toSignal interop treats
+  // this as a real signal; set/update only exist on the wrapper, so code
+  // that writes through the node itself would bypass them
   const res: WritableSignal<T> = Object.assign(() => internalSignal(), {
     [SIGNAL]: internalSignal[SIGNAL],
     set: (value: T) => options.update(value),
     update: (updateFn: (value: T) => T) => {
-      const newValue = updateFn(internalSignal());
+      const newValue = updateFn(untracked(internalSignal));
       options.update(newValue);
     },
     asReadonly: () => internalSignal,
