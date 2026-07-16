@@ -75,6 +75,7 @@ export function withLinkEntitiesSort<
       });
     },
     equal: (a: Sort<any>, b: Sort<any>) =>
-      a === b || (a.field === b.field && a.direction === b.direction),
+      a === b ||
+      (!!a && !!b && a.field === b.field && a.direction === b.direction),
   } as any) as any;
 }
