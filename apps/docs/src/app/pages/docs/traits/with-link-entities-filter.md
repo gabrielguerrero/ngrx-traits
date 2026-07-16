@@ -52,50 +52,40 @@ export class ProductListComponent {
 }
 ```
 
-Please note that this will set in the store valid or invalid form data if you want to only let valid data check the next case
+Please note that this will set both valid and invalid form data in the store. If you want to only let valid data through, check the next case.
 
-### Only setting validated data in the store with signalForm
+### Only setting validated data in the store with Signal Forms
 
-This case is very similar to previous one, but you will need a linkedSignal that works as a buffer between the form and the store that only lets validated data in the store
-For angular 22 you can use the new set in linkedSignal to only let valid data in the store
+This case is very similar to the previous one, but you will need a `linkedSignal` that works as a buffer between the form and the store, so only validated data reaches the store.
+For Angular 22 you can use the new `set` option in `linkedSignal` to only let valid data into the store:
 
 ```ts
 export class ProductListComponent {
   store = inject(ProductsStore);
 
   storeSignal = this.store.linkProductEntitiesFilter();
-  formData = linkedSignal(
-    this.storeSignal,
-    (value) => {
-      required(value.search);
+  // buffer signal
+  formData = linkedSignal(this.storeSignal, {
+    // new in angular 22, only propagates valid data to the store
+    set: (value) => {
+      if (this.filterForm().valid()) this.storeSignal.set(value);
     },
-    {
-      // new in angular 22 will only propagate valid data in the store
-      set: (value) => {
-        if (this.filterForm.valid()) storeSignal.set(value);
-      },
-    },
-  );
-
-  filterForm = form(this.formData(), (value) => {
-    required(value.search);
   });
 
-  constructor() {
-    effect(() => {
-      const value = _formData();
-    });
-  }
+  filterForm = form(this.formData, (value) => {
+    required(value.search);
+  });
 }
 ```
 
-For code with angular older than 22 you will need an effect to only let valid data in the store
+For Angular versions older than 22 you will need an effect to only let valid data into the store:
 
 ```ts
 export class ProductListComponent {
   store = inject(ProductsStore);
 
   storeSignal = this.store.linkProductEntitiesFilter();
+  // buffer signal
   formData = linkedSignal(this.storeSignal);
 
   filterForm = form(this.formData, (value) => {
@@ -105,97 +95,101 @@ export class ProductListComponent {
   constructor() {
     effect(() => {
       const value = this.formData();
-      this.storeSignal.set(value);
+      if (this.filterForm().valid()) 
+          this.storeSignal.set(value);
     });
   }
 }
 ```
 
-### On submission, only setting validated data in the store with signalForm
+### On submission, only setting validated data in the store with Signal Forms
 
 There are two ways for this case:
 
-First is very similar to previous one, with a linkedSignal that works as a buffer between the form and the store, and you will use the form submission or your own method to set the changes in the store
+The first is very similar to the previous one, with a `linkedSignal` that works as a buffer between the form and the store, but the changes are set in the store on form submission (or by your own method):
 
 ```ts
 export class ProductListComponent {
   store = inject(ProductsStore);
 
-  formData = linkedSignal(this.store.linkProductEntitiesFilter());
+  storeSignal = this.store.linkProductEntitiesFilter();
+  // buffer signal
+  formData = linkedSignal(this.storeSignal);
 
-  filterForm = form(this.formData, (value) => {
-    required(value.search);
-  }, {
-    // using angular signal form submission you will need formRoot directive
-    submission: {
-      action: async (){
-        if (this.filterForm.().valid()){
-          const value = this.formData();
-          this.storeSignal.set(value);
-        }
-        return Promise.resolve(true)
-      }
-    }
-  });
+  filterForm = form(
+    this.formData,
+    (value) => {
+      required(value.search);
+    },
+    {
+      // using signal form submission requires the formRoot directive
+      submission: {
+        action: async () => {
+          // submit is only allowed if the form is valid
+          this.storeSignal.set(this.formData());
+        },
+      },
+    },
+  );
 
-    // or <button (click)="onSubmit()">
-    onSubmit () {// called on lcik in a button
-        if (this.filterForm.().valid()){
-          const value = this.formData();
-          this.storeSignal.set(value);
-        }
-    }
-
+  // or <button (click)="onSubmit()">
+  onSubmit() {
+    submit(this.filterForm, async () => {
+      // submit is only allowed if the form is valid
+      this.storeSignal.set(this.formData());
+    });
+  }
 }
 ```
 
-Second way is not using the withLink and instead using the store read prod signal and calling the method in the store that saves the state or calls the backend, this is very useful because you can handle backend errors
+The second way is not using withLink, and instead reading the store filter signal directly and calling a store method that saves the state or calls the backend. This is very useful because you can handle backend errors:
 
 ```ts
 export class ProductListComponent {
   store = inject(ProductsStore);
 
-  formData = linkedSignal(this.store.productEntitiesFilter());
+  formData = linkedSignal(this.store.productEntitiesFilter);
 
-  filterForm = form(this.formData(), (value) => {
-    required(value.search);
-  }, {
-    // using angular signal form submission you will need formRoot directive
-    submission: {
-      action: async (){
-        const value = this.formData();
-        await result this.store.filterProductEntities(value);
-        if (!result.ok) {
-          return {
-            kind: 'server',
-            message: result.error as string,
-          } satisfies TreeValidationResult;
-        }
+  filterForm = form(
+    this.formData,
+    (value) => {
+      required(value.search);
+    },
+    {
+      // using signal form submission requires the formRoot directive
+      submission: {
+        action: async () => {
+        
+          const result = await this.store.filterProductEntities(this.formData());
+          if (!result.ok) {
+            return {
+              kind: 'server',
+              message: result.error as string,
+            } satisfies TreeValidationResult;
+          }
+        },
+      },
+    },
+  );
+
+  // or <button (click)="onSubmit()">
+  onSubmit() {
+    submit(this.filterForm, async () => {
+      const result = await this.store.filterProductEntities(this.formData());
+      if (!result.ok) {
+        return {
+          kind: 'server',
+          message: result.error as string,
+        } satisfies TreeValidationResult;
       }
-    }
-  });
-
-    // or <button (click)="onSubmit()">
-    onSubmit () {// called on lcik in a button
-        if (this.filterForm.().valid()){
-          submit(this.filterForm, async (form) => {
-            const value = this.formData();
-            await result this.store.filterProductEntities(value);
-            if (!result.ok) {
-              return {
-                kind: 'server',
-                message: result.error as string,
-              } satisfies TreeValidationResult;
-            }
-          });
-        }
-    }
-
+    });
+  }
 }
 ```
 
 ### Syncing with a model() or input
-You can sync the chnages of the signal return by the link function with a param model or signal, if is a model it will read and write to it, for inputs it will only read from it 
+
+You can sync the signal returned by the link method with a `model()` or `input()` signal passed as a param: a `model()` is read and written (two-way sync), an `input()` is only read (one-way input → store).
 
 ```typescript
 export class ProductListComponent {
@@ -205,7 +199,8 @@ export class ProductListComponent {
   linked = this.store.linkProductEntitiesFilter(this.filter);
 }
 ```
-The sync signal param will also work with all the previous examples
+
+The synced signal param also works with all the previous examples.
 
 ## API
 

@@ -93,6 +93,22 @@ describe('withLink', () => {
       });
     });
 
+    it('update() derives the new value from the current one', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount();
+
+        linked.update((v) => v + 1);
+        expect(store.count()).toBe(2);
+        expect(linked()).toBe(2);
+      });
+    });
+
     it('skips update when the value is equal to the source', () => {
       const update = vi.fn();
       const Store = signalStore(

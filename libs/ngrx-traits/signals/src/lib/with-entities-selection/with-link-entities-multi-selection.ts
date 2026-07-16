@@ -88,8 +88,10 @@ export function withLinkEntitiesMultiSelection<
     equal: (a: (string | number)[], b: (string | number)[]) => {
       if (a === b) return true;
       if (a.length !== b.length) return false;
+      const aSet = new Set(a);
       const bSet = new Set(b);
-      return a.every((id) => bSet.has(id));
+      // size check guards against duplicate ids making unequal arrays match
+      return aSet.size === bSet.size && a.every((id) => bSet.has(id));
     },
   } as any) as any;
 }

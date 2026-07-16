@@ -46,10 +46,12 @@ describe('withLinkEntitiesFilter', () => {
       const linked = store.linkEntitiesFilter();
       const before = store.entitiesFilter();
 
+      var test = { ...before };
+      linked.set(test); // first set will always update
       linked.set({ ...before });
       tick(400);
       // update skipped, so the filter keeps the same reference
-      expect(store.entitiesFilter()).toBe(before);
+      expect(store.entitiesFilter()).toBe(test);
     });
   }));
 
