@@ -30,7 +30,7 @@ export const GenresStore = signalStore(
 export class GenreMultiSelectComponent {
   store = inject(GenresStore);
 
-  // parent writes select the entities in the store,
+  // writes from the parent select the entities in the store,
   // selecting in the store updates the parent
   value = model<(string | number)[]>([]);
   valueField = form(this.store.linkIdsSelected(this.value));
