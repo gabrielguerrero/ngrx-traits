@@ -218,7 +218,7 @@ export function getQueryMapperWithPrefix(config: {
   mapper: QueryMapper<any>;
 }): QueryMapper<any> {
   return {
-    queryParamsToState: (query, store) => {
+    queryParamsToState: (query, store, firstLoad) => {
       const newQuery = Object.entries(query).reduce(
         (acc, [key, value]) => {
           if (key.startsWith(config.prefix + '-')) {
@@ -230,7 +230,7 @@ export function getQueryMapperWithPrefix(config: {
         },
         {} as Record<string, any>,
       );
-      config.mapper.queryParamsToState(newQuery, store);
+      config.mapper.queryParamsToState(newQuery, store, firstLoad);
     },
     stateToQueryParams: (store) => {
       const query = config.mapper.stateToQueryParams(store);

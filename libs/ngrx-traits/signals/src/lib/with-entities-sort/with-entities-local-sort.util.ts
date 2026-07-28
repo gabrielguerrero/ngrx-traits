@@ -99,9 +99,8 @@ export function getQueryMapperForEntitiesSort(config?: {
   sortDirection: string;
 }> {
   const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
-  let firstLoad = true;
   return {
-    queryParamsToState: (query, store) => {
+    queryParamsToState: (query, store, firstLoad) => {
       const sortBy = query.sortBy;
       if (sortBy) {
         const sortDirection = query.sortDirection;
@@ -119,7 +118,6 @@ export function getQueryMapperForEntitiesSort(config?: {
             skipLoadingCall: firstLoad && config?.skipLoadingCall,
           });
         }
-        firstLoad = false;
       }
     },
     stateToQueryParams: (store) => {
