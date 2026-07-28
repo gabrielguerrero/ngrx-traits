@@ -1,4 +1,8 @@
-import { Type } from '@angular/core';
+import {
+  createEnvironmentInjector,
+  EnvironmentInjector,
+  Type,
+} from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, Params, provideRouter, Router } from '@angular/router';
 import {
@@ -1222,6 +1226,57 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       tick(400);
       // With skipLoadingCall: false, the fetchEntities should be called
       expect(fetchEntitiesSpy).toHaveBeenCalled();
+    }));
+
+    it('should honour skipLoadingCall on every store instance', fakeAsync(() => {
+      // the mappers are built once per store definition, so a firstLoad flag
+      // kept in their closure would leak from one instance to the next and
+      // silently ignore skipLoadingCall from the second instance onwards
+      const fetchEntitiesSpy = vi.fn(() =>
+        of({ entities: mockProducts.slice(0, 10), total: 10 }),
+      );
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemoteFilter({
+          entity,
+          defaultFilter: { search: '', foo: 'bar' },
+        }),
+        withEntitiesLoadingCall({ fetchEntities: fetchEntitiesSpy }),
+        withEntitiesSyncToRouteQueryParams({ entity, skipLoadingCall: true }),
+      );
+      TestBed.configureTestingModule({
+        providers: [
+          provideRouter([]),
+          {
+            provide: ActivatedRoute,
+            useFactory: () => ({
+              queryParams: of({
+                filter: JSON.stringify({ search: 'test', foo: 'bar' }),
+              }),
+            }),
+          },
+        ],
+      });
+      const router = TestBed.inject(Router);
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      const parentInjector = TestBed.inject(EnvironmentInjector);
+
+      // each instance is its own first load, so none of them should fetch
+      for (const instance of [1, 2, 3]) {
+        const injector = createEnvironmentInjector([Store], parentInjector);
+        const store = injector.get(Store) as any;
+        tick();
+        tick(400);
+        expect(store.entitiesFilter()).toEqual({
+          search: 'test',
+          foo: 'bar',
+        });
+        expect(
+          fetchEntitiesSpy,
+          `fetchEntities should not be called for instance ${instance}`,
+        ).not.toHaveBeenCalled();
+      }
     }));
   });
 });
