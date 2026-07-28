@@ -54,9 +54,8 @@ export function getQueryMapperForEntitiesPagination(config?: {
   const { loadingKey, loadedKey } = getWithCallStatusKeys({
     collection: config?.collection,
   });
-  let firstLoad = true;
   return {
-    queryParamsToState: (query, store) => {
+    queryParamsToState: (query, store, firstLoad) => {
       const page = query.page;
       const pageSize = query.pageSize;
       const pagination = store[paginationKey] as Signal<
@@ -84,7 +83,6 @@ export function getQueryMapperForEntitiesPagination(config?: {
           // otherwise history navigation would not work as expected
           skipLoadingCall: firstLoad && config?.skipLoadingCall,
         });
-        firstLoad = false;
       }
     },
     stateToQueryParams: (store) => {

@@ -157,9 +157,8 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
 > {
   const { filterEntitiesKey, filterKey } = getWithEntitiesFilterKeys(config);
 
-  let firstLoad = true;
   return {
-    queryParamsToState: (query, store) => {
+    queryParamsToState: (query, store, firstLoad) => {
       const filter = config?.filterMapper
         ? config?.filterMapper.queryParamsToFilter(query)
         : query.filter
@@ -179,7 +178,6 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
           // otherwise history navigation would not work as expected
           skipLoadingCall: firstLoad && config?.skipLoadingCall,
         });
-        firstLoad = false;
       }
     },
     stateToQueryParams: (store) => {

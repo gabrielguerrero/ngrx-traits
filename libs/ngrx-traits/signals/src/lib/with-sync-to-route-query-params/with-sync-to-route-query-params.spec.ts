@@ -1,4 +1,8 @@
-import { computed, createEnvironmentInjector, EnvironmentInjector } from '@angular/core';
+import {
+  computed,
+  createEnvironmentInjector,
+  EnvironmentInjector,
+} from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { withSyncToRouteQueryParams } from '@ngrx-traits/signals';
@@ -198,6 +202,128 @@ describe('withSyncToRouteQueryParams', () => {
     }).not.toThrow();
     expect(queryParamsToStateSpy).not.toHaveBeenCalled();
   });
+
+  it('should not share the last pushed query params between store instances', fakeAsync(() => {
+    // the store definition is created once, so both instances go through the
+    // same withSyncToRouteQueryParams call, which is what used to leak
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        test: 'test',
+        foo: 'foo',
+        bar: false,
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: (query, store) => {
+              patchState(store, {
+                test: query.test,
+                foo: query.foo,
+                bar: query.bar === 'true',
+              });
+            },
+            stateToQueryParams: (store) =>
+              computed(() => ({
+                test: store.test(),
+                foo: store.foo(),
+                bar: store.bar().toString(),
+              })),
+          },
+        ],
+      }),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: of({
+              test: 'test2',
+              foo: 'foo2',
+              bar: 'true',
+            }),
+          }),
+        },
+      ],
+    });
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const parentInjector = TestBed.inject(EnvironmentInjector);
+
+    // first instance restores from the url and then pushes back to it
+    const injector1 = createEnvironmentInjector([Store], parentInjector);
+    const store1 = injector1.get(Store);
+    expect(store1.test()).toBe('test2');
+    TestBed.tick();
+    tick(400);
+    expect(router.navigate).toHaveBeenCalled();
+
+    // second instance must still restore from the url
+    const injector2 = createEnvironmentInjector([Store], parentInjector);
+    const store2 = injector2.get(Store);
+    expect(store2.test()).toBe('test2');
+    expect(store2.foo()).toBe('foo2');
+    expect(store2.bar()).toBe(true);
+  }));
+
+  it('should ignore query params emitted after pushing params with undefined values', fakeAsync(() => {
+    const queryParams$ = new Subject<Record<string, string | undefined>>();
+    const queryParamsToStateSpy = vi.fn(
+      (query: Record<string, string | undefined>, store: any) => {
+        patchState(store, { test: query['test'], foo: query['foo'] });
+      },
+    );
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        test: 'test' as string | undefined,
+        foo: 'foo',
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: queryParamsToStateSpy,
+            stateToQueryParams: (store: any) =>
+              computed(() => ({
+                test: store.test(),
+                foo: store.foo(),
+              })),
+          },
+        ],
+      }),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        Store,
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({ queryParams: queryParams$ }),
+        },
+      ],
+    });
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const store = TestBed.inject(Store);
+
+    // undefined params get dropped from the url, so they must not be stored
+    // as part of the last pushed params
+    patchState(store, { test: undefined });
+    TestBed.tick();
+    tick(400);
+    expect(router.navigate).toHaveBeenCalledWith([], {
+      relativeTo: expect.anything(),
+      queryParams: { test: undefined, foo: 'foo' },
+      queryParamsHandling: 'merge',
+    });
+
+    // the url now only has foo, which is what we just pushed, so the store
+    // should not be patched again
+    queryParams$.next({ foo: 'foo' });
+    expect(queryParamsToStateSpy).not.toHaveBeenCalled();
+  }));
 
   it('store should be synced with url query params with custom debounce', fakeAsync(() => {
     const { store } = init({ debounce: 1000 });

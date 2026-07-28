@@ -8,8 +8,16 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SignalStoreFeature, signalStoreFeature, SignalStoreFeatureResult, type, withHooks, withMethods, withState } from '@ngrx/signals';
-import { concatWith, debounce, defaultIfEmpty, NEVER, take, timer } from 'rxjs';
+import {
+  SignalStoreFeature,
+  signalStoreFeature,
+  SignalStoreFeatureResult,
+  type,
+  withHooks,
+  withMethods,
+  withProps,
+} from '@ngrx/signals';
+import { concatWith, debounce, defaultIfEmpty, NEVER, timer } from 'rxjs';
 
 import { combineFunctionsInObject } from '../util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
@@ -72,14 +80,26 @@ export function withSyncToRouteQueryParams<
     };
   }
 > {
-  let lastPushedQueryParams: Record<string, any> | undefined;
+  // per instance holder for the last query params this store pushed to the url.
+  // It has to live on the store because withHooks writes it and withMethods
+  // reads it, and it is symbol keyed so it stays off the store public api.
+  const LAST_PUSHED_QUERY_PARAMS = Symbol('lastPushedQueryParams');
   return signalStoreFeature(
     type<Input>(),
-    withState({}),
+    withProps(() => ({
+      [LAST_PUSHED_QUERY_PARAMS]: {
+        value: undefined as Record<string, unknown> | undefined,
+      },
+    })),
     withMethods((store) => {
       const injector = inject(Injector);
       const environmentInjector = inject(EnvironmentInjector);
       const destroyRef = inject(DestroyRef);
+      const lastPushedQueryParams = store[LAST_PUSHED_QUERY_PARAMS];
+      // per store instance, true until the first query params emission has been
+      // restored into the store. Mappers receive it so they can force the load
+      // and honour skipLoadingCall only on that first restore.
+      let firstLoad = true;
       return combineFunctionsInObject(
         {
           loadFromQueryParams: () => {
@@ -87,10 +107,12 @@ export function withSyncToRouteQueryParams<
             activatedRoute.queryParams
               .pipe(
                 defaultIfEmpty({}), // Provide default empty object if observable completes without emitting
-                takeUntilDestroyed(destroyRef)
+                takeUntilDestroyed(destroyRef),
               )
               .subscribe((queryParams) => {
-                if (shallowEqualParams(lastPushedQueryParams, queryParams)) {
+                if (
+                  shallowEqualParams(lastPushedQueryParams.value, queryParams)
+                ) {
                   return;
                 }
                 runInInjectionContext(environmentInjector, () => {
@@ -99,8 +121,10 @@ export function withSyncToRouteQueryParams<
                     mapper.queryParamsToState(
                       queryParams as Params,
                       store as any,
+                      firstLoad,
                     );
                   });
+                  firstLoad = false;
                   config.onQueryParamsStored?.(store);
                 });
               });
@@ -111,7 +135,7 @@ export function withSyncToRouteQueryParams<
     }),
     withHooks((store) => {
       const router = inject(Router);
-
+      const lastPushedQueryParams = store[LAST_PUSHED_QUERY_PARAMS];
       return {
         onInit: () => {
           if (config.restoreOnInit ?? true) {
@@ -132,7 +156,6 @@ export function withSyncToRouteQueryParams<
             }, {});
             return queryParams;
           });
-
           toObservable(computedChanges)
             .pipe(
               concatWith(NEVER),
@@ -140,23 +163,30 @@ export function withSyncToRouteQueryParams<
               takeUntilDestroyed(),
             )
             .subscribe((queryParams) => {
-              lastPushedQueryParams = {
+              const lastParams: Record<string, unknown> = {
                 ...(activatedRoute.snapshot?.queryParams || {}),
                 ...queryParams,
               };
-              const keys = Object.keys(lastPushedQueryParams);
-              for (let key of keys) {
+              for (const key of Object.keys(lastParams)) {
                 // undefined params will be deleted from the url so we should
-                // no store them
-                if (lastPushedQueryParams[key] === undefined) {
-                  delete lastPushedQueryParams[key];
+                // not store them
+                if (lastParams[key] === undefined) {
+                  delete lastParams[key];
                 }
               }
-              router.navigate([], {
-                relativeTo: activatedRoute,
-                queryParams,
-                queryParamsHandling: 'merge',
-              });
+              lastPushedQueryParams.value = lastParams;
+              router
+                .navigate([], {
+                  relativeTo: activatedRoute,
+                  queryParams,
+                  queryParamsHandling: 'merge',
+                })
+                .catch((error) => {
+                  console.error(
+                    'withSyncToRouteQueryParams: failed to sync the store to the route query params',
+                    error,
+                  );
+                });
             });
         },
       };
@@ -165,8 +195,8 @@ export function withSyncToRouteQueryParams<
 }
 
 function shallowEqualParams(
-  a: Record<string, any> | undefined,
-  b: Record<string, any>,
+  a: Record<string, unknown> | undefined,
+  b: Record<string, unknown>,
 ): boolean {
   if (!a) return false;
   const aKeys = Object.keys(a);
