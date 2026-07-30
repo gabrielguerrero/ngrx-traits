@@ -87,6 +87,122 @@ export const ProductsLocalStore = signalStore(
 );
 ```
 
+### Two collections, with a short prefix
+
+You can sync more than one collection in the same store, each `withEntitiesSyncToRouteQueryParams` prefixes its own query params so the two never collide.
+
+When you have multiple collections, group each one into its own custom store feature (or give it its own store) instead of listing every feature of both collections directly in one `signalStore`. It keeps each collection readable and reusable on its own. It also avoids the feature limit: `signalStore` accepts up to 15 features, and a fully configured collection already uses about 8 of them, so two collections would not fit.
+
+Use `entityConfig` to declare the entity and collection once, then spread it when a feature takes extra options, or pass it directly when it does not.
+
+```typescript
+// with-product-entities.ts
+export const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
+
+export function withProductEntities() {
+  return signalStoreFeature(
+    withEntities(productEntityConfig),
+    withCallStatus({ ...productEntityConfig, initialValue: 'loading' }),
+    withEntitiesRemoteFilter({
+      ...productEntityConfig,
+      defaultFilter: { search: '' },
+    }),
+    withEntitiesRemotePagination({
+      ...productEntityConfig,
+      pageSize: 10,
+    }),
+    withEntitiesRemoteSort({
+      ...productEntityConfig,
+      defaultSort: { field: 'name', direction: 'asc' },
+    }),
+    withEntitiesSingleSelection(productEntityConfig),
+    // 👇 params become p-filter, p-page, p-pageSize, p-sortBy, p-sortDirection, p-selectedId
+    withEntitiesSyncToRouteQueryParams({
+      ...productEntityConfig,
+      prefix: 'p',
+    }),
+    withEntitiesLoadingCall(
+      ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort },
+        service = inject(ProductService)) => ({
+        ...productEntityConfig,
+        fetchEntities: async () => { ... },
+      }),
+    ),
+  );
+}
+```
+
+```typescript
+// with-order-entities.ts
+export const orderItemEntityConfig = entityConfig({
+  entity: type<ProductOrder>(),
+  collection: 'orderItem',
+});
+
+export function withOrderEntities() {
+  return signalStoreFeature(
+    withEntities(orderItemEntityConfig),
+    withCallStatus({ ...orderItemEntityConfig, initialValue: 'loading' }),
+    withEntitiesLocalSort({
+      ...orderItemEntityConfig,
+      defaultSort: { field: 'name', direction: 'asc' },
+    }),
+    withEntitiesLocalPagination({
+      ...orderItemEntityConfig,
+      pageSize: 10,
+    }),
+    withEntitiesSingleSelection(orderItemEntityConfig),
+    // 👇 params become o-filter, o-page, o-pageSize, o-sortBy, o-sortDirection, o-selectedId
+    withEntitiesSyncToRouteQueryParams({
+      ...orderItemEntityConfig,
+      prefix: 'o',
+    }),
+  );
+}
+```
+
+Both collections then compose into a single store:
+
+```typescript
+export const ProductsShopStore = signalStore(
+  withProductEntities(),
+  withOrderEntities(),
+);
+```
+
+Without `prefix` the collection name is used, which gets verbose quickly:
+
+```
+?product-filter={"search":""}&product-page=1&product-pageSize=10&product-sortBy=name&product-sortDirection=asc&orderItem-filter={"search":""}&orderItem-page=1&orderItem-pageSize=10&orderItem-sortBy=name&orderItem-sortDirection=asc
+```
+
+With `prefix: 'p'` and `prefix: 'o'` the collections keep their full names in the store while the url stays short:
+
+```
+?p-filter={"search":""}&p-page=1&p-pageSize=10&p-sortBy=name&p-sortDirection=asc&o-filter={"search":""}&o-page=1&o-pageSize=10&o-sortBy=name&o-sortDirection=asc
+```
+
+Setting `prefix: false` removes the prefix entirely, only do that when a single collection syncs to the url, otherwise the collections overwrite each other's params.
+
+The `filter` param is usually the longest one, because the filter object is serialized with `JSON.stringify`. Use `filterMapper` to flatten it into shorter params:
+
+```typescript
+withEntitiesSyncToRouteQueryParams({
+  ...productEntityConfig,
+  prefix: 'p',
+  filterMapper: {
+    // 👇 p-filter={"search":"tv"} becomes p-q=tv
+    filterToQueryParams: (filter) => ({ q: filter.search }),
+    queryParamsToFilter: (query) => ({ search: query.q ?? '' }),
+  },
+}),
+```
+
+Also consider `syncPagination: false`, `syncSort: false` or `syncSingleSelection: false` to drop the params you do not need to restore from the url.
+
 ## API Reference
 
 

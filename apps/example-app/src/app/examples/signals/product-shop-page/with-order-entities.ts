@@ -4,6 +4,7 @@ import {
   withEntitiesLocalPagination,
   withEntitiesLocalSort,
   withEntitiesMultiSelection,
+  withEntitiesSingleSelection,
   withLogger,
   withSyncToWebStorage,
 } from '@ngrx-traits/signals';
@@ -22,6 +23,7 @@ export function withOrderEntities() {
       ...orderItemEntityConfig,
       defaultSort: { field: 'name', direction: 'asc' },
     }),
+    withEntitiesSingleSelection(orderItemEntityConfig),
     withEntitiesMultiSelection(orderItemEntityConfig),
     withEntitiesLocalPagination({
       ...orderItemEntityConfig,

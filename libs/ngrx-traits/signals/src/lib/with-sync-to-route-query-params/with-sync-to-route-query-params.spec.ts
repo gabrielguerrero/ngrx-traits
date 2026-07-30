@@ -82,6 +82,8 @@ describe('withSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: { test: 'test3', foo: 'foo3', bar: 'false' },
       queryParamsHandling: 'merge',
+      // the initial push replaces the history entry instead of adding one
+      replaceUrl: true,
     });
   }));
 
@@ -317,6 +319,8 @@ describe('withSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: { test: undefined, foo: 'foo' },
       queryParamsHandling: 'merge',
+      // the initial push replaces the history entry instead of adding one
+      replaceUrl: true,
     });
 
     // the url now only has foo, which is what we just pushed, so the store
@@ -342,6 +346,72 @@ describe('withSyncToRouteQueryParams', () => {
       relativeTo: expect.anything(),
       queryParams: { test: 'test3', foo: 'foo3', bar: 'false' },
       queryParamsHandling: 'merge',
+      // the initial push replaces the history entry instead of adding one
+      replaceUrl: true,
     });
+  }));
+
+  it('should not add history entries when initialising multiple sync features', fakeAsync(() => {
+    // each feature pushes its own initial state, so without replacing the
+    // current history entry the user would need one back navigation per
+    // feature just to leave the page
+    const Store = signalStore(
+      { protectedState: false },
+      withState({ aFilter: 'a1', bFilter: 'b1' }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: () => {},
+            stateToQueryParams: (store: any) =>
+              computed(() => ({ 'a-filter': store.aFilter() })),
+          },
+        ],
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: () => {},
+            stateToQueryParams: (store: any) =>
+              computed(() => ({ 'b-filter': store.bFilter() })),
+          },
+        ],
+      }),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        Store,
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: of({}),
+            snapshot: { queryParams: {} },
+          }),
+        },
+      ],
+    });
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi
+      .spyOn(router, 'navigate')
+      .mockResolvedValue(true) as any;
+    const store = TestBed.inject(Store) as any;
+
+    TestBed.tick();
+    tick(400);
+    // both features pushed, and neither added a history entry
+    expect(navigateSpy).toHaveBeenCalledTimes(2);
+    expect(
+      navigateSpy.mock.calls.every((call: any) => call[1].replaceUrl === true),
+    ).toBe(true);
+
+    // a later user driven change must still be reachable with the back button
+    navigateSpy.mockClear();
+    patchState(store, { aFilter: 'a2' });
+    TestBed.tick();
+    tick(400);
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(navigateSpy.mock.calls[0][1].replaceUrl).toBeUndefined();
+
+    tick(1000);
   }));
 });

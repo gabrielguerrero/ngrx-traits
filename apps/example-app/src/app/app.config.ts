@@ -14,7 +14,11 @@ import {
 } from '@angular/material/form-field';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, withInMemoryScrolling, withViewTransitions } from '@angular/router';
+import {
+  provideRouter,
+  withInMemoryScrolling,
+  withViewTransitions,
+} from '@angular/router';
 import { EffectsModule, provideEffects } from '@ngrx/effects';
 import { provideStore } from '@ngrx/store';
 import { StoreModule } from '@ngrx/store';
@@ -29,10 +33,12 @@ export const appConfig: ApplicationConfig = {
     provideRouter(
       routes,
       withInMemoryScrolling({
-        scrollPositionRestoration: 'enabled',
+        // commented out because it some pages the jump to the top of page when url changes is not desired
+        // scrollPositionRestoration: 'enabled',
         anchorScrolling: 'enabled',
       }),
-      withViewTransitions()
+      // this causes extra re-rendering of components when navigating between pages, so it is disabled for now
+      // withViewTransitions(),
     ),
     provideAnimations(),
     importProvidersFrom(StoreModule.forRoot({})),

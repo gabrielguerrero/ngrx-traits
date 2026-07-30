@@ -156,6 +156,11 @@ export function withSyncToRouteQueryParams<
             }, {});
             return queryParams;
           });
+          // the first push only reflects the initial state into the url, so it
+          // replaces the current history entry rather than adding one.
+          // Otherwise every sync feature in the store would cost the user an
+          // extra back navigation to get off the page.
+          let firstPush = true;
           toObservable(computedChanges)
             .pipe(
               concatWith(NEVER),
@@ -175,11 +180,16 @@ export function withSyncToRouteQueryParams<
                 }
               }
               lastPushedQueryParams.value = lastParams;
+              // replaceUrl defaults to false, so it is only set when needed to
+              // keep the navigation extras unchanged for later pushes
+              const replaceUrlExtra = firstPush ? { replaceUrl: true } : {};
+              firstPush = false;
               router
                 .navigate([], {
                   relativeTo: activatedRoute,
                   queryParams,
                   queryParamsHandling: 'merge',
+                  ...replaceUrlExtra,
                 })
                 .catch((error) => {
                   console.error(
