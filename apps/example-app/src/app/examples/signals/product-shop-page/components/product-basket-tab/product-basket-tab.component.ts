@@ -29,8 +29,8 @@ import { SmartProductDetailComponent } from '../smart-product-detail/smart-produ
             (toggleAllSelectForRemove)="
               store.toggleSelectAllOrderItemEntities()
             "
-            [selectedProduct]="store.productEntitySelected()"
-            (selectProduct)="store.selectProductEntity($event)"
+            [selectedProduct]="store.orderItemEntitySelected()"
+            (selectProduct)="store.selectOrderItemEntity($event)"
             (sort)="sortBasket($event)"
           ></product-basket>
         </mat-card-content>
@@ -60,8 +60,10 @@ import { SmartProductDetailComponent } from '../smart-product-detail/smart-produ
           </button>
         </mat-card-actions>
       </mat-card>
-      @if (store.productEntitySelected()) {
-        <smart-product-detail [productId]="store.productEntitySelected()!.id" />
+      @if (store.orderItemEntitySelected()) {
+        <smart-product-detail
+          [productId]="store.orderItemEntitySelected()!.id"
+        />
       }
     </div>
   `,

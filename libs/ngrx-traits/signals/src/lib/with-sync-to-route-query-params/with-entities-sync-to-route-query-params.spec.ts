@@ -264,6 +264,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
         }),
         queryParamsHandling: 'merge',
+        // the initial push replaces the history entry instead of adding one
+        replaceUrl: true,
       });
     }));
 
@@ -305,6 +307,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
         }),
         queryParamsHandling: 'merge',
+        // the initial push replaces the history entry instead of adding one
+        replaceUrl: true,
       });
     }));
 
@@ -362,6 +366,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           foo: 'bar4',
         }),
         queryParamsHandling: 'merge',
+        // the initial push replaces the history entry instead of adding one
+        replaceUrl: true,
       });
     }));
   });
@@ -402,6 +408,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           sortDirection: 'asc',
         }),
         queryParamsHandling: 'merge',
+        // the initial push replaces the history entry instead of adding one
+        replaceUrl: true,
       });
     }));
 
@@ -442,6 +450,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           sortDirection: 'asc',
         }),
         queryParamsHandling: 'merge',
+        // the initial push replaces the history entry instead of adding one
+        replaceUrl: true,
       });
     }));
   });
