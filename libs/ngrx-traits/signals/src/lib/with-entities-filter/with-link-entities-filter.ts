@@ -1,7 +1,6 @@
-import { Signal, WritableSignal } from '@angular/core';
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
-import { LinkOptions, withLink } from '../with-link/with-link';
+import { LinkMethod, withLink } from '../with-link/with-link';
 import { getWithEntitiesFilterKeys } from './with-entities-filter.util';
 import {
   EntitiesFilterState,
@@ -81,10 +80,9 @@ export function withLinkEntitiesFilter<
     methods: {
       [P in Collection extends ''
         ? 'entitiesFilter'
-        : `${Collection}EntitiesFilter` as `link${Capitalize<string & P>}`]: (
-        external?: Signal<ExtractFilter<Input['state'], Collection>>,
-        options?: LinkOptions,
-      ) => WritableSignal<ExtractFilter<Input['state'], Collection>>;
+        : `${Collection}EntitiesFilter` as `link${Capitalize<
+        string & P
+      >}`]: LinkMethod<ExtractFilter<Input['state'], Collection>>;
     };
   }
 > {

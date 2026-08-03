@@ -108,6 +108,28 @@ describe('withLinkEntitiesFilter', () => {
     });
   }));
 
+  it('accepts the options as the only argument', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const valid = signal(false);
+      const linked = store.linkEntitiesFilter({
+        updateWhen: (filter) => valid() && filter.search !== 'bad',
+      });
+
+      linked.set({ search: 'zero' });
+      TestBed.tick();
+      tick(400);
+      expect(store.entitiesFilter()).toEqual({ search: '' });
+
+      valid.set(true);
+      TestBed.tick();
+      tick(400);
+      expect(store.entitiesFilter()).toEqual({ search: 'zero' });
+      expect(store.entities().length).toEqual(2);
+    });
+  }));
+
   it('syncs an external signal with the filter both ways', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
