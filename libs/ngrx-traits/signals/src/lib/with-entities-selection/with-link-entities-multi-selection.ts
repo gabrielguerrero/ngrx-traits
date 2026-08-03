@@ -1,7 +1,7 @@
-import { Signal, WritableSignal } from '@angular/core';
+import { Signal } from '@angular/core';
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
-import { LinkOptions, withLink } from '../with-link/with-link';
+import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesMultiSelectionState,
   NamedEntitiesMultiSelectionState,
@@ -58,10 +58,9 @@ export function withLinkEntitiesMultiSelection<
     methods: {
       [P in Collection extends ''
         ? 'idsSelected'
-        : `${Collection}IdsSelected` as `link${Capitalize<string & P>}`]: (
-        external?: Signal<(string | number)[]>,
-        options?: LinkOptions,
-      ) => WritableSignal<(string | number)[]>;
+        : `${Collection}IdsSelected` as `link${Capitalize<
+        string & P
+      >}`]: LinkMethod<(string | number)[]>;
     };
   }
 > {
