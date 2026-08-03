@@ -1,4 +1,4 @@
-import { computed, signal } from '@angular/core';
+import { computed, Signal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
 
@@ -128,6 +128,62 @@ describe('withLink', () => {
     });
   });
 
+  // ── Call signatures ────────────────────────────────────────────
+
+  describe('call signatures', () => {
+    it('accepts the options as the only argument', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({ initialValue: 'store' });
+
+        expect(linked()).toBe(1);
+        linked.set(2);
+        expect(store.count()).toBe(2);
+      });
+    });
+
+    it('keeps the options when the external argument is explicitly undefined', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const maybeExternal: Signal<number> | undefined = undefined;
+        const linked = store.linkCount(maybeExternal, {
+          updateWhen: () => false,
+        });
+
+        linked.set(999);
+        TestBed.tick();
+        // the gate is still applied, the write does not reach the store
+        expect(store.count()).toBe(1);
+      });
+    });
+
+    it('still accepts an external signal plus options', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(5);
+        store.linkCount(external, { initialValue: 'store' });
+        TestBed.tick();
+
+        expect(external()).toBe(1);
+      });
+    });
+  });
+
   // ── External signal sync ───────────────────────────────────────
 
   describe('external signal sync', () => {
@@ -223,6 +279,222 @@ describe('withLink', () => {
         patchState(store, { count: 8 });
         TestBed.tick();
         expect(external()).toBe(4);
+      });
+    });
+
+    it("ignores initialValue 'store' for a read-only external signal", () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = computed(() => 5);
+        store.linkCount(external, { initialValue: 'store' });
+        TestBed.tick();
+
+        // read-only signals are always one-way external -> store
+        expect(store.count()).toBe(5);
+      });
+    });
+  });
+
+  // ── updateWhen gate ────────────────────────────────────────────
+
+  describe('updateWhen', () => {
+    it('buffers writes and only updates the store when it returns true', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(false);
+        const linked = store.linkCount({
+          updateWhen: () => allowed(),
+        });
+
+        linked.set(5);
+        TestBed.tick();
+        // buffered: readable on the linked signal, not yet in the store
+        expect(linked()).toBe(5);
+        expect(store.count()).toBe(1);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(store.count()).toBe(5);
+      });
+    });
+
+    it('receives the latest value', () => {
+      const updateWhen = vi.fn((value: number) => value > 10);
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({ updateWhen });
+        TestBed.tick();
+
+        linked.set(5);
+        TestBed.tick();
+        expect(updateWhen).toHaveBeenCalledWith(5);
+        expect(store.count()).toBe(1);
+
+        linked.set(20);
+        TestBed.tick();
+        expect(store.count()).toBe(20);
+      });
+    });
+
+    it('routes gated writes through a custom update', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ filter: { search: 'initial' } }),
+        withLink('filter', { update }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(false);
+        const linked = store.linkFilter({
+          updateWhen: () => allowed(),
+        });
+
+        linked.set({ search: 'updated' });
+        TestBed.tick();
+        expect(update).not.toHaveBeenCalled();
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(update).toHaveBeenCalledWith(
+          { search: 'updated' },
+          expect.anything(),
+        );
+      });
+    });
+
+    it('resets the buffer when the store changes', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({ updateWhen: () => false });
+
+        linked.set(5);
+        TestBed.tick();
+        expect(store.count()).toBe(1);
+
+        patchState(store, { count: 9 });
+        TestBed.tick();
+        expect(linked()).toBe(9);
+      });
+    });
+
+    it('gates an external signal through the buffer as well', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(false);
+        const external = signal(5);
+        store.linkCount(external, { updateWhen: () => allowed() });
+        TestBed.tick();
+
+        expect(store.count()).toBe(1);
+
+        external.set(7);
+        TestBed.tick();
+        expect(store.count()).toBe(1);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(store.count()).toBe(7);
+
+        // store -> external still syncs
+        patchState(store, { count: 9 });
+        TestBed.tick();
+        expect(external()).toBe(9);
+      });
+    });
+
+    it('keeps a diverging external initial value buffered until the gate opens', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(false);
+        const external = signal(5);
+        const linked = store.linkCount(external, {
+          updateWhen: () => allowed(),
+        });
+        TestBed.tick();
+
+        // 5 is buffered, and the external falls back to the committed value
+        expect(linked()).toBe(5);
+        expect(external()).toBe(1);
+        expect(store.count()).toBe(1);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(store.count()).toBe(5);
+        expect(external()).toBe(5);
+      });
+    });
+
+    it('only mirrors committed values to the external signal', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(false);
+        const external = signal(1);
+        const linked = store.linkCount(external, {
+          updateWhen: () => allowed(),
+        });
+
+        // buffered write does not leak to the external signal
+        linked.set(5);
+        TestBed.tick();
+        expect(linked()).toBe(5);
+        expect(external()).toBe(1);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(store.count()).toBe(5);
+        expect(external()).toBe(5);
+      });
+    });
+
+    it('does not update the store when the gated value equals the source', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ count: 1 }),
+        withLink('count', { update }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({ updateWhen: () => true });
+        TestBed.tick();
+
+        linked.set(1);
+        TestBed.tick();
+        expect(update).not.toHaveBeenCalled();
       });
     });
   });
