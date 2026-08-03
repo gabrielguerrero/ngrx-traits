@@ -1,7 +1,6 @@
-import { Signal, WritableSignal } from '@angular/core';
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
-import { LinkOptions, withLink } from '../with-link/with-link';
+import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesSortState,
   NamedEntitiesSortState,
@@ -60,10 +59,9 @@ export function withLinkEntitiesSort<
     methods: {
       [P in Collection extends ''
         ? 'entitiesSort'
-        : `${Collection}EntitiesSort` as `link${Capitalize<string & P>}`]: (
-        external?: Signal<Sort<Entity>>,
-        options?: LinkOptions,
-      ) => WritableSignal<Sort<Entity>>;
+        : `${Collection}EntitiesSort` as `link${Capitalize<
+        string & P
+      >}`]: LinkMethod<Sort<Entity>>;
     };
   }
 > {

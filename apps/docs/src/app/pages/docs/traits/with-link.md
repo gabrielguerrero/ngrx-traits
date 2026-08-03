@@ -12,6 +12,8 @@ Optionally pass an external signal to the link method to keep it in sync with th
 - `WritableSignal` (e.g. `model()`): two-way sync.
 - Read-only `Signal` (e.g. `input()`): one-way external → store.
 
+The method takes `(external?, options?)`, or just the options when there is no external signal to sync: `linkFilter({ updateWhen })`.
+
 Both sync directions are guarded by `equal` (defaults to `Object.is`), so writes only happen when the value actually changed — this prevents echo loops when `update` transforms the value (e.g. normalizes or sorts it).
 
 The first argument names the generated method and doubles as the state key to link to (with autocompletion), unless `computation` is provided in the options — then it is just a custom name and the value is derived from the store.
@@ -25,7 +27,7 @@ If you want to work with the ngrx traits withEntities\* store features, be sure 
 - [withLinkEntitiesSingleSelection](/docs/traits/with-link-entities-single-selection)
 - [withLinkEntitiesMultiSelection](/docs/traits/with-link-entities-multi-selection)
 
-> Passing an external signal requires an injection context (field initializer or constructor), because effects are created to keep it in sync. The no-arg form has no such requirement.
+> Passing an external signal, or the `updateWhen` option, requires an injection context (field initializer or constructor), because effects are created to keep things in sync. The plain no-arg form has no such requirement.
 
 ## Examples
 
@@ -160,8 +162,30 @@ Please note that this will set both valid and invalid form data in the store. If
 
 ### Only setting validated data in the store with Signal Forms
 
-This case is very similar to the previous one, but you will need a `linkedSignal` that works as a buffer between the form and the store, so only validated data reaches the store.
-For Angular 22 you can use the new `set` option in `linkedSignal` to only let valid data into the store:
+Pass `updateWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateWhen` returns true. It is called inside an effect, so it is reactive — a value held back while the form was invalid is pushed as soon as it becomes valid:
+
+```ts
+export class ProductListComponent {
+  store = inject(ProductsStore);
+
+  // buffers the form value, only valid data reaches the store
+  formData = this.store.linkProductEntitiesFilter({
+    updateWhen: () => this.filterForm().valid(),
+  });
+
+  filterForm = form(this.formData, (value) => {
+    required(value.search);
+  });
+}
+```
+
+If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
+
+If an external signal is also linked, it only ever receives values that were committed to the store — buffered edits stay local until the gate opens. So a `model()` whose initial value the gate has not accepted yet shows the store value, while the buffer keeps the pending one.
+
+> `updateWhen` requires an injection context (field initializer or constructor), because an effect is created.
+
+You can also build the buffer yourself. For Angular 22 you can use the new `set` option in `linkedSignal` to only let valid data into the store:
 
 ```ts
 export class ProductListComponent {
@@ -306,22 +330,28 @@ withLink(name, options?)
 ### Generated link method
 
 ```typescript
-link<Name>(external?: Signal<T>, options?: LinkOptions): WritableSignal<T>
+link<Name>(external?: Signal<T>, options?: LinkOptions<T>): WritableSignal<T>
+// or, when there is no external signal to sync, with just the options
+link<Name>(options: LinkOptions<T>): WritableSignal<T>
 ```
 
-| Property       | Description                                                                                   | Type                    |
-| -------------- | --------------------------------------------------------------------------------------------- | ----------------------- |
-| `external`     | Signal to keep in sync: `WritableSignal` two-way, read-only `Signal` one-way external → store | `Signal<T>`             |
-| `initialValue` | Which value wins on link: `'external'` (default) pushes to the store, `'store'` writes back   | `'external' \| 'store'` |
+| Property       | Description                                                                                     | Type                    |
+| -------------- | ----------------------------------------------------------------------------------------------- | ----------------------- |
+| `external`     | Signal to keep in sync: `WritableSignal` two-way, read-only `Signal` one-way external → store   | `Signal<T>`             |
+| `initialValue` | Which value wins on link: `'external'` (default) pushes to the store, `'store'` writes back     | `'external' \| 'store'` |
+| `updateWhen`   | Gate writes: the returned signal buffers them and only pushes to the store when it returns true | `(value: T) => boolean` |
 
-The returned `WritableSignal` is always the delegated store view, never the external signal.
+The returned `WritableSignal` is always the delegated store view (or, with `updateWhen`, the buffer over it), never the external signal.
 
 ## Methods
 
 ```typescript
 // for withLink('filter')
 {
-  linkFilter: (external?, options?) => WritableSignal<{ search: string }>;
+  linkFilter: {
+    (external?, options?): WritableSignal<{ search: string }>;
+    (options): WritableSignal<{ search: string }>;
+  };
 }
 ```
 
