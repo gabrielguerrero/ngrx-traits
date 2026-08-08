@@ -334,6 +334,10 @@ export class SideNavigationComponent {
           link: './traits/with-link',
           name: 'withLink',
         },
+        {
+          link: './traits/with-state-setter',
+          name: 'withStateSetter',
+        },
       ],
     },
   ] as Section[];
