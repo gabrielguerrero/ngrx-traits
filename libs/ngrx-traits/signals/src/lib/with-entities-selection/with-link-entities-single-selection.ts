@@ -30,7 +30,7 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  * );
  * // in a component:
  * // selectedId = model<string | number | undefined>(undefined);
- * // constructor() { this.store.linkIdSelected(this.selectedId); }
+ * // linked = this.store.linkIdSelected({ syncWith: this.selectedId });
  */
 export function withLinkEntitiesSingleSelection<
   Input extends SignalStoreFeatureResult,

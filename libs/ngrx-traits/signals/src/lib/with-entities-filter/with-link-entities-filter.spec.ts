@@ -135,7 +135,7 @@ describe('withLinkEntitiesFilter', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       const external = signal({ search: 'zero' });
-      store.linkEntitiesFilter(external);
+      store.linkEntitiesFilter({ syncWith: external });
 
       // external wins initially
       tick(400);

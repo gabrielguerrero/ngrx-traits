@@ -27,14 +27,16 @@ export const ProductsStore = signalStore(
 ```
 
 ```typescript
-@Component({ /* ... */ })
+@Component({
+  /* ... */
+})
 export class ProductSelectComponent {
   store = inject(ProductsStore);
 
   // writes from the parent select the entity in the store,
   // selecting in the store updates the parent
   selectedId = model<string | number | undefined>(undefined);
-  linked = this.store.linkProductIdSelected(this.selectedId);
+  linked = this.store.linkProductIdSelected({ syncWith: this.selectedId });
 }
 ```
 
@@ -64,15 +66,15 @@ withLinkEntitiesSingleSelection({ entity, collection? })
 ## Methods
 
 ```typescript
-// link[Collection]IdSelected(external?, options?) => WritableSignal<string | number | undefined>
+// link[Collection]IdSelected(options?) => WritableSignal<string | number | undefined>
 {
-  linkIdSelected: (external?, options?) => WritableSignal<string | number | undefined>;
+  linkIdSelected: (options?) => WritableSignal<string | number | undefined>;
   // or with collection 'product':
-  linkProductIdSelected: (external?, options?) => WritableSignal<string | number | undefined>;
+  linkProductIdSelected: (options?) => WritableSignal<string | number | undefined>;
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `external` and `options` parameters.
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateWhen`).
 
 ## State
 
