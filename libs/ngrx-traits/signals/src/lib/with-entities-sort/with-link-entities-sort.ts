@@ -35,7 +35,7 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * );
  * // in a component:
  * // sort = model<Sort<Product>>({ field: 'name', direction: 'asc' });
- * // constructor() { this.store.linkEntitiesSort(this.sort); }
+ * // linked = this.store.linkEntitiesSort({ syncWith: this.sort });
  */
 export function withLinkEntitiesSort<
   Input extends SignalStoreFeatureResult,

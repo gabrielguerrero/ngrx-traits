@@ -7,12 +7,13 @@ order: 19
 
 Generates a `link<Name>()` method that connects store state to component signals like `input()`, `model()` and Angular Signal Forms. The method returns a `WritableSignal` that is a live view of the store: reading it reads the state, writing it updates the store (via `patchState` by default, or a custom `update` callback, e.g. to call a store method like `filterEntities` instead).
 
-Optionally pass an external signal to the link method to keep it in sync with the store:
+The method takes an options object, which can also connect an external signal, in one of three ways:
 
-- `WritableSignal` (e.g. `model()`): two-way sync.
-- Read-only `Signal` (e.g. `input()`): one-way external → store.
+- `syncWith`: two-way sync, requires a `WritableSignal` (e.g. `model()`).
+- `readFrom`: one-way external → store. Accepts any signal, including a writable one you only write yourself (e.g. a `model()` set on a button click) — the store reads it and never writes back. Also accepts a function receiving the previous value, to merge a partial signal into it.
+- `writeTo`: one-way store → external. A `WritableSignal` that is set, or a function called with each committed change (e.g. to emit an output).
 
-The method takes `(external?, options?)`, or just the options when there is no external signal to sync: `linkFilter({ updateWhen })`.
+`readFrom` and `writeTo` combine into a two-way sync with a mapping in each direction (e.g. a `model()` whose type differs from the store's); `syncWith` is mutually exclusive with both, and `initialValue` only applies to it.
 
 Both sync directions are guarded by `equal` (defaults to `Object.is`), so writes only happen when the value actually changed — this prevents echo loops when `update` transforms the value (e.g. normalizes or sorts it).
 
@@ -27,7 +28,7 @@ If you want to work with the ngrx traits withEntities\* store features, be sure 
 - [withLinkEntitiesSingleSelection](/docs/traits/with-link-entities-single-selection)
 - [withLinkEntitiesMultiSelection](/docs/traits/with-link-entities-multi-selection)
 
-> Passing an external signal, or the `updateWhen` option, requires an injection context (field initializer or constructor), because effects are created to keep things in sync. The plain no-arg form has no such requirement.
+> `syncWith`, `readFrom`, `writeTo` and `updateWhen` each require an injection context (field initializer or constructor), because effects are created to keep things in sync. The plain no-arg form has no such requirement.
 
 ## Examples
 
@@ -81,9 +82,103 @@ export class ProductSelectComponent {
   // when the parent writes the model, the store updates;
   // when the store changes, the model (and the parent) updates
   selectedId = model<string | undefined>(undefined);
-  linked = this.store.linkProductIdSelected(this.selectedId);
+  linked = this.store.linkProductIdSelected({ syncWith: this.selectedId });
 }
 ```
+
+### One-way: the store only reads the signal
+
+Use `readFrom` when the component owns the writes — a `model()` the parent (or a button) sets, that the store should read but never overwrite:
+
+```typescript
+@Component({
+  template: `
+    <input [value]="draft().search" (input)="onInput($event)" />
+    <button (click)="apply()">Apply</button>
+  `,
+})
+export class ProductSearchComponent {
+  store = inject(ProductsStore);
+
+  // written locally, pushed to the store only when the button sets it
+  draft = model<{ search: string }>({ search: '' });
+
+  // the store reads draft, and never writes back to it
+  linked = this.store.linkProductEntitiesFilter({ readFrom: this.draft });
+}
+```
+
+`readFrom` accepts a `WritableSignal` on purpose: it is about the direction of the sync, not about whether the signal can be written. Use it for `input()` too, which is read-only anyway.
+
+### Merging a partial signal with readFrom
+
+`readFrom` also accepts a function that receives the previous linked value, so an external signal that only covers part of the state can be merged into it:
+
+```typescript
+@Component({
+  /* ... */
+})
+export class ProductListComponent {
+  store = inject(ProductsStore);
+
+  // only search comes from the parent,
+  // the store filter is { search: string; category: string }
+  search = input<string>('');
+
+  linked = this.store.linkProductEntitiesFilter({
+    readFrom: (prev) => ({ ...prev, search: this.search() }),
+  });
+}
+```
+
+The signals the function reads are tracked; the previous value is not — a store change alone does not re-run the merge, but the next external change merges into the latest value. With `updateWhen`, `prev` is the buffer, so pending edits the gate is holding back are preserved by the merge.
+
+### One-way out: pushing store changes with writeTo
+
+`writeTo` is the opposite direction: every change committed to the store is pushed out, either by setting a `WritableSignal` or by calling a function with the new value. The value at link time is not pushed — only changes after that. Use the function form to emit an output:
+
+```typescript
+@Component({
+  /* ... */
+})
+export class ProductSearchComponent {
+  store = inject(ProductsStore);
+
+  filterChange = output<{ search: string }>();
+
+  linked = this.store.linkProductEntitiesFilter({
+    writeTo: (value) => this.filterChange.emit(value),
+  });
+}
+```
+
+`writeTo` cannot be combined with `syncWith` (which already writes back), but it combines with `readFrom` — see the next section.
+
+### Two-way sync with a model() of a different type
+
+When an external `model()` does not match the store's type, `syncWith` cannot be used directly. Combine `readFrom` with a `computed` that maps the model into the store's type, and `writeTo` with a function mapping store changes back to the model:
+
+```typescript
+@Component({
+  /* ... */
+})
+export class ProductSearchComponent {
+  store = inject(ProductsStore);
+
+  // the parent works with a plain string,
+  // the store state is { search: string }
+  search = model<string>('');
+
+  linked = this.store.linkProductEntitiesFilter({
+    // in: model -> store type
+    readFrom: computed(() => ({ search: this.search() })),
+    // out: store type -> model
+    writeTo: (value) => this.search.set(value.search),
+  });
+}
+```
+
+On link, the mapped model value is pushed to the store (like `syncWith`'s default `initialValue: 'external'`). The `equal` guard on the store side prevents echo loops between the two mappings.
 
 ### Custom name with computation
 
@@ -106,11 +201,12 @@ const Store = signalStore(
 
 ### Choosing the initial value
 
-When an external signal is linked, by default its current value is pushed to the store. Use `initialValue: 'store'` to write the store value to the external signal instead:
+With `syncWith`, the signal's current value is pushed to the store on link by default. Use `initialValue: 'store'` to write the store value to the signal instead (it is only available with `syncWith` — `readFrom` always pushes to the store, there is nothing to write back to):
 
 ```typescript
 selectedId = model<string | undefined>(undefined);
-linked = this.store.linkProductIdSelected(this.selectedId, {
+linked = this.store.linkProductIdSelected({
+  syncWith: this.selectedId,
   initialValue: 'store',
 });
 ```
@@ -168,9 +264,11 @@ Pass `updateWhen` to the link method: the returned signal becomes a buffer over 
 export class ProductListComponent {
   store = inject(ProductsStore);
 
-  // buffers the form value, only valid data reaches the store
+  // buffers the form value, only valid data reaches the store.
+  // the `: boolean` annotation is needed because filterForm is declared below,
+  // without it typescript reports a circular inference
   formData = this.store.linkProductEntitiesFilter({
-    updateWhen: () => this.filterForm().valid(),
+    updateWhen: (): boolean => this.filterForm().valid(),
   });
 
   filterForm = form(this.formData, (value) => {
@@ -181,59 +279,16 @@ export class ProductListComponent {
 
 If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
 
-If an external signal is also linked, it only ever receives values that were committed to the store — buffered edits stay local until the gate opens. So a `model()` whose initial value the gate has not accepted yet shows the store value, while the buffer keeps the pending one.
+With `syncWith`, the external signal only ever receives values that were committed to the store — buffered edits stay local until the gate opens. So a `model()` whose initial value the gate has not accepted yet shows the store value, while the buffer keeps the pending one.
 
 > `updateWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
-You can also build the buffer yourself. For Angular 22 you can use the new `set` option in `linkedSignal` to only let valid data into the store:
-
-```ts
-export class ProductListComponent {
-  store = inject(ProductsStore);
-
-  storeSignal = this.store.linkProductEntitiesFilter();
-  // buffer signal
-  formData = linkedSignal(this.storeSignal, {
-    // new in angular 22, only propagates valid data to the store
-    set: (value) => {
-      if (this.filterForm().valid()) this.storeSignal.set(value);
-    },
-  });
-
-  filterForm = form(this.formData, (value) => {
-    required(value.search);
-  });
-}
-```
-
-For Angular versions older than 22 you will need an effect to only let valid data into the store:
-
-```ts
-export class ProductListComponent {
-  store = inject(ProductsStore);
-
-  storeSignal = this.store.linkProductEntitiesFilter();
-  // buffer signal
-  formData = linkedSignal(this.storeSignal);
-
-  filterForm = form(this.formData, (value) => {
-    required(value.search);
-  });
-
-  constructor() {
-    effect(() => {
-      const value = this.formData();
-      if (this.filterForm().valid()) this.storeSignal.set(value);
-    });
-  }
-}
-```
 
 ### On submission, only setting validated data in the store with Signal Forms
 
 There are two ways for this case:
 
-The first is very similar to the previous one, with a `linkedSignal` that works as a buffer between the form and the store, but the changes are set in the store on form submission (or by your own method):
+Use a `linkedSignal` that works as a buffer between the form and the store, but the changes are set in the store on form submission (or by your own method):
 
 ```ts
 export class ProductListComponent {
@@ -330,16 +385,18 @@ withLink(name, options?)
 ### Generated link method
 
 ```typescript
-link<Name>(external?: Signal<T>, options?: LinkOptions<T>): WritableSignal<T>
-// or, when there is no external signal to sync, with just the options
-link<Name>(options: LinkOptions<T>): WritableSignal<T>
+link<Name>(options?: LinkOptions<T>): WritableSignal<T>
 ```
 
-| Property       | Description                                                                                     | Type                    |
-| -------------- | ----------------------------------------------------------------------------------------------- | ----------------------- |
-| `external`     | Signal to keep in sync: `WritableSignal` two-way, read-only `Signal` one-way external → store   | `Signal<T>`             |
-| `initialValue` | Which value wins on link: `'external'` (default) pushes to the store, `'store'` writes back     | `'external' \| 'store'` |
-| `updateWhen`   | Gate writes: the returned signal buffers them and only pushes to the store when it returns true | `(value: T) => boolean` |
+| Property       | Description                                                                                       | Type                    |
+| -------------- | ------------------------------------------------------------------------------------------------- | ----------------------- |
+| `syncWith`     | Signal kept in sync both ways: writing it updates the store, store changes are written back to it | `WritableSignal<T>`     |
+| `readFrom`     | Signal the store only reads, never written back; or a function receiving the previous value, to merge a partial signal in | `Signal<T> \| (prev: T) => T` |
+| `writeTo`      | Where store changes are pushed: a signal that is set or a function called with the new value      | `WritableSignal<T> \| (value: T) => void` |
+| `initialValue` | With `syncWith`, which value wins on link: `'external'` (default) or `'store'`                    | `'external' \| 'store'` |
+| `updateWhen`   | Gate writes: the returned signal buffers them and only pushes to the store when it returns true   | `(value: T) => boolean` |
+
+`syncWith` is mutually exclusive with `readFrom` and `writeTo` (which combine for a two-way sync with a mapping in each direction), and `initialValue` is only accepted together with `syncWith` — all enforced by the types.
 
 The returned `WritableSignal` is always the delegated store view (or, with `updateWhen`, the buffer over it), never the external signal.
 
@@ -348,10 +405,7 @@ The returned `WritableSignal` is always the delegated store view (or, with `upda
 ```typescript
 // for withLink('filter')
 {
-  linkFilter: {
-    (external?, options?): WritableSignal<{ search: string }>;
-    (options): WritableSignal<{ search: string }>;
-  };
+  linkFilter: (options?) => WritableSignal<{ search: string }>;
 }
 ```
 

@@ -85,7 +85,7 @@ describe('withLinkEntitiesSort', () => {
         field: 'price',
         direction: 'asc',
       });
-      store.linkEntitiesSort(external);
+      store.linkEntitiesSort({ syncWith: external });
 
       // external wins initially
       expect(store.entitiesSort()).toEqual({

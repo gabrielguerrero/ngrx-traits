@@ -26,7 +26,9 @@ export const GenresStore = signalStore(
 ```
 
 ```typescript
-@Component({ /* ... */ })
+@Component({
+  /* ... */
+})
 export class GenreMultiSelectComponent {
   store = inject(GenresStore);
 
@@ -61,15 +63,15 @@ withLinkEntitiesMultiSelection({ entity, collection? })
 ## Methods
 
 ```typescript
-// link[Collection]IdsSelected(external?, options?) => WritableSignal<(string | number)[]>
+// link[Collection]IdsSelected(options?) => WritableSignal<(string | number)[]>
 {
-  linkIdsSelected: (external?, options?) => WritableSignal<(string | number)[]>;
+  linkIdsSelected: (options?) => WritableSignal<(string | number)[]>;
   // or with collection 'product':
-  linkProductIdsSelected: (external?, options?) => WritableSignal<(string | number)[]>;
+  linkProductIdsSelected: (options?) => WritableSignal<(string | number)[]>;
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `external` and `options` parameters.
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateWhen`).
 
 ## State
 
