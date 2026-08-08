@@ -21,9 +21,10 @@ type ExtractFilter<State, Collection extends string> = Collection extends ''
  *
  * Prebuilt version of `withLink` for `withEntitiesLocalFilter` /
  * `withEntitiesRemoteFilter` / `withEntitiesHybridFilter`: writes route through
- * `filter[Collection]Entities` (so filtering and its debounce still happen),
- * and syncs are guarded with a structural equality on the filter, preventing
- * echo loops.
+ * `filter[Collection]Entities` (so filtering and its debounce still happen).
+ * Echo loops are prevented because the filter features patch the filter value
+ * by reference, so the link method's default `Object.is` guard converges, and
+ * `filter[Collection]Entities` itself drops structurally-equal filters.
  *
  * Requires one of the withEntities*Filter features to be used before it.
  *

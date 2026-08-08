@@ -34,7 +34,7 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * );
  * // in a component:
  * // value = model<(string | number)[]>([]);
- * // valueField = form(this.store.linkIdsSelected(this.value));
+ * // valueField = form(this.store.linkIdsSelected({ syncWith: this.value }));
  */
 export function withLinkEntitiesMultiSelection<
   Input extends SignalStoreFeatureResult,
@@ -89,7 +89,9 @@ export function withLinkEntitiesMultiSelection<
       if (a.length !== b.length) return false;
       const aSet = new Set(a);
       const bSet = new Set(b);
-      // size check guards against duplicate ids making unequal arrays match
+      // size check guards against duplicate ids making unequal arrays match.
+      // Set semantics on purpose: same ids with different duplicate counts
+      // (e.g. [x,x,y] vs [x,y,y]) compare equal, a selection is a set
       return aSet.size === bSet.size && a.every((id) => bSet.has(id));
     },
   } as any) as any;

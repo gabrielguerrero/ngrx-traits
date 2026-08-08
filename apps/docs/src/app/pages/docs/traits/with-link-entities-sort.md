@@ -31,14 +31,16 @@ export const ProductsStore = signalStore(
 ```
 
 ```typescript
-@Component({ /* ... */ })
+@Component({
+  /* ... */
+})
 export class ProductListComponent {
   store = inject(ProductsStore);
 
   // writing the model sorts the entities,
   // sorting in the store updates the model
   sort = model<Sort<Product>>({ field: 'name', direction: 'asc' });
-  linked = this.store.linkProductEntitiesSort(this.sort);
+  linked = this.store.linkProductEntitiesSort({ syncWith: this.sort });
 }
 ```
 
@@ -65,15 +67,15 @@ withLinkEntitiesSort({ entity, collection? })
 ## Methods
 
 ```typescript
-// link[Collection]EntitiesSort(external?, options?) => WritableSignal<Sort<Entity>>
+// link[Collection]EntitiesSort(options?) => WritableSignal<Sort<Entity>>
 {
-  linkEntitiesSort: (external?, options?) => WritableSignal<Sort<Entity>>;
+  linkEntitiesSort: (options?) => WritableSignal<Sort<Entity>>;
   // or with collection 'product':
-  linkProductEntitiesSort: (external?, options?) => WritableSignal<Sort<Entity>>;
+  linkProductEntitiesSort: (options?) => WritableSignal<Sort<Entity>>;
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `external` and `options` parameters.
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateWhen`).
 
 ## State
 

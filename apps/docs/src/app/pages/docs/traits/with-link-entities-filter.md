@@ -56,20 +56,17 @@ Please note that this will set both valid and invalid form data in the store. If
 
 ### Only setting validated data in the store with Signal Forms
 
-This case is very similar to the previous one, but you will need a `linkedSignal` that works as a buffer between the form and the store, so only validated data reaches the store.
-For Angular 22 you can use the new `set` option in `linkedSignal` to only let valid data into the store:
+Pass `updateWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateWhen` returns true. It is called inside an effect, so it is reactive — a value held back while the form was invalid is pushed as soon as it becomes valid:
 
 ```ts
 export class ProductListComponent {
   store = inject(ProductsStore);
 
-  storeSignal = this.store.linkProductEntitiesFilter();
-  // buffer signal
-  formData = linkedSignal(this.storeSignal, {
-    // new in angular 22, only propagates valid data to the store
-    set: (value) => {
-      if (this.filterForm().valid()) this.storeSignal.set(value);
-    },
+  // buffers the form value, only valid data reaches the store.
+  // the `: boolean` annotation is needed because filterForm is declared below,
+  // without it typescript reports a circular inference
+  formData = this.store.linkProductEntitiesFilter({
+    updateWhen: (): boolean => this.filterForm().valid(),
   });
 
   filterForm = form(this.formData, (value) => {
@@ -78,35 +75,16 @@ export class ProductListComponent {
 }
 ```
 
-For Angular versions older than 22 you will need an effect to only let valid data into the store:
+If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
 
-```ts
-export class ProductListComponent {
-  store = inject(ProductsStore);
+> `updateWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
-  storeSignal = this.store.linkProductEntitiesFilter();
-  // buffer signal
-  formData = linkedSignal(this.storeSignal);
-
-  filterForm = form(this.formData, (value) => {
-    required(value.search);
-  });
-
-  constructor() {
-    effect(() => {
-      const value = this.formData();
-      if (this.filterForm().valid()) 
-          this.storeSignal.set(value);
-    });
-  }
-}
-```
 
 ### On submission, only setting validated data in the store with Signal Forms
 
 There are two ways for this case:
 
-The first is very similar to the previous one, with a `linkedSignal` that works as a buffer between the form and the store, but the changes are set in the store on form submission (or by your own method):
+Use a `linkedSignal` that works as a buffer between the form and the store, but the changes are set in the store on form submission (or by your own method):
 
 ```ts
 export class ProductListComponent {
@@ -159,7 +137,6 @@ export class ProductListComponent {
       // using signal form submission requires the formRoot directive
       submission: {
         action: async () => {
-        
           const result = await this.store.filterProductEntities(this.formData());
           if (!result.ok) {
             return {
@@ -189,18 +166,18 @@ export class ProductListComponent {
 
 ### Syncing with a model() or input
 
-You can sync the signal returned by the link method with a `model()` or `input()` signal passed as a param: a `model()` is read and written (two-way sync), an `input()` is only read (one-way input → store).
+You can connect the signal returned by the link method to a `model()` or `input()` signal: use `syncWith` for a two-way sync with a `model()`, or `readFrom` to only read a signal (e.g. an `input()`) into the store.
 
 ```typescript
 export class ProductListComponent {
   store = inject(ProductsStore);
 
   filter = model<{ search: string }>({ search: '' });
-  linked = this.store.linkProductEntitiesFilter(this.filter);
+  linked = this.store.linkProductEntitiesFilter({ syncWith: this.filter });
 }
 ```
 
-The synced signal param also works with all the previous examples.
+These options also work with all the previous examples.
 
 ## API
 
@@ -218,15 +195,15 @@ withLinkEntitiesFilter({ entity, collection?, debounce?, forceLoad? })
 ## Methods
 
 ```typescript
-// link[Collection]EntitiesFilter(external?, options?) => WritableSignal<Filter>
+// link[Collection]EntitiesFilter(options?) => WritableSignal<Filter>
 {
-  linkEntitiesFilter: (external?, options?) => WritableSignal<Filter>;
+  linkEntitiesFilter: (options?) => WritableSignal<Filter>;
   // or with collection 'product':
-  linkProductEntitiesFilter: (external?, options?) => WritableSignal<Filter>;
+  linkProductEntitiesFilter: (options?) => WritableSignal<Filter>;
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `external` and `options` parameters.
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateWhen`).
 
 ## State
 
