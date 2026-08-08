@@ -88,7 +88,7 @@ describe('withLinkEntitiesMultiSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       const external = signal<(string | number)[]>(['8', '4']);
-      store.linkIdsSelected(external);
+      store.linkIdsSelected({ syncWith: external });
       TestBed.tick();
 
       // external wins initially; the selection map normalizes the order,
