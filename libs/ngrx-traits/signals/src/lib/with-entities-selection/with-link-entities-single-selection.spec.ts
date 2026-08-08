@@ -63,7 +63,7 @@ describe('withLinkEntitiesSingleSelection', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       const external = signal<string | number | undefined>(mockProducts[4].id);
-      store.linkIdSelected(external);
+      store.linkIdSelected({ syncWith: external });
 
       // external wins initially
       expect(store.idSelected()).toEqual(mockProducts[4].id);
