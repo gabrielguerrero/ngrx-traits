@@ -86,8 +86,19 @@ export function getWithEntitiesFilterEvents(config?: { collection?: string }) {
 }
 
 export type FilterQueryMapper<Filter, T extends Params = Params> = {
-  queryParamsToFilter: (query: T) => Filter;
+  /**
+   * @param defaultFilter the filter the store was created with, to fall back on
+   *   for fields the query params do not carry
+   * @returns the filter to apply, or undefined to leave the current one alone
+   */
+  queryParamsToFilter: (query: T, defaultFilter: Filter) => Filter | undefined;
   filterToQueryParams: (filter: Filter) => T | undefined | null;
+  /**
+   * Merge the restored filter into the current one instead of replacing it,
+   * for mappers that only map some of the filter fields. Defaults to false,
+   * which replaces the whole filter.
+   */
+  patch?: boolean;
 };
 
 /**
@@ -155,12 +166,14 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
     ? T
     : { filter: string }
 > {
-  const { filterEntitiesKey, filterKey } = getWithEntitiesFilterKeys(config);
+  const { filterEntitiesKey, filterKey, defaultFilterKey } =
+    getWithEntitiesFilterKeys(config);
 
   return {
     queryParamsToState: (query, store, firstLoad) => {
+      const defaultFilter = (store[defaultFilterKey] as Signal<Filter>)?.();
       const filter = config?.filterMapper
-        ? config?.filterMapper.queryParamsToFilter(query)
+        ? config?.filterMapper.queryParamsToFilter(query, defaultFilter)
         : query.filter
           ? JSON.parse(query.filter)
           : undefined;
@@ -171,6 +184,9 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
         ] as EntitiesRemoteFilterMethods<any, any>['filterEntities'];
         filterEntities({
           filter,
+          // only mappers that ask for it, so the ones that map the whole filter
+          // keep replacing it as they always have
+          patch: config?.filterMapper?.patch,
           // we forceLoad on first load to ensure filter is set in the store, before fetching data
           // after that it should not force load, to allow history navigation without triggering loading state
           forceLoad: firstLoad,

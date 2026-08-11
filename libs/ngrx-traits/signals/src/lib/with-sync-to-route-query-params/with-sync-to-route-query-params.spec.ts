@@ -5,7 +5,10 @@ import {
 } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
-import { withSyncToRouteQueryParams } from '@ngrx-traits/signals';
+import {
+  getQueryMapperForState,
+  withSyncToRouteQueryParams,
+} from '@ngrx-traits/signals';
 import { patchState, signalStore, withState } from '@ngrx/signals';
 import { of, Subject } from 'rxjs';
 
@@ -412,6 +415,208 @@ describe('withSyncToRouteQueryParams', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
     expect(navigateSpy.mock.calls[0][1].replaceUrl).toBeUndefined();
 
+    tick(1000);
+  }));
+});
+
+describe('getQueryMapperForState', () => {
+  const from = new Date('2026-01-02T03:04:05.000Z');
+  // built from local parts, the same way the mapper reads them back
+  const day = new Date(2026, 2, 4);
+  const at = new Date(1970, 0, 1, 9, 30);
+
+  function init(queryParams: Record<string, string> = {}) {
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        search: 'initial',
+        page: 0,
+        active: false,
+        from,
+        day,
+        at,
+        filter: { color: 'red', size: 10 } as { color: string; size: number },
+        optional: undefined as string | undefined,
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          getQueryMapperForState({
+            search: 'string',
+            page: 'number',
+            active: 'boolean',
+            from: 'date-time',
+            day: 'date',
+            at: 'time',
+            filter: 'json',
+            optional: 'string',
+          }),
+        ],
+      }),
+    );
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        Store,
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: of(queryParams),
+            snapshot: { queryParams },
+          }),
+        },
+      ],
+    });
+    return { store: TestBed.inject(Store) };
+  }
+
+  it('should restore state props from query params using the declared types', () => {
+    const { store } = init({
+      search: 'shoes',
+      page: '2',
+      active: 'true',
+      from: '2026-05-06T07:08:09.000Z',
+      filter: JSON.stringify({ color: 'blue', size: 42 }),
+    });
+    expect(store.search()).toBe('shoes');
+    expect(store.page()).toBe(2);
+    expect(store.active()).toBe(true);
+    expect(store.from()).toEqual(new Date('2026-05-06T07:08:09.000Z'));
+    expect(store.filter()).toEqual({ color: 'blue', size: 42 });
+  });
+
+  it('should restore json looking values as strings when declared as string', () => {
+    expect(init({ search: '123' }).store.search()).toBe('123');
+    expect(init({ search: 'true' }).store.search()).toBe('true');
+    expect(init({ optional: 'not json' }).store.optional()).toBe('not json');
+  });
+
+  it('should keep the store value for params missing from the url', () => {
+    const { store } = init({ page: '5' });
+    expect(store.page()).toBe(5);
+    expect(store.search()).toBe('initial');
+    expect(store.filter()).toEqual({ color: 'red', size: 10 });
+  });
+
+  it('should skip params that do not match their declared type', () => {
+    const { store } = init({
+      page: 'not a number',
+      active: 'yes',
+      from: 'not a date',
+      day: '2026-13-45',
+      at: '25:99',
+      filter: '{ broken json',
+    });
+    expect(store.page()).toBe(0);
+    expect(store.active()).toBe(false);
+    expect(store.from()).toEqual(from);
+    expect(store.day()).toEqual(day);
+    expect(store.at()).toEqual(at);
+    expect(store.filter()).toEqual({ color: 'red', size: 10 });
+  });
+
+  it('should restore a date param as local midnight, not shifted by the timezone', () => {
+    const { store } = init({ day: '2026-08-11' });
+    const restored = store.day();
+    expect(restored.getFullYear()).toBe(2026);
+    expect(restored.getMonth()).toBe(7);
+    expect(restored.getDate()).toBe(11);
+    expect(restored.getHours()).toBe(0);
+  });
+
+  it('should reject a date that does not exist', () => {
+    // Date would roll 2026-02-31 over into march
+    expect(init({ day: '2026-02-31' }).store.day()).toEqual(day);
+    expect(init({ day: '11-08-2026' }).store.day()).toEqual(day);
+  });
+
+  it('should restore a time param onto the epoch date', () => {
+    expect(init({ at: '14:45' }).store.at()).toEqual(
+      new Date(1970, 0, 1, 14, 45),
+    );
+    expect(init({ at: '14:45:30' }).store.at()).toEqual(
+      new Date(1970, 0, 1, 14, 45, 30),
+    );
+  });
+
+  it('should write each date type in its own format', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, {
+      day: new Date(2026, 7, 11, 23, 30),
+      at: new Date(2026, 7, 11, 9, 5, 7),
+      from: new Date('2026-05-06T07:08:09.000Z'),
+    });
+    TestBed.tick();
+    tick(400);
+    const queryParams = navigate.mock.calls[0][1]?.queryParams as any;
+    // the local day, a late hour must not push it to the 12th
+    expect(queryParams.day).toBe('2026-08-11');
+    expect(queryParams.at).toBe('09:05:07');
+    expect(queryParams.from).toBe('2026-05-06T07:08:09.000Z');
+    tick(1000);
+  }));
+
+  it('should leave the seconds out of a time on the minute', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, { at: new Date(2026, 7, 11, 9, 5) });
+    TestBed.tick();
+    tick(400);
+    expect((navigate.mock.calls[0][1]?.queryParams as any).at).toBe('09:05');
+    tick(1000);
+  }));
+
+  it('should sync state props back to the query params', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, {
+      search: 'boots',
+      page: 3,
+      active: true,
+      from: new Date('2026-05-06T07:08:09.000Z'),
+      filter: { color: 'green', size: 1 },
+    });
+    TestBed.tick();
+    tick(400);
+
+    expect(router.navigate).toHaveBeenCalledWith([], {
+      relativeTo: expect.anything(),
+      queryParams: {
+        // only json props are stringified, the rest stay readable
+        search: 'boots',
+        page: '3',
+        active: 'true',
+        from: '2026-05-06T07:08:09.000Z',
+        day: '2026-03-04',
+        at: '09:30',
+        filter: JSON.stringify({ color: 'green', size: 1 }),
+        // undefined props are removed from the url
+        optional: undefined,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+    tick(1000);
+  }));
+
+  it('should remove a param from the url when its prop is set to null', fakeAsync(() => {
+    const { store } = init({ search: 'shoes' });
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, { search: null as any });
+    TestBed.tick();
+    tick(400);
+    expect((navigate.mock.calls[0][1]?.queryParams as any).search).toBe(
+      undefined,
+    );
     tick(1000);
   }));
 });
