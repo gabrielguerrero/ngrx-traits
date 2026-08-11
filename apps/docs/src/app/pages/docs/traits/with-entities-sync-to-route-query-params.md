@@ -16,7 +16,7 @@ Requires withEntities and withCallStatus to be present in the store.
 Import the withEntitiesSyncToRouteQueryParams trait from `@ngrx-traits/signals`.
 
 ```ts
-import { withEntitiesSyncToRouteQueryParams } from '@ngrx-traits/signals';
+import { withEntitiesSyncToRouteQueryParams, getFilterQueryMapper } from '@ngrx-traits/signals';
 ```
 
 ## Examples
@@ -27,7 +27,7 @@ export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
   // requires at least withEntities and withCallStatus
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
   withEntitiesRemoteFilter({
     entity,
     collection,
@@ -76,7 +76,7 @@ Use `syncMultiSelection: true`  when using `withEntitiesMultiSelection`. Selecte
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities({ entity, collection }),
-  withCallStatus({ prop: collection, initialValue: 'loading' }),
+  withCallStatus({ collection, initialValue: 'loading' }),
   withEntitiesMultiSelection({ entity, collection }),
   withEntitiesLoadingCall({ ... }),
   withEntitiesSyncToRouteQueryParams({
@@ -187,7 +187,34 @@ With `prefix: 'p'` and `prefix: 'o'` the collections keep their full names in th
 
 Setting `prefix: false` removes the prefix entirely, only do that when a single collection syncs to the url, otherwise the collections overwrite each other's params.
 
-The `filter` param is usually the longest one, because the filter object is serialized with `JSON.stringify`. Use `filterMapper` to flatten it into shorter params:
+The `filter` param is usually the longest one, because the filter object is serialized with `JSON.stringify`:
+
+```
+?p-filter=%7B%22search%22%3A%22tv%22%2C%22maxPrice%22%3A100%2C%22from%22%3A%222026-08-11T00%3A00%3A00.000Z%22%7D
+```
+
+Use `filterMapper` with `getFilterQueryMapper` to spread the filter over one param per field instead. Declare each field with its type and the serialization is generated for you:
+
+```typescript
+type ProductFilter = { search: string; maxPrice: number; from: Date };
+
+withEntitiesSyncToRouteQueryParams({
+  ...productEntityConfig,
+  prefix: 'p',
+  // 👇 p-search=tv&p-maxPrice=100&p-from=2026-08-11
+  filterMapper: getFilterQueryMapper<ProductFilter>({
+    search: 'string',
+    maxPrice: 'number',
+    from: 'date',
+  }),
+}),
+```
+
+The filter type has to be given, it cannot be inferred from the store, and that is what makes the field names autocomplete and their types check. The available types are the same ones [getQueryMapperForState](/docs/traits/with-sync-to-route-query-params) uses: `'string'`, `'number'`, `'boolean'`, `'date'`, `'date-time'`, `'time'` and `'json'`.
+
+Fields that are `undefined` or `null` are removed from the url, and a field that does not match its declared type is dropped. Keep in mind the filter is replaced rather than patched when restoring, so a hand edited url that only carries some of the fields gives a filter with only those. A url carrying none of them leaves the filter untouched.
+
+For anything else, like renaming a field to something shorter, pass the mapper object by hand:
 
 ```typescript
 withEntitiesSyncToRouteQueryParams({
@@ -211,7 +238,7 @@ Also consider `syncPagination: false`, `syncSort: false` or `syncSingleSelection
 | entity              | The entity type                                                                                                                                   | `type<T>()`                                  |
 | collection          | The name of the collection. Optional                                                                                                              | string                                       |
 | prefix              | Prefix for the url query params to avoid conflicts with query param                                                                               | string. Default to the collection value      |
-| filterMapper        | Configure how the entities filter is serialize to and from the query params                                                                       | FilterQueryMapper<Filter>                    |
+| filterMapper        | Configure how the entities filter is serialize to and from the query params, `getFilterQueryMapper` generates one from the filter fields           | FilterQueryMapper<Filter>                    |
 | onQueryParamsLoaded | Callback to execute something else when the query params are loaded from the store                                                                | `(store) => void`                            |
 | defaultDebounce     | Debounce time for syncing store changes back to the route query params                                                                            | number (milliseconds)                        |
 | skipLoadingCall     | When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default: false    | boolean                                      |
