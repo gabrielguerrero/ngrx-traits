@@ -1,6 +1,6 @@
-import { computed, effect, signal } from '@angular/core';
+import { computed, effect, Signal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { patchState, signalStore, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 
 import { LinkOptions, withLink } from './with-link';
 
@@ -31,6 +31,178 @@ describe('withLink', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         expect(store.linkSelectedIds).toBeDefined();
+      });
+    });
+  });
+
+  // ── Private setter ─────────────────────────────────────────────
+
+  describe('_set<Name>', () => {
+    const CountStore = signalStore(
+      { protectedState: false },
+      withState({ count: 1 }),
+      withLink('count'),
+      withMethods((store) => ({
+        // the setter is only reachable from inside the store
+        setCount: (
+          value: number | Signal<number> | ((current: number) => number),
+        ) => store._setCount(value),
+      })),
+    );
+
+    it('is not part of the public store type', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        // @ts-expect-error _setCount is private, only reachable inside the store
+        expect(store._setCount).toBeInstanceOf(Function);
+      });
+    });
+
+    it('is not generated with noSetter', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count', { noSetter: true }),
+        // inside the store is where a private setter would be visible
+        withMethods((store) => {
+          // @ts-expect-error noSetter: true, so _setCount is not generated
+          const setter = store._setCount;
+          return { hasSetter: () => setter !== undefined };
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        expect(new Store().hasSetter()).toBe(false);
+      });
+    });
+
+    it('is still generated when noSetter is false', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count', { noSetter: false }),
+        withMethods((store) => ({
+          setCount: (value: number) => store._setCount(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setCount(3);
+        expect(store.count()).toBe(3);
+      });
+    });
+
+    it('writes the value through the link update path', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ filter: { search: 'initial' } }),
+        withLink('filter', { update }),
+        withMethods((store) => ({
+          setFilter: (value: { search: string }) => store._setFilter(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setFilter({ search: 'updated' });
+
+        expect(update).toHaveBeenCalledWith(
+          { search: 'updated' },
+          expect.anything(),
+        );
+      });
+    });
+
+    it('patches state by default', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        store.setCount(5);
+
+        expect(store.count()).toBe(5);
+      });
+    });
+
+    it('accepts an updater receiving the current value', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        store.setCount((current) => current + 1);
+
+        expect(store.count()).toBe(2);
+      });
+    });
+
+    it('accepts a signal, keeping the store in sync with it', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        const source = signal(5);
+        store.setCount(source);
+        TestBed.tick();
+        expect(store.count()).toBe(5);
+
+        source.set(7);
+        TestBed.tick();
+        expect(store.count()).toBe(7);
+      });
+    });
+
+    it('writes through update with a computation source', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ ids: ['a'] as string[] }),
+        withLink('selectedIds', {
+          computation: (store) => store.ids(),
+          update: (value, store) => patchState(store as any, { ids: value }),
+        }),
+        withMethods((store) => ({
+          addId: (id: string) => store._setSelectedIds((ids) => [...ids, id]),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.addId('b');
+
+        expect(store.ids()).toEqual(['a', 'b']);
+      });
+    });
+
+    it('skips the update using a custom equal', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ ids: ['a', 'b'] as string[] }),
+        withLink('ids', {
+          update,
+          equal: (a, b) =>
+            a.length === b.length && a.every((v, i) => v === b[i]),
+        }),
+        withMethods((store) => ({
+          setIds: (value: string[]) => store._setIds(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        // structurally equal, fresh reference
+        store.setIds(['a', 'b']);
+        expect(update).not.toHaveBeenCalled();
+
+        store.setIds(['a', 'c']);
+        expect(update).toHaveBeenCalledWith(['a', 'c'], expect.anything());
+      });
+    });
+
+    it('skips the update when the value is equal to the source', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ count: 1 }),
+        withLink('count', { update }),
+        withMethods((store) => ({
+          setCount: (value: number) => store._setCount(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setCount(1);
+        expect(update).not.toHaveBeenCalled();
+
+        store.setCount(2);
+        expect(update).toHaveBeenCalledWith(2, expect.anything());
       });
     });
   });
@@ -296,7 +468,7 @@ describe('withLink', () => {
         const linked = store.linkCount({
           syncWith: external,
           initialValue: 'store',
-          updateWhen: () => true,
+          updateStoreWhen: () => true,
         });
         // buffered before any effect ran
         linked.set(7);
@@ -380,7 +552,7 @@ describe('withLink', () => {
       });
     });
 
-    it('is gated by updateWhen like any other write', () => {
+    it('is gated by updateStoreWhen like any other write', () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -392,7 +564,7 @@ describe('withLink', () => {
         const external = signal(5);
         const linked = store.linkCount({
           readFrom: external,
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
         TestBed.tick();
 
@@ -456,7 +628,7 @@ describe('withLink', () => {
       });
     });
 
-    it('function form merges into the buffer when gated by updateWhen', () => {
+    it('function form merges into the buffer when gated by updateStoreWhen', () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ filter: { search: '', category: 'books' } }),
@@ -468,7 +640,7 @@ describe('withLink', () => {
         const search = signal('a');
         const linked = store.linkFilter({
           readFrom: (prev) => ({ ...prev, search: search() }),
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
         TestBed.tick();
 
@@ -585,7 +757,7 @@ describe('withLink', () => {
       });
     });
 
-    it('only pushes values committed through the updateWhen gate', () => {
+    it('only pushes values committed through the updateStoreWhen gate', () => {
       const emitted: number[] = [];
       const Store = signalStore(
         { protectedState: false },
@@ -597,7 +769,7 @@ describe('withLink', () => {
         const allowed = signal(false);
         const linked = store.linkCount({
           writeTo: (value) => emitted.push(value),
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
         TestBed.tick();
 
@@ -612,7 +784,7 @@ describe('withLink', () => {
       });
     });
 
-    it('does not push the readFrom initial value out when gated by updateWhen', () => {
+    it('does not push the readFrom initial value out when gated by updateStoreWhen', () => {
       const emitted: { search: string }[] = [];
       const Store = signalStore(
         { protectedState: false },
@@ -625,7 +797,7 @@ describe('withLink', () => {
         store.linkFilter({
           readFrom: computed(() => ({ search: search() })),
           writeTo: (value) => emitted.push(value),
-          updateWhen: () => true,
+          updateStoreWhen: () => true,
         });
         TestBed.tick();
         // the mapped initial value is committed through the gate...
@@ -652,9 +824,9 @@ describe('withLink', () => {
     });
   });
 
-  // ── updateWhen gate ────────────────────────────────────────────
+  // ── updateStoreWhen gate ────────────────────────────────────────────
 
-  describe('updateWhen', () => {
+  describe('updateStoreWhen', () => {
     it('buffers writes and only updates the store when it returns true', () => {
       const Store = signalStore(
         { protectedState: false },
@@ -665,7 +837,7 @@ describe('withLink', () => {
         const store = new Store();
         const allowed = signal(false);
         const linked = store.linkCount({
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
 
         linked.set(5);
@@ -681,7 +853,7 @@ describe('withLink', () => {
     });
 
     it('receives the latest value', () => {
-      const updateWhen = vi.fn((value: number) => value > 10);
+      const updateStoreWhen = vi.fn((value: number) => value > 10);
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -689,12 +861,12 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateWhen });
+        const linked = store.linkCount({ updateStoreWhen });
         TestBed.tick();
 
         linked.set(5);
         TestBed.tick();
-        expect(updateWhen).toHaveBeenCalledWith(5);
+        expect(updateStoreWhen).toHaveBeenCalledWith(5);
         expect(store.count()).toBe(1);
 
         linked.set(20);
@@ -713,7 +885,7 @@ describe('withLink', () => {
         const store = new Store();
         const allowed = signal(false);
         const linked = store.linkFilter({
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
 
         linked.set({ search: 'updated' });
@@ -737,7 +909,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateWhen: () => false });
+        const linked = store.linkCount({ updateStoreWhen: () => false });
 
         linked.set(5);
         TestBed.tick();
@@ -759,7 +931,10 @@ describe('withLink', () => {
         const store = new Store();
         const allowed = signal(false);
         const external = signal(5);
-        store.linkCount({ syncWith: external, updateWhen: () => allowed() });
+        store.linkCount({
+          syncWith: external,
+          updateStoreWhen: () => allowed(),
+        });
         TestBed.tick();
 
         expect(store.count()).toBe(1);
@@ -791,7 +966,7 @@ describe('withLink', () => {
         const external = signal(5);
         const linked = store.linkCount({
           syncWith: external,
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
         TestBed.tick();
 
@@ -819,7 +994,7 @@ describe('withLink', () => {
         const external = signal(1);
         const linked = store.linkCount({
           syncWith: external,
-          updateWhen: () => allowed(),
+          updateStoreWhen: () => allowed(),
         });
 
         // buffered write does not leak to the external signal
@@ -843,7 +1018,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateWhen: () => true });
+        const linked = store.linkCount({ updateStoreWhen: () => true });
         TestBed.tick();
 
         linked.set(1);

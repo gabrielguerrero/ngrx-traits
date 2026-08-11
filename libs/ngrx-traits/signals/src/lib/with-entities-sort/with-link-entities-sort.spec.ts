@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import { withEntitiesLocalSort, withLinkEntitiesSort } from '../index';
@@ -105,6 +105,26 @@ describe('withLinkEntitiesSort', () => {
       store.sortEntities({ sort: { field: 'name', direction: 'asc' } });
       TestBed.tick();
       expect(external()).toEqual({ field: 'name', direction: 'asc' });
+    });
+  });
+  it('generates no _set setter, sortEntities already covers that write', () => {
+    const StoreNoSetter = signalStore(
+      { protectedState: false },
+      withEntities({ entity }),
+      withEntitiesLocalSort({
+        entity,
+        defaultSort: { field: 'name', direction: 'asc' },
+      }),
+      withLinkEntitiesSort({ entity }),
+      // inside the store is where a private setter would be visible
+      withMethods((store) => {
+        // @ts-expect-error withLinkEntities* pass noSetter, so it is not generated
+        const setter = store._setEntitiesSort;
+        return { hasSetter: () => setter !== undefined };
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      expect(new StoreNoSetter().hasSetter()).toBe(false);
     });
   });
 });

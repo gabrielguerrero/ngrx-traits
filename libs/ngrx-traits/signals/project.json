@@ -66,6 +66,12 @@
       "executor": "@analogjs/vitest-angular:test",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
     },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/ngrx-traits/signals/tsconfig.spec.json --noEmit"
+      }
+    },
     "lint": {
       "executor": "@nx/eslint:lint"
     },
