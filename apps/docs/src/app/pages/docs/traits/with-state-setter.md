@@ -9,6 +9,8 @@ Generates a `set<Prop>()` method for each provided state prop that patches the s
 
 The generated methods are [signalMethod](https://ngrx.io/guide/signals/signal-method)s, so they accept either a plain value or a signal, keeping the state in sync when given one. They also accept an updater function `(current) => next`, for partial updates.
 
+The generated setters are always public, a leading underscore in the prop name is dropped, so `_filter` generates `setFilter`. To generate a setter only accessible inside the store, use [withStatePrivateSetter](./with-state-private-setter).
+
 ## Import
 
 Import the withStateSetter trait from `@ngrx-traits/signals`.
