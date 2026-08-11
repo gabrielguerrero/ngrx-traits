@@ -6,6 +6,7 @@ import {
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, Params, provideRouter, Router } from '@angular/router';
 import {
+  getFilterQueryMapper,
   withCallStatus,
   withEntitiesLoadingCall,
   withEntitiesLocalFilter,
@@ -308,6 +309,143 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         }),
         queryParamsHandling: 'merge',
         // the initial push replaces the history entry instead of adding one
+        replaceUrl: true,
+      });
+    }));
+
+    it('filter url query params should update store, with a generated filterMapper', () => {
+      const Store = signalStore(
+        localStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<{ search: string; foo: string }>({
+            search: 'string',
+            foo: 'string',
+          }),
+        }),
+      );
+      const { store } = init({
+        Store,
+        queryParams: { search: 'foo', foo: 'bar' },
+      });
+      expect(store.entitiesFilter()).toEqual({ search: 'foo', foo: 'bar' });
+    });
+
+    it('should leave the filter alone when the url carries none of its fields, with a generated filterMapper', () => {
+      const Store = signalStore(
+        localStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<{ search: string; foo: string }>({
+            search: 'string',
+            foo: 'string',
+          }),
+        }),
+      );
+      const { store } = init({ Store, queryParams: {} });
+      expect(store.entitiesFilter()).toEqual({ search: '', foo: 'bar' });
+    });
+
+    it('should keep filter fields the generated filterMapper does not declare', () => {
+      const Store = signalStore(
+        localStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          // foo is deliberately left out of the url
+          filterMapper: getFilterQueryMapper<{ search: string; foo: string }>({
+            search: 'string',
+          }),
+        }),
+      );
+      const { store } = init({ Store, queryParams: { search: 'foo' } });
+      // foo keeps its default instead of being wiped by the partial filter
+      expect(store.entitiesFilter()).toEqual({ search: 'foo', foo: 'bar' });
+    });
+
+    it('should restore a declared filter field to its default when its param is not in the url', () => {
+      const Store = signalStore(
+        localStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<{ search: string; foo: string }>({
+            search: 'string',
+            foo: 'string',
+          }),
+        }),
+      );
+      const { store } = init({ Store, queryParams: { search: 'foo' } });
+      // foo is declared but not in the url, so it falls back to the value it
+      // has in defaultFilter instead of being handed to filterFn as undefined
+      expect(store.entitiesFilter()).toEqual({ search: 'foo', foo: 'bar' });
+    });
+
+    it('should restore the declared fields to their defaults on a bare url', () => {
+      const Store = signalStore(
+        localStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<{ search: string; foo: string }>({
+            search: 'string',
+            foo: 'string',
+          }),
+        }),
+      );
+      const { store } = init({ Store, queryParams: {} });
+      expect(store.entitiesFilter()).toEqual({ search: '', foo: 'bar' });
+    });
+
+    it('should not hand a declared field to filterFn as undefined', () => {
+      // a filterFn written against the filter shape used to throw inside the
+      // filter rxMethod when a declared param was missing, which killed the
+      // subscription and turned every later filterEntities call into a no op
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loaded' }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '', category: 'all' },
+          filterFn: (e, filter) =>
+            filter.category.toLowerCase() === 'all' &&
+            e.name.toLowerCase().includes(filter.search.toLowerCase()),
+        }),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<{
+            search: string;
+            category: string;
+          }>({ search: 'string' }),
+        }),
+      );
+      const { store } = init({ Store, queryParams: { search: 'a' } });
+      expect(() => store.entities()).not.toThrow();
+      expect(store.entitiesFilter()).toEqual({ search: 'a', category: 'all' });
+    });
+
+    it('changes on entities filter should update url query params, with a generated filterMapper', fakeAsync(() => {
+      const Store = signalStore(
+        localStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<{ search: string; foo: string }>({
+            search: 'string',
+            foo: 'string',
+          }),
+        }),
+      );
+      const { store, router } = init({ Store, queryParams: {} });
+      store.filterEntities({
+        filter: { search: 'foo3', foo: 'bar4' },
+        forceLoad: true,
+      });
+      tick(400);
+      expect(router.navigate).toHaveBeenCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          // one param per field instead of a single json blob
+          search: 'foo3',
+          foo: 'bar4',
+        }),
+        queryParamsHandling: 'merge',
         replaceUrl: true,
       });
     }));
