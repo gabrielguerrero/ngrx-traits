@@ -64,7 +64,7 @@ import { QueryMapper } from './with-sync-to-route-query-params.util';
 export function withSyncToRouteQueryParams<
   Input extends SignalStoreFeatureResult,
   Params extends Record<string, any>,
-  Mappers extends ReadonlyArray<QueryMapper<any, StoreSource<Input>>>,
+  Mappers extends ReadonlyArray<QueryMapper<any, StoreSource<Input>, Input>>,
 >(config: {
   mappers: Mappers;
   defaultDebounce?: number;
