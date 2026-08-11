@@ -338,6 +338,10 @@ export class SideNavigationComponent {
           link: './traits/with-state-setter',
           name: 'withStateSetter',
         },
+        {
+          link: './traits/with-state-private-setter',
+          name: 'withStatePrivateSetter',
+        },
       ],
     },
   ] as Section[];
