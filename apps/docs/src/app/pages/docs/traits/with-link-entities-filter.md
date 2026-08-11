@@ -56,7 +56,7 @@ Please note that this will set both valid and invalid form data in the store. If
 
 ### Only setting validated data in the store with Signal Forms
 
-Pass `updateWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateWhen` returns true. It is called inside an effect, so it is reactive — a value held back while the form was invalid is pushed as soon as it becomes valid:
+Pass `updateStoreWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateStoreWhen` returns true. It is called inside an effect, so it is reactive — a value held back while the form was invalid is pushed as soon as it becomes valid:
 
 ```ts
 export class ProductListComponent {
@@ -66,7 +66,7 @@ export class ProductListComponent {
   // the `: boolean` annotation is needed because filterForm is declared below,
   // without it typescript reports a circular inference
   formData = this.store.linkProductEntitiesFilter({
-    updateWhen: (): boolean => this.filterForm().valid(),
+    updateStoreWhen: (): boolean => this.filterForm().valid(),
   });
 
   filterForm = form(this.formData, (value) => {
@@ -77,8 +77,7 @@ export class ProductListComponent {
 
 If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
 
-> `updateWhen` requires an injection context (field initializer or constructor), because an effect is created.
-
+> `updateStoreWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
 ### On submission, only setting validated data in the store with Signal Forms
 
@@ -203,7 +202,9 @@ withLinkEntitiesFilter({ entity, collection?, debounce?, forceLoad? })
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateStoreWhen`).
+
+This feature passes `noSetter: true`, so no private `_set` method is generated — `filter[Collection]Entities` already covers that write.
 
 ## State
 

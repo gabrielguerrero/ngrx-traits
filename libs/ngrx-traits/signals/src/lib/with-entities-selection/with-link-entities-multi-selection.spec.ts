@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import {
@@ -105,6 +105,23 @@ describe('withLinkEntitiesMultiSelection', () => {
       store.selectEntities({ ids: ['2'] });
       TestBed.tick();
       expect(external()).toEqual(['1', '2']);
+    });
+  });
+  it('generates no _set setter, selectEntities/clearEntitiesSelection already covers that write', () => {
+    const StoreNoSetter = signalStore(
+      { protectedState: false },
+      withEntities({ entity }),
+      withEntitiesMultiSelection({ entity }),
+      withLinkEntitiesMultiSelection({ entity }),
+      // inside the store is where a private setter would be visible
+      withMethods((store) => {
+        // @ts-expect-error withLinkEntities* pass noSetter, so it is not generated
+        const setter = store._setIdsSelected;
+        return { hasSetter: () => setter !== undefined };
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      expect(new StoreNoSetter().hasSetter()).toBe(false);
     });
   });
 });
