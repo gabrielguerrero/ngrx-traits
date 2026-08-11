@@ -75,5 +75,7 @@ export function withLinkEntitiesSort<
     equal: (a: Sort<any>, b: Sort<any>) =>
       a === b ||
       (!!a && !!b && a.field === b.field && a.direction === b.direction),
+    // the store already exposes sort[Collection]Entities for this write
+    noSetter: true,
   } as any) as any;
 }

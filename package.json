@@ -15,6 +15,7 @@
     "test": "nx affected:test",
     "build": "nx run-many --all --target=build",
     "test-all": "nx run-many --all --target=test --skip-nx-cache --no-cloud",
+    "typecheck": "nx run-many --all --target=typecheck",
     "lint": "nx lint ngrx-traits",
     "e2e": "nx e2e",
     "affected:apps": "nx affected:apps",

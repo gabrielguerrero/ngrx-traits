@@ -74,7 +74,9 @@ withLinkEntitiesSingleSelection({ entity, collection? })
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValue`, `updateStoreWhen`).
+
+This feature passes `noSetter: true`, so no private `_set` method is generated — `select/deselect[Collection]Entity` already covers that write.
 
 ## State
 

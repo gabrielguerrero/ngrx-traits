@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import {
@@ -81,6 +81,23 @@ describe('withLinkEntitiesSingleSelection', () => {
       store.deselectEntity();
       TestBed.tick();
       expect(external()).toBeUndefined();
+    });
+  });
+  it('generates no _set setter, selectEntity/deselectEntity already covers that write', () => {
+    const StoreNoSetter = signalStore(
+      { protectedState: false },
+      withEntities({ entity }),
+      withEntitiesSingleSelection({ entity }),
+      withLinkEntitiesSingleSelection({ entity }),
+      // inside the store is where a private setter would be visible
+      withMethods((store) => {
+        // @ts-expect-error withLinkEntities* pass noSetter, so it is not generated
+        const setter = store._setIdSelected;
+        return { hasSetter: () => setter !== undefined };
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      expect(new StoreNoSetter().hasSetter()).toBe(false);
     });
   });
 });

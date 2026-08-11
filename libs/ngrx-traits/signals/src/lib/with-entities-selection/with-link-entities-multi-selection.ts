@@ -94,5 +94,7 @@ export function withLinkEntitiesMultiSelection<
       // (e.g. [x,x,y] vs [x,y,y]) compare equal, a selection is a set
       return aSet.size === bSet.size && a.every((id) => bSet.has(id));
     },
+    // the store already exposes select/clear[Collection]Entities for this write
+    noSetter: true,
   } as any) as any;
 }
