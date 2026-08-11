@@ -96,5 +96,7 @@ export function withLinkEntitiesFilter<
         forceLoad: config?.forceLoad,
       });
     },
+    // the store already exposes filter[Collection]Entities for this write
+    noSetter: true,
   } as any) as any;
 }
