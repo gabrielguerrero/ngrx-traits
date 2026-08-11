@@ -72,5 +72,7 @@ export function withLinkEntitiesSingleSelection<
         });
       }
     },
+    // the store already exposes select/deselect[Collection]Entity for this write
+    noSetter: true,
   } as any) as any;
 }

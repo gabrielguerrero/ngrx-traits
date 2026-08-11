@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { patchState, signalStore, type } from '@ngrx/signals';
+import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import { withEntitiesLocalFilter, withLinkEntitiesFilter } from '../index';
@@ -114,7 +114,7 @@ describe('withLinkEntitiesFilter', () => {
       patchState(store, setAllEntities(mockProducts));
       const valid = signal(false);
       const linked = store.linkEntitiesFilter({
-        updateWhen: (filter) => valid() && filter.search !== 'bad',
+        updateStoreWhen: (filter) => valid() && filter.search !== 'bad',
       });
 
       linked.set({ search: 'zero' });
@@ -129,6 +129,30 @@ describe('withLinkEntitiesFilter', () => {
       expect(store.entities().length).toEqual(2);
     });
   }));
+
+  it('generates no _set setter, filterEntities already covers that write', () => {
+    const StoreNoSetter = signalStore(
+      { protectedState: false },
+      withEntities({ entity }),
+      withEntitiesLocalFilter({
+        entity,
+        defaultFilter: { search: '' },
+        filterFn: (entity, filter) =>
+          !filter?.search ||
+          entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+      }),
+      withLinkEntitiesFilter({ entity }),
+      // inside the store is where a private setter would be visible
+      withMethods((store) => {
+        // @ts-expect-error withLinkEntities* pass noSetter, so it is not generated
+        const setter = store._setEntitiesFilter;
+        return { hasSetter: () => setter !== undefined };
+      }),
+    );
+    TestBed.runInInjectionContext(() => {
+      expect(new StoreNoSetter().hasSetter()).toBe(false);
+    });
+  });
 
   it('syncs an external signal with the filter both ways', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
