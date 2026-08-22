@@ -127,6 +127,26 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     );
   };
 
+  const defaultFrom = new Date(2026, 0, 2);
+  type NestedFilter = { search: string; range: { from: Date; to: string } };
+
+  const nestedFilterStoreFeature = () => {
+    return signalStoreFeature(
+      withEntities({ entity }),
+      withCallStatus({ initialValue: 'loaded' }),
+      withEntitiesLocalFilter({
+        entity,
+        defaultFilter: {
+          search: '',
+          range: { from: defaultFrom, to: 'end' },
+        } as NestedFilter,
+        filterFn: (e, filter) =>
+          !filter?.search ||
+          e?.name.toLowerCase().includes(filter.search.toLowerCase()),
+      }),
+    );
+  };
+
   const localCollectionStoreFeature = ({
     load,
   }: { load?: Subject<boolean> } = {}) => {
@@ -420,6 +440,180 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       expect(() => store.entities()).not.toThrow();
       expect(store.entitiesFilter()).toEqual({ search: 'a', category: 'all' });
     });
+
+    it('should spread a nested filter field over one param per leaf', () => {
+      const Store = signalStore(
+        nestedFilterStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<NestedFilter>({
+            search: 'string',
+            range: { from: 'date' },
+          }),
+        }),
+      );
+      const { store } = init({
+        Store,
+        queryParams: { search: 'foo', 'range.from': '2026-05-06' },
+      });
+      expect(store.entitiesFilter()).toEqual({
+        search: 'foo',
+        // a nested date comes back a Date, and to, which is not declared,
+        // keeps the value it has in defaultFilter
+        range: { from: new Date(2026, 4, 6), to: 'end' },
+      });
+    });
+
+    it('should restore a declared nested field to its default when its param is not in the url', () => {
+      const Store = signalStore(
+        nestedFilterStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<NestedFilter>({
+            search: 'string',
+            range: { from: 'date' },
+          }),
+        }),
+      );
+      const { store } = init({ Store, queryParams: { search: 'foo' } });
+      expect(store.entitiesFilter()).toEqual({
+        search: 'foo',
+        range: { from: defaultFrom, to: 'end' },
+      });
+    });
+
+    function initWithQueryParams<S extends Type<any>>({
+      Store,
+      queryParams,
+    }: {
+      Store: S;
+      queryParams: Subject<Record<string, any>>;
+    }) {
+      TestBed.configureTestingModule({
+        providers: [
+          Store,
+          provideRouter([]),
+          {
+            provide: ActivatedRoute,
+            useFactory: () => ({ queryParams }),
+          },
+        ],
+      });
+      const router = TestBed.inject(Router);
+      vi.spyOn(router, 'navigate').mockResolvedValue(true);
+      return { store: TestBed.inject(Store) as InstanceType<S> };
+    }
+
+    it('should keep an undeclared nested field the user changed, not only on the first load', fakeAsync(() => {
+      const Store = signalStore(
+        nestedFilterStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          // to is deliberately left out, only from is synced
+          filterMapper: getFilterQueryMapper<NestedFilter>({
+            search: 'string',
+            range: { from: 'date' },
+          }),
+        }),
+      );
+      const queryParams = new Subject<Record<string, any>>();
+      const { store } = initWithQueryParams({ Store, queryParams });
+      queryParams.next({});
+      tick(400);
+
+      store.filterEntities({
+        filter: { search: '', range: { from: defaultFrom, to: 'MINE' } },
+        forceLoad: true,
+      });
+      tick(400);
+      expect(store.entitiesFilter().range.to).toBe('MINE');
+
+      // a later emission, a back navigation or another feature pushing a param
+      queryParams.next({ search: 'foo' });
+      tick(400);
+
+      expect(store.entitiesFilter()).toEqual({
+        search: 'foo',
+        // the field the mapper does not declare keeps what the user set, it
+        // used to be reset to the value it has in defaultFilter
+        range: { from: defaultFrom, to: 'MINE' },
+      });
+    }));
+
+    it('should keep an undeclared nested field when the default filter has no value for it', fakeAsync(() => {
+      type OptionalRangeFilter = {
+        search: string;
+        range?: { from: Date; to: string };
+      };
+      const Store = signalStore(
+        withEntities({ entity }),
+        withCallStatus({ initialValue: 'loaded' }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '' } as OptionalRangeFilter,
+          filterFn: (e, filter) =>
+            !filter?.search ||
+            e?.name.toLowerCase().includes(filter.search.toLowerCase()),
+        }),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<OptionalRangeFilter>({
+            search: 'string',
+            range: { from: 'date' },
+          }),
+        }),
+      );
+      const queryParams = new Subject<Record<string, any>>();
+      const { store } = initWithQueryParams({ Store, queryParams });
+      queryParams.next({});
+      tick(400);
+
+      store.filterEntities({
+        filter: { search: '', range: { from: defaultFrom, to: 'MINE' } },
+        forceLoad: true,
+      });
+      tick(400);
+
+      queryParams.next({ search: 'foo' });
+      tick(400);
+
+      // the whole range used to be replaced by { from: undefined }
+      expect(store.entitiesFilter()).toEqual({
+        search: 'foo',
+        range: { from: defaultFrom, to: 'MINE' },
+      });
+    }));
+
+    it('changes on a nested filter field should update url query params', fakeAsync(() => {
+      const Store = signalStore(
+        nestedFilterStoreFeature(),
+        withEntitiesSyncToRouteQueryParams({
+          entity,
+          filterMapper: getFilterQueryMapper<NestedFilter>({
+            search: 'string',
+            range: { from: 'date' },
+          }),
+        }),
+      );
+      const { store, router } = init({ Store, queryParams: {} });
+      store.filterEntities({
+        filter: {
+          search: 'foo3',
+          range: { from: new Date(2026, 4, 6), to: 'end' },
+        },
+        forceLoad: true,
+      });
+      tick(400);
+      expect(router.navigate).toHaveBeenCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          search: 'foo3',
+          'range.from': '2026-05-06',
+        }),
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }));
 
     it('changes on entities filter should update url query params, with a generated filterMapper', fakeAsync(() => {
       const Store = signalStore(
