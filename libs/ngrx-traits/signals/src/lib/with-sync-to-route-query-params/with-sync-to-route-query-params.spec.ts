@@ -620,3 +620,327 @@ describe('getQueryMapperForState', () => {
     tick(1000);
   }));
 });
+
+describe('getQueryMapperForState with nested props', () => {
+  const day = new Date(2026, 2, 4);
+
+  function init(queryParams: Record<string, string> = {}) {
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        filter: {
+          color: 'red',
+          size: 10,
+          from: day,
+          nested: { deep: 'initial' },
+        },
+        optional: undefined as { a: string } | undefined,
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          getQueryMapperForState({
+            filter: {
+              color: 'string',
+              from: 'date',
+              nested: { deep: 'string' },
+            },
+            optional: { a: 'string' },
+          }),
+        ],
+      }),
+    );
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        Store,
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: of(queryParams),
+            snapshot: { queryParams },
+          }),
+        },
+      ],
+    });
+    return { store: TestBed.inject(Store) };
+  }
+
+  it('should restore nested props from their dotted params', () => {
+    const { store } = init({
+      'filter.color': 'blue',
+      'filter.from': '2026-05-06',
+      'filter.nested.deep': 'restored',
+    });
+    expect(store.filter()).toEqual({
+      color: 'blue',
+      // a nested date comes back a Date, JSON.parse would give a string
+      from: new Date(2026, 4, 6),
+      // size is not declared, so it keeps the value the store had
+      size: 10,
+      nested: { deep: 'restored' },
+    });
+  });
+
+  it('should keep the undeclared and missing nested fields untouched', () => {
+    const { store } = init({ 'filter.color': 'blue' });
+    expect(store.filter()).toEqual({
+      color: 'blue',
+      size: 10,
+      from: day,
+      nested: { deep: 'initial' },
+    });
+  });
+
+  it('should skip a nested param that does not match its declared type', () => {
+    const { store } = init({ 'filter.from': 'not a date' });
+    expect(store.filter().from).toEqual(day);
+  });
+
+  it('should build the object when the prop holds nothing yet', () => {
+    const { store } = init({ 'optional.a': 'built' });
+    expect(store.optional()).toEqual({ a: 'built' });
+  });
+
+  it('should write one param per leaf, named with the path to it', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, {
+      filter: {
+        color: 'green',
+        size: 42,
+        from: new Date(2026, 4, 6),
+        nested: { deep: 'written' },
+      },
+    });
+    TestBed.tick();
+    tick(400);
+
+    expect(navigate.mock.calls[0][1]?.queryParams).toEqual({
+      'filter.color': 'green',
+      'filter.from': '2026-05-06',
+      'filter.nested.deep': 'written',
+      // size is not declared, so it never reaches the url
+      'optional.a': undefined,
+    });
+    tick(1000);
+  }));
+
+  it('should remove the params of a prop that holds nothing', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, { filter: undefined as any });
+    TestBed.tick();
+    tick(400);
+
+    const params = navigate.mock.calls[0][1]?.queryParams as any;
+    expect(params['filter.color']).toBe(undefined);
+    expect(params['filter.nested.deep']).toBe(undefined);
+    tick(1000);
+  }));
+});
+
+describe('getQueryMapperForState prop checking', () => {
+  // these only have to compile, the @ts-expect-error comments are the
+  // assertions, tsc fails the build when one of them stops erroring
+  it('should reject props and types that do not fit the state', () => {
+    signalStore(
+      withState({ search: '', page: 0, filter: { color: 'red', size: 1 } }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          getQueryMapperForState({
+            search: 'string',
+            // @ts-expect-error not a prop of the state
+            pge: 'number',
+          }),
+          getQueryMapperForState({
+            // @ts-expect-error page holds a number, not a string
+            page: 'string',
+          }),
+          getQueryMapperForState({
+            // @ts-expect-error color is not a field of filter
+            filter: { colour: 'string' },
+          }),
+          getQueryMapperForState({
+            // @ts-expect-error size holds a number, not a boolean
+            filter: { size: 'boolean' },
+          }),
+          // the ones that do fit still compile
+          getQueryMapperForState({ filter: 'json' }),
+          getQueryMapperForState({ filter: { color: 'string' } }),
+        ],
+      }),
+    );
+    expect(true).toBe(true);
+  });
+});
+
+describe('getQueryMapperForState with array props', () => {
+  function init(queryParams: Record<string, string> = {}) {
+    const Store = signalStore(
+      { protectedState: false },
+      withState({
+        tags: ['a', 'b'] as string[],
+        ids: [1, 2] as number[],
+        mixed: [{ a: 1 }] as { a: number }[],
+        filter: { sizes: [10] as number[] },
+      }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          getQueryMapperForState({
+            tags: 'string-array',
+            ids: 'number-array',
+            mixed: 'json',
+            filter: { sizes: 'number-array' },
+          }),
+        ],
+      }),
+    );
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        Store,
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useFactory: () => ({
+            queryParams: of(queryParams),
+            snapshot: { queryParams },
+          }),
+        },
+      ],
+    });
+    return { store: TestBed.inject(Store) };
+  }
+
+  it('should restore arrays from a comma separated param', () => {
+    const { store } = init({
+      tags: 'shoes,boots,hats',
+      ids: '3,4,5',
+      'filter.sizes': '10,20',
+    });
+    expect(store.tags()).toEqual(['shoes', 'boots', 'hats']);
+    expect(store.ids()).toEqual([3, 4, 5]);
+    expect(store.filter()).toEqual({ sizes: [10, 20] });
+  });
+
+  it('should restore a single value as an array of one', () => {
+    const { store } = init({ tags: 'shoes', ids: '3' });
+    expect(store.tags()).toEqual(['shoes']);
+    expect(store.ids()).toEqual([3]);
+  });
+
+  it('should restore an empty param as an empty array', () => {
+    const { store } = init({ tags: '', ids: '' });
+    expect(store.tags()).toEqual([]);
+    expect(store.ids()).toEqual([]);
+  });
+
+  it('should skip a number array with an element that is not a number', () => {
+    expect(init({ ids: '1,x,3' }).store.ids()).toEqual([1, 2]);
+    // an empty element would read as 0
+    expect(init({ ids: '1,,3' }).store.ids()).toEqual([1, 2]);
+    expect(init({ ids: '1,2,' }).store.ids()).toEqual([1, 2]);
+  });
+
+  it('should write arrays as a comma separated list', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    patchState(store, {
+      tags: ['shoes', 'boots'],
+      ids: [3, 4],
+      mixed: [{ a: 2 }],
+      filter: { sizes: [] },
+    });
+    TestBed.tick();
+    tick(400);
+
+    expect(navigate.mock.calls[0][1]?.queryParams).toEqual({
+      tags: 'shoes,boots',
+      ids: '3,4',
+      // an array of anything else still goes through JSON.stringify
+      mixed: JSON.stringify([{ a: 2 }]),
+      // an empty array keeps the param, so it does not read back as missing
+      'filter.sizes': '',
+    });
+    tick(1000);
+  }));
+
+  it('should skip a repeated param instead of failing the whole restore', () => {
+    // the router hands a repeated param over as an array, which used to throw
+    // inside the mapper and take every mapper after it down with it
+    const { store } = init({
+      tags: ['shoes', 'boots'] as unknown as string,
+      ids: '3,4',
+    });
+    // the prop keeps the value it started with, nothing is guessed from it
+    expect(store.tags()).toEqual(['a', 'b']);
+    // and the params after the repeated one are still restored
+    expect(store.ids()).toEqual([3, 4]);
+  });
+
+  it('should warn when a string array value carries the separator', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    patchState(store, { tags: ['shoes,boots'] });
+    TestBed.tick();
+    tick(400);
+
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("'tags'"));
+    // the value is still written, it just does not survive the round trip
+    expect((navigate.mock.calls[0][1]?.queryParams as any).tags).toBe(
+      'shoes,boots',
+    );
+    warn.mockRestore();
+    tick(1000);
+  }));
+
+  it('should not warn for a number array or for values without a comma', fakeAsync(() => {
+    const { store } = init();
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    patchState(store, { tags: ['shoes', 'boots'], ids: [1, 2] });
+    TestBed.tick();
+    tick(400);
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+    tick(1000);
+  }));
+
+  it('should reject an array type that does not fit the array', () => {
+    signalStore(
+      withState({ tags: ['a'] as string[], ids: [1] as number[] }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          getQueryMapperForState({
+            // @ts-expect-error tags holds strings, not numbers
+            tags: 'number-array',
+          }),
+          getQueryMapperForState({
+            // @ts-expect-error ids holds numbers, not strings
+            ids: 'string-array',
+          }),
+          getQueryMapperForState({
+            // @ts-expect-error an array cannot be described field by field
+            tags: { 0: 'string' },
+          }),
+          // json is still allowed for both
+          getQueryMapperForState({ tags: 'json', ids: 'json' }),
+        ],
+      }),
+    );
+    expect(true).toBe(true);
+  });
+});
