@@ -89,9 +89,15 @@ export type FilterQueryMapper<Filter, T extends Params = Params> = {
   /**
    * @param defaultFilter the filter the store was created with, to fall back on
    *   for fields the query params do not carry
+   * @param currentFilter the filter the store holds right now, to keep the
+   *   parts of it the query params say nothing about
    * @returns the filter to apply, or undefined to leave the current one alone
    */
-  queryParamsToFilter: (query: T, defaultFilter: Filter) => Filter | undefined;
+  queryParamsToFilter: (
+    query: T,
+    defaultFilter: Filter,
+    currentFilter: Filter,
+  ) => Filter | undefined;
   filterToQueryParams: (filter: Filter) => T | undefined | null;
   /**
    * Merge the restored filter into the current one instead of replacing it,
@@ -172,8 +178,13 @@ export function getQueryMapperForEntitiesFilter<Filter>(config?: {
   return {
     queryParamsToState: (query, store, firstLoad) => {
       const defaultFilter = (store[defaultFilterKey] as Signal<Filter>)?.();
+      const currentFilter = (store[filterKey] as Signal<Filter>)?.();
       const filter = config?.filterMapper
-        ? config?.filterMapper.queryParamsToFilter(query, defaultFilter)
+        ? config?.filterMapper.queryParamsToFilter(
+            query,
+            defaultFilter,
+            currentFilter,
+          )
         : query.filter
           ? JSON.parse(query.filter)
           : undefined;

@@ -210,9 +210,29 @@ withEntitiesSyncToRouteQueryParams({
 }),
 ```
 
-The filter type has to be given, it cannot be inferred from the store, and that is what makes the field names autocomplete and their types check. The available types are the same ones [getQueryMapperForState](/docs/traits/with-sync-to-route-query-params) uses: `'string'`, `'number'`, `'boolean'`, `'date'`, `'date-time'`, `'time'` and `'json'`.
+The filter type has to be given, it cannot be inferred from the store, and that is what makes the field names autocomplete and their types check. The available types are the same ones [getQueryMapperForState](/docs/traits/with-sync-to-route-query-params) uses: `'string'`, `'number'`, `'boolean'`, `'date'`, `'date-time'`, `'time'`, `'string-array'`, `'number-array'` and `'json'`. The same caveat applies to `'string-array'`, a field whose values can carry a comma has to be declared as `'json'`, since the comma is what separates the entries.
 
-Fields that are `undefined` or `null` are removed from the url, and a field that does not match its declared type is dropped. Keep in mind the filter is replaced rather than patched when restoring, so a hand edited url that only carries some of the fields gives a filter with only those. A url carrying none of them leaves the filter untouched.
+A field holding an object can be described field by field too, with a nested props object, which gives it one param per leaf named with the path to it:
+
+```typescript
+type ProductFilter = { search: string; range: { from: Date; to: Date } };
+
+withEntitiesSyncToRouteQueryParams({
+  ...productEntityConfig,
+  prefix: 'p',
+  // 👇 p-search=tv&p-range.from=2026-08-11&p-range.to=2026-08-31
+  filterMapper: getFilterQueryMapper<ProductFilter>({
+    search: 'string',
+    range: { from: 'date', to: 'date' },
+  }),
+}),
+```
+
+Fields that are `undefined` or `null` are removed from the url. On the way back the generated mapper patches the filter instead of replacing it, so the fields it does not declare keep the value they have, at the top level and inside a declared object alike.
+
+Every declared field is restored, and one whose param is missing from the url, or does not match its declared type, falls back to the value it has in `defaultFilter` rather than being left empty, which is what makes a bare url restore the declared fields to their defaults instead of leaving the filter alone. When `defaultFilter` says nothing about the field, the value the filter already holds is kept instead of emptying it.
+
+The flip side is that a field cannot travel as cleared unless its default already is, restoring a url without its param brings the default back rather than an empty value.
 
 For anything else, like renaming a field to something shorter, pass the mapper object by hand:
 
@@ -227,6 +247,8 @@ withEntitiesSyncToRouteQueryParams({
   },
 }),
 ```
+
+`queryParamsToFilter` also receives the store `defaultFilter` and the filter the store holds right now, `(query, defaultFilter, currentFilter)`, to fall back on for what the url does not carry, and it can return `undefined` to leave the filter alone. Set `patch: true` on the mapper when it only maps some of the fields, so the rest are merged instead of replaced.
 
 Also consider `syncPagination: false`, `syncSort: false` or `syncSingleSelection: false` to drop the params you do not need to restore from the url.
 
