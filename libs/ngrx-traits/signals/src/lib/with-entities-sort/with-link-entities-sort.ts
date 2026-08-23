@@ -1,5 +1,6 @@
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
+import { RequireEntitiesSort } from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesSortState,
@@ -46,13 +47,18 @@ export function withLinkEntitiesSort<
   collection?: Collection;
 }): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? { state: EntitiesSortState<Entity>; props: {}; methods: {} }
-      : {
-          state: NamedEntitiesSortState<Entity, Collection>;
-          props: {};
-          methods: {};
-        }),
+    RequireEntitiesSort<
+      Input,
+      Collection,
+      'withLinkEntitiesSort',
+      Collection extends ''
+        ? { state: EntitiesSortState<Entity>; props: {}; methods: {} }
+        : {
+            state: NamedEntitiesSortState<Entity, Collection>;
+            props: {};
+            methods: {};
+          }
+    >,
   {
     state: {};
     props: {};
