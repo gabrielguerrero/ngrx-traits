@@ -9,20 +9,12 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import {
-  EntityState,
-  NamedEntityState,
-  SelectEntityId,
-} from '@ngrx/signals/entities';
-import {
-  EntityId,
-  EntityMap,
-  EntityProps,
-  NamedEntityProps,
-} from '@ngrx/signals/entities';
+import { SelectEntityId } from '@ngrx/signals/entities';
+import { EntityId, EntityMap } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 
+import { RequireEntities } from '../feature-requirements.model';
 import { getWithEntitiesKeys, toMap } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
@@ -97,17 +89,7 @@ export function withEntitiesMultiSelection<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity>;
-          methods: {};
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection>;
-          methods: {};
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesMultiSelection'>,
   Collection extends ''
     ? {
         state: EntitiesMultiSelectionState;
@@ -268,7 +250,7 @@ export function withEntitiesMultiSelection<
             const ids = 'id' in options ? [options.id] : options.ids;
             // protect againts cyclic resetting
             if (areAllIds({ ids, selected: false })) return;
-            
+
             const idsMap = ids.reduce(
               (acc, id) => {
                 acc[id] = false;

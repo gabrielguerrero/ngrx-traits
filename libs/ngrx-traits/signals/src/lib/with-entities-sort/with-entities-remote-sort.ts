@@ -8,15 +8,13 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import { EntityProps, NamedEntityProps } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isObservable, map, Observable, pipe, tap } from 'rxjs';
 
 import {
-  CallStatusMethods,
-  NamedCallStatusMethods,
-} from '../with-call-status/with-call-status.model';
+  RequireEntities,
+  RequireEntitiesCallStatus,
+} from '../feature-requirements.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   broadcast,
@@ -133,17 +131,8 @@ export function withEntitiesRemoteSort<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity>;
-          methods: CallStatusMethods;
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`>;
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesRemoteSort'> &
+    RequireEntitiesCallStatus<Input, Collection, 'withEntitiesRemoteSort'>,
   Collection extends ''
     ? {
         state: EntitiesSortState<Entity>;

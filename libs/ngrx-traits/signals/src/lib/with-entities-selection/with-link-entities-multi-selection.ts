@@ -1,6 +1,7 @@
 import { Signal } from '@angular/core';
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
+import { RequireEntitiesMultiSelection } from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesMultiSelectionState,
@@ -45,13 +46,18 @@ export function withLinkEntitiesMultiSelection<
   collection?: Collection;
 }): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? { state: EntitiesMultiSelectionState; props: {}; methods: {} }
-      : {
-          state: NamedEntitiesMultiSelectionState<Collection>;
-          props: {};
-          methods: {};
-        }),
+    RequireEntitiesMultiSelection<
+      Input,
+      Collection,
+      'withLinkEntitiesMultiSelection',
+      Collection extends ''
+        ? { state: EntitiesMultiSelectionState; props: {}; methods: {} }
+        : {
+            state: NamedEntitiesMultiSelectionState<Collection>;
+            props: {};
+            methods: {};
+          }
+    >,
   {
     state: {};
     props: {};
