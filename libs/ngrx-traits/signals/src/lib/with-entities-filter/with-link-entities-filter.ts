@@ -1,5 +1,6 @@
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
+import { RequireEntitiesFilter } from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import { getWithEntitiesFilterKeys } from './with-entities-filter.util';
 import {
@@ -61,20 +62,27 @@ export function withLinkEntitiesFilter<
   forceLoad?: boolean;
 }): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntitiesFilterState<ExtractFilter<Input['state'], Collection>>;
-          props: {};
-          methods: {};
-        }
-      : {
-          state: NamedEntitiesFilterState<
-            Collection,
-            ExtractFilter<Input['state'], Collection>
-          >;
-          props: {};
-          methods: {};
-        }),
+    RequireEntitiesFilter<
+      Input,
+      Collection,
+      'withLinkEntitiesFilter',
+      Collection extends ''
+        ? {
+            state: EntitiesFilterState<
+              ExtractFilter<Input['state'], Collection>
+            >;
+            props: {};
+            methods: {};
+          }
+        : {
+            state: NamedEntitiesFilterState<
+              Collection,
+              ExtractFilter<Input['state'], Collection>
+            >;
+            props: {};
+            methods: {};
+          }
+    >,
   {
     state: {};
     props: {};

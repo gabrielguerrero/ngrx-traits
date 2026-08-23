@@ -1,5 +1,6 @@
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
+import { RequireEntitiesSingleSelection } from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesSingleSelectionState,
@@ -41,13 +42,18 @@ export function withLinkEntitiesSingleSelection<
   collection?: Collection;
 }): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? { state: EntitiesSingleSelectionState; props: {}; methods: {} }
-      : {
-          state: NamedEntitiesSingleSelectionState<Collection>;
-          props: {};
-          methods: {};
-        }),
+    RequireEntitiesSingleSelection<
+      Input,
+      Collection,
+      'withLinkEntitiesSingleSelection',
+      Collection extends ''
+        ? { state: EntitiesSingleSelectionState; props: {}; methods: {} }
+        : {
+            state: NamedEntitiesSingleSelectionState<Collection>;
+            props: {};
+            methods: {};
+          }
+    >,
   {
     state: {};
     props: {};

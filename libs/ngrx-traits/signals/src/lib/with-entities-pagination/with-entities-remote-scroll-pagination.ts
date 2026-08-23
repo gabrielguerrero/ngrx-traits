@@ -13,23 +13,17 @@ import {
 } from '@ngrx/signals';
 import {
   addEntities,
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
   SelectEntityId,
   setAllEntities,
 } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { exhaustMap, first, pipe, tap } from 'rxjs';
 
-import { getWithEntitiesKeys } from '../util';
 import {
-  CallStatusComputed,
-  CallStatusMethods,
-  NamedCallStatusComputed,
-  NamedCallStatusMethods,
-} from '../with-call-status/with-call-status.model';
+  RequireEntities,
+  RequireEntitiesCallStatus,
+} from '../feature-requirements.model';
+import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
@@ -174,18 +168,17 @@ export function withEntitiesRemoteScrollPagination<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity> & CallStatusComputed;
-          methods: CallStatusMethods;
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<`${Collection}Entities`>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`>;
-        }),
+    RequireEntities<
+      Input,
+      Entity,
+      Collection,
+      'withEntitiesRemoteScrollPagination'
+    > &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesRemoteScrollPagination'
+    >,
   Collection extends ''
     ? {
         state: EntitiesScrollPaginationState;
