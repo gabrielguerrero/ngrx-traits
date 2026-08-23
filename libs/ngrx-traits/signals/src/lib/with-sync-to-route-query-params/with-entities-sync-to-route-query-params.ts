@@ -7,22 +7,12 @@ import {
   type,
   withHooks,
 } from '@ngrx/signals';
-import {
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
-} from '@ngrx/signals/entities';
 import { concatMap, first } from 'rxjs';
 
 import {
-  CallStatusComputed,
-  CallStatusMethods,
-  CallStatusState,
-  NamedCallStatusComputed,
-  NamedCallStatusMethods,
-  NamedCallStatusState,
-} from '../with-call-status/with-call-status.model';
+  RequireEntities,
+  RequireEntitiesCallStatus,
+} from '../feature-requirements.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   FilterQueryMapper,
@@ -182,19 +172,17 @@ export function withEntitiesSyncToRouteQueryParams<
   syncMultiSelection?: boolean;
 }): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity> & CallStatusState;
-          props: EntityProps<Entity> & CallStatusComputed;
-          methods: CallStatusMethods;
-        }
-      : {
-          state: NamedEntityState<Entity, Collection> &
-            NamedCallStatusState<`${Collection}Entities`>;
-          props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<`${Collection}Entities`>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`>;
-        }),
+    RequireEntities<
+      Input,
+      Entity,
+      Collection,
+      'withEntitiesSyncToRouteQueryParams'
+    > &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesSyncToRouteQueryParams'
+    >,
   {
     state: {};
     props: {};

@@ -19,10 +19,6 @@ import {
   withState,
 } from '@ngrx/signals';
 import {
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
   removeEntity,
   SelectEntityId,
   updateEntity,
@@ -46,13 +42,11 @@ import {
 } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+import { RequireEntities } from '../feature-requirements.model';
 import { getWithEntitiesKeys, insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import { NamedCallStatusMapState } from '../with-call-status-map/with-call-status-map.model';
-import {
-  CallStatus,
-  NamedCallStatusState,
-} from '../with-call-status/with-call-status.model';
+import { CallStatus } from '../with-call-status/with-call-status.model';
 import { ObservableCall, RxMethodRef } from '../with-calls/with-calls.model';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
@@ -145,28 +139,19 @@ export function withEntitiesCalls<
   calls: (store: StoreSource<Input>) => Calls;
 }): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<NoInfer<Entity>>;
-          props: EntityProps<NoInfer<Entity>>;
-          methods: {};
-        }
-      : {
-          state: NamedEntityState<NoInfer<Entity>, Collection>;
-          props: NamedEntityProps<NoInfer<Entity>, Collection>;
-          methods: {};
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesCalls'>,
   {
     state: NamedCallStatusMapState<keyof Calls & string>;
     props: NamedEntitiesCallsStatusComputed<Calls>;
     methods: NamedEntitiesCallsStatusMethods<Entity, Calls> & {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
         ? {
-            (
-              param: P[0],
-            ): Promise<
+            (param: P[0]): Promise<
               | { value: Signal<Entity>; ok: true }
-              | { error: Signal<ExtractEntityCallErrorType<Calls[K]>>; ok: false }
+              | {
+                  error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
+                  ok: false;
+                }
             >;
             (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
           }
@@ -176,11 +161,12 @@ export function withEntitiesCalls<
               // a call with no params is not a supported shape
               never
             : {
-                (
-                  ...param: Parameters<Calls[K]['call']>
-                ): Promise<
+                (...param: Parameters<Calls[K]['call']>): Promise<
                   | { value: Signal<Entity>; ok: true }
-                  | { error: Signal<ExtractEntityCallErrorType<Calls[K]>>; ok: false }
+                  | {
+                      error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
+                      ok: false;
+                    }
                 >;
                 (
                   param:
@@ -477,9 +463,14 @@ export function withEntitiesCalls<
                     take(1),
                     map((v) =>
                       v === 'loaded'
-                        ? { value: computed(() => entityMap()[id]), ok: true as const }
+                        ? {
+                            value: computed(() => entityMap()[id]),
+                            ok: true as const,
+                          }
                         : {
-                            error: computed(() => typeof v === 'object' ? v.error : undefined),
+                            error: computed(() =>
+                              typeof v === 'object' ? v.error : undefined,
+                            ),
                             ok: false as const,
                           },
                     ),

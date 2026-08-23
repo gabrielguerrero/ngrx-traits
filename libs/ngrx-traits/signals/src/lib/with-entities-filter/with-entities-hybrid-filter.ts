@@ -18,14 +18,7 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import {
-  EntityMap,
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
-  SelectEntityId,
-} from '@ngrx/signals/entities';
+import { EntityMap, SelectEntityId } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   filter as filterPipe,
@@ -37,12 +30,12 @@ import {
   tap,
 } from 'rxjs';
 
-import { getWithEntitiesKeys, insertIf } from '../util';
 import {
-  CallStatus,
-  CallStatusMethods,
-  NamedCallStatusMethods,
-} from '../with-call-status/with-call-status.model';
+  RequireEntities,
+  RequireEntitiesCallStatus,
+} from '../feature-requirements.model';
+import { getWithEntitiesKeys, insertIf } from '../util';
+import { CallStatus } from '../with-call-status/with-call-status.model';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
   broadcast,
@@ -180,17 +173,8 @@ export function withEntitiesHybridFilter<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity>;
-          methods: CallStatusMethods;
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`>;
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesHybridFilter'> &
+    RequireEntitiesCallStatus<Input, Collection, 'withEntitiesHybridFilter'>,
   Collection extends ''
     ? {
         state: EntitiesFilterState<Filter>;
