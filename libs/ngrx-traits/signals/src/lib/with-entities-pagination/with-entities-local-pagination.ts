@@ -10,9 +10,8 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import { EntityState, NamedEntityState } from '@ngrx/signals/entities';
-import { EntityProps, NamedEntityProps } from '@ngrx/signals/entities';
 
+import { RequireEntities } from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesLocalSortEvents } from '../with-entities-sort/with-entities-local-sort.util';
@@ -87,17 +86,7 @@ export function withEntitiesLocalPagination<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity>;
-          methods: {};
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection>;
-          methods: {};
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesLocalPagination'>,
   Collection extends ''
     ? {
         state: EntitiesPaginationLocalState;

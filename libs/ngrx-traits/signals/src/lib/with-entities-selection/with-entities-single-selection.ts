@@ -9,16 +9,11 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import {
-  EntityMap,
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
-} from '@ngrx/signals/entities';
+import { EntityMap } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 
+import { RequireEntities } from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
@@ -93,17 +88,7 @@ export function withEntitiesSingleSelection<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity>;
-          methods: {};
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection>;
-          methods: {};
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesSingleSelection'>,
   Collection extends ''
     ? {
         state: EntitiesSingleSelectionState;

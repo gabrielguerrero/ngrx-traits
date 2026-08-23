@@ -10,17 +10,11 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import {
-  EntityMap,
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
-  SelectEntityId,
-} from '@ngrx/signals/entities';
+import { EntityMap, SelectEntityId } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { map, Observable, pipe, tap } from 'rxjs';
 
+import { RequireEntities } from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
@@ -105,18 +99,7 @@ export function withEntitiesLocalFilter<
     }
   >,
 ): SignalStoreFeature<
-  Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity>;
-          methods: {};
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection>;
-          methods: {};
-        }),
+  Input & RequireEntities<Input, Entity, Collection, 'withEntitiesLocalFilter'>,
   Collection extends ''
     ? {
         state: EntitiesFilterState<Filter>;

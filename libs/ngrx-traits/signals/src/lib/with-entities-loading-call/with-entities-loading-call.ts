@@ -13,14 +13,7 @@ import {
   withHooks,
   WritableStateSource,
 } from '@ngrx/signals';
-import {
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
-  SelectEntityId,
-  setAllEntities,
-} from '@ngrx/signals/entities';
+import { SelectEntityId, setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   asapScheduler,
@@ -38,18 +31,14 @@ import {
 } from 'rxjs';
 
 import {
-  CallStatusComputed,
-  CallStatusMethods,
-  CallStatusState,
-  NamedCallStatusComputed,
-  NamedCallStatusMethods,
-  NamedCallStatusState,
-} from '../with-call-status/with-call-status.model';
+  EntitiesCallStatusRequirement,
+  RequireEntities,
+  RequireEntitiesCallStatus,
+} from '../feature-requirements.model';
 import {
   getWithCallStatusEvents,
   getWithCallStatusKeys,
 } from '../with-call-status/with-call-status.util';
-import { NamedSetEntitiesResult } from '../with-entities-pagination/with-entities-local-pagination.model';
 import { getWithEntitiesRemotePaginationKeys } from '../with-entities-pagination/with-entities-remote-pagination.util';
 import {
   onEvent,
@@ -61,6 +50,10 @@ import {
   getFeatureConfig,
   StoreSource,
 } from '../with-feature-factory/with-feature-factory.model';
+import {
+  ExpectedFetchEntitiesResult,
+  FetchEntitiesResult,
+} from './with-entities-loading-call.model';
 
 /**
  * Generates a onInit hook that fetches entities from a remote source
@@ -143,30 +136,11 @@ export function withEntitiesLoadingCall<
       fetchEntities: (
         store: StoreSource<Input>,
       ) =>
-        | Observable<
-            Input['methods'] extends NamedSetEntitiesResult<
-              Collection,
-              infer ResultParam
-            >
-              ? ResultParam
-              : Entity[] | { entities: Entity[] }
-          >
-        | Promise<
-            Input['methods'] extends NamedSetEntitiesResult<
-              Collection,
-              infer ResultParam
-            >
-              ? ResultParam
-              : Entity[] | { entities: Entity[] }
-          >;
+        | Observable<ExpectedFetchEntitiesResult<Input, Collection, Entity>>
+        | Promise<ExpectedFetchEntitiesResult<Input, Collection, Entity>>;
       mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
       onSuccess?: (
-        result: Input['methods'] extends NamedSetEntitiesResult<
-          Collection,
-          infer ResultParam
-        >
-          ? ResultParam
-          : Entity[] | { entities: Entity[] },
+        result: FetchEntitiesResult<Input, Collection, Entity>,
       ) => void;
       mapError?: (error: unknown) => Error;
       onError?: (error: Error) => void;
@@ -177,19 +151,13 @@ export function withEntitiesLoadingCall<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity> & CallStatusState;
-          props: EntityProps<Entity> & CallStatusComputed<Error>;
-          methods: CallStatusMethods<Error>;
-        }
-      : {
-          state: NamedEntityState<Entity, Collection> &
-            NamedCallStatusState<`${Collection}Entities`>;
-          props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<`${Collection}Entities`, Error>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`, Error>;
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesLoadingCall'> &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesLoadingCall',
+      EntitiesCallStatusRequirement<Collection, Error>
+    >,
   EmptyFeatureResult
 > {
   return withFeatureFactory(
@@ -256,7 +224,10 @@ export function withEntitiesLoadingCall<
                   }
                 }
                 setLoaded();
-                if (onSuccess) onSuccess(result);
+                if (onSuccess)
+                  onSuccess(
+                    result as FetchEntitiesResult<Input, Collection, Entity>,
+                  );
               }),
               first(),
               catchError((error: unknown) => {

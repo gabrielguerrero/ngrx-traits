@@ -1,3 +1,4 @@
+export * from './feature-requirements.model';
 export * from './with-call-status/with-call-status';
 export * from './with-call-status/with-call-status.model';
 export * from './with-entities-filter/with-entities-local-filter';

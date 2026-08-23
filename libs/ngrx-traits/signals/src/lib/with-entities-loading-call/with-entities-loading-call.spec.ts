@@ -11,6 +11,7 @@ import {
   withCallStatus,
   withEntitiesLoadingCall,
   withEntitiesRemotePagination,
+  withEntitiesRemoteScrollPagination,
 } from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
@@ -773,6 +774,91 @@ describe('withEntitiesLoadingCall', () => {
           expect(store.productEntities()).toEqual(mockProducts.slice(0, 30));
         });
       }));
+    });
+  });
+  describe('missing required features', () => {
+    it('should error if withCallStatus is missing', () => {
+      // @ts-expect-error withEntitiesLoadingCall requires withCallStatus({ collection: 'product' })
+      signalStore(
+        withEntities({ entity, collection }),
+        withEntitiesLoadingCall({
+          collection,
+          fetchEntities: () => of([...mockProducts]),
+        }),
+      );
+    });
+
+    it('should error if withCallStatus is missing without collection', () => {
+      // @ts-expect-error withEntitiesLoadingCall requires withCallStatus()
+      signalStore(
+        withEntities({ entity }),
+        withEntitiesLoadingCall({
+          fetchEntities: () => of([...mockProducts]),
+        }),
+      );
+    });
+
+    it('should error if withEntities is missing', () => {
+      // @ts-expect-error withEntitiesLoadingCall requires withEntities({ entity, collection: 'product' })
+      signalStore(
+        withCallStatus({ collection }),
+        withEntitiesLoadingCall({
+          collection,
+          entity,
+          fetchEntities: () => of([...mockProducts]),
+        }),
+      );
+    });
+  });
+
+  describe('fetchEntities result', () => {
+    it('should require the result the pagination feature accepts', () => {
+      signalStore(
+        withEntities({ entity, collection }),
+        withCallStatus({ collection }),
+        withEntitiesRemotePagination({ entity, collection, pageSize: 10 }),
+        withEntitiesLoadingCall({
+          collection,
+          // withEntitiesRemotePagination stores { entities, total }, so
+          // returning the entities alone is not enough
+          // @ts-expect-error
+          fetchEntities: () => of([...mockProducts]),
+        }),
+      );
+    });
+
+    it('should allow any of the results the scroll pagination accepts', () => {
+      const Store = signalStore(
+        withEntities({ entity, collection }),
+        withCallStatus({ collection }),
+        withEntitiesRemoteScrollPagination({
+          entity,
+          collection,
+          pageSize: 10,
+        }),
+        withEntitiesLoadingCall({
+          collection,
+          fetchEntities: () => of({ entities: [...mockProducts] }),
+        }),
+      );
+      expect(Store).toBeDefined();
+    });
+
+    it('should not leak the explanation into onSuccess', () => {
+      const Store = signalStore(
+        withEntities({ entity, collection }),
+        withCallStatus({ collection }),
+        withEntitiesRemotePagination({ entity, collection, pageSize: 10 }),
+        withEntitiesLoadingCall({
+          collection,
+          fetchEntities: () =>
+            of({ entities: [...mockProducts], total: mockProducts.length }),
+          // total and entities are reachable without narrowing
+          onSuccess: (result) =>
+            expect(result.total).toBe(result.entities.length),
+        }),
+      );
+      expect(Store).toBeDefined();
     });
   });
 });

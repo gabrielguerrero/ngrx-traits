@@ -11,14 +11,7 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import {
-  EntityProps,
-  EntityState,
-  NamedEntityProps,
-  NamedEntityState,
-  SelectEntityId,
-  setAllEntities,
-} from '@ngrx/signals/entities';
+import { SelectEntityId, setAllEntities } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import {
   distinctUntilChanged,
@@ -29,13 +22,11 @@ import {
   tap,
 } from 'rxjs';
 
-import { getWithEntitiesKeys } from '../util';
 import {
-  CallStatusComputed,
-  CallStatusMethods,
-  NamedCallStatusComputed,
-  NamedCallStatusMethods,
-} from '../with-call-status/with-call-status.model';
+  RequireEntities,
+  RequireEntitiesCallStatus,
+} from '../feature-requirements.model';
+import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
@@ -175,18 +166,12 @@ export function withEntitiesRemotePagination<
   >,
 ): SignalStoreFeature<
   Input &
-    (Collection extends ''
-      ? {
-          state: EntityState<Entity>;
-          props: EntityProps<Entity> & CallStatusComputed;
-          methods: CallStatusMethods;
-        }
-      : {
-          state: NamedEntityState<Entity, Collection>;
-          props: NamedEntityProps<Entity, Collection> &
-            NamedCallStatusComputed<`${Collection}Entities`>;
-          methods: NamedCallStatusMethods<`${Collection}Entities`>;
-        }),
+    RequireEntities<Input, Entity, Collection, 'withEntitiesRemotePagination'> &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesRemotePagination'
+    >,
   Collection extends ''
     ? {
         state: EntitiesPaginationRemoteState;
@@ -310,7 +295,6 @@ export function withEntitiesRemotePagination<
           pageSize?: number;
           skipLoadingCall?: boolean;
         }) => {
-
           const size = pageSize ?? pagination().pageSize;
           if (size !== pagination().pageSize)
             clearEntitiesCache(state, config, size);
@@ -359,7 +343,7 @@ export function withEntitiesRemotePagination<
             return;
           }
           if (!skipLoadingCall) setLoading();
-          
+
           broadcast(
             state,
             entitiesRemotePageChanged({
