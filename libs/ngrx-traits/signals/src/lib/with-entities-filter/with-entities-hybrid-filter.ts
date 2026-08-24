@@ -323,7 +323,7 @@ export function withEntitiesHybridFilter<
               }
               filterEntities(options);
 
-              return lastValueFrom(
+              const resultPromise = lastValueFrom(
                 toObservable(callState, { injector: environmentInjector }).pipe(
                   filterPipe((v) => v === 'loaded' || typeof v === 'object'),
                   take(1),
@@ -334,6 +334,10 @@ export function withEntitiesHybridFilter<
                   ),
                 ),
               );
+              // see withCalls: keep a no-op handler attached so a promise the
+              // caller ignores cannot surface as an unhandled rejection
+              resultPromise.catch(() => {});
+              return resultPromise;
             },
             [resetEntitiesFilterKey]: (options?: {
               newDefaultFilter?: Filter;
