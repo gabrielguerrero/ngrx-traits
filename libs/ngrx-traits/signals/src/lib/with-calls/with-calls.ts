@@ -125,7 +125,7 @@ import { getWithCallKeys } from './with-calls.util';
  *   store.checkoutError // unknown | null
  *   // generates the following methods
  *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
- *   store.checkout // () => void
+ *   store.checkout // () => Promise<{value, ok: true} | {error, ok: false}>
  *
  * @warning The default mapPipe is {@link https://www.learnrxjs.io/learn-rxjs/operators/transformation/exhaustmap exhaustMap}. If your call returns an observable that does not complete after the first value is emitted, any changes to the input params will be ignored. Either specify {@link https://www.learnrxjs.io/learn-rxjs/operators/transformation/switchmap switchMap} as mapPipe, or use {@link https://www.learnrxjs.io/learn-rxjs/operators/filtering/take take(1)} or {@link https://www.learnrxjs.io/learn-rxjs/operators/filtering/first first()} as part of your call.
  */
@@ -147,7 +147,10 @@ export function withCalls<
     methods: {
       [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
         ? P extends []
-          ? () => void
+          ? () => Promise<
+              | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
+              | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
+            >
           : {
               (
                 param: P[0],
@@ -159,7 +162,10 @@ export function withCalls<
             }
         : Calls[K] extends CallConfig
           ? Parameters<Calls[K]['call']> extends undefined[]
-            ? () => void
+            ? () => Promise<
+                | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
+                | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
+              >
             : {
                 (
                   param: Parameters<Calls[K]['call']>[0],

@@ -125,7 +125,8 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  *   store.isLoadOrderDetailLoading(id: string) => boolean
  *   store.isLoadOrderDetailLoaded(id: string) => boolean
  *   store.loadOrderDetailError(id: string) => string | null
- *   store.loadOrderDetail ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
+ *   store.loadOrderDetail // ({id: string}) => Promise<{value, ok: true} | {error, ok: false}>
+ *   //   passing a Signal or Observable instead returns an RxMethodRef
  *   // same for changeOrderStatus and deleteOrder
  *
  */
@@ -171,7 +172,9 @@ export function withEntitiesCalls<
           }
         : Calls[K] extends EntityCallConfig
           ? Parameters<Calls[K]['call']> extends undefined[]
-            ? () => void
+            ? // an entity call needs a param to derive the entity id from, so
+              // a call with no params is not a supported shape
+              never
             : {
                 (
                   ...param: Parameters<Calls[K]['call']>
