@@ -466,7 +466,7 @@ export function withEntitiesCalls<
                       ? selectId((param as any).entity)
                       : selectId(param as any);
                 const entityStatus = computed(() => callState()[id]);
-                return lastValueFrom(
+                const resultPromise = lastValueFrom(
                   toObservable(entityStatus, {
                     injector: environmentInjector,
                   }).pipe(
@@ -482,6 +482,10 @@ export function withEntitiesCalls<
                     ),
                   ),
                 );
+                // see withCalls: keep a no-op handler attached so a promise the
+                // caller ignores cannot surface as an unhandled rejection
+                resultPromise.catch(() => {});
+                return resultPromise;
               };
               return acc;
             },

@@ -361,6 +361,12 @@ export function withCalls<
                     ),
                   ),
                 );
+                // the promise never settles if the call is skipped by skipWhen,
+                // or if the store is destroyed mid call (toObservable completes
+                // empty), and callers are free to ignore it, so keep a no-op
+                // handler attached to stop that surfacing as an unhandled
+                // rejection. Callers that await still see the rejection.
+                resultPromise.catch(() => {});
                 return resultPromise;
               };
               return acc;
