@@ -458,7 +458,7 @@ withCalls(({ productsSelectedEntity }) => ({
   store.checkoutError // unknown | null
   // generates the following methods
   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
-  store.checkout // () => void
+  store.checkout // () => Promise<{value, ok: true} | {error, ok: false}>
 ```
 <a name="entityCallConfig"></a>
 

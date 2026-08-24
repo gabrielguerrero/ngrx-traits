@@ -79,7 +79,6 @@ describe('withCalls', () => {
     });
   });
 
-
   it('Fail on a call should set status return error ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
@@ -134,6 +133,25 @@ describe('withCalls', () => {
       apiResponse.next('test');
       expect(store.isTestCallLoaded()).toBeTruthy();
       expect(store.testCallResult()).toBe('test');
+    });
+  });
+
+  it('should return promise with value on success for a call with no params', async () => {
+    const Store = signalStore(
+      withCalls(() => ({
+        testCall: () => apiResponse,
+      })),
+    );
+    await TestBed.runInInjectionContext(async () => {
+      const store = new Store();
+      const resultPromise = store.testCall();
+      apiResponse.next('test');
+      TestBed.tick();
+      const result = await resultPromise;
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value()).toBe('test');
+      }
     });
   });
 
