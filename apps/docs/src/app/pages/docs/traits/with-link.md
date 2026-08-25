@@ -13,9 +13,11 @@ The method takes an options object, which can also connect an external signal, i
 - `readFrom`: one-way external → store. Accepts any signal, including a writable one you only write yourself (e.g. a `model()` set on a button click) — the store reads it and never writes back. Also accepts a function receiving the previous value, to merge a partial signal into it.
 - `writeTo`: one-way store → external. A `WritableSignal` that is set, or a function called with each committed change (e.g. to emit an output).
 
-`readFrom` and `writeTo` combine into a two-way sync with a mapping in each direction (e.g. a `model()` whose type differs from the store's); `syncWith` is mutually exclusive with both, and `initialValue` only applies to it.
+`readFrom` and `writeTo` combine into a two-way sync with a mapping in each direction (e.g. a `model()` whose type differs from the store's); `syncWith` is mutually exclusive with both, and `initialValueFrom` only applies to it.
 
 Both sync directions are guarded by `equal` (defaults to `Object.is`), so writes only happen when the value actually changed — this prevents echo loops when `update` transforms the value (e.g. normalizes or sorts it).
+
+Besides a function, `equal` accepts the name of a premade comparison — `'array'`, `'set'`, `'stringify'` — or a property to compare by, like `'id'` on an object and `'array.id'` / `'set.id'` on an array of them (see [Premade equality](#premade-equality)).
 
 The first argument names the generated method and doubles as the state key to link to (with autocompletion), unless `computation` is provided in the options — then it is just a custom name and the value is derived from the store.
 
@@ -178,7 +180,7 @@ export class ProductSearchComponent {
 }
 ```
 
-On link, the mapped model value is pushed to the store (like `syncWith`'s default `initialValue: 'external'`). The `equal` guard on the store side prevents echo loops between the two mappings.
+On link, the mapped model value is pushed to the store (like `syncWith`'s default `initialValueFrom: 'external'`). The `equal` guard on the store side prevents echo loops between the two mappings.
 
 ### Custom name with computation
 
@@ -192,12 +194,52 @@ const Store = signalStore(
   withLink('selectedGenreIds', {
     computation: (store) => store.idsSelected(),
     update: (value, store) => store.selectEntities({ ids: value, clearSelectionBeforeSelect: true }),
-    // structural equal prevents echo loops, the selection map
-    // produces fresh arrays with a normalized order
-    equal: (a, b) => a.length === b.length && a.every((v, i) => v === b[i]),
+    // premade equal prevents echo loops, the selection map
+    // produces fresh arrays and does not preserve the order
+    equal: 'set',
   }),
 );
 ```
+
+### Premade equality
+
+`equal` defaults to `Object.is`, which only matches the same reference — so for an object or array value that is rebuilt on every read (a `computation` mapping the store, a form producing a fresh object, a spread in `update`) the guard never matches and both sync directions keep writing, which can echo loop. For those, pass your own `equal`, or the name of one of the premade comparisons:
+
+| Name             | Compares                                                            | Offered for       |
+| ---------------- | ------------------------------------------------------------------- | ----------------- |
+| `'array'`        | Same length and every element equal by `Object.is`, order sensitive | arrays            |
+| `'set'`          | Same elements regardless of order, set semantics                    | arrays            |
+| `'stringify'`    | `JSON.stringify(a) === JSON.stringify(b)`, structural               | any value         |
+| `'<prop>'`       | `a[prop]` and `b[prop]` by `Object.is`, e.g. `'id'`                 | objects           |
+| `'array.<prop>'` | Element by element by that property, order sensitive                | arrays of objects |
+| `'set.<prop>'`   | The same property values regardless of order                        | arrays of objects |
+
+All of them are type-checked against the linked value, and the property names are autocompleted from its type — from the element's type for the `array.` and `set.` forms, so an array of entities is compared by id with `equal: 'array.id'` (same ids in the same positions) or `equal: 'set.id'` (same ids, any order), and never by a bare `'id'`, which is only offered for a value that is an object itself.
+
+Use `'stringify'` for objects, or for arrays of objects — it walks the whole value, so key order matters (`{a,b}` and `{b,a}` are not equal) and values JSON can not represent are lost.
+
+```typescript
+const Store = signalStore(
+  withState({
+    filter: { search: '', category: '' },
+    ids: [] as string[],
+    selectedProduct: undefined as Product | undefined,
+    products: [] as Product[],
+  }),
+  // objects rebuilt on every read
+  withLink('filter', { equal: 'stringify' }),
+  // a selection is a set, order does not matter
+  withLink('ids', { equal: 'set' }),
+  // changed only when the id changes, whatever else the product carries
+  withLink('selectedProduct', { equal: 'id' }),
+  // a list of entities, compared by the ids it holds
+  withLink('products', { equal: 'array.id' }),
+);
+```
+
+A premade name wins over a property of the same name, so a value with a prop called `array`, `set` or `stringify` has to be compared with the exported `equalByKey('stringify')` instead.
+
+The same comparisons are exported as functions — `equalArray`, `equalSet`, `equalStringify`, `equalByKey(prop)` (the `'array.<prop>'` form on arrays) and `equalSetBy(prop)` — for use anywhere an equality function is taken (e.g. a `computed` or a `linkedSignal`).
 
 ### Writing from inside the store with \_set&lt;Name&gt;
 
@@ -239,13 +281,13 @@ The premade [withLinkEntities\*](#premade-withlink-for-entities) features all pa
 
 ### Choosing the initial value
 
-With `syncWith`, the signal's current value is pushed to the store on link by default. Use `initialValue: 'store'` to write the store value to the signal instead (it is only available with `syncWith` — `readFrom` always pushes to the store, there is nothing to write back to):
+With `syncWith`, the signal's current value is pushed to the store on link by default. Use `initialValueFrom: 'store'` to write the store value to the signal instead (it is only available with `syncWith` — `readFrom` always pushes to the store, there is nothing to write back to):
 
 ```typescript
 selectedId = model<string | undefined>(undefined);
 linked = this.store.linkProductIdSelected({
   syncWith: this.selectedId,
-  initialValue: 'store',
+  initialValueFrom: 'store',
 });
 ```
 
@@ -412,13 +454,13 @@ export class ProductListComponent {
 withLink(name, options?)
 ```
 
-| Property      | Description                                                                    | Type                     |
-| ------------- | ------------------------------------------------------------------------------ | ------------------------ |
-| `name`        | State key to link to, or a custom name when `computation` is used              | `keyof State \| string`  |
-| `computation` | Derive the linked value from the store (requires `update`)                     | `(store) => T`           |
-| `update`      | How writes reach the store; defaults to `patchState(store, { [name]: value })` | `(value, store) => void` |
-| `equal`       | Equality guard for both sync directions, defaults to `Object.is`               | `(a, b) => boolean`      |
-| `noSetter`    | Skip generating the private `_set<Name>()` method, defaults to `false`         | `boolean`                |
+| Property      | Description                                                                    | Type                                                                                                                                        |
+| ------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | State key to link to, or a custom name when `computation` is used              | `keyof State \| string`                                                                                                                     |
+| `computation` | Derive the linked value from the store (requires `update`)                     | `(store) => T`                                                                                                                              |
+| `update`      | How writes reach the store; defaults to `patchState(store, { [name]: value })` | `(value, store) => void`                                                                                                                    |
+| `equal`       | Equality guard for both sync directions, defaults to `Object.is`               | `(a, b) => boolean` or a name: `'array'`, `'set'`, `'stringify'`, a prop of the value, or `'array.<prop>'` / `'set.<prop>'` of its elements |
+| `noSetter`    | Skip generating the private `_set<Name>()` method, defaults to `false`         | `boolean`                                                                                                                                   |
 
 ### Generated link method
 
@@ -426,15 +468,15 @@ withLink(name, options?)
 link<Name>(options?: LinkOptions<T>): WritableSignal<T>
 ```
 
-| Property          | Description                                                                                                               | Type                                      |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `syncWith`        | Signal kept in sync both ways: writing it updates the store, store changes are written back to it                         | `WritableSignal<T>`                       |
-| `readFrom`        | Signal the store only reads, never written back; or a function receiving the previous value, to merge a partial signal in | `Signal<T> \| (prev: T) => T`             |
-| `writeTo`         | Where store changes are pushed: a signal that is set or a function called with the new value                              | `WritableSignal<T> \| (value: T) => void` |
-| `initialValue`    | With `syncWith`, which value wins on link: `'external'` (default) or `'store'`                                            | `'external' \| 'store'`                   |
-| `updateStoreWhen` | Gate writes: the returned signal buffers them and only pushes to the store when it returns true                           | `(value: T) => boolean`                   |
+| Property           | Description                                                                                                               | Type                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `syncWith`         | Signal kept in sync both ways: writing it updates the store, store changes are written back to it                         | `WritableSignal<T>`                       |
+| `readFrom`         | Signal the store only reads, never written back; or a function receiving the previous value, to merge a partial signal in | `Signal<T> \| (prev: T) => T`             |
+| `writeTo`          | Where store changes are pushed: a signal that is set or a function called with the new value                              | `WritableSignal<T> \| (value: T) => void` |
+| `initialValueFrom` | With `syncWith`, where the value that wins on link comes from: `'external'` (default) or `'store'`                        | `'external' \| 'store'`                   |
+| `updateStoreWhen`  | Gate writes: the returned signal buffers them and only pushes to the store when it returns true                           | `(value: T) => boolean`                   |
 
-`syncWith` is mutually exclusive with `readFrom` and `writeTo` (which combine for a two-way sync with a mapping in each direction), and `initialValue` is only accepted together with `syncWith` — all enforced by the types.
+`syncWith` is mutually exclusive with `readFrom` and `writeTo` (which combine for a two-way sync with a mapping in each direction), and `initialValueFrom` is only accepted together with `syncWith` — all enforced by the types.
 
 The returned `WritableSignal` is always the delegated store view (or, with `updateStoreWhen`, the buffer over it), never the external signal.
 

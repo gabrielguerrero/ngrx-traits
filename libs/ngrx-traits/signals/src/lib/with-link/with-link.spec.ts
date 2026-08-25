@@ -207,6 +207,199 @@ describe('withLink', () => {
     });
   });
 
+  // ── Premade equal ──────────────────────────────────────────────
+
+  describe('premade equal', () => {
+    const storeWith = (equal: 'array' | 'set' | 'stringify', update: any) =>
+      signalStore(
+        withState({ ids: ['a', 'b'] as string[] }),
+        withLink('ids', { update, equal }),
+        withMethods((store) => ({
+          setIds: (value: string[]) => store._setIds(value),
+        })),
+      );
+
+    it("'array' compares elements in order", () => {
+      const update = vi.fn();
+      const Store = storeWith('array', update);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        // structurally equal, fresh reference
+        store.setIds(['a', 'b']);
+        expect(update).not.toHaveBeenCalled();
+
+        store.setIds(['b', 'a']);
+        expect(update).toHaveBeenCalledWith(['b', 'a'], expect.anything());
+      });
+    });
+
+    it("'set' ignores the order of the elements", () => {
+      const update = vi.fn();
+      const Store = storeWith('set', update);
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setIds(['b', 'a']);
+        expect(update).not.toHaveBeenCalled();
+
+        store.setIds(['a', 'c']);
+        expect(update).toHaveBeenCalledWith(['a', 'c'], expect.anything());
+      });
+    });
+
+    it("'stringify' compares objects structurally", () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ filter: { search: '', category: 'a' } }),
+        withLink('filter', { update, equal: 'stringify' }),
+        withMethods((store) => ({
+          setFilter: (value: { search: string; category: string }) =>
+            store._setFilter(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setFilter({ search: '', category: 'a' });
+        expect(update).not.toHaveBeenCalled();
+
+        store.setFilter({ search: 'x', category: 'a' });
+        expect(update).toHaveBeenCalledWith(
+          { search: 'x', category: 'a' },
+          expect.anything(),
+        );
+      });
+    });
+
+    it('a property name compares by that property', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({
+          selected: { id: 1, name: 'a' } as { id: number; name: string },
+        }),
+        withLink('selected', { update, equal: 'id' }),
+        withMethods((store) => ({
+          setSelected: (value: { id: number; name: string }) =>
+            store._setSelected(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        // same id, the rest of the object is ignored
+        store.setSelected({ id: 1, name: 'renamed' });
+        expect(update).not.toHaveBeenCalled();
+
+        store.setSelected({ id: 2, name: 'a' });
+        expect(update).toHaveBeenCalledWith(
+          { id: 2, name: 'a' },
+          expect.anything(),
+        );
+      });
+    });
+
+    it("'array.<prop>' compares the elements by that property, in order", () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({
+          products: [
+            { id: 1, name: 'a' },
+            { id: 2, name: 'b' },
+          ] as { id: number; name: string }[],
+        }),
+        withLink('products', { update, equal: 'array.id' }),
+        withMethods((store) => ({
+          setProducts: (value: { id: number; name: string }[]) =>
+            store._setProducts(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        // same ids in the same positions, the rest of the elements is ignored
+        store.setProducts([
+          { id: 1, name: 'renamed' },
+          { id: 2, name: 'b' },
+        ]);
+        expect(update).not.toHaveBeenCalled();
+
+        const reordered = [
+          { id: 2, name: 'b' },
+          { id: 1, name: 'a' },
+        ];
+        store.setProducts(reordered);
+        expect(update).toHaveBeenCalledWith(reordered, expect.anything());
+      });
+    });
+
+    it("'set.<prop>' compares the elements by that property, in any order", () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({
+          products: [
+            { id: 1, name: 'a' },
+            { id: 2, name: 'b' },
+          ] as { id: number; name: string }[],
+        }),
+        withLink('products', { update, equal: 'set.id' }),
+        withMethods((store) => ({
+          setProducts: (value: { id: number; name: string }[]) =>
+            store._setProducts(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setProducts([
+          { id: 2, name: 'renamed' },
+          { id: 1, name: 'a' },
+        ]);
+        expect(update).not.toHaveBeenCalled();
+
+        const changed = [
+          { id: 1, name: 'a' },
+          { id: 3, name: 'c' },
+        ];
+        store.setProducts(changed);
+        expect(update).toHaveBeenCalledWith(changed, expect.anything());
+      });
+    });
+
+    it('only offers the properties of the linked value', () => {
+      signalStore(
+        withState({
+          selected: { id: 1, name: 'a' },
+          products: [] as { id: number; name: string }[],
+          count: 1,
+        }),
+        // @ts-expect-error 'missing' is not a property of the linked value
+        withLink('selected', { equal: 'missing' }),
+        // @ts-expect-error a number has no properties to compare by
+        withLink('count', { equal: 'id' }),
+        // @ts-expect-error an array takes the prefixed form, array.id or set.id
+        withLink('products', { equal: 'id' }),
+        // @ts-expect-error 'missing' is not a property of the elements
+        withLink('products', { equal: 'array.missing' }),
+      );
+    });
+
+    it("guards the sync to an external signal, and 'array'/'set' are not offered for non arrays", () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ ids: ['a', 'b'] as string[], count: 1 }),
+        withLink('ids', { equal: 'set' }),
+        // @ts-expect-error 'set' is only offered when the value is an array
+        withLink('count', { equal: 'set' }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(['b', 'a']);
+        const setSpy = vi.spyOn(external, 'set');
+        store.linkIds({ syncWith: external });
+        TestBed.tick();
+
+        // same ids in another order: neither side is written back
+        expect(setSpy).not.toHaveBeenCalled();
+        expect(store.ids()).toEqual(['a', 'b']);
+      });
+    });
+  });
+
   // ── Delegated signal (no external) ─────────────────────────────
 
   describe('delegated signal', () => {
@@ -356,13 +549,13 @@ describe('withLink', () => {
 
       // @ts-expect-error syncWith and readFrom are mutually exclusive
       check({ syncWith: signal(1), readFrom: signal(2) });
-      // @ts-expect-error initialValue is only allowed with syncWith
-      check({ initialValue: 'store' });
-      // @ts-expect-error initialValue is only allowed with syncWith
-      check({ readFrom: signal(1), initialValue: 'store' });
+      // @ts-expect-error initialValueFrom is only allowed with syncWith
+      check({ initialValueFrom: 'store' });
+      // @ts-expect-error initialValueFrom is only allowed with syncWith
+      check({ readFrom: signal(1), initialValueFrom: 'store' });
       // readFrom accepts a writable signal, it just never writes to it
       check({ readFrom: signal(1) });
-      check({ syncWith: signal(1), initialValue: 'store' });
+      check({ syncWith: signal(1), initialValueFrom: 'store' });
 
       expect(check).toBeDefined();
     });
@@ -376,7 +569,7 @@ describe('withLink', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         const external = signal(5);
-        store.linkCount({ syncWith: external, initialValue: 'store' });
+        store.linkCount({ syncWith: external, initialValueFrom: 'store' });
         TestBed.tick();
 
         expect(external()).toBe(1);
@@ -403,7 +596,7 @@ describe('withLink', () => {
       });
     });
 
-    it("initialValue 'external' (default) pushes the external value to the store", () => {
+    it("initialValueFrom 'external' (default) pushes the external value to the store", () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -418,7 +611,7 @@ describe('withLink', () => {
       });
     });
 
-    it("initialValue 'store' writes the store value to the external signal", () => {
+    it("initialValueFrom 'store' writes the store value to the external signal", () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -427,7 +620,7 @@ describe('withLink', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         const external = signal(5);
-        store.linkCount({ syncWith: external, initialValue: 'store' });
+        store.linkCount({ syncWith: external, initialValueFrom: 'store' });
         TestBed.tick();
 
         expect(external()).toBe(1);
@@ -435,7 +628,7 @@ describe('withLink', () => {
       });
     });
 
-    it("initialValue 'store' does not re-apply the link-time external value on first tick", () => {
+    it("initialValueFrom 'store' does not re-apply the link-time external value on first tick", () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -444,7 +637,7 @@ describe('withLink', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         const external = signal(5);
-        store.linkCount({ syncWith: external, initialValue: 'store' });
+        store.linkCount({ syncWith: external, initialValueFrom: 'store' });
         expect(external()).toBe(1);
 
         // the store moves on before the first effect flush
@@ -456,7 +649,7 @@ describe('withLink', () => {
       });
     });
 
-    it("initialValue 'store' keeps a write made before the first tick", () => {
+    it("initialValueFrom 'store' keeps a write made before the first tick", () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -467,7 +660,7 @@ describe('withLink', () => {
         const external = signal(5);
         const linked = store.linkCount({
           syncWith: external,
-          initialValue: 'store',
+          initialValueFrom: 'store',
           updateStoreWhen: () => true,
         });
         // buffered before any effect ran
