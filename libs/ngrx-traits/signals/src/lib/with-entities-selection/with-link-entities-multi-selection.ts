@@ -90,16 +90,9 @@ export function withLinkEntitiesMultiSelection<
         (store[clearEntitiesSelectionKey] as () => void)();
       }
     },
-    equal: (a: (string | number)[], b: (string | number)[]) => {
-      if (a === b) return true;
-      if (a.length !== b.length) return false;
-      const aSet = new Set(a);
-      const bSet = new Set(b);
-      // size check guards against duplicate ids making unequal arrays match.
-      // Set semantics on purpose: same ids with different duplicate counts
-      // (e.g. [x,x,y] vs [x,y,y]) compare equal, a selection is a set
-      return aSet.size === bSet.size && a.every((id) => bSet.has(id));
-    },
+    // set semantics on purpose: the selection map does not preserve the order
+    // of the ids it was given, so an order-sensitive compare would echo loop
+    equal: 'set',
     // the store already exposes select/clear[Collection]Entities for this write
     noSetter: true,
   } as any) as any;
