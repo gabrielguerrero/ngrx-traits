@@ -15,7 +15,8 @@ import { deepDiff } from './with-logger.util';
  * Log the state of the store on every change, optionally filter the signals to log
  * the filter prop can receive an array with the names of the props to filter, or you can provide a function
  * which receives the store as an argument and should return the object to log, if any of the props in the object is a signal
- * it will log the value of the signal. If showDiff is true it will log the diff of the state on every change.
+ * it will log the value of the signal, the returned value can also be a non object value like a nested signal value.
+ * If showDiff is true it will log the diff of the state on every change.
  *
  * @param name - The name of the store to log
  * @param filter - optional filter function to filter the store signals or an array of keys to filter
@@ -35,6 +36,9 @@ import { deepDiff } from './with-logger.util';
  *       // filter: ['prop1', 'prop2'],
  *       // or you can filter with a function
  *       // filter: ({ prop1, prop2 }) => ({ prop1, prop2 }),
+ *       // the function can also return nested signals or their values
+ *       // filter: ({ myObject }) => ({ x: myObject.x }),
+ *       // filter: ({ myObject }) => myObject.x(),
  *       // showDiff: true,
  *     }),
  *   );
@@ -59,11 +63,11 @@ export function withLogger<Input extends SignalStoreFeatureResult>({
             ? (sort ? Object.keys(source).sort() : Object.keys(source)).reduce(
                 (acc, key) => {
                   if (!keys || keys.includes(key)) {
-                    if (isSignal(store[key])) {
-                      acc[key] = store[key]();
-                    } else if (typeof store[key] != 'function') {
+                    if (isSignal(source[key])) {
+                      acc[key] = source[key]();
+                    } else if (typeof source[key] != 'function') {
                       // if not signal only log values that are not methods
-                      acc[key] = store[key];
+                      acc[key] = source[key];
                     }
                   }
                   return acc;
@@ -85,12 +89,17 @@ export function withLogger<Input extends SignalStoreFeatureResult>({
               : evaluateSignals(store, filter as unknown as string[]);
         });
         let lastState: any = undefined;
+        let initialized = false;
         effect(() => {
           const state = signalsComputed();
-          console.log(`${name} store changed: `, state);
-          if (showDiff && lastState)
+          console.log(
+            `${name} store ${initialized ? 'changed' : 'initialized'}: `,
+            state,
+          );
+          if (showDiff && initialized)
             deepDiff(`${name} store changes diff :`, lastState, state);
           lastState = state;
+          initialized = true;
         });
       },
     }),
