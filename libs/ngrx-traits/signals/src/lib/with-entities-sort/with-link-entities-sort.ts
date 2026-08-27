@@ -73,7 +73,7 @@ export function withLinkEntitiesSort<
 > {
   const { sortKey, sortEntitiesKey } = getWithEntitiesSortKeys(config);
   return withLink(sortKey, {
-    update: (value: Sort<any>, store: any) => {
+    set: (value: Sort<any>, store: any) => {
       (store[sortEntitiesKey] as (options: { sort: Sort<any> }) => void)({
         sort: value,
       });

@@ -5,7 +5,7 @@ order: 19
 
 # withLink
 
-Generates a `link<Name>()` method that connects store state to component signals like `input()`, `model()` and Angular Signal Forms. The method returns a `WritableSignal` that is a live view of the store: reading it reads the state, writing it updates the store (via `patchState` by default, or a custom `update` callback, e.g. to call a store method like `filterEntities` instead).
+Generates a `link<Name>()` method that connects store state to component signals like `input()`, `model()` and Angular Signal Forms. The method returns a `WritableSignal` that is a live view of the store: reading it reads the state, writing it updates the store (via `patchState` by default, or a custom `set` callback, e.g. to call a store method like `filterEntities` instead).
 
 The method takes an options object, which can also connect an external signal, in one of three ways:
 
@@ -15,7 +15,7 @@ The method takes an options object, which can also connect an external signal, i
 
 `readFrom` and `writeTo` combine into a two-way sync with a mapping in each direction (e.g. a `model()` whose type differs from the store's); `syncWith` is mutually exclusive with both, and `initialValueFrom` only applies to it.
 
-Both sync directions are guarded by `equal` (defaults to `Object.is`), so writes only happen when the value actually changed — this prevents echo loops when `update` transforms the value (e.g. normalizes or sorts it).
+Both sync directions are guarded by `equal`, so writes only happen when the value actually changed — this prevents echo loops when `set` transforms the value (e.g. normalizes or sorts it).
 
 Besides a function, `equal` accepts the name of a premade comparison — `'array'`, `'set'`, `'stringify'` — or a property to compare by, like `'id'` on an object and `'array.id'` / `'set.id'` on an array of them (see [Premade equality](#premade-equality)).
 
@@ -52,7 +52,7 @@ filter.set({ search: 'shoes' });
 // store.filter() => { search: 'shoes' }
 ```
 
-### Custom update callback
+### Custom set callback
 
 Route writes through a store method instead of patching state directly:
 
@@ -67,7 +67,7 @@ const ProductsStore = signalStore(
   }),
   // generates linkProductEntitiesFilter()
   withLink('productEntitiesFilter', {
-    update: (value, store) => store.filterProductEntities({ filter: value }),
+    set: (value, store) => store.filterProductEntities({ filter: value }),
   }),
 );
 ```
@@ -184,7 +184,7 @@ On link, the mapped model value is pushed to the store (like `syncWith`'s defaul
 
 ### Custom name with computation
 
-Use `computation` and `update` to derive the linked value from the store; `update` maps writes back:
+Use `computation` and `set` to derive the linked value from the store; `set` maps writes back:
 
 ```typescript
 const Store = signalStore(
@@ -193,7 +193,7 @@ const Store = signalStore(
   // generates linkSelectedGenreIds()
   withLink('selectedGenreIds', {
     computation: (store) => store.idsSelected(),
-    update: (value, store) => store.selectEntities({ ids: value, clearSelectionBeforeSelect: true }),
+    set: (value, store) => store.selectEntities({ ids: value, clearSelectionBeforeSelect: true }),
     // premade equal prevents echo loops, the selection map
     // produces fresh arrays and does not preserve the order
     equal: 'set',
@@ -203,10 +203,13 @@ const Store = signalStore(
 
 ### Premade equality
 
-`equal` defaults to `Object.is`, which only matches the same reference — so for an object or array value that is rebuilt on every read (a `computation` mapping the store, a form producing a fresh object, a spread in `update`) the guard never matches and both sync directions keep writing, which can echo loop. For those, pass your own `equal`, or the name of one of the premade comparisons:
+`equal` defaults to comparing by content, chosen from the value at hand: `Object.is` for primitives, element by element for arrays, and structurally for plain objects. Reference equality is the wrong default for a two-way link — a value rebuilt on every read (a `computation` mapping the store, a form producing a fresh object, a spread in `set`) is never equal to its own previous value, so every write re-triggers the read and the link never settles.
+
+The one shape this does not settle on its own is an array whose _elements_ are rebuilt on every read, since arrays are compared element by element and never serialized. For that, and whenever you want different semantics, pass your own `equal` to create your own comparation or the name of one of the premade comparisons:
 
 | Name             | Compares                                                            | Offered for       |
 | ---------------- | ------------------------------------------------------------------- | ----------------- |
+| `'reference'`    | `Object.is`, opting out of the content comparison                   | any value         |
 | `'array'`        | Same length and every element equal by `Object.is`, order sensitive | arrays            |
 | `'set'`          | Same elements regardless of order, set semantics                    | arrays            |
 | `'stringify'`    | `JSON.stringify(a) === JSON.stringify(b)`, structural               | any value         |
@@ -215,6 +218,8 @@ const Store = signalStore(
 | `'set.<prop>'`   | The same property values regardless of order                        | arrays of objects |
 
 All of them are type-checked against the linked value, and the property names are autocompleted from its type — from the element's type for the `array.` and `set.` forms, so an array of entities is compared by id with `equal: 'array.id'` (same ids in the same positions) or `equal: 'set.id'` (same ids, any order), and never by a bare `'id'`, which is only offered for a value that is an object itself.
+
+> The structural comparison is JSON-based, so it only reads what JSON can represent. A `Date`, `Map`, `Set` or class instance nested in the linked value is flattened — two different ones can compare equal, and the update is dropped. Keeping non-serializable values in store state is discouraged for other reasons too (persistence, transfer state, devtools); if you do, pass your own `equal` that knows how to compare them, or `'reference'`.
 
 Use `'stringify'` for objects, or for arrays of objects — it walks the whole value, so key order matters (`{a,b}` and `{b,a}` are not equal) and values JSON can not represent are lost.
 
@@ -243,7 +248,7 @@ The same comparisons are exported as functions — `equalArray`, `equalSet`, `eq
 
 ### Writing from inside the store with \_set&lt;Name&gt;
 
-Besides the link method, `withLink('filter')` generates a `_setFilter()` method that writes through the same path as the linked signal (the `update` callback, or `patchState` by default), including the `equal` guard — a write equal to the current value is skipped. The `_` prefix makes it private to the store: other features and methods can use it, consumers of the store cannot see it:
+Besides the link method, `withLink('filter')` generates a `_setFilter()` method that writes through the same path as the linked signal (the `set` callback, or `patchState` by default), including the `equal` guard — a write equal to the current value is skipped. The `_` prefix makes it private to the store: other features and methods can use it, consumers of the store cannot see it:
 
 ```typescript
 const ProductsStore = signalStore(
@@ -271,7 +276,7 @@ Pass `noSetter: true` to skip it, when the store already has its own method for 
 
 ```typescript
 withLink('productEntitiesFilter', {
-  update: (value, store) => store.filterProductEntities({ filter: value }),
+  set: (value, store) => store.filterProductEntities({ filter: value }),
   // filterProductEntities already covers this write
   noSetter: true,
 });
@@ -308,7 +313,7 @@ export const ProductsStore = signalStore(
   }),
   // generates linkProductEntitiesFilter()
   withLink('productEntitiesFilter', {
-    update: (value, store) => store.filterProductEntities({ filter: value }),
+    set: (value, store) => store.filterProductEntities({ filter: value }),
   }),
 );
 ```
@@ -454,13 +459,13 @@ export class ProductListComponent {
 withLink(name, options?)
 ```
 
-| Property      | Description                                                                    | Type                                                                                                                                        |
-| ------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `name`        | State key to link to, or a custom name when `computation` is used              | `keyof State \| string`                                                                                                                     |
-| `computation` | Derive the linked value from the store (requires `update`)                     | `(store) => T`                                                                                                                              |
-| `update`      | How writes reach the store; defaults to `patchState(store, { [name]: value })` | `(value, store) => void`                                                                                                                    |
-| `equal`       | Equality guard for both sync directions, defaults to `Object.is`               | `(a, b) => boolean` or a name: `'array'`, `'set'`, `'stringify'`, a prop of the value, or `'array.<prop>'` / `'set.<prop>'` of its elements |
-| `noSetter`    | Skip generating the private `_set<Name>()` method, defaults to `false`         | `boolean`                                                                                                                                   |
+| Property      | Description                                                                    | Type                                                                                                                                                       |
+| ------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`        | State key to link to, or a custom name when `computation` is used              | `keyof State \| string`                                                                                                                                    |
+| `computation` | Derive the linked value from the store (requires `set`)                        | `(store) => T`                                                                                                                                             |
+| `set`         | How writes reach the store; defaults to `patchState(store, { [name]: value })` | `(value, store) => void`                                                                                                                                   |
+| `equal`       | Equality guard for both sync directions, defaults to comparing by content      | `(a, b) => boolean` or a name: `'reference'`, `'array'`, `'set'`, `'stringify'`, a prop of the value, or `'array.<prop>'` / `'set.<prop>'` of its elements |
+| `noSetter`    | Skip generating the private `_set<Name>()` method, defaults to `false`         | `boolean`                                                                                                                                                  |
 
 ### Generated link method
 

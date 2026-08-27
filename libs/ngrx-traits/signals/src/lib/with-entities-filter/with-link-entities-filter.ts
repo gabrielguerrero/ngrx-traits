@@ -97,7 +97,7 @@ export function withLinkEntitiesFilter<
 > {
   const { filterKey, filterEntitiesKey } = getWithEntitiesFilterKeys(config);
   return withLink(filterKey, {
-    update: (value: any, store: any) => {
+    set: (value: any, store: any) => {
       (store[filterEntitiesKey] as (options: any) => void)({
         filter: value,
         debounce: config?.debounce ?? 0,
