@@ -25,7 +25,7 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.tick();
-    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
       prop1: 1,
       prop2: 2,
       prop3: 3,
@@ -57,7 +57,7 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.tick();
-    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
       prop1: 1,
       prop2: 2,
     });
@@ -87,7 +87,7 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.tick();
-    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
       prop1: 1,
       prop2: 2,
     });
@@ -117,7 +117,7 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.tick();
-    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
       prop1: 1,
       prop2: 2,
     });
@@ -127,6 +127,98 @@ describe('withLogger', () => {
       prop1: 2,
       prop2: 2,
     });
+  });
+
+  it('should filter nested signal props in function returning object ', () => {
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ myObject: { x: 1, y: 2 }, prop2: 2 })),
+      withLogger({
+        name: 'Store',
+        filter: ({ myObject }) => ({ x: myObject.x, y: myObject.y }),
+      }),
+    );
+
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    const store = TestBed.inject(Store);
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
+      x: 1,
+      y: 2,
+    });
+    patchState(store, { myObject: { x: 5, y: 2 } });
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+      x: 5,
+      y: 2,
+    });
+  });
+
+  it('should filter nested signal props already evaluated in function returning object ', () => {
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ myObject: { x: 1, y: 2 }, prop2: 2 })),
+      withLogger({
+        name: 'Store',
+        filter: ({ myObject }) => ({ x: myObject.x() }),
+      }),
+    );
+
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    const store = TestBed.inject(Store);
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
+      x: 1,
+    });
+    patchState(store, { myObject: { x: 5, y: 2 } });
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', { x: 5 });
+  });
+
+  it('should log the value when filter returns a non object value', () => {
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ myObject: { x: 1, y: 2 }, prop2: 2 })),
+      withLogger({
+        name: 'Store',
+        filter: ({ myObject }) => myObject.x(),
+      }),
+    );
+
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    const store = TestBed.inject(Store);
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', 1);
+    patchState(store, { myObject: { x: 5, y: 2 } });
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', 5);
+  });
+
+  it('should log changed after the first log even if the logged value is falsy', () => {
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ prop1: 0 })),
+      withLogger({
+        name: 'Store',
+        filter: ({ prop1 }) => prop1(),
+      }),
+    );
+
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    const store = TestBed.inject(Store);
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', 0);
+    patchState(store, { prop1: 1 });
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', 1);
   });
 
   it('should show diff if showDiff s true', () => {
@@ -148,7 +240,7 @@ describe('withLogger', () => {
     });
     const store = TestBed.inject(Store);
     TestBed.tick();
-    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
       prop3: 3,
     });
     patchState(store, { prop1: 2 });
