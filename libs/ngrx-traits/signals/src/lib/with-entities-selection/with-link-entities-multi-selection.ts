@@ -78,7 +78,7 @@ export function withLinkEntitiesMultiSelection<
   return withLink(selectedEntitiesIdsKey, {
     computation: (store: any) =>
       (store[selectedEntitiesIdsKey] as Signal<(string | number)[]>)(),
-    update: (ids: (string | number)[], store: any) => {
+    set: (ids: (string | number)[], store: any) => {
       if (ids.length) {
         (
           store[selectEntitiesKey] as (options: {

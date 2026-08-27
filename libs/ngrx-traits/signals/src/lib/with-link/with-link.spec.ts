@@ -1,4 +1,4 @@
-import { computed, effect, Signal, signal } from '@angular/core';
+import { computed, effect, Signal, signal, untracked } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 
@@ -25,7 +25,7 @@ describe('withLink', () => {
         withState({ ids: [] as string[] }),
         withLink('selectedIds', {
           computation: (store) => store.ids(),
-          update: (value, store) => patchState(store as any, { ids: value }),
+          set: (value, store) => patchState(store as any, { ids: value }),
         }),
       );
       TestBed.runInInjectionContext(() => {
@@ -95,7 +95,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ filter: { search: 'initial' } }),
-        withLink('filter', { update }),
+        withLink('filter', { set: update }),
         withMethods((store) => ({
           setFilter: (value: { search: string }) => store._setFilter(value),
         })),
@@ -149,7 +149,7 @@ describe('withLink', () => {
         withState({ ids: ['a'] as string[] }),
         withLink('selectedIds', {
           computation: (store) => store.ids(),
-          update: (value, store) => patchState(store as any, { ids: value }),
+          set: (value, store) => patchState(store as any, { ids: value }),
         }),
         withMethods((store) => ({
           addId: (id: string) => store._setSelectedIds((ids) => [...ids, id]),
@@ -168,7 +168,7 @@ describe('withLink', () => {
       const Store = signalStore(
         withState({ ids: ['a', 'b'] as string[] }),
         withLink('ids', {
-          update,
+          set: update,
           equal: (a, b) =>
             a.length === b.length && a.every((v, i) => v === b[i]),
         }),
@@ -191,7 +191,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ count: 1 }),
-        withLink('count', { update }),
+        withLink('count', { set: update }),
         withMethods((store) => ({
           setCount: (value: number) => store._setCount(value),
         })),
@@ -213,7 +213,7 @@ describe('withLink', () => {
     const storeWith = (equal: 'array' | 'set' | 'stringify', update: any) =>
       signalStore(
         withState({ ids: ['a', 'b'] as string[] }),
-        withLink('ids', { update, equal }),
+        withLink('ids', { set: update, equal }),
         withMethods((store) => ({
           setIds: (value: string[]) => store._setIds(value),
         })),
@@ -250,7 +250,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ filter: { search: '', category: 'a' } }),
-        withLink('filter', { update, equal: 'stringify' }),
+        withLink('filter', { set: update, equal: 'stringify' }),
         withMethods((store) => ({
           setFilter: (value: { search: string; category: string }) =>
             store._setFilter(value),
@@ -275,7 +275,7 @@ describe('withLink', () => {
         withState({
           selected: { id: 1, name: 'a' } as { id: number; name: string },
         }),
-        withLink('selected', { update, equal: 'id' }),
+        withLink('selected', { set: update, equal: 'id' }),
         withMethods((store) => ({
           setSelected: (value: { id: number; name: string }) =>
             store._setSelected(value),
@@ -304,7 +304,7 @@ describe('withLink', () => {
             { id: 2, name: 'b' },
           ] as { id: number; name: string }[],
         }),
-        withLink('products', { update, equal: 'array.id' }),
+        withLink('products', { set: update, equal: 'array.id' }),
         withMethods((store) => ({
           setProducts: (value: { id: number; name: string }[]) =>
             store._setProducts(value),
@@ -337,7 +337,7 @@ describe('withLink', () => {
             { id: 2, name: 'b' },
           ] as { id: number; name: string }[],
         }),
-        withLink('products', { update, equal: 'set.id' }),
+        withLink('products', { set: update, equal: 'set.id' }),
         withMethods((store) => ({
           setProducts: (value: { id: number; name: string }[]) =>
             store._setProducts(value),
@@ -356,6 +356,30 @@ describe('withLink', () => {
           { id: 3, name: 'c' },
         ];
         store.setProducts(changed);
+        expect(update).toHaveBeenCalledWith(changed, expect.anything());
+      });
+    });
+
+    it('compares by a property that shadows one of Object.prototype', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ item: { toString: 'a', payload: 1 } }),
+        // a real property of the value, not a premade name: it must not
+        // resolve to the Object.prototype member of the same name, which
+        // reports every value equal and so drops every write
+        withLink('item', { set: update, equal: 'toString' }),
+        withMethods((store) => ({
+          setItem: (value: { toString: string; payload: number }) =>
+            store._setItem(value),
+        })),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.setItem({ toString: 'a', payload: 2 });
+        expect(update).not.toHaveBeenCalled();
+
+        const changed = { toString: 'b', payload: 2 };
+        store.setItem(changed);
         expect(update).toHaveBeenCalledWith(changed, expect.anything());
       });
     });
@@ -425,7 +449,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ filter: { search: 'initial' } }),
-        withLink('filter', { update }),
+        withLink('filter', { set: update }),
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
@@ -445,7 +469,7 @@ describe('withLink', () => {
         withState({ ids: ['a'] }),
         withLink('selectedIds', {
           computation: (store) => store.ids(),
-          update: (value, store) => patchState(store as any, { ids: value }),
+          set: (value, store) => patchState(store as any, { ids: value }),
         }),
       );
       TestBed.runInInjectionContext(() => {
@@ -480,7 +504,7 @@ describe('withLink', () => {
         { protectedState: false },
         withState({ count: 1 }),
         withLink('count', {
-          update: (value, store) => {
+          set: (value, store) => {
             // update reads another signal, like filterEntities reads entities()
             dep();
             patchState(store as any, { count: value });
@@ -510,7 +534,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ count: 1 }),
-        withLink('count', { update }),
+        withLink('count', { set: update }),
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
@@ -774,7 +798,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ count: 1 }),
-        withLink('count', { update }),
+        withLink('count', { set: update }),
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
@@ -1072,7 +1096,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ filter: { search: 'initial' } }),
-        withLink('filter', { update }),
+        withLink('filter', { set: update }),
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
@@ -1207,7 +1231,7 @@ describe('withLink', () => {
       const update = vi.fn();
       const Store = signalStore(
         withState({ count: 1 }),
-        withLink('count', { update }),
+        withLink('count', { set: update }),
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
@@ -1232,7 +1256,7 @@ describe('withLink', () => {
       const Store = signalStore(
         withState({ ids: ['a'] as string[] }),
         withLink('ids', {
-          update,
+          set: update,
           equal: (a, b) =>
             a.length === b.length && a.every((v, i) => v === b[i]),
         }),
@@ -1254,6 +1278,218 @@ describe('withLink', () => {
         expect(update).toHaveBeenCalledTimes(1);
         // external converges to the store's normalized value
         expect(external()).toEqual(['a', 'b']);
+      });
+    });
+
+    it('does not loop when the computation returns a fresh value on every read', () => {
+      // guards the loop: without it a regression hangs the suite instead of
+      // failing, the buffer and the store push each other forever
+      const update = vi.fn((value: { id: number }[], store: unknown) => {
+        if (update.mock.calls.length > 10) throw new Error('update loop');
+        patchState(store as any, { rows: value });
+      });
+      const Store = signalStore(
+        withState({ rows: [{ id: 1 }] }),
+        withLink('mapped', {
+          // rebuilt elements, so the default equality can not dedupe this:
+          // two reads of the source are not equal to each other
+          computation: (store) => store.rows().map((row) => ({ ...row })),
+          set: update,
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal([{ id: 7 }]);
+        const linked = store.linkMapped({
+          readFrom: external,
+          updateStoreWhen: () => true,
+        });
+        TestBed.tick();
+
+        expect(store.rows()).toEqual([{ id: 7 }]);
+        expect(linked()).toEqual([{ id: 7 }]);
+        expect(update).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('does not loop when readFrom feeds itself', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '', category: 'books' } }),
+        withLink('filter', {
+          set: (value, store) => {
+            update(value);
+            patchState(store as any, { filter: value });
+          },
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('a');
+        // reads the linked state and rebuilds a fresh object from it: under
+        // reference equality every write would re-trigger the read forever
+        const read = computed(() => ({
+          ...store.filter(),
+          search: search(),
+        }));
+        store.linkFilter({ readFrom: read, updateStoreWhen: () => true });
+        TestBed.tick();
+
+        expect(store.filter()).toEqual({ search: 'a', category: 'books' });
+        expect(update).toHaveBeenCalledTimes(1);
+
+        search.set('b');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'b', category: 'books' });
+        expect(update).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('does not loop when a self-feeding readFrom is given an equality', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '', category: 'books' } }),
+        withLink('filter', {
+          set: (value, store) => {
+            update(value);
+            patchState(store as any, { filter: value });
+          },
+          equal: 'stringify',
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('a');
+        const read = computed(() => ({
+          ...store.filter(),
+          search: search(),
+        }));
+        store.linkFilter({ readFrom: read, updateStoreWhen: () => true });
+        TestBed.tick();
+
+        expect(store.filter()).toEqual({ search: 'a', category: 'books' });
+        expect(update).toHaveBeenCalledTimes(1);
+
+        search.set('b');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'b', category: 'books' });
+        expect(update).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('settles on every one of a long run of real changes', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '', category: 'books' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('');
+        // a fresh object per change: each one is a real edit, so each has to
+        // reach the store rather than being dropped as an echo
+        store.linkFilter({
+          readFrom: computed(() => ({
+            search: search(),
+            category: 'books',
+          })),
+        });
+
+        for (let i = 0; i < 200; i++) {
+          search.set('typed ' + i);
+          TestBed.tick();
+        }
+        expect(store.filter()).toEqual({
+          search: 'typed 199',
+          category: 'books',
+        });
+      });
+    });
+
+    it('does not serialize primitives or arrays of stable references', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 0, ids: [] as { id: number }[] }),
+        withLink('count'),
+        withLink('ids'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const a = { id: 1 };
+        const b = { id: 2 };
+        const count = signal(0);
+        const ids = signal([a]);
+        store.linkCount({ readFrom: count });
+        store.linkIds({ readFrom: ids });
+        TestBed.tick();
+
+        // the default only reaches for a structural comparison when the cheap
+        // ones can not answer: never for a primitive, and not for an array
+        // whose elements are the same references
+        const stringify = vi.spyOn(JSON, 'stringify');
+        count.set(1);
+        ids.set([a, b]);
+        TestBed.tick();
+
+        expect(stringify).not.toHaveBeenCalled();
+        stringify.mockRestore();
+        expect(store.count()).toBe(1);
+        expect(store.ids()).toEqual([a, b]);
+      });
+    });
+
+    it("compares by reference when asked with 'reference'", () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter', {
+          set: (value, store) => {
+            update(value);
+            patchState(store as any, { filter: value });
+          },
+          equal: 'reference',
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal({ search: 'a' });
+        store.linkFilter({ readFrom: external });
+        TestBed.tick();
+
+        // same content, new reference: pushed, unlike under the default
+        expect(update).toHaveBeenCalledTimes(1);
+        expect(store.filter()).toBe(untracked(external));
+      });
+    });
+
+    it('falls back to reference equality for values JSON would flatten', () => {
+      const update = vi.fn();
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ picked: new Set<number>() }),
+        withLink('picked', {
+          set: (value, store) => {
+            update(value);
+            patchState(store as any, { picked: value });
+          },
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(new Set([1]));
+        store.linkPicked({ readFrom: external });
+        TestBed.tick();
+        expect(update).toHaveBeenCalledTimes(1);
+
+        // two Sets both serialize to '{}', so a structural comparison would
+        // call them equal and silently drop this update
+        external.set(new Set([1, 2]));
+        TestBed.tick();
+        expect(update).toHaveBeenCalledTimes(2);
+        expect(store.picked()).toEqual(new Set([1, 2]));
       });
     });
 
