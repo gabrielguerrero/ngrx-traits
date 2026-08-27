@@ -69,7 +69,7 @@ export function withLinkEntitiesSingleSelection<
   const { selectedIdKey, selectEntityKey, deselectEntityKey } =
     getEntitiesSingleSelectionKeys(config);
   return withLink(selectedIdKey, {
-    update: (value: string | number | undefined, store: any) => {
+    set: (value: string | number | undefined, store: any) => {
       if (value == null) {
         (store[deselectEntityKey] as () => void)();
       } else {
