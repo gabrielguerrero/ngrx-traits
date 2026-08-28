@@ -1,24 +1,30 @@
 import {
-  createLoadEntitiesInitialState,
-  createLoadEntitiesTraitReducer,
-} from './load-entities.trait.reducer';
-import {
-  LoadEntitiesState,
-  LoadEntitiesConfig,
-  LoadEntitiesKeyedConfig,
-  loadEntitiesTraitKey,
-} from './load-entities.model';
-import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
   TraitSelectorsFactoryConfig,
   TraitStateMutatorsFactoryConfig,
 } from '@ngrx-traits/core';
-import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
-import { createLoadEntitiesTraitMutators } from './load-entities.mutators';
 import { createTraitFactory } from '@ngrx-traits/core';
-import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
+import {
+  Comparer,
+  createEntityAdapter,
+  EntityAdapter,
+  IdSelector,
+} from '@ngrx/entity';
+
+import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
+import {
+  LoadEntitiesConfig,
+  LoadEntitiesKeyedConfig,
+  LoadEntitiesState,
+  loadEntitiesTraitKey,
+} from './load-entities.model';
+import { createLoadEntitiesTraitMutators } from './load-entities.mutators';
 import { createLoadEntitiesTraitActions } from './load-entities.trait.actions';
+import {
+  createLoadEntitiesInitialState,
+  createLoadEntitiesTraitReducer,
+} from './load-entities.trait.reducer';
 import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selectors';
 
 /**
@@ -64,9 +70,18 @@ import { createLoadEntitiesTraitSelectors } from './load-entities.trait.selector
  * traits.selectors.isTodosLoadingFail
  */
 export function addLoadEntitiesTrait<Entity>(
-  traitConfig?: Omit<LoadEntitiesConfig<Entity>, 'adapter'>
+  traitConfig?: Omit<LoadEntitiesConfig<Entity>, 'adapter'>,
 ) {
-  const adapter: EntityAdapter<Entity> = createEntityAdapter(traitConfig);
+  // @ngrx/entity v22 narrowed the createEntityAdapter overloads: they either
+  // constrain Entity to have an `id`, or require `selectId` to be present.
+  // Here traitConfig is optional and the adapter falls back to `entity.id` at
+  // runtime, so pick the IdSelector overload explicitly.
+  const adapter: EntityAdapter<Entity> = createEntityAdapter(
+    traitConfig as {
+      selectId: IdSelector<Entity>;
+      sortComparer?: false | Comparer<Entity>;
+    },
+  );
 
   return createTraitFactory({
     key: loadEntitiesTraitKey,
@@ -76,12 +91,12 @@ export function addLoadEntitiesTrait<Entity>(
     selectors: ({ allConfigs }: TraitSelectorsFactoryConfig) =>
       createLoadEntitiesTraitSelectors<Entity>(
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
-          EntitiesPaginationKeyedConfig
+          EntitiesPaginationKeyedConfig,
       ),
     mutators: ({ allConfigs }: TraitStateMutatorsFactoryConfig) =>
       createLoadEntitiesTraitMutators<Entity>(
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
-          EntitiesPaginationKeyedConfig
+          EntitiesPaginationKeyedConfig,
       ),
     initialState: ({
       previousInitialState,
@@ -94,7 +109,7 @@ export function addLoadEntitiesTrait<Entity>(
         allActions,
         allMutators,
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
-          EntitiesPaginationKeyedConfig
+          EntitiesPaginationKeyedConfig,
       ),
   });
 }

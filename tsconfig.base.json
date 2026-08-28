@@ -21,7 +21,12 @@
       "@ngrx-traits/core/testing": ["libs/ngrx-traits/core/src/lib/index.ts"],
       "@ngrx-traits/signals": ["libs/ngrx-traits/signals/src/index.ts"],
       "@example-api/shared/*": ["apps/example-api/src/shared/*"]
-    }
+    },
+    "strict": true,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"],
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }

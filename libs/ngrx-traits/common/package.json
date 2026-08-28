@@ -6,14 +6,15 @@
     "postinstall": "ngcc"
   },
   "peerDependencies": {
-    "@angular/core": "^21.0.0",
-    "@ngrx/effects": "^21.0.0",
-    "@ngrx/entity": "^21.0.0",
-    "@ngrx/store": "^21.0.0",
-    "@ngrx-traits/core": "^21.0.0"
+    "@angular/core": "^22.0.0",
+    "@ngrx/effects": "^22.0.0",
+    "@ngrx/entity": "^22.0.0",
+    "@ngrx/operators": "^22.0.0",
+    "@ngrx/store": "^22.0.0",
+    "@ngrx-traits/core": "^22.0.0"
   },
   "optionalDependencies": {
-    "@angular/router": "^21.0.0"
+    "@angular/router": "^22.0.0"
   },
   "sideEffects": false,
   "repository": {
