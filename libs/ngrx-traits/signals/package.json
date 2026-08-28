@@ -7,12 +7,14 @@
     "build": "ng-packagr -p package.json"
   },
   "peerDependencies": {
-    "@angular/core": "^21.0.0",
-    "@ngrx/signals": "^21.0.0",
+    "@angular/core": "^22.0.0",
+    "@ngrx/signals": "^22.0.0",
     "rxjs": "^7.8.1"
   },
   "optionalDependencies": {
-    "@angular/cdk": "^21.0.0"
+    "@angular/cdk": "^22.0.0",
+    "@angular/common": "^22.0.0",
+    "@angular/router": "^22.0.0"
   },
   "sideEffects": false,
   "ng-update": {
