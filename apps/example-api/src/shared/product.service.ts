@@ -1,4 +1,4 @@
-import { images, mockProducts } from './mock-data';
+import { mockProducts } from './mock-data';
 import { Category, Product, ProductDetail } from './models';
 import { sortData } from './sort-entities.utils';
 import { getRandomInteger } from './utils';
@@ -32,15 +32,9 @@ export function searchProducts(
     );
   }
 
-  // Filter by category
+  // Filter by category (console)
   if (options?.category) {
-    const description =
-      options.category === 'snes'
-        ? 'Super Nintendo Game'
-        : options.category === 'gamecube'
-          ? 'GameCube Game'
-          : '';
-    result = result.filter((entity) => entity.description === description);
+    result = result.filter((entity) => entity.console === options.category);
   }
 
   const total = result.length;
@@ -75,11 +69,9 @@ export function getProductDetail(id: string): ProductDetail | null {
 
   return {
     ...product,
-    id: product.id,
-    image: 'assets/' + images[+product.id % 6],
     maker: 'Nintendo',
     releaseDate: '' + getRandomInteger(1990, 2000),
-  } as ProductDetail;
+  };
 }
 
 /**

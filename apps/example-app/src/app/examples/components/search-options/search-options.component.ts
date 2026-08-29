@@ -24,7 +24,7 @@ import { delay } from 'rxjs/operators';
   template: `
     <div
       (mousedown)="$event.stopPropagation()"
-      class="mv-search-options flex items-center"
+      class="search-options flex items-center"
     >
       <input
         type="text"
@@ -45,7 +45,7 @@ import { delay } from 'rxjs/operators';
   `,
   styles: [
     `
-      .mv-search-options {
+      .search-options {
         border: 1px solid rgba(0, 0, 0, 0.04);
         height: 3em;
         line-height: 3em;
