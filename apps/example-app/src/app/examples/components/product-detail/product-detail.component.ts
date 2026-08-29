@@ -18,9 +18,15 @@ import { ProductDetail } from '@example-api/shared/models';
               {{ product().releaseDate }}</mat-card-subtitle
             >
           </mat-card-header>
-          <img mat-card-image src="{{ product().image }}" />
+          <img
+            mat-card-image
+            class="h-96 w-full object-cover my-6"
+            src="{{ product().image }}"
+          />
           <mat-card-content>
-            <p>{{ product().description }}</p>
+            <p class="line-clamp-3 overflow-hidden">
+              {{ product().description }}
+            </p>
           </mat-card-content>
         </mat-card>
       }

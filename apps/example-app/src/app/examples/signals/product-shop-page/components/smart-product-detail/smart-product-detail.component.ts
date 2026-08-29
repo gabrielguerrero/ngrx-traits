@@ -49,10 +49,13 @@ const ProductDetailStore = signalStore(
         </mat-card-header>
         <img
           mat-card-image
+          class="h-96 w-full object-cover my-6"
           src="/{{ store.loadProductDetailResult()?.image }}"
         />
         <mat-card-content>
-          <p>{{ store.loadProductDetailResult()?.description }}</p>
+          <p class="line-clamp-3 overflow-hidden">
+            {{ store.loadProductDetailResult()?.description }}
+          </p>
         </mat-card-content>
       </mat-card>
     } @else if (store.isLoadProductDetailLoading()) {

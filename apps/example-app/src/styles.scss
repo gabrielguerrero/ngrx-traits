@@ -39,9 +39,6 @@ $angular-client-theme: mat.m2-define-dark-theme(
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.all-component-themes($angular-client-theme);
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 .mdc-notched-outline__notch {
   border-right: none;

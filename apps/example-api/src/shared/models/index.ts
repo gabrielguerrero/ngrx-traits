@@ -1,8 +1,32 @@
+export const genreLabelMap = {
+  action: 'Action',
+  rpg: 'RPG',
+  platformer: 'Platformer',
+  puzzle: 'Puzzle',
+  racing: 'Racing',
+  sports: 'Sports',
+  fighting: 'Fighting',
+  adventure: 'Adventure',
+};
+export type Genre = keyof typeof genreLabelMap;
+export const genreArray = Object.entries(genreLabelMap).map(
+  ([id, label]) => ({ id, label }),
+) as { id: Genre; label: string }[];
+export interface GenreResponse {
+  resultList: { id: Genre; label: string }[];
+  total: number;
+}
+
+export type GameConsole = 'snes' | 'gamecube';
+
 export interface Product {
   id: string;
   name: string;
   description: string;
   price: number;
+  image: string;
+  genre: Genre;
+  console: GameConsole;
   categoryId?: string;
 }
 export type Category =
@@ -67,7 +91,6 @@ export interface ProductFilter {
 export interface ProductDetail extends Product {
   maker: string;
   releaseDate: string;
-  image: string;
 }
 
 export interface Branch {
