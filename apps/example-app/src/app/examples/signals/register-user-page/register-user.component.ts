@@ -122,7 +122,9 @@ const initialValue: RegisterData = {
             color="primary"
             (click)="onSubmit()"
             [disabled]="
-              registerForm().invalid() || store.isRegisterUserLoading()
+              !registerForm().dirty() ||
+              registerForm().invalid() ||
+              store.isRegisterUserLoading()
             "
           >
             @if (store.isRegisterUserLoading()) {
@@ -185,7 +187,7 @@ export class RegisterUserComponent {
         this.snackBar.open('Registration successful!', 'Close', {
           duration: 3000,
         });
-        this.model.set({ ...initialValue });
+        this.registerForm().reset(initialValue);
       } else {
         this.snackBar.open(result.error() as string, 'Close', {
           duration: 5000,

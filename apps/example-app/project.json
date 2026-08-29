@@ -24,7 +24,8 @@
         ],
         "styles": [
           "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-          "apps/example-app/src/styles.scss"
+          "apps/example-app/src/styles.scss",
+          "apps/example-app/src/tailwind.css"
         ],
         "scripts": [],
         "ssr": {
@@ -63,7 +64,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
           "buildTarget": "example-app:build:production"
@@ -80,7 +81,7 @@
       "continuous": true
     },
     "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "executor": "@angular/build:extract-i18n",
       "options": {
         "buildTarget": "example-app:build"
       }

@@ -1,4 +1,3 @@
-const { createGlobPatternsForDependencies } = require('@nx/angular/tailwind');
 const { join } = require('node:path');
 
 /** @type {import('tailwindcss').Config} */
@@ -6,7 +5,7 @@ module.exports = {
   darkMode: 'selector',
   content: [
     join(__dirname, '**/!(*.stories|*.spec).{ts,html}'),
-    ...createGlobPatternsForDependencies(__dirname),
+    join(__dirname, '../../libs/**/!(*.stories|*.spec).{ts,html}'),
   ],
   theme: {
     extend: {

@@ -15,7 +15,13 @@
         "bundle": false,
         "main": "apps/example-api/src/main.ts",
         "tsConfig": "apps/example-api/tsconfig.app.json",
-        "assets": ["apps/example-api/src/assets"],
+        "assets": [
+          {
+            "input": "apps/example-api/src/assets",
+            "glob": "**/*",
+            "output": "apps/example-api/src/assets"
+          }
+        ],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,

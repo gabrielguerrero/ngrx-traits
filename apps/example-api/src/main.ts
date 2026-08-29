@@ -1,6 +1,9 @@
+import cors from 'cors';
 import express from 'express';
+import path from 'path';
 
 import { getBranchDetail, searchBranches } from './shared/branches.service';
+import { searchGenres } from './shared/genres.service';
 import { Category, OrderSummary } from './shared/models';
 import {
   deleteOrder,
@@ -18,8 +21,12 @@ const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
+console.log({ __dirname: path.join(__dirname, '/assets') });
+
+app.use('/assets', express.static(path.join(__dirname, '/assets')));
 // ===== PRODUCT ROUTES =====
 app.post('/api/checkout', (req, res) => {
   const orderId = processCheckout();
@@ -43,6 +50,18 @@ app.get('/api/products', (req, res) => {
   };
   const response = searchProducts(options);
   res.json(response);
+});
+
+// ===== GENRE ROUTES =====
+app.get('/api/genres', (req, res) => {
+  const options = {
+    search: req.query.search as string,
+    sortColumn: req.query.sortColumn as string,
+    sortAscending: req.query.sortAscending as string,
+    skip: req.query.skip as string,
+    take: req.query.take as string,
+  };
+  res.json(searchGenres(options));
 });
 
 // ===== BRANCH ROUTES =====
