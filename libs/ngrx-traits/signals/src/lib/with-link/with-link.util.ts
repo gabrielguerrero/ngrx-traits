@@ -178,13 +178,24 @@ type ElementPropertyName<T> = T extends readonly (infer E)[]
  *
  * The array ones are only offered when the value is an array, the property
  * names when it is an object, the prefixed ones when it is an array of them.
+ *
+ * `unknown extends T` short-circuits all of that while `T` is still
+ * unresolved, which is the case on the `computation` form of `withLink`: the
+ * value type comes from a context-sensitive callback, typed only on a later
+ * inference pass, while `equal` is a plain string checked on the first one.
+ * Narrowing against the empty `T` of that first pass pins it to `unknown` for
+ * good — the value type collapses and every name is rejected. Accepting any
+ * name there costs nothing: `T` is known by the time the argument is checked,
+ * so a wrong name or one that does not fit the value is still an error.
  */
-export type EqualName<T> =
-  | 'stringify'
-  | 'reference'
-  | (T extends readonly any[] ? 'array' | 'set' : never)
-  | PropertyName<T>
-  | ElementPropertyName<T>;
+export type EqualName<T> = unknown extends T
+  ? string
+  :
+      | 'stringify'
+      | 'reference'
+      | (T extends readonly any[] ? 'array' | 'set' : never)
+      | PropertyName<T>
+      | ElementPropertyName<T>;
 
 /** A custom equality function, or the name of a premade one. */
 export type EqualOption<T> = ((a: T, b: T) => boolean) | EqualName<T>;

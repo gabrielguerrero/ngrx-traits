@@ -402,6 +402,37 @@ describe('withLink', () => {
       );
     });
 
+    it('takes a premade name on the computation form, where the value type comes from the computation', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ ids: ['a', 'b'] as string[] }),
+        withLink('selectedIds', {
+          // the value type is only known once this callback is typed, so the
+          // name must not be checked against an unresolved type
+          computation: (store) => store.ids(),
+          set: (value, store) => patchState(store as any, { ids: value }),
+          equal: 'set',
+        }),
+        // @ts-expect-error 'missing' is not a property of the computed value
+        withLink('firstId', {
+          computation: (store) => ({ id: store.ids()[0] }),
+          set: () => void 0,
+          equal: 'missing',
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(['b', 'a']);
+        const setSpy = vi.spyOn(external, 'set');
+        store.linkSelectedIds({ syncWith: external });
+        TestBed.tick();
+
+        // same ids in another order: 'set' resolved, so neither side is written
+        expect(setSpy).not.toHaveBeenCalled();
+        expect(store.ids()).toEqual(['a', 'b']);
+      });
+    });
+
     it("guards the sync to an external signal, and 'array'/'set' are not offered for non arrays", () => {
       const Store = signalStore(
         { protectedState: false },
