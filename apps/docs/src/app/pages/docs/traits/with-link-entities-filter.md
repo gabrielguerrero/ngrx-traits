@@ -56,7 +56,7 @@ Please note that this will set both valid and invalid form data in the store. If
 
 ### Only setting validated data in the store with Signal Forms
 
-Pass `updateStoreWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateStoreWhen` returns true. It is called inside an effect, so it is reactive — a value held back while the form was invalid is pushed as soon as it becomes valid:
+Pass `updateStoreWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateStoreWhen` returns true. It is checked on each write and again inside an effect, so it is reactive — a write made while the form is valid reaches the store straight away, and a value held back while it was invalid is pushed as soon as it becomes valid:
 
 ```ts
 export class ProductListComponent {
