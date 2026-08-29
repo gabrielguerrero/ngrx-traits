@@ -35,7 +35,11 @@ import { Sort } from '@ngrx-traits/common';
         </ng-container>
         <ng-container matColumnDef="description">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Description</th>
-          <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+          <td mat-cell *matCellDef="let row">
+            <div class="line-clamp-3 overflow-hidden">
+              {{ row.description }}
+            </div>
+          </td>
         </ng-container>
         <ng-container matColumnDef="price">
           <th mat-header-cell mat-sort-header *matHeaderCellDef>Price</th>
