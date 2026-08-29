@@ -426,7 +426,7 @@ describe('withLink', () => {
 
   // ── Delegated signal (no external) ─────────────────────────────
 
-  describe('delegated signal', () => {
+  describe('store-delegating writes', () => {
     it('reads the source and patches state on set by default', () => {
       const Store = signalStore(
         { protectedState: false },
@@ -1241,6 +1241,93 @@ describe('withLink', () => {
         linked.set(1);
         TestBed.tick();
         expect(update).not.toHaveBeenCalled();
+      });
+    });
+
+    it('a gate derived from the linked value sees the just-written state', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        // the gate reads the linked value reactively rather than its
+        // argument, so it only opens if the write landed in the buffer
+        // before updateStoreWhen ran
+        let linked!: ReturnType<typeof store.linkCount>;
+        const valid = computed(() => linked() > 10);
+        linked = store.linkCount({ updateStoreWhen: () => valid() });
+        TestBed.tick();
+
+        linked.set(20);
+        expect(store.count()).toBe(20);
+      });
+    });
+
+    it('commits synchronously while the gate is open', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({ updateStoreWhen: () => true });
+        TestBed.tick();
+
+        linked.set(5);
+        // no tick: an open gate must not wait for the flush effect
+        expect(store.count()).toBe(5);
+      });
+    });
+
+    it('writes once per write while the gate is open', () => {
+      // a set that does not update the store synchronously, so the flush
+      // effect can not tell the value has already been committed
+      const update = vi.fn();
+      const Store = signalStore(
+        withState({ count: 1 }),
+        withLink('count', { set: update }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({ updateStoreWhen: () => true });
+        TestBed.tick();
+
+        linked.set(5);
+        TestBed.tick();
+        expect(update).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('buffers again when the gate closes after a commit', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(true);
+        const linked = store.linkCount({ updateStoreWhen: () => allowed() });
+        TestBed.tick();
+
+        linked.set(5);
+        TestBed.tick();
+        expect(store.count()).toBe(5);
+
+        allowed.set(false);
+        TestBed.tick();
+
+        linked.set(9);
+        TestBed.tick();
+        expect(linked()).toBe(9);
+        expect(store.count()).toBe(5);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(store.count()).toBe(9);
       });
     });
   });
