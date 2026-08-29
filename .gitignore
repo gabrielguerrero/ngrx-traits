@@ -47,6 +47,7 @@ Thumbs.db
 apps/docs/.env
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
+.playwright-mcp/*
 
 .claude/worktrees
 .claude/settings.local.json
