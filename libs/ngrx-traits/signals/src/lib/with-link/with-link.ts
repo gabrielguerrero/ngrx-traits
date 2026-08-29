@@ -9,7 +9,6 @@ import {
   untracked,
   WritableSignal,
 } from '@angular/core';
-import { SIGNAL } from '@angular/core/primitives/signals';
 import {
   patchState,
   signalMethod,
@@ -30,9 +29,12 @@ type LinkCommonOptions<T> = {
    * becomes a `linkedSignal` buffer over the source: writes are kept locally
    * and only pushed to the store when `updateStoreWhen(value)` returns true.
    *
-   * It runs inside an effect, so it is reactive: a value held back while it
-   * returned false is pushed as soon as its dependencies make it true
-   * (e.g. a form becoming valid).
+   * It is evaluated on every write, and again inside an effect so it stays
+   * reactive: a write made while it returns true commits synchronously, and a
+   * value held back while it returned false is pushed as soon as its
+   * dependencies make it true (e.g. a form becoming valid). Because the write
+   * lands in the buffer first, a gate derived from the value itself (such as a
+   * form's `valid()`) already sees the new state.
    *
    * Requires an injection context, since an effect is created.
    */
@@ -434,16 +436,34 @@ export function withLink<Input extends SignalStoreFeatureResult>(
               })
             | undefined;
           const updateStoreWhen = linkOptions?.updateStoreWhen;
-          // with updateStoreWhen the linked signal is a buffer over the source:
-          // writes stay local until the gate opens. Without it, writes go
-          // straight to the store.
-          const linked: WritableSignal<any> = updateStoreWhen
-            ? linkedSignal(() => source(), { equal })
-            : delegatedSignal({
-                computation: () => source(),
-                write: guardedWrite,
-                equal,
-              });
+          // one linkedSignal over the source for both modes. Writes go
+          // through the custom set: without a gate they delegate straight to
+          // the store — no rawSet, the store stays the single source of truth
+          // and the computation reflects the committed value. With a gate the
+          // write lands in the buffer first, so a gate derived from the value
+          // (e.g. a form's valid()) sees the just-written state, then commits
+          // when open; when closed the value stays buffered until the flush
+          // effect below pushes it. updateStoreWhen is untracked here since
+          // set must not register deps; its reactive tracking lives in that
+          // effect.
+          // value already committed synchronously by set. rawSet below marks
+          // the flush effect dirty, so that effect still runs after a
+          // synchronous commit; without this it would write again whenever the
+          // write does not land in source synchronously (a debounced or
+          // async set), since its equal(value, source()) guard can not yet see
+          // the value. Cleared by the effect on its next run.
+          let committedInSet: { value: any } | undefined;
+          const linked: WritableSignal<any> = linkedSignal(() => source(), {
+            equal,
+            set: (value, rawSet) => {
+              if (!updateStoreWhen) return guardedWrite(value);
+              rawSet(value);
+              if (untracked(() => updateStoreWhen(value))) {
+                committedInSet = { value };
+                guardedWrite(value);
+              }
+            },
+          });
 
           const readFrom = linkOptions?.readFrom;
           if (readFrom) {
@@ -469,12 +489,24 @@ export function withLink<Input extends SignalStoreFeatureResult>(
           }
 
           if (updateStoreWhen) {
-            // buffer -> store; updateStoreWhen is called tracked so its own
-            // dependencies re-run the effect, flushing a value that was
-            // held back while the gate was closed
+            // flush on gate open: writes commit synchronously in set when the
+            // gate is open, so this effect only flushes a value held back
+            // while it was closed, or one whose gate opened without a write
+            // (async validators, external signals). updateStoreWhen is called
+            // tracked so its own dependencies re-run the effect
             effect(() => {
               const value = linked();
+              const committed = committedInSet;
+              committedInSet = undefined;
+              // updateStoreWhen stays outside the skip so its dependencies are
+              // registered on every run — the gate must still be able to
+              // re-open this effect when it changes without a write
               if (updateStoreWhen(value)) {
+                // by reference, not equal: the run this skips is the one
+                // rawSet scheduled, which reads back the very object set
+                // committedInSet. When the reference does differ the write did
+                // land in source, and guardedWrite's own guard already no-ops
+                if (committed && Object.is(committed.value, value)) return;
                 untracked(() => guardedWrite(value));
               }
             });
@@ -577,28 +609,4 @@ function linkSetter<T>(
   };
   setter.destroy = setValue.destroy;
   return setter as LinkSetter<T>;
-}
-
-function delegatedSignal<T>(options: {
-  computation: () => T;
-  write: (value: T) => void;
-  equal?: (a: T, b: T) => boolean;
-}): WritableSignal<T> {
-  const internalSignal = computed(options.computation, {
-    equal: options.equal,
-  });
-
-  // reuses the computed's SIGNAL node so isSignal/toSignal interop treats
-  // this as a real signal; set/update only exist on the wrapper, so code
-  // that writes through the node itself would bypass them
-  const res: WritableSignal<T> = Object.assign(() => internalSignal(), {
-    [SIGNAL]: internalSignal[SIGNAL],
-    set: (value: T) => options.write(value),
-    update: (updateFn: (value: T) => T) => {
-      const newValue = updateFn(untracked(internalSignal));
-      options.write(newValue);
-    },
-    asReadonly: () => internalSignal,
-  } as WritableSignal<T>);
-  return res;
 }
