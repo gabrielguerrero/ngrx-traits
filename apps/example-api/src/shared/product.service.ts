@@ -1,5 +1,5 @@
 import { mockProducts } from './mock-data';
-import { Category, Product, ProductDetail } from './models';
+import { Console, Product, ProductDetail } from './models';
 import { sortData } from './sort-entities.utils';
 import { getRandomInteger } from './utils';
 
@@ -7,7 +7,7 @@ export interface SearchProductsOptions {
   search?: string | null;
   sortColumn?: string | null;
   sortAscending?: string | null;
-  category?: Category | null;
+  category?: Console | null;
   skip?: string | null;
   take?: string | null;
 }
@@ -61,17 +61,59 @@ export function searchProducts(
  * Get product detail by ID
  */
 export function getProductDetail(id: string): ProductDetail | null {
-  const product = mockProducts.find((p) => p.id === id);
+  const product = mockProducts.find((p) => p.id === id) as
+    | Partial<ProductDetail>
+    | undefined;
 
   if (!product) {
     return null;
   }
 
+  // maker and release date are not part of the list data, so they are made up
+  // on first read — but kept once a product has been saved with them
   return {
-    ...product,
-    maker: 'Nintendo',
-    releaseDate: '' + getRandomInteger(1990, 2000),
+    ...(product as ProductDetail),
+    maker: product.maker || 'Nintendo',
+    releaseDate: product.releaseDate || '' + getRandomInteger(1990, 2000),
   };
+}
+
+/**
+ * Create a product, returning its detail with the id it was given
+ */
+export function createProduct(changes: Partial<Product>): ProductDetail {
+  const nextId =
+    mockProducts.reduce((max, p) => Math.max(max, Number(p.id)), -1) + 1;
+  const product: Product = {
+    name: '',
+    description: '',
+    price: 0,
+    image: '',
+    genre: 'action',
+    console: 'snes',
+    ...changes,
+    id: String(nextId),
+  };
+  mockProducts.push(product);
+
+  return getProductDetail(product.id) as ProductDetail;
+}
+
+/**
+ * Update a product by ID, returning the updated detail
+ */
+export function updateProduct(params: {
+  id: string;
+  changes: Partial<Product>;
+}): ProductDetail | null {
+  const product = mockProducts.find((p) => p.id === params.id);
+
+  if (!product) {
+    return null;
+  }
+  Object.assign(product, params.changes, { id: product.id });
+
+  return getProductDetail(params.id);
 }
 
 /**

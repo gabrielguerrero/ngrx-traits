@@ -37,7 +37,7 @@ import { ProductsBranchStore } from './products-branch.store';
       [compareWith]="compareById"
       (closed)="search('')"
     >
-      <search-options (valueChanges)="search($event)"></search-options>
+      <search-options (valueChange)="search($event)"></search-options>
       <cdk-virtual-scroll-viewport
         itemSize="42"
         class="fact-scroll-viewport"
