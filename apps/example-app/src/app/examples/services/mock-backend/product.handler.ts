@@ -1,4 +1,4 @@
-import { Category } from '@example-api/shared/models';
+import { Console } from '@example-api/shared/models';
 import {
   getProductDetail,
   processCheckout,
@@ -22,7 +22,7 @@ export const productHandlers = [
       search: url.searchParams.get('search'),
       sortColumn: url.searchParams.get('sortColumn'),
       sortAscending: url.searchParams.get('sortAscending'),
-      category: url.searchParams.get('category') as Category,
+      category: url.searchParams.get('category') as Console,
       skip: url.searchParams.get('skip'),
       take: url.searchParams.get('take'),
     };

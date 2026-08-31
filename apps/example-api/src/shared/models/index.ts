@@ -9,15 +9,14 @@ export const genreLabelMap = {
   adventure: 'Adventure',
 };
 export type Genre = keyof typeof genreLabelMap;
-export const genreArray = Object.entries(genreLabelMap).map(
+export const genres = Object.keys(genreLabelMap) as Genre[];
+export const genreOptionsArray = Object.entries(genreLabelMap).map(
   ([id, label]) => ({ id, label }),
 ) as { id: Genre; label: string }[];
 export interface GenreResponse {
   resultList: { id: Genre; label: string }[];
   total: number;
 }
-
-export type GameConsole = 'snes' | 'gamecube';
 
 export interface Product {
   id: string;
@@ -26,17 +25,21 @@ export interface Product {
   price: number;
   image: string;
   genre: Genre;
-  console: GameConsole;
+  console: Console;
   categoryId?: string;
 }
-export type Category =
-  | 'snes'
-  | 'nes'
-  | 'gamecube'
-  | 'n64'
-  | 'wii'
-  | 'wiiu'
-  | 'switch';
+export const consoleLabelMap = {
+  snes: 'Super Nintendo',
+  nes: 'NES',
+  gamecube: 'GameCube',
+  n64: 'Nintendo 64',
+};
+export type Console = keyof typeof consoleLabelMap;
+export const consoles = Object.keys(consoleLabelMap) as Console[];
+export const consoleOptionsArray = Object.entries(consoleLabelMap).map(
+  ([id, label]) => ({ id, label }),
+) as { id: Console; label: string }[];
+
 export interface ProductOrder extends Product {
   quantity?: number;
 }

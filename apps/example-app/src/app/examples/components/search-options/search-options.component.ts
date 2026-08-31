@@ -1,21 +1,11 @@
-import {
-  Component,
-  effect,
-  ElementRef,
-  inject,
-  Input,
-  input,
-  Output,
-  viewChild,
-} from '@angular/core';
+import { Component, effect, inject, input, model } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
+import { form, FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
-import { Observable } from 'rxjs';
 import { delay } from 'rxjs/operators';
 
 @Component({
@@ -31,14 +21,20 @@ import { delay } from 'rxjs/operators';
         class="flex-1 "
         [placeholder]="placeholder()"
         matInput
-        [formControl]="control"
+        [formField]="field"
         autocomplete="off"
         (keydown)="handleKeydown($event)"
         (keyup.enter)="selectFirst()"
         (click)="$event.stopPropagation()"
         #input
       />
-      <button mat-icon-button matSuffix class="flex-initial" (click)="clear()">
+      <button
+        type="button"
+        mat-icon-button
+        matSuffix
+        class="flex-initial"
+        (click)="clear()"
+      >
         <mat-icon class="!flex items-center">close</mat-icon>
       </button>
     </div>
@@ -62,7 +58,7 @@ import { delay } from 'rxjs/operators';
   standalone: true,
   imports: [
     MatInputModule,
-    ReactiveFormsModule,
+    FormField,
     MatButtonModule,
     MatFormFieldModule,
     MatIconModule,
@@ -71,29 +67,19 @@ import { delay } from 'rxjs/operators';
 export class SearchOptionsComponent {
   placeholder = input('Search...');
 
-  control = new UntypedFormControl();
-
-  @Output() valueChanges = this.control.valueChanges as Observable<string>;
+  value = model<string>('');
+  field = form(this.value);
 
   matSelect = inject(MatSelect);
-  input = viewChild.required<ElementRef>('input');
 
   matOpenedChange = toSignal(this.matSelect.openedChange.pipe(delay(1)));
   onMatOpenedChange = effect(() => {
     if (this.matOpenedChange()) {
       this.focus();
     } else {
-      this.control.reset(null, { emitEvent: false });
+      this.value.set('');
     }
   });
-
-  get value() {
-    return this.control.value;
-  }
-  @Input()
-  set value(v: string) {
-    this.control.setValue(v);
-  }
 
   focus() {
     // save and restore scrollTop of panel, since it will be reset by focus()
@@ -102,14 +88,15 @@ export class SearchOptionsComponent {
     const scrollTop = panel.scrollTop;
 
     // focus
-    this.input().nativeElement.focus();
+    this.field().focusBoundControl();
 
     panel.scrollTop = scrollTop;
   }
 
   clear() {
-    this.control.reset();
+    this.value.set('');
   }
+
   handleKeydown(event: KeyboardEvent) {
     // Prevent propagation for all alphanumeric characters in order to avoid selection issues
     if (
