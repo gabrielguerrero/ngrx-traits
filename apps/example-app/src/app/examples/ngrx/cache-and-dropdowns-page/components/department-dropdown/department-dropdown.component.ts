@@ -36,7 +36,7 @@ import { DepartmentLocalTraits } from './department.local-traits';
           [compareWith]="compareById"
           (closed)="search(undefined)"
         >
-          <search-options (valueChanges)="search($event)"></search-options>
+          <search-options (valueChange)="search($event)"></search-options>
           @for (item of data.stores; track item) {
             <mat-option class="fact-item" [value]="item">
               {{ item.name }}

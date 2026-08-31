@@ -4,7 +4,7 @@ import path from 'path';
 
 import { getBranchDetail, searchBranches } from './shared/branches.service';
 import { searchGenres } from './shared/genres.service';
-import { Category, OrderSummary } from './shared/models';
+import { Console, OrderSummary, Product } from './shared/models';
 import {
   deleteOrder,
   getOrderDetail,
@@ -12,9 +12,11 @@ import {
   updateOrder,
 } from './shared/orders.service';
 import {
+  createProduct,
   getProductDetail,
   processCheckout,
   searchProducts,
+  updateProduct,
 } from './shared/product.service';
 
 const host = process.env.HOST ?? 'localhost';
@@ -39,12 +41,25 @@ app.get('/api/products/:id', (req, res) => {
   res.json(productDetail);
 });
 
+app.post('/api/products', (req, res) => {
+  const changes = req.body as Partial<Product>;
+  const productDetail = createProduct(changes);
+  res.json(productDetail);
+});
+
+app.put('/api/products/:id', (req, res) => {
+  const id = req.params.id;
+  const changes = req.body as Partial<Product>;
+  const productDetail = updateProduct({ id, changes });
+  res.json(productDetail);
+});
+
 app.get('/api/products', (req, res) => {
   const options = {
     search: req.query.search as string,
     sortColumn: req.query.sortColumn as string,
     sortAscending: req.query.sortAscending as string,
-    category: req.query.category as Category,
+    category: req.query.category as Console,
     skip: req.query.skip as string,
     take: req.query.take as string,
   };
