@@ -80,6 +80,13 @@ export const routes: Routes = [
             './examples/signals/product-shop-page/product-shop-page.routes'
           ).then((m) => m.routes),
       },
+      {
+        path: 'product-link',
+        loadComponent: () =>
+          import(
+            './examples/signals/product-link-page/product-link-page.component'
+          ).then((m) => m.ProductLinkPageComponent),
+      },
     ],
   },
   {

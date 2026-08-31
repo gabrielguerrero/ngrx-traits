@@ -65,6 +65,15 @@ import { RouterLink } from '@angular/router';
               with async error handling
             </div>
           </mat-list-item>
+          <mat-list-item [routerLink]="'product-link'">
+            <div matListItemTitle><b>Product Search and Edit (withLink)</b></div>
+            <div matListItemLine>
+              Example using withLink to connect the store to signal forms and a
+              model(): a validated filter form, a genre picker synced with
+              syncWith, and an edit panel that writes valid changes back to the
+              list
+            </div>
+          </mat-list-item>
           <mat-list-item [routerLink]="'order-list'">
             <div matListItemTitle><b>Drill-down List</b></div>
             <div matListItemLine>

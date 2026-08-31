@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Category, Product, ProductDetail } from '@example-api/shared/models';
+import { Console, Product, ProductDetail } from '@example-api/shared/models';
 import { delay } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -13,7 +13,7 @@ export class ProductService {
     sortAscending?: boolean | undefined;
     skip?: number | undefined;
     take?: number | undefined;
-    category?: Category;
+    category?: Console;
   }) {
     return this.httpClient
       .get<{
@@ -26,6 +26,18 @@ export class ProductService {
           category: options?.category ?? '',
         },
       })
+      .pipe(delay(500));
+  }
+
+  createProduct(product: ProductDetail) {
+    return this.httpClient
+      .post<ProductDetail>('/api/products', product)
+      .pipe(delay(500));
+  }
+
+  updateProduct(product: ProductDetail) {
+    return this.httpClient
+      .put<ProductDetail>('/api/products/' + product.id, product)
       .pipe(delay(500));
   }
 
