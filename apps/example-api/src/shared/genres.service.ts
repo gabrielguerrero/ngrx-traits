@@ -1,4 +1,4 @@
-import { Genre, GenreResponse, genreArray } from './models';
+import { Genre, genreOptionsArray, GenreResponse } from './models';
 import { sortData } from './sort-entities.utils';
 
 export interface SearchGenresOptions {
@@ -13,7 +13,7 @@ export interface SearchGenresOptions {
  * Search and filter genres based on provided options
  */
 export function searchGenres(options: SearchGenresOptions): GenreResponse {
-  let result = [...genreArray];
+  let result = [...genreOptionsArray];
 
   // Filter by search term (label substring, case-insensitive)
   if (options?.search) {
