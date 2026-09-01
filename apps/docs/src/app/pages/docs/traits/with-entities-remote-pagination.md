@@ -28,22 +28,20 @@ If you need to keep all previous pages in memory, use withEntitiesRemoteScrollPa
 In this example we have a list of products and we want to paginate them, we will use the pageSize prop to set the initial page size.
 
 ```typescript
-const entityConfig = entityConfig({
+const productEntityConfig = entityConfig({
   entity: type<T>(),
   collection: 'product'
 });
 
 export const store = signalStore(
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: 'loading' }),
-  withEntitiesRemotePagination({
-    ...entityConfig,
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+  withEntitiesRemotePagination(productEntityConfig, {
     pageSize: 5,
     pagesToCache: 2,
   }),
-  withEntitiesLoadingCall({
-    ...entityConfig,
-    fetchEntities: ({ productEntitiesPagedRequest }) => {
+  withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesPagedRequest }) => ({
+    fetchEntities: () => {
       return inject(ProductService)
         .getProducts({
           take: productEntitiesPagedRequest().size,
@@ -56,7 +54,7 @@ export const store = signalStore(
           })),
         );
     },
-  }),
+  })),
 );
 ```
 Now we use it in a component, the generated usersCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
@@ -79,34 +77,29 @@ You can mix this feature with other remote store features like withEntitiesRemot
 
 
 ```typescript
+const productsEntityConfig = entityConfig({
+  entity: productsEntity,
+  collection: productsCollection,
+});
+
 const productsStoreFeature = signalStoreFeature(
-  withEntities({
-    entity: productsEntity,
-    collection: productsCollection,
-  }),
-  withCallStatus({
+  withEntities(productsEntityConfig),
+  withCallStatus(productsEntityConfig, {
     initialValue: 'loading',
-    collection: productsCollection,
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemotePagination(productsEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
+    productsEntityConfig,
     ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
-      collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({

@@ -26,28 +26,21 @@ export const productEntityConfig = entityConfig({
 export function withProductEntities() {
   return signalStoreFeature(
     withEntities(productEntityConfig),
-    withCallStatus({
-      ...productEntityConfig,
+    withCallStatus(productEntityConfig, {
       initialValue: 'loading',
       errorType: type<string>(),
     }),
-    withEntitiesRemoteFilter({
-      ...productEntityConfig,
+    withEntitiesRemoteFilter(productEntityConfig, {
       defaultFilter: { search: '' },
     }),
-    withEntitiesRemotePagination({
-      ...productEntityConfig,
-      pageSize: 10,
-    }),
-    withEntitiesRemoteSort({
-      ...productEntityConfig,
+    withEntitiesRemotePagination(productEntityConfig, { pageSize: 10 }),
+    withEntitiesRemoteSort(productEntityConfig, {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(productEntityConfig),
-    withEntitiesSyncToRouteQueryParams({
-      ...productEntityConfig,
-    }),
+    withEntitiesSyncToRouteQueryParams(productEntityConfig),
     withEntitiesLoadingCall(
+      productEntityConfig,
       (
         {
           productEntitiesPagedRequest,
@@ -56,7 +49,6 @@ export function withProductEntities() {
         },
         service = inject(ProductService),
       ) => ({
-        ...productEntityConfig,
         fetchEntities: async () => {
           const query = {
             search: productEntitiesFilter().search,

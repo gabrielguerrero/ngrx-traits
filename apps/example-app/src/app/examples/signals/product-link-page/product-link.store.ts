@@ -31,12 +31,11 @@ export type ProductFilter = {
 };
 
 export const ProductLinkStore = signalStore(
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
   withEntities(productsEntityConfig),
   withEntitiesSingleSelection(productsEntityConfig),
-  withEntitiesLocalPagination({ ...productsEntityConfig, pageSize: 10 }),
-  withEntitiesLocalFilter({
-    ...productsEntityConfig,
+  withEntitiesLocalPagination(productsEntityConfig, { pageSize: 10 }),
+  withEntitiesLocalFilter(productsEntityConfig, {
     defaultFilter: {
       search: '',
       genres: genres,
@@ -52,8 +51,7 @@ export const ProductLinkStore = signalStore(
       (!filter?.price ||
         (entity.price >= filter.price.min && entity.price <= filter.price.max)),
   }),
-  withEntitiesLoadingCall({
-    ...productsEntityConfig,
+  withEntitiesLoadingCall(productsEntityConfig, {
     fetchEntities: () =>
       inject(ProductService)
         .getProducts()

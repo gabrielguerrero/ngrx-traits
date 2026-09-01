@@ -63,26 +63,22 @@ const productEntityConfig = entityConfig({
 
 const productsStoreFeature = signalStoreFeature(
   withEntities(productEntityConfig),
-  withCallStatus({
-    ...productEntityConfig,
+  withCallStatus(productEntityConfig, {
     initialValue: 'loading',
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    ...productEntityConfig,
+  withEntitiesRemoteFilter(productEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    ...productEntityConfig,
+  withEntitiesRemotePagination(productEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    ...productEntityConfig,
+  withEntitiesRemoteSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
+    productEntityConfig,
     ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
-      ...productEntityConfig,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({
@@ -116,26 +112,22 @@ const productEntityConfig = entityConfig({
 
 const productsStoreFeature = signalStoreFeature(
   withEntities(productEntityConfig),
-  withCallStatus({
-    ...productEntityConfig,
+  withCallStatus(productEntityConfig, {
     initialValue: 'loading',
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    ...productEntityConfig,
+  withEntitiesRemoteFilter(productEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    ...productEntityConfig,
+  withEntitiesRemotePagination(productEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    ...productEntityConfig,
+  withEntitiesRemoteSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
+    productEntityConfig,
     ({ itemEntitiesPagedRequest, itemEntitiesFilter, itemEntitiesSort }) => ({
-      ...productEntityConfig,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({

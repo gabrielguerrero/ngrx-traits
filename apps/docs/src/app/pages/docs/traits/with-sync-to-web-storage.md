@@ -25,7 +25,7 @@ import { withSyncToWebStorage } from '@ngrx-traits/signals';
 // ✅ Correct order
 signalStore(
   withEntities({ entity }),
-  withCallStatus({ prop: 'products', initialValue: 'loading' }),
+  withCallStatus({ initialValue: 'loading' }),
 
   // Add withSyncToWebStorage BEFORE loading calls
   withSyncToWebStorage({
@@ -42,7 +42,7 @@ signalStore(
 // ❌ Incorrect order - will make unnecessary backend call
 signalStore(
   withEntities({ entity }),
-  withCallStatus({ prop: 'products', initialValue: 'loading' }),
+  withCallStatus({ initialValue: 'loading' }),
 
   // Loading call runs first
   withEntitiesLoadingCall({

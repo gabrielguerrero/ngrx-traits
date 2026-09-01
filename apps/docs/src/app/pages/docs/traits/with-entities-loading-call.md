@@ -36,40 +36,40 @@ const productsEntityConfig = entityConfig({
 export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
-  withEntitiesRemoteFilter({
-    ...productsEntityConfig,
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
+  withEntitiesRemoteFilter(productsEntityConfig, {
     defaultFilter: { name: '' },
   }),
-  withEntitiesRemotePagination({
-    ...productsEntityConfig,
+  withEntitiesRemotePagination(productsEntityConfig, {
     pageSize: 5,
     pagesToCache: 2,
   }),
-  withEntitiesRemoteSort({
-    ...productsEntityConfig,
+  withEntitiesRemoteSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
 
-  withEntitiesLoadingCall({
-    collection,
-    fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
-      return inject(ProductService)
-        .getProducts({
-          search: productEntitiesFilter().name,
-          take: productEntitiesPagedRequest().size,
-          skip: productEntitiesPagedRequest().startIndex,
-          sortColumn: productEntitiesSort().field,
-          sortAscending: productEntitiesSort().direction === 'asc',
-        })
-        .pipe(
-          map((d) => ({
-            entities: d.resultList,
-            total: d.total,
-          })),
-        );
-    },
-  });
+  withEntitiesLoadingCall(
+    productsEntityConfig,
+    ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => ({
+      fetchEntities: () => {
+        return inject(ProductService)
+          .getProducts({
+            search: productEntitiesFilter().name,
+            take: productEntitiesPagedRequest().size,
+            skip: productEntitiesPagedRequest().startIndex,
+            sortColumn: productEntitiesSort().field,
+            sortAscending: productEntitiesSort().direction === 'asc',
+          })
+          .pipe(
+            map((d) => ({
+              entities: d.resultList,
+              total: d.total,
+            })),
+          );
+      },
+    }),
+  ),
+);
 ```
 
 Example using withEntitiesLoadingCall to with the withEntitiesLocal\* store features
@@ -82,22 +82,18 @@ const productsEntityConfig = entityConfig({
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
-  withEntitiesLocalPagination({
-    ...productsEntityConfig,
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
+  withEntitiesLocalPagination(productsEntityConfig, {
     pageSize: 5,
   }),
-  withEntitiesLocalFilter({
-    ...productsEntityConfig,
+  withEntitiesLocalFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) => !filter?.search || entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    ...productsEntityConfig,
+  withEntitiesLocalSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesLoadingCall({
-    ...productsEntityConfig,
+  withEntitiesLoadingCall(productsEntityConfig, {
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()

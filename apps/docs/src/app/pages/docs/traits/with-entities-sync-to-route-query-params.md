@@ -23,27 +23,25 @@ import { withEntitiesSyncToRouteQueryParams, getFilterQueryMapper } from '@ngrx-
 ### Syncing entities filter, pagination, sort and single selection to route query params
 
 ```typescript
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
+
 export const ProductsRemoteStore = signalStore(
   { providedIn: 'root' },
   // requires at least withEntities and withCallStatus
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: 'loading' }),
-  withEntitiesRemoteFilter({
-    entity,
-    collection,
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+  withEntitiesRemoteFilter(productEntityConfig, {
+    defaultFilter: { name: '' },
   }),
-  withEntitiesRemotePagination({
-    entity,
-    collection,
-  }),
-  withEntitiesRemoteSort({
-    entity,
-    collection,
+  withEntitiesRemotePagination(productEntityConfig),
+  withEntitiesRemoteSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesLoadingCall({
-    collection,
-    fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
+  withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => ({
+    fetchEntities: () => {
       return inject(ProductService)
         .getProducts({
           search: productEntitiesFilter().name,
@@ -59,12 +57,9 @@ export const ProductsRemoteStore = signalStore(
           })),
         );
     },
-  }),
+  })),
   // syncs the entities filter, pagination, sort and single selection to the route query params
-  withEntitiesSyncToRouteQueryParams({
-    entity,
-    collection,
-  })
+  withEntitiesSyncToRouteQueryParams(productEntityConfig)
 );
 ```
 
@@ -73,15 +68,18 @@ export const ProductsRemoteStore = signalStore(
 Use `syncMultiSelection: true`  when using `withEntitiesMultiSelection`. Selected ids are serialized as a comma-separated `selectedIds` query param.
 
 ```typescript
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
+
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: 'loading' }),
-  withEntitiesMultiSelection({ entity, collection }),
-  withEntitiesLoadingCall({ ... }),
-  withEntitiesSyncToRouteQueryParams({
-    entity,
-    collection,
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+  withEntitiesMultiSelection(productEntityConfig),
+  withEntitiesLoadingCall(productEntityConfig, { ... }),
+  withEntitiesSyncToRouteQueryParams(productEntityConfig, {
     syncMultiSelection: true,
   }),
 );
@@ -93,7 +91,7 @@ You can sync more than one collection in the same store, each `withEntitiesSyncT
 
 When you have multiple collections, group each one into its own custom store feature (or give it its own store) instead of listing every feature of both collections directly in one `signalStore`. It keeps each collection readable and reusable on its own. It also avoids the feature limit: `signalStore` accepts up to 15 features, and a fully configured collection already uses about 8 of them, so two collections would not fit.
 
-Use `entityConfig` to declare the entity and collection once, then spread it when a feature takes extra options, or pass it directly when it does not.
+Use `entityConfig` to declare the entity and collection once, then pass it as the first argument to every feature for that collection.
 
 ```typescript
 // with-product-entities.ts
@@ -105,29 +103,25 @@ export const productEntityConfig = entityConfig({
 export function withProductEntities() {
   return signalStoreFeature(
     withEntities(productEntityConfig),
-    withCallStatus({ ...productEntityConfig, initialValue: 'loading' }),
-    withEntitiesRemoteFilter({
-      ...productEntityConfig,
+    withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+    withEntitiesRemoteFilter(productEntityConfig, {
       defaultFilter: { search: '' },
     }),
-    withEntitiesRemotePagination({
-      ...productEntityConfig,
+    withEntitiesRemotePagination(productEntityConfig, {
       pageSize: 10,
     }),
-    withEntitiesRemoteSort({
-      ...productEntityConfig,
+    withEntitiesRemoteSort(productEntityConfig, {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(productEntityConfig),
     // 👇 params become p-filter, p-page, p-pageSize, p-sortBy, p-sortDirection, p-selectedId
-    withEntitiesSyncToRouteQueryParams({
-      ...productEntityConfig,
+    withEntitiesSyncToRouteQueryParams(productEntityConfig, {
       prefix: 'p',
     }),
     withEntitiesLoadingCall(
+      productEntityConfig,
       ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort },
         service = inject(ProductService)) => ({
-        ...productEntityConfig,
         fetchEntities: async () => { ... },
       }),
     ),
@@ -145,19 +139,16 @@ export const orderItemEntityConfig = entityConfig({
 export function withOrderEntities() {
   return signalStoreFeature(
     withEntities(orderItemEntityConfig),
-    withCallStatus({ ...orderItemEntityConfig, initialValue: 'loading' }),
-    withEntitiesLocalSort({
-      ...orderItemEntityConfig,
+    withCallStatus(orderItemEntityConfig, { initialValue: 'loading' }),
+    withEntitiesLocalSort(orderItemEntityConfig, {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
-    withEntitiesLocalPagination({
-      ...orderItemEntityConfig,
+    withEntitiesLocalPagination(orderItemEntityConfig, {
       pageSize: 10,
     }),
     withEntitiesSingleSelection(orderItemEntityConfig),
     // 👇 params become o-filter, o-page, o-pageSize, o-sortBy, o-sortDirection, o-selectedId
-    withEntitiesSyncToRouteQueryParams({
-      ...orderItemEntityConfig,
+    withEntitiesSyncToRouteQueryParams(orderItemEntityConfig, {
       prefix: 'o',
     }),
   );
@@ -198,8 +189,7 @@ Use `filterMapper` with `getFilterQueryMapper` to spread the filter over one par
 ```typescript
 type ProductFilter = { search: string; maxPrice: number; from: Date };
 
-withEntitiesSyncToRouteQueryParams({
-  ...productEntityConfig,
+withEntitiesSyncToRouteQueryParams(productEntityConfig, {
   prefix: 'p',
   // 👇 p-search=tv&p-maxPrice=100&p-from=2026-08-11
   filterMapper: getFilterQueryMapper<ProductFilter>({
@@ -217,8 +207,7 @@ A field holding an object can be described field by field too, with a nested pro
 ```typescript
 type ProductFilter = { search: string; range: { from: Date; to: Date } };
 
-withEntitiesSyncToRouteQueryParams({
-  ...productEntityConfig,
+withEntitiesSyncToRouteQueryParams(productEntityConfig, {
   prefix: 'p',
   // 👇 p-search=tv&p-range.from=2026-08-11&p-range.to=2026-08-31
   filterMapper: getFilterQueryMapper<ProductFilter>({
@@ -237,8 +226,7 @@ The flip side is that a field cannot travel as cleared unless its default alread
 For anything else, like renaming a field to something shorter, pass the mapper object by hand:
 
 ```typescript
-withEntitiesSyncToRouteQueryParams({
-  ...productEntityConfig,
+withEntitiesSyncToRouteQueryParams(productEntityConfig, {
   prefix: 'p',
   filterMapper: {
     // 👇 p-filter={"search":"tv"} becomes p-q=tv
