@@ -1,10 +1,26 @@
 <!doctype html>
-<html lang="en" class='dark' data-theme="dark">
+<html lang="en" class="dark" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <title>NgRx Traits</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+      // applies the stored/system theme before first paint to avoid a flash of
+      // the wrong theme, ThemeService picks it up from here on the client
+      (function () {
+        try {
+          var theme = localStorage.getItem('ngrx-traits-theme');
+          if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches
+              ? 'light'
+              : 'dark';
+          }
+          document.documentElement.classList.toggle('dark', theme === 'dark');
+          document.documentElement.setAttribute('data-theme', theme);
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/x-icon" href="public/favicon.ico" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <link
@@ -26,7 +42,7 @@
       href="https://gabrielguerrerosite-914026926.imgix.net"
     />
   </head>
-  <body class="dark bg-white dark:bg-gray-950">
+  <body class="bg-white dark:bg-gray-950">
     <app-root></app-root>
     <script type="module" src="/src/main.ts"></script>
   </body>

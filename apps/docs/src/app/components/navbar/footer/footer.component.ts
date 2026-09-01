@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'docs-footer',
   standalone: true,
   host: { class: 'block' },
-  template: `<footer class="grid pt-24 text-zinc-300 z-10">
+  template: `<footer class="grid pt-24 text-zinc-700 dark:text-zinc-300 z-10">
     <div class="grid sm:grid-cols-3 gap-8 sm:gap-24">
       <ul class="flex flex-col gap-2">
         <li class="font-bold">Documentation</li>
