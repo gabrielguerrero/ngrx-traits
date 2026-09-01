@@ -190,18 +190,17 @@ export const ProductsLocalStore = signalStore(
 By default, the withEntities expect the Entity to have an id prop, but you can change that by passing a custom id like:
 
 ```typescript
-const entityConfig = entityConfig({
+const productEntityConfig = entityConfig({
   entity: type<ProductCustom>(),
   collection: 'product',
   selectId: (entity) => entity.productId,
 });
 
 export const ProductsLocalStore = signalStore(
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: "loading" }),
-  withEntitiesLocalPagination({ ...entityConfig, pageSize: 5 }),
-  withEntitiesLoadingCall({
-    ...entityConfig,
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: "loading" }),
+  withEntitiesLocalPagination(productEntityConfig, { pageSize: 5 }),
+  withEntitiesLoadingCall(productEntityConfig, {
     fetchEntities: () =>
       inject(ProductService)
         .getProducts()

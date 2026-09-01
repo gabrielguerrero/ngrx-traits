@@ -30,26 +30,24 @@ import { withEntitiesRemoteFilter } from '@ngrx-traits/signals';
 In this example we have a list of products and we want to filter them based on a search term, we will use the defaultFilter prop to set the initial filter, and the filterFn to filter the entities based on the search term. The generated `filterProductEntities` will store the filter and  call `setProductEntitiesLoading()` which triggers the `fetchEntities` function, notice we access the filter value in the `fetchEntities` function using the `productEntitiesFilter()` signal.
 
 ```typescript
-const entityConfig = entityConfig({
+const productEntityConfig = entityConfig({
   entity: type<T>(),
-  collection,
+  collection: 'product',
 });
 
 export const store = signalStore(
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: 'loading' }),
-  withEntitiesRemoteFilter({
-    ...entityConfig,
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+  withEntitiesRemoteFilter(productEntityConfig, {
     defaultFilter: { name: '' },
   }),
-  withEntitiesLoadingCall({
-    ...entityConfig,
-    fetchEntities: ({ productEntitiesFilter }) => {
+  withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesFilter }) => ({
+    fetchEntities: () => {
       return inject(ProductService).getProducts({
         search: productEntitiesFilter().name,
       });
     },
-  }),
+  })),
 );
 ```
 
@@ -106,34 +104,29 @@ You can mix this feature with other remote store features like withEntitiesRemot
 
 
 ```typescript
+const productsEntityConfig = entityConfig({
+  entity: productsEntity,
+  collection: productsCollection,
+});
+
 const productsStoreFeature = signalStoreFeature(
-  withEntities({
-    entity: productsEntity,
-    collection: productsCollection,
-  }),
-  withCallStatus({
+  withEntities(productsEntityConfig),
+  withCallStatus(productsEntityConfig, {
     initialValue: 'loading',
-    collection: productsCollection,
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemotePagination(productsEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
+    productsEntityConfig,
     ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
-      collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({

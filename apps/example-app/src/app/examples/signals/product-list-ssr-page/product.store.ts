@@ -36,21 +36,18 @@ export const ProductsSSRStore = signalStore(
   { providedIn: 'root' },
   withErrorSnackbar(),
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
-  withEntitiesLocalPagination({
-    ...productsEntityConfig,
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
+  withEntitiesLocalPagination(productsEntityConfig, {
     pageSize: 5,
   }),
-  withEntitiesLocalFilter({
-    ...productsEntityConfig,
+  withEntitiesLocalFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
   withLinkEntitiesFilter(productsEntityConfig),
-  withEntitiesLocalSort({
-    ...productsEntityConfig,
+  withEntitiesLocalSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesSingleSelection(productsEntityConfig),
@@ -75,8 +72,7 @@ export const ProductsSSRStore = signalStore(
     key: 'product-list-ssr',
   }),
   // be sure to put loading call last, so any state updates are done before loading
-  withEntitiesLoadingCall({
-    ...productsEntityConfig,
+  withEntitiesLoadingCall(productsEntityConfig, {
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()

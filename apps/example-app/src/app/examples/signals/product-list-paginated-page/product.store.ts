@@ -33,25 +33,21 @@ export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withErrorSnackbar(),
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
-  withEntitiesLocalPagination({
-    ...productsEntityConfig,
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
+  withEntitiesLocalPagination(productsEntityConfig, {
     pageSize: 5,
   }),
-  withEntitiesLocalFilter({
-    ...productsEntityConfig,
+  withEntitiesLocalFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    ...productsEntityConfig,
+  withEntitiesLocalSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesSingleSelection(productsEntityConfig),
-  withEntitiesLoadingCall({
-    ...productsEntityConfig,
+  withEntitiesLoadingCall(productsEntityConfig, {
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()
