@@ -699,6 +699,64 @@ describe('withEntitiesRemotePagination', () => {
     });
   }));
 
+  describe('two-arg (entityConfig, options) form', () => {
+    it('with collection entitiesCurrentPage should split entities in the correct pages, same as single object form', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const collection = 'product';
+        const Store = signalStore(
+          withEntities({ entity, collection }),
+          withCallStatus({ collection }),
+          // pageSize is deliberately not the default 10, so this fails if the
+          // options argument is ignored
+          withEntitiesRemotePagination({ entity, collection }, { pageSize: 5 }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: ({ productEntitiesPagedRequest }) => {
+              let result = [...mockProducts.slice(0, 25)];
+              const total = result.length;
+              const options = {
+                skip: productEntitiesPagedRequest()?.startIndex,
+                take: productEntitiesPagedRequest()?.size,
+              };
+              if (options?.skip || options?.take) {
+                const skip = +(options?.skip ?? 0);
+                const take = +(options?.take ?? 0);
+                result = result.slice(skip, skip + take);
+              }
+              return of({ entities: result, total });
+            },
+          }),
+        );
+
+        const store = new Store();
+        TestBed.tick();
+        expect(store.productEntities()).toEqual([]);
+        store.setProductEntitiesLoading();
+        tick();
+
+        // check the first page
+        expect(store.productEntitiesCurrentPage().entities.length).toEqual(5);
+        expect(store.productEntitiesCurrentPage().entities).toEqual(
+          mockProducts.slice(0, 5),
+        );
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(0);
+        expect(store.productEntitiesCurrentPage().pageSize).toEqual(5);
+        expect(store.productEntitiesCurrentPage().pagesCount).toEqual(5);
+        expect(store.productEntitiesCurrentPage().total).toEqual(25);
+        expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(false);
+        expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
+
+        store.loadProductEntitiesPage({ pageIndex: 1 });
+        // check the second page
+        expect(store.productEntitiesCurrentPage().entities.length).toEqual(5);
+        expect(store.productEntitiesCurrentPage().entities).toEqual(
+          mockProducts.slice(5, 10),
+        );
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(1);
+      });
+    }));
+  });
+
   describe('loadEntitiesPage', () => {
     it('test when a requested page is not cache gets loaded', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
