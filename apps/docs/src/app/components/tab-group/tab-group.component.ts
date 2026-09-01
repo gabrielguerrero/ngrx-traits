@@ -16,7 +16,7 @@ import type { TabComponent } from '../tab/tab.component';
   template: ` <div class="mb-3 flex gap-x-4 border-b">
       @for (tab of tabs(); track tab.label) {
         <button
-          class="focus-visible:ring-primary -mb-px h-10 border-b-2 font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-opacity-50 focus-visible:ring-offset-2"
+          class="focus-visible:ring-primary/50 -mb-px h-10 border-b-2 font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
           [ngClass]="{
             'border-primary text-zinc-600 dark:text-zinc-300':
               activeTab()?.label === tab.label,
