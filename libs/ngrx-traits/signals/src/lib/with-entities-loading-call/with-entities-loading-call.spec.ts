@@ -1,3 +1,4 @@
+import { inject, Injectable } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type } from '@ngrx/signals';
 import {
@@ -776,6 +777,65 @@ describe('withEntitiesLoadingCall', () => {
       }));
     });
   });
+  describe('two-arg (entityConfig, options) form', () => {
+    it('with collection should setAllEntities if fetchEntities returns an Entity[], same as single object form', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({
+            entity,
+            collection,
+          }),
+          withCallStatus({ collection }),
+          withEntitiesLoadingCall(
+            { entity, collection },
+            {
+              fetchEntities: () => {
+                let result = [...mockProducts];
+                return of(result);
+              },
+            },
+          ),
+        );
+        const store = new Store();
+        tick();
+        expect(store.productEntities()).toEqual([]);
+        store.setProductEntitiesLoading();
+        tick();
+        expect(store.productEntities()).toEqual(mockProducts);
+      });
+    }));
+
+    it('with collection options as a store-factory that calls inject() works', fakeAsync(() => {
+      @Injectable({ providedIn: 'root' })
+      class TestProductsService {
+        getProducts() {
+          return of([...mockProducts]);
+        }
+      }
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({
+            entity,
+            collection,
+          }),
+          withCallStatus({ collection }),
+          withEntitiesLoadingCall(
+            { entity, collection },
+            (store, service = inject(TestProductsService)) => ({
+              fetchEntities: () => service.getProducts(),
+            }),
+          ),
+        );
+        const store = new Store();
+        tick();
+        expect(store.productEntities()).toEqual([]);
+        store.setProductEntitiesLoading();
+        tick();
+        expect(store.productEntities()).toEqual(mockProducts);
+      });
+    }));
+  });
+
   describe('missing required features', () => {
     it('should error if withCallStatus is missing', () => {
       // @ts-expect-error withEntitiesLoadingCall requires withCallStatus({ collection: 'product' })

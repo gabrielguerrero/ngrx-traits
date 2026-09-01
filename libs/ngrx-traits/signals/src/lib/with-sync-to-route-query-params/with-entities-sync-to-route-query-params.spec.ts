@@ -1267,6 +1267,55 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     });
   }));
 
+  describe('two-arg (entityConfig, options) form', () => {
+    it('prefix false should remove collection prefix, same as single object form', fakeAsync(() => {
+      // Arrange
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        localCollectionStoreFeature({ load }),
+        withEntitiesSyncToRouteQueryParams(
+          { entity, collection },
+          { prefix: false },
+        ),
+      );
+      const { store, router } = init({
+        Store,
+        queryParams: {
+          page: '2',
+          filter: JSON.stringify({ search: '', foo: 'bar' }),
+          sortBy: 'description',
+          sortDirection: 'desc',
+          selectedId: '2',
+        },
+      });
+      tick();
+      load.next(true);
+      tick(400);
+      // Act
+      store.filterProductEntities({
+        filter: { search: 'a', foo: 'bar2' },
+        forceLoad: true,
+      });
+      store.sortProductEntities({ sort: { field: 'name', direction: 'asc' } });
+      store.selectProductEntity({ id: '35' });
+      store.loadProductEntitiesPage({ pageIndex: 2 });
+      tick(400);
+      // Assert
+      expect(router.navigate).toHaveBeenCalledWith([], {
+        relativeTo: expect.anything(),
+        queryParams: expect.objectContaining({
+          page: '3',
+          pageSize: '10',
+          filter: JSON.stringify({ search: 'a', foo: 'bar2' }),
+          sortBy: 'name',
+          sortDirection: 'asc',
+          selectedId: '35',
+        }),
+        queryParamsHandling: 'merge',
+      });
+    }));
+  });
+
   it('onQueryParamsLoaded should called after query params are set in the store', fakeAsync(() => {
     // Arrange
     const load = new Subject<boolean>();

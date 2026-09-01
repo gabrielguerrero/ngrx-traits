@@ -314,8 +314,7 @@ describe('withEntitiesCalls', () => {
                 return apiResponse;
               },
               paramsSelectId: ({ id }) => id,
-              mapError: (error, { id }) =>
-                (error as Error).message + ' ' + id,
+              mapError: (error, { id }) => (error as Error).message + ' ' + id,
             }),
           }),
         }),
@@ -368,6 +367,41 @@ describe('withEntitiesCalls', () => {
       expect(store.productEntityMap()[product.id].detail).toEqual(
         productDetail,
       );
+    });
+  });
+
+  describe('two-arg (entityConfig, callsFactory) form', () => {
+    it('Successful call using collection, should set status to loading and loaded, same as single object form', async () => {
+      TestBed.runInInjectionContext(() => {
+        const apiResponse = new Subject<Partial<ProductDetail>>();
+        const Store = signalStore(
+          { protectedState: false },
+          withState({ foo: 'bar' }),
+          withEntities({ entity, collection }),
+          withEntitiesCalls({ entity, collection }, () => ({
+            loadProductDetail: entityCallConfig({
+              call: ({ id }: { id: string; apiKey: string }) => {
+                return apiResponse;
+              },
+              paramsSelectId: ({ id }) => id,
+              onSuccess,
+              onError,
+            }),
+          })),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+
+        const product = mockProducts[0];
+        expect(store.isLoadProductDetailLoading(product.id)).toBeFalsy();
+        store.loadProductDetail({ id: product.id, apiKey: 'test' });
+        expect(store.isLoadProductDetailLoading(product.id)).toBeTruthy();
+        apiResponse.next({ detail: productDetail });
+        expect(store.isLoadProductDetailLoaded(product.id)).toBeTruthy();
+        expect(store.productEntityMap()[product.id].detail).toEqual(
+          productDetail,
+        );
+      });
     });
   });
 

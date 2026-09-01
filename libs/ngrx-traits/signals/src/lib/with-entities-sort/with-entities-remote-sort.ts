@@ -22,6 +22,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -51,37 +52,37 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  *
  * Requires withEntities and withCallStatus to be present before this function.
  *
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection })`)
  * @param configFactory.defaultSort - The default sort to use when the store is initialized
  * @param configFactory.entity - The entity type
  * @param configFactory.collection - The collection name
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = 'product';
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ collection, initialValue: 'loading' }),
+ *   withEntities(productEntityConfig),
+ *   withCallStatus(productEntityConfig, { initialValue: 'loading' }),
  *
- *   withEntitiesRemoteSort({
- *     entity,
- *     collection,
+ *   withEntitiesRemoteSort(productEntityConfig, {
  *     defaultSort: { field: 'name', direction: 'asc' },
  *   }),
  *   // after you can use withEntitiesLoadingCall to connect the filter to
  *   // the api call, or do it manually as shown after
- *    withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productEntitiesSort }) => {
+ *    withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesSort }) => ({
+ *     fetchEntities: () => {
  *       return inject(ProductService)
  *         .getProducts({
  *           sortColumn: productEntitiesSort().field,
  *           sortAscending: productEntitiesSort().direction === 'asc',
  *         })
  *     },
- *   }),
+ *   })),
  * // withEntitiesLoadingCall is the same as doing the following:
  * // withHooks(({ productEntitiesSort, isProductEntitiesLoading, setProductEntitiesError, ...state }) => ({
  * //   onInit: async () => {
@@ -144,9 +145,58 @@ export function withEntitiesRemoteSort<
         props: {};
         methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
       }
-> {
+>;
+export function withEntitiesRemoteSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultSort: Sort<NoInfer<Entity>>;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesRemoteSort'> &
+    RequireEntitiesCallStatus<Input, Collection, 'withEntitiesRemoteSort'>,
+  Collection extends ''
+    ? {
+        state: EntitiesSortState<Entity>;
+        props: {};
+        methods: EntitiesRemoteSortMethods<Entity>;
+      }
+    : {
+        state: NamedEntitiesSortState<Entity, Collection>;
+        props: {};
+        methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
+      }
+>;
+export function withEntitiesRemoteSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory((store: StoreSource<Input>) => {
-    const { defaultSort, ...config } = getFeatureConfig(configFactory, store);
+    const { defaultSort, ...config } = getFeatureConfig(
+      configFactory,
+      store,
+    ) as {
+      entity: Entity;
+      defaultSort: Sort<Entity>;
+      collection?: Collection;
+    };
     const { setLoadingKey } = getWithCallStatusKeys({
       collection: config.collection,
     });

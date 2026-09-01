@@ -69,10 +69,12 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  * *Important* The calls must have a parameter of type Entity  {entity: Entity, ...extra params} or use entityCallConfig
  * and the paramsSelectId to return with param prop represents the entityId .
  * The call can be skipped based on the result of the previous call, to skip a call return undefined or false.
+ * @param config - The full feature config or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param config.entity - The entity type to be used
  * @param config.collection - The optional collection name to be used
  * @param config.selectId - The function to use to select the id of the entity
- * @param config.callsFactory - a factory function that receives the store and returns an object of type {Record<string,  EntitiesCallConfig>} with the calls to be made
+ * @param config.calls - a factory function that receives the store and returns an object of type {Record<string,  EntitiesCallConfig>} with the calls to be made
+ * @param calls - Two-argument form only: the calls factory, passed directly as the second argument instead of as a `calls` property
  *
  * @example
  * const orderEntity = entityConfig({
@@ -81,29 +83,26 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  * });
  * export const OrderStore = signalStore(
  *   withEntities(orderEntity),
- *   withEntitiesCalls({
- *     ...orderEntity,
- *     calls: (store, orderService = inject(OrderService)) => ({
- *       loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id),
- *       // alternative way to define the call
- *       // loadOrderDetail: entityCallConfig({
- *       //   call: (entity: OrderSummary) => orderService.getOrderDetail(entity.id),
- *       //   // skip the call if result is already loaded
- *       //   skipWhen: (param, previousResult) => !!previousResult?.items,
- *       // }),
- *       changeOrderStatus: (option: {
- *         entity: OrderSummary;
- *         status: OrderSummary['status'];
- *       }) => orderService.changeStatus(option.entity.id, option.status),
- *       deleteOrder: (entity: OrderSummary) => {
- *         return orderService.delete(entity.id).pipe(
- *           map((deleted) => {
- *             deleted ? undefined : entity; // returning undefined will remove the entity from the store
- *           }),
- *         );
- *       },
- *     }),
- *   }),
+ *   withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => ({
+ *     loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id),
+ *     // alternative way to define the call
+ *     // loadOrderDetail: entityCallConfig({
+ *     //   call: (entity: OrderSummary) => orderService.getOrderDetail(entity.id),
+ *     //   // skip the call if result is already loaded
+ *     //   skipWhen: (param, previousResult) => !!previousResult?.items,
+ *     // }),
+ *     changeOrderStatus: (option: {
+ *       entity: OrderSummary;
+ *       status: OrderSummary['status'];
+ *     }) => orderService.changeStatus(option.entity.id, option.status),
+ *     deleteOrder: (entity: OrderSummary) => {
+ *       return orderService.delete(entity.id).pipe(
+ *         map((deleted) => {
+ *           deleted ? undefined : entity; // returning undefined will remove the entity from the store
+ *         }),
+ *       );
+ *     },
+ *   })),
  * );
  *
  *   // generates the following signals
@@ -137,8 +136,7 @@ export function withEntitiesCalls<
   selectId?: SelectEntityId<NoInfer<Entity>>;
   calls: (store: StoreSource<Input>) => Calls;
 }): SignalStoreFeature<
-  Input &
-    RequireEntities<Input, Entity, Collection, 'withEntitiesCalls'>,
+  Input & RequireEntities<Input, Entity, Collection, 'withEntitiesCalls'>,
   {
     state: NamedCallStatusMapState<keyof Calls & string>;
     props: NamedEntitiesCallsStatusComputed<Calls>;
@@ -174,7 +172,78 @@ export function withEntitiesCalls<
           : never;
     };
   }
-> {
+>;
+export function withEntitiesCalls<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  const Calls extends Record<
+    string,
+    EntityCall<NoInfer<Entity>> | EntityCallConfig<NoInfer<Entity>>
+  >,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  calls: (store: StoreSource<Input>) => Calls,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, Collection, 'withEntitiesCalls'>,
+  {
+    state: NamedCallStatusMapState<keyof Calls & string>;
+    props: NamedEntitiesCallsStatusComputed<Calls>;
+    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> & {
+      [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
+        ? {
+            (param: P[0]): Promise<
+              | { value: Signal<Entity>; ok: true }
+              | {
+                  error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
+                  ok: false;
+                }
+            >;
+            (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
+          }
+        : Calls[K] extends EntityCallConfig
+          ? Parameters<Calls[K]['call']> extends undefined[]
+            ? () => void
+            : {
+                (...param: Parameters<Calls[K]['call']>): Promise<
+                  | { value: Signal<Entity>; ok: true }
+                  | {
+                      error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
+                      ok: false;
+                    }
+                >;
+                (
+                  param:
+                    | Observable<Parameters<Calls[K]['call']>[0]>
+                    | (() => Parameters<Calls[K]['call']>[0]),
+                ): RxMethodRef;
+              }
+          : never;
+    };
+  }
+>;
+export function withEntitiesCalls<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrEntityConfig: Record<string, any>,
+  callsFactory?: (store: StoreSource<Input>) => Record<string, any>,
+): SignalStoreFeature<any, any> {
+  const config = (
+    callsFactory
+      ? { ...configOrEntityConfig, calls: callsFactory }
+      : configOrEntityConfig
+  ) as {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<Entity>;
+    calls: (store: StoreSource<Input>) => Record<string, any>;
+  };
   return withFeatureFactory((store) => {
     const calls = config.calls(store as StoreSource<Input>);
     const callsState = Object.entries(calls).reduce(

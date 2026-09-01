@@ -649,6 +649,124 @@ describe('withEntitiesLocalFilter', () => {
     });
   });
 
+  describe('two-arg (entityConfig, options) form', () => {
+    it(' should rename props when collection param is set, same as single object form', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({
+            entity,
+            collection,
+          }),
+          withEntitiesLocalPagination({ entity, collection }),
+          withEntitiesLocalFilter(
+            { entity, collection },
+            {
+              defaultFilter: { search: '', foo: 'bar' },
+              filterFn: (entity, filter) =>
+                !filter?.search ||
+                entity?.name
+                  .toLowerCase()
+                  .includes(filter?.search.toLowerCase()),
+            },
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.loadProductEntitiesPage({ pageIndex: 3 });
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
+
+        store.filterProductEntities({
+          filter: { search: 'zero' },
+          patch: true,
+        });
+        tick(400);
+        expect(store.productEntities().length).toEqual(2);
+        expect(store.productEntities()).toEqual([
+          {
+            description: 'Super Nintendo Game',
+            id: '1',
+            name: 'F-Zero',
+            price: 12,
+            categoryId: 'snes',
+          },
+          {
+            description: 'GameCube Game',
+            id: '80',
+            name: 'F-Zero GX',
+            price: 55,
+            categoryId: 'gamecube',
+          },
+        ]);
+        expect(store.productEntitiesFilter()).toEqual({
+          search: 'zero',
+          foo: 'bar',
+        });
+        expect(store.productEntitiesFilter.search()).toEqual('zero');
+      });
+    }));
+
+    it('options as config factory can read previous state, with collection', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({ myDefault: { search: '', foo: 'bar' } }),
+          withEntities({
+            entity,
+            collection,
+          }),
+          withEntitiesLocalFilter({ entity, collection }, ({ myDefault }) => ({
+            defaultFilter: myDefault(),
+            filterFn: (entity, filter: { search: string; foo: string }) =>
+              !filter?.search ||
+              entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+          })),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.filterProductEntities({
+          filter: { search: 'zero', foo: 'bar2' },
+        });
+        expect(store.productEntities().length).toEqual(mockProducts.length);
+        tick(400);
+        expect(store.productEntities().length).toEqual(2);
+        expect(store.productEntitiesFilter()).toEqual({
+          search: 'zero',
+          foo: 'bar2',
+        });
+      });
+    }));
+
+    it('with no collection should filter entities and store filter', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity }),
+          withEntitiesLocalFilter(
+            { entity },
+            {
+              defaultFilter: { search: '', foo: 'bar' },
+              filterFn: (entity, filter) =>
+                !filter?.search ||
+                entity?.name
+                  .toLowerCase()
+                  .includes(filter?.search.toLowerCase()),
+            },
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        store.filterEntities({ filter: { search: 'zero', foo: 'bar2' } });
+        tick(400);
+        expect(store.entitiesFilter()).toEqual({
+          search: 'zero',
+          foo: 'bar2',
+        });
+        expect(store.entities().length).toEqual(2);
+      });
+    }));
+  });
+
   describe('resetEntitiesFilter with newDefaultFilter', () => {
     it('should set filter to newDefaultFilter and apply filtering', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
