@@ -22,6 +22,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -43,22 +44,23 @@ import {
  * Generates necessary state, computed and methods for local pagination of entities in the store.
  *
  * Requires withEntities to be present in the store.
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection })`)
  * @param configFactory.pageSize - The number of entities to show per page
  * @param configFactory.currentPage - The current page to show
  * @param configFactory.entity - The entity type
  * @param configFactory.collection - The name of the collection
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = "product";
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const ProductsLocalStore = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities
- *   withEntities({ entity, collection }),
- *   withEntitiesLocalPagination({
- *     entity,
- *     collection,
+ *   withEntities(productEntityConfig),
+ *   withEntitiesLocalPagination(productEntityConfig, {
  *     pageSize: 5,
  *   }),
  *
@@ -98,7 +100,66 @@ export function withEntitiesLocalPagination<
         props: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
         methods: NamedEntitiesPaginationLocalMethods<Collection>;
       }
-> {
+>;
+export function withEntitiesLocalPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesLocalPagination'>,
+  Collection extends ''
+    ? {
+        state: EntitiesPaginationLocalState;
+        props: EntitiesPaginationLocalComputed<Entity>;
+        methods: EntitiesPaginationLocalMethods;
+      }
+    : {
+        state: NamedEntitiesPaginationLocalState<Collection>;
+        props: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
+        methods: NamedEntitiesPaginationLocalMethods<Collection>;
+      }
+>;
+export function withEntitiesLocalPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      entity: Entity;
+      collection?: Collection;
+    }
+  >,
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+    }
+  >,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(
+    configOrFactory,
+    options,
+  ) as typeof configOrFactory;
   return withFeatureFactory((store: StoreSource<Input>) => {
     const {
       pageSize = 10,

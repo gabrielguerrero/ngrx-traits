@@ -34,6 +34,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -71,32 +72,32 @@ import {
  * or a hasMore param set[Collection]Result({entities, hasMore}) that you can set to false to indicate the end of the entities.
  *
  * Requires withEntities and withCallStatus to be present in the store.
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection })`)
  * @param configFactory.pageSize - The number of entities to show per page
  * @param configFactory.pagesToCache - The number of pages to cache
  * @param configFactory.entity - The entity type
  * @param configFactory.collection - The name of the collection
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = 'product';
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // required withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ collection, initialValue: 'loading' }),
+ *   withEntities(productEntityConfig),
+ *   withCallStatus(productEntityConfig, { initialValue: 'loading' }),
  *
- *   withEntitiesRemoteScrollPagination({
- *     entity,
- *     collection,
+ *   withEntitiesRemoteScrollPagination(productEntityConfig, {
  *     pageSize: 5,
  *     pagesToCache: 2,
  *   })
  *   // after you can use withEntitiesLoadingCall to connect the filter to
  *   // the api call, or do it manually as shown after
- *    withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productPagedRequest }) => {
+ *    withEntitiesLoadingCall(productEntityConfig, ({ productPagedRequest }) => ({
+ *     fetchEntities: () => {
  *       return inject(ProductService)
  *         .getProducts({
  *           take: productPagedRequest().size,
@@ -108,7 +109,7 @@ import {
  *           })),
  *         )
  *     },
- *   }),
+ *   })),
  * // withEntitiesLoadingCall is the same as doing the following:
  * // withHooks(({ productEntitiesCallStatus, setProductEntitiesError, setProductPagedResult, ...state }) => ({
  * //   onInit: async () => {
@@ -190,13 +191,73 @@ export function withEntitiesRemoteScrollPagination<
         props: NamedEntitiesScrollPaginationComputed<Entity, Collection>;
         methods: NamedEntitiesScrollPaginationMethods<Entity, Collection>;
       }
-> {
+>;
+export function withEntitiesRemoteScrollPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      pagesToCache?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<
+      Input,
+      Entity,
+      Collection,
+      'withEntitiesRemoteScrollPagination'
+    > &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesRemoteScrollPagination'
+    >,
+  Collection extends ''
+    ? {
+        state: EntitiesScrollPaginationState;
+        props: EntitiesScrollPaginationComputed<Entity>;
+        methods: EntitiesScrollPaginationMethods<Entity>;
+      }
+    : {
+        state: NamedEntitiesScrollPaginationState<Collection>;
+        props: NamedEntitiesScrollPaginationComputed<Entity, Collection>;
+        methods: NamedEntitiesScrollPaginationMethods<Entity, Collection>;
+      }
+>;
+export function withEntitiesRemoteScrollPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory((store: StoreSource<Input>) => {
     const {
       pageSize = 10,
       pagesToCache = 3,
       ...config
-    } = getFeatureConfig(configFactory, store);
+    } = getFeatureConfig(configFactory, store) as {
+      entity: Entity;
+      collection?: Collection;
+      pageSize?: number;
+      pagesToCache?: number;
+      selectId?: SelectEntityId<Entity>;
+    };
     const { loadingKey, setLoadingKey } = getWithCallStatusKeys({
       collection: config.collection,
     });
