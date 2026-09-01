@@ -179,14 +179,16 @@ export class SignalProductListPaginatedPageContainerComponent {
 Most store features support a collection param that allows you have custom names in the generated signals and methods for example:
 
 ```typescript 
-  const entity = type<Product>();
-  const collection = 'products';
+  const productsConfig = entityConfig({
+    entity: type<Product>(),
+    collection: 'products',
+  });
   export const ProductsLocalStore = signalStore(
-    withEntities({ entity , collection}),
-    withCallStatus({ collection, initialValue: 'loading' }),
+    withEntities(productsConfig),
+    withCallStatus(productsConfig, { initialValue: 'loading' }),
     // 👆 adds signals isProductsLoading(), isProductsLoaded(), productsError()
     // and methods setProductsLoading() setProductsLoaded(), setProductsError(error)
-    withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
+    withEntitiesLocalPagination(productsConfig, { pageSize: 5 }),
     // 👆 adds signal productsCurrentPage()
     // and method loadProductsPage({pageIndex: number})"
     withHooks(({ setProductsLoaded, setProductsError, ...store }) => ({
@@ -212,16 +214,16 @@ Now we can also replace that withHook with withEntitiesLoadingCall, which is sim
 it will call the fetchEntities, when the entities status it set to loading, and will handle the storing the result, status changes and errors if any for you.
 
 ```typescript
-const entity = type<Product>();
-  const collection = "products";
+const productsConfig = entityConfig({
+    entity: type<Product>(),
+    collection: "products",
+  });
   export const ProductsLocalStore = signalStore(
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: "loading" }),
-  withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
+  withEntities(productsConfig),
+  withCallStatus(productsConfig, { initialValue: "loading" }),
+  withEntitiesLocalPagination(productsConfig, { pageSize: 5 }),
   // 👇 replaces withHook, will store entities result, change the status and handle errors
-  withEntitiesLoadingCall({
-  entity,
-  collection,
+  withEntitiesLoadingCall(productsConfig, {
   fetchEntities: () =>
     inject(ProductService)
       .getProducts()
@@ -245,10 +247,9 @@ const config = entityConfig({
 
 export const ProductsLocalStore = signalStore(
   withEntities(config),
-  withCallStatus({ ...config, initialValue: "loading" }),
-  withEntitiesLocalPagination({ ...config, pageSize: 5 }),
-  withEntitiesLoadingCall({
-    ...config,
+  withCallStatus(config, { initialValue: "loading" }),
+  withEntitiesLocalPagination(config, { pageSize: 5 }),
+  withEntitiesLoadingCall(config, {
     fetchEntities: () =>
       inject(ProductService)
         .getProducts()
@@ -260,7 +261,7 @@ export const ProductsLocalStore = signalStore(
   })),
 );
 ```
-Create a entityConfig like shown above, and then spread it to all withEntities* that you are using.
+Create a entityConfig like shown above, and then pass it as the first argument to all withEntities* features that you are using.
 
 ```typescript
 To see a full list of the store features in the library with details and examples, check the [API](../libs/ngrx-traits/signals/api-docs.md) documentation.

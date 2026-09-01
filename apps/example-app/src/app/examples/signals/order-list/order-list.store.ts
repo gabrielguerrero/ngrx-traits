@@ -19,17 +19,16 @@ const orderEntity = entityConfig({
 export const OrderStore = signalStore(
   withEntities(orderEntity),
   withEntitiesMultiSelection(orderEntity),
-  withCallStatus({ ...orderEntity, initialValue: 'loading' }),
-  withEntitiesLoadingCall({
-    ...orderEntity,
+  withCallStatus(orderEntity, { initialValue: 'loading' }),
+  withEntitiesLoadingCall(orderEntity, {
     fetchEntities: () =>
       inject(OrderService)
         .getOrders()
         .pipe(map((res) => res.resultList)),
   }),
-  withEntitiesCalls({
-    ...orderEntity,
-    calls: (store, orderService = inject(OrderService)) => ({
+  withEntitiesCalls(
+    orderEntity,
+    (store, orderService = inject(OrderService)) => ({
       loadOrderDetail: (entity: OrderSummary) =>
         orderService.getOrderDetail(entity.id),
       // alternative way to define the call
@@ -49,7 +48,7 @@ export const OrderStore = signalStore(
         );
       },
     }),
-  }),
+  ),
   withMethods((store) => ({
     toggleShowDetail(order: OrderSummary) {
       store.toggleSelectOrderEntities(order);

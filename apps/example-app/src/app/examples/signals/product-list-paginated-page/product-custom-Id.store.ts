@@ -27,27 +27,21 @@ const config = entityConfig({
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities(config),
-  withCallStatus({ ...config, initialValue: 'loading' }),
-  withEntitiesLocalPagination({
-    ...config,
+  withCallStatus(config, { initialValue: 'loading' }),
+  withEntitiesLocalPagination(config, {
     pageSize: 5,
   }),
-  withEntitiesLocalFilter({
-    ...config,
+  withEntitiesLocalFilter(config, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    ...config,
+  withEntitiesLocalSort(config, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesSingleSelection({
-    ...config,
-  }),
-  withEntitiesLoadingCall({
-    ...config,
+  withEntitiesSingleSelection(config),
+  withEntitiesLoadingCall(config, {
     fetchEntities: ({ productEntitiesFilter }) => {
       return inject(ProductService)
         .getProducts({
