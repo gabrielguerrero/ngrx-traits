@@ -14,19 +14,19 @@ Requires withEntitiesLocalSort or withEntitiesRemoteSort to be used before it.
 ### Two-way sync with a model()
 
 ```typescript
-const entity = type<Product>();
-const collection = 'product';
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 
 export const ProductsStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withEntitiesLocalSort({
-    entity,
-    collection,
+  withEntities(productEntityConfig),
+  withEntitiesLocalSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   // generates linkProductEntitiesSort()
-  withLinkEntitiesSort({ entity, collection }),
+  withLinkEntitiesSort(productEntityConfig),
 );
 ```
 

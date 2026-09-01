@@ -14,15 +14,17 @@ Requires withEntitiesSingleSelection to be used before it.
 ### Two-way sync with a model()
 
 ```typescript
-const entity = type<Product>();
-const collection = 'product';
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 
 export const ProductsStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withEntitiesSingleSelection({ entity, collection }),
+  withEntities(productEntityConfig),
+  withEntitiesSingleSelection(productEntityConfig),
   // generates linkProductIdSelected()
-  withLinkEntitiesSingleSelection({ entity, collection }),
+  withLinkEntitiesSingleSelection(productEntityConfig),
 );
 ```
 

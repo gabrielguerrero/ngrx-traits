@@ -31,32 +31,29 @@ withEntitiesCalls simplifies this by centralizing all entity-related calls withi
 	Note: The call function must receive a parameter that includes an entity ID. This ID is essential for tracking the call’s status and can be extracted in several ways:
 
 ```typescript
-withEntitiesCalls({
-  ...orderEntity,
-  calls: (store, orderService = inject(OrderService)) => ({
-    // with an id as param
-    loadOrderDetail: (id: string) => orderService.getOrderDetail(entity.id).pipe(map(({ items }) => ({ items }))),
-    // with an entity as param
-    loadOrderDetail2: (entity: OrderSummary) => orderService.getOrderDetail(entity.id).pipe(map(({ items }) => ({ items }))),
-    // with an entity as param prop and extra props
-    loadOrderDetail3: (option: { entity: OrderSummary; extraProp: string }) => orderService.getOrderDetail(option.entity.id).pipe(map(({ items }) => ({ items }))),
-    // with a entityCallConfig and paramSelectId
-    loadOrderDetail4: entityCallConfig({
-      call: (option: { productId: string, extraProp: string }) => orderService.getOrderDetail(id),
-      paramsSelectId: (param) => param.productId,
-    }),
-    // in all the previous calls you must returm a Partial<Entity>  to update the entity or undefined to delete the entity
-    // if you want to control how the result is stored you use storeResult false and onSuccess like this
-    loadOrderDetail5: entityCallConfig({
-      call: (option: { productId: string, extraProp: string }) => orderService.getOrderDetail(id),
-      paramsSelectId: (param) => param.productId,
-      storeResult: false,
-      onSuccess: (store, result, param) => {
-        store.updateEntity(param.productId, { items: result.items });
-      },
-    }),
+withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => ({
+  // with an id as param
+  loadOrderDetail: (id: string) => orderService.getOrderDetail(entity.id).pipe(map(({ items }) => ({ items }))),
+  // with an entity as param
+  loadOrderDetail2: (entity: OrderSummary) => orderService.getOrderDetail(entity.id).pipe(map(({ items }) => ({ items }))),
+  // with an entity as param prop and extra props
+  loadOrderDetail3: (option: { entity: OrderSummary; extraProp: string }) => orderService.getOrderDetail(option.entity.id).pipe(map(({ items }) => ({ items }))),
+  // with a entityCallConfig and paramSelectId
+  loadOrderDetail4: entityCallConfig({
+    call: (option: { productId: string, extraProp: string }) => orderService.getOrderDetail(id),
+    paramsSelectId: (param) => param.productId,
   }),
-}),
+  // in all the previous calls you must returm a Partial<Entity>  to update the entity or undefined to delete the entity
+  // if you want to control how the result is stored you use storeResult false and onSuccess like this
+  loadOrderDetail5: entityCallConfig({
+    call: (option: { productId: string, extraProp: string }) => orderService.getOrderDetail(id),
+    paramsSelectId: (param) => param.productId,
+    storeResult: false,
+    onSuccess: (store, result, param) => {
+      store.updateEntity(param.productId, { items: result.items });
+    },
+  }),
+})),
 ```
 Each call should return either a Partial<Entity> to update the entity, or undefined to delete it from the store. If you need more control over how the result is handled, you can set storeResult to false and use the onSuccess callback to manually update the entity.
 
@@ -85,9 +82,8 @@ const orderEntity = entityConfig({
 export const OrderStore = signalStore(
   withEntities(orderEntity),
   // load entities
-  withCallStatus({ ...orderEntity, initialValue: 'loading' }),
-  withEntitiesLoadingCall({
-    ...orderEntity,
+  withCallStatus(orderEntity, { initialValue: 'loading' }),
+  withEntitiesLoadingCall(orderEntity, {
     fetchEntities: () =>
       inject(OrderService)
         .getOrders()
@@ -95,13 +91,10 @@ export const OrderStore = signalStore(
   }),
   withEntitiesMultiSelection(orderEntity), // we use this to track which rows are expanded
   // call to load the order detail
-  withEntitiesCalls({
-    ...orderEntity,
-    calls: (store, orderService = inject(OrderService)) => ({
-      // the function must return one or more properties of the entity
-      loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id).pipe(map(({items}) => ({ items })))
-    }),
-  }),
+  withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => ({
+    // the function must return one or more properties of the entity
+    loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id).pipe(map(({items}) => ({ items })))
+  })),
   withMethods((store) => ({
     toggleShowDetail(order: OrderSummary) {
       store.toggleSelectOrdersEntities(order);// this will toggle the row expanded
@@ -155,24 +148,20 @@ const orderEntity = entityConfig({
 export const OrderStore = signalStore(
   withEntities(orderEntity),
   // load entities
-  withCallStatus({ ...orderEntity, initialValue: 'loading' }),
-  withEntitiesLoadingCall({
-    ...orderEntity,
+  withCallStatus(orderEntity, { initialValue: 'loading' }),
+  withEntitiesLoadingCall(orderEntity, {
     fetchEntities: () =>
       inject(OrderService)
         .getOrders()
         .pipe(map((res) => res.resultList)),
   }),
   // call to change status
-  withEntitiesCalls({
-    ...orderEntity,
-    calls: (store, orderService = inject(OrderService)) => ({
-      changeOrderStatus: (option: {
-        entity: OrderSummary;
-        status: OrderSummary['status'];
-      }) => orderService.changeStatus(option.entity.id, option.status),
-    }),
-  }),
+  withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => ({
+    changeOrderStatus: (option: {
+      entity: OrderSummary;
+      status: OrderSummary['status'];
+    }) => orderService.changeStatus(option.entity.id, option.status),
+  })),
 );
 ```
 Now we can use in inside a mat table, for this case we use a dropdown to render the status and allow the user to change it:
@@ -221,21 +210,17 @@ const orderEntity = entityConfig({
 export const OrderStore = signalStore(
   withEntities(orderEntity),
   // load entities
-  withCallStatus({ ...orderEntity, initialValue: 'loading' }),
-  withEntitiesLoadingCall({
-    ...orderEntity,
+  withCallStatus(orderEntity, { initialValue: 'loading' }),
+  withEntitiesLoadingCall(orderEntity, {
     fetchEntities: () =>
       inject(OrderService)
         .getOrders()
         .pipe(map((res) => res.resultList)),
   }),
   // call to delete the order
-  withEntitiesCalls({
-    ...orderEntity,
-    calls: (store, orderService = inject(OrderService)) => ({
-      deleteOrder: (entity: OrderSummary) => orderService.deleteOrder(entity.id).pipe(map(() => undefined)),
-    }),
-  }),
+  withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => ({
+    deleteOrder: (entity: OrderSummary) => orderService.deleteOrder(entity.id).pipe(map(() => undefined)),
+  })),
 );
 ```
 Now we can use in inside a mat table, for this case we use a button to delete the order:
@@ -280,13 +265,10 @@ const orderEntity = entityConfig({
   entity: type<OrderSummary & { items?: OrderDetail['items'] }>(),
   collection: 'order',
 });
- withEntitiesCalls({
-    ...orderEntity,
-    calls: (store, orderService = inject(OrderService)) => ({
-      // the function must return one or more properties of the entity
-      loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id).pipe(map(({items}) => ({ items })))
-    }),
-  }),
+ withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => ({
+    // the function must return one or more properties of the entity
+    loadOrderDetail: (entity) => orderService.getOrderDetail(entity.id).pipe(map(({items}) => ({ items })))
+  })),
 ```
 
 
