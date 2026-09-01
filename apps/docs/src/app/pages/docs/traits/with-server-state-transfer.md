@@ -27,7 +27,7 @@ import { withServerStateTransfer } from '@ngrx-traits/signals';
 // ✅ Correct order
 signalStore(
   withEntities({ entity }),
-  withCallStatus({ prop: 'products', initialValue: 'loading' }),
+  withCallStatus({ initialValue: 'loading' }),
 
   // Add withServerStateTransfer BEFORE loading calls
   withServerStateTransfer({ key: 'my-state' }),
@@ -41,7 +41,7 @@ signalStore(
 // ❌ Incorrect order - will make unnecessary backend call
 signalStore(
   withEntities({ entity }),
-  withCallStatus({ prop: 'products', initialValue: 'loading' }),
+  withCallStatus({ initialValue: 'loading' }),
 
   // Loading call runs first
   withEntitiesLoadingCall({
@@ -163,22 +163,19 @@ export const ProductsSSRStore = signalStore(
 
   // 1. State declarations first
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
 
   // 2. Feature configurations
-  withEntitiesLocalPagination({
-    ...productsEntityConfig,
+  withEntitiesLocalPagination(productsEntityConfig, {
     pageSize: 5,
   }),
-  withEntitiesLocalFilter({
-    ...productsEntityConfig,
+  withEntitiesLocalFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    ...productsEntityConfig,
+  withEntitiesLocalSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesSingleSelection(productsEntityConfig),
@@ -193,8 +190,7 @@ export const ProductsSSRStore = signalStore(
 
   // 5. Loading call LAST - when state comes from server 
   // overrides status to loaded so fetchEntities wont be trigger
-  withEntitiesLoadingCall({
-    ...productsEntityConfig,
+  withEntitiesLoadingCall(productsEntityConfig, {
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()

@@ -25,15 +25,14 @@ import { withEntitiesLocalPagination } from '@ngrx-traits/signals';
 
 In this example we have a list of users and we want to paginate them, we will use the pageSize prop to set the initial page size.
 ```typescript
-const entity = entityConfig({
+const userEntityConfig = entityConfig({
     entity: type<T>(),
     collection: 'user'
 })
 
 const store = signalStore(
-    withEntities(entity),
-    withEntitiesLocalPagination({
-        ...entity,
+    withEntities(userEntityConfig),
+    withEntitiesLocalPagination(userEntityConfig, {
         pageSize: 10,
     })
 );
@@ -64,24 +63,20 @@ const productsEntityConfig = entityConfig({
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
-  withEntitiesLocalPagination({
-    ...productsEntityConfig,
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
+  withEntitiesLocalPagination(productsEntityConfig, {
     pageSize: 5,
   }),
-  withEntitiesLocalFilter({
-    ...productsEntityConfig,
+  withEntitiesLocalFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    ...productsEntityConfig,
+  withEntitiesLocalSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesLoadingCall({
-    ...productsEntityConfig,
+  withEntitiesLoadingCall(productsEntityConfig, {
     fetchEntities: () => {
       return inject(ProductService)
         .getProducts()

@@ -25,26 +25,23 @@ const productEntityConfig = entityConfig({
 
 export const ProductStore = signalStore(
   withEntities(productEntityConfig),
-  withCallStatus({
-    ...productEntityConfig,
+  withCallStatus(productEntityConfig, {
     initialValue: 'loading',
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    ...productEntityConfig,
+  withEntitiesRemoteFilter(productEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    ...productEntityConfig,
+  withEntitiesRemotePagination(productEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    ...productEntityConfig,
+  withEntitiesRemoteSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesSingleSelection(productEntityConfig),
   // load list of products from server
   withEntitiesLoadingCall(
+    productEntityConfig,
     (
       {
         productEntitiesPagedRequest,
@@ -53,7 +50,6 @@ export const ProductStore = signalStore(
       },
       service = inject(ProductService),
     ) => ({
-      ...productEntityConfig,
       fetchEntities: async () => {
         const query = {
           search: productEntitiesFilter().search,
@@ -97,21 +93,17 @@ export const productEntityConfig = entityConfig({
 export function withProductEntities() {
   return signalStoreFeature(
     withEntities(productEntityConfig),
-    withCallStatus({
-      ...productEntityConfig,
+    withCallStatus(productEntityConfig, {
       initialValue: 'loading',
       errorType: type<string>(),
     }),
-    withEntitiesRemoteFilter({
-      ...productEntityConfig,
+    withEntitiesRemoteFilter(productEntityConfig, {
       defaultFilter: { search: '' },
     }),
-    withEntitiesRemotePagination({
-      ...productEntityConfig,
+    withEntitiesRemotePagination(productEntityConfig, {
       pageSize: 10,
     }),
-    withEntitiesRemoteSort({
-      ...productEntityConfig,
+    withEntitiesRemoteSort(productEntityConfig, {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(productEntityConfig),
@@ -131,6 +123,7 @@ export function withProductCalls() {
     /// notice here we use the ProductEntitiesStoreFeature, as input type
     type<ProductEntitiesStoreFeature>(),
     withEntitiesLoadingCall(
+      productEntityConfig,
       (
         {
           productEntitiesPagedRequest,
@@ -139,7 +132,6 @@ export function withProductCalls() {
         },
         service = inject(ProductService),
       ) => ({
-        ...productEntityConfig,
         fetchEntities: async () => {
           const query = {
             search: productEntitiesFilter().search,

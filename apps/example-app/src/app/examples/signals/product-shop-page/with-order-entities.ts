@@ -19,14 +19,12 @@ export const orderItemEntityConfig = entityConfig({
 export function withOrderEntities() {
   return signalStoreFeature(
     withEntities(orderItemEntityConfig),
-    withEntitiesLocalSort({
-      ...orderItemEntityConfig,
+    withEntitiesLocalSort(orderItemEntityConfig, {
       defaultSort: { field: 'name', direction: 'asc' },
     }),
     withEntitiesSingleSelection(orderItemEntityConfig),
     withEntitiesMultiSelection(orderItemEntityConfig),
-    withEntitiesLocalPagination({
-      ...orderItemEntityConfig,
+    withEntitiesLocalPagination(orderItemEntityConfig, {
       pageSize: 10,
     }),
     withLogger({
