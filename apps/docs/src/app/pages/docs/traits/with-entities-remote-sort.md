@@ -21,28 +21,26 @@ Useful in cases where you want to further change the state before manually calli
 
 ### Implement remote sort for a list of entities
 ```typescript
-const entityConfig = entityConfig({
+const productEntityConfig = entityConfig({
   entity: type<T>(),
   collection: "product",
 });
 
 export const store = signalStore(
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: 'loading' }),
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
 
-  withEntitiesRemoteSort({
-    ...entityConfig,
+  withEntitiesRemoteSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesLoadingCall({
-    ...entityConfig,
-    fetchEntities: ({ productEntitiesSort }) => {
+  withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesSort }) => ({
+    fetchEntities: () => {
       return inject(ProductService).getProducts({
         sortColumn: productEntitiesSort().field,
         sortAscending: productEntitiesSort().direction === 'asc',
       });
     },
-  }),
+  })),
 );
 ```
 To use you generally need either a sort dropdown if is a list or a table where clicking on the columns headers sorts, bellow is how s used with a dropdown (you can find full source code in the examples folder in GitHub):
@@ -86,34 +84,29 @@ You can mix this feature with other remote store features like withEntitiesRemot
 
 
 ```typescript
+const productsEntityConfig = entityConfig({
+  entity: productsEntity,
+  collection: productsCollection,
+});
+
 const productsStoreFeature = signalStoreFeature(
-  withEntities({
-    entity: productsEntity,
-    collection: productsCollection,
-  }),
-  withCallStatus({
+  withEntities(productsEntityConfig),
+  withCallStatus(productsEntityConfig, {
     initialValue: 'loading',
-    collection: productsCollection,
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemotePagination(productsEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
+    productsEntityConfig,
     ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
-      collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({

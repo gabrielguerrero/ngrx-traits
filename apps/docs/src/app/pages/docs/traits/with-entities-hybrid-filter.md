@@ -30,29 +30,27 @@ import { withEntitiesHybridFilter } from '@ngrx-traits/signals';
 We have a Products list that shows all the products for a category, there is a category dropdown that should reload the list when the category changes, There is also search box that filters locally the rendered list by name and other props.
 
 ```typescript
-const entityConfig = entityConfig({
+const productEntityConfig = entityConfig({
   entity: type<Product>(),
   collection: 'product',
 });
 
 export const store = signalStore(
-  withEntities(entityConfig),
-  withCallStatus({ ...entityConfig, initialValue: 'loading' }),
-  withEntitiesHybridFilter({
-    entity,
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+  withEntitiesHybridFilter(productEntityConfig, {
     defaultFilter: { search: '', categoryId: 'snes' },
     isRemoteFilter: (previous, current) => previous.categoryId !== current.categoryId,
     // only remote filter when the category changes
     filterFn: (entity, filter) => !filter?.search || entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLoadingCall({
-    ...entityConfig,
-    fetchEntities: ({ productEntitiesFilter }) => {
+  withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesFilter }) => ({
+    fetchEntities: () => {
       return inject(ProductService).getProducts({
         categoryId: productEntitiesFilter().categoryId,
       });
     },
-  }),
+  })),
 );
 ```
 
@@ -131,30 +129,26 @@ const productsEntityConfig = entityConfig({
 export const ProductsLocalStore = signalStore(
   { providedIn: 'root' },
   withEntities(productsEntityConfig),
-  withCallStatus({ ...productsEntityConfig, initialValue: 'loading' }),
-  withEntitiesLocalPagination({
-    ...productsEntityConfig,
+  withCallStatus(productsEntityConfig, { initialValue: 'loading' }),
+  withEntitiesLocalPagination(productsEntityConfig, {
     pageSize: 5,
   }),
-  withEntitiesHybridFilter({
-    entity,
+  withEntitiesHybridFilter(productsEntityConfig, {
     defaultFilter: { search: '', categoryId: 'snes' },
     isRemoteFilter: (previous, current) => previous.categoryId !== current.categoryId,
     // only remote filter when the category changes
     filterFn: (entity, filter) => !filter?.search || entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    ...productsEntityConfig,
+  withEntitiesLocalSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
-  withEntitiesLoadingCall({
-    ...entityConfig,
-    fetchEntities: ({ productEntitiesFilter }) => {
+  withEntitiesLoadingCall(productsEntityConfig, ({ productEntitiesFilter }) => ({
+    fetchEntities: () => {
       return inject(ProductService).getProducts({
         categoryId: productEntitiesFilter().categoryId,
       });
     },
-  }),
+  })),
 );
 ```
 

@@ -28,9 +28,8 @@ const genreEntityConfig = entityConfig({
 
 export const GenreStore = signalStore(
   withEntities(genreEntityConfig),
-  withCallStatus({ ...genreEntityConfig, initialValue: 'loading' }),
-  withEntitiesLocalFilter({
-    ...genreEntityConfig,
+  withCallStatus(genreEntityConfig, { initialValue: 'loading' }),
+  withEntitiesLocalFilter(genreEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (genre, filter) =>
       !filter?.search ||
@@ -38,10 +37,9 @@ export const GenreStore = signalStore(
   }),
   // both selections live here, so the same store backs the multi select used
   // by the filter and the single select used by the edit form
-  withEntitiesMultiSelection({ ...genreEntityConfig, clearOnFilter: false }),
-  withEntitiesSingleSelection({ ...genreEntityConfig, clearOnFilter: false }),
-  withEntitiesLoadingCall({
-    ...genreEntityConfig,
+  withEntitiesMultiSelection(genreEntityConfig, { clearOnFilter: false }),
+  withEntitiesSingleSelection(genreEntityConfig, { clearOnFilter: false }),
+  withEntitiesLoadingCall(genreEntityConfig, {
     fetchEntities: () =>
       inject(GenreService)
         .getGenres()

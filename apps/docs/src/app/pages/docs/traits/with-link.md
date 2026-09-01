@@ -57,11 +57,14 @@ filter.set({ search: 'shoes' });
 Route writes through a store method instead of patching state directly:
 
 ```typescript
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
+
 const ProductsStore = signalStore(
-  withEntities({ entity: type<Product>(), collection: 'product' }),
-  withEntitiesLocalFilter({
-    entity: type<Product>(),
-    collection: 'product',
+  withEntities(productEntityConfig),
+  withEntitiesLocalFilter(productEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) => !filter?.search || entity.name.toLowerCase().includes(filter.search.toLowerCase()),
   }),
@@ -299,15 +302,15 @@ linked = this.store.linkProductIdSelected({
 ### Basic usage with Signal Forms
 
 ```typescript
-const entity = type<Product>();
-const collection = 'product';
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 
 export const ProductsStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withEntitiesLocalFilter({
-    entity,
-    collection,
+  withEntities(productEntityConfig),
+  withEntitiesLocalFilter(productEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) => !filter?.search || entity.name.toLowerCase().includes(filter.search.toLowerCase()),
   }),

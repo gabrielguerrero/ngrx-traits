@@ -14,20 +14,20 @@ Requires one of the withEntities\*Filter traits to be used before it.
 ### Basic usage with Signal Forms
 
 ```typescript
-const entity = type<Product>();
-const collection = 'product';
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 
 export const ProductsStore = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withEntitiesLocalFilter({
-    entity,
-    collection,
+  withEntities(productEntityConfig),
+  withEntitiesLocalFilter(productEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) => !filter?.search || entity.name.toLowerCase().includes(filter.search.toLowerCase()),
   }),
   // generates linkProductEntitiesFilter()
-  withLinkEntitiesFilter({ entity, collection }),
+  withLinkEntitiesFilter(productEntityConfig),
 );
 ```
 
