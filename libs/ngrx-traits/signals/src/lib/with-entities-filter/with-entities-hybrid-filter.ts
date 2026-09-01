@@ -43,6 +43,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -77,7 +78,7 @@ import {
  * Useful in cases where you want to further change the state before manually calling set[Collection]Loading() to trigger a fetch of entities.
  *
  * Requires withEntities and withCallStatus to be present before this function.
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param configFactory.defaultFilter - The default filter to be used
  * @param configFactory.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
  * @param configFactory.filterFn - The function to filter the entities
@@ -85,18 +86,19 @@ import {
  * @param configFactory.entity - The entity type to be used
  * @param configFactory.collection - The optional collection name to be used
  * @param configFactory.selectId - The optional function to select the id of the entity
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = 'product';
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // requires withEntities and withCallStatus to be used
- *   withEntities({ entity, collection }),
- *   withCallStatus({ collection, initialValue: 'loading' }),
- *   withEntitiesHybridFilter({
- *     entity,
- *     collection,
+ *   withEntities(productEntityConfig),
+ *   withCallStatus(productEntityConfig, { initialValue: 'loading' }),
+ *   withEntitiesHybridFilter(productEntityConfig, {
  *     defaultFilter: { search: '' , category: ''},
  *     filterFn: (entity, filter) =>
  *        (!filter.search || entity.name.toLowerCase().includes(filter.search.toLowerCase()))
@@ -108,15 +110,14 @@ import {
  *   }),
  *   // after you can use withEntitiesLoadingCall to connect the filter to
  *   // the api call, or do it manually as shown after
- *    withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productEntitiesFilter }) => {
+ *    withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesFilter }) => ({
+ *     fetchEntities: () => {
  *       return inject(ProductService)
  *         .getProducts({
  *           category: productEntitiesFilter().category,
  *         })
  *     },
- *   }),
+ *   })),
  * // withEntitiesLoadingCall is the same as doing the following:
  * // withHooks(({ productEntitiesCallStatus, setProductEntitiesError, ...state }) => ({
  * //   onInit: async () => {
@@ -186,9 +187,72 @@ export function withEntitiesHybridFilter<
         props: NamedEntitiesFilterComputed<Collection, Filter>;
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
       }
-> {
+>;
+export function withEntitiesHybridFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      filterFn: (entity: NoInfer<Entity>, filter: NoInfer<Filter>) => boolean;
+      isRemoteFilter: (
+        previous: NoInfer<Filter>,
+        current: NoInfer<Filter>,
+      ) => boolean;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesHybridFilter'> &
+    RequireEntitiesCallStatus<Input, Collection, 'withEntitiesHybridFilter'>,
+  Collection extends ''
+    ? {
+        state: EntitiesFilterState<Filter>;
+        props: EntitiesFilterComputed<Filter>;
+        methods: EntitiesRemoteFilterMethods<Filter, Entity>;
+      }
+    : {
+        state: NamedEntitiesFilterState<Collection, Filter>;
+        props: NamedEntitiesFilterComputed<Collection, Filter>;
+        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
+      }
+>;
+export function withEntitiesHybridFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory((store: StoreSource<Input>) => {
-    const { defaultFilter, ...config } = getFeatureConfig(configFactory, store);
+    const { defaultFilter, ...config } = getFeatureConfig(
+      configFactory,
+      store,
+    ) as {
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity: Entity;
+      collection?: Collection;
+      selectId?: SelectEntityId<Entity>;
+      filterFn: (entity: Entity, filter: Filter) => boolean;
+      isRemoteFilter: (previous: Filter, current: Filter) => boolean;
+    };
     const filterFn = config.filterFn;
     const { entityMapKey, idsKey, entitiesKey } = getWithEntitiesKeys(config);
     const { setLoadingKey, loadedKey, callStatusKey, errorKey } =

@@ -24,6 +24,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -44,19 +45,22 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * correctly in using remote pagination, because they cant select all the data.
  *
  * Requires withEntities to be used before this feature.
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param configFactory.entity - the entity type
  * @param configFactory.collection - the collection name
  * @param configFactory.clearOnFilter - Clear the selected entity when the filter changes (default: true)
  * @param configFactory.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = "product";
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const store = signalStore(
  *   { providedIn: 'root' },
- *   withEntities({ entity, collection }),
- *   withEntitiesMultiSelection({ entity, collection }),
+ *   withEntities(productEntityConfig),
+ *   withEntitiesMultiSelection(productEntityConfig),
  *   );
  *
  * // generates the following signals
@@ -101,9 +105,61 @@ export function withEntitiesMultiSelection<
         props: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
         methods: NamedEntitiesMultiSelectionMethods<Collection>;
       }
-> {
+>;
+export function withEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedIds?: (string | number)[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesMultiSelection'>,
+  Collection extends ''
+    ? {
+        state: EntitiesMultiSelectionState;
+        props: EntitiesMultiSelectionComputed<Entity>;
+        methods: EntitiesMultiSelectionMethods;
+      }
+    : {
+        state: NamedEntitiesMultiSelectionState<Collection>;
+        props: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
+        methods: NamedEntitiesMultiSelectionMethods<Collection>;
+      }
+>;
+export function withEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory((store: StoreSource<Input>) => {
-    const config = getFeatureConfig(configFactory, store);
+    const config = getFeatureConfig(configFactory, store) as {
+      entity: Entity;
+      collection?: Collection;
+      selectId?: SelectEntityId<Entity>;
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedIds?: (string | number)[];
+    };
     const { entityMapKey, idsKey } = getWithEntitiesKeys(config);
     const {
       selectedIdsMapKey,

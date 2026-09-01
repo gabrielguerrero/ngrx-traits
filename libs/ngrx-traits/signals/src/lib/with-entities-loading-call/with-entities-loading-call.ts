@@ -46,6 +46,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -65,7 +66,7 @@ import {
  *
  * Requires withEntities and withCallStatus to be present in the store.
  *
- * @param config - Configuration object or factory function that returns the configuration object
+ * @param config - The full feature config or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param config.fetchEntities - A function that fetches the entities from a remote source, the return type can be an array of entities or an object with entities and total
  * @param config.collection - The collection name
  * @param config.onSuccess - A function that is called when the fetchEntities is successful
@@ -73,38 +74,36 @@ import {
  * @param config.onError - A function that is called when the fetchEntities fails
  * @param config.selectId - The function to use to select the id of the entity
  * @param config.storeResult - Whether to automatically store the fetched entities in the store (default: true). When false, entities are not stored, but setLoaded and onSuccess are still called, useful when you want to handle storing in onSuccess yourself
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  *
  * @example
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const ProductsRemoteStore = signalStore(
  *   { providedIn: 'root' },
  *   // requires at least withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   withEntities(productEntityConfig),
+ *   withCallStatus(productEntityConfig, { initialValue: 'loading' }),
  *   // other features
- *   withEntitiesRemoteFilter({
- *     entity,
- *     collection,
+ *   withEntitiesRemoteFilter(productEntityConfig, {
  *     defaultFilter: { name: '' },
  *   }),
- *   withEntitiesRemotePagination({
- *     entity,
- *     collection,
+ *   withEntitiesRemotePagination(productEntityConfig, {
  *     pageSize: 5,
  *     pagesToCache: 2,
  *   }),
- *   withEntitiesRemoteSort({
- *     entity,
- *     collection,
+ *   withEntitiesRemoteSort(productEntityConfig, {
  *     defaultSort: { field: 'name', direction: 'asc' },
  *   }),
  *   // now we add the withEntitiesLoadingCall, in this case any time the filter,
  *   // pagination or sort changes they call set[Collection]Loading() which then
  *   // triggers the onInit effect that checks if [Collection]Loading(), if true
  *   // then calls fetchEntities function
- *   withEntitiesLoadingCall({
- *     collection,
- *     fetchEntities: ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => {
+ *   withEntitiesLoadingCall(productEntityConfig, ({ productEntitiesFilter, productEntitiesPagedRequest, productEntitiesSort }) => ({
+ *     fetchEntities: () => {
  *       return inject(ProductService)
  *         .getProducts({
  *           search: productEntitiesFilter().name,
@@ -120,7 +119,7 @@ import {
  *           })),
  *         );
  *     },
- *   }),
+ *   })),
  */
 
 export function withEntitiesLoadingCall<
@@ -159,7 +158,59 @@ export function withEntitiesLoadingCall<
       EntitiesCallStatusRequirement<Collection, Error>
     >,
   EmptyFeatureResult
-> {
+>;
+export function withEntitiesLoadingCall<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+  Error = unknown,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      fetchEntities: (
+        store: StoreSource<Input>,
+      ) =>
+        | Observable<ExpectedFetchEntitiesResult<Input, Collection, Entity>>
+        | Promise<ExpectedFetchEntitiesResult<Input, Collection, Entity>>;
+      mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+      onSuccess?: (
+        result: FetchEntitiesResult<Input, Collection, Entity>,
+      ) => void;
+      mapError?: (error: unknown) => Error;
+      onError?: (error: Error) => void;
+      storeResult?: boolean;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesLoadingCall'> &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesLoadingCall',
+      EntitiesCallStatusRequirement<Collection, Error>
+    >,
+  EmptyFeatureResult
+>;
+export function withEntitiesLoadingCall<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+  Error = unknown,
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, EmptyFeatureResult> {
+  const config = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory(
     (
       _store: StoreSource<Input>,
@@ -174,7 +225,18 @@ export function withEntitiesLoadingCall<
         mapPipe: mapPipeType,
         selectId,
         storeResult = true,
-      } = getFeatureConfig(config, _store);
+      } = getFeatureConfig(config, _store) as {
+        collection?: Collection;
+        fetchEntities: (
+          store: StoreSource<Input>,
+        ) => Observable<unknown> | Promise<unknown>;
+        mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+        onSuccess?: (result: unknown) => void;
+        mapError?: (error: unknown) => Error;
+        onError?: (error: Error) => void;
+        selectId?: SelectEntityId<Entity>;
+        storeResult?: boolean;
+      };
       const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
         collection,
       });

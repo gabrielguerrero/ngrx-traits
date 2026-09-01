@@ -23,6 +23,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -49,25 +50,26 @@ import {
  *
  * Requires withEntities to be used.
  *
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param configFactory.filterFn - The function that will be used to filter the entities
  * @param configFactory.defaultFilter - The default filter to be used
  * @param configFactory.defaultDebounce - The default debounce time to be used, if not set it will default to 300ms
  * @param configFactory.entity - The entity type to be used
  * @param configFactory.collection - The optional collection name to be used
  * @param configFactory.selectId - The function to use to select the id of the entity
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = 'product';
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * const store = signalStore(
  *   { providedIn: 'root' },
  *   // requires withEntities to be used
- *   withEntities({ entity, collection }),
+ *   withEntities(productEntityConfig),
  *
- *   withEntitiesLocalFilter({
- *     entity,
- *     collection,
+ *   withEntitiesLocalFilter(productEntityConfig, {
  *     defaultFilter: { search: '' },
  *     filterFn: (entity, filter) =>
  *       !filter?.search || // if there is no search term return all entities
@@ -111,12 +113,65 @@ export function withEntitiesLocalFilter<
         props: NamedEntitiesFilterComputed<Collection, Filter>;
         methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
       }
-> {
+>;
+export function withEntitiesLocalFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      filterFn: (entity: NoInfer<Entity>, filter: Filter) => boolean;
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, Collection, 'withEntitiesLocalFilter'>,
+  Collection extends ''
+    ? {
+        state: EntitiesFilterState<Filter>;
+        props: EntitiesFilterComputed<Filter>;
+        methods: EntitiesFilterMethods<Filter, Entity>;
+      }
+    : {
+        state: NamedEntitiesFilterState<Collection, Filter>;
+        props: NamedEntitiesFilterComputed<Collection, Filter>;
+        methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
+      }
+>;
+export function withEntitiesLocalFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory((store: StoreSource<Input>) => {
     const { filterFn, defaultFilter, ...config } = getFeatureConfig(
       configFactory,
       store,
-    );
+    ) as {
+      filterFn: (entity: Entity, filter: Filter) => boolean;
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity: Entity;
+      collection?: Collection;
+      selectId?: SelectEntityId<Entity>;
+    };
     const { entityMapKey, idsKey, entitiesKey } = getWithEntitiesKeys(config);
     const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
     const {

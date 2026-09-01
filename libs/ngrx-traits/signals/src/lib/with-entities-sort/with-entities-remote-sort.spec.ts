@@ -1,3 +1,4 @@
+import { inject, Injectable } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { signalStore, type, withState } from '@ngrx/signals';
 import { withEntities } from '@ngrx/signals/entities';
@@ -579,6 +580,131 @@ describe('withEntitiesRemoteSort', () => {
       expect(store.entities().length).toEqual(mockProducts.length);
     });
   }));
+
+  describe('two-arg (entityConfig, options) form', () => {
+    it('with collection should sort entities and store sort, same as single object form', fakeAsync(() => {
+      const collection = 'product';
+      const Store = signalStore(
+        withEntities({
+          entity,
+          collection,
+        }),
+        withCallStatus({ initialValue: 'loading', collection }),
+        withEntitiesRemoteSort(
+          { entity, collection },
+          { defaultSort: { field: 'name', direction: 'asc' } },
+        ),
+        withEntitiesLoadingCall({
+          collection,
+          fetchEntities: ({ productEntitiesSort }) => {
+            let result = [...mockProducts];
+            if (productEntitiesSort()?.field) {
+              result = sortData(result, {
+                field: productEntitiesSort()?.field as any,
+                direction: productEntitiesSort().direction,
+              });
+            }
+
+            return Promise.resolve({ entities: result, total: result.length });
+          },
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        TestBed.tick();
+        tick();
+        expect(store.productEntitiesSort()).toEqual({
+          field: 'name',
+          direction: 'asc',
+        });
+        expect(
+          store
+            .productEntities()
+            .map((e) => e.name)
+            .slice(0, 5),
+        ).toEqual([
+          '1080° Avalanche',
+          'Animal Crossing',
+          'Arkanoid: Doh it Again',
+          'Battalion Wars',
+          'BattleClash',
+        ]);
+        store.sortProductEntities({
+          sort: { field: 'price', direction: 'desc' },
+        });
+        tick();
+        expect(
+          store
+            .productEntities()
+            .map((e) => e.price)
+            .slice(0, 5),
+        ).toEqual([178, 175, 172, 169, 166]);
+        expect(store.productEntities().length).toEqual(mockProducts.length);
+        expect(store.productEntitiesSort()).toEqual({
+          field: 'price',
+          direction: 'desc',
+        });
+      });
+    }));
+
+    it('options as store-factory that calls inject() works, with collection', fakeAsync(() => {
+      const collection = 'product';
+      @Injectable({ providedIn: 'root' })
+      class TestSortDefaultService {
+        getDefault(): Sort<Product> {
+          return { field: 'name', direction: 'asc' };
+        }
+      }
+      const Store = signalStore(
+        withEntities({
+          entity,
+          collection,
+        }),
+        withCallStatus({ initialValue: 'loading', collection }),
+        withEntitiesRemoteSort(
+          { entity, collection },
+          (store, service = inject(TestSortDefaultService)) => ({
+            defaultSort: service.getDefault(),
+          }),
+        ),
+        withEntitiesLoadingCall({
+          collection,
+          fetchEntities: ({ productEntitiesSort }) => {
+            let result = [...mockProducts];
+            if (productEntitiesSort()?.field) {
+              result = sortData(result, {
+                field: productEntitiesSort()?.field as any,
+                direction: productEntitiesSort().direction,
+              });
+            }
+
+            return Promise.resolve({ entities: result, total: result.length });
+          },
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        TestBed.tick();
+        tick();
+        expect(store.productEntitiesSort()).toEqual({
+          field: 'name',
+          direction: 'asc',
+        });
+        expect(
+          store
+            .productEntities()
+            .map((e) => e.name)
+            .slice(0, 5),
+        ).toEqual([
+          '1080° Avalanche',
+          'Animal Crossing',
+          'Arkanoid: Doh it Again',
+          'Battalion Wars',
+          'BattleClash',
+        ]);
+      });
+    }));
+  });
 
   it('should not reset  selection when sort is executed if configured that way', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {

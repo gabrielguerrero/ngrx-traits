@@ -24,6 +24,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -47,22 +48,23 @@ export { sortData };
  * Generates necessary state, computed and methods for sorting locally entities in the store.
  *
  * Requires withEntities to be present before this function
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param configFactory.defaultSort - The default sort to be applied to the entities
  * @param configFactory.entity - The type entity to be used
  * @param configFactory.collection - The name of the collection for which will be sorted
  * @param configFactory.selectId - The function to use to select the id of the entity
  * @param configFactory.sortFunction - Optional custom function use to sort the entities
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  *
  * @example
- * const entity = type<Product>();
- * const collection = "product";
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const store = signalStore(
  *   { providedIn: 'root' },
- *   withEntities({ entity, collection }),
- *   withEntitiesLocalSort({
- *     entity,
- *     collection,
+ *   withEntities(productEntityConfig),
+ *   withEntitiesLocalSort(productEntityConfig, {
  *     defaultSort: { field: 'name', direction: 'asc' },
  *   }),
  * );
@@ -100,9 +102,64 @@ export function withEntitiesLocalSort<
         props: {};
         methods: NamedEntitiesSortMethods<Entity, Collection>;
       }
-> {
+>;
+export function withEntitiesLocalSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultSort: Sort<NoInfer<Entity>>;
+      sortFunction?: (
+        entities: NoInfer<Entity>[],
+        sort: Sort<NoInfer<Entity>>,
+      ) => NoInfer<Entity>[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, Collection, 'withEntitiesLocalSort'>,
+  Collection extends ''
+    ? {
+        state: EntitiesSortState<Entity>;
+        props: {};
+        methods: EntitiesSortMethods<Entity>;
+      }
+    : {
+        state: NamedEntitiesSortState<Entity, Collection>;
+        props: {};
+        methods: NamedEntitiesSortMethods<Entity, Collection>;
+      }
+>;
+export function withEntitiesLocalSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
+  options?: FeatureConfigFactory<Input, Record<string, any>>,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory((store: StoreSource<Input>) => {
-    const { defaultSort, ...config } = getFeatureConfig(configFactory, store);
+    const { defaultSort, ...config } = getFeatureConfig(
+      configFactory,
+      store,
+    ) as {
+      defaultSort: Sort<Entity>;
+      entity: Entity;
+      collection?: Collection;
+      selectId?: SelectEntityId<Entity>;
+      sortFunction?: (entities: Entity[], sort: Sort<Entity>) => Entity[];
+    };
     const { entitiesKey, idsKey } = getWithEntitiesKeys(config);
     const { sortEntitiesKey, sortKey } = getWithEntitiesSortKeys(config);
     const { entitiesLocalSortChanged } = getWithEntitiesLocalSortEvents(config);

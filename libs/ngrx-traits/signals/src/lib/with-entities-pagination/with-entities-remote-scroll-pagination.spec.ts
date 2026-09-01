@@ -422,6 +422,59 @@ describe('withEntitiesRemoteScrollPagination', () => {
       expect(store.productEntitiesPagination().hasMore).toEqual(false);
     });
   }));
+  describe('two-arg (entityConfig, options) form', () => {
+    it('with collection should append entities when using load more, same as single object form', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const collection = 'product';
+        const Store = signalStore(
+          withEntities({ entity, collection }),
+          withCallStatus({ collection }),
+          // pageSize is deliberately not the default 10, so this fails if the
+          // options argument is ignored
+          withEntitiesRemoteScrollPagination(
+            { entity, collection },
+            { pageSize: 5, pagesToCache: 1 },
+          ),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: ({ productEntitiesPagedRequest }) => {
+              let result = [...mockProducts.slice(0, 25)];
+              const total = result.length;
+              const options = {
+                skip: productEntitiesPagedRequest()?.startIndex,
+                take: productEntitiesPagedRequest()?.size,
+              };
+              if (options?.skip || options?.take) {
+                const skip = +(options?.skip ?? 0);
+                const take = +(options?.take ?? 0);
+                result = result.slice(skip, skip + take);
+              }
+              return of({ entities: result, total });
+            },
+          }),
+        );
+
+        const store = new Store();
+        TestBed.tick();
+        expect(store.productEntities()).toEqual([]);
+        store.setProductEntitiesLoading();
+        tick();
+        // check the first load
+        expect(store.productEntities().length).toEqual(5);
+        expect(store.productEntities()).toEqual(mockProducts.slice(0, 5));
+        expect(store.productEntitiesPagination().hasMore).toEqual(true);
+        expect(store.productEntitiesPagination().pageSize).toEqual(5);
+
+        store.loadMoreProductEntities();
+        tick();
+        // check the second load
+        expect(store.productEntities().length).toEqual(10);
+        expect(store.productEntities()).toEqual(mockProducts.slice(0, 10));
+        expect(store.productEntitiesPagination().hasMore).toEqual(true);
+      });
+    }));
+  });
+
   it('using next and previous entitiesCurrentPage should split entities in the correct pages', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(

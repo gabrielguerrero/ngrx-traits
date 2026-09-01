@@ -24,6 +24,26 @@ export function getFeatureConfig<
 >(config: FeatureConfigFactory<Input, Config>, store: StoreSource<Input>) {
   return typeof config === 'function' ? config(store) : config;
 }
+
+/**
+ * Combines the two-arg form (entityConfig, options) of a feature into the
+ * single config factory the implementations consume. With no options the first
+ * arg (object or factory) is used as is.
+ */
+export function combineFeatureConfig(
+  configOrFactory: FeatureConfigFactory<any, Record<string, any>>,
+  options: FeatureConfigFactory<any, Record<string, any>> | undefined,
+): FeatureConfigFactory<any, Record<string, any>> {
+  if (options === undefined) return configOrFactory;
+  return typeof options === 'function'
+    ? (store: any) => ({
+        ...getFeatureConfig(configOrFactory, store),
+        ...options(store),
+      })
+    : typeof configOrFactory === 'function'
+      ? (store: any) => ({ ...configOrFactory(store), ...options })
+      : { ...configOrFactory, ...options };
+}
 export type ExtractStoreFeatureOutput<
   Result extends (...args: any[]) => SignalStoreFeature<any, any>,
 > =

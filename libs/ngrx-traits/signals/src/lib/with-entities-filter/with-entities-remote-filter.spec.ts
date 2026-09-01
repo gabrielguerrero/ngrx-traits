@@ -648,12 +648,82 @@ describe('withEntitiesRemoteFilter', () => {
     });
   });
 
+  describe('two-arg (entityConfig, options) form', () => {
+    it(' should rename props when collection param is set, same as single object form', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({
+            entity,
+            collection,
+          }),
+          withCallStatus({ collection, initialValue: 'loading' }),
+          withEntitiesRemotePagination({ entity, collection }),
+          withEntitiesRemoteFilter(
+            { entity, collection },
+            { defaultFilter: { search: '', foo: 'bar' } },
+          ),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: ({ productEntitiesFilter }) => {
+              let result = [...mockProducts];
+              if (productEntitiesFilter()?.search) {
+                result = mockProducts.filter((entity) =>
+                  productEntitiesFilter()?.search
+                    ? entity.name
+                        .toLowerCase()
+                        .includes(productEntitiesFilter()?.search.toLowerCase())
+                    : false,
+                );
+              }
+              return of({ entities: result, total: result.length });
+            },
+          }),
+        );
+        const store = new Store();
+        tick();
+        store.loadProductEntitiesPage({ pageIndex: 3 });
+        tick(400);
+        expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
+
+        store.filterProductEntities({
+          filter: { search: 'zero' },
+          patch: true,
+        });
+        tick(400);
+        expect(store.productEntities().length).toEqual(2);
+        expect(store.productEntities()).toEqual([
+          {
+            description: 'Super Nintendo Game',
+            id: '1',
+            name: 'F-Zero',
+            price: 12,
+            categoryId: 'snes',
+          },
+          {
+            description: 'GameCube Game',
+            id: '80',
+            name: 'F-Zero GX',
+            price: 55,
+            categoryId: 'gamecube',
+          },
+        ]);
+        expect(store.productEntitiesFilter()).toEqual({
+          search: 'zero',
+          foo: 'bar',
+        });
+        expect(store.productEntitiesFilter.search()).toEqual('zero');
+      });
+    }));
+  });
+
   describe('resetEntitiesFilter with newDefaultFilter', () => {
     it('should set filter to newDefaultFilter and trigger load', fakeAsync(() => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         tick();
-        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        store.resetEntitiesFilter({
+          newDefaultFilter: { search: 'zero', foo: 'bar' },
+        });
         tick(400);
         expect(store.entitiesFilter()).toEqual({ search: 'zero', foo: 'bar' });
         expect(store.entities().length).toEqual(2);
@@ -664,9 +734,14 @@ describe('withEntitiesRemoteFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         tick();
-        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        store.resetEntitiesFilter({
+          newDefaultFilter: { search: 'zero', foo: 'bar' },
+        });
         tick(400);
-        store.filterEntities({ filter: { search: 'zzzyyyy', foo: 'bar' }, forceLoad: true });
+        store.filterEntities({
+          filter: { search: 'zzzyyyy', foo: 'bar' },
+          forceLoad: true,
+        });
         tick(400);
         expect(store.entities().length).toEqual(0);
         store.resetEntitiesFilter();
@@ -680,9 +755,14 @@ describe('withEntitiesRemoteFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         tick();
-        store.filterEntities({ filter: { search: 'zero', foo: 'bar' }, forceLoad: true });
+        store.filterEntities({
+          filter: { search: 'zero', foo: 'bar' },
+          forceLoad: true,
+        });
         tick(400);
-        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        store.resetEntitiesFilter({
+          newDefaultFilter: { search: 'zero', foo: 'bar' },
+        });
         tick(400);
         expect(store.isEntitiesFilterChanged()).toBe(false);
       });
@@ -692,9 +772,14 @@ describe('withEntitiesRemoteFilter', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         tick();
-        store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', foo: 'bar' } });
+        store.resetEntitiesFilter({
+          newDefaultFilter: { search: 'zero', foo: 'bar' },
+        });
         tick(400);
-        store.filterEntities({ filter: { search: 'mario', foo: 'bar' }, forceLoad: true });
+        store.filterEntities({
+          filter: { search: 'mario', foo: 'bar' },
+          forceLoad: true,
+        });
         tick(400);
         expect(store.isEntitiesFilterChanged()).toBe(true);
       });

@@ -741,6 +741,69 @@ describe('withEntitiesHybridFilter', () => {
       });
     });
 
+    describe('two-arg (entityConfig, options) form', () => {
+      it(' should rename props when collection param is set, same as single object form', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const Store = signalStore(
+            { protectedState: false },
+            withEntities({
+              entity,
+              collection,
+            }),
+            withCallStatus({ collection }),
+            withEntitiesLocalPagination({ entity, collection }),
+            withEntitiesHybridFilter(
+              { entity, collection },
+              {
+                defaultFilter: { search: '', categoryId: 'snes' },
+                isRemoteFilter: (previous, current) =>
+                  previous.categoryId !== current.categoryId,
+                filterFn: (entity, filter) =>
+                  !filter?.search ||
+                  entity?.name
+                    .toLowerCase()
+                    .includes(filter?.search.toLowerCase()),
+              },
+            ),
+          );
+          const store = new Store();
+          patchState(store, setAllEntities(mockProducts, { collection }));
+          store.setProductEntitiesLoaded();
+          tick(400);
+          store.loadProductEntitiesPage({ pageIndex: 3 });
+          expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
+
+          store.filterProductEntities({
+            filter: { search: 'zero' },
+            patch: true,
+          });
+          tick(400);
+          expect(store.productEntities().length).toEqual(2);
+          expect(store.productEntities()).toEqual([
+            {
+              description: 'Super Nintendo Game',
+              id: '1',
+              name: 'F-Zero',
+              price: 12,
+              categoryId: 'snes',
+            },
+            {
+              description: 'GameCube Game',
+              id: '80',
+              name: 'F-Zero GX',
+              price: 55,
+              categoryId: 'gamecube',
+            },
+          ]);
+          expect(store.productEntitiesFilter()).toEqual({
+            search: 'zero',
+            categoryId: 'snes',
+          });
+          expect(store.productEntitiesFilter.search()).toEqual('zero');
+        });
+      }));
+    });
+
     describe('resetEntitiesFilter with newDefaultFilter', () => {
       it('should set filter to newDefaultFilter and apply local filtering', fakeAsync(() => {
         TestBed.runInInjectionContext(() => {
@@ -748,9 +811,14 @@ describe('withEntitiesHybridFilter', () => {
           patchState(store, setAllEntities(mockProducts));
           store.setLoaded();
           tick(400);
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'snes' },
+          });
           tick(400);
-          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'snes' });
+          expect(store.entitiesFilter()).toEqual({
+            search: 'zero',
+            categoryId: 'snes',
+          });
           expect(store.entities().length).toEqual(2);
         });
       }));
@@ -761,14 +829,22 @@ describe('withEntitiesHybridFilter', () => {
           patchState(store, setAllEntities(mockProducts));
           store.setLoaded();
           tick(400);
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'snes' },
+          });
           tick(400);
-          store.filterEntities({ filter: { search: 'zzzyyyy', categoryId: 'snes' }, forceLoad: true });
+          store.filterEntities({
+            filter: { search: 'zzzyyyy', categoryId: 'snes' },
+            forceLoad: true,
+          });
           tick(400);
           expect(store.entities().length).toEqual(0);
           store.resetEntitiesFilter();
           tick(400);
-          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'snes' });
+          expect(store.entitiesFilter()).toEqual({
+            search: 'zero',
+            categoryId: 'snes',
+          });
           expect(store.entities().length).toEqual(2);
         });
       }));
@@ -779,9 +855,14 @@ describe('withEntitiesHybridFilter', () => {
           patchState(store, setAllEntities(mockProducts));
           store.setLoaded();
           tick(400);
-          store.filterEntities({ filter: { search: 'zero', categoryId: 'snes' }, forceLoad: true });
+          store.filterEntities({
+            filter: { search: 'zero', categoryId: 'snes' },
+            forceLoad: true,
+          });
           tick(400);
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'snes' },
+          });
           tick(400);
           expect(store.isEntitiesFilterChanged()).toBe(false);
         });
@@ -793,9 +874,14 @@ describe('withEntitiesHybridFilter', () => {
           patchState(store, setAllEntities(mockProducts));
           store.setLoaded();
           tick(400);
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'snes' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'snes' },
+          });
           tick(400);
-          store.filterEntities({ filter: { search: 'mario', categoryId: 'snes' }, forceLoad: true });
+          store.filterEntities({
+            filter: { search: 'mario', categoryId: 'snes' },
+            forceLoad: true,
+          });
           tick(400);
           expect(store.isEntitiesFilterChanged()).toBe(true);
         });
@@ -1392,14 +1478,96 @@ describe('withEntitiesHybridFilter', () => {
       });
     });
 
+    describe('two-arg (entityConfig, options) form', () => {
+      it(' should rename props when collection param is set, same as single object form', fakeAsync(() => {
+        TestBed.runInInjectionContext(() => {
+          const Store = signalStore(
+            withEntities({
+              entity,
+              collection,
+            }),
+            withCallStatus({ collection, initialValue: 'loading' }),
+            withEntitiesRemotePagination({ entity, collection }),
+            withEntitiesHybridFilter(
+              { entity, collection },
+              {
+                defaultFilter: { search: '', categoryId: 'snes' },
+                isRemoteFilter: (previous, current) =>
+                  previous.categoryId !== current.categoryId,
+                filterFn: (entity, filter) =>
+                  !filter?.search ||
+                  entity?.name
+                    .toLowerCase()
+                    .includes(filter?.search.toLowerCase()),
+              },
+            ),
+            withEntitiesLoadingCall({
+              collection,
+              fetchEntities: ({ productEntitiesFilter }) => {
+                let result = [...mockProducts];
+                if (productEntitiesFilter()?.search) {
+                  result = mockProducts.filter((entity) =>
+                    productEntitiesFilter()?.search
+                      ? entity.name
+                          .toLowerCase()
+                          .includes(
+                            productEntitiesFilter()?.search.toLowerCase(),
+                          )
+                      : false,
+                  );
+                }
+                if (productEntitiesFilter()?.categoryId) {
+                  result = result.filter(
+                    (entity) =>
+                      entity.categoryId === productEntitiesFilter()?.categoryId,
+                  );
+                }
+                return of({ entities: result, total: result.length });
+              },
+            }),
+          );
+          const store = new Store();
+          tick();
+          store.loadProductEntitiesPage({ pageIndex: 3 });
+          tick(400);
+          expect(store.productEntitiesCurrentPage().pageIndex).toEqual(3);
+
+          store.filterProductEntities({
+            filter: { search: 'zero', categoryId: 'gamecube' },
+            patch: true,
+          });
+          tick(400);
+          expect(store.productEntities().length).toEqual(1);
+          expect(store.productEntities()).toEqual([
+            {
+              description: 'GameCube Game',
+              id: '80',
+              name: 'F-Zero GX',
+              price: 55,
+              categoryId: 'gamecube',
+            },
+          ]);
+          expect(store.productEntitiesFilter()).toEqual({
+            search: 'zero',
+            categoryId: 'gamecube',
+          });
+        });
+      }));
+    });
+
     describe('resetEntitiesFilter with newDefaultFilter', () => {
       it('should set filter to newDefaultFilter and trigger remote load', fakeAsync(() => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           tick();
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'gamecube' },
+          });
           tick(400);
-          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'gamecube' });
+          expect(store.entitiesFilter()).toEqual({
+            search: 'zero',
+            categoryId: 'gamecube',
+          });
           expect(store.entities().length).toEqual(1);
         });
       }));
@@ -1408,14 +1576,22 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           tick();
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'gamecube' },
+          });
           tick(400);
-          store.filterEntities({ filter: { search: 'zzzyyyy', categoryId: 'gamecube' }, forceLoad: true });
+          store.filterEntities({
+            filter: { search: 'zzzyyyy', categoryId: 'gamecube' },
+            forceLoad: true,
+          });
           tick(400);
           expect(store.entities().length).toEqual(0);
           store.resetEntitiesFilter();
           tick(400);
-          expect(store.entitiesFilter()).toEqual({ search: 'zero', categoryId: 'gamecube' });
+          expect(store.entitiesFilter()).toEqual({
+            search: 'zero',
+            categoryId: 'gamecube',
+          });
           expect(store.entities().length).toEqual(1);
         });
       }));
@@ -1424,9 +1600,14 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           tick();
-          store.filterEntities({ filter: { search: 'zero', categoryId: 'gamecube' }, forceLoad: true });
+          store.filterEntities({
+            filter: { search: 'zero', categoryId: 'gamecube' },
+            forceLoad: true,
+          });
           tick(400);
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'gamecube' },
+          });
           tick(400);
           expect(store.isEntitiesFilterChanged()).toBe(false);
         });
@@ -1436,9 +1617,14 @@ describe('withEntitiesHybridFilter', () => {
         TestBed.runInInjectionContext(() => {
           const store = new Store();
           tick();
-          store.resetEntitiesFilter({ newDefaultFilter: { search: 'zero', categoryId: 'gamecube' } });
+          store.resetEntitiesFilter({
+            newDefaultFilter: { search: 'zero', categoryId: 'gamecube' },
+          });
           tick(400);
-          store.filterEntities({ filter: { search: 'mario', categoryId: 'gamecube' }, forceLoad: true });
+          store.filterEntities({
+            filter: { search: 'mario', categoryId: 'gamecube' },
+            forceLoad: true,
+          });
           tick(400);
           expect(store.isEntitiesFilterChanged()).toBe(true);
         });
