@@ -236,6 +236,94 @@ describe('withEntitiesLocalPagination', () => {
     expect(store.productEntitiesCurrentPage().hasNext).toEqual(false);
   });
 
+  describe('two-arg (entityConfig, options) form', () => {
+    it('with collection entitiesCurrentPage should split entities in the correct pages, same as single object form', () => {
+      const collection = 'product';
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity, collection }),
+        // pageSize is deliberately not the default 10, so this fails if the
+        // options argument is ignored
+        withEntitiesLocalPagination({ entity, collection }, { pageSize: 5 }),
+      );
+
+      const store = new Store();
+      patchState(
+        store,
+        setAllEntities(mockProducts.slice(0, 25), { collection }),
+      );
+      // check the first page
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(5);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 5),
+      );
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(0);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(5);
+      expect(store.productEntitiesCurrentPage().pagesCount).toEqual(5);
+      expect(store.productEntitiesCurrentPage().total).toEqual(25);
+      expect(store.productEntitiesCurrentPage().hasPrevious).toEqual(false);
+      expect(store.productEntitiesCurrentPage().hasNext).toEqual(true);
+
+      store.loadProductEntitiesPage({ pageIndex: 1 });
+      // check the second page
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(5);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(5, 10),
+      );
+      expect(store.productEntitiesCurrentPage().pageIndex).toEqual(1);
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(5);
+    });
+
+    it('options as config factory can read previous state, with collection', () => {
+      const collection = 'product';
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ myDefault: { pageSize: 20 } }),
+        withEntities({ entity, collection }),
+        withEntitiesLocalPagination(
+          { entity, collection },
+          ({ myDefault }) => ({
+            pageSize: myDefault().pageSize,
+          }),
+        ),
+      );
+
+      const store = new Store();
+      patchState(
+        store,
+        setAllEntities(mockProducts.slice(0, 45), { collection }),
+      );
+      expect(store.productEntitiesCurrentPage().entities.length).toEqual(20);
+      expect(store.productEntitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 20),
+      );
+      expect(store.productEntitiesCurrentPage().pageSize).toEqual(20);
+    });
+
+    it('with no collection entitiesCurrentPage should split entities in the correct pages', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withEntitiesLocalPagination({ entity }, { pageSize: 5 }),
+      );
+
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts.slice(0, 25)));
+      expect(store.entitiesCurrentPage().entities.length).toEqual(5);
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(0, 5),
+      );
+      expect(store.entitiesCurrentPage().pageSize).toEqual(5);
+      expect(store.entitiesCurrentPage().pagesCount).toEqual(5);
+
+      store.loadEntitiesPage({ pageIndex: 1 });
+      expect(store.entitiesCurrentPage().entities).toEqual(
+        mockProducts.slice(5, 10),
+      );
+      expect(store.entitiesCurrentPage().pageIndex).toEqual(1);
+    });
+  });
+
   it('should resetPage when filter is executed', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(

@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import {
   entityConfig,
@@ -6,7 +6,7 @@ import {
   withEntities,
 } from '@ngrx/signals/entities';
 
-import { withEntitiesMultiSelection } from '../index';
+import { withEntitiesLocalFilter, withEntitiesMultiSelection } from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product, Product2 } from '../test.model';
 
@@ -297,6 +297,109 @@ describe('withEntitiesMultiSelection', () => {
         expect(store.isAllProductEntitiesSelected()).toEqual('some');
         store.clearProductEntitiesSelection();
         expect(store.isAllProductEntitiesSelected()).toEqual('none');
+      });
+    });
+  });
+
+  describe('two-arg (entityConfig, options) form', () => {
+    const collection = 'product';
+
+    it('defaultSelectedIds should select the entity, with collection, same as single object form', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({ myDefaultIds: [mockProducts[4].id, mockProducts[8].id] }),
+          withEntities({ entity, collection }),
+          withEntitiesMultiSelection(
+            { entity, collection },
+            ({ myDefaultIds }) => ({
+              defaultSelectedIds: myDefaultIds(),
+            }),
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        expect(store.productIdsSelected()).toEqual(['4', '8']);
+        expect(store.productEntitiesSelected()).toEqual([
+          mockProducts[4],
+          mockProducts[8],
+        ]);
+      });
+    });
+
+    it('select[Collection]Entities should select the entity, with collection', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          withEntitiesMultiSelection({ entity, collection }, {}),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductEntities({
+          ids: [mockProducts[4].id, mockProducts[8].id],
+        });
+        expect(store.productIdsSelected()).toEqual(['4', '8']);
+        expect(store.productEntitiesSelected()).toEqual([
+          mockProducts[4],
+          mockProducts[8],
+        ]);
+      });
+    });
+
+    it('clearOnFilter false should keep the selection when the filter runs, with collection', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          // clearOnFilter defaults to true, so the selection survives only if
+          // the options argument reached the feature
+          withEntitiesMultiSelection(
+            { entity, collection },
+            { clearOnFilter: false },
+          ),
+          withEntitiesLocalFilter(
+            { entity, collection },
+            {
+              defaultFilter: { search: '' },
+              filterFn: (entity, filter) =>
+                !filter?.search ||
+                entity?.name
+                  .toLowerCase()
+                  .includes(filter?.search.toLowerCase()),
+            },
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductEntities({
+          ids: [mockProducts[4].id, mockProducts[8].id],
+        });
+        expect(store.productIdsSelected()).toEqual(['4', '8']);
+
+        store.filterProductEntities({ filter: { search: 'zero' } });
+        tick(400);
+        expect(store.productIdsSelected()).toEqual(['4', '8']);
+      });
+    }));
+
+    it('with no collection defaultSelectedIds should select the entities', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity }),
+          withEntitiesMultiSelection(
+            { entity },
+            { defaultSelectedIds: [mockProducts[4].id, mockProducts[8].id] },
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        expect(store.idsSelected()).toEqual(['4', '8']);
+        expect(store.entitiesSelected()).toEqual([
+          mockProducts[4],
+          mockProducts[8],
+        ]);
       });
     });
   });

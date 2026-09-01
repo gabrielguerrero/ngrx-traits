@@ -23,6 +23,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -41,24 +42,24 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  * Generates state, computed and methods for single selection of entities.
  *
  * Requires withEntities to be present before this function.
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection })`)
  * @param configFactory.collection - The collection name
  * @param configFactory.entity - The entity type
  * @param configFactory.clearOnFilter - Clear the selected entity when the filter changes (default: true)
  * @param configFactory.clearOnRemoteSort - Clear the selected entity when the remote sort changes (default: true)
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  * @example
- * const entity = type<Product>();
- * const collection = "product";
+ * const productEntityConfig = entityConfig({
+ *   entity: type<Product>(),
+ *   collection: 'product',
+ * });
  * export const store = signalStore(
  *   { providedIn: 'root' },
  *   // Required withEntities and withCallStatus
- *   withEntities({ entity, collection }),
- *   withCallStatus({ prop: collection, initialValue: 'loading' }),
+ *   withEntities(productEntityConfig),
+ *   withCallStatus({ prop: 'product', initialValue: 'loading' }),
  *
- *   withEntitiesSingleSelection({
- *     entity,
- *     collection,
- *   }),
+ *   withEntitiesSingleSelection(productEntityConfig),
  *  );
  *
  *  // generates the following signals
@@ -100,7 +101,69 @@ export function withEntitiesSingleSelection<
         props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
         methods: NamedEntitiesSingleSelectionMethods<Collection>;
       }
-> {
+>;
+export function withEntitiesSingleSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: Collection;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedId?: string | number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesSingleSelection'>,
+  Collection extends ''
+    ? {
+        state: EntitiesSingleSelectionState;
+        props: EntitiesSingleSelectionComputed<Entity>;
+        methods: EntitiesSingleSelectionMethods;
+      }
+    : {
+        state: NamedEntitiesSingleSelectionState<Collection>;
+        props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
+        methods: NamedEntitiesSingleSelectionMethods<Collection>;
+      }
+>;
+export function withEntitiesSingleSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string = '',
+>(
+  configOrFactory: FeatureConfigFactory<
+    Input,
+    {
+      entity: Entity;
+      collection?: Collection;
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedId?: string | number;
+    }
+  >,
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedId?: string | number;
+    }
+  >,
+): SignalStoreFeature<any, any> {
+  const configFactory = combineFeatureConfig(
+    configOrFactory,
+    options,
+  ) as typeof configOrFactory;
   return withFeatureFactory((store: StoreSource<Input>) => {
     const config = getFeatureConfig(configFactory, store);
     const { entityMapKey } = getWithEntitiesKeys(config);

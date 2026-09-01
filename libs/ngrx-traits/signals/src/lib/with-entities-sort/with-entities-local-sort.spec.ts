@@ -751,6 +751,100 @@ describe('withEntitiesLocalSort', () => {
     });
   });
 
+  describe('two-arg (entityConfig, options) form', () => {
+    it('with collection should sort entities and store sort, same as single object form', () => {
+      const collection = 'product';
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({
+          entity,
+          collection,
+        }),
+        withEntitiesLocalSort(
+          { entity, collection },
+          { defaultSort: { field: 'name', direction: 'asc' } },
+        ),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        expect(store.productEntitiesSort()).toEqual({
+          field: 'name',
+          direction: 'asc',
+        });
+        // check default sort
+        store.sortProductEntities();
+        expect(
+          store
+            .productEntities()
+            .map((e) => e.name)
+            .slice(0, 5),
+        ).toEqual([
+          '1080° Avalanche',
+          'Animal Crossing',
+          'Arkanoid: Doh it Again',
+          'Battalion Wars',
+          'BattleClash',
+        ]);
+        // sort by price
+        store.sortProductEntities({
+          sort: { field: 'price', direction: 'desc' },
+        });
+        expect(
+          store
+            .productEntities()
+            .map((e) => e.price)
+            .slice(0, 5),
+        ).toEqual([178, 175, 172, 169, 166]);
+        expect(store.productEntities().length).toEqual(mockProducts.length);
+        expect(store.productEntitiesSort()).toEqual({
+          field: 'price',
+          direction: 'desc',
+        });
+      });
+    });
+
+    it('options as config factory can read previous state, with collection', () => {
+      const collection = 'product';
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({
+            myDefault: { field: 'name', direction: 'asc' } as Sort<Product>,
+          }),
+          withEntities({
+            entity,
+            collection,
+          }),
+          withCallStatus({ collection }),
+          withEntitiesLocalSort({ entity, collection }, ({ myDefault }) => ({
+            defaultSort: myDefault(),
+          })),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.setProductEntitiesLoaded();
+        TestBed.tick();
+        expect(store.productEntitiesSort()).toEqual({
+          field: 'name',
+          direction: 'asc',
+        });
+        expect(
+          store
+            .productEntities()
+            .map((e) => e.name)
+            .slice(0, 5),
+        ).toEqual([
+          '1080° Avalanche',
+          'Animal Crossing',
+          'Arkanoid: Doh it Again',
+          'Battalion Wars',
+          'BattleClash',
+        ]);
+      });
+    });
+  });
+
   it('should sort entities by using custom sort function', () => {
     const Store = signalStore(
       { protectedState: false },

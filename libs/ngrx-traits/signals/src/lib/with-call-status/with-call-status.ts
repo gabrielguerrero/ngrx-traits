@@ -16,6 +16,7 @@ import {
 } from '../with-event-handler/with-event-handler';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import {
+  combineFeatureConfig,
   FeatureConfigFactory,
   getFeatureConfig,
   StoreSource,
@@ -36,7 +37,7 @@ import {
 
 /**
  * Generates necessary state, computed and methods for call progress status to the store
- * @param configFactory - The configuration object for the feature or a factory function that receives the store and returns the configuration object
+ * @param configFactory - The full feature config or a factory that receives the store and returns it, or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection })`)
  * @param configFactory.prop - The name of the property for which this represents the call status
  * @param configFactory.initialValue - The initial value of the call status
  * @param configFactory.collection - The name of the collection for which this represents the call status is an alias to prop param
@@ -44,12 +45,14 @@ import {
  * they do the same thing
  *
  * prop or collection is required
+ * @param options - Two-argument form only: the behavior options, or a factory that receives the store and returns them
  * @example
  * const store = signalStore(
  *  withCallStatus({ collection: 'user', })
  *  // other valid configurations
  *  // withCallStatus()
  *  // withCallStatus({ collection: 'user', initialValue: 'loading' , errorType: type<string>()})
+ *  // withCallStatus(userEntityConfig, { initialValue: 'loading', errorType: type<string>() })
  *  )
  *
  *  // generates the following signals
@@ -131,13 +134,42 @@ export function withCallStatus<
   }
 >;
 
+// Overload for entityConfig as first param, extra options as second
+export function withCallStatus<
+  Input extends SignalStoreFeatureResult,
+  Prop extends string,
+  Error = unknown,
+>(
+  entityConfig: {
+    entity?: unknown;
+    collection: Prop;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      initialValue?: CallStatus;
+      errorType?: Error;
+      entity?: never;
+      collection?: never;
+      prop?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & { state: {}; props: {}; methods: {} },
+  {
+    state: NamedCallStatusState<`${Prop}Entities`>;
+    props: NamedCallStatusComputed<`${Prop}Entities`, Error>;
+    methods: NamedCallStatusMethods<`${Prop}Entities`, Error>;
+  }
+>;
+
 // Implementation
 export function withCallStatus<
   Input extends SignalStoreFeatureResult,
   Prop extends string = '',
   Error = unknown,
 >(
-  configFactory: FeatureConfigFactory<
+  configOrFactory: FeatureConfigFactory<
     Input,
     {
       prop?: Prop;
@@ -146,7 +178,18 @@ export function withCallStatus<
       errorType?: Error;
     }
   > = {},
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      initialValue?: CallStatus;
+      errorType?: Error;
+    }
+  >,
 ): any {
+  const configFactory = combineFeatureConfig(
+    configOrFactory,
+    options,
+  ) as typeof configOrFactory;
   return withFeatureFactory((store: StoreSource<Input>) => {
     const config = getFeatureConfig(configFactory, store);
 
