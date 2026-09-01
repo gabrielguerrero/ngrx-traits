@@ -106,4 +106,32 @@ describe('withCallStatus', () => {
       expect(store.dataEntitiesError()).toBe('Not found');
     });
   });
+
+  describe('two-arg (entityConfig, options) form', () => {
+    it('generates Entities-suffixed methods for collection param, same as single object form', () => {
+      const Store = signalStore(
+        withCallStatus({ collection: 'pet' }, { initialValue: 'loading' }),
+      );
+      const store = new Store();
+
+      expect(store.isPetEntitiesLoading()).toBe(true);
+      store.setPetEntitiesLoaded();
+      expect(store.isPetEntitiesLoaded()).toBe(true);
+
+      expect(store.petEntitiesError()).toEqual(undefined);
+      store.setPetEntitiesError({ message: 'error' });
+      expect(store.petEntitiesError()).toEqual({ message: 'error' });
+    });
+
+    it('options as config factory can read previous state', () => {
+      const Store = signalStore(
+        withState({ myValue: 'loading' }),
+        withCallStatus({ collection: 'pet' }, ({ myValue }) => ({
+          initialValue: myValue() as CallStatus,
+        })),
+      );
+      const store = new Store();
+      expect(store.isPetEntitiesLoading()).toEqual(true);
+    });
+  });
 });

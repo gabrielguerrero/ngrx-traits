@@ -1,8 +1,8 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
-import { withEntitiesSingleSelection } from '../index';
+import { withEntitiesLocalFilter, withEntitiesSingleSelection } from '../index';
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';
 
@@ -86,7 +86,7 @@ describe('withEntitiesSingleSelection', () => {
   });
 
   describe('with collection', () => {
-    const collection = "product";
+    const collection = 'product';
     const Store = signalStore(
       { protectedState: false },
       withEntities({ entity, collection }),
@@ -129,6 +129,93 @@ describe('withEntitiesSingleSelection', () => {
         expect(store.productEntitySelected()).toEqual(mockProducts[4]);
         store.toggleSelectProductEntity({ id: mockProducts[4].id });
         expect(store.productEntitySelected()).toEqual(undefined);
+      });
+    });
+  });
+
+  describe('two-arg (entityConfig, options) form', () => {
+    const collection = 'product';
+
+    it('defaultSelectedId should select the entity, with collection, same as single object form', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withState({ myDefault: { id: mockProducts[4].id } }),
+          withEntities({ entity, collection }),
+          withEntitiesSingleSelection(
+            { entity, collection },
+            ({ myDefault }) => ({
+              defaultSelectedId: myDefault().id,
+            }),
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        expect(store.productEntitySelected()).toEqual(mockProducts[4]);
+      });
+    });
+
+    it('selectEntity should select the entity, with collection', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          withEntitiesSingleSelection({ entity, collection }, {}),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductEntity({ id: mockProducts[4].id });
+        expect(store.productEntitySelected()).toEqual(mockProducts[4]);
+      });
+    });
+
+    it('clearOnFilter false should keep the selection when the filter runs, with collection', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          // clearOnFilter defaults to true, so the selection survives only if
+          // the options argument reached the feature
+          withEntitiesSingleSelection(
+            { entity, collection },
+            { clearOnFilter: false },
+          ),
+          withEntitiesLocalFilter(
+            { entity, collection },
+            {
+              defaultFilter: { search: '' },
+              filterFn: (entity, filter) =>
+                !filter?.search ||
+                entity?.name
+                  .toLowerCase()
+                  .includes(filter?.search.toLowerCase()),
+            },
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts, { collection }));
+        store.selectProductEntity({ id: mockProducts[4].id });
+        expect(store.productEntitySelected()).toEqual(mockProducts[4]);
+
+        store.filterProductEntities({ filter: { search: 'zero' } });
+        tick(400);
+        expect(store.productEntitySelected()).toEqual(mockProducts[4]);
+      });
+    }));
+
+    it('with no collection defaultSelectedId should select the entity', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity }),
+          withEntitiesSingleSelection(
+            { entity },
+            { defaultSelectedId: mockProducts[4].id },
+          ),
+        );
+        const store = new Store();
+        patchState(store, setAllEntities(mockProducts));
+        expect(store.entitySelected()).toEqual(mockProducts[4]);
       });
     });
   });
