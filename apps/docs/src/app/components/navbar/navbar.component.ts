@@ -16,10 +16,12 @@ import {
 } from '@ng-icons/bootstrap-icons';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 
+import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+
 @Component({
   selector: 'docs-navbar',
   standalone: true,
-  imports: [MatIconButton, MatIcon, NgIcon],
+  imports: [MatIconButton, MatIcon, NgIcon, ThemeToggleComponent],
   viewProviders: [
     provideIcons({ bootstrapGithub, bootstrapDiscord, bootstrapMedium }),
   ],
@@ -90,7 +92,8 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
           <ng-icon class="text-lg" name="bootstrapGithub" />
           <span class="hidden font-medium sm:inline">GitHub</span>
         </a>
-        <div id="docsearch" data-theme="dark"></div>
+        <docs-theme-toggle />
+        <div id="docsearch"></div>
       </div>
     </nav>
   </header>`,

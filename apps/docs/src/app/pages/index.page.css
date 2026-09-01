@@ -8,12 +8,7 @@
   height: 100vh;
   /*position: fixed;*/
   /*inset: 0;*/
-  background: linear-gradient(
-    315deg,
-    rgb(41, 40, 40) 33%,
-    rgb(7, 1, 7) 68%,
-    rgb(4, 11, 37) 98%
-  );
+  background: var(--home-background);
   /*background: linear-gradient(*/
   /*  315deg,*/
   /*  rgb(3, 24, 34) 33%,*/
@@ -47,7 +42,7 @@
 
 .wave {
   /*background: rgba(255, 255, 255, 0.25);*/
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--home-wave);
   border-radius: 1000% 1000% 0 0;
   position: absolute;
   width: 800%;
@@ -109,5 +104,5 @@
   aspect-ratio: 1/1;
 }
 ::ng-deep a:hover{
-  color: rgb(154 177 251);
+  color: var(--home-link-hover);
 }

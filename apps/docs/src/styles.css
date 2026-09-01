@@ -1,6 +1,30 @@
 @import 'tailwindcss';
 @config '../tailwind.config.cjs';
 
+/* theme tokens, consumed by component stylesheets that cannot see the
+   `dark` class through view encapsulation */
+:root {
+  --home-background: linear-gradient(
+    315deg,
+    rgb(226, 232, 240) 33%,
+    rgb(248, 250, 252) 68%,
+    rgb(219, 226, 245) 98%
+  );
+  --home-wave: rgba(100, 116, 139, 0.18);
+  --home-link-hover: rgb(37, 99, 235);
+}
+
+html.dark {
+  --home-background: linear-gradient(
+    315deg,
+    rgb(41, 40, 40) 33%,
+    rgb(7, 1, 7) 68%,
+    rgb(4, 11, 37) 98%
+  );
+  --home-wave: rgba(0, 0, 0, 0.25);
+  --home-link-hover: rgb(154, 177, 251);
+}
+
 
 @font-face {
   font-family: 'Geist Mono';
@@ -27,8 +51,14 @@ pre[class*='language-'] {
   @apply py-4 px-5;
 }
 
+/* prose renders code blocks on a dark surface by default, keep them in step
+   with the theme instead */
+.prose pre {
+  @apply bg-zinc-100 text-zinc-900 dark:bg-zinc-900 dark:text-zinc-100;
+}
+
 .token {
-  @apply bg-zinc-950 dark:bg-zinc-800;
+  @apply bg-transparent;
 }
 
 .token.function,
@@ -66,7 +96,7 @@ pre[class*='language-'] {
 }
 
 .app-hover-text{
-  @apply hover:from-[#f14eff] hover:to-[#ffffff] hover:bg-gradient-to-r hover:bg-clip-text hover:text-transparent
+  @apply hover:from-[#f14eff] hover:to-[#5b21b6] dark:hover:to-[#ffffff] hover:bg-gradient-to-r hover:bg-clip-text hover:text-transparent
 }
 .app-title-color {
   @apply from-primary to-accent bg-gradient-to-r bg-clip-text  text-transparent
@@ -86,7 +116,7 @@ pre[class*='language-'] {
 
 .DocSearch-Button {
   --docsearch-searchbox-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.2);
-  @apply absolute left-[calc(50%-88px)] top-[15px] inline-flex h-9 w-44 flex-none items-center gap-x-3 overflow-hidden rounded-lg bg-white px-3 shadow shadow-black/5 ring-1 ring-black/10 focus-within:ring-2 focus-within:ring-blue-500 md:left-[calc(50%-104px)] md:w-52 lg:left-[calc(50%-160px)] lg:w-80;
+  @apply absolute left-[calc(50%-88px)] top-[15px] inline-flex h-9 w-44 flex-none items-center gap-x-3 overflow-hidden rounded-lg bg-white px-3 shadow shadow-black/5 ring-1 ring-black/10 focus-within:ring-2 focus-within:ring-blue-500 md:left-[calc(50%-104px)] md:w-52 lg:left-[calc(50%-160px)] lg:w-80 dark:bg-gray-900 dark:ring-white/10;
 }
 
 .DocSearch-Button-Placeholder {

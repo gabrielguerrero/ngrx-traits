@@ -26,9 +26,11 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
             </div>
 
             <p
-              class="p-4 sm:rounded-2xl  bg-white/5 max-w-xl text-xl font-light leading-9 text-zinc-300 "
+              class="p-4 sm:rounded-2xl bg-zinc-900/5 dark:bg-white/5 max-w-xl text-xl font-light leading-9 text-zinc-700 dark:text-zinc-300 "
             >
-              <span class="text-blue-300 font-bold">Ngrx Traits</span> is a set
+              <span class="text-blue-700 dark:text-blue-300 font-bold"
+                >Ngrx Traits</span
+              > is a set
               of NgRx Signals Custom Store Features that will speed up your
               development by solving common problems such as calling a backend,
               adding pagination, sorting, filtering, selection of entities, and
