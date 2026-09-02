@@ -1564,7 +1564,7 @@ Parameters from deeper child routes take precedence over parent route parameters
 | Param | Description |
 | --- | --- |
 | key | <p>the key to use in the TransferState</p> |
-| filterState | <p>filter the state before saving to TransferState (mutually exclusive with valueMapper)</p> |
+| filterState | <p>filter the state before saving to TransferState, either an array of state keys or a function (mutually exclusive with valueMapper)</p> |
 | valueMapper | <p>custom transformation between store state and transfer value (mutually exclusive with filterState)</p> |
 | onRestore | <p>callback after the state is restored from TransferState</p> |
 
@@ -1578,10 +1578,13 @@ const store = signalStore(
  withServerStateTransfer({
      key: 'my-state',
      // optionally, filter the state before transferring
-     filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
-      orderItemsEntityMap,
-      orderItemsIds,
-    }),
+     // with an array of state keys
+     filterState: ['orderItemsEntityMap', 'orderItemsIds'],
+     // or with a function
+     // filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+     //  orderItemsEntityMap,
+     //  orderItemsIds,
+     // }),
  }),
  );
 ```
@@ -1743,7 +1746,7 @@ const Store = signalStore(
 | type | <p>'session' or 'local' storage</p> |
 | saveStateChangesAfterMs | <p>save the state to the storage after this many milliseconds, 0 to disable</p> |
 | restoreOnInit | <p>restore the state from the storage on init</p> |
-| filterState | <p>filter the state before saving to the storage (mutually exclusive with valueMapper)</p> |
+| filterState | <p>filter the state before saving to the storage, either an array of state keys or a function (mutually exclusive with valueMapper)</p> |
 | valueMapper | <p>custom transformation between store state and storage value (mutually exclusive with filterState)</p> |
 | onRestore | <p>callback after the state is restored from the storage</p> |
 | expires | <p>storage will not be loaded if is older than this many milliseconds</p> |
@@ -1761,10 +1764,13 @@ const store = signalStore(
      restoreOnInit: true,
      saveStateChangesAfterMs: 300,
      // optionally, filter the state before saving to the storage
-     filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
-      orderItemsEntityMap,
-      orderItemsIds,
-    }),
+     // with an array of state keys
+     filterState: ['orderItemsEntityMap', 'orderItemsIds'],
+     // or with a function
+     // filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+     //  orderItemsEntityMap,
+     //  orderItemsIds,
+     // }),
  }),
  );
 ```
