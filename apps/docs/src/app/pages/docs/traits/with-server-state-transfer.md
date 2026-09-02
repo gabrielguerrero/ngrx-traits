@@ -70,7 +70,8 @@ const store = signalStore(
 
 ### Transfer specific state properties using filterState
 
-Use `filterState` when you only want to transfer a subset of your state:
+Use `filterState` when you only want to transfer a subset of your state, it can
+receive an array with the names of the state props to transfer:
 
 ```typescript
 const store = signalStore(
@@ -80,6 +81,20 @@ const store = signalStore(
   withServerStateTransfer({
     key: 'products-state',
     // Only transfer entity data, not loading states
+    filterState: ['orderItemsEntityMap', 'orderItemsIds'],
+  }),
+);
+```
+
+Or a function, useful when you need to transform the state before transferring it:
+
+```typescript
+const store = signalStore(
+  withEntities({ entity, collection }),
+  withCallStatus({ prop: collection, initialValue: 'loading' }),
+
+  withServerStateTransfer({
+    key: 'products-state',
     filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
       orderItemsEntityMap,
       orderItemsIds,
@@ -224,7 +239,7 @@ This custom store feature receives an object to allow specific configurations:
 | Property      | Description                                                                                          | Value                          |
 |---------------|------------------------------------------------------------------------------------------------------|--------------------------------|
 | key           | Unique key to store state in TransferState                                                           | string                         |
-| filterState   | Filter state before transferring (mutually exclusive with valueMapper)                               | (state) => Partial\<State\>    |
+| filterState   | Array of state prop names, or function, to filter the state before transferring (mutually exclusive with valueMapper) | ['state1'] \| (state) => Partial\<State\> |
 | valueMapper   | Custom transformation between store and transfer value (mutually exclusive with filterState)         | TransferValueMapper<T, Store>   |
 | onRestore     | Callback executed after state restoration on client                                                  | (store) => void                |
 
@@ -244,7 +259,7 @@ valueMapper: (store: Store) => {
 | stateToTransferValue  | Transform store state to transfer value (server)     | () => T \| undefined \| null   |
 | transferValueToState  | Transform transfer value to state (client)           | (value: T) => void             |
 
-**Note:** `valueMapper` and `filterState` are mutually exclusive - use one or the other, not both.
+**Note:** `valueMapper` and `filterState` are mutually exclusive - use one or the other, not both, TypeScript will report an error if you provide both.
 
 ## State
 
