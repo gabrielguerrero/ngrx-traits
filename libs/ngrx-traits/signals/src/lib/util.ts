@@ -1,3 +1,5 @@
+import { isDevMode } from '@angular/core';
+
 export function capitalize(name: string) {
   return name.charAt(0).toUpperCase() + name.slice(1);
 }
@@ -75,4 +77,28 @@ export function combineFunctionsInObject<
   );
   result = Object.getOwnPropertySymbols(param).reduce(replaceProps, result);
   return result as T;
+}
+
+// Normalizes a filterState option, which can be an array of state prop names or
+// a function, into a function that filters the state. Not part of the public api,
+// the jsdoc comment style is avoided here so it does not end up in api-docs.md
+export function toFilterStateFn<T extends object>(
+  filterState?: ((state: T) => Partial<T>) | readonly (keyof T)[],
+): ((state: T) => Partial<T>) | undefined {
+  if (!filterState) return undefined;
+  if (Array.isArray(filterState)) {
+    // Array.isArray does not narrow a readonly array out of the union
+    const keys = filterState as readonly (keyof T)[];
+    if (!keys.length) {
+      isDevMode() &&
+        console.warn('filterState received an empty array, it will be ignored');
+      return undefined;
+    }
+    return (state) =>
+      keys.reduce((acc, key) => {
+        acc[key] = state[key];
+        return acc;
+      }, {} as Partial<T>);
+  }
+  return filterState as (state: T) => Partial<T>;
 }

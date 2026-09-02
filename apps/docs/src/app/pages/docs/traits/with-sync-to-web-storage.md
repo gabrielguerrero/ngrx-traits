@@ -87,7 +87,25 @@ const store = signalStore(
     key: 'my-key',
     type: 'session',
     expires: 5000,
-    // filter the state before saving to the storage
+    // filter the state before saving to the storage,
+    // with an array of state prop names
+    filterState: ['orderItemsEntityMap', 'orderItemsIds'],
+  }),
+);
+```
+
+Or with a function, useful when you need to transform the state before saving it:
+
+```typescript
+const store = signalStore(
+  // following are not required, just an example it can have anything
+  withEntities({ entity, collection }),
+  withCallStatus({ prop: collection, initialValue: 'loading' }),
+
+  withSyncToWebStorage({
+    key: 'my-key',
+    type: 'session',
+    expires: 5000,
     filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
       orderItemsEntityMap,
       orderItemsIds,
@@ -154,7 +172,7 @@ const store = signalStore(
 );
 ```
 
-**Note:** `valueMapper` and `filterState` are mutually exclusive - you can only use one or the other, not both.
+**Note:** `valueMapper` and `filterState` are mutually exclusive - you can only use one or the other, not both, TypeScript will report an error if you provide both.
 
 ### Splitting the state in multiple store keys
 You can add withSyncToWebStorage multiple times with different keys, this can be useful if you are creating your own store features and each has a withSyncToWebStorage, or you need to split the state in two keys.
@@ -216,7 +234,7 @@ This trait receives an object to allow specific configurations:
 | type                    | Type of storage to use                                                                               | 'session' \| 'local'                                   |
 | restoreOnInit           | Auto restore the state from the storage when the store is initialized                                | boolean. Default: true                                 |
 | saveStateChangesAfterMs | Milliseconds after which the state is saved to storage when it changes                               | number. Default: 500                                   |
-| filterState             | Optional function to filter the state signals that will be synced to storage (mutually exclusive with valueMapper) | ({state1}) => ({state1})                               |
+| filterState             | Optional array of state prop names, or function, to filter the state that will be synced to storage (mutually exclusive with valueMapper) | ['state1'] \| ({state1}) => ({state1})                  |
 | valueMapper             | Optional custom transformation between store state and storage value (mutually exclusive with filterState) | StorageValueMapper<T, Store>                           |
 | expires                 | If the data is older than the time in milliseconds it won't be restored                              | number                                                 |
 | onRestore               | Optional callback after the state is restored from storage                                           | (store) => void                                        |
