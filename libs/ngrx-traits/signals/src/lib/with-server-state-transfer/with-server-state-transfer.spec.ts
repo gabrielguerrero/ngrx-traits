@@ -97,6 +97,40 @@ describe('withServerStateTransfer', () => {
       });
     });
 
+    it('should save state filtered with an array of state keys to TransferState on server', () => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity }),
+          withCallStatus(),
+          withServerStateTransfer({
+            key: 'test-state',
+            filterState: ['ids', 'entityMap'],
+          }),
+        );
+        const store = new Store();
+        TestBed.tick();
+
+        patchState(store, setAllEntities(mockProducts));
+        store.setLoaded();
+        TestBed.tick();
+
+        const stateKey = makeStateKey('test-state');
+        expect(mockTransferState.set).toHaveBeenCalledWith(
+          stateKey,
+          expect.objectContaining({
+            ids: expect.any(Array),
+            entityMap: expect.any(Object),
+          }),
+        );
+        // Should only include the filtered props
+        const lastCall = mockTransferState.set.mock.calls[
+          mockTransferState.set.mock.calls.length - 1
+        ][1] as any;
+        expect(Object.keys(lastCall)).toEqual(['ids', 'entityMap']);
+      });
+    });
+
     it('should save state using valueMapper on server', () => {
       TestBed.runInInjectionContext(() => {
         const Store = signalStore(
@@ -220,6 +254,31 @@ describe('withServerStateTransfer', () => {
         TestBed.tick();
 
         expect(store.entities()).toEqual(mockProducts);
+      });
+    });
+
+    it('should restore state filtered with an array of state keys on client', () => {
+      const transferredState = {
+        ids: mockProducts.map((p) => p.id),
+        entityMap: mockProducts.reduce((acc, p) => ({ ...acc, [p.id]: p }), {}),
+      };
+      mockTransferState.get.mockReturnValue(transferredState);
+
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity }),
+          withCallStatus(),
+          withServerStateTransfer({
+            key: 'test-state',
+            filterState: ['ids', 'entityMap'],
+          }),
+        );
+        const store = new Store();
+        TestBed.tick();
+
+        expect(store.entities()).toEqual(mockProducts);
+        expect(store.isLoaded()).toBe(false); // callStatus was filtered out
       });
     });
 
@@ -360,5 +419,38 @@ describe('withServerStateTransfer', () => {
         expect(mockTransferState.set).not.toHaveBeenCalled();
       });
     });
+  });
+  it('should only allow state props and not computed props or valueMapper in filterState', () => {
+    signalStore(
+      withEntities({ entity }),
+      withCallStatus(),
+      withServerStateTransfer({
+        key: 'test-state',
+        // @ts-expect-error entities is a computed prop, not a state prop
+        filterState: ['ids', 'entities'],
+      }),
+    );
+    signalStore(
+      withEntities({ entity }),
+      withServerStateTransfer({
+        key: 'test-state',
+        // @ts-expect-error not a state prop
+        filterState: ['nope'],
+      }),
+    );
+    signalStore(
+      withEntities({ entity }),
+      // @ts-expect-error filterState and valueMapper are mutually exclusive
+      withServerStateTransfer({
+        key: 'test-state',
+        filterState: ['ids'],
+        valueMapper: () => ({
+          stateToTransferValue: () => ({}),
+          transferValueToState: () => {
+            /* Empty */
+          },
+        }),
+      }),
+    );
   });
 });

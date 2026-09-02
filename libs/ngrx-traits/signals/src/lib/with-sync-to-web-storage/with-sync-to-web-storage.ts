@@ -3,18 +3,16 @@ import { effect, inject, isDevMode, PLATFORM_ID } from '@angular/core';
 import {
   getState,
   patchState,
-  Prettify,
   SignalStoreFeature,
   signalStoreFeature,
   SignalStoreFeatureResult,
-  StateSignals,
   type,
   withHooks,
   withMethods,
   WritableStateSource,
 } from '@ngrx/signals';
 
-import { combineFunctionsInObject } from '../util';
+import { combineFunctionsInObject, toFilterStateFn } from '../util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import { StorageValueMapper } from './with-sync-to-web-storage.util';
 
@@ -24,7 +22,7 @@ import { StorageValueMapper } from './with-sync-to-web-storage.util';
  * @param type - 'session' or 'local' storage
  * @param saveStateChangesAfterMs - save the state to the storage after this many milliseconds, 0 to disable
  * @param restoreOnInit - restore the state from the storage on init
- * @param filterState - filter the state before saving to the storage (mutually exclusive with valueMapper)
+ * @param filterState - filter the state before saving to the storage, either an array of state keys or a function (mutually exclusive with valueMapper)
  * @param valueMapper - custom transformation between store state and storage value (mutually exclusive with filterState)
  * @param onRestore - callback after the state is restored from the storage
  * @param expires - storage will not be loaded if is older than this many milliseconds
@@ -41,10 +39,13 @@ import { StorageValueMapper } from './with-sync-to-web-storage.util';
  *      restoreOnInit: true,
  *      saveStateChangesAfterMs: 300,
  *      // optionally, filter the state before saving to the storage
- *      filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
- *       orderItemsEntityMap,
- *       orderItemsIds,
- *     }),
+ *      // with an array of state keys
+ *      filterState: ['orderItemsEntityMap', 'orderItemsIds'],
+ *      // or with a function
+ *      // filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+ *      //  orderItemsEntityMap,
+ *      //  orderItemsIds,
+ *      // }),
  *  }),
  *  );
  *
@@ -107,10 +108,16 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
   onRestore?: (store: StoreSource<Input>) => void;
 } & (
   | {
-      filterState: (state: Input['state']) => Partial<Input['state']>;
+      filterState:
+        | ((state: Input['state']) => Partial<Input['state']>)
+        | readonly (keyof Input['state'])[];
+      valueMapper?: never;
     }
-  | { valueMapper: StorageValueMapper<any, StoreSource<Input>> }
-  | {}
+  | {
+      valueMapper: StorageValueMapper<any, StoreSource<Input>>;
+      filterState?: never;
+    }
+  | { filterState?: never; valueMapper?: never }
 )): SignalStoreFeature<
   Input,
   {
@@ -123,11 +130,13 @@ export function withSyncToWebStorage<Input extends SignalStoreFeatureResult>({
     };
   }
 > {
+  const filterState = toFilterStateFn<Input['state']>(
+    (rest as any).filterState,
+  );
   return signalStoreFeature(
     type<Input>(),
     withMethods((store: WritableStateSource<Input['state']>) => {
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-      const filterState = (rest as any).filterState;
       const valueMapper = (rest as any).valueMapper?.(store);
       return combineFunctionsInObject(
         {
