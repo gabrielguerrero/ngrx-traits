@@ -106,6 +106,121 @@ describe('withSyncToWebStorage', () => {
     });
   });
 
+  it('should save and load to local session using an array of state keys in filterState', () => {
+    const onRestore = vi.fn();
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withCallStatus(),
+        withSyncToWebStorage({
+          key: 'test',
+          type: 'session',
+          restoreOnInit: false,
+          saveStateChangesAfterMs: 0,
+          filterState: ['ids', 'entityMap'],
+          onRestore,
+        }),
+      );
+      const store = new Store();
+      store.clearFromStore();
+      TestBed.tick();
+      store.setLoaded();
+      patchState(store, setAllEntities(mockProducts));
+      store.saveToStorage();
+      expect(Object.keys(getFromStorage('test', 'session'))).toEqual([
+        'ids',
+        'entityMap',
+      ]);
+
+      store.setLoading();
+      patchState(store, setAllEntities(mockProducts.slice(0, 30)));
+
+      store.loadFromStorage();
+      expect(store.entities()).toEqual(mockProducts);
+      expect(store.isLoading()).toBe(true); // it keeps the current value because it was filtered
+      expect(onRestore).toHaveBeenCalled();
+    });
+  });
+
+  it('should filter with an array of state keys of a collection', () => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity, collection: 'products' }),
+        withCallStatus({ prop: 'products' }),
+        withSyncToWebStorage({
+          key: 'test',
+          type: 'session',
+          restoreOnInit: false,
+          saveStateChangesAfterMs: 0,
+          filterState: ['productsIds', 'productsEntityMap'],
+        }),
+      );
+      const store = new Store();
+      store.clearFromStore();
+      TestBed.tick();
+      store.setProductsLoaded();
+      patchState(
+        store,
+        setAllEntities(mockProducts, { collection: 'products' }),
+      );
+      store.saveToStorage();
+
+      expect(Object.keys(getFromStorage('test', 'session'))).toEqual([
+        'productsIds',
+        'productsEntityMap',
+      ]);
+
+      store.setProductsLoading();
+      patchState(
+        store,
+        setAllEntities(mockProducts.slice(0, 30), { collection: 'products' }),
+      );
+
+      store.loadFromStorage();
+      expect(store.productsEntities()).toEqual(mockProducts);
+      expect(store.isProductsLoading()).toBe(true); // it keeps the current value because it was filtered
+    });
+  });
+
+  it('should only allow state props and not computed props or valueMapper in filterState', () => {
+    signalStore(
+      withEntities({ entity }),
+      withCallStatus(),
+      withSyncToWebStorage({
+        key: 'test',
+        type: 'session',
+        // @ts-expect-error entities is a computed prop, not a state prop
+        filterState: ['ids', 'entities'],
+      }),
+    );
+    signalStore(
+      withEntities({ entity }),
+      withSyncToWebStorage({
+        key: 'test',
+        type: 'session',
+        // @ts-expect-error not a state prop
+        filterState: ['nope'],
+      }),
+    );
+    signalStore(
+      withEntities({ entity }),
+      // @ts-expect-error filterState and valueMapper are mutually exclusive
+      withSyncToWebStorage({
+        key: 'test',
+        type: 'session',
+        filterState: ['ids'],
+        valueMapper: () => ({
+          stateToStorageValue: () => ({}),
+          storageValueToState: () => {
+            /* Empty */
+          },
+        }),
+      }),
+    );
+  });
+
   it('should save after milliseconds set in saveStateChangesAfterMs if is greater than 0 ', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
@@ -654,7 +769,10 @@ describe('withSyncToWebStorage', () => {
     }));
   });
 });
-function getFromStorage(key: string) {
-  const data = window.localStorage.getItem(key);
+function getFromStorage(key: string, type: 'local' | 'session' = 'local') {
+  const data =
+    type === 'local'
+      ? window.localStorage.getItem(key)
+      : window.sessionStorage.getItem(key);
   return data ? JSON.parse(data) : undefined;
 }

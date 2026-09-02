@@ -39,10 +39,7 @@ export function withOrderEntities() {
     withSyncToWebStorage({
       key: 'orderItems',
       type: 'session',
-      filterState: ({ orderItemEntityMap, orderItemIds }) => ({
-        orderItemEntityMap,
-        orderItemIds,
-      }),
+      filterState: ['orderItemEntityMap', 'orderItemIds'],
     }),
   );
 }

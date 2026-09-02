@@ -17,13 +17,14 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 
+import { toFilterStateFn } from '../util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import { TransferValueMapper } from './with-server-state-transfer.util';
 
 /**
  * Sync the state of the store using Angular's TransferState API for SSR
  * @param key - the key to use in the TransferState
- * @param filterState - filter the state before saving to TransferState (mutually exclusive with valueMapper)
+ * @param filterState - filter the state before saving to TransferState, either an array of state keys or a function (mutually exclusive with valueMapper)
  * @param valueMapper - custom transformation between store state and transfer value (mutually exclusive with filterState)
  * @param onRestore - callback after the state is restored from TransferState
  *
@@ -36,10 +37,13 @@ import { TransferValueMapper } from './with-server-state-transfer.util';
  *  withServerStateTransfer({
  *      key: 'my-state',
  *      // optionally, filter the state before transferring
- *      filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
- *       orderItemsEntityMap,
- *       orderItemsIds,
- *     }),
+ *      // with an array of state keys
+ *      filterState: ['orderItemsEntityMap', 'orderItemsIds'],
+ *      // or with a function
+ *      // filterState: ({ orderItemsEntityMap, orderItemsIds }) => ({
+ *      //  orderItemsEntityMap,
+ *      //  orderItemsIds,
+ *      // }),
  *  }),
  *  );
  *
@@ -77,7 +81,9 @@ import { TransferValueMapper } from './with-server-state-transfer.util';
  *  );
  *
  */
-export function withServerStateTransfer<Input extends SignalStoreFeatureResult>({
+export function withServerStateTransfer<
+  Input extends SignalStoreFeatureResult,
+>({
   key,
   onRestore,
   ...rest
@@ -86,17 +92,25 @@ export function withServerStateTransfer<Input extends SignalStoreFeatureResult>(
   onRestore?: (store: StoreSource<Input>) => void;
 } & (
   | {
-      filterState: (state: Input['state']) => Partial<Input['state']>;
+      filterState:
+        | ((state: Input['state']) => Partial<Input['state']>)
+        | readonly (keyof Input['state'])[];
+      valueMapper?: never;
     }
-  | { valueMapper: TransferValueMapper<any, StoreSource<Input>> }
-  | {}
+  | {
+      valueMapper: TransferValueMapper<any, StoreSource<Input>>;
+      filterState?: never;
+    }
+  | { filterState?: never; valueMapper?: never }
 )): SignalStoreFeature<Input, { state: {}; props: {}; methods: {} }> {
+  const filterState = toFilterStateFn<Input['state']>(
+    (rest as any).filterState,
+  );
   return signalStoreFeature(
     type<Input>(),
     withHooks((store: WritableStateSource<Input['state']>) => {
       const transferState = inject(TransferState);
       const isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
-      const filterState = (rest as any).filterState;
       const valueMapper = (rest as any).valueMapper?.(store);
       const stateKey = makeStateKey<any>(key);
 
