@@ -1,7 +1,10 @@
 import { Signal, signal } from '@angular/core';
 import { TestScheduler } from 'rxjs/testing';
 
-import { debounceFilterPipe, toFilterOptions } from './with-entities-filter.util';
+import {
+  debounceFilterPipe,
+  toFilterOptions,
+} from './with-entities-filter.util';
 
 describe('toFilterOptions', () => {
   it('should wrap raw Filter when no filter key exists', () => {
@@ -39,10 +42,7 @@ describe('toFilterOptions', () => {
 
   it('should pass through FilterOptions with empty filter in patch mode', () => {
     const defaultFilter = { search: '', name: '' };
-    const result = toFilterOptions(
-      { filter: {}, patch: true },
-      defaultFilter,
-    );
+    const result = toFilterOptions({ filter: {}, patch: true }, defaultFilter);
     expect(result).toEqual({ filter: {}, patch: true });
   });
 
@@ -75,10 +75,7 @@ describe('toFilterOptions', () => {
 
   it('should wrap raw Filter when filter key has undefined value', () => {
     const defaultFilter = { filter: '' };
-    const result = toFilterOptions(
-      { filter: undefined } as any,
-      defaultFilter,
-    );
+    const result = toFilterOptions({ filter: undefined } as any, defaultFilter);
     expect(result).toEqual({ filter: { filter: undefined } });
   });
 

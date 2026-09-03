@@ -120,10 +120,7 @@ export type ExtractCallResultType<T extends Call | CallConfig> =
         : D
       : never;
 export type ExtractErrorType<T extends Call | CallConfig> =
-  T extends CallConfig<any, any, any, infer E>
-    ? E
-    : unknown;
-
+  T extends CallConfig<any, any, any, infer E> ? E : unknown;
 
 export type NamedCallsStatusComputed<
   Calls extends Record<string, Call | CallConfig>,
@@ -147,5 +144,5 @@ export type NamedCallsStatusComputed<
 };
 
 export type RxMethodRef = {
-    destroy: () => void;
+  destroy: () => void;
 };

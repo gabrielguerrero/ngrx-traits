@@ -79,7 +79,6 @@ describe('withCalls', () => {
     });
   });
 
-
   it('Fail on a call should set status return error ', async () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();

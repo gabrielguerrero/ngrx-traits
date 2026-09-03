@@ -1,6 +1,5 @@
 import { signal } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { callConfig, withCalls } from '@ngrx-traits/signals';
 import { patchState, signalStore, type, withState } from '@ngrx/signals';
 import {
   setAllEntities,
@@ -8,6 +7,8 @@ import {
   withEntities,
 } from '@ngrx/signals/entities';
 import { BehaviorSubject, first, of, Subject } from 'rxjs';
+
+import { callConfig, withCalls } from '@ngrx-traits/signals';
 
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';

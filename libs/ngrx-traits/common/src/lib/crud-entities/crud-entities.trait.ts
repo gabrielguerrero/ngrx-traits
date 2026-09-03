@@ -5,22 +5,11 @@ import {
   TraitSelectorsFactoryConfig,
   TraitStateMutatorsFactoryConfig,
 } from '@ngrx-traits/core';
-import { createCrudTraitActions } from './crud-entities.trait.actions';
-import { createCrudTraitSelectors } from './crud-entities.trait.selectors';
+
 import {
-  createCrudInitialState,
-  createCrudTraitReducer,
-} from './crud-entities.trait.reducer';
-import {
-  SortEntitiesActions,
-  SortEntitiesKeyedConfig,
-} from '../sort-entities/sort-entities.model';
-import {
-  CrudEntitiesActions,
-  CrudEntitiesConfig,
-  CrudEntitiesKeyedConfig,
-  crudEntitiesTraitKey,
-} from './crud-entities.model';
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../entities-pagination/entities-pagination.model';
 import {
   FilterEntitiesActions,
   FilterEntitiesKeyedConfig,
@@ -32,10 +21,22 @@ import {
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
 import {
-  EntitiesPaginationActions,
-  EntitiesPaginationKeyedConfig,
-} from '../entities-pagination/entities-pagination.model';
+  SortEntitiesActions,
+  SortEntitiesKeyedConfig,
+} from '../sort-entities/sort-entities.model';
+import {
+  CrudEntitiesActions,
+  CrudEntitiesConfig,
+  CrudEntitiesKeyedConfig,
+  crudEntitiesTraitKey,
+} from './crud-entities.model';
+import { createCrudTraitActions } from './crud-entities.trait.actions';
 import { createCrudTraitMutators } from './crud-entities.trait.mutators';
+import {
+  createCrudInitialState,
+  createCrudTraitReducer,
+} from './crud-entities.trait.reducer';
+import { createCrudTraitSelectors } from './crud-entities.trait.selectors';
 
 /**
  * Generates ngrx code to add, remove update, upsert entities on a list, it also
@@ -86,11 +87,11 @@ export function addCrudEntitiesTrait<Entity>({
       createCrudTraitActions<Entity>(actionsGroupKey, entitiesName),
     selectors: ({ previousSelectors }: TraitSelectorsFactoryConfig) =>
       createCrudTraitSelectors<Entity>(
-        previousSelectors as LoadEntitiesSelectors<Entity>
+        previousSelectors as LoadEntitiesSelectors<Entity>,
       ),
     mutators: ({ allConfigs }: TraitStateMutatorsFactoryConfig) =>
       createCrudTraitMutators<Entity>(
-        allConfigs as CrudEntitiesKeyedConfig & LoadEntitiesKeyedConfig<Entity>
+        allConfigs as CrudEntitiesKeyedConfig & LoadEntitiesKeyedConfig<Entity>,
       ),
     initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>
       createCrudInitialState<Entity>(previousInitialState),
@@ -107,7 +108,7 @@ export function addCrudEntitiesTrait<Entity>({
           FilterEntitiesKeyedConfig<Entity, unknown> &
           LoadEntitiesKeyedConfig<Entity> &
           SortEntitiesKeyedConfig<Entity> &
-          EntitiesPaginationKeyedConfig
+          EntitiesPaginationKeyedConfig,
       ),
   });
 }

@@ -1,5 +1,7 @@
 import { createFeatureSelector, props } from '@ngrx/store';
+
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
+
 import { AsyncActionState } from './async-action.model';
 import { addAsyncActionTrait } from './async-action.trait';
 
@@ -17,7 +19,7 @@ describe('addApiCall trait', () => {
         name: 'createClient',
         actionProps: props<{ name: string }>(),
         actionSuccessProps: props<{ id: string }>(),
-      })
+      }),
     )({
       actionsGroupKey: 'Client',
       featureSelector,
@@ -36,7 +38,7 @@ describe('addApiCall trait', () => {
         name: 'createProduct',
         actionProps: props<{ name: string }>(),
         actionSuccessProps: props<{ id: string }>(),
-      })
+      }),
     )({
       actionsGroupKey: 'Client',
       featureSelector: featureSelector2,
@@ -51,12 +53,12 @@ describe('addApiCall trait', () => {
       expect(
         selectors.isLoadingCreateClient.projector({
           createClientStatus: 'loading',
-        })
+        }),
       ).toEqual(true);
       expect(
         selectors.isLoadingCreateClient.projector({
           createClientStatus: 'success',
-        })
+        }),
       ).toEqual(false);
     });
     it('isSuccessClientDetailsSelected should return right value ', () => {
@@ -64,12 +66,12 @@ describe('addApiCall trait', () => {
       expect(
         selectors.isSuccessCreateClient.projector({
           createClientStatus: 'success',
-        })
+        }),
       ).toEqual(true);
       expect(
         selectors.isSuccessCreateClient.projector({
           createClientStatus: 'loading',
-        })
+        }),
       ).toEqual(false);
     });
     it('isFailClientDetailsSelected should return right value ', () => {
@@ -77,12 +79,12 @@ describe('addApiCall trait', () => {
       expect(
         selectors.isFailCreateClient.projector({
           createClientStatus: 'fail',
-        })
+        }),
       ).toEqual(true);
       expect(
         selectors.isFailCreateClient.projector({
           createClientStatus: 'loading',
-        })
+        }),
       ).toEqual(false);
     });
   });
@@ -104,7 +106,7 @@ describe('addApiCall trait', () => {
         {},
         actions.createClientSuccess({
           id: '123',
-        })
+        }),
       );
       expect(state).toEqual({
         createClientStatus: 'success',
@@ -119,13 +121,13 @@ describe('addApiCall trait', () => {
         {},
         actions.createClient({
           name: 'Bob',
-        })
+        }),
       );
       state = reducer(
         state,
         actions.createProduct({
           name: 'Something',
-        })
+        }),
       );
       expect(selectors.isLoadingCreateClient.projector(state)).toEqual(true);
       expect(selectors.isLoadingCreateProduct.projector(state)).toEqual(true);

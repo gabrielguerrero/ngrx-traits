@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { delay } from 'rxjs/operators';
-
 import { GenreResponse } from '@example-api/shared/models';
+import { delay } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class GenreService {

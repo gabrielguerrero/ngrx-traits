@@ -27,7 +27,11 @@ export class TemporalStringDateAdapter extends DateAdapter<string> {
   override getMonthNames(style: 'long' | 'short' | 'narrow'): string[] {
     const formatter = new Intl.DateTimeFormat(this.locale, { month: style });
     return Array.from({ length: 12 }, (_, i) => {
-      const date = Temporal.PlainDate.from({ year: 2020, month: i + 1, day: 1 });
+      const date = Temporal.PlainDate.from({
+        year: 2020,
+        month: i + 1,
+        day: 1,
+      });
       return formatter.format(new Date(date.toString()));
     });
   }
@@ -40,7 +44,11 @@ export class TemporalStringDateAdapter extends DateAdapter<string> {
     const formatter = new Intl.DateTimeFormat(this.locale, { weekday: style });
     // 2020-01-05 is a Sunday
     return Array.from({ length: 7 }, (_, i) => {
-      const date = Temporal.PlainDate.from({ year: 2020, month: 1, day: 5 + i });
+      const date = Temporal.PlainDate.from({
+        year: 2020,
+        month: 1,
+        day: 5 + i,
+      });
       return formatter.format(new Date(date.toString()));
     });
   }
@@ -62,7 +70,11 @@ export class TemporalStringDateAdapter extends DateAdapter<string> {
   }
 
   override createDate(year: number, month: number, date: number): string {
-    return Temporal.PlainDate.from({ year, month: month + 1, day: date }).toString();
+    return Temporal.PlainDate.from({
+      year,
+      month: month + 1,
+      day: date,
+    }).toString();
   }
 
   override today(): string {

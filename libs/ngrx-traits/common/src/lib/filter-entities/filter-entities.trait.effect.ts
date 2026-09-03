@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { TraitEffect, Type } from '@ngrx-traits/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { asyncScheduler, EMPTY, of, pipe, timer } from 'rxjs';
 import {
@@ -11,6 +10,8 @@ import {
   pairwise,
   startWith,
 } from 'rxjs/operators';
+
+import { TraitEffect, Type } from '@ngrx-traits/core';
 
 import { EntitiesPaginationActions } from '../entities-pagination';
 import {

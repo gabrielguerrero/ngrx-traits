@@ -1,5 +1,9 @@
 import { inject } from '@angular/core';
 import { Product } from '@example-api/shared/models';
+import { signalStoreFeature, type } from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
+import { lastValueFrom } from 'rxjs';
+
 import {
   cacheRxCall,
   ExtractStoreFeatureOutput,
@@ -12,9 +16,6 @@ import {
   withEntitiesSyncToRouteQueryParams,
   withLogger,
 } from '@ngrx-traits/signals';
-import { signalStoreFeature, type } from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
-import { lastValueFrom } from 'rxjs';
 
 import { ProductService } from '../../services/product.service';
 

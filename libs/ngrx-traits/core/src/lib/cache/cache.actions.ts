@@ -1,4 +1,5 @@
 import { createAction, props } from '@ngrx/store';
+
 import { CacheKey } from './cache.models';
 
 export const cache = createAction(
@@ -9,17 +10,17 @@ export const cache = createAction(
     date: number;
     maxCacheSize?: number;
     expires?: number;
-  }>()
+  }>(),
 );
 export const hitCache = createAction(
   '[Cache] Hit Cache',
-  props<{ key: CacheKey }>()
+  props<{ key: CacheKey }>(),
 );
 export const invalidateCache = createAction(
   '[Cache] Invalidate Cache',
-  props<{ key: CacheKey }>()
+  props<{ key: CacheKey }>(),
 );
 export const deleteCache = createAction(
   '[Cache] Delete Cache',
-  props<{ key: CacheKey }>()
+  props<{ key: CacheKey }>(),
 );

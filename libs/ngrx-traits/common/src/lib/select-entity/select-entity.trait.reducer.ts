@@ -1,4 +1,13 @@
 import { createReducer, on } from '@ngrx/store';
+
+import { insertIf } from '@ngrx-traits/core';
+
+import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
+import {
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../entities-pagination/entities-pagination.model';
+import { FilterEntitiesActions } from '../filter-entities';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -14,18 +23,11 @@ import {
   SelectEntityMutators,
   SelectEntityState,
 } from './select-entity.model';
-import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
-import { insertIf } from '@ngrx-traits/core';
-import {
-  EntitiesPaginationActions,
-  EntitiesPaginationKeyedConfig,
-} from '../entities-pagination/entities-pagination.model';
-import { FilterEntitiesActions } from '../filter-entities';
 import { createSelectEntityTraitActions } from './select-entity.trait.actions';
 
 export function createSelectEntityInitialState<Entity>(
   previousInitialState: any,
-  allConfigs: SelectEntityKeyedConfig
+  allConfigs: SelectEntityKeyedConfig,
 ): LoadEntitiesState<Entity> & SelectEntityState {
   const selectedId = allConfigs.singleSelection?.selectedId;
   return {
@@ -35,7 +37,7 @@ export function createSelectEntityInitialState<Entity>(
 }
 export function createSelectEntityTraitReducer<
   Entity,
-  S extends LoadEntitiesState<Entity> & SelectEntityState
+  S extends LoadEntitiesState<Entity> & SelectEntityState,
 >(
   initialState: S,
   allActions: SelectEntityActions &
@@ -48,7 +50,7 @@ export function createSelectEntityTraitReducer<
   allConfigs: SelectEntityKeyedConfig &
     LoadEntitiesKeyedConfig<Entity> &
     EntitiesPaginationKeyedConfig &
-    SortEntitiesKeyedConfig<Entity>
+    SortEntitiesKeyedConfig<Entity>,
 ) {
   const { adapter } = allConfigs.loadEntities!;
 
@@ -58,41 +60,41 @@ export function createSelectEntityTraitReducer<
   return createReducer(
     initialState,
     on(allActions.selectEntity, (state, { id }) =>
-      allMutators.selectEntity(id, state)
+      allMutators.selectEntity(id, state),
     ),
     on(allActions.deselectEntity, (state) => allMutators.deselectEntity(state)),
     on(allActions.toggleSelectEntity, (state, { id }) =>
-      allMutators.toggleSelectEntity(id, state)
+      allMutators.toggleSelectEntity(id, state),
     ),
     ...insertIf<S>(allActions.removeAllEntities, () =>
       on(allActions.removeAllEntities, (state) =>
-        allMutators.deselectEntity(state)
-      )
+        allMutators.deselectEntity(state),
+      ),
     ),
     ...insertIf<S>(sortRemote, () =>
-      on(allActions.sortEntities, (state) => allMutators.deselectEntity(state))
+      on(allActions.sortEntities, (state) => allMutators.deselectEntity(state)),
     ),
     ...insertIf<S>(allActions.filterEntities, () =>
       on(allActions.filterEntities, (state) =>
-        allMutators.deselectEntity(state)
-      )
+        allMutators.deselectEntity(state),
+      ),
     ),
     ...insertIf<S>(!allActions.loadEntitiesPageSuccess, () =>
       on(allActions.loadEntitiesSuccess, (state) =>
-        allMutators.deselectEntity(state)
-      )
+        allMutators.deselectEntity(state),
+      ),
     ),
     ...insertIf<S>(
       !!allActions.loadEntitiesPageSuccess && paginationCacheType === 'partial',
       () =>
         on(allActions.loadEntitiesPageSuccess, (state) =>
-          allMutators.deselectEntity(state)
-        )
+          allMutators.deselectEntity(state),
+        ),
     ),
     ...insertIf<S>(allActions.removeEntities, () =>
       on(allActions.removeEntities, (state, { keys }) => {
         const shouldDeselect = keys.some(
-          (v: string | number) => v === state.selectedId
+          (v: string | number) => v === state.selectedId,
         );
         return shouldDeselect
           ? {
@@ -100,7 +102,7 @@ export function createSelectEntityTraitReducer<
               selectedId: undefined,
             }
           : state;
-      })
+      }),
     ),
     ...insertIf<S>(allActions.updateEntities, () =>
       on(allActions.updateEntities, (state, { updates }) => {
@@ -114,7 +116,7 @@ export function createSelectEntityTraitReducer<
               selectedId: adapter.selectId(change.changes as Entity),
             }
           : state;
-      })
-    )
+      }),
+    ),
   );
 }

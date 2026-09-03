@@ -1,17 +1,19 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { createReducer, on } from '@ngrx/store';
+
+import { insertIf } from '@ngrx-traits/core';
+
+import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
 import {
-  LoadEntitiesState,
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
   LoadEntitiesMutators,
+  LoadEntitiesState,
 } from './load-entities.model';
-import { createReducer, on } from '@ngrx/store';
-import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
-import { insertIf } from '@ngrx-traits/core';
 
 export function createLoadEntitiesInitialState<Entity>(
   previousInitialState = {},
-  allConfigs: LoadEntitiesKeyedConfig<Entity>
+  allConfigs: LoadEntitiesKeyedConfig<Entity>,
 ): LoadEntitiesState<Entity> {
   const traitConfig = allConfigs.loadEntities;
   const adapter = traitConfig!.adapter;
@@ -25,12 +27,12 @@ export function createLoadEntitiesInitialState<Entity>(
 
 export function createLoadEntitiesTraitReducer<
   T,
-  S extends LoadEntitiesState<T>
+  S extends LoadEntitiesState<T>,
 >(
   initialState: S,
   actions: LoadEntitiesActions<T>,
   allMutators: LoadEntitiesMutators<T>,
-  allConfigs: LoadEntitiesKeyedConfig<T> & EntitiesPaginationKeyedConfig
+  allConfigs: LoadEntitiesKeyedConfig<T> & EntitiesPaginationKeyedConfig,
 ) {
   const handleEntitiesMerge = !allConfigs?.pagination;
 
@@ -52,8 +54,8 @@ export function createLoadEntitiesTraitReducer<
       on(actions.loadEntitiesSuccess, (state, { entities }) =>
         allMutators.setEntitiesList(entities, {
           ...state,
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 }

@@ -1,9 +1,9 @@
-import { SelectEntitiesState } from './select-entities.model';
 import { LoadEntitiesState } from '../load-entities';
+import { SelectEntitiesState } from './select-entities.model';
 
 export function deselectEntities<S extends SelectEntitiesState>(
   id: number | string,
-  state: S
+  state: S,
 ): S {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { [id]: _value, ...selectedIds } = state.selectedIds;
@@ -15,7 +15,7 @@ export function deselectEntities<S extends SelectEntitiesState>(
 
 export function selectEntities<S extends SelectEntitiesState>(
   id: number | string,
-  state: S
+  state: S,
 ): S {
   return {
     ...state,
@@ -25,7 +25,7 @@ export function selectEntities<S extends SelectEntitiesState>(
 
 export function toggleSelectEntities<S extends SelectEntitiesState>(
   id: number | string,
-  state: S
+  state: S,
 ): S {
   const selected = state.selectedIds[id];
   if (selected) {
@@ -35,14 +35,14 @@ export function toggleSelectEntities<S extends SelectEntitiesState>(
   }
 }
 export function clearEntitiesSelection<S extends SelectEntitiesState>(
-  state: S
+  state: S,
 ): S {
   return { ...state, selectedIds: {} };
 }
 
 export function selectTotalSelectedEntities<
   Entity,
-  S extends LoadEntitiesState<Entity> & SelectEntitiesState
+  S extends LoadEntitiesState<Entity> & SelectEntitiesState,
 >(state: S): number {
   return Object.keys(state.selectedIds).length;
 }

@@ -12,12 +12,12 @@ import { sortData } from './sort-entities.utils';
 
 export function createSortTraitMutators<Entity>(
   { selectEntitiesList }: LoadEntitiesSelectors<Entity>,
-  allConfigs: LoadEntitiesKeyedConfig<Entity>
+  allConfigs: LoadEntitiesKeyedConfig<Entity>,
 ): SortEntitiesMutators<Entity> {
   const { remote } = allConfigs.sort!;
 
   function sortEntities<
-    S extends LoadEntitiesState<Entity> & SortEntitiesState<Entity>
+    S extends LoadEntitiesState<Entity> & SortEntitiesState<Entity>,
   >({ active, direction }: Sort<Entity>, state: S) {
     if (remote) {
       return {
@@ -29,7 +29,7 @@ export function createSortTraitMutators<Entity>(
     const { adapter } = allConfigs.loadEntities!;
     const entities = selectEntitiesList(state);
     const sortedIds = sortData(entities, { active, direction }).map((v) =>
-      adapter.selectId(v)
+      adapter.selectId(v),
     );
     return {
       ...state,

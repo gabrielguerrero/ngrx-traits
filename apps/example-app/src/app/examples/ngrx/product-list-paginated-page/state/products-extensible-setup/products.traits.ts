@@ -1,3 +1,5 @@
+import { props } from '@ngrx/store';
+
 import {
   addAsyncActionTrait,
   addEntitiesPaginationTrait,
@@ -7,7 +9,6 @@ import {
   addSortEntitiesTrait,
 } from '@ngrx-traits/common';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { props } from '@ngrx/store';
 
 import { Product, ProductFilter } from '../../../models';
 import { selectProductState } from './products.state';

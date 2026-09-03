@@ -4,13 +4,12 @@ import {
   TraitInitialStateFactoryConfig,
 } from '@ngrx-traits/core';
 
-import { createSelectEntityTraitActions } from './select-entity.trait.actions';
-import { createSelectEntityTraitSelectors } from './select-entity.trait.selectors';
+import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import {
-  createSelectEntityInitialState,
-  createSelectEntityTraitReducer,
-} from './select-entity.trait.reducer';
-import { createSelectEntityTraitMutators } from './select-entity.trait.mutators';
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../entities-pagination/entities-pagination.model';
+import { FilterEntitiesActions } from '../filter-entities';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -25,12 +24,13 @@ import {
   SelectEntityConfig,
   SelectEntityKeyedConfig,
 } from './select-entity.model';
-import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
+import { createSelectEntityTraitActions } from './select-entity.trait.actions';
+import { createSelectEntityTraitMutators } from './select-entity.trait.mutators';
 import {
-  EntitiesPaginationActions,
-  EntitiesPaginationKeyedConfig,
-} from '../entities-pagination/entities-pagination.model';
-import { FilterEntitiesActions } from '../filter-entities';
+  createSelectEntityInitialState,
+  createSelectEntityTraitReducer,
+} from './select-entity.trait.reducer';
+import { createSelectEntityTraitSelectors } from './select-entity.trait.selectors';
 
 /**
  * Generates ngrx code to add single selection to a list
@@ -80,7 +80,7 @@ export function addSelectEntityTrait<Entity>(config?: SelectEntityConfig) {
     }: TraitInitialStateFactoryConfig) =>
       createSelectEntityInitialState<Entity>(
         previousInitialState,
-        allConfigs as SelectEntityKeyedConfig
+        allConfigs as SelectEntityKeyedConfig,
       ),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
       createSelectEntityTraitReducer(
@@ -95,7 +95,7 @@ export function addSelectEntityTrait<Entity>(config?: SelectEntityConfig) {
         allConfigs as SelectEntityKeyedConfig &
           LoadEntitiesKeyedConfig<Entity> &
           EntitiesPaginationKeyedConfig &
-          SortEntitiesKeyedConfig<Entity>
+          SortEntitiesKeyedConfig<Entity>,
       ),
   });
 }
