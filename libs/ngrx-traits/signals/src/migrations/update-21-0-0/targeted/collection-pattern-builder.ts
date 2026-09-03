@@ -17,7 +17,9 @@ function capitalize(str: string): string {
 /**
  * Build all rename patterns for a specific collection name
  */
-export function buildPatternsForCollection(collectionName: string): CollectionPattern[] {
+export function buildPatternsForCollection(
+  collectionName: string,
+): CollectionPattern[] {
   const cap = capitalize(collectionName);
 
   return [
@@ -129,7 +131,7 @@ export function buildPatternsForCollection(collectionName: string): CollectionPa
  * Build patterns for all collections
  */
 export function buildPatternsForCollections(
-  collections: Set<string>
+  collections: Set<string>,
 ): Map<string, CollectionPattern[]> {
   const result = new Map<string, CollectionPattern[]>();
 

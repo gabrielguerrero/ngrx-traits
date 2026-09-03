@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { TraitEffect } from '@ngrx-traits/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { concatMap } from 'rxjs/operators';
+
+import { TraitEffect } from '@ngrx-traits/core';
 import { Type } from '@ngrx-traits/core';
+
+import { EntitiesPaginationActions } from '../entities-pagination/entities-pagination.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -11,13 +14,12 @@ import {
   SortEntitiesActions,
   SortEntitiesKeyedConfig,
 } from './sort-entities.model';
-import { EntitiesPaginationActions } from '../entities-pagination/entities-pagination.model';
 
 export function createSortTraitEffect<Entity>(
   allActions: LoadEntitiesActions<Entity> &
     SortEntitiesActions<Entity> &
     EntitiesPaginationActions,
-  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>
+  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>,
 ): Type<TraitEffect>[] {
   const { remote } = allConfigs.sort!;
 
@@ -32,8 +34,8 @@ export function createSortTraitEffect<Entity>(
                 allActions.clearEntitiesPagesCache(),
                 allActions.loadEntitiesFirstPage(),
               ]
-            : [allActions.loadEntities()]
-        )
+            : [allActions.loadEntities()],
+        ),
       );
     });
   }

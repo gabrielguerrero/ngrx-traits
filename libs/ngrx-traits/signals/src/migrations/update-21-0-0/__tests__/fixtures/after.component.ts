@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+
 import { createProductsStore } from '../products.store';
 
 @Component({
@@ -16,7 +17,7 @@ import { createProductsStore } from '../products.store';
       <button (click)="resetProductsEntitiesFilter()">Reset Filter</button>
       <button (click)="sortProductsEntities()">Sort</button>
     </div>
-  `
+  `,
 })
 export class ProductsComponent {
   store = inject(createProductsStore);

@@ -1,20 +1,22 @@
-import { createFeatureSelector } from '@ngrx/store';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
-import { addFilterEntitiesTrait } from './filter-entities.trait';
-import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
+import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
+import { createFeatureSelector } from '@ngrx/store';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { hot, Scheduler } from 'jest-marbles';
 import { of } from 'rxjs';
 import { first, take, toArray } from 'rxjs/operators';
+
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
+
 import {
   addEntitiesPaginationTrait,
   EntitiesPaginationState,
 } from '../entities-pagination';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { TestBed } from '@angular/core/testing';
-import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { hot, Scheduler } from 'jest-marbles';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
+import { addFilterEntitiesTrait } from './filter-entities.trait';
 import { FilterEntitiesState } from './index';
 
 export interface TestState
@@ -33,7 +35,7 @@ describe('addFilter Trait', () => {
     const traits = createEntityFeatureFactory(
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
-      addFilterEntitiesTrait<Todo, TodoFilter>()
+      addFilterEntitiesTrait<Todo, TodoFilter>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -53,7 +55,7 @@ describe('addFilter Trait', () => {
 
   function initWithIsLocalOrRemoteFilter(
     initialState?: any,
-    filter?: TodoFilter
+    filter?: TodoFilter,
   ) {
     const featureSelector = createFeatureSelector<TestState2>('test');
     const traits = createEntityFeatureFactory(
@@ -66,7 +68,7 @@ describe('addFilter Trait', () => {
           !!todo.content?.toLowerCase().includes(filter.content.toLowerCase()),
         isRemoteFilter: (previous, current) =>
           previous?.extra !== current?.extra,
-      })
+      }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -90,7 +92,7 @@ describe('addFilter Trait', () => {
       { entityName: 'entity', entitiesName: 'entities' },
       addLoadEntitiesTrait<Todo>(),
       addFilterEntitiesTrait<Todo, TodoFilter>(),
-      addEntitiesPaginationTrait<Todo>()
+      addEntitiesPaginationTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -116,7 +118,7 @@ describe('addFilter Trait', () => {
           actions as unknown as ƟFilterEntitiesActions<TodoFilter>
         ).storeEntitiesFilter({
           filters: { content: 'x' },
-        })
+        }),
       );
       expect(state.filters).toEqual({ content: 'x' });
     });
@@ -133,7 +135,7 @@ describe('addFilter Trait', () => {
           actions as unknown as ƟFilterEntitiesActions<TodoFilter>
         ).storeEntitiesFilter({
           filters: { content: 'x' },
-        })
+        }),
       );
       expect(selectors.selectEntitiesFilter.projector(state)).toEqual({
         content: 'x',
@@ -149,7 +151,7 @@ describe('addFilter Trait', () => {
           actions as unknown as ƟFilterEntitiesActions<TodoFilter>
         ).storeEntitiesFilter({
           filters: { content: 'x' },
-        })
+        }),
       );
       const action = await effects.loadEntities$.pipe(first()).toPromise();
       expect(action).toEqual(actions.loadEntities());
@@ -162,7 +164,7 @@ describe('addFilter Trait', () => {
           actions as unknown as ƟFilterEntitiesActions<TodoFilter>
         ).storeEntitiesFilter({
           filters: { content: 'x' },
-        })
+        }),
       );
       const action = await effects.loadEntities$
         .pipe(take(2), toArray())
@@ -179,7 +181,10 @@ describe('addFilter Trait', () => {
           initWithRemoteFilter();
         mockStore.overrideSelector(selectors.selectEntitiesFilter, {});
         actions$ = of(
-          actions.filterEntities({ filters: { content: 'x' }, forceLoad: true })
+          actions.filterEntities({
+            filters: { content: 'x' },
+            forceLoad: true,
+          }),
         );
         const action = await effects
           .storeFilter$({
@@ -193,7 +198,7 @@ describe('addFilter Trait', () => {
             actions as unknown as ƟFilterEntitiesActions<TodoFilter>
           ).storeEntitiesFilter({
             filters: { content: 'x' },
-          })
+          }),
         );
       });
 
@@ -216,7 +221,7 @@ describe('addFilter Trait', () => {
           effects.storeFilter$({
             debounce: 30,
             scheduler: Scheduler.get(),
-          })
+          }),
         ).toBeObservable(expected);
       });
 
@@ -241,7 +246,7 @@ describe('addFilter Trait', () => {
           effects.storeFilter$({
             debounce: 30,
             scheduler: Scheduler.get(),
-          })
+          }),
         ).toBeObservable(expected);
       });
       it('should fire storeFilter and not loadEntities if isRemote is defined and returns false', () => {
@@ -276,7 +281,7 @@ describe('addFilter Trait', () => {
           effects.storeFilter$({
             debounce: 30,
             scheduler: Scheduler.get(),
-          })
+          }),
         ).toBeObservable(expected);
       });
 
@@ -298,13 +303,13 @@ describe('addFilter Trait', () => {
           effects.storeFilter$({
             debounce: 30,
             scheduler: Scheduler.get(),
-          })
+          }),
         ).toBeObservable(expected);
       });
 
       it('should merge current filters with passed filters when patch is true', () => {
         const { effects, actions, mockStore, selectors } = initWithRemoteFilter(
-          { test: { filters: { content: 'x' } } }
+          { test: { filters: { content: 'x' } } },
         );
         // following mocking doesnt work not sure why so I had to pass initialState
         // mockStore.overrideSelector(selectors.selectEntitiesFilter, {
@@ -326,7 +331,7 @@ describe('addFilter Trait', () => {
           effects.storeFilter$({
             debounce: 30,
             scheduler: Scheduler.get(),
-          })
+          }),
         ).toBeObservable(expected);
       });
     });

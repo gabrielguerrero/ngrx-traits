@@ -1,5 +1,13 @@
 import { inject } from '@angular/core';
 import { Console, Genre, genres, Product } from '@example-api/shared/models';
+import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
+import {
+  entityConfig,
+  upsertEntity,
+  withEntities,
+} from '@ngrx/signals/entities';
+import { map } from 'rxjs/operators';
+
 import {
   withCallStatus,
   withEntitiesLoadingCall,
@@ -9,13 +17,6 @@ import {
   withLinkEntitiesFilter,
   withLogger,
 } from '@ngrx-traits/signals';
-import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
-import {
-  entityConfig,
-  upsertEntity,
-  withEntities,
-} from '@ngrx/signals/entities';
-import { map } from 'rxjs/operators';
 
 import { ProductService } from '../../services/product.service';
 

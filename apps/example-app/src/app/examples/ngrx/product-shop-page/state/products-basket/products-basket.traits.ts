@@ -1,4 +1,6 @@
 import { ProductOrder } from '@example-api/shared/models';
+import { props } from '@ngrx/store';
+
 import {
   addAsyncActionTrait,
   addCrudEntitiesTrait,
@@ -8,7 +10,6 @@ import {
   addSortEntitiesTrait,
 } from '@ngrx-traits/common';
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { props } from '@ngrx/store';
 
 import { addLoadProductDetailTraits } from '../products/load-product.trait';
 

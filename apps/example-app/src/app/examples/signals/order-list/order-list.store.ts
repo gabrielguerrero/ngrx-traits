@@ -1,14 +1,15 @@
 import { inject } from '@angular/core';
 import { OrderDetail, OrderSummary } from '@example-api/shared/models';
+import { signalStore, type, withMethods } from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
+import { map } from 'rxjs/operators';
+
 import {
   withCallStatus,
   withEntitiesCalls,
   withEntitiesLoadingCall,
   withEntitiesMultiSelection,
 } from '@ngrx-traits/signals';
-import { signalStore, type, withMethods } from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
-import { map } from 'rxjs/operators';
 
 import { OrderService } from '../../services/order.service';
 

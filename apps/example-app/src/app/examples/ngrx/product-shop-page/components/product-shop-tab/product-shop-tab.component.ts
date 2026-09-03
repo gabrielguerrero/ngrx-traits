@@ -4,9 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Product, ProductFilter } from '@example-api/shared/models';
-import { Sort } from '@ngrx-traits/common';
 import { createSelector, Store } from '@ngrx/store';
 import { first, map } from 'rxjs/operators';
+
+import { Sort } from '@ngrx-traits/common';
 
 import { ProductDetailComponent } from '../../../../components/product-detail/product-detail.component';
 import { ProductListComponent } from '../../../../components/product-list/product-list.component';

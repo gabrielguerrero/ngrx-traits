@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
+import { concatMap, first, tap } from 'rxjs/operators';
+
+import * as CacheActions from './cache.actions';
 import { CacheData, CacheKey, isCacheValid } from './cache.models';
 import { selectCache } from './cache.selectors';
-import { concatMap, first, tap } from 'rxjs/operators';
-import * as CacheActions from './cache.actions';
 
 /**
  * Cache the result of source parameter using the provided key, when call
@@ -82,7 +83,7 @@ export function cache<T>({
     concatMap((cache) =>
       cache && !skip && isCacheValid(cache, exp)
         ? of(cache.value).pipe(
-            tap(() => store.dispatch(CacheActions.hitCache({ key })))
+            tap(() => store.dispatch(CacheActions.hitCache({ key }))),
           )
         : source.pipe(
             tap((value) =>
@@ -92,10 +93,10 @@ export function cache<T>({
                   date: Date.now(),
                   value,
                   maxCacheSize,
-                })
-              )
-            )
-          )
-    )
+                }),
+              ),
+            ),
+          ),
+    ),
   );
 }

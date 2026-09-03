@@ -1,32 +1,33 @@
+import { createTraitFactory } from '@ngrx-traits/core';
+import {
+  TraitActionsFactoryConfig,
+  TraitInitialStateFactoryConfig,
+} from '@ngrx-traits/core';
+
 import {
   EntitiesPaginationActions,
   entitiesPaginationTraitKey,
 } from '../entities-pagination/entities-pagination.model';
-import { createFilterTraitEffects } from './filter-entities.trait.effect';
 import {
-  createFilterInitialState,
-  createFilterTraitReducer,
-} from './filter-entities.trait.reducer';
+  LoadEntitiesActions,
+  LoadEntitiesSelectors,
+  loadEntitiesTraitKey,
+} from '../load-entities/load-entities.model';
 import {
   FilterEntitiesConfig,
   FilterEntitiesKeyedConfig,
   FilterEntitiesSelectors,
   filterEntitiesTraitKey,
 } from './filter-entities.model';
-import { createFilterTraitSelectors } from './filter-entities.trait.selectors';
-import {
-  LoadEntitiesActions,
-  LoadEntitiesSelectors,
-  loadEntitiesTraitKey,
-} from '../load-entities/load-entities.model';
-import { createFilterTraitMutators } from './filter-entities.trait.mutators';
-import { createTraitFactory } from '@ngrx-traits/core';
-import { createFilterTraitActions } from './filter-entities.trait.actions';
 import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
+import { createFilterTraitActions } from './filter-entities.trait.actions';
+import { createFilterTraitEffects } from './filter-entities.trait.effect';
+import { createFilterTraitMutators } from './filter-entities.trait.mutators';
 import {
-  TraitActionsFactoryConfig,
-  TraitInitialStateFactoryConfig,
-} from '@ngrx-traits/core';
+  createFilterInitialState,
+  createFilterTraitReducer,
+} from './filter-entities.trait.reducer';
+import { createFilterTraitSelectors } from './filter-entities.trait.selectors';
 
 /**
  * Generates the ngrx code needed to filter a list of entities locally or remotely, adds a filter
@@ -99,13 +100,13 @@ export function addFilterEntitiesTrait<Entity, F>({
     }: TraitInitialStateFactoryConfig) =>
       createFilterInitialState<Entity, F>(
         previousInitialState,
-        allConfigs as FilterEntitiesKeyedConfig<Entity, F>
+        allConfigs as FilterEntitiesKeyedConfig<Entity, F>,
       ),
     reducer: ({ initialState, allActions, allMutators }) =>
       createFilterTraitReducer(
         initialState,
         allActions as ƟFilterEntitiesActions<F> & LoadEntitiesActions<Entity>,
-        allMutators
+        allMutators,
       ),
     effects: ({ allActions, allSelectors, allConfigs }) =>
       createFilterTraitEffects(
@@ -114,7 +115,7 @@ export function addFilterEntitiesTrait<Entity, F>({
           EntitiesPaginationActions,
         allSelectors as FilterEntitiesSelectors<Entity, F> &
           LoadEntitiesSelectors<Entity>,
-        allConfigs
+        allConfigs,
       ),
   });
 }

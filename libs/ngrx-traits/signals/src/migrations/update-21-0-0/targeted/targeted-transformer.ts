@@ -1,13 +1,13 @@
 /**
  * Targeted Transformer - Phase 3: AST-aware transformations
  */
-
 import * as ts from 'typescript';
-import { TransformResult, RenameChange } from './types';
+
 import {
-  CollectionPattern,
   buildPatternsForCollections,
+  CollectionPattern,
 } from './collection-pattern-builder';
+import { RenameChange, TransformResult } from './types';
 
 /**
  * Transform a TypeScript file using AST to avoid modifying strings/comments
@@ -16,7 +16,7 @@ import {
 export function transformTypeScriptFile(
   content: string,
   filePath: string,
-  collections: Set<string>
+  collections: Set<string>,
 ): TransformResult {
   const patterns = buildPatternsForCollections(collections);
   const allPatterns: CollectionPattern[] = [];
@@ -26,11 +26,12 @@ export function transformTypeScriptFile(
     filePath,
     content,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   const changes: RenameChange[] = [];
-  const replacements: Array<{ start: number; end: number; newText: string }> = [];
+  const replacements: Array<{ start: number; end: number; newText: string }> =
+    [];
 
   // Track if we're inside a template property of @Component
   let inComponentTemplate = false;
@@ -61,7 +62,9 @@ export function transformTypeScriptFile(
           newContent = newContent.replace(pattern.pattern, pattern.replacement);
 
           if (matches) {
-            const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+            const { line } = sourceFile.getLineAndCharacterOfPosition(
+              node.getStart(sourceFile),
+            );
             for (const match of matches) {
               changes.push({
                 oldName: match,
@@ -132,7 +135,7 @@ export function transformTypeScriptFile(
  */
 export function transformHtmlFile(
   content: string,
-  collections: Set<string>
+  collections: Set<string>,
 ): TransformResult {
   const patterns = buildPatternsForCollections(collections);
   const changes: RenameChange[] = [];

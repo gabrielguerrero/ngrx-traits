@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@angular/core';
 import { Department, DepartmentFilter } from '@example-api/shared/models';
+import { createEffect, ofType } from '@ngrx/effects';
+import { concatLatestFrom } from '@ngrx/operators';
+import { of } from 'rxjs';
+import { catchError, exhaustMap, map } from 'rxjs/operators';
+
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -11,10 +16,6 @@ import {
   LocalTraitsConfig,
   TraitsLocalStore,
 } from '@ngrx-traits/core';
-import { createEffect, ofType } from '@ngrx/effects';
-import { concatLatestFrom } from '@ngrx/operators';
-import { of } from 'rxjs';
-import { catchError, exhaustMap, map } from 'rxjs/operators';
 
 import { BranchService } from '../../../../services/branch.service';
 import { storeCacheKeys } from '../branch-dropdown/store.local-traits';

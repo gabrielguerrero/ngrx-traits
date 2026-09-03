@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Branch, BranchFilter } from '@example-api/shared/models';
+import { createEffect, ofType } from '@ngrx/effects';
+import { of } from 'rxjs';
+import { catchError, exhaustMap, map } from 'rxjs/operators';
+
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,
@@ -10,9 +14,6 @@ import {
   LocalTraitsConfig,
   TraitsLocalStore,
 } from '@ngrx-traits/core';
-import { createEffect, ofType } from '@ngrx/effects';
-import { of } from 'rxjs';
-import { catchError, exhaustMap, map } from 'rxjs/operators';
 
 import { BranchService } from '../../../../services/branch.service';
 

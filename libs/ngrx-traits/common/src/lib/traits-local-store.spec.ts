@@ -1,18 +1,6 @@
 import { Injectable, Injector } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
-  addFilterEntitiesTrait,
-  addLoadEntitiesTrait,
-} from '@ngrx-traits/common';
-import {
-  buildLocalTraits,
-  createEntityFeatureFactory,
-  EntityFeatureFactory,
-  LocalTraitsConfig,
-  TraitEffect,
-  TraitsLocalStore,
-} from '@ngrx-traits/core';
-import {
   Actions,
   createEffect,
   EffectsModule,
@@ -34,6 +22,19 @@ import {
   verify,
   when,
 } from 'ts-mockito';
+
+import {
+  addFilterEntitiesTrait,
+  addLoadEntitiesTrait,
+} from '@ngrx-traits/common';
+import {
+  buildLocalTraits,
+  createEntityFeatureFactory,
+  EntityFeatureFactory,
+  LocalTraitsConfig,
+  TraitEffect,
+  TraitsLocalStore,
+} from '@ngrx-traits/core';
 
 import { Todo, TodoFilter } from './load-entities/load-entities.trait.spec';
 
