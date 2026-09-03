@@ -1,10 +1,10 @@
 /**
  * Store Analyzer - Phase 1: Find stores and custom features with collection param
  */
-
-import * as ts from 'typescript';
 import { Tree } from '@angular-devkit/schematics';
-import { StoreInfo, CustomFeatureInfo, BREAKING_FEATURES } from './types';
+import * as ts from 'typescript';
+
+import { BREAKING_FEATURES, CustomFeatureInfo, StoreInfo } from './types';
 
 export interface AnalysisResult {
   stores: StoreInfo[];
@@ -44,7 +44,11 @@ export function analyzeAll(tree: Tree): AnalysisResult {
     const text = content.toString('utf-8');
 
     // Quick check - must have @ngrx-traits/signals or signalStoreFeature
-    if (!text.includes('@ngrx-traits/signals') && !text.includes('signalStoreFeature')) return;
+    if (
+      !text.includes('@ngrx-traits/signals') &&
+      !text.includes('signalStoreFeature')
+    )
+      return;
 
     // Find custom features
     const features = findCustomFeatures(text, filePath);
@@ -86,12 +90,15 @@ export function analyzeAll(tree: Tree): AnalysisResult {
 /**
  * Find custom signalStoreFeature functions and variables that contain collections
  */
-function findCustomFeatures(content: string, filePath: string): CustomFeatureInfo[] {
+function findCustomFeatures(
+  content: string,
+  filePath: string,
+): CustomFeatureInfo[] {
   const sourceFile = ts.createSourceFile(
     filePath,
     content,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   const features: CustomFeatureInfo[] = [];
@@ -134,7 +141,11 @@ function findCustomFeatures(content: string, filePath: string): CustomFeatureInf
               if (ts.isCallExpression(arg)) {
                 const innerFuncName = arg.expression.getText(sourceFile);
                 if (BREAKING_FEATURES.includes(innerFuncName as any)) {
-                  extractCollectionFromFeatureCall(arg, sourceFile, collections);
+                  extractCollectionFromFeatureCall(
+                    arg,
+                    sourceFile,
+                    collections,
+                  );
                 }
               }
             }
@@ -164,7 +175,7 @@ function findCustomFeatures(content: string, filePath: string): CustomFeatureInf
 function findSignalStoreFeatureCollections(
   node: ts.Node,
   sourceFile: ts.SourceFile,
-  collections: Set<string>
+  collections: Set<string>,
 ): void {
   if (ts.isCallExpression(node)) {
     const funcName = node.expression.getText(sourceFile);
@@ -183,7 +194,7 @@ function findSignalStoreFeatureCollections(
   }
 
   ts.forEachChild(node, (child) =>
-    findSignalStoreFeatureCollections(child, sourceFile, collections)
+    findSignalStoreFeatureCollections(child, sourceFile, collections),
   );
 }
 
@@ -193,13 +204,13 @@ function findSignalStoreFeatureCollections(
 function analyzeFile(
   content: string,
   filePath: string,
-  featureCollections: Map<string, string[]> = new Map()
+  featureCollections: Map<string, string[]> = new Map(),
 ): StoreInfo | null {
   const sourceFile = ts.createSourceFile(
     filePath,
     content,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let storeName: string | null = null;
@@ -221,7 +232,12 @@ function analyzeFile(
           if (callText === 'signalStore') {
             storeName = decl.name.text;
             // Analyze signalStore arguments for breaking features with collection
-            extractCollections(decl.initializer, sourceFile, collections, featureCollections);
+            extractCollections(
+              decl.initializer,
+              sourceFile,
+              collections,
+              featureCollections,
+            );
           }
         }
       }
@@ -250,7 +266,7 @@ function extractCollections(
   callExpr: ts.CallExpression,
   sourceFile: ts.SourceFile,
   collections: Set<string>,
-  featureCollections: Map<string, string[]> = new Map()
+  featureCollections: Map<string, string[]> = new Map(),
 ): void {
   for (const arg of callExpr.arguments) {
     // Handle variable reference: signalStore(productsStoreFeature, ...)
@@ -282,7 +298,12 @@ function extractCollections(
 
       // Handle withFeature((store) => customFeature(...))
       if (funcName === 'withFeature') {
-        extractCollectionsFromWithFeature(arg, sourceFile, collections, featureCollections);
+        extractCollectionsFromWithFeature(
+          arg,
+          sourceFile,
+          collections,
+          featureCollections,
+        );
       }
     }
   }
@@ -295,7 +316,7 @@ function extractCollectionsFromWithFeature(
   callExpr: ts.CallExpression,
   sourceFile: ts.SourceFile,
   collections: Set<string>,
-  featureCollections: Map<string, string[]>
+  featureCollections: Map<string, string[]>,
 ): void {
   for (const arg of callExpr.arguments) {
     // withFeature takes an arrow function: (store) => featureCall(...)
@@ -321,7 +342,11 @@ function extractCollectionsFromWithFeature(
       // Arrow with block body: (store) => { return featureCall(...); }
       if (ts.isBlock(body)) {
         for (const stmt of body.statements) {
-          if (ts.isReturnStatement(stmt) && stmt.expression && ts.isCallExpression(stmt.expression)) {
+          if (
+            ts.isReturnStatement(stmt) &&
+            stmt.expression &&
+            ts.isCallExpression(stmt.expression)
+          ) {
             const funcName = stmt.expression.expression.getText(sourceFile);
 
             if (featureCollections.has(funcName)) {
@@ -330,7 +355,11 @@ function extractCollectionsFromWithFeature(
             }
 
             if (BREAKING_FEATURES.includes(funcName as any)) {
-              extractCollectionFromFeatureCall(stmt.expression, sourceFile, collections);
+              extractCollectionFromFeatureCall(
+                stmt.expression,
+                sourceFile,
+                collections,
+              );
             }
           }
         }
@@ -346,7 +375,7 @@ function extractCollectionsFromWithFeature(
 function extractCollectionFromFeatureCall(
   callExpr: ts.CallExpression,
   sourceFile: ts.SourceFile,
-  collections: Set<string>
+  collections: Set<string>,
 ): void {
   for (const arg of callExpr.arguments) {
     // Handle direct variable reference: withCallStatus(resourcesEntityConfig)
@@ -370,7 +399,10 @@ function extractCollectionFromFeatureCall(
             }
             // Handle variable reference: { collection } or { collection: collectionVar }
             else if (ts.isIdentifier(prop.initializer)) {
-              const varValue = findStringVariableValue(prop.initializer.text, sourceFile);
+              const varValue = findStringVariableValue(
+                prop.initializer.text,
+                sourceFile,
+              );
               if (varValue) {
                 collections.add(varValue);
               }
@@ -396,7 +428,7 @@ function extractCollectionFromFeatureCall(
             // Try to find the variable definition
             const collectionFromVar = findCollectionInVariable(
               spreadExpr.text,
-              sourceFile
+              sourceFile,
             );
             if (collectionFromVar) {
               collections.add(collectionFromVar);
@@ -413,7 +445,7 @@ function extractCollectionFromFeatureCall(
  */
 function findStringVariableValue(
   varName: string,
-  sourceFile: ts.SourceFile
+  sourceFile: ts.SourceFile,
 ): string | null {
   let result: string | null = null;
 
@@ -438,7 +470,7 @@ function findStringVariableValue(
  */
 function findCollectionInVariable(
   varName: string,
-  sourceFile: ts.SourceFile
+  sourceFile: ts.SourceFile,
 ): string | null {
   let result: string | null = null;
 

@@ -1,4 +1,6 @@
 import { createReducer, on } from '@ngrx/store';
+
+import * as CacheActions from './cache.actions';
 import {
   CacheData,
   CacheKeys,
@@ -6,7 +8,6 @@ import {
   hashKey,
   isCacheValid,
 } from './cache.models';
-import * as CacheActions from './cache.actions';
 
 export const initialState: CacheState = {
   keys: {},
@@ -19,8 +20,8 @@ export const cacheReducer = createReducer(
       hashKey(key),
       { value, date, invalid: false },
       state,
-      maxCacheSize
-    )
+      maxCacheSize,
+    ),
   ),
   on(CacheActions.invalidateCache, (state, { key }) => {
     const k = hashKey(key);
@@ -33,7 +34,7 @@ export const cacheReducer = createReducer(
   on(CacheActions.hitCache, (state, { key }) => {
     const k = hashKey(key);
     return increaseCacheHitCount(k, state);
-  })
+  }),
 );
 
 function setCacheValue(
@@ -41,7 +42,7 @@ function setCacheValue(
   value: Omit<CacheData, 'hitCount'>,
   state: CacheState,
   maxCacheSize?: number,
-  expires?: number
+  expires?: number,
 ) {
   const newState = { ...state };
   let cache = newState;
@@ -67,7 +68,7 @@ function setCacheValue(
     const entries = findLessHitOrOldestCacheEntries(
       lastCache,
       expires ?? Infinity,
-      maxCacheSize
+      maxCacheSize,
     );
     if (entries && entries.length) {
       for (const [key] of entries) {
@@ -81,7 +82,7 @@ function setCacheValue(
 function findLessHitOrOldestCacheEntries(
   state: CacheKeys,
   expires: number,
-  maxCacheSize: number
+  maxCacheSize: number,
 ) {
   if (!state.keys) return undefined;
   const entries = Object.entries(state.keys);

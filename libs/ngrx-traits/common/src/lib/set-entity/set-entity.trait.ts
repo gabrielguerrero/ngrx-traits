@@ -1,11 +1,12 @@
+import { createAction, createReducer, on } from '@ngrx/store';
+import { ActionCreatorProps } from '@ngrx/store';
+
 import {
   capitalize,
   createTraitFactory,
   TraitActionsFactoryConfig,
 } from '@ngrx-traits/core';
 import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
-import { createAction, createReducer, on } from '@ngrx/store';
-import { ActionCreatorProps } from '@ngrx/store';
 
 import {
   SetEntityActions,

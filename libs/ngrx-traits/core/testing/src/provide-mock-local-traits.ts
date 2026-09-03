@@ -1,11 +1,12 @@
-import {
-  EntityFeatureFactory,
-  TraitsLocalStore,
-  DISABLE_LOCAL_TRAIT_EFFECTS,
-} from '@ngrx-traits/core';
 import { Injector, Provider, Type } from '@angular/core';
 import { EffectSources } from '@ngrx/effects';
 import { MockStore } from '@ngrx/store/testing';
+
+import {
+  DISABLE_LOCAL_TRAIT_EFFECTS,
+  EntityFeatureFactory,
+  TraitsLocalStore,
+} from '@ngrx-traits/core';
 
 /*
  * NOTE: provideMockStore({initialState}) initialState will be ignored with local traits store!
@@ -15,7 +16,7 @@ import { MockStore } from '@ngrx/store/testing';
  * */
 
 export function provideMockLocalTraits<
-  T extends TraitsLocalStore<EntityFeatureFactory<any, any>>
+  T extends TraitsLocalStore<EntityFeatureFactory<any, any>>,
 >({
   traitFactory,
   selectors,
@@ -46,8 +47,8 @@ export function provideMockLocalTraits<
               trait.localSelectors?.[key] &&
               mockStore.overrideSelector(
                 trait.localSelectors[key],
-                selectors?.[key]
-              )
+                selectors?.[key],
+              ),
           );
         }
         return trait;

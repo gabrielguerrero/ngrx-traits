@@ -6,10 +6,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   root: __dirname,
   cacheDir: '../../../node_modules/.vite/ngrx-traits-signals',
-  plugins: [
-    angular({ include: ['src/**/*.ts'] }),
-    nxViteTsPaths(),
-  ],
+  plugins: [angular({ include: ['src/**/*.ts'] }), nxViteTsPaths()],
   test: {
     globals: true,
     environment: 'jsdom',

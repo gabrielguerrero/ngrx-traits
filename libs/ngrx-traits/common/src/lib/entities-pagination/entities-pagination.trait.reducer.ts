@@ -1,9 +1,13 @@
+import { createReducer, on } from '@ngrx/store';
+
+import { insertIf } from '@ngrx-traits/core';
+
+import { CrudEntitiesActions } from '../crud-entities';
 import {
   FilterEntitiesActions,
   FilterEntitiesKeyedConfig,
 } from '../filter-entities/filter-entities.model';
-import { createReducer, on } from '@ngrx/store';
-
+import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -16,14 +20,11 @@ import {
   EntitiesPaginationMutators,
   EntitiesPaginationState,
 } from './entities-pagination.model';
-import { CrudEntitiesActions } from '../crud-entities';
 import { ƟPaginationActions } from './entities-pagination.model.internal';
-import { insertIf } from '@ngrx-traits/core';
-import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 
 export function createPaginationInitialState<Entity>(
   previousInitialState: any,
-  allConfigs: EntitiesPaginationKeyedConfig
+  allConfigs: EntitiesPaginationKeyedConfig,
 ): LoadEntitiesState<Entity> & EntitiesPaginationState {
   const { currentPage, pageSize, cacheType, pagesToCache } =
     allConfigs.pagination!;
@@ -46,7 +47,7 @@ export function createPaginationInitialState<Entity>(
 
 export function createPaginationTraitReducer<
   Entity,
-  S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+  S extends LoadEntitiesState<Entity> & EntitiesPaginationState,
 >(
   initialState: S,
   allActions: ƟPaginationActions &
@@ -58,10 +59,10 @@ export function createPaginationTraitReducer<
     LoadEntitiesMutators<Entity>,
   allConfigs: FilterEntitiesKeyedConfig<Entity, unknown> &
     LoadEntitiesKeyedConfig<Entity> &
-    EntitiesPaginationKeyedConfig
+    EntitiesPaginationKeyedConfig,
 ) {
   function addToCacheTotal<
-    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState,
   >(state: S, add: number) {
     return {
       ...state,
@@ -73,7 +74,7 @@ export function createPaginationTraitReducer<
   }
 
   function clearPagesCache<
-    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState,
   >(state: S): S {
     return {
       ...state,
@@ -89,7 +90,7 @@ export function createPaginationTraitReducer<
   }
 
   function recalculateTotal<
-    S extends LoadEntitiesState<Entity> & EntitiesPaginationState
+    S extends LoadEntitiesState<Entity> & EntitiesPaginationState,
   >(state: S): S {
     const total = allSelectors.selectEntitiesTotal(state);
     return {
@@ -113,7 +114,7 @@ export function createPaginationTraitReducer<
   return createReducer(
     initialState,
     on(allActions.loadEntitiesPage, (state, { index }) =>
-      allMutators.setEntitiesPage(state, index)
+      allMutators.setEntitiesPage(state, index),
     ),
     on(allActions.setEntitiesRequestPage, (state, { index }) => ({
       ...state,
@@ -136,23 +137,23 @@ export function createPaginationTraitReducer<
       allMutators.mergePaginatedEntities(entities, total, {
         ...state,
         status: 'success',
-      })
+      }),
     ),
     ...insertIf<S>(allActions.addEntities, () =>
       on(allActions.addEntities, (state, { entities }) =>
-        addToCacheTotal(state, entities.length)
-      )
+        addToCacheTotal(state, entities.length),
+      ),
     ),
     ...insertIf<S>(allActions.removeEntities, () =>
       on(allActions.removeEntities, (state, { keys }) =>
-        addToCacheTotal(state, -keys.length)
-      )
+        addToCacheTotal(state, -keys.length),
+      ),
     ),
     ...insertIf<S>(allActions.storeEntitiesFilter, () =>
-      on(allActions.storeEntitiesFilter, (state) => recalculateTotal(state))
+      on(allActions.storeEntitiesFilter, (state) => recalculateTotal(state)),
     ),
     ...insertIf<S>(allActions.removeAllEntities, () =>
-      on(allActions.removeAllEntities, (state) => clearPagesCache(state))
-    )
+      on(allActions.removeAllEntities, (state) => clearPagesCache(state)),
+    ),
   );
 }

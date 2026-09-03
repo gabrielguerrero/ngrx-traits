@@ -4,8 +4,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { callConfig, withCalls, withRoute } from '@ngrx-traits/signals';
 import { signalStore } from '@ngrx/signals';
+
+import { callConfig, withCalls, withRoute } from '@ngrx-traits/signals';
 
 import { ProductService } from '../../services/product.service';
 

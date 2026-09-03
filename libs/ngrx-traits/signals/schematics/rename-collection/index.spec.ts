@@ -284,11 +284,7 @@ describe('Rename Collection Schematic', () => {
     });
 
     it('should rename isAllProductEntitiesSelected to isAllItemEntitiesSelected', () => {
-      const result = rename(
-        'isAllProductEntitiesSelected',
-        'product',
-        'item',
-      );
+      const result = rename('isAllProductEntitiesSelected', 'product', 'item');
       expect(result).toContain('isAllItemEntitiesSelected');
     });
 
@@ -322,11 +318,7 @@ describe('Rename Collection Schematic', () => {
     });
 
     it('should rename clearProductEntitiesSelection to clearItemEntitiesSelection', () => {
-      const result = rename(
-        'clearProductEntitiesSelection',
-        'product',
-        'item',
-      );
+      const result = rename('clearProductEntitiesSelection', 'product', 'item');
       expect(result).toContain('clearItemEntitiesSelection');
     });
   });
@@ -342,7 +334,7 @@ describe('Rename Collection Schematic', () => {
       expect(result).toContain('collection: "item"');
     });
 
-    it("should rename collection = 'product' to collection = \"item\"", () => {
+    it('should rename collection = \'product\' to collection = "item"', () => {
       const result = rename("collection = 'product'", 'product', 'item');
       expect(result).toContain('collection = "item"');
     });
@@ -463,11 +455,7 @@ describe('Rename Collection Schematic', () => {
   });
 });
 
-function rename(
-  input: string,
-  oldName: string,
-  newName: string,
-): string {
+function rename(input: string, oldName: string, newName: string): string {
   return renameInContent(input, generateRenamePatterns(oldName, newName))
     .content;
 }

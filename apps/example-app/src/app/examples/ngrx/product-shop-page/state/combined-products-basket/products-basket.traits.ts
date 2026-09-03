@@ -1,3 +1,5 @@
+import { props } from '@ngrx/store';
+
 import {
   addAsyncActionTrait,
   addCrudEntitiesTrait,
@@ -11,7 +13,6 @@ import {
   combineEntityFeatures,
   createEntityFeatureFactory,
 } from '@ngrx-traits/core';
-import { props } from '@ngrx/store';
 
 import { Product, ProductFilter, ProductOrder } from '../../../models';
 import { addLoadProductDetailTraits } from '../products/load-product.trait';

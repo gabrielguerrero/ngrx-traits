@@ -1,6 +1,6 @@
-import { cacheReducer, initialState } from './cache.reducer';
 import * as CacheActions from './cache.actions';
 import { getCacheValue, hashKey } from './cache.models';
+import { cacheReducer, initialState } from './cache.reducer';
 
 describe('Cache Reducer', () => {
   it('cache action should save value in store ', () => {
@@ -220,14 +220,14 @@ describe('Cache Reducer', () => {
     // all keys should be present expect ['test', { a: 4, b: '2' }]
     for (let i = 0; i < 4; i++) {
       expect(
-        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result)
+        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result),
       ).toBeDefined();
     }
     expect(
-      getCacheValue(hashKey(['test', { a: 4, b: '2' }]), result)
+      getCacheValue(hashKey(['test', { a: 4, b: '2' }]), result),
     ).toBeUndefined();
     expect(
-      getCacheValue(hashKey(['test', { a: 5, b: '2' }]), result)
+      getCacheValue(hashKey(['test', { a: 5, b: '2' }]), result),
     ).toBeDefined();
   });
 
@@ -253,7 +253,7 @@ describe('Cache Reducer', () => {
 
     for (let i = 0; i < 7; i++) {
       expect(
-        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result)
+        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result),
       ).toBeDefined();
     }
   });
@@ -283,11 +283,11 @@ describe('Cache Reducer', () => {
     // all keys should be present expect ['test', { a: 4, b: '2' }]
     for (let i = 1; i < 6; i++) {
       expect(
-        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result)
+        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result),
       ).toBeDefined();
     }
     expect(
-      getCacheValue(hashKey(['test', { a: 0, b: '2' }]), result)
+      getCacheValue(hashKey(['test', { a: 0, b: '2' }]), result),
     ).toBeUndefined();
   });
 
@@ -333,14 +333,14 @@ describe('Cache Reducer', () => {
     // all keys should be present expect ['test', { a: 4, b: '2' }]
     for (let i = 0; i < 4; i++) {
       expect(
-        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result)
+        getCacheValue(hashKey(['test', { a: i, b: '2' }]), result),
       ).toBeDefined();
     }
     expect(
-      getCacheValue(hashKey(['test', { a: 4, b: '2' }]), result)
+      getCacheValue(hashKey(['test', { a: 4, b: '2' }]), result),
     ).toBeUndefined();
     expect(
-      getCacheValue(hashKey(['test', { a: 5, b: '2' }]), result)
+      getCacheValue(hashKey(['test', { a: 5, b: '2' }]), result),
     ).toBeDefined();
   });
 });

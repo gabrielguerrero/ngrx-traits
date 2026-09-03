@@ -1,12 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
+
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
 
 import { addEntitiesPaginationTrait } from '../entities-pagination';
 import { addFilterEntitiesTrait } from '../filter-entities';

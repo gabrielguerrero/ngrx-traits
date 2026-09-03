@@ -25,7 +25,7 @@ function hash(key: string | object): string {
             result[k] = val[k];
             return result;
           }, {} as any)
-      : val
+      : val,
   );
 }
 
@@ -39,7 +39,7 @@ export function hashKey(key: CacheKey): string[] {
 
 export function getCacheValue(
   keys: string[],
-  state: CacheState
+  state: CacheState,
 ): CacheData | undefined {
   let parent: CacheKeys | undefined = state;
   for (const key of keys) {

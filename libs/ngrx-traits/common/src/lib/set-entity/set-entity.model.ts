@@ -1,6 +1,7 @@
-import { PostfixProps } from '@ngrx-traits/core';
 import { Action } from '@ngrx/store';
 import { ActionCreator } from '@ngrx/store';
+
+import { PostfixProps } from '@ngrx-traits/core';
 
 type SetActions<T> = {
   /**

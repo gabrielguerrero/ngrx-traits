@@ -1,4 +1,5 @@
 import { Product, ProductFilter } from '@example-api/shared/models';
+
 import {
   addFilterEntitiesTrait,
   addLoadEntitiesTrait,

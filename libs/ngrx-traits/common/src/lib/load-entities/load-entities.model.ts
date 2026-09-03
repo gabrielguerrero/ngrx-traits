@@ -1,7 +1,8 @@
-import { KeyedConfig } from '@ngrx-traits/core';
 import { Comparer, EntityAdapter, EntityState, IdSelector } from '@ngrx/entity';
 import { Dictionary } from '@ngrx/entity';
 import { Action, ActionCreator } from '@ngrx/store';
+
+import { KeyedConfig } from '@ngrx-traits/core';
 
 export type Status = 'loading' | 'success' | 'fail';
 

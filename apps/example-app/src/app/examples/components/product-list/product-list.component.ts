@@ -8,6 +8,7 @@ import {
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { Product } from '@example-api/shared/models';
+
 import { Sort } from '@ngrx-traits/common';
 
 @Component({

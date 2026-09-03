@@ -9,6 +9,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { Branch } from '@example-api/shared/models';
+
 import { getInfiniteScrollDataSource } from '@ngrx-traits/signals';
 
 import { SearchOptionsComponent } from '../../components/search-options/search-options.component';

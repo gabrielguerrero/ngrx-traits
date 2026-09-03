@@ -1,4 +1,10 @@
+import { Dictionary } from '@ngrx/entity';
 import { createSelector } from '@ngrx/store';
+
+import {
+  LoadEntitiesSelectors,
+  LoadEntitiesState,
+} from '../load-entities/load-entities.model';
 import {
   Change,
   ChangeType,
@@ -6,21 +12,16 @@ import {
   CrudEntitiesState,
   EntityChange,
 } from './crud-entities.model';
-import {
-  LoadEntitiesSelectors,
-  LoadEntitiesState,
-} from '../load-entities/load-entities.model';
-import { Dictionary } from '@ngrx/entity';
 
 export function createCrudTraitSelectors<Entity>(
-  previousSelectors: LoadEntitiesSelectors<Entity>
+  previousSelectors: LoadEntitiesSelectors<Entity>,
 ): CrudEntitiesSelectors<Entity> {
   function selectChanges<S extends CrudEntitiesState<Entity>>(state: S) {
     return state.changes;
   }
 
   function selectFilteredChanges<S extends CrudEntitiesState<Entity>>(
-    state: S
+    state: S,
   ) {
     const cache: { [id: string]: ChangeType[] } = {};
     return state.changes.reduce((acc, value) => {
@@ -67,10 +68,10 @@ export function createCrudTraitSelectors<Entity>(
             entity: entities[change.id] ?? {
               id: change.id,
             },
-          } as EntityChange<Entity>)
+          }) as EntityChange<Entity>,
       );
       return map;
-    }
+    },
   );
 
   const selectFilteredEntitiesChangesList = createSelector(
@@ -83,7 +84,7 @@ export function createCrudTraitSelectors<Entity>(
           entity: entities[c.id] ?? { id: c.id },
           changeType: c.changeType,
         } as EntityChange<Entity>;
-      })
+      }),
   );
 
   return {
