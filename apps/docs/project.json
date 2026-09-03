@@ -5,50 +5,30 @@
   "prefix": "docs",
   "targets": {
     "build": {
-      "executor": "@analogjs/platform:vite",
-      "defaultConfiguration": "production",
-      "configurations": {
-        "development": {
-          "mode": "development"
-        },
-        "production": {
-          "sourcemap": false,
-          "mode": "production"
-        }
-      },
-      "outputs": [
-        "{options.outputPath}",
-        "{workspaceRoot}/dist/apps/docs/.nitro",
-        "{workspaceRoot}/dist/apps/docs/ssr",
-        "{workspaceRoot}/dist/apps/docs/analog"
-      ],
+      "executor": "nx:run-commands",
+      "cache": true,
+      "outputs": ["{projectRoot}/dist"],
       "options": {
-        "main": "apps/docs/src/main.ts",
-        "configFile": "apps/docs/vite.config.ts",
-        "outputPath": "dist/apps/docs/client",
-        "tsConfig": "apps/docs/tsconfig.app.json"
+        "cwd": "apps/docs",
+        "command": "pnpm build"
       }
     },
     "serve": {
-      "executor": "@analogjs/platform:vite-dev-server",
-      "defaultConfiguration": "development",
+      "executor": "nx:run-commands",
+      "continuous": true,
       "options": {
-        "buildTarget": "docs:build",
-        "port": 4200
-      },
-      "configurations": {
-        "development": {
-          "buildTarget": "docs:build:development",
-          "hmr": true
-        },
-        "production": {
-          "buildTarget": "docs:build:production"
-        }
+        "cwd": "apps/docs",
+        "command": "pnpm start"
       }
     },
     "test": {
-      "executor": "@analogjs/vitest-angular:test",
-      "outputs": ["{projectRoot}/coverage"]
+      "executor": "nx:run-commands",
+      "cache": true,
+      "outputs": ["{projectRoot}/coverage"],
+      "options": {
+        "cwd": "apps/docs",
+        "command": "pnpm test"
+      }
     }
   },
   "tags": [],
