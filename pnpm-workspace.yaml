@@ -1,0 +1,98 @@
+packages:
+  # apps/docs is deliberately excluded. It shares no code with the libs, so it
+  # is a standalone project with its own lockfile and node_modules, built from
+  # its own folder. That keeps every docs dependency - @analogjs/platform and
+  # the marked/prismjs content chain in particular - out of the root manifest.
+  - 'apps/example-app'
+  - 'apps/example-api'
+
+# The libs are deliberately NOT workspace members. Their package.json files are
+# ng-packagr build manifests that get published as-is, so keeping them out means
+# a "catalog:" specifier can never leak into a published package.
+#
+# These must stay in the ROOT manifest even though only an app uses them. Both
+# were found by breaking them; please re-verify before moving them into apps/*:
+#
+#   @analogjs/platform
+#     As a sub-project dependency it makes pnpm resolve rolldown and oxc-parser
+#     to their wasm builds and prune every native binding in the tree, which
+#     breaks vitest with "Cannot find native binding".
+#
+#   @angular/platform-server, @angular/ssr
+#     @angular/build generates SSR polyfill modules that are resolved from the
+#     workspace root, not from the project, so example-app fails to build with
+#     'Could not resolve "@angular/ssr"'.
+#
+# Docs dependencies are not here at all: apps/docs is outside this workspace
+# and carries its own lockfile. Nothing about the docs site should ever need a
+# line in the root manifest.
+
+# Single source of truth for versions shared across the root manifest and the
+# app manifests. Referenced as "catalog:" instead of a literal range.
+#
+# This exists to prevent duplicate copies of a package in the tree: two
+# different @angular/core versions means two InjectionToken identities and DI
+# failures that are very hard to trace back to a version skew.
+#
+# The libs' peerDependencies are deliberately NOT catalogued - those are loose
+# published ranges (^22.0.0), not pinned installs.
+catalog:
+  # Angular - all on the same minor
+  '@angular/animations': 22.1.3
+  '@angular/cdk': 22.1.3
+  '@angular/common': 22.1.3
+  '@angular/compiler': 22.1.3
+  '@angular/compiler-cli': 22.1.3
+  '@angular/core': 22.1.3
+  '@angular/forms': 22.1.3
+  '@angular/material': 22.1.3
+  '@angular/language-service': 22.1.3
+  '@angular/platform-browser': 22.1.3
+  '@angular/platform-server': 22.1.3
+  '@angular/router': 22.1.3
+
+  # Angular build tooling - tracks the CLI version, not the framework version
+  '@angular-devkit/build-angular': 22.1.5
+  '@angular-devkit/core': 22.1.5
+  '@angular-devkit/schematics': 22.1.5
+  '@angular/build': 22.1.5
+  '@angular/cli': 22.1.5
+  '@angular/ssr': 22.1.5
+  '@schematics/angular': 22.1.5
+
+  # NgRx
+  '@ngrx/effects': 22.0.0
+  '@ngrx/entity': 22.0.0
+  '@ngrx/operators': 22.0.0
+  '@ngrx/signals': 22.0.0
+  '@ngrx/store': 22.0.0
+  '@ngrx/store-devtools': 22.0.0
+
+  # Analog
+  '@analogjs/vite-plugin-angular': 2.7.0
+  '@analogjs/vitest-angular': 2.7.0
+
+  # Cross-cutting
+  cors: ^2.8.6
+  express: ^5.2.1
+  rxjs: 7.8.1
+  tailwindcss: ^4.3.3
+  tslib: ^2.3.0
+  typescript: 6.0.3
+  vite: 8.2.2
+  vitest: 4.1.11
+  zone.js: 0.16.2
+
+# Packages allowed to run install scripts. pnpm 10 blocks these by default;
+# they are all native-binary or service-worker builds the toolchain needs.
+# esbuild is deliberately absent: its postinstall validates the binary by
+# shelling out to `esbuild --version`, which resolves the wrong copy from
+# node_modules/.bin when several versions coexist. The platform-specific
+# optional dependency is installed either way, so the script is not needed.
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - less
+  - msw
+  - nx
+  - unrs-resolver
