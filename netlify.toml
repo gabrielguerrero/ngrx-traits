@@ -1,4 +1,8 @@
+# The docs site is a standalone project with its own lockfile and node_modules,
+# so the build runs entirely inside apps/docs and never installs the repo
+# workspace. Paths below are relative to that base.
 [build]
-  command = "nx build docs"
-  publish = "dist/apps/docs/analog/public"
-  functions = "dist/apps/docs/analog"
+  base = "apps/docs"
+  command = "pnpm build"
+  publish = "dist/analog/public"
+  functions = "dist/analog"
