@@ -1,16 +1,17 @@
 import {
+  Comparer,
+  createEntityAdapter,
+  EntityAdapter,
+  IdSelector,
+} from '@ngrx/entity';
+
+import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
   TraitSelectorsFactoryConfig,
   TraitStateMutatorsFactoryConfig,
 } from '@ngrx-traits/core';
 import { createTraitFactory } from '@ngrx-traits/core';
-import {
-  Comparer,
-  createEntityAdapter,
-  EntityAdapter,
-  IdSelector,
-} from '@ngrx/entity';
 
 import { EntitiesPaginationKeyedConfig } from '../entities-pagination';
 import {

@@ -1,5 +1,4 @@
-import { Injectable, inject } from '@angular/core';
-import { takeUntil } from 'rxjs/operators';
+import { inject, Injectable } from '@angular/core';
 import {
   Actions,
   ofType,
@@ -8,6 +7,7 @@ import {
 } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Injectable()
 export class TraitEffect implements OnIdentifyEffects, OnRunEffects {
@@ -24,8 +24,8 @@ export class TraitEffect implements OnIdentifyEffects, OnRunEffects {
     return this.componentId
       ? resolvedEffects$.pipe(
           takeUntil(
-            this.actions$.pipe(ofType(getDestroyActionName(this.componentId)))
-          )
+            this.actions$.pipe(ofType(getDestroyActionName(this.componentId))),
+          ),
         )
       : resolvedEffects$;
   }

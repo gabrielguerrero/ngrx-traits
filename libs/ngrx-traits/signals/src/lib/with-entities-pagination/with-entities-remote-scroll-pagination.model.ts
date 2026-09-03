@@ -1,10 +1,10 @@
 import { Signal } from '@angular/core';
+import { DeepSignal } from '@ngrx/signals';
 
 import {
   NamedSetEntitiesResult,
   SetEntitiesResult,
 } from './with-entities-local-pagination.model';
-import { DeepSignal } from '@ngrx/signals';
 
 export type ScrollPaginationState = {
   hasMore: boolean;

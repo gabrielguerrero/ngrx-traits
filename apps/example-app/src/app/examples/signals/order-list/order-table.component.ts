@@ -200,9 +200,7 @@ import { OrderStore } from './order-list.store';
             mat-row
             *matRowDef="let order; columns: displayedColumns"
             class="example-element-row"
-            [class.example-expanded-row]="
-              store.orderIdsSelectedMap()[order.id]
-            "
+            [class.example-expanded-row]="store.orderIdsSelectedMap()[order.id]"
           ></tr>
           <tr
             mat-row

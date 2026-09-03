@@ -1,9 +1,18 @@
 {
   "singleQuote": true,
   "plugins": ["@trivago/prettier-plugin-sort-imports"],
-  "importOrder": ["^zone.js(.*)$", "<THIRD_PARTY_MODULES>", "^@turntown/(.*)$", "^[./]"],
+  "importOrder": [
+    "^zone.js(.*)$",
+    "<THIRD_PARTY_MODULES>",
+    "^@ngrx-traits/(.*)$",
+    "^[./]"
+  ],
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
   "importOrderCaseInsensitive": true,
-  "importOrderParserPlugins": ["typescript", "classProperties", "decorators-legacy"]
+  "importOrderParserPlugins": [
+    "typescript",
+    "classProperties",
+    "decorators-legacy"
+  ]
 }

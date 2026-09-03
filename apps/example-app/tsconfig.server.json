@@ -2,7 +2,7 @@
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "outDir": "../../dist/out-tsc/server",
-    "types": ["node"],
+    "types": ["node"]
   },
   "files": ["src/main.server.ts", "src/server.ts"]
 }

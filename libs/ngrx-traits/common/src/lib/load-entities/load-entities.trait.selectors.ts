@@ -1,16 +1,17 @@
 import { Dictionary } from '@ngrx/entity';
+import { createSelector } from '@ngrx/store';
+
+import { FilterEntitiesKeyedConfig } from '../filter-entities';
+import { selectEntitiesFilter } from '../filter-entities/filter-entities.trait.selectors';
 import {
   LoadEntitiesKeyedConfig,
   LoadEntitiesSelectors,
 } from './load-entities.model';
-import { FilterEntitiesKeyedConfig } from '../filter-entities';
 import { isFail, isLoading, isSuccess } from './load-entities.utils';
-import { createSelector } from '@ngrx/store';
-import { selectEntitiesFilter } from '../filter-entities/filter-entities.trait.selectors';
 
 export function createLoadEntitiesTraitSelectors<Entity>(
   allConfigs?: LoadEntitiesKeyedConfig<Entity> &
-    FilterEntitiesKeyedConfig<Entity, unknown>
+    FilterEntitiesKeyedConfig<Entity, unknown>,
 ) {
   const adapter = allConfigs?.loadEntities?.adapter;
   const entitySelectors = adapter!.getSelectors();
@@ -30,7 +31,7 @@ export function createLoadEntitiesTraitSelectors<Entity>(
       entitySelectors.selectAll,
       selectEntitiesFilter,
       (entities, filters) =>
-        filters ? entities.filter((e) => filterFunction(filters, e)) : entities
+        filters ? entities.filter((e) => filterFunction(filters, e)) : entities,
     );
 
     selectors = {
@@ -48,16 +49,16 @@ export function createLoadEntitiesTraitSelectors<Entity>(
             }
           }
           return result;
-        }
+        },
       ),
       selectEntitiesTotal: createSelector(
         selectEntitiesList,
-        (entities) => entities.length
+        (entities) => entities.length,
       ),
       selectEntitiesIdsList: createSelector(
         selectEntitiesList,
         (entities) =>
-          entities.map((e) => adapter?.selectId(e)) as string[] | number[]
+          entities.map((e) => adapter?.selectId(e)) as string[] | number[],
       ),
     } as unknown as LoadEntitiesSelectors<Entity>;
   }

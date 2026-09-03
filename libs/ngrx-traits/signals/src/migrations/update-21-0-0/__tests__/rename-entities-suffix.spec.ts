@@ -1,12 +1,11 @@
 /**
  * Tests for the rename-entities-suffix migration (targeted approach)
  */
-
-import { analyzeAll } from '../targeted/store-analyzer';
 import { resolveDependencies } from '../targeted/dependency-resolver';
+import { analyzeAll } from '../targeted/store-analyzer';
 import {
-  transformTypeScriptFile,
   transformHtmlFile,
+  transformTypeScriptFile,
 } from '../targeted/targeted-transformer';
 
 // Helper to create mock tree for targeted migration tests
@@ -36,7 +35,7 @@ import { withCallStatus } from '@ngrx-traits/signals';
 export const ProductStore = signalStore(
   withCallStatus({ collection: 'product' }),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -60,7 +59,7 @@ const collection = 'products';
 export const ProductStore = signalStore(
   withCallStatus({ collection }),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -83,7 +82,7 @@ const productEntityConfig = entityConfig({ collection: 'product' });
 export const ProductStore = signalStore(
   withCallStatus({ ...productEntityConfig }),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -106,7 +105,7 @@ const productEntityConfig = entityConfig({ collection: 'product' });
 export const ProductStore = signalStore(
   withCallStatus(productEntityConfig),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -128,7 +127,7 @@ export const ShopStore = signalStore(
   withCallStatus({ collection: 'product' }),
   withEntitiesLocalFilter({ collection: 'order' }),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -154,7 +153,7 @@ export function withJobEntities() {
     withCallStatus({ collection: 'job' }),
   );
 }
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -180,7 +179,7 @@ export function withJobEntities() {
     withCallStatus({ ...jobEntityConfig }),
   );
 }
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -203,7 +202,7 @@ export function withJobEntities() {
     withCallStatus({ collection: 'job' }),
   );
 }
-`
+`,
       );
       files.set(
         '/store.ts',
@@ -216,7 +215,7 @@ export const MyStore = signalStore(
   withCallStatus({ collection: 'product' }),
   withJobEntities(),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -241,7 +240,7 @@ export function withJobEntities() {
     withCallStatus({ collection: 'job' }),
   );
 }
-`
+`,
       );
       files.set(
         '/store.ts',
@@ -252,7 +251,7 @@ import { withJobEntities } from './feature';
 export const JobStore = signalStore(
   withFeature((store) => withJobEntities()),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -275,7 +274,7 @@ export function withJobEntities() {
     withCallStatus({ collection: 'job' }),
   );
 }
-`
+`,
       );
       files.set(
         '/store.ts',
@@ -288,7 +287,7 @@ export const JobStore = signalStore(
     return withJobEntities();
   }),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -313,7 +312,7 @@ const productsStoreFeature = signalStoreFeature(
 );
 
 export const ProductStore = signalStore(productsStoreFeature);
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -342,7 +341,7 @@ export const ShopStore = signalStore(
     withEntitiesLocalSort({ collection: 'orderItem' }),
   ),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -371,7 +370,7 @@ export const ShopStore = signalStore(
     withEntitiesLocalSort({ collection: 'orderItem' }),
   ),
 );
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -395,7 +394,7 @@ import { withCallStatus } from '@ngrx-traits/signals';
 export const ProductStore = signalStore(
   withCallStatus({ collection: 'product' }),
 );
-`
+`,
       );
       files.set(
         '/component.ts',
@@ -405,7 +404,7 @@ import { ProductStore } from './store';
 export class MyComponent {
   store = inject(ProductStore);
 }
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -429,7 +428,7 @@ export function withJobEntities() {
     withCallStatus({ collection: 'job' }),
   );
 }
-`
+`,
       );
       files.set(
         '/store.ts',
@@ -438,7 +437,7 @@ import { signalStore } from '@ngrx/signals';
 import { withJobEntities } from './feature';
 
 export const JobStore = signalStore(withJobEntities());
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -478,7 +477,11 @@ const status = productCallStatus;
 export class MyComponent {}
 `;
 
-      const result = transformTypeScriptFile(input, '/component.ts', collections);
+      const result = transformTypeScriptFile(
+        input,
+        '/component.ts',
+        collections,
+      );
 
       expect(result.modified).toBe(true);
       expect(result.content).toContain('isProductEntitiesLoading');
@@ -624,7 +627,7 @@ export function withJobEntities() {
     withCallStatus({ collection: 'job' }),
   );
 }
-`
+`,
       );
       files.set(
         '/store.ts',
@@ -633,7 +636,7 @@ import { signalStore } from '@ngrx/signals';
 import { withJobEntities } from './feature';
 
 export const JobStore = signalStore(withJobEntities());
-`
+`,
       );
       files.set(
         '/component.ts',
@@ -645,7 +648,7 @@ export class JobComponent {
   isLoading = this.store.isJobLoading;
   status = this.store.jobCallStatus;
 }
-`
+`,
       );
 
       const tree = createMockTree(files);
@@ -656,7 +659,7 @@ export class JobComponent {
       const result = transformTypeScriptFile(
         componentContent,
         '/component.ts',
-        scope.collections
+        scope.collections,
       );
 
       expect(result.modified).toBe(true);

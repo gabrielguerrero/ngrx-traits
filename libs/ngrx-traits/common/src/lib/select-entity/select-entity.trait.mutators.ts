@@ -1,11 +1,11 @@
-import { SelectEntityMutators, SelectEntityState } from './select-entity.model';
 import { LoadEntitiesState } from '../load-entities';
+import { SelectEntityMutators, SelectEntityState } from './select-entity.model';
 
 export function createSelectEntityTraitMutators<
-  Entity
+  Entity,
 >(): SelectEntityMutators<Entity> {
   function selectEntity<
-    S extends LoadEntitiesState<Entity> & SelectEntityState
+    S extends LoadEntitiesState<Entity> & SelectEntityState,
   >(id: string | number, state: S) {
     return {
       ...state,
@@ -13,7 +13,7 @@ export function createSelectEntityTraitMutators<
     };
   }
   function deselectEntity<
-    S extends LoadEntitiesState<Entity> & SelectEntityState
+    S extends LoadEntitiesState<Entity> & SelectEntityState,
   >(state: S) {
     return {
       ...state,
@@ -21,7 +21,7 @@ export function createSelectEntityTraitMutators<
     };
   }
   function toggleSelectEntity<
-    S extends LoadEntitiesState<Entity> & SelectEntityState
+    S extends LoadEntitiesState<Entity> & SelectEntityState,
   >(id: string | number, state: S) {
     return {
       ...state,

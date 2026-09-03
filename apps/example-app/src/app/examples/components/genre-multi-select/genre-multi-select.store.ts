@@ -1,5 +1,9 @@
 import { inject } from '@angular/core';
 import { Genre } from '@example-api/shared/models';
+import { signalStore, type } from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
+import { map } from 'rxjs/operators';
+
 import {
   withCallStatus,
   withEntitiesLoadingCall,
@@ -10,9 +14,6 @@ import {
   withLinkEntitiesSingleSelection,
   withLogger,
 } from '@ngrx-traits/signals';
-import { signalStore, type } from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
-import { map } from 'rxjs/operators';
 
 import { GenreService } from '../../services/genre.service';
 

@@ -11,7 +11,7 @@ export function _isNumberValue(value: any): boolean {
 
 function sortingDataAccessor<T>(
   data: T,
-  sortHeaderId: string
+  sortHeaderId: string,
 ): string | number {
   const value = (data as { [key: string]: any })[sortHeaderId];
 
