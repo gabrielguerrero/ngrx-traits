@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Product, ProductFilter } from '@example-api/shared/models';
+
 import { Sort } from '@ngrx-traits/common';
 
 import { ProductDetailComponent } from '../../../../components/product-detail/product-detail.component';

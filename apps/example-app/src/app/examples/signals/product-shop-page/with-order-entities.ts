@@ -1,4 +1,7 @@
 import { ProductOrder } from '@example-api/shared/models';
+import { signalStoreFeature, type } from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
+
 import {
   ExtractStoreFeatureOutput,
   withEntitiesLocalPagination,
@@ -8,8 +11,6 @@ import {
   withLogger,
   withSyncToWebStorage,
 } from '@ngrx-traits/signals';
-import { signalStoreFeature, type } from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
 
 export const orderItemEntityConfig = entityConfig({
   entity: type<ProductOrder>(),

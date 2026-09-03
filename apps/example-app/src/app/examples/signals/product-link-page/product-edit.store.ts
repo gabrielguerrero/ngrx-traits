@@ -1,6 +1,14 @@
 import { computed, inject } from '@angular/core';
 import { ProductDetail } from '@example-api/shared/models';
 import {
+  patchState,
+  signalStore,
+  withComputed,
+  withState,
+} from '@ngrx/signals';
+import { of } from 'rxjs';
+
+import {
   cacheRxCall,
   callConfig,
   withCalls,
@@ -8,13 +16,6 @@ import {
   withLogger,
   withStateSetter,
 } from '@ngrx-traits/signals';
-import {
-  patchState,
-  signalStore,
-  withComputed,
-  withState,
-} from '@ngrx/signals';
-import { of } from 'rxjs';
 
 import { ProductService } from '../../services/product.service';
 

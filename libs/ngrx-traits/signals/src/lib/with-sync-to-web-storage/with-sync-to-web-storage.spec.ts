@@ -1,11 +1,12 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { patchState, signalStore, type, withState } from '@ngrx/signals';
+import { setAllEntities, withEntities } from '@ngrx/signals/entities';
+
 import {
   withCallStatus,
   withEntitiesSingleSelection,
   withSyncToWebStorage,
 } from '@ngrx-traits/signals';
-import { patchState, signalStore, type, withState } from '@ngrx/signals';
-import { setAllEntities, withEntities } from '@ngrx/signals/entities';
 
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';

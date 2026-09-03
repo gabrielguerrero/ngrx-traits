@@ -1,1 +1,1 @@
-export { ProductActions, ProductSelectors } from './products.traits'
+export { ProductActions, ProductSelectors } from './products.traits';

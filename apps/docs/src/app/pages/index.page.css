@@ -1,4 +1,3 @@
-
 .background-container {
   margin: auto;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
@@ -21,12 +20,8 @@
   background-attachment: fixed;
 }
 
-.name-bg{
-  background: linear-gradient(
-    340deg,
-    transparent 60%,
-    rgb(16, 61, 106) 98%
-  );
+.name-bg {
+  background: linear-gradient(340deg, transparent 60%, rgb(16, 61, 106) 98%);
 }
 @keyframes gradient {
   0% {
@@ -46,7 +41,7 @@
   border-radius: 1000% 1000% 0 0;
   position: absolute;
   width: 800%;
-  height:  12rem;
+  height: 12rem;
   /*height: 98%; !* 12rem;*!*/
   animation: wave 20s -3s linear infinite;
   transform: translate3d(0, 0, 0);
@@ -100,9 +95,9 @@
 /*  !*border-radius: 20px;*!*/
 /*  !*   background-color:red *!*/
 /*}*/
-.gratio img{
+.gratio img {
   aspect-ratio: 1/1;
 }
-::ng-deep a:hover{
+::ng-deep a:hover {
   color: var(--home-link-hover);
 }

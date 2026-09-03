@@ -1,6 +1,7 @@
-import { insertIf } from '@ngrx-traits/core';
 import { Update } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
+
+import { insertIf } from '@ngrx-traits/core';
 
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import {

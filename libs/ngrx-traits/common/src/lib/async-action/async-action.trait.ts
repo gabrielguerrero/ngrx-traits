@@ -1,10 +1,11 @@
+import { createAction, createReducer, on } from '@ngrx/store';
+import { ActionCreatorProps } from '@ngrx/store';
+
 import { camelCaseToSentence, createTraitFactory } from '@ngrx-traits/core';
 import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
 } from '@ngrx-traits/core';
-import { createAction, createReducer, on } from '@ngrx/store';
-import { ActionCreatorProps } from '@ngrx/store';
 
 import {
   ActionCreatorWithOptionalProps,

@@ -1,4 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
+
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -13,7 +14,7 @@ import {
 
 export function createSortInitialState<Entity>(
   previousInitialState: any,
-  allConfigs: SortEntitiesKeyedConfig<Entity>
+  allConfigs: SortEntitiesKeyedConfig<Entity>,
 ): LoadEntitiesState<Entity> & SortEntitiesState<Entity> {
   const { defaultSort } = allConfigs.sort!;
 
@@ -30,20 +31,20 @@ export function createSortTraitReducer<
   Entity,
   S extends LoadEntitiesState<Entity> &
     SortEntitiesState<Entity> = LoadEntitiesState<Entity> &
-    SortEntitiesState<Entity>
+    SortEntitiesState<Entity>,
 >(
   initialState: S,
   allActions: SortEntitiesActions<Entity> & LoadEntitiesActions<Entity>,
   allMutators: SortEntitiesMutators<Entity>,
-  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>
+  allConfigs: LoadEntitiesKeyedConfig<Entity> & SortEntitiesKeyedConfig<Entity>,
 ) {
   return createReducer(
     initialState,
     on(allActions.sortEntities, (state, { active, direction }) =>
-      allMutators.sortEntities({ active, direction }, state)
+      allMutators.sortEntities({ active, direction }, state),
     ),
     on(allActions.resetEntitiesSort, (state) =>
-      allMutators.sortEntities(state.sort?.default, state)
-    )
+      allMutators.sortEntities(state.sort?.default, state),
+    ),
   );
 }

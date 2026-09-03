@@ -7,7 +7,9 @@ export function getWithEntitiesInfinitePaginationKeys(config?: {
   const collection = config?.collection;
   const capitalizedProp = collection && capitalize(collection);
   return {
-    paginationKey: collection ? `${config.collection}EntitiesPagination` : 'pagination',
+    paginationKey: collection
+      ? `${config.collection}EntitiesPagination`
+      : 'pagination',
     entitiesCurrentPageKey: collection
       ? `${config.collection}EntitiesCurrentPage`
       : 'entitiesCurrentPage',

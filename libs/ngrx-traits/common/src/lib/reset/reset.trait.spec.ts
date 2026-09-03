@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { createAction, createFeatureSelector } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { first } from 'rxjs/operators';
+
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
 
 import {
   addEntitiesPaginationTrait,

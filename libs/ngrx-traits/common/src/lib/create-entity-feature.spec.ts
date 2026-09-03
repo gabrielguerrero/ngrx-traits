@@ -1,19 +1,21 @@
+import { Injectable } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { createEffect, EffectsModule, ofType } from '@ngrx/effects';
+import { Store, StoreModule } from '@ngrx/store';
+import { first, mapTo } from 'rxjs/operators';
+
 import {
   addCrudEntitiesTrait,
   addLoadEntitiesTrait,
   addSelectEntitiesTrait,
 } from '@ngrx-traits/common';
-import { Store, StoreModule } from '@ngrx/store';
+
 import {
   addEntityFeaturesProperties,
   combineEntityFeatures,
   createEntityFeatureFactory,
   mixEntityFeatures,
 } from '../../../core/src/lib/create-entity-feature';
-import { TestBed } from '@angular/core/testing';
-import { createEffect, EffectsModule, ofType } from '@ngrx/effects';
-import { first, mapTo } from 'rxjs/operators';
-import { Injectable } from '@angular/core';
 import {
   LocalTraitsConfig,
   TraitsLocalStore,
@@ -44,19 +46,19 @@ export interface ProductFilter {
 const clientsFeatureFactory = createEntityFeatureFactory(
   { entityName: 'client', entitiesName: 'clients' },
   addLoadEntitiesTrait<Client>(),
-  addCrudEntitiesTrait<Client>()
+  addCrudEntitiesTrait<Client>(),
 );
 
 const productOrderFeatureFactory = createEntityFeatureFactory(
   { entityName: 'productOrder' },
   addLoadEntitiesTrait<ProductOrder>(),
-  addSelectEntitiesTrait<ProductOrder>()
+  addSelectEntitiesTrait<ProductOrder>(),
 );
 
 const productFeatureFactory = createEntityFeatureFactory(
   { entityName: 'product' },
   addLoadEntitiesTrait<Product>(),
-  addSelectEntitiesTrait<Product>()
+  addSelectEntitiesTrait<Product>(),
 );
 
 const productCombinedFactory = combineEntityFeatures({
@@ -70,7 +72,7 @@ const productAddEntityPropertiesFactory = addEntityFeaturesProperties(
   {
     productOrders: productOrderFeatureFactory,
     clients: clientsFeatureFactory,
-  }
+  },
 );
 
 const productMixedFactory = mixEntityFeatures({
@@ -89,8 +91,8 @@ class ProductTraitLocal extends TraitsLocalStore<typeof productFeatureFactory> {
           entities: [
             { id: 1, name: 'name', description: 'description', price: 123 },
           ],
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -119,8 +121,8 @@ class ProductCombinedTraitLocal extends TraitsLocalStore<
           entities: [
             { id: 1, name: 'name', description: 'description', price: 123 },
           ],
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -149,8 +151,8 @@ class ProductMixedTraitLocal extends TraitsLocalStore<
           entities: [
             { id: 1, name: 'name', description: 'description', price: 123 },
           ],
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -179,8 +181,8 @@ class ProductAddEntityPropertiesTraitLocal extends TraitsLocalStore<
           entities: [
             { id: 1, name: 'name', description: 'description', price: 123 },
           ],
-        })
-      )
+        }),
+      ),
     );
   });
 
@@ -201,12 +203,12 @@ type ProductFeature = ReturnType<typeof productFeatureFactory>;
 async function basicProductTest(
   actions: ProductFeature['actions'],
   selectors: ProductFeature['selectors'],
-  store: Store
+  store: Store,
 ) {
   store.dispatch(
     actions.loadProductsSuccess({
       entities: [{ id: 1, name: 'X', description: 'Y', price: 10 }],
-    })
+    }),
   );
   store.dispatch(actions.selectProducts({ id: 1 }));
   const result = await store
@@ -225,12 +227,12 @@ type ProductOrderFeature = ReturnType<typeof productOrderFeatureFactory>;
 async function basicProductOrdersTest(
   actions: ProductOrderFeature['actions'],
   selectors: ProductOrderFeature['selectors'],
-  store: Store
+  store: Store,
 ) {
   store.dispatch(
     actions.loadProductOrdersSuccess({
       entities: [{ id: 2, name: 'X', description: 'Y', price: 10 }],
-    })
+    }),
   );
   store.dispatch(actions.selectProductOrders({ id: 2 }));
   const result = await store
@@ -248,12 +250,12 @@ type ClientFeature = ReturnType<typeof clientsFeatureFactory>;
 async function basicClientsTest(
   actions: ClientFeature['actions'],
   selectors: ClientFeature['selectors'],
-  store: Store
+  store: Store,
 ) {
   store.dispatch(
     actions.loadClientsSuccess({
       entities: [{ id: 3, name: 'X' }],
-    })
+    }),
   );
   store.dispatch(actions.addClients({ id: 4, name: 'X' }));
   const result = await store
@@ -397,7 +399,7 @@ describe('Ngrx-Traits Integration Test', () => {
       await basicProductOrdersTest(
         productOrders.actions,
         productOrders.selectors,
-        store
+        store,
       );
     });
 
@@ -418,7 +420,7 @@ describe('Ngrx-Traits Integration Test', () => {
       await basicProductOrdersTest(
         actions.productOrders,
         selectors.productOrders,
-        store
+        store,
       );
     });
 
@@ -456,7 +458,7 @@ describe('Ngrx-Traits Integration Test', () => {
       await basicProductOrdersTest(
         actions.productOrders,
         selectors.productOrders,
-        store
+        store,
       );
     });
 
@@ -473,7 +475,7 @@ describe('Ngrx-Traits Integration Test', () => {
         await basicProductTest(
           localTrait.localActions,
           localTrait.localSelectors,
-          store
+          store,
         );
       });
 
@@ -483,7 +485,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicProductTest(
             localTrait.localActions.products,
             localTrait.localSelectors.products,
-            store
+            store,
           );
         });
 
@@ -492,7 +494,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicProductOrdersTest(
             localTrait.localActions.productOrders,
             localTrait.localSelectors.productOrders,
-            store
+            store,
           );
         });
 
@@ -501,7 +503,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicClientsTest(
             localTrait.localActions.clients,
             localTrait.localSelectors.clients,
-            store
+            store,
           );
         });
       });
@@ -512,7 +514,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicProductTest(
             localTrait.localActions,
             localTrait.localSelectors,
-            store
+            store,
           );
         });
 
@@ -521,7 +523,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicProductOrdersTest(
             localTrait.localActions,
             localTrait.localSelectors,
-            store
+            store,
           );
         });
 
@@ -530,7 +532,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicClientsTest(
             localTrait.localActions,
             localTrait.localSelectors,
-            store
+            store,
           );
         });
       });
@@ -541,7 +543,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicProductTest(
             localTrait.localActions,
             localTrait.localSelectors,
-            store
+            store,
           );
         });
 
@@ -550,7 +552,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicProductOrdersTest(
             localTrait.localActions.productOrders,
             localTrait.localSelectors.productOrders,
-            store
+            store,
           );
         });
 
@@ -559,7 +561,7 @@ describe('Ngrx-Traits Integration Test', () => {
           await basicClientsTest(
             localTrait.localActions.clients,
             localTrait.localSelectors.clients,
-            store
+            store,
           );
         });
       });

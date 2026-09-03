@@ -1,3 +1,5 @@
+import { createFeatureSelector } from '@ngrx/store';
+
 import {
   AsyncActionState,
   EntitiesPaginationState,
@@ -6,7 +8,6 @@ import {
   SelectEntityState,
   SortEntitiesState,
 } from '@ngrx-traits/common';
-import { createFeatureSelector } from '@ngrx/store';
 
 import { Product, ProductFilter } from '../../../models';
 

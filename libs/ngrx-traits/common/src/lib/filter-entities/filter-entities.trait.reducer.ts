@@ -1,4 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
+
 import {
   LoadEntitiesActions,
   LoadEntitiesState,
@@ -12,7 +13,7 @@ import { ƟFilterEntitiesActions } from './filter-entities.model.internal';
 
 export function createFilterInitialState<Entity, F>(
   previousInitialState: any,
-  allConfigs: FilterEntitiesKeyedConfig<Entity, F>
+  allConfigs: FilterEntitiesKeyedConfig<Entity, F>,
 ): LoadEntitiesState<Entity> & FilterEntitiesState<F> {
   return {
     ...previousInitialState,
@@ -23,16 +24,16 @@ export function createFilterInitialState<Entity, F>(
 export function createFilterTraitReducer<
   T,
   F,
-  S extends LoadEntitiesState<T> & FilterEntitiesState<F>
+  S extends LoadEntitiesState<T> & FilterEntitiesState<F>,
 >(
   initialState: S,
   allActions: ƟFilterEntitiesActions<F> & LoadEntitiesActions<T>,
-  allMutators: FilterEntitiesMutators<T, F>
+  allMutators: FilterEntitiesMutators<T, F>,
 ) {
   return createReducer(
     initialState,
     on(allActions.storeEntitiesFilter, (state, { filters }) =>
-      allMutators.setEntitiesFilters(filters, state)
-    )
+      allMutators.setEntitiesFilters(filters, state),
+    ),
   );
 }

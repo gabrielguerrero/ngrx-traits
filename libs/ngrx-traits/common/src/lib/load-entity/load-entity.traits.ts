@@ -1,7 +1,8 @@
-import { capitalize, createTraitFactory } from '@ngrx-traits/core';
-import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
 import { ActionCreatorProps } from '@ngrx/store';
 import { createReducer, on } from '@ngrx/store';
+
+import { capitalize, createTraitFactory } from '@ngrx-traits/core';
+import { TraitInitialStateFactoryConfig } from '@ngrx-traits/core';
 
 import { addAsyncActionTrait } from '../async-action/async-action.trait';
 import { LoadEntitySelectors, LoadEntityState } from './load-entity.model';

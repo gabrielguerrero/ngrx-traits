@@ -1,17 +1,14 @@
-import { createSortTraitMutators } from './sort-entities.trait.mutators';
+import { createTraitFactory } from '@ngrx-traits/core';
 import {
-  createSortInitialState,
-  createSortTraitReducer,
-} from './sort-entities.trait.reducer';
-import { createSortTraitSelectors } from './sort-entities.trait.selectors';
-import { createSortTraitEffect } from './sort-entities.trait.effect';
+  TraitActionsFactoryConfig,
+  TraitInitialStateFactoryConfig,
+  TraitStateMutatorsFactoryConfig,
+} from '@ngrx-traits/core';
+
 import {
-  SortEntitiesActions,
-  SortEntitiesConfig,
-  SortEntitiesKeyedConfig,
-  SortEntitiesSelectors,
-  sortTraitKey,
-} from './sort-entities.model';
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../entities-pagination/entities-pagination.model';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -19,16 +16,20 @@ import {
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
 import {
-  EntitiesPaginationActions,
-  EntitiesPaginationKeyedConfig,
-} from '../entities-pagination/entities-pagination.model';
-import { createTraitFactory } from '@ngrx-traits/core';
+  SortEntitiesActions,
+  SortEntitiesConfig,
+  SortEntitiesKeyedConfig,
+  SortEntitiesSelectors,
+  sortTraitKey,
+} from './sort-entities.model';
 import { createSortTraitActions } from './sort-entities.trait.actions';
+import { createSortTraitEffect } from './sort-entities.trait.effect';
+import { createSortTraitMutators } from './sort-entities.trait.mutators';
 import {
-  TraitActionsFactoryConfig,
-  TraitInitialStateFactoryConfig,
-  TraitStateMutatorsFactoryConfig,
-} from '@ngrx-traits/core';
+  createSortInitialState,
+  createSortTraitReducer,
+} from './sort-entities.trait.reducer';
+import { createSortTraitSelectors } from './sort-entities.trait.selectors';
 
 /**
  * Generates ngrx code to sort locally or remotely a list of entities
@@ -84,7 +85,7 @@ export function addSortEntitiesTrait<Entity>({
       createSortTraitMutators<Entity>(
         allSelectors as SortEntitiesSelectors<Entity> &
           LoadEntitiesSelectors<Entity>,
-        allConfigs
+        allConfigs,
       ),
     initialState: ({
       previousInitialState,
@@ -98,7 +99,7 @@ export function addSortEntitiesTrait<Entity>({
         allMutators,
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
           EntitiesPaginationKeyedConfig &
-          SortEntitiesKeyedConfig<Entity>
+          SortEntitiesKeyedConfig<Entity>,
       ),
     effects: ({ allActions, allConfigs }) =>
       createSortTraitEffect(
@@ -106,7 +107,7 @@ export function addSortEntitiesTrait<Entity>({
           SortEntitiesActions<Entity> &
           EntitiesPaginationActions,
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
-          SortEntitiesKeyedConfig<Entity>
+          SortEntitiesKeyedConfig<Entity>,
       ),
   });
 }

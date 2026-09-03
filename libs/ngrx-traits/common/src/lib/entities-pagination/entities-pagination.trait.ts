@@ -1,16 +1,16 @@
+import { createTraitFactory } from '@ngrx-traits/core';
 import {
-  EntitiesPaginationConfig,
-  EntitiesPaginationKeyedConfig,
-  EntitiesPaginationMutators,
-  EntitiesPaginationSelectors,
-  entitiesPaginationTraitKey,
-} from './entities-pagination.model';
-import { createPaginationTraitSelectors } from './entities-pagination.trait.selectors';
-import { createPaginationTraitActions } from './entities-pagination.trait.actions';
+  TraitActionsFactoryConfig,
+  TraitInitialStateFactoryConfig,
+  TraitSelectorsFactoryConfig,
+} from '@ngrx-traits/core';
+
+import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import {
   FilterEntitiesActions,
   FilterEntitiesKeyedConfig,
 } from '../filter-entities/filter-entities.model';
+import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
 import {
   LoadEntitiesActions,
   LoadEntitiesKeyedConfig,
@@ -19,23 +19,24 @@ import {
   loadEntitiesTraitKey,
 } from '../load-entities/load-entities.model';
 import {
-  createPaginationInitialState,
-  createPaginationTraitReducer,
-} from './entities-pagination.trait.reducer';
-import { createPaginationTraitEffects } from './entities-pagination.trait.effects';
-import { createTraitFactory } from '@ngrx-traits/core';
-import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
-import { createPaginationTraitMutators } from './entities-pagination.trait.mutators';
+  EntitiesPaginationConfig,
+  EntitiesPaginationKeyedConfig,
+  EntitiesPaginationMutators,
+  EntitiesPaginationSelectors,
+  entitiesPaginationTraitKey,
+} from './entities-pagination.model';
 import {
   ƟEntitiesPaginationSelectors,
   ƟPaginationActions,
 } from './entities-pagination.model.internal';
+import { createPaginationTraitActions } from './entities-pagination.trait.actions';
+import { createPaginationTraitEffects } from './entities-pagination.trait.effects';
+import { createPaginationTraitMutators } from './entities-pagination.trait.mutators';
 import {
-  TraitActionsFactoryConfig,
-  TraitInitialStateFactoryConfig,
-  TraitSelectorsFactoryConfig,
-} from '@ngrx-traits/core';
-import { ƟFilterEntitiesActions } from '../filter-entities/filter-entities.model.internal';
+  createPaginationInitialState,
+  createPaginationTraitReducer,
+} from './entities-pagination.trait.reducer';
+import { createPaginationTraitSelectors } from './entities-pagination.trait.selectors';
 
 /**
  * Generates ngrx code to paginate a list of entities, this has 3 cache `cacheType`
@@ -128,14 +129,14 @@ export function addEntitiesPaginationTrait<Entity>({
       createPaginationTraitSelectors<Entity>(
         previousSelectors as LoadEntitiesSelectors<Entity>,
         allConfigs as EntitiesPaginationKeyedConfig &
-          FilterEntitiesKeyedConfig<Entity, unknown>
+          FilterEntitiesKeyedConfig<Entity, unknown>,
       ),
     mutators: ({ allSelectors, allConfigs }) =>
       createPaginationTraitMutators<Entity>(
         allSelectors as EntitiesPaginationSelectors<Entity> &
           LoadEntitiesSelectors<Entity>,
         allConfigs as EntitiesPaginationKeyedConfig &
-          LoadEntitiesKeyedConfig<Entity>
+          LoadEntitiesKeyedConfig<Entity>,
       ),
     initialState: ({
       previousInitialState,
@@ -143,7 +144,7 @@ export function addEntitiesPaginationTrait<Entity>({
     }: TraitInitialStateFactoryConfig) =>
       createPaginationInitialState<Entity>(
         previousInitialState,
-        allConfigs as EntitiesPaginationKeyedConfig
+        allConfigs as EntitiesPaginationKeyedConfig,
       ),
     reducer: ({
       initialState,
@@ -164,7 +165,7 @@ export function addEntitiesPaginationTrait<Entity>({
           LoadEntitiesMutators<Entity>,
         allConfigs as FilterEntitiesKeyedConfig<Entity, unknown> &
           LoadEntitiesKeyedConfig<Entity> &
-          EntitiesPaginationKeyedConfig
+          EntitiesPaginationKeyedConfig,
       ),
     effects: ({ allActions, allSelectors }) =>
       createPaginationTraitEffects(
@@ -173,7 +174,7 @@ export function addEntitiesPaginationTrait<Entity>({
           LoadEntitiesActions<Entity> &
           CrudEntitiesActions<Entity>,
         allSelectors as ƟEntitiesPaginationSelectors<Entity> &
-          LoadEntitiesSelectors<Entity>
+          LoadEntitiesSelectors<Entity>,
       ),
   });
 }

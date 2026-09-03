@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { withCalls, withCallStatus } from '@ngrx-traits/signals';
 import { signalStore } from '@ngrx/signals';
 import { first, Subject } from 'rxjs';
+
+import { withCalls, withCallStatus } from '@ngrx-traits/signals';
 
 import { withAllCallStatus } from './with-all-call-status';
 

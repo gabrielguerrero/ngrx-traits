@@ -1,6 +1,8 @@
 import { Actions } from '@ngrx/effects';
 import { createFeatureSelector, props } from '@ngrx/store';
+
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
+
 import { LoadEntityState } from './load-entity.model';
 import { addLoadEntityTraits } from './load-entity.traits';
 
@@ -25,7 +27,7 @@ describe('addLoadEntityTraits trait', () => {
         entityName: 'client',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ client: Client }>(),
-      })
+      }),
     )({
       actionsGroupKey: 'Client',
       featureSelector,
@@ -46,7 +48,7 @@ describe('addLoadEntityTraits trait', () => {
         entityName: 'product',
         actionProps: props<{ id: string }>(),
         actionSuccessProps: props<{ product: Product }>(),
-      })
+      }),
     )({
       actionsGroupKey: 'Client',
       featureSelector: featureSelector2,
@@ -60,7 +62,7 @@ describe('addLoadEntityTraits trait', () => {
       expect(
         selectors.selectClient.projector({
           client: { name: 'gabs', id: '1' },
-        })
+        }),
       ).toEqual({ name: 'gabs', id: '1' });
     });
   });
@@ -72,7 +74,7 @@ describe('addLoadEntityTraits trait', () => {
         { loadClientStatus: 'loading' },
         actions.loadClientSuccess({
           client: { name: 'gabs', id: '1' },
-        })
+        }),
       );
       expect(state).toEqual({
         loadClientStatus: 'success',
@@ -88,13 +90,13 @@ describe('addLoadEntityTraits trait', () => {
         {},
         actions.loadProduct({
           id: 'A',
-        })
+        }),
       );
       state = reducer(
         state,
         actions.loadClient({
           id: '1',
-        })
+        }),
       );
       expect(selectors.isLoadingLoadClient.projector(state)).toEqual(true);
       expect(selectors.isLoadingLoadProduct.projector(state)).toEqual(true);
@@ -102,7 +104,7 @@ describe('addLoadEntityTraits trait', () => {
         state,
         actions.loadClientSuccess({
           client: { id: '1', name: 'uno' },
-        })
+        }),
       );
       state = reducer(state, actions.loadProductFail());
       expect(selectors.isSuccessLoadClient.projector(state)).toEqual(true);

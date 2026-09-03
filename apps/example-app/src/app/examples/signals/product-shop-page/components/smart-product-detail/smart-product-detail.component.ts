@@ -8,8 +8,9 @@ import {
 } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { withCalls } from '@ngrx-traits/signals';
 import { signalStore } from '@ngrx/signals';
+
+import { withCalls } from '@ngrx-traits/signals';
 
 import { ProductService } from '../../../../services/product.service';
 

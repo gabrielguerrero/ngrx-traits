@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { TraitEffect } from '@ngrx-traits/core';
-import { createAction } from '@ngrx/store';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { first, map } from 'rxjs/operators';
 import { provideMockActions } from '@ngrx/effects/testing';
+import { createAction } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
 import { from, Observable } from 'rxjs';
+import { first, map } from 'rxjs/operators';
+
+import { TraitEffect } from '@ngrx-traits/core';
 
 describe('TraitEffect', () => {
   const test = createAction('Test');
@@ -17,7 +18,7 @@ describe('TraitEffect', () => {
     test$ = createEffect(() => {
       return this.actions$.pipe(
         ofType(test),
-        map(() => testSuccess())
+        map(() => testSuccess()),
       );
     });
   }
