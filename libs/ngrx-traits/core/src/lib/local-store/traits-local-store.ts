@@ -1,7 +1,8 @@
 import { inject, Injectable, Injector, OnDestroy } from '@angular/core';
-import { BaseEntityFeatureFactory, EntityFeatureFactory } from '../model';
-import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
 import { Actions, EffectSources } from '@ngrx/effects';
+import { createFeatureSelector, ReducerManager, Store } from '@ngrx/store';
+
+import { BaseEntityFeatureFactory, EntityFeatureFactory } from '../model';
 import { getDestroyActionName, TraitEffect } from '../trait-effect';
 import { DISABLE_LOCAL_TRAIT_EFFECTS } from './disable-local-trait-effects.token';
 
@@ -24,7 +25,7 @@ function uniqueComponentId() {
  */
 export function buildLocalTraits<
   State,
-  F extends BaseEntityFeatureFactory<any, any, any>
+  F extends BaseEntityFeatureFactory<any, any, any>,
 >(injector: Injector, componentName: string, traitFactory: F) {
   const reducers = injector.get(ReducerManager);
   const effects = injector.get(EffectSources);
@@ -43,7 +44,7 @@ export function buildLocalTraits<
 
   const disableLocalTraitsEffects = injector.get(
     DISABLE_LOCAL_TRAIT_EFFECTS,
-    false
+    false,
   );
   if (!disableLocalTraitsEffects) {
     const i = Injector.create({
@@ -87,7 +88,7 @@ export interface Type<T> extends Function {
 }
 
 export interface LocalTraitsConfig<
-  F extends BaseEntityFeatureFactory<any, any, any>
+  F extends BaseEntityFeatureFactory<any, any, any>,
 > {
   componentName: string;
   traitsFactory: F;
@@ -156,7 +157,7 @@ export interface LocalTraitsConfig<
  */
 @Injectable()
 export abstract class TraitsLocalStore<
-    F extends BaseEntityFeatureFactory<any, any, any>
+    F extends BaseEntityFeatureFactory<any, any, any>,
   >
   extends TraitEffect
   implements OnDestroy
@@ -178,7 +179,7 @@ export abstract class TraitsLocalStore<
     this.traits = buildLocalTraits(
       this.injector,
       config.componentName,
-      config.traitsFactory
+      config.traitsFactory,
     );
     this.localActions = this.traits.actions;
     this.localSelectors = this.traits.selectors;

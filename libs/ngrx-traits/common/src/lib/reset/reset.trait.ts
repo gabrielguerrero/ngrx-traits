@@ -1,9 +1,10 @@
+import { ActionCreator, createAction, createReducer, on } from '@ngrx/store';
+
 import {
   createTraitFactory,
   insertIf,
   TraitActionsFactoryConfig,
 } from '@ngrx-traits/core';
-import { ActionCreator, createAction, createReducer, on } from '@ngrx/store';
 
 /**
  * Generates the ngrx code needed to reset the current state to the initial state.

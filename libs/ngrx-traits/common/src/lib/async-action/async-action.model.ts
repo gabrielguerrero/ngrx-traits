@@ -1,6 +1,7 @@
-import { PostfixProps, PrefixProps } from '@ngrx-traits/core';
 import { ActionCreator, NotAllowedCheck } from '@ngrx/store';
 import { Action } from '@ngrx/store';
+
+import { PostfixProps, PrefixProps } from '@ngrx-traits/core';
 
 import { StatusState } from '../load-entities';
 

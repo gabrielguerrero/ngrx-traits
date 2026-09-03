@@ -1,34 +1,35 @@
-import { createSelectEntitiesTraitActions } from './select-entities.trait.actions';
-import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort-entities';
-import { createSelectEntitiesTraitSelectors } from './select-entities.trait.selectors';
-import {
-  SelectEntitiesSelectors,
-  SelectEntitiesActions,
-} from './select-entities.model';
-import {
-  EntitiesPaginationActions,
-  EntitiesPaginationKeyedConfig,
-} from '../entities-pagination/entities-pagination.model';
-import {
-  LoadEntitiesActions,
-  LoadEntitiesKeyedConfig,
-  LoadEntitiesSelectors,
-  loadEntitiesTraitKey,
-} from '../load-entities/load-entities.model';
 import { createTraitFactory } from '@ngrx-traits/core';
-import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
-import {
-  createSelectEntitiesInitialState,
-  createSelectEntitiesTraitReducer,
-} from './select-entities.trait.reducer';
-import { createSelectEntitiesTraitMutators } from './select-entities.trait.mutators';
-import { FilterEntitiesActions } from '../filter-entities';
 import {
   TraitActionsFactoryConfig,
   TraitInitialStateFactoryConfig,
   TraitSelectorsFactoryConfig,
   TraitStateMutatorsFactoryConfig,
 } from '@ngrx-traits/core';
+
+import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
+import {
+  EntitiesPaginationActions,
+  EntitiesPaginationKeyedConfig,
+} from '../entities-pagination/entities-pagination.model';
+import { FilterEntitiesActions } from '../filter-entities';
+import {
+  LoadEntitiesActions,
+  LoadEntitiesKeyedConfig,
+  LoadEntitiesSelectors,
+  loadEntitiesTraitKey,
+} from '../load-entities/load-entities.model';
+import { SortEntitiesActions, SortEntitiesKeyedConfig } from '../sort-entities';
+import {
+  SelectEntitiesActions,
+  SelectEntitiesSelectors,
+} from './select-entities.model';
+import { createSelectEntitiesTraitActions } from './select-entities.trait.actions';
+import { createSelectEntitiesTraitMutators } from './select-entities.trait.mutators';
+import {
+  createSelectEntitiesInitialState,
+  createSelectEntitiesTraitReducer,
+} from './select-entities.trait.reducer';
+import { createSelectEntitiesTraitSelectors } from './select-entities.trait.selectors';
 
 /**
  * Generates ngrx code to add multi selection to a list
@@ -75,13 +76,13 @@ export function addSelectEntitiesTrait<Entity>() {
       createSelectEntitiesTraitActions(actionsGroupKey, entitiesName),
     selectors: ({ previousSelectors }: TraitSelectorsFactoryConfig) =>
       createSelectEntitiesTraitSelectors<Entity>(
-        previousSelectors as LoadEntitiesSelectors<Entity>
+        previousSelectors as LoadEntitiesSelectors<Entity>,
       ),
     initialState: ({ previousInitialState }: TraitInitialStateFactoryConfig) =>
       createSelectEntitiesInitialState<Entity>(previousInitialState),
     mutators: ({ allSelectors }: TraitStateMutatorsFactoryConfig) =>
       createSelectEntitiesTraitMutators<Entity>(
-        allSelectors as SelectEntitiesSelectors<Entity>
+        allSelectors as SelectEntitiesSelectors<Entity>,
       ),
     reducer: ({ initialState, allActions, allMutators, allConfigs }) =>
       createSelectEntitiesTraitReducer(
@@ -95,7 +96,7 @@ export function addSelectEntitiesTrait<Entity>() {
         allMutators,
         allConfigs as LoadEntitiesKeyedConfig<Entity> &
           EntitiesPaginationKeyedConfig &
-          SortEntitiesKeyedConfig<Entity>
+          SortEntitiesKeyedConfig<Entity>,
       ),
   });
 }

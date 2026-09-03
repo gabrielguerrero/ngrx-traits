@@ -2,6 +2,15 @@ import { effect, inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Product } from '@example-api/shared/models';
 import {
+  signalStore,
+  signalStoreFeature,
+  type,
+  withHooks,
+} from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
+import { map } from 'rxjs/operators';
+
+import {
   callConfig,
   withAllCallStatus,
   withCalls,
@@ -15,14 +24,6 @@ import {
   withLinkEntitiesFilter,
   withServerStateTransfer,
 } from '@ngrx-traits/signals';
-import {
-  signalStore,
-  signalStoreFeature,
-  type,
-  withHooks,
-} from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
-import { map } from 'rxjs/operators';
 
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';

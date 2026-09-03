@@ -1,6 +1,7 @@
 import { Product, ProductFilter } from '@example-api/shared/models';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
 import { props } from '@ngrx/store';
+
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
 
 import {
   addAsyncActionTrait,

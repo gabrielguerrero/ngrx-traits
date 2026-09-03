@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { StoreModule } from '@ngrx/store';
+
 import { cacheReducer } from './cache.reducer';
 
 @NgModule({

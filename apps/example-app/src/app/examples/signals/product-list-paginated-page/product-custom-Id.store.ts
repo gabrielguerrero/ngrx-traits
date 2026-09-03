@@ -1,5 +1,9 @@
 import { inject } from '@angular/core';
 import { Product } from '@example-api/shared/models';
+import { signalStore, type } from '@ngrx/signals';
+import { entityConfig, withEntities } from '@ngrx/signals/entities';
+import { map } from 'rxjs/operators';
+
 import {
   withCalls,
   withCallStatus,
@@ -9,9 +13,6 @@ import {
   withEntitiesLocalSort,
   withEntitiesSingleSelection,
 } from '@ngrx-traits/signals';
-import { signalStore, type } from '@ngrx/signals';
-import { entityConfig, withEntities } from '@ngrx/signals/entities';
-import { map } from 'rxjs/operators';
 
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';

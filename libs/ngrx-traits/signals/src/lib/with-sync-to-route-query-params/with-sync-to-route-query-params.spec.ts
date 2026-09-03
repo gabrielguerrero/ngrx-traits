@@ -5,12 +5,13 @@ import {
 } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import { patchState, signalStore, withState } from '@ngrx/signals';
+import { of, Subject } from 'rxjs';
+
 import {
   getQueryMapperForState,
   withSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
-import { patchState, signalStore, withState } from '@ngrx/signals';
-import { of, Subject } from 'rxjs';
 
 describe('withSyncToRouteQueryParams', () => {
   function init({ debounce }: { debounce?: number } = {}) {

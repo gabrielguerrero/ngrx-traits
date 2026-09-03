@@ -1,11 +1,16 @@
 /**
  * Dependency Resolver - Phase 2: Find store consumers and templates
  */
-
-import * as ts from 'typescript';
 import { Tree } from '@angular-devkit/schematics';
-import { StoreInfo, CustomFeatureInfo, ConsumerInfo, MigrationScope } from './types';
 import * as path from 'path';
+import * as ts from 'typescript';
+
+import {
+  ConsumerInfo,
+  CustomFeatureInfo,
+  MigrationScope,
+  StoreInfo,
+} from './types';
 
 /**
  * Resolve all files that need migration based on store usage
@@ -13,7 +18,7 @@ import * as path from 'path';
 export function resolveDependencies(
   tree: Tree,
   stores: StoreInfo[],
-  customFeatures: CustomFeatureInfo[] = []
+  customFeatures: CustomFeatureInfo[] = [],
 ): MigrationScope {
   const consumers = new Map<string, ConsumerInfo[]>();
   const allFiles = new Set<string>();
@@ -78,13 +83,13 @@ export function resolveDependencies(
 function analyzeConsumer(
   content: string,
   filePath: string,
-  tree: Tree
+  tree: Tree,
 ): ConsumerInfo | null {
   const sourceFile = ts.createSourceFile(
     filePath,
     content,
     ts.ScriptTarget.Latest,
-    true
+    true,
   );
 
   let templatePath: string | undefined;
@@ -101,7 +106,10 @@ function analyzeConsumer(
               if (ts.isPropertyAssignment(prop)) {
                 const propName = prop.name.getText(sourceFile);
 
-                if (propName === 'templateUrl' && ts.isStringLiteral(prop.initializer)) {
+                if (
+                  propName === 'templateUrl' &&
+                  ts.isStringLiteral(prop.initializer)
+                ) {
                   const templateRelPath = prop.initializer.text;
                   const dirPath = path.dirname(filePath);
                   templatePath = path.join(dirPath, templateRelPath);
@@ -112,7 +120,10 @@ function analyzeConsumer(
                   }
 
                   // Verify template exists
-                  if (!tree.exists(templatePath) && !tree.exists('/' + templatePath)) {
+                  if (
+                    !tree.exists(templatePath) &&
+                    !tree.exists('/' + templatePath)
+                  ) {
                     templatePath = undefined;
                   }
                 }

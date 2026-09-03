@@ -1,15 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import {
-  createTraitFactory,
-  TraitActionsFactoryConfig,
-  TraitEffect,
-} from '@ngrx-traits/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import { createAction, createReducer, on, props } from '@ngrx/store';
 import { Action, ActionCreator } from '@ngrx/store';
 import { delay, map, mapTo, tap } from 'rxjs/operators';
+
+import {
+  createTraitFactory,
+  TraitActionsFactoryConfig,
+  TraitEffect,
+} from '@ngrx-traits/core';
 
 import {
   EntitiesPaginationActions,

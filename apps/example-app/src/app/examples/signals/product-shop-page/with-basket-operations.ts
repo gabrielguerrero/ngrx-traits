@@ -1,7 +1,6 @@
 import { inject } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ProductOrder } from '@example-api/shared/models';
-import { cacheRxCall, callConfig, withCalls } from '@ngrx-traits/signals';
 import {
   patchState,
   signalStoreFeature,
@@ -13,6 +12,8 @@ import {
   removeEntities,
   updateEntity,
 } from '@ngrx/signals/entities';
+
+import { cacheRxCall, callConfig, withCalls } from '@ngrx-traits/signals';
 
 import { OrderService } from '../../services/order.service';
 import { ProductService } from '../../services/product.service';

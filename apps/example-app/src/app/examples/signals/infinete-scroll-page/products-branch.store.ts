@@ -1,14 +1,15 @@
 import { inject } from '@angular/core';
 import { Branch } from '@example-api/shared/models';
+import { signalStore, signalStoreFeature, type } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+import { lastValueFrom } from 'rxjs';
+
 import {
   withCallStatus,
   withEntitiesLoadingCall,
   withEntitiesRemoteFilter,
   withEntitiesRemoteScrollPagination,
 } from '@ngrx-traits/signals';
-import { signalStore, signalStoreFeature, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
-import { lastValueFrom } from 'rxjs';
 
 import { BranchService } from '../../services/branch.service';
 

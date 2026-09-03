@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { ProductDetail } from '@example-api/shared/models';
+import { createEffect, ofType } from '@ngrx/effects';
+import { props } from '@ngrx/store';
+import { of } from 'rxjs';
+import { catchError, exhaustMap, map } from 'rxjs/operators';
+
 import { addLoadEntityTraits } from '@ngrx-traits/common';
 import {
   createTraitFactory,
   ExtractActionsType,
   TraitEffect,
 } from '@ngrx-traits/core';
-import { createEffect, ofType } from '@ngrx/effects';
-import { props } from '@ngrx/store';
-import { of } from 'rxjs';
-import { catchError, exhaustMap, map } from 'rxjs/operators';
 
 import { ProductService } from '../../../../services/product.service';
 

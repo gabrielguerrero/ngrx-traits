@@ -1,8 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import {
-  createEntityFeatureFactory,
-  FeatureSelectors,
-} from '@ngrx-traits/core';
 import { Actions } from '@ngrx/effects';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Dictionary } from '@ngrx/entity';
@@ -10,6 +6,11 @@ import { createAction, createFeatureSelector } from '@ngrx/store';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { first, take, toArray } from 'rxjs/operators';
+
+import {
+  createEntityFeatureFactory,
+  FeatureSelectors,
+} from '@ngrx-traits/core';
 
 import { addCrudEntitiesTrait, CrudEntitiesState } from '../crud-entities';
 import {

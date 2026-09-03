@@ -4,7 +4,7 @@ import {
 } from './sort-entities.model';
 
 export function createSortTraitSelectors<
-  Entity
+  Entity,
 >(): SortEntitiesSelectors<Entity> {
   function selectEntitiesSort(state: SortEntitiesState<Entity>) {
     return state.sort?.current;

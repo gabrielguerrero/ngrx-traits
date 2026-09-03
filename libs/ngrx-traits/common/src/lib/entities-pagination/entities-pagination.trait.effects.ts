@@ -1,6 +1,4 @@
 import { Injectable } from '@angular/core';
-import { TraitEffect } from '@ngrx-traits/core';
-import { Type } from '@ngrx-traits/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { concatLatestFrom } from '@ngrx/operators';
 import {
@@ -11,6 +9,9 @@ import {
   map,
   tap,
 } from 'rxjs/operators';
+
+import { TraitEffect } from '@ngrx-traits/core';
+import { Type } from '@ngrx-traits/core';
 
 import { CrudEntitiesActions } from '../crud-entities/crud-entities.model';
 import { FilterEntitiesActions } from '../filter-entities/filter-entities.model';

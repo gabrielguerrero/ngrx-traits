@@ -15,8 +15,9 @@ import { MatList, MatListItem } from '@angular/material/list';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { Branch } from '@example-api/shared/models';
-import { getInfiniteScrollDataSource } from '@ngrx-traits/signals';
 import { map } from 'rxjs/operators';
+
+import { getInfiniteScrollDataSource } from '@ngrx-traits/signals';
 
 import { ProductsBranchStore } from './products-branch.store';
 

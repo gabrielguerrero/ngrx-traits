@@ -5,6 +5,11 @@ import {
 } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ActivatedRoute, Params, provideRouter, Router } from '@angular/router';
+import { signalStore, signalStoreFeature, type } from '@ngrx/signals';
+import { withEntities } from '@ngrx/signals/entities';
+import { BehaviorSubject, map, of, Subject } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
 import {
   getFilterQueryMapper,
   withCallStatus,
@@ -19,10 +24,6 @@ import {
   withEntitiesSingleSelection,
   withEntitiesSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
-import { signalStore, signalStoreFeature, type } from '@ngrx/signals';
-import { withEntities } from '@ngrx/signals/entities';
-import { BehaviorSubject, map, of, Subject } from 'rxjs';
-import { filter } from 'rxjs/operators';
 
 import { mockProducts } from '../test.mocks';
 import { Product } from '../test.model';

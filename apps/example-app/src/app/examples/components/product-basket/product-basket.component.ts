@@ -18,10 +18,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { Product, ProductOrder } from '@example-api/shared/models';
-import { Selected, Sort } from '@ngrx-traits/common';
 import { Dictionary } from '@ngrx/entity';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import { Selected, Sort } from '@ngrx-traits/common';
 
 import { rebuildFormArray } from '../../utils/form-utils';
 

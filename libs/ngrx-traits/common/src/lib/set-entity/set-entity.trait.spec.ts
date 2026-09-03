@@ -1,6 +1,8 @@
 import { Actions } from '@ngrx/effects';
 import { createFeatureSelector, props } from '@ngrx/store';
+
 import { createEntityFeatureFactory } from '@ngrx-traits/core';
+
 import { SetEntityState } from './set-entity.model';
 import { addSetEntityTrait } from './set-entity.trait';
 
@@ -25,7 +27,7 @@ describe('addSetEntityTrait trait', () => {
       addSetEntityTrait({
         entityName: 'client',
         actionProps: props<{ client: Client }>(),
-      })
+      }),
     )({
       actionsGroupKey: 'Client',
       featureSelector,
@@ -44,7 +46,7 @@ describe('addSetEntityTrait trait', () => {
       addSetEntityTrait({
         entityName: 'product',
         actionProps: props<{ product: Product }>(),
-      })
+      }),
     )({
       actionsGroupKey: 'Client',
       featureSelector: featureSelector2,
@@ -58,7 +60,7 @@ describe('addSetEntityTrait trait', () => {
       expect(
         selectors.selectClient.projector({
           client: { name: 'gabs', id: '1' },
-        })
+        }),
       ).toEqual({ name: 'gabs', id: '1' });
     });
   });
@@ -70,7 +72,7 @@ describe('addSetEntityTrait trait', () => {
         {},
         actions.setClient({
           client: { name: 'gabs', id: '1' },
-        })
+        }),
       );
       expect(state).toEqual({
         client: { name: 'gabs', id: '1' },
@@ -89,13 +91,13 @@ describe('addSetEntityTrait trait', () => {
             price: 123,
             name: 'a',
           },
-        })
+        }),
       );
       state = reducer(
         state,
         actions.setClient({
           client: { name: 'gabs', id: '1' },
-        })
+        }),
       );
       expect(selectors.selectClient.projector(state)).toEqual({
         name: 'gabs',

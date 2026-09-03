@@ -5,6 +5,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
 import { Product, ProductFilter } from '@example-api/shared/models';
+
 import { Sort } from '@ngrx-traits/common';
 
 import { ProductDetailComponent } from '../../components/product-detail/product-detail.component';

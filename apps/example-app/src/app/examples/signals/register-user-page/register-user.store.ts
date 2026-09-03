@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { callConfig, withCalls, withLogger } from '@ngrx-traits/signals';
 import { signalStore } from '@ngrx/signals';
+
+import { callConfig, withCalls, withLogger } from '@ngrx-traits/signals';
 
 import { UserService } from '../../services/user.service';
 

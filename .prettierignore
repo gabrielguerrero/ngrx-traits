@@ -8,3 +8,12 @@
 
 /.nx/workspace-data
 .nx/self-healing
+
+# generated - prettier rewrites the whole file and gains nothing
+pnpm-lock.yaml
+
+# markdown is left unformatted for now - 52 files, mostly apps/docs content
+# rendered by Analog, so reformatting shows up on the site rather than in a
+# compiler error. Drop this line and run prettier when someone wants to do it
+# deliberately.
+*.md

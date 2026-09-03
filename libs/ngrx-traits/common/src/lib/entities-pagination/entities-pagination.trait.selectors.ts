@@ -1,31 +1,32 @@
 import { createSelector } from '@ngrx/store';
+
+import { FilterEntitiesKeyedConfig } from '../filter-entities/filter-entities.model';
+import {
+  LoadEntitiesSelectors,
+  LoadEntitiesState,
+} from '../load-entities/load-entities.model';
 import {
   CacheType,
   EntitiesPaginationSelectors,
   EntitiesPaginationState,
   PageModel,
 } from './entities-pagination.model';
-import {
-  LoadEntitiesSelectors,
-  LoadEntitiesState,
-} from '../load-entities/load-entities.model';
-import { FilterEntitiesKeyedConfig } from '../filter-entities/filter-entities.model';
 
 export function createPaginationTraitSelectors<Entity>(
   previousSelectors: LoadEntitiesSelectors<Entity>,
-  allConfigs: FilterEntitiesKeyedConfig<Entity, unknown>
+  allConfigs: FilterEntitiesKeyedConfig<Entity, unknown>,
 ): EntitiesPaginationSelectors<Entity> {
   const { selectEntitiesList, isEntitiesLoading } = previousSelectors;
 
   const filterFunction = allConfigs?.filter?.filterFn;
 
   function selectPagination(
-    state: LoadEntitiesState<Entity> & EntitiesPaginationState
+    state: LoadEntitiesState<Entity> & EntitiesPaginationState,
   ) {
     return state.pagination;
   }
   const selectPaginationFiltered: (
-    state: LoadEntitiesState<Entity> & EntitiesPaginationState
+    state: LoadEntitiesState<Entity> & EntitiesPaginationState,
   ) => EntitiesPaginationState['pagination'] = filterFunction
     ? createSelector(
         selectEntitiesList,
@@ -40,7 +41,7 @@ export function createPaginationTraitSelectors<Entity>(
               end: entities.length,
             },
           };
-        }
+        },
       )
     : selectPagination;
 
@@ -54,7 +55,7 @@ export function createPaginationTraitSelectors<Entity>(
       endIndex =
         endIndex < pagination.cache.end ? endIndex : pagination.cache.end;
       return entities.slice(startIndex, endIndex);
-    }
+    },
   );
 
   const selectEntitiesCurrentPageInfo = createSelector(
@@ -76,7 +77,7 @@ export function createPaginationTraitSelectors<Entity>(
             : true,
         cacheType: pagination.cache.type,
       };
-    }
+    },
   );
 
   function isEntitiesPageInCache(
@@ -88,7 +89,7 @@ export function createPaginationTraitSelectors<Entity>(
       total?: number;
       pagesToCache: number;
       cache: { type: CacheType; start: number; end: number };
-    }
+    },
   ) {
     const startIndex = page * pagination.pageSize;
     let endIndex = startIndex + pagination.pageSize - 1;
@@ -106,20 +107,20 @@ export function createPaginationTraitSelectors<Entity>(
     (pagination) => {
       const page = pagination.currentPage;
       return isEntitiesPageInCache(page, pagination);
-    }
+    },
   );
   const isEntitiesNextPageInCache = createSelector(
     selectPaginationFiltered,
     (pagination) => {
       const page = pagination.currentPage + 1;
       return isEntitiesPageInCache(page, pagination);
-    }
+    },
   );
   const isLoadingEntitiesCurrentPage = createSelector(
     isEntitiesLoading,
     selectPagination,
     (isLoading, pagination) =>
-      isLoading && pagination.requestPage === pagination.currentPage
+      isLoading && pagination.requestPage === pagination.currentPage,
   );
 
   const selectEntitiesCurrentPage = createSelector(
@@ -131,7 +132,7 @@ export function createPaginationTraitSelectors<Entity>(
         entities,
         isLoading,
         ...pageInfo,
-      } as PageModel<Entity>)
+      }) as PageModel<Entity>,
   );
 
   const selectEntitiesPagedRequest = createSelector(
@@ -140,7 +141,7 @@ export function createPaginationTraitSelectors<Entity>(
       startIndex: pagination.pageSize * pagination.requestPage,
       size: pagination.pageSize * pagination.pagesToCache,
       page: pagination.requestPage,
-    })
+    }),
   );
 
   const selectors = {

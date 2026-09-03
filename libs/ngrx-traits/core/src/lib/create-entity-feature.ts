@@ -1,25 +1,4 @@
 import {
-  Config,
-  ExtractActionsType,
-  ExtractSelectorsType,
-  ExtractStateType,
-  EntityFeatureFactory,
-  FeatureSelectors,
-  KeyedConfig,
-  TraitActions,
-  TraitFactory,
-  TraitSelectors,
-  TraitStateMutators,
-  UnionToIntersection,
-  TraitActionsFactory,
-  TraitSelectorsFactory,
-  TraitInitialStateFactory,
-  TraitStateMutatorsFactory,
-  TraitReducerFactory,
-  TraitEffectsFactory,
-  AllTraitConfigs,
-} from './model';
-import {
   Action,
   ActionType,
   combineReducers,
@@ -28,8 +7,30 @@ import {
   createSelector,
   MemoizedSelector,
 } from '@ngrx/store';
-import { TraitEffect } from './trait-effect';
+
 import { Type } from './local-store';
+import {
+  AllTraitConfigs,
+  Config,
+  EntityFeatureFactory,
+  ExtractActionsType,
+  ExtractSelectorsType,
+  ExtractStateType,
+  FeatureSelectors,
+  KeyedConfig,
+  TraitActions,
+  TraitActionsFactory,
+  TraitEffectsFactory,
+  TraitFactory,
+  TraitInitialStateFactory,
+  TraitReducerFactory,
+  TraitSelectors,
+  TraitSelectorsFactory,
+  TraitStateMutators,
+  TraitStateMutatorsFactory,
+  UnionToIntersection,
+} from './model';
+import { TraitEffect } from './trait-effect';
 import { capitalize, setPropertiesReducer } from './util';
 
 /**
@@ -62,7 +63,7 @@ import { capitalize, setPropertiesReducer } from './util';
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
   EntityName extends string,
-  EntitiesName extends string = `${EntityName}s`
+  EntitiesName extends string = `${EntityName}s`,
 >(
   {
     entityName,
@@ -141,7 +142,7 @@ export function createEntityFeatureFactory<F extends readonly TraitFactory[]>(
 export function createEntityFeatureFactory<
   F extends readonly TraitFactory[],
   EntityName extends string,
-  EntitiesName extends string = `${EntityName}s`
+  EntitiesName extends string = `${EntityName}s`,
 >(
   namesOrFactory:
     | { entityName: EntityName; entitiesName?: EntitiesName }
@@ -169,7 +170,9 @@ export function createEntityFeatureFactory<
       : capitalize(entityName + 's');
 
     const sortedTraits = sortTraits(
-      'entityName' in namesOrFactory ? [...traits] : [namesOrFactory, ...traits]
+      'entityName' in namesOrFactory
+        ? [...traits]
+        : [namesOrFactory, ...traits],
     );
 
     const allConfigs = buildAllConfigs(sortedTraits);
@@ -179,7 +182,7 @@ export function createEntityFeatureFactory<
       config.actionsGroupKey,
       singular,
       plural,
-      allConfigs
+      allConfigs,
     );
 
     const allSelectors = buildAllSelectors(sortedTraits, allConfigs);
@@ -187,7 +190,7 @@ export function createEntityFeatureFactory<
     const allMutators = buildAllMutators(
       sortedTraits,
       allSelectors,
-      allConfigs
+      allConfigs,
     );
 
     const initialState = buildInitialState(sortedTraits, allConfigs);
@@ -198,7 +201,7 @@ export function createEntityFeatureFactory<
       allActions,
       allSelectors,
       allMutators,
-      allConfigs
+      allConfigs,
     );
 
     const featureSelector =
@@ -213,7 +216,7 @@ export function createEntityFeatureFactory<
       sortedTraits,
       allActions,
       allFeatureSelectors,
-      allConfigs
+      allConfigs,
     );
 
     return {
@@ -248,7 +251,7 @@ function renameProps(target: any, entityName: string, entitiesName: string) {
 }
 
 function sortTraits(
-  traits: TraitFactory<any, any, any, any>[]
+  traits: TraitFactory<any, any, any, any>[],
 ): TraitFactory<any, any, any, any>[] {
   const sortedTraits: TraitFactory<any, any, any, any>[] = [];
   for (let i = 0; i < traits.length; i++) {
@@ -268,7 +271,7 @@ function sortTraits(
     if (trait.depends.length > 1)
       throw Error('could not find dependencies ' + trait.depends.join(' '));
     const isDependencyAlreadyAdded = sortedTraits.some(
-      (tr) => tr.key === trait?.depends?.[0]
+      (tr) => tr.key === trait?.depends?.[0],
     );
 
     if (isDependencyAlreadyAdded) sortedTraits.push(trait);
@@ -293,7 +296,7 @@ function buildAllActions(
   actionsGroupKey: string,
   entityName: string,
   entitiesName: string,
-  allConfigs: Record<string, any> & { [p: string]: any }
+  allConfigs: Record<string, any> & { [p: string]: any },
 ) {
   return sortedTraits.reduce((previousResult: TraitActions, factory) => {
     let result =
@@ -310,7 +313,7 @@ function buildAllActions(
 
 function buildAllSelectors(
   sortedTraits: TraitFactory<any, any, any, any>[],
-  allConfigs: Record<string, any> & { [p: string]: any }
+  allConfigs: Record<string, any> & { [p: string]: any },
 ) {
   return sortedTraits.reduce((previousResult: TraitSelectors<any>, factory) => {
     let result =
@@ -326,7 +329,7 @@ function buildAllSelectors(
 function buildAllMutators(
   sortedTraits: TraitFactory<any, any, any, any>[],
   allSelectors: TraitSelectors<any>,
-  allConfigs: Record<string, any> & { [p: string]: any }
+  allConfigs: Record<string, any> & { [p: string]: any },
 ) {
   return (
     sortedTraits.reduce(
@@ -340,14 +343,14 @@ function buildAllMutators(
         result = previousResult ? { ...previousResult, ...result } : result;
         return result;
       },
-      {}
+      {},
     ) || {}
   );
 }
 
 function buildInitialState(
   sortedTraits: TraitFactory<any, any, any, any>[],
-  allConfigs: Record<string, any> & { [p: string]: any }
+  allConfigs: Record<string, any> & { [p: string]: any },
 ) {
   return sortedTraits.reduce((previousResult: any, factory) => {
     const result =
@@ -367,12 +370,12 @@ function buildReducer(
   allActions: TraitActions,
   allSelectors: TraitSelectors<any>,
   allMutators: TraitStateMutators<any>,
-  allConfigs: Record<string, any> & { [p: string]: any }
+  allConfigs: Record<string, any> & { [p: string]: any },
 ) {
   return sortedTraits.reduce(
     (
       previousResult: ((state: any, action: Action) => any) | undefined,
-      factory
+      factory,
     ) => {
       const result = factory?.reducer?.({
         initialState,
@@ -388,7 +391,7 @@ function buildReducer(
           }
         : result ?? previousResult;
     },
-    undefined
+    undefined,
   );
 }
 
@@ -396,7 +399,7 @@ function buildAllEffects(
   sortedTraits: TraitFactory<any, any, any, any>[],
   allActions: TraitActions,
   allFeatureSelectors: TraitSelectors<any>,
-  allConfigs: Record<string, any> & { [p: string]: any }
+  allConfigs: Record<string, any> & { [p: string]: any },
 ) {
   return sortedTraits.reduce(
     (previousResult: Type<TraitEffect>[] | undefined, factory) => {
@@ -409,7 +412,7 @@ function buildAllEffects(
       result = previousResult ? [...previousResult, ...result] : result;
       return result;
     },
-    []
+    [],
   );
 }
 
@@ -417,7 +420,7 @@ function getSelectorsForFeature<
   State,
   S extends TraitSelectors<State>,
   // eslint-disable-next-line @typescript-eslint/ban-types
-  F extends MemoizedSelector<object, any>
+  F extends MemoizedSelector<object, any>,
 >(featureSelect: F, selectors: S): FeatureSelectors<State, S> {
   const ss: { [key in keyof S]?: any } = {};
   for (const prop in selectors) {
@@ -479,7 +482,7 @@ export function combineEntityFeatures<
     reducer: (state: State, action: ActionType<any>) => State;
     effects: Type<any>[];
     initialState: State;
-  }
+  },
 >(traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =
@@ -491,11 +494,11 @@ export function combineEntityFeatures<
     const reducers: any = {};
     let effects: Type<any>[] = [];
     for (const [key, entityFeatureFactory] of Object.entries(
-      traitFactoriesMap
+      traitFactoriesMap,
     )) {
       const selector = createSelector(
         featureSelector,
-        (state: any) => state[key]
+        (state: any) => state[key],
       );
       const featureTraits = entityFeatureFactory({
         actionsGroupKey: config.actionsGroupKey,
@@ -564,7 +567,7 @@ export function mixEntityFeatures<
     UnionToIntersection<
       FeatureSelectors<State, ExtractSelectorsType<ReturnType<T[K]>>>
     >,
-  R extends EntityFeatureFactory<any, any, State, A, S>
+  R extends EntityFeatureFactory<any, any, State, A, S>,
 >(traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =
@@ -576,11 +579,11 @@ export function mixEntityFeatures<
     const reducers: any = {};
     let effects: Type<any>[] = [];
     for (const [key, entityFeatureFactory] of Object.entries(
-      traitFactoriesMap
+      traitFactoriesMap,
     )) {
       const selector = createSelector(
         featureSelector,
-        (state: any) => state[key]
+        (state: any) => state[key],
       );
       const featureTraits = entityFeatureFactory({
         actionsGroupKey: config.actionsGroupKey,
@@ -662,7 +665,7 @@ export function addEntityFeaturesProperties<
     reducer: (state: State, action: ActionType<any>) => State;
     effects: Type<any>[];
     initialState: State;
-  }
+  },
 >(targetTraitFactory: F, traitFactoriesMap: T): R {
   return ((config: Config<any, any>) => {
     const featureSelector =
@@ -678,11 +681,11 @@ export function addEntityFeaturesProperties<
     const reducers: any = {};
     let effects: Type<any>[] = [...targetFeatureTraits.effects];
     for (const [key, entityFeatureFactory] of Object.entries(
-      traitFactoriesMap
+      traitFactoriesMap,
     )) {
       const selector = createSelector(
         featureSelector,
-        (state: any) => state[key]
+        (state: any) => state[key],
       );
       const featureTraits = entityFeatureFactory({
         actionsGroupKey: config.actionsGroupKey,
@@ -713,7 +716,7 @@ export function createTraitFactory<
   M extends TraitStateMutators<State> = {},
   KEY extends string = string,
   C = unknown,
-  KC extends AllTraitConfigs = KeyedConfig<KEY, C>
+  KC extends AllTraitConfigs = KeyedConfig<KEY, C>,
 >(f: {
   key: KEY;
   config?: C;
@@ -744,7 +747,7 @@ export function createTraitFactory<
  * @param t
  */
 export function combineSelectors<
-  T extends { [k: string]: MemoizedSelector<any, any> }
+  T extends { [k: string]: MemoizedSelector<any, any> },
 >(t: T): MemoizedSelector<any, { [j in keyof T]: ReturnType<T[j]> }> {
   const selectors = Object.values(t);
   const keys = Object.keys(t);

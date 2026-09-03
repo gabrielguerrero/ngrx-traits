@@ -1,23 +1,25 @@
+import { TestBed } from '@angular/core/testing';
 import { Actions } from '@ngrx/effects';
+import { provideMockActions } from '@ngrx/effects/testing';
 import { createFeatureSelector } from '@ngrx/store';
+import { provideMockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
-import { TestBed } from '@angular/core/testing';
-import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
+
+import { createEntityFeatureFactory } from '@ngrx-traits/core';
+
 import {
   addEntitiesPaginationTrait,
   EntitiesPaginationState,
 } from '../entities-pagination';
-import { SortEntitiesState } from './sort-entities.model';
-import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
 import {
   addFilterEntitiesTrait,
   FilterEntitiesState,
 } from '../filter-entities';
-import { createEntityFeatureFactory } from '@ngrx-traits/core';
-import { provideMockStore } from '@ngrx/store/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
+import { addLoadEntitiesTrait, LoadEntitiesState } from '../load-entities';
+import { Todo, TodoFilter } from '../load-entities/load-entities.trait.spec';
 import { SelectEntityState } from '../select-entity';
+import { SortEntitiesState } from './sort-entities.model';
 import { addSortEntitiesTrait } from './sort-entities.trait';
 
 describe('addSortEntitiesTrait trait', () => {
@@ -60,7 +62,7 @@ describe('addSortEntitiesTrait trait', () => {
       addSortEntitiesTrait<Todo>({
         defaultSort: { active: 'id', direction: 'asc' },
         remote: remoteSort,
-      })
+      }),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector,
@@ -94,7 +96,7 @@ describe('addSortEntitiesTrait trait', () => {
         defaultSort: { direction: 'asc', active: 'id' },
         remote: true,
       }),
-      addLoadEntitiesTrait<Todo>()
+      addLoadEntitiesTrait<Todo>(),
     )({
       actionsGroupKey: 'test',
       featureSelector: featureSelector2,
@@ -134,7 +136,7 @@ describe('addSortEntitiesTrait trait', () => {
             current: { active: 'id', direction: 'asc' },
             default: { active: 'content', direction: 'asc' },
           },
-        })
+        }),
       ).toEqual({ active: 'id', direction: 'asc' });
     });
   });
@@ -144,25 +146,25 @@ describe('addSortEntitiesTrait trait', () => {
       const { reducer, actions, state } = init();
       let result = reducer(
         state,
-        actions.sortEntities({ direction: 'asc', active: 'id' })
+        actions.sortEntities({ direction: 'asc', active: 'id' }),
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7]);
 
       result = reducer(
         state,
-        actions.sortEntities({ direction: 'desc', active: 'id' })
+        actions.sortEntities({ direction: 'desc', active: 'id' }),
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7].reverse());
 
       result = reducer(
         state,
-        actions.sortEntities({ direction: 'asc', active: 'content' })
+        actions.sortEntities({ direction: 'asc', active: 'content' }),
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7]);
 
       result = reducer(
         state,
-        actions.sortEntities({ direction: 'desc', active: 'content' })
+        actions.sortEntities({ direction: 'desc', active: 'content' }),
       );
       expect(result.ids).toEqual([1, 2, 3, 4, 5, 6, 7].reverse());
     });
@@ -177,7 +179,7 @@ describe('addSortEntitiesTrait trait', () => {
             current: { active: 'content', direction: 'asc' },
           },
         },
-        actions.sortEntities({ direction: 'asc', active: 'id' })
+        actions.sortEntities({ direction: 'asc', active: 'id' }),
       );
 
       result = reducer(result, actions.resetEntitiesSort());
