@@ -1,0 +1,43 @@
+{
+  "name": "@ngrx-traits/example-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Demo app for @ngrx-traits. Consumes the libs from source via the tsconfig.base.json path mappings, so it deliberately does not depend on them by version.",
+  "scripts": {
+    "start": "nx serve example-app",
+    "build": "nx build example-app",
+    "test": "nx test example-app"
+  },
+  "dependencies": {
+    "@angular/animations": "catalog:",
+    "@angular/cdk": "catalog:",
+    "@angular/common": "catalog:",
+    "@angular/core": "catalog:",
+    "@angular/forms": "catalog:",
+    "@angular/material": "catalog:",
+    "@angular/platform-browser": "catalog:",
+    "@angular/platform-server": "catalog:",
+    "@angular/router": "catalog:",
+    "@angular/ssr": "catalog:",
+    "@js-temporal/polyfill": "^0.5.1",
+    "@ngrx/effects": "catalog:",
+    "@ngrx/entity": "catalog:",
+    "@ngrx/operators": "catalog:",
+    "@ngrx/signals": "catalog:",
+    "@ngrx/store": "catalog:",
+    "@ngrx/store-devtools": "catalog:",
+    "express": "catalog:",
+    "rxjs": "catalog:",
+    "tailwindcss": "catalog:",
+    "tslib": "catalog:",
+    "zone.js": "catalog:"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/express": "^5.0.2",
+    "msw": "^2.12.3"
+  },
+  "msw": {
+    "workerDirectory": "src"
+  }
+}

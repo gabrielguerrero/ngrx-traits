@@ -45,6 +45,28 @@ Move to the root folder of the project and install dependencies:
 pnpm install
 ```
 
+This is a pnpm workspace. Each app under `apps/` carries its own
+`package.json`, and the root manifest holds only what is needed to build and
+test the libraries. `pnpm install` installs everything; if you only need to
+work on the libs you can skip the app dependencies entirely:
+
+```bash
+pnpm install:libs   # root manifest only - enough for `pnpm build` and `pnpm test`
+```
+
+The docs site is a separate project. It shares no code with the libraries, so
+it lives outside the workspace with its own lockfile and `node_modules`, and
+none of its dependencies appear in the root `package.json`:
+
+```bash
+cd apps/docs && pnpm install && pnpm start
+```
+
+Shared versions (Angular, NgRx, Analog, rxjs, ...) live in the `catalog:`
+block of `pnpm-workspace.yaml` rather than in each manifest, so there is one
+place to bump them and no way for the apps to drift off the version the libs
+are built against.
+
 ## Test
 
 ```bash

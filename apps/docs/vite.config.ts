@@ -1,6 +1,5 @@
 /// <reference types="vitest" />
 import analog from '@analogjs/platform';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { globSync } from 'glob';
 import { defineConfig } from 'vite';
 
@@ -8,10 +7,10 @@ import { defineConfig } from 'vite';
 export default defineConfig(({ mode }) => {
   return {
     root: __dirname,
-    cacheDir: `../../node_modules/.vite`,
+    cacheDir: `node_modules/.vite`,
 
     build: {
-      outDir: '../../dist/apps/documentation/client',
+      outDir: 'dist/client',
       reportCompressedSize: true,
       target: ['es2020'],
     },
@@ -29,15 +28,13 @@ export default defineConfig(({ mode }) => {
         prerender: {
           routes: async () => [
             '/',
-            ...globSync('apps/docs/src/app/pages/**/*.md').map(
+            ...globSync('src/app/pages/**/*.md', { cwd: __dirname }).map(
               (file) =>
-                '/' +
-                file.replace('apps/docs/src/app/pages/', '').replace('.md', ''),
+                '/' + file.replace('src/app/pages/', '').replace('.md', ''),
             ),
           ],
         },
       }),
-      nxViteTsPaths(),
     ],
     test: {
       globals: true,
@@ -53,8 +50,25 @@ export default defineConfig(({ mode }) => {
     optimizeDeps: {
       include: ['@ng-icons/core'],
     },
+    // Analog emits the SSR bundle to dist/ssr and runs it from there to
+    // prerender. Anything left external is resolved by Node from that
+    // location rather than by Vite, so it depends on the node_modules layout
+    // around it - which is exactly how the docs build broke once before.
+    // Bundling the packages used during SSR keeps prerendering self-contained
+    // and independent of how pnpm happens to lay things out.
     ssr: {
-      noExternal: ['@ng-icons/core'],
+      noExternal: [
+        '@angular/material',
+        '@docsearch/js',
+        '@ng-icons/bootstrap-icons',
+        '@ng-icons/core',
+        'front-matter',
+        'marked',
+        'marked-gfm-heading-id',
+        'marked-highlight',
+        'marked-mangle',
+        'prismjs',
+      ],
     },
   };
 });
