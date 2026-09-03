@@ -1,0 +1,10 @@
+# Marks apps/docs as its own pnpm root, so `pnpm install` here installs this
+# project rather than walking up and installing the repo workspace. The docs
+# site shares no code with the libs and keeps its dependencies to itself.
+packages: []
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - less
+  - unrs-resolver
