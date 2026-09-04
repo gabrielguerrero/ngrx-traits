@@ -92,18 +92,14 @@ const productsEntityConfig = entityConfig({
 });
 export const Store = signalStore(
   { providedIn: 'root' },
-  withEntities({ entity, collection }),
-  withEntitiesLocalFilter({
-    entity,
-    collection,
+  withEntities(productEntityConfig),
+  withEntitiesLocalFilter(productEntityConfig, {
     defaultFilter: { search: '' },
     filterFn: (entity, filter) =>
       !filter?.search ||
       entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
   }),
-  withEntitiesLocalSort({
-    entity,
-    collection,
+  withEntitiesLocalSort(productEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withCalls((store) => ({
@@ -211,34 +207,28 @@ In this scenario, sorting, filtering, and pagination are handled by the backend.
 Notice that in the `fetchEntities` function, we pass the filter, sort, and pagination parameters to the backend, which we read from the signals added by the other withEntities* store features. The backend processes these parameters and returns the filtered, sorted, and paginated entities along with the total count. The store features then takes care of the rest.
 
 ```typescript
+const productsEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
 const productsStoreFeature = signalStoreFeature(
-  withEntities({
-    entity: productsEntity,
-    collection: productsCollection,
-  }),
-  withCallStatus({
+  withEntities(productsEntityConfig),
+  withCallStatus(productsEntityConfig, {
     initialValue: 'loading',
-    collection: productsCollection,
     errorType: type<string>(),
   }),
-  withEntitiesRemoteFilter({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteFilter(productsEntityConfig, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemotePagination(productsEntityConfig, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    entity: productsEntity,
-    collection: productsCollection,
+  withEntitiesRemoteSort(productsEntityConfig, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
+    productsEntityConfig,
     ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
-      collection: productsCollection,
       fetchEntities: async () => {
         const res = await lastValueFrom(
           inject(ProductService).getProducts({

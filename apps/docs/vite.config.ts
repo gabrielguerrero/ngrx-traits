@@ -4,7 +4,7 @@ import { globSync } from 'glob';
 import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   return {
     root: __dirname,
     cacheDir: `node_modules/.vite`,
@@ -56,19 +56,26 @@ export default defineConfig(({ mode }) => {
     // around it - which is exactly how the docs build broke once before.
     // Bundling the packages used during SSR keeps prerendering self-contained
     // and independent of how pnpm happens to lay things out.
+    // Only applied on build: the dev server evaluates inlined modules as esm,
+    // so bundling a cjs package like front-matter there fails with "require is
+    // not defined". Serve leaves them external, which is vite's default and
+    // lets node load them as cjs from apps/docs/node_modules.
     ssr: {
-      noExternal: [
-        '@angular/material',
-        '@docsearch/js',
-        '@ng-icons/bootstrap-icons',
-        '@ng-icons/core',
-        'front-matter',
-        'marked',
-        'marked-gfm-heading-id',
-        'marked-highlight',
-        'marked-mangle',
-        'prismjs',
-      ],
+      noExternal:
+        command === 'build'
+          ? [
+              '@angular/material',
+              '@docsearch/js',
+              '@ng-icons/bootstrap-icons',
+              '@ng-icons/core',
+              'front-matter',
+              'marked',
+              'marked-gfm-heading-id',
+              'marked-highlight',
+              'marked-mangle',
+              'prismjs',
+            ]
+          : [],
     },
   };
 });

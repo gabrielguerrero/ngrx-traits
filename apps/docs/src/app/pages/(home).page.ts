@@ -1,6 +1,4 @@
-import { NgOptimizedImage } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { FooterComponent } from '../components/navbar/footer/footer.component';
 import { NavbarComponent } from '../components/navbar/navbar.component';
@@ -10,23 +8,17 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
   standalone: true,
   template: ` <docs-navbar />
     <div class="background-container grid grid-rows-[auto_1fr_auto]">
+      <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="circuit" aria-hidden="true"><i></i></div>
       <div>
-        <section class="max-w-max m-auto  mt-16 mb-4 ">
-          <div class="grid gap-6 relative z-30 ]">
-            <div>
-              <img
-                ngSrc="/ngrx-traits/logo_name_transparent.PNG"
-                alt="Gabriel Guerrero Picture"
-                width="426"
-                height="426"
-                srcset
-                priority
-                class="m-auto opacity-80"
-              />
+        <section class="max-w-max m-auto  mt-16 sm:mt-24 mb-4 ">
+          <div class="grid gap-6 relative z-30">
+            <div class="hero-logo" role="img" aria-label="NgRx Traits">
+              <span class="hero-logo-fill"></span>
             </div>
 
             <p
-              class="p-4 sm:rounded-2xl bg-zinc-900/5 dark:bg-white/5 max-w-xl text-xl font-light leading-9 text-zinc-700 dark:text-zinc-300 "
+              class="p-4 rounded-2xl bg-white/70 dark:bg-zinc-950/70 max-w-xl text-xl font-light leading-9 text-zinc-700 dark:text-zinc-300 "
             >
               <span class="text-blue-700 dark:text-blue-300 font-bold"
                 >Ngrx Traits</span
@@ -41,9 +33,11 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
                 <a href="/docs/getting-started/what-is-ngrx-traits">
                   <button
                     type="button"
-                    class="flex gap-2 p-4 rounded-lg  font-bold bg-blue-600 "
+                    class="flex gap-2 p-4 rounded-lg font-bold border-2 border-blue-500 bg-blue-400/30 backdrop-blur-sm dark:border-blue-400 dark:bg-blue-500/35"
                   >
-                    <span class="text-white">Read the Docs</span>
+                    <span class="text-blue-700 dark:text-blue-100"
+                      >Read the Docs</span
+                    >
                   </button>
                 </a>
               </div>
@@ -62,13 +56,6 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
       </div>
     </div>`,
   styleUrls: ['./index.page.css'],
-  imports: [
-    NgOptimizedImage,
-    RouterLink,
-    RouterLinkActive,
-    RouterOutlet,
-    NavbarComponent,
-    FooterComponent,
-  ],
+  imports: [NavbarComponent, FooterComponent],
 })
 export default class HomeComponent {}
