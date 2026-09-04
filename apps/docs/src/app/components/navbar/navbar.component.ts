@@ -1,12 +1,14 @@
+import { isPlatformBrowser } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   model,
   OnInit,
+  PLATFORM_ID,
 } from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import '@docsearch/css';
 import '@docsearch/css';
 import docsearch from '@docsearch/js';
 import {
@@ -26,7 +28,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
     provideIcons({ bootstrapGithub, bootstrapDiscord, bootstrapMedium }),
   ],
   template: ` <header
-    class="fixed z-50 bg-white dark:bg-gray-950  top-0 z-20 h-16 w-full border-b border-black/10 dark:border-blue-950 "
+    class="fixed z-50 bg-white/70 dark:bg-gray-950/60 backdrop-blur-md top-0 z-20 h-16 w-full border-b border-black/10 dark:border-blue-950 "
   >
     <div
       class="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-[#AA1BB6] to-[#452070]"
@@ -110,9 +112,15 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
 })
 export class NavbarComponent implements OnInit {
   readonly menuOpen = model(false);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly appId = import.meta.env['VITE_DOC_SEARCH_APP_ID'];
   private readonly apiKey = import.meta.env['VITE_DOC_SEARCH_API_KEY'];
+
   ngOnInit() {
+    // docsearch reaches for window as soon as it is called, and there is no
+    // search box to render on the server anyway
+    if (!this.isBrowser) return;
+
     docsearch({
       container: '#docsearch',
       appId: this.appId,

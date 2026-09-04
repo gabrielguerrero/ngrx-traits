@@ -5,60 +5,172 @@
   overflow-x: hidden;
   width: 100dvw;
   height: 100vh;
-  /*position: fixed;*/
-  /*inset: 0;*/
   background: var(--home-background);
-  /*background: linear-gradient(*/
-  /*  315deg,*/
-  /*  rgb(3, 24, 34) 33%,*/
-  /*  rgb(71, 9, 70) 68%,*/
-  /*  rgb(4, 11, 37) 98%*/
-  /*);*/
-  background-color: #535bf2;
-  /*animation: gradient 50s ease infinite;*/
-  background-size: 400% 400%;
   background-attachment: fixed;
 }
 
-.name-bg {
-  background: linear-gradient(340deg, transparent 60%, rgb(16, 61, 106) 98%);
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
-@keyframes gradient {
-  0% {
-    background-position: 0% 0%;
-  }
-  50% {
-    background-position: 15% 15%;
-  }
-  100% {
-    background-position: 0% 0%;
+
+/* three slow drifting colour fields, the only thing behind the hero */
+.aurora i {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  filter: blur(90px);
+  will-change: transform;
+}
+
+.aurora i:nth-child(1) {
+  width: 46rem;
+  height: 46rem;
+  left: 8%;
+  top: -18%;
+  background: radial-gradient(circle, var(--home-aurora-1), transparent 70%);
+  animation: aurora-1 28s ease-in-out infinite alternate;
+}
+
+.aurora i:nth-child(2) {
+  width: 40rem;
+  height: 40rem;
+  right: 4%;
+  top: 10%;
+  background: radial-gradient(circle, var(--home-aurora-2), transparent 70%);
+  animation: aurora-2 34s ease-in-out infinite alternate;
+}
+
+.aurora i:nth-child(3) {
+  width: 52rem;
+  height: 52rem;
+  left: 26%;
+  bottom: -30%;
+  background: radial-gradient(circle, var(--home-aurora-3), transparent 70%);
+  animation: aurora-3 40s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-1 {
+  to {
+    transform: translate3d(6%, 8%, 0) scale(1.12);
   }
 }
 
+@keyframes aurora-2 {
+  to {
+    transform: translate3d(-8%, 6%, 0) scale(1.08);
+  }
+}
+
+@keyframes aurora-3 {
+  to {
+    transform: translate3d(5%, -7%, 0) scale(1.1);
+  }
+}
+
+/* pcb traces: the svg is the mask, so the colour stays themeable */
+.circuit {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* even across the middle, only the far edges fade out: fading the centre
+     read as a dark halo sitting behind the logo */
+  -webkit-mask: radial-gradient(
+    circle at 50% 36%,
+    #000 0%,
+    #000 58%,
+    rgba(0, 0, 0, 0.75) 74%,
+    transparent 96%
+  );
+  mask: radial-gradient(
+    circle at 50% 36%,
+    #000 0%,
+    #000 58%,
+    rgba(0, 0, 0, 0.75) 74%,
+    transparent 96%
+  );
+  /* the copper catches a little light, as it would on a real board */
+  filter: drop-shadow(0 0 6px var(--home-circuit-glow));
+}
+
+.circuit i {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(
+    120deg,
+    var(--home-circuit-a),
+    var(--home-circuit-b)
+  );
+  /* the file is a 2x2 mirrored board, so cover shows four tiles worth of
+     routing and the middle stays clear of its big chip blocks */
+  -webkit-mask: url('/circuit-board.svg') center / cover no-repeat;
+  mask: url('/circuit-board.svg') center / cover no-repeat;
+}
+
+/* darkens the frame so the middle of the board reads as the focus */
+.background-container::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 78% 78% at 50% 36%,
+    transparent 22%,
+    var(--home-vignette-mid) 66%,
+    var(--home-vignette-edge) 100%
+  );
+}
+
+.hero-logo {
+  position: relative;
+  width: 426px;
+  max-width: 88vw;
+  aspect-ratio: 1410 / 1620;
+  margin-inline: auto;
+  /* a pale tint rather than a saturated one: drop-shadow paints over the
+     board with normal blending, so a mid tone would dim the traces and read
+     as a shadow instead of a glow. keep the halo tight, a wide one only fogs
+     the shape against the board */
+  filter: drop-shadow(0 0 7px var(--home-logo-glow-near))
+    drop-shadow(0 0 27px var(--home-logo-glow-mid));
+  opacity: var(--home-logo-opacity);
+}
+
+.hero-logo-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--home-logo-fill);
+  -webkit-mask: url('/ngrx-traits/logo_name_transparent.PNG') center / contain
+    no-repeat;
+  mask: url('/ngrx-traits/logo_name_transparent.PNG') center / contain no-repeat;
+}
+
 .wave {
-  /*background: rgba(255, 255, 255, 0.25);*/
   background: var(--home-wave);
   border-radius: 1000% 1000% 0 0;
   position: absolute;
   width: 800%;
   height: 12rem;
-  /*height: 98%; !* 12rem;*!*/
   animation: wave 20s -3s linear infinite;
   transform: translate3d(0, 0, 0);
   opacity: 0.8;
   bottom: 0;
   left: 0;
-  /*z-index: -1;*/
 }
 
 .wave:nth-of-type(2) {
-  /*bottom: -1.25em;*/
   animation: wave 28s linear reverse infinite;
   opacity: 0.8;
 }
 
 .wave:nth-of-type(3) {
-  /*bottom: -2.5em;*/
   animation: wave 20s -1s reverse infinite;
   opacity: 0.9;
 }
@@ -85,19 +197,13 @@
   }
 }
 
-/*.my-blur {*/
-/*  color: hsl(0 0% 80%);*/
-
-/*  !*font-size: clamp(2rem, 6vw + 1rem, 12rem);*!*/
-/*       !*filter: blur(1.5rem);*!*/
-/*  backdrop-filter: blur(100px);*/
-/*  !*border: 0px solid black;*!*/
-/*  !*border-radius: 20px;*!*/
-/*  !*   background-color:red *!*/
-/*}*/
-.gratio img {
-  aspect-ratio: 1/1;
-}
 ::ng-deep a:hover {
   color: var(--home-link-hover);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora i,
+  .wave {
+    animation: none;
+  }
 }
