@@ -12,17 +12,53 @@
   );
   --home-wave: rgba(100, 116, 139, 0.18);
   --home-link-hover: rgb(37, 99, 235);
+  --home-logo-fill: linear-gradient(
+    165deg,
+    rgb(192, 38, 211) 0%,
+    rgb(147, 51, 234) 50%,
+    rgb(91, 33, 182) 100%
+  );
+  --home-logo-opacity: 0.93;
+  --home-logo-glow-near: rgba(192, 38, 211, 0.115);
+  --home-logo-glow-mid: rgba(109, 40, 217, 0.065);
+  --home-vignette-mid: rgba(71, 85, 105, 0.1);
+  --home-vignette-edge: rgba(51, 65, 85, 0.28);
+  --home-circuit-a: rgba(14, 116, 144, 0.2);
+  --home-circuit-b: rgba(147, 51, 234, 0.17);
+  --home-circuit-glow: rgba(14, 116, 144, 0.05);
+  --home-aurora-1: rgba(192, 38, 211, 0.22);
+  --home-aurora-2: rgba(14, 116, 144, 0.18);
+  --home-aurora-3: rgba(109, 40, 217, 0.18);
 }
 
 html.dark {
+  /* near black, the neon of the hero scene only reads against a dark ground */
   --home-background: linear-gradient(
     315deg,
-    rgb(41, 40, 40) 33%,
-    rgb(7, 1, 7) 68%,
-    rgb(4, 11, 37) 98%
+    rgb(8, 5, 20) 25%,
+    rgb(2, 1, 8) 62%,
+    rgb(1, 4, 20) 98%
   );
   --home-wave: rgba(0, 0, 0, 0.25);
   --home-link-hover: rgb(154, 177, 251);
+  --home-logo-fill: linear-gradient(
+    165deg,
+    rgb(245, 184, 255) 0%,
+    rgb(232, 121, 249) 38%,
+    rgb(210, 60, 232) 72%,
+    rgb(186, 110, 250) 100%
+  );
+  --home-logo-opacity: 1;
+  --home-logo-glow-near: rgba(255, 214, 255, 0.36);
+  --home-logo-glow-mid: rgba(216, 180, 254, 0.15);
+  --home-vignette-mid: rgba(0, 0, 0, 0.62);
+  --home-vignette-edge: rgba(0, 0, 0, 0.96);
+  --home-circuit-a: rgba(34, 211, 238, 0.38);
+  --home-circuit-b: rgba(232, 121, 249, 0.32);
+  --home-circuit-glow: rgba(34, 211, 238, 0.14);
+  --home-aurora-1: rgba(162, 28, 175, 0.42);
+  --home-aurora-2: rgba(14, 116, 144, 0.36);
+  --home-aurora-3: rgba(88, 28, 135, 0.36);
 }
 
 @font-face {
