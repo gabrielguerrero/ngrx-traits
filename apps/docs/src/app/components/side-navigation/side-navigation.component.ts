@@ -6,7 +6,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   selector: 'docs-side-navigation',
   standalone: true,
   imports: [NgTemplateOutlet, RouterLink, RouterLinkActive],
-  template: ` <ng-template #content>
+  template: ` <ng-template #pill let-badge>
+      <span
+        class="ml-2 shrink-0 rounded-full px-1 py-px text-[9px] font-semibold uppercase leading-4 tracking-wide"
+        [class]="
+          badge === 'new'
+            ? 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-400/15 dark:text-emerald-300'
+            : 'bg-amber-500/15 text-amber-700 dark:bg-amber-400/15 dark:text-amber-300'
+        "
+        >{{ badge }}</span
+      >
+    </ng-template>
+    <ng-template #content>
       <div
         class="sticky top-24 flex h-[calc(100dvh-140px)] w-full flex-col gap-y-4 overflow-auto overscroll-contain md:h-max md:overflow-visible"
       >
@@ -20,19 +31,31 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                 <li class="text-zinc-600 dark:text-zinc-300 text-sm">
                   @if (link.external) {
                     <a
-                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [href]="link.link"
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
+                      @if (link.badge) {
+                        <ng-container
+                          [ngTemplateOutlet]="pill"
+                          [ngTemplateOutletContext]="{ $implicit: link.badge }"
+                        />
+                      }
                     </a>
                   } @else {
                     <a
-                      class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      class="flex min-h-8 items-center py-1 rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [routerLink]="link.link"
                       routerLinkActive="text-sm font-medium text-[#629ef8] "
                     >
                       {{ link.name }}
+                      @if (link.badge) {
+                        <ng-container
+                          [ngTemplateOutlet]="pill"
+                          [ngTemplateOutletContext]="{ $implicit: link.badge }"
+                        />
+                      }
                     </a>
                   }
                 </li>
@@ -57,19 +80,31 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                 <li class="text-zinc-600 dark:text-zinc-300 text-sm">
                   @if (link.external) {
                     <a
-                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [href]="link.link"
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
+                      @if (link.badge) {
+                        <ng-container
+                          [ngTemplateOutlet]="pill"
+                          [ngTemplateOutletContext]="{ $implicit: link.badge }"
+                        />
+                      }
                     </a>
                   } @else {
                     <a
-                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [routerLink]="link.link"
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
+                      @if (link.badge) {
+                        <ng-container
+                          [ngTemplateOutlet]="pill"
+                          [ngTemplateOutletContext]="{ $implicit: link.badge }"
+                        />
+                      }
                     </a>
                   }
                 </li>
@@ -89,19 +124,31 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                 <li class="text-zinc-600 dark:text-zinc-300 text-sm">
                   @if (link.external) {
                     <a
-                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [href]="link.link"
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
+                      @if (link.badge) {
+                        <ng-container
+                          [ngTemplateOutlet]="pill"
+                          [ngTemplateOutletContext]="{ $implicit: link.badge }"
+                        />
+                      }
                     </a>
                   } @else {
                     <a
-                      class="flex h-8 items-center  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+                      class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [routerLink]="link.link"
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
+                      @if (link.badge) {
+                        <ng-container
+                          [ngTemplateOutlet]="pill"
+                          [ngTemplateOutletContext]="{ $implicit: link.badge }"
+                        />
+                      }
                     </a>
                   }
                 </li>
@@ -111,7 +158,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         }
         <h2 class=" mb-2 inline-block text-xl font-medium app-title-color">
           <a
-            class="flex h-8 items-center rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
+            class="flex min-h-8 items-center py-1 rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
             routerLink="/docs/other/support"
             routerLinkActive="font-medium text-[#629ef8] "
           >
@@ -130,7 +177,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
         </div>
       </div>
     } @else {
-      <div class="hidden w-50 md:block">
+      <div class="hidden w-78 shrink-0 md:block">
         <ng-container [ngTemplateOutlet]="content" />
       </div>
     }`,
@@ -158,6 +205,7 @@ export class SideNavigationComponent {
         {
           link: './getting-started/working-with-entities',
           name: 'Working with Entities',
+          badge: 'updated',
         },
         {
           link: './getting-started/caching',
@@ -191,6 +239,7 @@ export class SideNavigationComponent {
         {
           link: './traits/with-calls',
           name: 'withCalls',
+          badge: 'updated',
         },
         {
           link: './traits/with-call-status',
@@ -199,6 +248,7 @@ export class SideNavigationComponent {
         {
           link: './traits/with-entities-loading-call',
           name: 'withEntitiesLoadingCall',
+          badge: 'updated',
         },
         {
           link: './traits/with-call-status-map',
@@ -329,14 +379,17 @@ export class SideNavigationComponent {
         {
           link: './traits/with-link',
           name: 'withLink',
+          badge: 'new',
         },
         {
           link: './traits/with-state-setter',
           name: 'withStateSetter',
+          badge: 'new',
         },
         {
           link: './traits/with-state-private-setter',
           name: 'withStatePrivateSetter',
+          badge: 'new',
         },
       ],
     },
@@ -368,4 +421,6 @@ interface Link {
   link: string;
   external?: boolean;
   name: string;
+  /** optional marker shown as a pill next to the name */
+  badge?: 'new' | 'updated';
 }
