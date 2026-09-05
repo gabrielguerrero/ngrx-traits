@@ -81,5 +81,5 @@ export const ProductEditStore = signalStore(
     // a draft that has never been saved still has no id
     isNew: () => !productDetail().id,
   })),
-  withLogger({ name: 'ProductEditStore', filter: ['id'] }),
+  withLogger('ProductEditStore', { filter: ['id'] }),
 );

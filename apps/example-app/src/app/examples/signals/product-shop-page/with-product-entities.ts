@@ -69,7 +69,7 @@ export function withProductEntities() {
         mapError: (error) => (error as Error).message,
       }),
     ),
-    withLogger({ name: 'ProductEntitiesStore' }),
+    withLogger('ProductEntitiesStore'),
   );
 }
 
