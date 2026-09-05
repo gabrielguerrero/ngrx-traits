@@ -48,8 +48,7 @@ export const GenreStore = signalStore(
   }),
   withLinkEntitiesMultiSelection(genreEntityConfig),
   withLinkEntitiesSingleSelection(genreEntityConfig),
-  withLogger({
-    name: 'GenreStore',
+  withLogger('GenreStore', {
     filter: ['genreIdsSelected', 'genreIdSelected'],
   }),
 );

@@ -17,7 +17,7 @@ describe('withLogger', () => {
       withComputed(({ prop1, prop2 }) => ({
         prop3: computed(() => prop1() + prop2()),
       })),
-      withLogger({ name: 'Store' }),
+      withLogger('Store'),
     );
 
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
@@ -46,8 +46,7 @@ describe('withLogger', () => {
       withComputed(({ prop1, prop2 }) => ({
         prop3: computed(() => prop1() + prop2()),
       })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ['prop1', 'prop2'],
       }),
     );
@@ -76,8 +75,7 @@ describe('withLogger', () => {
       withComputed(({ prop1, prop2 }) => ({
         prop3: computed(() => prop1() + prop2()),
       })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ({ prop1, prop2 }) => ({ prop1: prop1(), prop2: prop2() }),
       }),
     );
@@ -106,8 +104,7 @@ describe('withLogger', () => {
       withComputed(({ prop1, prop2 }) => ({
         prop3: computed(() => prop1() + prop2()),
       })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ({ prop1, prop2 }) => ({ prop1: prop1, prop2: prop2 }),
       }),
     );
@@ -133,8 +130,7 @@ describe('withLogger', () => {
     const Store = signalStore(
       { providedIn: 'root', protectedState: false },
       withState(() => ({ myObject: { x: 1, y: 2 }, prop2: 2 })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ({ myObject }) => ({ x: myObject.x, y: myObject.y }),
       }),
     );
@@ -160,8 +156,7 @@ describe('withLogger', () => {
     const Store = signalStore(
       { providedIn: 'root', protectedState: false },
       withState(() => ({ myObject: { x: 1, y: 2 }, prop2: 2 })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ({ myObject }) => ({ x: myObject.x() }),
       }),
     );
@@ -183,8 +178,7 @@ describe('withLogger', () => {
     const Store = signalStore(
       { providedIn: 'root', protectedState: false },
       withState(() => ({ myObject: { x: 1, y: 2 }, prop2: 2 })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ({ myObject }) => myObject.x(),
       }),
     );
@@ -204,8 +198,7 @@ describe('withLogger', () => {
     const Store = signalStore(
       { providedIn: 'root', protectedState: false },
       withState(() => ({ prop1: 0 })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ({ prop1 }) => prop1(),
       }),
     );
@@ -228,8 +221,7 @@ describe('withLogger', () => {
       withComputed(({ prop1, prop2 }) => ({
         prop3: computed(() => prop1() + prop2()),
       })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ['prop3'],
         showDiff: true,
       }),
@@ -265,7 +257,7 @@ describe('withLogger', () => {
       withComputed(({ zebra, apple }) => ({
         computed1: computed(() => zebra() + apple()),
       })),
-      withLogger({ name: 'Store' }),
+      withLogger('Store'),
     );
 
     const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
@@ -296,8 +288,7 @@ describe('withLogger', () => {
       withComputed(({ zebra, apple }) => ({
         computed1: computed(() => zebra() + apple()),
       })),
-      withLogger({
-        name: 'Store',
+      withLogger('Store', {
         filter: ['zebra', 'apple'],
       }),
     );
@@ -317,6 +308,28 @@ describe('withLogger', () => {
     expect(loggedObject).toEqual({
       zebra: 1,
       apple: 2,
+    });
+  });
+
+  it('should still support the deprecated object syntax', () => {
+    const Store = signalStore(
+      { providedIn: 'root', protectedState: false },
+      withState(() => ({ prop1: 1, prop2: 2 })),
+      withLogger({ name: 'Store', filter: ['prop1'] }),
+    );
+
+    const consoleLog = vi.spyOn(console, 'log').mockImplementation(() => {
+      /* Empty */
+    });
+    const store = TestBed.inject(Store);
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store initialized: ', {
+      prop1: 1,
+    });
+    patchState(store, { prop1: 2 });
+    TestBed.tick();
+    expect(consoleLog).toHaveBeenCalledWith('Store store changed: ', {
+      prop1: 2,
     });
   });
 });

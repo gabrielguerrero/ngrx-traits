@@ -67,8 +67,7 @@ export const ProductLinkStore = signalStore(
     upsertProduct: (product: Product) =>
       patchState(store, upsertEntity(product, productsEntityConfig)),
   })),
-  withLogger({
-    name: 'ProductLinkStore',
+  withLogger('ProductLinkStore', {
     showDiff: true,
     filter: ['productEntitiesFilter', 'productEntitySelected'],
   }),
