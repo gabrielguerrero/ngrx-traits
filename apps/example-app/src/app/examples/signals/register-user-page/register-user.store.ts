@@ -16,5 +16,5 @@ export const RegisterUserStore = signalStore(
       },
     }),
   })),
-  withLogger({ name: 'RegisterUserStore' }),
+  withLogger('RegisterUserStore'),
 );
