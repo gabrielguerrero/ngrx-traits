@@ -28,8 +28,7 @@ export function withOrderEntities() {
     withEntitiesLocalPagination(orderItemEntityConfig, {
       pageSize: 10,
     }),
-    withLogger({
-      name: 'orderItemStore',
+    withLogger('orderItemStore', {
       showDiff: true,
       // filter: ({ orderItemEntityMap, orderItemIds }) => ({
       //   orderItemEntityMap,

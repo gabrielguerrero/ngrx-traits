@@ -145,7 +145,7 @@ can access the store. This can be useful for creating store features that need t
 features that don't have a config factory that can access the store.</p></dd>
 <dt><a href="#withInputBindings">withInputBindings(inputs)</a></dt>
 <dd><p>Binds component inputs to the store, so that the store is updated with the latest values of the inputs.</p></dd>
-<dt><a href="#withLogger">withLogger(name, filter, showDiff)</a></dt>
+<dt><a href="#withLogger">withLogger(name, config)</a></dt>
 <dd><p>Log the state of the store on every change, optionally filter the signals to log
 the filter prop can receive an array with the names of the props to filter, or you can provide a function
 which receives the store as an argument and should return the object to log, if any of the props in the object is a signal
@@ -1515,7 +1515,7 @@ const Store = signalStore(
 ```
 <a name="withLogger"></a>
 
-## withLogger(name, filter, showDiff)
+## withLogger(name, config)
 <p>Log the state of the store on every change, optionally filter the signals to log
 the filter prop can receive an array with the names of the props to filter, or you can provide a function
 which receives the store as an argument and should return the object to log, if any of the props in the object is a signal
@@ -1526,8 +1526,7 @@ it will log the value of the signal. If showDiff is true it will log the diff of
 | Param | Description |
 | --- | --- |
 | name | <p>The name of the store to log</p> |
-| filter | <p>optional filter function to filter the store signals or an array of keys to filter</p> |
-| showDiff | <p>optional flag to log the diff of the state on every change</p> |
+| config | <p>optional filter and showDiff options</p> |
 
 **Example**  
 ```js
@@ -1536,16 +1535,45 @@ const Store = signalStore(
     withComputed(({ prop1, prop2 }) => ({
       prop3: computed(() => prop1() + prop2()),
     })),
-    withLogger({
-      name: 'Store',
-      // by default it will log all state and computed signals
-      // or you can filter with an array of keys
-      // filter: ['prop1', 'prop2'],
+    // by default it will log all state and computed signals
+    withLogger('Store'),
+  );
+
+ // logs on every change:
+ // Store store initialized:  { prop1: 1, prop2: 2, prop3: 3 }
+ // Store store changed:  { prop1: 5, prop2: 2, prop3: 7 }
+```
+**Example**  
+```js
+const Store = signalStore(
+    withState(() => ({ prop1: 1, prop2: 2 })),
+    withComputed(({ prop1, prop2 }) => ({
+      prop3: computed(() => prop1() + prop2()),
+    })),
+    withLogger('Store', {
+      // you can filter with an array of keys
+      filter: ['prop1', 'prop2'],
       // or you can filter with a function
       // filter: ({ prop1, prop2 }) => ({ prop1, prop2 }),
-      // showDiff: true,
+      // the function can also return nested signals or their values
+      // filter: ({ myObject }) => ({ x: myObject.x }),
+      // filter: ({ myObject }) => myObject.x(),
     }),
   );
+```
+**Example**  
+```js
+// showDiff logs what changed between the previous and the current state
+ const Store = signalStore(
+    withState(() => ({ prop1: 1, prop2: 2 })),
+    withLogger('Store', { showDiff: true }),
+  );
+
+ // after patchState(store, { prop1: 5 }) logs:
+ // Store store changed:  { prop1: 5, prop2: 2 }
+ // Store store changes diff :
+ // - prop1: 1
+ // + prop1: 5
 ```
 <a name="extractRouteParams"></a>
 
