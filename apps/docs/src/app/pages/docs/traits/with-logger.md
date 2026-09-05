@@ -23,7 +23,7 @@ import { withLogger } from '@ngrx-traits/signals';
 const store = signalStore(
   withState({ foo: 'foo' }),
   withEntities({entity: type<Product>()}),
-  withLogger({name: "MyStore"}),
+  withLogger('MyStore'),
 );
 ```
 
@@ -33,8 +33,7 @@ const store = signalStore(
 const store = signalStore(
   withState({ foo: 'foo' }),
   withEntities({entity: type<Product>()}),
-  withLogger({
-    name: 'orderItemsStore',
+  withLogger('orderItemsStore', {
     // you can use a function to filter the state that is logged
     // filter: ({ entityMap, ids }) => ({
     //   entityMap,
@@ -46,9 +45,25 @@ const store = signalStore(
 );
 ```
 
+### Log the diff of the state on every change:
+
+```typescript
+const store = signalStore(
+  withState({ foo: 'foo', bar: 'bar' }),
+  withLogger('MyStore', { showDiff: true }),
+);
+
+// patchState(store, { foo: 'foo2' }) logs:
+// MyStore store changed:  { bar: 'bar', foo: 'foo2' }
+// MyStore store changes diff :
+// - foo: foo
+// + foo: foo2
+```
+
 ## API Reference
 
-| Property     | Description                                                                                                                   | Value                                 |
-|--------------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
-| name         | Name to log in the console                                                                                                    | `type<T>()`                           |
-| filter       | Optional either a function to filter the state that is logged or an array of props names of the state that should be included | `(store)=> filteredStore` \| string[] |
+| Property | Description                                                                                                                   | Value                                 |
+|----------|-------------------------------------------------------------------------------------------------------------------------------|---------------------------------------|
+| name     | Name to log in the console, passed as the first argument                                                                      | `string`                              |
+| filter   | Optional either a function to filter the state that is logged or an array of props names of the state that should be included | `(store)=> filteredStore` \| string[] |
+| showDiff | Optional, if true logs the diff between the previous and the current state on every change                                    | `boolean`                             |
