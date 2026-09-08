@@ -55,29 +55,52 @@ describe('withLinkEntitiesFilter', () => {
     });
   }));
 
-  it('passes debounce config to filterEntities', fakeAsync(() => {
-    const Store = signalStore(
-      { protectedState: false },
-      withEntities({ entity }),
-      withEntitiesLocalFilter({
-        entity,
-        defaultFilter: { search: '' },
-        filterFn: (entity, filter) =>
-          !filter?.search ||
-          entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
-      }),
-      withLinkEntitiesFilter({ entity, debounce: 1000 }),
-    );
+  it('does not debounce the filter write, so it lands synchronously', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       const linked = store.linkEntitiesFilter();
 
       linked.set({ search: 'zero' });
+      // no tick: a debounced write would still be in flight here
+      expect(store.entitiesFilter()).toEqual({ search: 'zero' });
+    });
+  }));
+
+  // regression: while a debounced write was in flight the store still held the
+  // old filter, so a write back to it was dropped as a no-op and the pending
+  // one won — the user's edit silently undone. Writing synchronously rules
+  // this out, and is why there is no debounce option.
+  it('applies a filter set back to the committed value', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const linked = store.linkEntitiesFilter();
+
+      linked.set({ search: 'zero' });
+      linked.set({ search: '' });
       tick(400);
       expect(store.entitiesFilter()).toEqual({ search: '' });
-      tick(700);
-      expect(store.entitiesFilter()).toEqual({ search: 'zero' });
+    });
+  }));
+
+  // readFrom writes straight to the store, so nothing is ever in flight for
+  // writeTo to echo when the value arrives late
+  it('does not echo the readFrom value out', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const emitted: { search: string }[] = [];
+      store.linkEntitiesFilter({
+        readFrom: signal({ search: 'from-input' }),
+        writeTo: (value) => emitted.push(value),
+      });
+      TestBed.tick();
+      tick(400);
+      TestBed.tick();
+
+      expect(store.entitiesFilter()).toEqual({ search: 'from-input' });
+      expect(emitted).toEqual([]);
     });
   }));
 
@@ -114,7 +137,7 @@ describe('withLinkEntitiesFilter', () => {
       patchState(store, setAllEntities(mockProducts));
       const valid = signal(false);
       const linked = store.linkEntitiesFilter({
-        updateStoreWhen: (filter) => valid() && filter.search !== 'bad',
+        storeEditsWhen: (filter) => valid() && filter.search !== 'bad',
       });
 
       linked.set({ search: 'zero' });
