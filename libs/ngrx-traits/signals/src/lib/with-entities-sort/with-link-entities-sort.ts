@@ -10,6 +10,7 @@ import {
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
 
 /**
+ * @experimental
  * Generates a `link[Collection]EntitiesSort()` method that connects the
  * entities sort to component signals (inputs, models, signal forms).
  *

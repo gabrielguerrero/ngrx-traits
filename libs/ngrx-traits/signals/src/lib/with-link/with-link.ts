@@ -27,7 +27,7 @@ type LinkCommonOptions<T> = {
   /**
    * Gates which writes reach the store. When provided, the returned signal
    * becomes a `linkedSignal` buffer over the source: writes are kept locally
-   * and only pushed to the store when `updateStoreWhen(value)` returns true.
+   * and only pushed to the store when `storeEditsWhen(value)` returns true.
    *
    * It is evaluated on every write, and again inside an effect so it stays
    * reactive: a write made while it returns true commits synchronously, and a
@@ -36,9 +36,27 @@ type LinkCommonOptions<T> = {
    * lands in the buffer first, a gate derived from the value itself (such as a
    * form's `valid()`) already sees the new state.
    *
+   * It only applies to writes made **through the returned signal** — the form
+   * or code editing the buffer. Values arriving from `readFrom` or `syncWith`
+   * are written straight to the store and never gated: those options tell the
+   * store what to read, and holding their value back would leave the store
+   * disagreeing with the signal it was told to follow. It also means the gate
+   * is never evaluated while `link<Name>()` runs, so it can safely read a
+   * field declared after it, such as a form built from the returned signal.
+   *
+   * To reject values coming from `readFrom`, do it in the function form,
+   * which receives the previous committed value: return the new value to
+   * accept it, or `prev` to keep the store as it is. `syncWith` has no such
+   * hook — if you need to validate what an external signal supplies, use
+   * `readFrom` + `writeTo` instead of `syncWith`, with the check in
+   * `readFrom`.
+   *
+   * A gate that throws surfaces the error from the write that called it, or
+   * from the flush effect on the first tick — never from `link<Name>()`.
+   *
    * Requires an injection context, since an effect is created.
    */
-  updateStoreWhen?: (value: T) => boolean;
+  storeEditsWhen?: (value: T) => boolean;
 };
 
 /**
@@ -73,12 +91,13 @@ export type LinkOptions<T = any> =
        * (e.g. a `model()` only written on a button click), or a `computed`
        * that maps an external model to the store type.
        *
-       * Also accepts a function that receives the previous linked value (the
-       * store value, or the buffer when `updateStoreWhen` is used) so a partial
-       * external signal can be merged into it, e.g.
+       * Also accepts a function receiving the previous committed value, to
+       * merge a partial external signal into it, e.g.
        * `(prev) => ({ ...prev, search: this.search() })`. The signals it
-       * reads are tracked; the previous value is not, so store changes alone
-       * do not re-run it.
+       * reads are tracked, the previous value is not, so store changes alone
+       * do not re-run it; `prev` is always committed state, never a pending
+       * edit the gate is holding back. Return `prev` to reject a value —
+       * `storeEditsWhen` does not gate what `readFrom` supplies.
        */
       readFrom?: Signal<T> | ((prev: T) => T);
       /**
@@ -89,6 +108,11 @@ export type LinkOptions<T = any> =
        *
        * Combine with `readFrom` for a two-way sync with a mapping in each
        * direction. Cannot be combined with `syncWith`.
+       *
+       * With `readFrom`, a value the external side already holds — the last
+       * one it supplied, or the last one pushed out — is not pushed again,
+       * so an `output()` does not fire on every change its own input drove.
+       * Anything else is a change it does not know about, and is pushed.
        */
       writeTo?: WritableSignal<T> | ((value: T) => void);
       syncWith?: never;
@@ -131,30 +155,39 @@ export type LinkSourceOptions<
   K extends keyof Input['state'],
   NoSetter extends boolean = boolean,
 > = {
+  /**
+   * How writes reach the store; defaults to
+   * `patchState(store, { [name]: value })`.
+   *
+   * It must write synchronously: by the time it returns, reading the source
+   * must give the new value. Writes are compared against the committed value
+   * to skip redundant ones, so while one is still in flight the store reads
+   * as the old value and a write back to it is dropped as a no-op — the
+   * pending write then wins, undoing the edit. Routing through a debouncing
+   * store method (e.g. `filterEntities`) is the usual way to hit this: pass
+   * `debounce: 0`. To debounce a form field use Signal Forms'
+   * `debounce(path, ms)`, which delays the update reaching the signal rather
+   * than the write, and only for updates from a bound control.
+   *
+   * A `set` that transforms what it is given is called on every write of the
+   * raw value — the store settles on the transformed value, so the
+   * comparison never matches. Worth knowing if `set` does more than write
+   * state.
+   */
   set?: (value: Input['state'][NoInfer<K>], store: StoreSource<Input>) => void;
   /**
-   * Equality used to suppress redundant syncs in both directions.
+   * Equality used to suppress redundant syncs in both directions. Defaults
+   * to comparing by content — `Object.is` for primitives, element by element
+   * for arrays, structurally for plain objects — since a source that
+   * rebuilds an object on every read is never reference-equal to itself and
+   * the link would never settle. The structural compare is JSON-based, so a
+   * nested `Date`, `Map`, `Set` or class instance is flattened and two
+   * different ones can compare equal; pass an `equal` that knows them, or
+   * 'reference'.
    *
-   * Defaults to comparing by content, chosen from the value at hand:
-   * `Object.is` for primitives, element by element for arrays, and
-   * structurally (JSON.stringify) for plain objects. Reference equality is
-   * the wrong default for a two-way link — a source that rebuilds an object
-   * on every read is never equal to its own previous value, so every write
-   * re-triggers the read and the link never settles.
-   *
-   * The structural comparison is JSON-based, so a `Date`, `Map`, `Set` or
-   * class instance nested in the value is flattened and two different ones
-   * can compare equal, dropping the update. Keeping non-serializable values
-   * in store state is discouraged anyway; if you do, pass an `equal` that
-   * knows how to compare them, or 'reference'.
-   *
-   * Override with a function, or the name of a premade one — 'reference'
-   * (`Object.is`, to opt out of the content comparison), 'array' (shallow,
-   * order sensitive), 'set' (order insensitive, both only offered for
-   * arrays), 'stringify' (JSON.stringify, works on objects and arrays, and
-   * the one to reach for when an array holds objects rebuilt on every read),
-   * a property of the value to compare by, e.g. 'id', or 'array.id' /
-   * 'set.id' to compare the elements of an array by one of their properties.
+   * Override with a function or a premade name: 'reference', 'array'
+   * (shallow, order sensitive), 'set' (order insensitive), 'stringify', a
+   * property to compare by ('id'), or 'array.id' / 'set.id' per element.
    */
   equal?: EqualOption<Input['state'][NoInfer<K>]>;
   /**
@@ -173,28 +206,18 @@ export type LinkComputedOptions<
   computation: (store: StoreSource<Input>) => T;
   set: (value: T, store: StoreSource<Input>) => void;
   /**
-   * Equality used to suppress redundant syncs in both directions.
+   * Equality used to suppress redundant syncs in both directions. Defaults
+   * to comparing by content — `Object.is` for primitives, element by element
+   * for arrays, structurally for plain objects — since a source that
+   * rebuilds an object on every read is never reference-equal to itself and
+   * the link would never settle. The structural compare is JSON-based, so a
+   * nested `Date`, `Map`, `Set` or class instance is flattened and two
+   * different ones can compare equal; pass an `equal` that knows them, or
+   * 'reference'.
    *
-   * Defaults to comparing by content, chosen from the value at hand:
-   * `Object.is` for primitives, element by element for arrays, and
-   * structurally (JSON.stringify) for plain objects. Reference equality is
-   * the wrong default for a two-way link — a source that rebuilds an object
-   * on every read is never equal to its own previous value, so every write
-   * re-triggers the read and the link never settles.
-   *
-   * The structural comparison is JSON-based, so a `Date`, `Map`, `Set` or
-   * class instance nested in the value is flattened and two different ones
-   * can compare equal, dropping the update. Keeping non-serializable values
-   * in store state is discouraged anyway; if you do, pass an `equal` that
-   * knows how to compare them, or 'reference'.
-   *
-   * Override with a function, or the name of a premade one — 'reference'
-   * (`Object.is`, to opt out of the content comparison), 'array' (shallow,
-   * order sensitive), 'set' (order insensitive, both only offered for
-   * arrays), 'stringify' (JSON.stringify, works on objects and arrays, and
-   * the one to reach for when an array holds objects rebuilt on every read),
-   * a property of the value to compare by, e.g. 'id', or 'array.id' /
-   * 'set.id' to compare the elements of an array by one of their properties.
+   * Override with a function or a premade name: 'reference', 'array'
+   * (shallow, order sensitive), 'set' (order insensitive), 'stringify', a
+   * property to compare by ('id'), or 'array.id' / 'set.id' per element.
    */
   equal?: EqualOption<NoInfer<T>>;
   /**
@@ -205,6 +228,7 @@ export type LinkComputedOptions<
 };
 
 /**
+ * @experimental
  * Generates a `link<Name>()` method that connects store state to component
  * signals (inputs, models, signal forms), plus a `_set<Name>()` method — the
  * same write path, private to the store, for other features and methods to
@@ -229,25 +253,13 @@ export type LinkComputedOptions<
  * direction (e.g. a `model()` whose type differs from the store's); `syncWith`
  * is mutually exclusive with both, and `initialValueFrom` only applies to it.
  *
- * Both sync directions are guarded by `equal`, so writes only happen when the
- * value actually changed — this prevents echo loops when `set` transforms the
- * value. It defaults to comparing by content, chosen from the value at hand:
- * `Object.is` for primitives, element by element for arrays, and structurally
- * for plain objects. Reference equality is the wrong default for a two-way
- * link, since a source that rebuilds an object on every read is never equal
- * to its own previous value and the link never settles.
+ * Both sync directions are guarded by `equal`, which defaults to comparing
+ * by content — see the `equal` option for the premade names it accepts.
  *
- * Besides a function, `equal` accepts the name of a premade comparison:
- * `'reference'` (`Object.is`, to opt out of the content comparison),
- * `'array'` (shallow, order sensitive), `'set'` (order insensitive — both
- * only offered when the value is an array), `'stringify'` (JSON.stringify,
- * for objects and arrays), a property of the value to compare by, or
- * `'array.<prop>'` / `'set.<prop>'` to compare the elements of an array by
- * one of their properties.
- *
- * `syncWith`, `readFrom`, `writeTo` and `updateStoreWhen` each require an injection context
- * (field initializer or constructor), because effects are created to keep
- * things in sync. The plain no-arg form has no such requirement.
+ * `syncWith`, `readFrom`, `writeTo` and `storeEditsWhen` each require an
+ * injection context (field initializer or constructor), because effects are
+ * created to keep things in sync. The plain no-arg form has no such
+ * requirement.
  *
  * @param name - State key to link to, or a custom name when `computation` is used
  * @param options.computation - Derive the linked value from the store
@@ -346,7 +358,7 @@ export type LinkComputedOptions<
  * // filterForm = form(this.formData, (value) => required(value.search));
  * // formData = this.store.linkFilter({
  * //   // annotated because filterForm is declared below
- * //   updateStoreWhen: (): boolean => this.filterForm().valid(),
+ * //   storeEditsWhen: (): boolean => this.filterForm().valid(),
  * // });
  */
 // Overload: state key source
@@ -397,8 +409,8 @@ export function withLink<Input extends SignalStoreFeatureResult>(
     // memoized: the computation must return the same value while its
     // dependencies are unchanged, or every read produces a fresh value
     // (e.g. a `.map()`), the source never compares equal to itself, and the
-    // updateStoreWhen buffer and the store push each other in an endless loop
-    const source: () => any = computation
+    // storeEditsWhen buffer and the store push each other in an endless loop
+    const storeSource: () => any = computation
       ? computed(() => computation(store as any))
       : (store as any)[name];
 
@@ -413,7 +425,7 @@ export function withLink<Input extends SignalStoreFeatureResult>(
     // (e.g. filterEntities reads entities())
     const guardedWrite = (value: any) =>
       untracked(() => {
-        if (!equal(value, source())) {
+        if (!equal(value, storeSource())) {
           write(value);
         }
       });
@@ -425,7 +437,7 @@ export function withLink<Input extends SignalStoreFeatureResult>(
       withMethods(() => ({
         ...(options?.noSetter
           ? {}
-          : { [setterMethodName]: linkSetter(source, guardedWrite) }),
+          : { [setterMethodName]: linkSetter(storeSource, guardedWrite) }),
         [linkMethodName]: (options?: LinkOptions) => {
           const linkOptions = options as
             | (LinkCommonOptions<any> & {
@@ -435,73 +447,83 @@ export function withLink<Input extends SignalStoreFeatureResult>(
                 initialValueFrom?: 'store' | 'external';
               })
             | undefined;
-          const updateStoreWhen = linkOptions?.updateStoreWhen;
-          // one linkedSignal over the source for both modes. Writes go
-          // through the custom set: without a gate they delegate straight to
-          // the store — no rawSet, the store stays the single source of truth
-          // and the computation reflects the committed value. With a gate the
-          // write lands in the buffer first, so a gate derived from the value
-          // (e.g. a form's valid()) sees the just-written state, then commits
-          // when open; when closed the value stays buffered until the flush
-          // effect below pushes it. updateStoreWhen is untracked here since
-          // set must not register deps; its reactive tracking lives in that
-          // effect.
+          const storeEditsWhen = linkOptions?.storeEditsWhen;
+          // one linkedSignal over the source for both modes. Without a gate
+          // writes delegate straight to the store, which stays the single
+          // source of truth. With a gate they land in the buffer first, so a
+          // gate derived from the value (e.g. a form's valid()) sees the
+          // just-written state; a value held back stays buffered until the
+          // flush effect below pushes it. storeEditsWhen is untracked here —
+          // set must not register deps; its tracking lives in that effect.
           // value already committed synchronously by set. rawSet below marks
           // the flush effect dirty, so that effect still runs after a
-          // synchronous commit; without this it would write again whenever the
-          // write does not land in source synchronously (a debounced or
-          // async set), since its equal(value, source()) guard can not yet see
-          // the value. Cleared by the effect on its next run.
+          // synchronous commit; without this it would write again whenever
+          // the write does not land in storeSource synchronously (a debounced
+          // or async set), since its equal(value, storeSource()) guard can
+          // not yet see the value. Cleared by the effect on its next run.
           let committedInSet: { value: any } | undefined;
-          const linked: WritableSignal<any> = linkedSignal(() => source(), {
-            equal,
-            set: (value, rawSet) => {
-              if (!updateStoreWhen) return guardedWrite(value);
-              rawSet(value);
-              if (untracked(() => updateStoreWhen(value))) {
-                committedInSet = { value };
-                guardedWrite(value);
-              }
+          const linked: WritableSignal<any> = linkedSignal(
+            () => storeSource(),
+            {
+              equal,
+              set: (value, rawSet) => {
+                if (!storeEditsWhen) return guardedWrite(value);
+                rawSet(value);
+                if (untracked(() => storeEditsWhen(value))) {
+                  committedInSet = { value };
+                  guardedWrite(value);
+                }
+              },
             },
-          });
+          );
 
+          // what the external side is known to hold. Seeded with the store's
+          // value at link time (writeTo pushes changes only), then updated by
+          // every value readFrom supplies and every value writeTo pushes out
+          let externalHolds: unknown = untracked(storeSource);
           const readFrom = linkOptions?.readFrom;
           if (readFrom) {
-            // the function form receives the previous linked value untracked,
-            // so a merge can not register the store (or buffer) as a
-            // dependency — only the external signals it reads re-run it
+            // the function form receives the previous committed value
+            // untracked, so a merge can not register the store as a
+            // dependency — only the external signals it reads re-run it.
+            // The store, not the buffer: the merged value is written straight
+            // to the store, so merging a pending buffered edit into it would
+            // commit that edit behind the gate's back
             const read = isSignal(readFrom)
               ? () => readFrom()
-              : () => readFrom(untracked(linked));
-            // one way: the store reads the signal, never writes it back
-            const initial = untracked(read);
-            linked.set(initial);
-            // the initial sync above already applied this value, so the effect
-            // below must not apply it again — that would discard a buffered
-            // write made before the first tick
-            let lastRead: unknown = initial;
+              : () => readFrom(untracked(storeSource));
+            // one way: the store reads the signal, never writes it back.
+            // Writes to the store, not through `linked`, so storeEditsWhen
+            // never sees it — the gate is about edits made through the
+            // returned signal. externalHolds is recorded before the write, so
+            // the writeTo effect can not observe the store change ahead of it
+            // whatever order the effects run in
+            let lastRead: unknown = untracked(read);
+            externalHolds = lastRead;
+            guardedWrite(lastRead);
             effect(() => {
               const value = read();
               if (equal(value, lastRead)) return;
               lastRead = value;
-              untracked(() => linked.set(value));
+              externalHolds = value;
+              untracked(() => guardedWrite(value));
             });
           }
 
-          if (updateStoreWhen) {
+          if (storeEditsWhen) {
             // flush on gate open: writes commit synchronously in set when the
             // gate is open, so this effect only flushes a value held back
             // while it was closed, or one whose gate opened without a write
-            // (async validators, external signals). updateStoreWhen is called
+            // (async validators, external signals). storeEditsWhen is called
             // tracked so its own dependencies re-run the effect
             effect(() => {
               const value = linked();
               const committed = committedInSet;
               committedInSet = undefined;
-              // updateStoreWhen stays outside the skip so its dependencies are
+              // storeEditsWhen stays outside the skip so its dependencies are
               // registered on every run — the gate must still be able to
               // re-open this effect when it changes without a write
-              if (updateStoreWhen(value)) {
+              if (storeEditsWhen(value)) {
                 // by reference, not equal: the run this skips is the one
                 // rawSet scheduled, which reads back the very object set
                 // committedInSet. When the reference does differ the write did
@@ -519,18 +541,22 @@ export function withLink<Input extends SignalStoreFeatureResult>(
               'function'
                 ? (value: any) => (writeTo as WritableSignal<any>).set(value)
                 : (writeTo as (value: any) => void);
-            // changes only: the value at link time is not pushed, so an
-            // output does not emit spuriously and a readFrom mapping is not
-            // echoed straight back. Reads the source, not the buffer, so
-            // only values committed to the store are pushed out. The linked
-            // signal (not the source) seeds the guard so a readFrom initial
-            // value still pending in the updateStoreWhen buffer is not pushed
-            // once the gate commits it.
-            let lastWritten: unknown = untracked(linked);
+            // changes only: the link-time value is not pushed, so an output
+            // does not emit spuriously — checked on the first run only, since
+            // later a return to it is a real change. Reads the source, not
+            // the buffer, so only committed values go out. A value the
+            // external side already holds — last supplied by readFrom, or
+            // last pushed — is not pushed again, which is what stops an echo
+            let linkTime: { value: unknown } | undefined = {
+              value: untracked(storeSource),
+            };
             effect(() => {
-              const value = source();
-              if (equal(value, lastWritten)) return;
-              lastWritten = value;
+              const value = storeSource();
+              const initial = linkTime;
+              linkTime = undefined;
+              if (initial && equal(value, initial.value)) return;
+              if (equal(value, externalHolds)) return;
+              externalHolds = value;
               untracked(() => writeExternal(value));
             });
           }
@@ -544,35 +570,38 @@ export function withLink<Input extends SignalStoreFeatureResult>(
             // branches below seed it before the effects run
             let lastExternal: unknown;
             if (initialValueFrom === 'external') {
-              linked.set(untracked(syncWith));
+              // straight to the store, not through `linked`: like readFrom,
+              // a value the external signal supplies is not an edit made
+              // through the returned signal, so storeEditsWhen does not
+              // apply to it
+              guardedWrite(untracked(syncWith));
               // the initial sync above already applied this value, so the
-              // effect below must not apply it again — that would discard a
-              // buffered write made before the first tick
+              // effect below must not apply it again
               lastExternal = untracked(syncWith);
             } else {
-              syncWith.set(untracked(source));
+              syncWith.set(untracked(storeSource));
               // our own write: without recording it, the effect below would
               // treat its first run as a user edit and force-apply the
               // external snapshot — reverting a store change or clobbering a
               // buffered write made before the first tick
-              lastExternal = untracked(source);
+              lastExternal = untracked(storeSource);
             }
-            // external -> linked
+            // external -> store, bypassing the gate for the same reason as
+            // the seed above
             effect(() => {
               const value = syncWith();
               if (equal(value, lastExternal)) return;
               lastExternal = value;
-              untracked(() => linked.set(value));
+              untracked(() => guardedWrite(value));
             });
             // store -> external. Reads the source, not the buffer, so an
             // external model() only ever sees values committed to the store.
             effect(() => {
-              const value = source();
+              const value = storeSource();
               untracked(() => {
                 if (!equal(syncWith(), value)) {
                   // our own write, not a user edit: recording it keeps the
-                  // effect above from pushing it back into the buffer and
-                  // overwriting a value the gate is still holding
+                  // effect above from writing it straight back
                   lastExternal = value;
                   syncWith.set(value);
                 }

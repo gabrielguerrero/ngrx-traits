@@ -10,6 +10,7 @@ import {
 import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.util';
 
 /**
+ * @experimental
  * Generates a `link[Collection]IdsSelected()` method that connects the
  * selected entity ids to component signals (inputs, models, signal forms).
  *

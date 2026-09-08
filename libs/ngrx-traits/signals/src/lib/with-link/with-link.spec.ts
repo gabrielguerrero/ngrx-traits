@@ -1,5 +1,6 @@
 import { computed, effect, Signal, signal, untracked } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { required, form as signalForm } from '@angular/forms/signals';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 
 import { LinkOptions, withLink } from './with-link';
@@ -716,7 +717,7 @@ describe('withLink', () => {
         const linked = store.linkCount({
           syncWith: external,
           initialValueFrom: 'store',
-          updateStoreWhen: () => true,
+          storeEditsWhen: () => true,
         });
         // buffered before any effect ran
         linked.set(7);
@@ -800,7 +801,7 @@ describe('withLink', () => {
       });
     });
 
-    it('is gated by updateStoreWhen like any other write', () => {
+    it('is not gated by storeEditsWhen', () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -812,16 +813,54 @@ describe('withLink', () => {
         const external = signal(5);
         const linked = store.linkCount({
           readFrom: external,
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
 
+        // the gate only applies to writes made through the returned signal;
+        // readFrom tells the store what to read, so it writes through
         expect(linked()).toBe(5);
-        expect(store.count()).toBe(1);
+        expect(store.count()).toBe(5);
+
+        external.set(7);
+        TestBed.tick();
+        expect(store.count()).toBe(7);
+
+        // a write through the signal is still gated
+        linked.set(9);
+        TestBed.tick();
+        expect(store.count()).toBe(7);
 
         allowed.set(true);
         TestBed.tick();
-        expect(store.count()).toBe(5);
+        expect(store.count()).toBe(9);
+      });
+    });
+
+    it('rejects a value by returning prev from the function form', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(5);
+        // validation for readFrom values lives here, since the gate does not
+        // apply to them: return prev to keep the store as it is
+        store.linkCount({
+          readFrom: (prev) => (external() % 2 === 0 ? external() : prev),
+        });
+        TestBed.tick();
+        expect(store.count()).toBe(1);
+
+        external.set(8);
+        TestBed.tick();
+        expect(store.count()).toBe(8);
+
+        external.set(9);
+        TestBed.tick();
+        expect(store.count()).toBe(8);
       });
     });
 
@@ -876,7 +915,7 @@ describe('withLink', () => {
       });
     });
 
-    it('function form merges into the buffer when gated by updateStoreWhen', () => {
+    it('function form merges into the committed value when gated', () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ filter: { search: '', category: 'books' } }),
@@ -888,23 +927,29 @@ describe('withLink', () => {
         const search = signal('a');
         const linked = store.linkFilter({
           readFrom: (prev) => ({ ...prev, search: search() }),
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
+
+        // readFrom is not gated, so its merge is already committed
+        expect(store.filter()).toEqual({ search: 'a', category: 'books' });
 
         // buffered edit the gate is holding back
         linked.update((value) => ({ ...value, category: 'toys' }));
         TestBed.tick();
-        expect(store.filter()).toEqual({ search: '', category: 'books' });
+        expect(store.filter()).toEqual({ search: 'a', category: 'books' });
 
-        // the merge reads the buffer, so the pending edit is preserved
+        // the merge reads the committed value, not the buffer: merging the
+        // pending edit in would commit it behind the gate's back. Writing to
+        // the store resets the buffer, so the pending edit is dropped
         search.set('b');
         TestBed.tick();
-        expect(linked()).toEqual({ search: 'b', category: 'toys' });
+        expect(store.filter()).toEqual({ search: 'b', category: 'books' });
+        expect(linked()).toEqual({ search: 'b', category: 'books' });
 
         allowed.set(true);
         TestBed.tick();
-        expect(store.filter()).toEqual({ search: 'b', category: 'toys' });
+        expect(store.filter()).toEqual({ search: 'b', category: 'books' });
       });
     });
   });
@@ -973,6 +1018,238 @@ describe('withLink', () => {
       });
     });
 
+    it('does not echo a readFrom change back out', () => {
+      // the target does not feed back into readFrom's source, which is the
+      // shape an output() has — and the one where an echo is visible
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('a');
+        store.linkFilter({
+          readFrom: computed(() => ({ search: search() })),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        search.set('b');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'b' });
+        expect(emitted).toEqual([]);
+      });
+    });
+
+    it('pushes a store change back to the readFrom value after another push', () => {
+      // the intervening push left the external side holding 'b', so a change
+      // back to what readFrom supplies is news to it again. Without that
+      // push it would be suppressed — see the transforming-set test
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({
+          readFrom: signal({ search: 'a' }),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { filter: { search: 'b' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'b' }]);
+
+        // back to what readFrom supplies, e.g. a reset
+        patchState(store, { filter: { search: 'a' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'b' }, { search: 'a' }]);
+      });
+    });
+
+    it('does not push a store change back to the value readFrom holds', () => {
+      // the store settles on the trimmed value, so it never held what
+      // readFrom supplied. A later change to exactly that value is still not
+      // pushed: the external side is where it came from, it holds it already.
+      // Once something else is pushed the external side holds that instead,
+      // and the readFrom value is a change again
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter', {
+          set: (value, store) =>
+            patchState(store as any, {
+              filter: { search: value.search.trim() },
+            }),
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({
+          readFrom: signal({ search: ' typed ' }),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'typed' });
+        expect(emitted).toEqual([]);
+
+        patchState(store, { filter: { search: ' typed ' } });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { filter: { search: 'x' } });
+        TestBed.tick();
+        patchState(store, { filter: { search: ' typed ' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'x' }, { search: ' typed ' }]);
+      });
+    });
+
+    it('re-pushes a pending async readFrom value that lands after an interleaved change', async () => {
+      // the interleaved push told the external side 'other', so when the
+      // readFrom value finally lands it is a change from what the external
+      // side holds. A redundant emit for a fire-and-forget callback, but
+      // never a divergence: a parent wiring the output back into the input
+      // ends up consistent either way
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter', {
+          set: (value, store) =>
+            void setTimeout(() => patchState(store as any, { filter: value })),
+        }),
+      );
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        store.linkFilter({
+          readFrom: signal({ search: 'from-input' }),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+
+        patchState(store, { filter: { search: 'other' } });
+        TestBed.tick();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        TestBed.tick();
+
+        expect(store.filter()).toEqual({ search: 'from-input' });
+        expect(emitted).toEqual([
+          { search: 'other' },
+          { search: 'from-input' },
+        ]);
+      });
+    });
+
+    it('pushes a store change made before the first tick', () => {
+      // changes only means relative to the link-time value, not to whatever
+      // the first effect run happens to see
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({ writeTo: (value) => emitted.push(value) });
+        patchState(store, { filter: { search: 'b' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'b' }]);
+      });
+    });
+
+    it('pushes a store change made before the first tick with a readFrom', () => {
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({
+          readFrom: signal({ search: 'in' }),
+          writeTo: (value) => emitted.push(value),
+        });
+        patchState(store, { filter: { search: 'b' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'b' }]);
+      });
+    });
+
+    it('pushes a gated write that equals the readFrom value', () => {
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const allowed = signal(false);
+        const linked = store.linkFilter({
+          readFrom: signal({ search: 'a' }),
+          writeTo: (value) => emitted.push(value),
+          storeEditsWhen: () => allowed(),
+        });
+        TestBed.tick();
+
+        // held back by the gate, then committed by the flush effect
+        linked.set({ search: 'b' });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'b' }]);
+
+        // a gated write back to the value readFrom supplies is still a real
+        // change the external side does not know about
+        linked.set({ search: 'a' });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'b' }, { search: 'a' }]);
+      });
+    });
+
+    it('pushes a field the readFrom merge does not control', () => {
+      // externalHolds carries the whole merged value, category included, and
+      // every push replaces it — so a category the merge does not control is
+      // never frozen on the value it had when the merge last ran
+      const emitted: { search: string; category: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'x', category: 'books' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('x');
+        store.linkFilter({
+          readFrom: (prev) => ({ ...prev, search: search() }),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+
+        patchState(store, { filter: { search: 'x', category: 'films' } });
+        TestBed.tick();
+        patchState(store, { filter: { search: 'x', category: 'books' } });
+        TestBed.tick();
+        expect(emitted).toEqual([
+          { search: 'x', category: 'films' },
+          { search: 'x', category: 'books' },
+        ]);
+      });
+    });
+
     it('combines with readFrom into a two-way sync with a mapping each way', () => {
       const Store = signalStore(
         { protectedState: false },
@@ -1005,7 +1282,7 @@ describe('withLink', () => {
       });
     });
 
-    it('only pushes values committed through the updateStoreWhen gate', () => {
+    it('only pushes values committed through the storeEditsWhen gate', () => {
       const emitted: number[] = [];
       const Store = signalStore(
         { protectedState: false },
@@ -1017,7 +1294,7 @@ describe('withLink', () => {
         const allowed = signal(false);
         const linked = store.linkCount({
           writeTo: (value) => emitted.push(value),
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
 
@@ -1032,7 +1309,7 @@ describe('withLink', () => {
       });
     });
 
-    it('does not push the readFrom initial value out when gated by updateStoreWhen', () => {
+    it('does not push the readFrom initial value out when gated by storeEditsWhen', () => {
       const emitted: { search: string }[] = [];
       const Store = signalStore(
         { protectedState: false },
@@ -1045,7 +1322,7 @@ describe('withLink', () => {
         store.linkFilter({
           readFrom: computed(() => ({ search: search() })),
           writeTo: (value) => emitted.push(value),
-          updateStoreWhen: () => true,
+          storeEditsWhen: () => true,
         });
         TestBed.tick();
         // the mapped initial value is committed through the gate...
@@ -1053,9 +1330,124 @@ describe('withLink', () => {
         // ...but not pushed back out
         expect(emitted).toEqual([]);
 
+        // nor is any later readFrom value: the external side supplied it, so
+        // it already agrees with the store
         search.set('typed');
         TestBed.tick();
-        expect(emitted).toEqual([{ search: 'typed' }]);
+        expect(store.filter()).toEqual({ search: 'typed' });
+        expect(emitted).toEqual([]);
+
+        // a change the external side did not supply is pushed
+        patchState(store, { filter: { search: 'from-store' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'from-store' }]);
+      });
+    });
+
+    // regression: the store's pre-link value used to be pushed out on the
+    // first tick here, because the guard was seeded from the buffer while a
+    // closed gate held the readFrom seed back from the store
+    it('does not push the pre-link store value out when the gate starts closed', () => {
+      const emitted: { search: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('from-input');
+        const allowed = signal(false);
+        store.linkFilter({
+          readFrom: computed(() => ({ search: search() })),
+          writeTo: (value) => emitted.push(value),
+          storeEditsWhen: () => allowed(),
+        });
+        TestBed.tick();
+        // readFrom is not gated, so the seed is committed at link time — and
+        // being the value at link time, it must not be pushed out
+        expect(store.filter()).toEqual({ search: 'from-input' });
+        expect(emitted).toEqual([]);
+
+        allowed.set(true);
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        search.set('typed');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'typed' });
+        // still nothing: readFrom supplied it, so the external side agrees
+        expect(emitted).toEqual([]);
+
+        // only a change the external side did not supply is pushed
+        patchState(store, { filter: { search: 'from-store' } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ search: 'from-store' }]);
+      });
+    });
+
+    // regression: the link-time skip only covers the value the store held at
+    // link time, which is still the pre-link one when `set` writes
+    // asynchronously. externalHolds is what suppresses the echo when the
+    // readFrom value finally lands.
+    it('does not push the link-time value out when set writes asynchronously', async () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial' } }),
+        withLink('filter', {
+          // does not land in the source synchronously, like filterEntities
+          // with a debounce
+          set: (value, store) =>
+            void setTimeout(() => patchState(store as any, { filter: value })),
+        }),
+      );
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        const emitted: { search: string }[] = [];
+        store.linkFilter({
+          readFrom: signal({ search: 'from-input' }),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        TestBed.tick();
+
+        // the readFrom seed is the value at link time, however late it lands
+        expect(store.filter()).toEqual({ search: 'from-input' });
+        expect(emitted).toEqual([]);
+      });
+    });
+
+    // same, through readFrom's function form — a separate read path, since
+    // it merges into the committed value. (The syncWith seed has the same
+    // shape but cannot be observed this way: syncWith and writeTo are
+    // mutually exclusive.)
+    it('does not push the link-time value out with an async set and a readFrom merge', async () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial', category: 'books' } }),
+        withLink('filter', {
+          set: (value, store) =>
+            void setTimeout(() => patchState(store as any, { filter: value })),
+        }),
+      );
+      await TestBed.runInInjectionContext(async () => {
+        const store = new Store();
+        const emitted: { search: string; category: string }[] = [];
+        const search = signal('from-input');
+        store.linkFilter({
+          readFrom: (prev) => ({ ...prev, search: search() }),
+          writeTo: (value) => emitted.push(value),
+        });
+        TestBed.tick();
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        TestBed.tick();
+
+        expect(store.filter()).toEqual({
+          search: 'from-input',
+          category: 'books',
+        });
+        expect(emitted).toEqual([]);
       });
     });
 
@@ -1072,9 +1464,9 @@ describe('withLink', () => {
     });
   });
 
-  // ── updateStoreWhen gate ────────────────────────────────────────────
+  // ── storeEditsWhen gate ────────────────────────────────────────────
 
-  describe('updateStoreWhen', () => {
+  describe('storeEditsWhen', () => {
     it('buffers writes and only updates the store when it returns true', () => {
       const Store = signalStore(
         { protectedState: false },
@@ -1085,7 +1477,7 @@ describe('withLink', () => {
         const store = new Store();
         const allowed = signal(false);
         const linked = store.linkCount({
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
 
         linked.set(5);
@@ -1101,7 +1493,7 @@ describe('withLink', () => {
     });
 
     it('receives the latest value', () => {
-      const updateStoreWhen = vi.fn((value: number) => value > 10);
+      const storeEditsWhen = vi.fn((value: number) => value > 10);
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -1109,12 +1501,12 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateStoreWhen });
+        const linked = store.linkCount({ storeEditsWhen });
         TestBed.tick();
 
         linked.set(5);
         TestBed.tick();
-        expect(updateStoreWhen).toHaveBeenCalledWith(5);
+        expect(storeEditsWhen).toHaveBeenCalledWith(5);
         expect(store.count()).toBe(1);
 
         linked.set(20);
@@ -1133,7 +1525,7 @@ describe('withLink', () => {
         const store = new Store();
         const allowed = signal(false);
         const linked = store.linkFilter({
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
 
         linked.set({ search: 'updated' });
@@ -1157,7 +1549,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateStoreWhen: () => false });
+        const linked = store.linkCount({ storeEditsWhen: () => false });
 
         linked.set(5);
         TestBed.tick();
@@ -1169,40 +1561,7 @@ describe('withLink', () => {
       });
     });
 
-    it('gates an external signal through the buffer as well', () => {
-      const Store = signalStore(
-        { protectedState: false },
-        withState({ count: 1 }),
-        withLink('count'),
-      );
-      TestBed.runInInjectionContext(() => {
-        const store = new Store();
-        const allowed = signal(false);
-        const external = signal(5);
-        store.linkCount({
-          syncWith: external,
-          updateStoreWhen: () => allowed(),
-        });
-        TestBed.tick();
-
-        expect(store.count()).toBe(1);
-
-        external.set(7);
-        TestBed.tick();
-        expect(store.count()).toBe(1);
-
-        allowed.set(true);
-        TestBed.tick();
-        expect(store.count()).toBe(7);
-
-        // store -> external still syncs
-        patchState(store, { count: 9 });
-        TestBed.tick();
-        expect(external()).toBe(9);
-      });
-    });
-
-    it('keeps a diverging external initial value buffered until the gate opens', () => {
+    it('is not gated by storeEditsWhen either', () => {
       const Store = signalStore(
         { protectedState: false },
         withState({ count: 1 }),
@@ -1214,19 +1573,53 @@ describe('withLink', () => {
         const external = signal(5);
         const linked = store.linkCount({
           syncWith: external,
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
 
-        // 5 is buffered, and the external falls back to the committed value
-        expect(linked()).toBe(5);
-        expect(external()).toBe(1);
-        expect(store.count()).toBe(1);
+        // like readFrom, the external signal writes through
+        expect(store.count()).toBe(5);
+
+        external.set(7);
+        TestBed.tick();
+        expect(store.count()).toBe(7);
+
+        // a write through the returned signal is still gated
+        linked.set(9);
+        TestBed.tick();
+        expect(store.count()).toBe(7);
 
         allowed.set(true);
         TestBed.tick();
-        expect(store.count()).toBe(5);
+        expect(store.count()).toBe(9);
+
+        // store -> external still syncs
+        patchState(store, { count: 11 });
+        TestBed.tick();
+        expect(external()).toBe(11);
+      });
+    });
+
+    it('does not overwrite a diverging external initial value', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(5);
+        const linked = store.linkCount({
+          syncWith: external,
+          storeEditsWhen: () => false,
+        });
+        TestBed.tick();
+
+        // the external value wins at link time and is committed, so the
+        // model is not clobbered with the store's pre-link value
+        expect(linked()).toBe(5);
         expect(external()).toBe(5);
+        expect(store.count()).toBe(5);
       });
     });
 
@@ -1242,7 +1635,7 @@ describe('withLink', () => {
         const external = signal(1);
         const linked = store.linkCount({
           syncWith: external,
-          updateStoreWhen: () => allowed(),
+          storeEditsWhen: () => allowed(),
         });
 
         // buffered write does not leak to the external signal
@@ -1266,7 +1659,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateStoreWhen: () => true });
+        const linked = store.linkCount({ storeEditsWhen: () => true });
         TestBed.tick();
 
         linked.set(1);
@@ -1285,10 +1678,10 @@ describe('withLink', () => {
         const store = new Store();
         // the gate reads the linked value reactively rather than its
         // argument, so it only opens if the write landed in the buffer
-        // before updateStoreWhen ran
+        // before storeEditsWhen ran
         let linked!: ReturnType<typeof store.linkCount>;
         const valid = computed(() => linked() > 10);
-        linked = store.linkCount({ updateStoreWhen: () => valid() });
+        linked = store.linkCount({ storeEditsWhen: () => valid() });
         TestBed.tick();
 
         linked.set(20);
@@ -1304,7 +1697,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateStoreWhen: () => true });
+        const linked = store.linkCount({ storeEditsWhen: () => true });
         TestBed.tick();
 
         linked.set(5);
@@ -1323,7 +1716,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        const linked = store.linkCount({ updateStoreWhen: () => true });
+        const linked = store.linkCount({ storeEditsWhen: () => true });
         TestBed.tick();
 
         linked.set(5);
@@ -1341,7 +1734,7 @@ describe('withLink', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         const allowed = signal(true);
-        const linked = store.linkCount({ updateStoreWhen: () => allowed() });
+        const linked = store.linkCount({ storeEditsWhen: () => allowed() });
         TestBed.tick();
 
         linked.set(5);
@@ -1359,6 +1752,231 @@ describe('withLink', () => {
         allowed.set(true);
         TestBed.tick();
         expect(store.count()).toBe(9);
+      });
+    });
+
+    it('is never called while linking, so it can read a form built from the link', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '', category: 'books' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('a');
+        // mirrors a component: readFrom pushes an input into the store while
+        // the gate reads a form built from the linked signal, so the form
+        // does not exist yet while linkFilter() runs. readFrom bypasses the
+        // gate, so it is never called there
+        class Cmp {
+          data = store.linkFilter({
+            readFrom: (prev) => ({ ...prev, search: search() }),
+            storeEditsWhen: (): boolean => this.form().valid(),
+          });
+          form = fakeForm(this.data);
+        }
+        const cmp = new Cmp();
+        TestBed.tick();
+
+        expect(cmp.data()).toEqual({ search: 'a', category: 'books' });
+        expect(store.filter()).toEqual({ search: 'a', category: 'books' });
+
+        search.set('bb');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'bb', category: 'books' });
+      });
+    });
+
+    it('is never called while linking with syncWith either', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '', category: 'books' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal({ search: 'a', category: 'books' });
+        class Cmp {
+          data = store.linkFilter({
+            syncWith: external,
+            storeEditsWhen: (): boolean => this.form().valid(),
+          });
+          form = fakeForm(this.data);
+        }
+        const cmp = new Cmp();
+        TestBed.tick();
+
+        expect(cmp.data()).toEqual({ search: 'a', category: 'books' });
+        expect(store.filter()).toEqual({ search: 'a', category: 'books' });
+        expect(external()).toEqual({ search: 'a', category: 'books' });
+      });
+    });
+
+    it('commits the readFrom seed synchronously when the gate can run', () => {
+      // a gate that does not depend on a later field must not be delayed to
+      // the first tick: a one-shot reader of the store (a callWith, an
+      // ngOnInit) would otherwise see the pre-link value and never be
+      // corrected
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({
+          readFrom: signal({ search: 'from-input' }),
+          storeEditsWhen: () => true,
+        });
+        // no tick
+        expect(store.filter()).toEqual({ search: 'from-input' });
+      });
+    });
+
+    it('commits the readFrom seed even while the form is invalid', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial', category: 'books' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('');
+        // the form starts invalid (empty search), but readFrom is not gated,
+        // so the value it supplies still reaches the store
+        class Cmp {
+          data = store.linkFilter({
+            readFrom: (prev) => ({ ...prev, search: search() }),
+            storeEditsWhen: (): boolean => this.form().valid(),
+          });
+          form = fakeForm(this.data);
+        }
+        const cmp = new Cmp();
+        TestBed.tick();
+
+        expect(cmp.form().valid()).toBe(false);
+        expect(store.filter()).toEqual({ search: '', category: 'books' });
+
+        // an edit through the returned signal is still gated on the form
+        cmp.data.update((value) => ({ ...value, category: 'toys' }));
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: '', category: 'books' });
+
+        search.set('now valid');
+        TestBed.tick();
+        expect(store.filter()).toEqual({
+          search: 'now valid',
+          category: 'books',
+        });
+      });
+    });
+
+    it('does not swallow a gate that is genuinely broken', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        // readFrom does not consult the gate, so the link itself succeeds...
+        expect(() =>
+          store.linkFilter({
+            readFrom: signal({ search: 'a' }),
+            storeEditsWhen: () => {
+              throw new Error('boom');
+            },
+          }),
+        ).not.toThrow();
+        // ...but the flush effect does evaluate it, and the error has to
+        // surface there rather than disappearing
+        expect(() => TestBed.tick()).toThrow('boom');
+      });
+    });
+
+    it('works with a real signal form built from the link', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial', category: 'books' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('');
+        class Cmp {
+          data = store.linkFilter({
+            readFrom: (prev) => ({ ...prev, search: search() }),
+            storeEditsWhen: (): boolean => this.form().valid(),
+          });
+          form = signalForm(this.data, (path) => {
+            required(path.search);
+          });
+        }
+        const cmp = new Cmp();
+        TestBed.tick();
+
+        // the form starts invalid, but readFrom still writes through
+        expect(cmp.form().valid()).toBe(false);
+        expect(store.filter()).toEqual({ search: '', category: 'books' });
+
+        // an edit through the form is gated on its validity. category, not
+        // search: it has to differ from the store for the write to be
+        // attempted at all, while leaving the form invalid
+        cmp.data.update((value) => ({ ...value, category: 'toys' }));
+        TestBed.tick();
+        expect(cmp.form().valid()).toBe(false);
+        expect(store.filter()).toEqual({ search: '', category: 'books' });
+
+        search.set('typed');
+        TestBed.tick();
+        expect(cmp.form().valid()).toBe(true);
+        expect(store.filter()).toEqual({ search: 'typed', category: 'books' });
+      });
+    });
+
+    it('rethrows a gate error on an ordinary write', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkCount({
+          storeEditsWhen: () => {
+            throw new Error('boom');
+          },
+        });
+        // a write through the returned signal calls the gate, so a broken
+        // gate fails at the call site
+        expect(() => linked.set(5)).toThrow('boom');
+      });
+    });
+
+    it('does not push the readFrom value out with a form gate', () => {
+      // the writeTo guard is seeded from the source, which readFrom has
+      // already written by then, so the value at link time is not echoed back
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const pushed: { search: string }[] = [];
+        class Cmp {
+          data = store.linkFilter({
+            readFrom: signal({ search: 'from-input' }),
+            writeTo: (value) => pushed.push(value),
+            storeEditsWhen: (): boolean => this.form().valid(),
+          });
+          form = fakeForm(this.data);
+        }
+        new Cmp();
+        TestBed.tick();
+
+        expect(pushed).toEqual([]);
+        expect(store.filter()).toEqual({ search: 'from-input' });
       });
     });
   });
@@ -1420,7 +2038,7 @@ describe('withLink', () => {
         const external = signal([{ id: 7 }]);
         const linked = store.linkMapped({
           readFrom: external,
-          updateStoreWhen: () => true,
+          storeEditsWhen: () => true,
         });
         TestBed.tick();
 
@@ -1451,7 +2069,7 @@ describe('withLink', () => {
           ...store.filter(),
           search: search(),
         }));
-        store.linkFilter({ readFrom: read, updateStoreWhen: () => true });
+        store.linkFilter({ readFrom: read, storeEditsWhen: () => true });
         TestBed.tick();
 
         expect(store.filter()).toEqual({ search: 'a', category: 'books' });
@@ -1484,7 +2102,7 @@ describe('withLink', () => {
           ...store.filter(),
           search: search(),
         }));
-        store.linkFilter({ readFrom: read, updateStoreWhen: () => true });
+        store.linkFilter({ readFrom: read, storeEditsWhen: () => true });
         TestBed.tick();
 
         expect(store.filter()).toEqual({ search: 'a', category: 'books' });
@@ -1629,3 +2247,13 @@ describe('withLink', () => {
     });
   });
 });
+
+/**
+ * Stand-in for a signal form built over a linked signal: like `form()`, it is
+ * a signal of a node with a `valid()` derived from the value, and it is
+ * declared after the link, so `this.form()` throws while `link<Name>()` runs.
+ */
+function fakeForm<T extends { search: string }>(data: Signal<T>) {
+  const valid = computed(() => data().search.length > 0);
+  return signal({ valid });
+}

@@ -178,7 +178,7 @@ export class ProductEditPanelComponent {
   // the loaded detail in the store; only valid edits are written to it
   protected data = this.store.linkProductDetail({
     // annotated because editForm is declared below
-    updateStoreWhen: (): boolean => this.editForm().valid(),
+    storeEditsWhen: (): boolean => this.editForm().valid(),
   });
   protected editForm = form(this.data, (path) => {
     required(path.name);

@@ -29,7 +29,7 @@ import { ProductLinkStore } from './product-link.store';
 /**
  * withLink showcase:
  * - the filter is a signal form over linkProductEntitiesFilter(), gated with
- *   updateStoreWhen so only valid filters run (min price <= max price)
+ *   storeEditsWhen so only valid filters run (min price <= max price)
  * - the genre and console pickers are reusable FormValueControls, bound to
  *   fields of that same form with [formField]
  * - clicking a row loads its detail (withCalls + callWith) and opens an edit
@@ -144,7 +144,7 @@ export class ProductLinkPageComponent {
   protected filterForm = form(
     this.store.linkProductEntitiesFilter({
       // annotated because filterForm is declared below
-      updateStoreWhen: (): boolean => this.filterForm().valid(),
+      storeEditsWhen: (): boolean => this.filterForm().valid(),
     }),
     (path) => {
       debounce(path.search, 300);
