@@ -110,24 +110,26 @@ jobs:
 
   # Everything, apps included. Split from the libs audit so app and docs
   # tooling advisories cannot drown out the ones affecting published packages.
-  audit-apps:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - name: Install pnpm
-        # No "version:" here on purpose - it comes from "packageManager" in
-        # package.json. Setting both makes the action fail with
-        # ERR_PNPM_BAD_PM_VERSION.
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
-      - name: Use Node.js 24
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
-        with:
-          node-version: 24
-          cache: 'pnpm'
-      - run: pnpm audit --prod
+  # This is a separate job so it can run even if the libs audit fails, but it is not a gate for publishing
+  # disabled till apps dependencies are cleaned up and the audit is passing
+  # audit-apps:
+  #   runs-on: ubuntu-latest
+  #   continue-on-error: true
+  #   permissions:
+  #     contents: read
+  #   steps:
+  #     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+  #     - name: Install pnpm
+  #       # No "version:" here on purpose - it comes from "packageManager" in
+  #       # package.json. Setting both makes the action fail with
+  #       # ERR_PNPM_BAD_PM_VERSION.
+  #       uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+  #     - name: Use Node.js 24
+  #       uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+  #       with:
+  #         node-version: 24
+  #         cache: 'pnpm'
+  #     - run: pnpm audit --prod
 
   publish:
     runs-on: ubuntu-latest

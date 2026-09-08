@@ -76,6 +76,7 @@
     "@angular/cli": "catalog:",
     "@angular/compiler": "catalog:",
     "@angular/compiler-cli": "catalog:",
+    "@angular/forms": "catalog:",
     "@angular/language-service": "catalog:",
     "@angular/router": "catalog:",
     "@babel/cli": "^7.17.10",

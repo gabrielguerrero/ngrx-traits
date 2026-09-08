@@ -5,6 +5,8 @@ order: 19
 
 # withLink
 
+> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
+
 Generates a `link<Name>()` method that connects store state to component signals like `input()`, `model()` and Angular Signal Forms. The method returns a `WritableSignal` that is a live view of the store: reading it reads the state, writing it updates the store (via `patchState` by default, or a custom `set` callback, e.g. to call a store method like `filterEntities` instead).
 
 The method takes an options object, which can also connect an external signal, in one of three ways:
@@ -30,7 +32,7 @@ If you want to work with the ngrx traits withEntities\* store features, be sure 
 - [withLinkEntitiesSingleSelection](/docs/traits/with-link-entities-single-selection)
 - [withLinkEntitiesMultiSelection](/docs/traits/with-link-entities-multi-selection)
 
-> `syncWith`, `readFrom`, `writeTo` and `updateStoreWhen` each require an injection context (field initializer or constructor), because effects are created to keep things in sync. The plain no-arg form has no such requirement.
+> `syncWith`, `readFrom`, `writeTo` and `storeEditsWhen` each require an injection context (field initializer or constructor), because effects are created to keep things in sync. The plain no-arg form has no such requirement.
 
 ## Examples
 
@@ -70,10 +72,16 @@ const ProductsStore = signalStore(
   }),
   // generates linkProductEntitiesFilter()
   withLink('productEntitiesFilter', {
-    set: (value, store) => store.filterProductEntities({ filter: value }),
+    set: (value, store) => store.filterProductEntities({ filter: value, debounce: 0 }),
   }),
 );
 ```
+
+`set` must write synchronously: by the time it returns, reading the source has to give the new value (or whatever `set` transformed it into). The link compares each write against the committed value to skip redundant ones, so while a write is still in flight the store still reads as the old value, and a write back to it is dropped as a no-op — leaving the store on the superseded value. That is why the example passes `debounce: 0`: typing `a` then deleting it within the debounce window would otherwise leave the filter on `a`.
+
+To debounce a form field, use Signal Forms' `debounce(path, ms)`, which delays the update reaching the signal at all instead of delaying the write. It only covers updates coming from a bound control — a programmatic `.set()` on the linked signal or model is not debounced. For that, and to debounce anything else, call the debouncing store method (`filterProductEntities`) directly rather than through the link.
+
+A `set` that transforms what it is given (normalizes, trims, sorts) is called on every write of the raw value — the store settles on the transformed value, so the comparison never matches. Worth knowing if `set` does more than write state.
 
 ### Two-way sync with a model()
 
@@ -117,7 +125,7 @@ export class ProductSearchComponent {
 
 ### Merging a partial signal with readFrom
 
-`readFrom` also accepts a function that receives the previous linked value, so an external signal that only covers part of the state can be merged into it:
+`readFrom` also accepts a function that receives the previous committed value, so an external signal that only covers part of the state can be merged into it:
 
 ```typescript
 @Component({
@@ -136,7 +144,9 @@ export class ProductListComponent {
 }
 ```
 
-The signals the function reads are tracked; the previous value is not — a store change alone does not re-run the merge, but the next external change merges into the latest value. With `updateStoreWhen`, `prev` is the buffer, so pending edits the gate is holding back are preserved by the merge.
+The signals the function reads are tracked; the previous value is not — a store change alone does not re-run the merge, but the next external change merges into the latest value. `prev` is always the value committed to the store, never a pending edit the `storeEditsWhen` gate is holding back — merging one in would commit it behind the gate's back.
+
+This means a gated edit in progress is **lost** when `readFrom` changes the store: the returned signal is a `linkedSignal` over the store, so a new committed value resets it. If a user is part-way through an invalid form and a parent input feeding `readFrom` changes, their edit is replaced by the merged value. (A `readFrom` value that compares equal to the current state writes nothing, so it does not reset anything.) Where that matters, keep the external signal out of the same link — read it into separate state, or drive it from an explicit user action rather than continuously.
 
 ### One-way out: pushing store changes with writeTo
 
@@ -158,6 +168,8 @@ export class ProductSearchComponent {
 ```
 
 `writeTo` cannot be combined with `syncWith` (which already writes back), but it combines with `readFrom` — see the next section.
+
+When both are used, a value the external side already holds is not pushed: the last one `readFrom` supplied, or the last one `writeTo` pushed out. So a `readFrom` value is not echoed straight back (an `output()` would otherwise fire on every change its own input drove), and neither is a store change back to the value the external side currently holds. Anything else — a reset to a value it does not hold, a write through the returned signal the gate commits, a field the merge does not control changing — is pushed.
 
 ### Two-way sync with a model() of a different type
 
@@ -346,7 +358,7 @@ Please note that this will set both valid and invalid form data in the store. If
 
 ### Only setting validated data in the store with Signal Forms
 
-Pass `updateStoreWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateStoreWhen` returns true. It is checked on each write and again inside an effect, so it is reactive — a write made while the form is valid reaches the store straight away, and a value held back while it was invalid is pushed as soon as it becomes valid:
+Pass `storeEditsWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `storeEditsWhen` returns true. It is checked on each write and again inside an effect, so it is reactive — a write made while the form is valid reaches the store straight away, and a value held back while it was invalid is pushed as soon as it becomes valid:
 
 ```ts
 export class ProductListComponent {
@@ -356,7 +368,7 @@ export class ProductListComponent {
   // the `: boolean` annotation is needed because filterForm is declared below,
   // without it typescript reports a circular inference
   formData = this.store.linkProductEntitiesFilter({
-    updateStoreWhen: (): boolean => this.filterForm().valid(),
+    storeEditsWhen: (): boolean => this.filterForm().valid(),
   });
 
   filterForm = form(this.formData, (value) => {
@@ -367,9 +379,30 @@ export class ProductListComponent {
 
 If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
 
-With `syncWith`, the external signal only ever receives values that were committed to the store — buffered edits stay local until the gate opens. So a `model()` whose initial value the gate has not accepted yet shows the store value, while the buffer keeps the pending one.
+With `syncWith`, the external signal only ever receives values that were committed to the store — buffered edits stay local until the gate opens.
 
-> `updateStoreWhen` requires an injection context (field initializer or constructor), because an effect is created.
+#### The gate only applies to writes through the returned signal
+
+`storeEditsWhen` gates what the form (or your own code) writes into the buffer. Values arriving from `readFrom` or `syncWith` are written straight to the store and are never gated — those options tell the store which signal to follow, and holding their value back would leave the store disagreeing with the signal it was told to read.
+
+That also means the gate is never called while `link<Name>()` runs, so it can safely read a field declared after it, like the `filterForm` above.
+
+To reject values coming from `readFrom`, do it in the function form, which receives the previous committed value — return the new value to accept it, or `prev` to leave the store alone:
+
+```ts
+linked = this.store.linkProductEntitiesFilter({
+  readFrom: (prev) => {
+    const next = { ...prev, search: this.search() };
+    return next.search.length >= 3 ? next : prev;
+  },
+});
+```
+
+`syncWith` has no such hook. If you need to validate what an external signal supplies, use `readFrom` + `writeTo` instead of `syncWith`, with the check in `readFrom`.
+
+Because those values write through, they also reset the buffer, discarding an edit the gate is currently holding — see [Merging a partial signal with readFrom](#merging-a-partial-signal-with-readfrom).
+
+> `storeEditsWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
 ### On submission, only setting validated data in the store with Signal Forms
 
@@ -466,7 +499,7 @@ withLink(name, options?)
 | ------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`        | State key to link to, or a custom name when `computation` is used              | `keyof State \| string`                                                                                                                                    |
 | `computation` | Derive the linked value from the store (requires `set`)                        | `(store) => T`                                                                                                                                             |
-| `set`         | How writes reach the store; defaults to `patchState(store, { [name]: value })` | `(value, store) => void`                                                                                                                                   |
+| `set`         | How writes reach the store, must write synchronously; defaults to `patchState(store, { [name]: value })` | `(value, store) => void`                                                                                                                                   |
 | `equal`       | Equality guard for both sync directions, defaults to comparing by content      | `(a, b) => boolean` or a name: `'reference'`, `'array'`, `'set'`, `'stringify'`, a prop of the value, or `'array.<prop>'` / `'set.<prop>'` of its elements |
 | `noSetter`    | Skip generating the private `_set<Name>()` method, defaults to `false`         | `boolean`                                                                                                                                                  |
 
@@ -482,11 +515,11 @@ link<Name>(options?: LinkOptions<T>): WritableSignal<T>
 | `readFrom`         | Signal the store only reads, never written back; or a function receiving the previous value, to merge a partial signal in | `Signal<T> \| (prev: T) => T`             |
 | `writeTo`          | Where store changes are pushed: a signal that is set or a function called with the new value                              | `WritableSignal<T> \| (value: T) => void` |
 | `initialValueFrom` | With `syncWith`, where the value that wins on link comes from: `'external'` (default) or `'store'`                        | `'external' \| 'store'`                   |
-| `updateStoreWhen`  | Gate writes: the returned signal buffers them and only pushes to the store when it returns true                           | `(value: T) => boolean`                   |
+| `storeEditsWhen` | Gate writes made through the returned signal: it buffers them and only pushes to the store when this returns true. Does not apply to `readFrom` / `syncWith` values | `(value: T) => boolean`                   |
 
 `syncWith` is mutually exclusive with `readFrom` and `writeTo` (which combine for a two-way sync with a mapping in each direction), and `initialValueFrom` is only accepted together with `syncWith` — all enforced by the types.
 
-The returned `WritableSignal` is always the store view (or, with `updateStoreWhen`, the buffer over it), never the external signal.
+The returned `WritableSignal` is always the store view (or, with `storeEditsWhen`, the buffer over it), never the external signal.
 
 ### Generated private setter
 
