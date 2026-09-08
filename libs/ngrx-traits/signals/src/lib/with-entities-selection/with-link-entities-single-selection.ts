@@ -9,6 +9,7 @@ import {
 import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection.util';
 
 /**
+ * @experimental
  * Generates a `link[Collection]IdSelected()` method that connects the selected
  * entity id to component signals (inputs, models, signal forms).
  *

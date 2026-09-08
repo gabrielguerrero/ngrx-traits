@@ -5,6 +5,8 @@ order: 9
 
 # withLinkEntitiesSingleSelection
 
+> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
+
 Generates a `link[Collection]IdSelected()` method that connects the selected entity id to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesSingleSelection`: writes route through `select[Collection]Entity` / `deselect[Collection]Entity` (setting `undefined` deselects).
 
 Requires withEntitiesSingleSelection to be used before it.
@@ -76,7 +78,7 @@ withLinkEntitiesSingleSelection({ entity, collection? })
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `updateStoreWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `storeEditsWhen`).
 
 This feature passes `noSetter: true`, so no private `_set` method is generated — `select/deselect[Collection]Entity` already covers that write.
 
