@@ -75,7 +75,7 @@ export const ProductEditStore = signalStore(
     }),
   })),
   // the form binds to this: writes land in productDetail, and only valid ones,
-  // since the panel gates them with updateStoreWhen
+  // since the panel gates them with storeEditsWhen
   withLink('productDetail'),
   withComputed(({ productDetail }) => ({
     // a draft that has never been saved still has no id

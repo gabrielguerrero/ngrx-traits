@@ -17,12 +17,14 @@ type ExtractFilter<State, Collection extends string> = Collection extends ''
     : Record<string, unknown>;
 
 /**
+ * @experimental
  * Generates a `link[Collection]EntitiesFilter()` method that connects the
  * entities filter to component signals (inputs, models, signal forms).
  *
  * Prebuilt version of `withLink` for `withEntitiesLocalFilter` /
  * `withEntitiesRemoteFilter` / `withEntitiesHybridFilter`: writes route through
- * `filter[Collection]Entities` (so filtering and its debounce still happen).
+ * `filter[Collection]Entities` with no debounce, so the filter lands in the
+ * store synchronously and the returned signal behaves like a signal.
  * Echo loops are prevented because the filter features patch the filter value
  * by reference, so the link method's default `Object.is` guard converges, and
  * `filter[Collection]Entities` itself drops structurally-equal filters.
@@ -32,9 +34,15 @@ type ExtractFilter<State, Collection extends string> = Collection extends ''
  * @param config - The configuration object for the feature
  * @param config.entity - The entity type to be used
  * @param config.collection - The optional collection name to be used
- * @param config.debounce - Debounce passed to filter[Collection]Entities on
- *   each sync; defaults to 0 to respect signal semantics, and so user can use the signalForm field debounce
  * @param config.forceLoad - forceLoad passed to filter[Collection]Entities
+ *
+ * There is no debounce option: a debounced write lands in the store after the
+ * signal was set, and the link can not tell a value still in flight from one
+ * the store never took — a write back to the committed value inside the window
+ * is dropped as a no-op, leaving the store on the superseded value. To debounce
+ * a form field use Signal Forms' `debounce(path, ms)`, which delays the update
+ * reaching the signal at all; to debounce anything else call
+ * `filter[Collection]Entities` directly, which debounces as usual.
  *
  * @example
  * const entity = type<Product>();
@@ -58,7 +66,6 @@ export function withLinkEntitiesFilter<
 >(config?: {
   entity?: Entity;
   collection?: Collection;
-  debounce?: number;
   forceLoad?: boolean;
 }): SignalStoreFeature<
   Input &
@@ -100,7 +107,8 @@ export function withLinkEntitiesFilter<
     set: (value: any, store: any) => {
       (store[filterEntitiesKey] as (options: any) => void)({
         filter: value,
-        debounce: config?.debounce ?? 0,
+        // always 0: see the note on debouncing in the docblock above
+        debounce: 0,
         forceLoad: config?.forceLoad,
       });
     },
