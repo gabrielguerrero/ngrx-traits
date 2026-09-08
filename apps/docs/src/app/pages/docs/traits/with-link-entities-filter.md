@@ -5,7 +5,9 @@ order: 5
 
 # withLinkEntitiesFilter
 
-Generates a `link[Collection]EntitiesFilter()` method that connects the entities filter to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesLocalFilter`, `withEntitiesRemoteFilter` and `withEntitiesHybridFilter`: writes route through `filter[Collection]Entities`, so filtering (and its debounce) still happen, and syncs are guarded with a structural equality on the filter to prevent echo loops.
+> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
+
+Generates a `link[Collection]EntitiesFilter()` method that connects the entities filter to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesLocalFilter`, `withEntitiesRemoteFilter` and `withEntitiesHybridFilter`: writes route through `filter[Collection]Entities` with no debounce, so the filter lands in the store synchronously, and syncs are guarded with a structural equality on the filter to prevent echo loops.
 
 Requires one of the withEntities\*Filter traits to be used before it.
 
@@ -56,7 +58,7 @@ Please note that this will set both valid and invalid form data in the store. If
 
 ### Only setting validated data in the store with Signal Forms
 
-Pass `updateStoreWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `updateStoreWhen` returns true. It is checked on each write and again inside an effect, so it is reactive — a write made while the form is valid reaches the store straight away, and a value held back while it was invalid is pushed as soon as it becomes valid:
+Pass `storeEditsWhen` to the link method: the returned signal becomes a buffer over the store, and writes only reach it while `storeEditsWhen` returns true. It is checked on each write and again inside an effect, so it is reactive — a write made while the form is valid reaches the store straight away, and a value held back while it was invalid is pushed as soon as it becomes valid:
 
 ```ts
 export class ProductListComponent {
@@ -66,7 +68,7 @@ export class ProductListComponent {
   // the `: boolean` annotation is needed because filterForm is declared below,
   // without it typescript reports a circular inference
   formData = this.store.linkProductEntitiesFilter({
-    updateStoreWhen: (): boolean => this.filterForm().valid(),
+    storeEditsWhen: (): boolean => this.filterForm().valid(),
   });
 
   filterForm = form(this.formData, (value) => {
@@ -77,7 +79,9 @@ export class ProductListComponent {
 
 If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
 
-> `updateStoreWhen` requires an injection context (field initializer or constructor), because an effect is created.
+The gate only applies to writes made through the returned signal. Values arriving from `readFrom` or `syncWith` are written straight to the store — see [withLink](/docs/traits/with-link) for how to reject those in `readFrom` instead.
+
+> `storeEditsWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
 ### On submission, only setting validated data in the store with Signal Forms
 
@@ -181,15 +185,20 @@ These options also work with all the previous examples.
 ## API
 
 ```typescript
-withLinkEntitiesFilter({ entity, collection?, debounce?, forceLoad? })
+withLinkEntitiesFilter({ entity, collection?, forceLoad? })
 ```
 
 | Property     | Description                                                                                                         | Type        |
 | ------------ | ------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `entity`     | The entity type                                                                                                     | `type<T>()` |
 | `collection` | The name of the collection (optional)                                                                               | `string`    |
-| `debounce`   | Debounce passed to `filter[Collection]Entities` on each sync (optional, defaults to the filter trait's own default) | `number`    |
 | `forceLoad`  | forceLoad passed to `filter[Collection]Entities` (optional)                                                         | `boolean`   |
+
+There is no `debounce` option. The write must land in the store synchronously: while a debounced write is in flight the store still reads as the old filter, so a write back to it is dropped as a no-op and the pending one wins — typing `a` and deleting it inside the window would leave the filter on `a`. See [`withLink`](/docs/traits/with-link#custom-set-callback).
+
+To debounce a filter driven by a form field, use Signal Forms' `debounce(path, ms)`, which delays the update reaching the linked signal at all. It only covers updates coming from a bound control — a programmatic `.set()` on the linked signal is not debounced. For that, and to debounce anywhere else, call `filter[Collection]Entities` directly — it still debounces as usual.
+
+With a remote filter this matters: writes through the link are not debounced, so each keystroke bound straight to the linked signal is one request. Debounce the form field, or call `filter[Collection]Entities` yourself.
 
 ## Methods
 
@@ -202,7 +211,7 @@ withLinkEntitiesFilter({ entity, collection?, debounce?, forceLoad? })
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `updateStoreWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `storeEditsWhen`).
 
 This feature passes `noSetter: true`, so no private `_set` method is generated — `filter[Collection]Entities` already covers that write.
 

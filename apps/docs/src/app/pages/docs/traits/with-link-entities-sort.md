@@ -5,6 +5,8 @@ order: 12
 
 # withLinkEntitiesSort
 
+> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
+
 Generates a `link[Collection]EntitiesSort()` method that connects the entities sort to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesLocalSort` and `withEntitiesRemoteSort`: writes route through `sort[Collection]Entities`, so the entities are re-sorted, and syncs are guarded with a structural equality on the sort (`field` + `direction`) to prevent echo loops.
 
 Requires withEntitiesLocalSort or withEntitiesRemoteSort to be used before it.
@@ -75,7 +77,7 @@ withLinkEntitiesSort({ entity, collection? })
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `updateStoreWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `storeEditsWhen`).
 
 This feature passes `noSetter: true`, so no private `_set` method is generated — `sort[Collection]Entities` already covers that write.
 
