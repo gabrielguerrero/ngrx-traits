@@ -79,7 +79,7 @@ export class ProductListComponent {
 
 If the store changes from elsewhere, the buffer resets to the store value (it is a `linkedSignal` over it), so the form follows the store as usual.
 
-The gate only applies to writes made through the returned signal. Values arriving from `readFrom` or `syncWith` are written straight to the store — see [withLink](/docs/traits/with-link) for how to reject those in `readFrom` instead.
+The gate only applies to writes made through the returned signal. Values arriving from `readFrom` or `syncWith` are written straight to the store — see [withLink](/docs/traits/with-link) for how to reject those with `readMap`'s `skip()` instead.
 
 > `storeEditsWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
@@ -211,7 +211,7 @@ With a remote filter this matters: writes through the link are not debounced, so
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `storeEditsWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `readMap`, `writeMap`, `initialValueFrom`, `storeEditsWhen`).
 
 This feature passes `noSetter: true`, so no private `_set` method is generated — `filter[Collection]Entities` already covers that write.
 

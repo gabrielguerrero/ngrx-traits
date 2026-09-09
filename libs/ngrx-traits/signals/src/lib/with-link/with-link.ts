@@ -2,9 +2,11 @@ import {
   computed,
   effect,
   EffectRef,
+  EventEmitter,
   Injector,
   isSignal,
   linkedSignal,
+  OutputEmitterRef,
   Signal,
   untracked,
   WritableSignal,
@@ -21,7 +23,38 @@ import {
 import { capitalize } from '../util';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
-import { EqualOption, resolveEqual } from './with-link.util';
+import {
+  EqualOption,
+  resolveEqual,
+  resolveEqualMapped,
+} from './with-link.util';
+
+/**
+ * Thrown by the `skip` passed to `readMap`/`writeMap`, and caught around the
+ * call. Module-private, so nothing else can produce or observe it.
+ */
+const SKIP = Symbol('withLink.skip');
+
+/**
+ * Runs a map, turning a `skip()` into the `SKIP` marker so it works anywhere
+ * in the function, not only in a return. Only the sentinel is caught — any
+ * other error propagates unchanged. Without a map the value passes through,
+ * which the types only allow when the two sides have the same type.
+ */
+function runMap<A, B>(
+  map: ((value: A, skip: () => never) => B) | undefined,
+  value: A,
+): B | typeof SKIP {
+  if (!map) return value as unknown as B;
+  try {
+    return map(value, () => {
+      throw SKIP;
+    });
+  } catch (error) {
+    if (error === SKIP) return SKIP;
+    throw error;
+  }
+}
 
 type LinkCommonOptions<T> = {
   /**
@@ -44,12 +77,8 @@ type LinkCommonOptions<T> = {
    * is never evaluated while `link<Name>()` runs, so it can safely read a
    * field declared after it, such as a form built from the returned signal.
    *
-   * To reject values coming from `readFrom`, do it in the function form,
-   * which receives the previous committed value: return the new value to
-   * accept it, or `prev` to keep the store as it is. `syncWith` has no such
-   * hook — if you need to validate what an external signal supplies, use
-   * `readFrom` + `writeTo` instead of `syncWith`, with the check in
-   * `readFrom`.
+   * To reject values coming from `readFrom` or `syncWith`, call `skip()` in
+   * `readMap`.
    *
    * A gate that throws surfaces the error from the write that called it, or
    * from the flush effect on the first tick — never from `link<Name>()`.
@@ -60,67 +89,175 @@ type LinkCommonOptions<T> = {
 };
 
 /**
+ * Rejects the value being mapped, from anywhere in the map function: in
+ * `readMap` the store is left as it is, in `writeMap` nothing is pushed out.
+ */
+type Skip = () => never;
+
+/** Whether the external type is exactly the store's. Decides which of
+ * syncWith / readFrom / writeTo supplies the external type, so it stays an
+ * equality — a one-way assignability would pick the wrong side. */
+type Same<T, E> = [T] extends [E] ? ([E] extends [T] ? true : false) : false;
+
+// whether a map is needed is a question of assignability, not equality, and
+// each direction asks it its own way: a narrower external type flows into the
+// store unmapped, while sending a store value back out to it needs the map
+/** Whether what the external side supplies is already a store value. */
+type FlowsIn<T, E> = [E] extends [T] ? true : false;
+/** Whether a store value is already what the external side expects. */
+type FlowsOut<T, E> = [T] extends [E] ? true : false;
+
+// NoInfer: E is inferred from the signal or sink alone, never from the map —
+// a map argument is context-sensitive, and letting it feed the inference
+// leaves both unresolved
+type ReadMapOpt<T, E> =
+  FlowsIn<T, E> extends true
+    ? {
+        /** Maps what the external side supplies into the store's type. */
+        readMap?: (value: NoInfer<E>, skip: Skip) => T;
+      }
+    : {
+        /** Maps what the external side supplies into the store's type. */
+        readMap: (value: NoInfer<E>, skip: Skip) => T;
+      };
+
+type MappedOut<T, E> = {
+  /** Maps a store value into what the external side expects. */
+  writeMap: (value: T, skip: Skip) => NoInfer<E>;
+  /**
+   * Equality for the outbound side, replacing `equal` there. Typed against
+   * what `writeMap` returns, so the premade names ('id', 'array.id', …)
+   * autocomplete from the external type rather than the store's, and it is
+   * used as given instead of being carried over.
+   */
+  writeEqual?: EqualOption<NoInfer<E>>;
+};
+
+// the union gates writeEqual on writeMap being passed: without a map the
+// values pushed out are the store's, which `equal` already describes. It is
+// a union of object types, not of the map itself, so writeMap keeps a single
+// contextual type in each branch and its parameters are still inferred
+type WriteMapOpt<T, E> =
+  FlowsOut<T, E> extends true
+    ? { writeMap?: undefined; writeEqual?: never } | MappedOut<T, E>
+    : MappedOut<T, E>;
+
+/** What `readFrom` accepts: a signal, or a merge over the previous value. */
+type ReadSource<T> = Signal<any> | ((prev: T) => T);
+
+/** What `writeTo` accepts: a writable signal, an `output()`, or an EventEmitter. */
+type WriteSink<E> = WritableSignal<E> | OutputEmitterRef<E> | EventEmitter<E>;
+
+/** The external type of a read source, falling back to the store's. */
+type ExternalIn<T, S> = S extends Signal<infer E> ? E : T;
+
+/** The external type of a write sink, falling back to the store's. */
+type ExternalOut<T, S> =
+  S extends WritableSignal<infer E>
+    ? E
+    : S extends OutputEmitterRef<infer E>
+      ? E
+      : S extends EventEmitter<infer E>
+        ? E
+        : T;
+
+// syncWith and readFrom/writeTo are mutually exclusive, so at most one of the
+// three resolves to something other than the store's type — which is what
+// makes a single readMap/writeMap pair cover all of them
+type ReadExt<T, RF, SW> =
+  Same<ExternalIn<T, SW>, T> extends true
+    ? ExternalIn<T, RF>
+    : ExternalIn<T, SW>;
+type WriteExt<T, WT, SW> =
+  Same<ExternalIn<T, SW>, T> extends true
+    ? ExternalOut<T, WT>
+    : ExternalIn<T, SW>;
+
+/**
  * Options of the generated `link<Name>()` method.
  *
  * `syncWith` is mutually exclusive with `readFrom`/`writeTo`: use `syncWith`
- * when the external signal already matches the store type, or the
- * `readFrom` + `writeTo` pair when each direction needs its own mapping.
+ * for a two-way sync with one external signal, or the `readFrom` + `writeTo`
+ * pair when each direction has its own signal.
+ *
+ * `readMap` and `writeMap` map between the store's type and the external
+ * one, each required only in the direction the types do not already flow.
+ * The map options are outside
+ * the union on purpose: as one intersected pair they have a single contextual
+ * type, so their parameters are inferred.
  */
-export type LinkOptions<T = any> =
-  | (LinkCommonOptions<T> & {
-      /**
-       * External signal kept in sync with the store both ways: writing it
-       * updates the store, and store changes are written back to it.
-       * Requires a WritableSignal (e.g. `model()`).
-       */
-      syncWith: WritableSignal<T>;
-      readFrom?: never;
-      writeTo?: never;
-      /**
-       * Where the value that wins on link comes from.
-       * - 'external' (default): the signal's current value is pushed to the store.
-       * - 'store': the store value is written to the signal.
-       */
-      initialValueFrom?: 'store' | 'external';
-    })
-  | (LinkCommonOptions<T> & {
-      /**
-       * External signal the store only reads from: its value is pushed to the
-       * store, and store changes are never written back. Accepts any signal,
-       * including a writable one whose writes you drive yourself
-       * (e.g. a `model()` only written on a button click), or a `computed`
-       * that maps an external model to the store type.
-       *
-       * Also accepts a function receiving the previous committed value, to
-       * merge a partial external signal into it, e.g.
-       * `(prev) => ({ ...prev, search: this.search() })`. The signals it
-       * reads are tracked, the previous value is not, so store changes alone
-       * do not re-run it; `prev` is always committed state, never a pending
-       * edit the gate is holding back. Return `prev` to reject a value —
-       * `storeEditsWhen` does not gate what `readFrom` supplies.
-       */
-      readFrom?: Signal<T> | ((prev: T) => T);
-      /**
-       * Where store changes are pushed: a WritableSignal that is set, or a
-       * function called with the new value — use it to map back to an
-       * external model's type, or to emit an output. Only changes after link
-       * are pushed, the value at link time is not.
-       *
-       * Combine with `readFrom` for a two-way sync with a mapping in each
-       * direction. Cannot be combined with `syncWith`.
-       *
-       * With `readFrom`, a value the external side already holds — the last
-       * one it supplied, or the last one pushed out — is not pushed again,
-       * so an `output()` does not fire on every change its own input drove.
-       * Anything else is a change it does not know about, and is pushed.
-       */
-      writeTo?: WritableSignal<T> | ((value: T) => void);
-      syncWith?: never;
-      initialValueFrom?: never;
-    });
+export type LinkOptions<
+  T = any,
+  RF = ReadSource<T>,
+  WT = WriteSink<T>,
+  SW = WritableSignal<T>,
+> = LinkCommonOptions<T> &
+  ReadMapOpt<T, ReadExt<T, RF, SW>> &
+  WriteMapOpt<T, WriteExt<T, WT, SW>> &
+  (
+    | {
+        /**
+         * External signal kept in sync with the store both ways: writing it
+         * updates the store, and store changes are written back to it.
+         * Requires a WritableSignal (e.g. `model()`).
+         */
+        syncWith: SW;
+        readFrom?: never;
+        writeTo?: never;
+        /**
+         * Where the value that wins on link comes from.
+         * - 'external' (default): the signal's current value is pushed to the store.
+         * - 'store': the store value is written to the signal.
+         */
+        initialValueFrom?: 'store' | 'external';
+      }
+    | {
+        /**
+         * External signal the store only reads from: its value is pushed to
+         * the store, and store changes are never written back. Accepts any
+         * signal, including a writable one whose writes you drive yourself
+         * (e.g. a `model()` only written on a button click).
+         *
+         * Also accepts a function receiving the previous committed value, to
+         * merge a partial external signal into it, e.g.
+         * `(prev) => ({ ...prev, search: this.search() })`. The signals it
+         * reads are tracked, the previous value is not, so store changes
+         * alone do not re-run it; `prev` is always committed state, never a
+         * pending edit the gate is holding back. To reject a value, call
+         * `skip()` in `readMap` — `storeEditsWhen` does not gate what
+         * `readFrom` supplies.
+         */
+        readFrom?: RF;
+        /**
+         * Where store changes are pushed: a WritableSignal that is set, or an
+         * `output()` / EventEmitter that is emitted. Only changes after link
+         * are pushed, the value at link time is not.
+         *
+         * Combine with `readFrom` for a two-way sync with a signal of its own
+         * in each direction. Cannot be combined with `syncWith`.
+         *
+         * Redundant pushes are dropped by comparing in the external type,
+         * after `writeMap`: a writable sink is compared against what it
+         * currently holds, an emit-only one against what it was last given —
+         * which is also every value `readFrom` supplied, so an `output()`
+         * does not fire on the change its own input drove. An emit-only sink
+         * can not be read, so that memo is all there is: at most one
+         * redundant emit per value, never a missed one.
+         */
+        writeTo?: WT;
+        syncWith?: never;
+        initialValueFrom?: never;
+      }
+  );
 
 /** The `link<Name>()` method generated by `withLink`. */
-export type LinkMethod<T> = (options?: LinkOptions<T>) => WritableSignal<T>;
+export type LinkMethod<T> = <
+  RF extends ReadSource<T> = ReadSource<T>,
+  WT extends WriteSink<any> = WriteSink<T>,
+  SW extends WritableSignal<any> = WritableSignal<T>,
+>(
+  options?: LinkOptions<T, RF, WT, SW>,
+) => WritableSignal<T>;
 
 /**
  * The `_set<Name>()` method generated by `withLink`, the same write path the
@@ -169,10 +306,11 @@ export type LinkSourceOptions<
    * `debounce(path, ms)`, which delays the update reaching the signal rather
    * than the write, and only for updates from a bound control.
    *
-   * A `set` that transforms what it is given is called on every write of the
-   * raw value — the store settles on the transformed value, so the
-   * comparison never matches. Worth knowing if `set` does more than write
-   * state.
+   * A `set` that transforms what it is given is re-entered for any value the
+   * transform rewrites, since writes are compared against what the store
+   * settled on: writing ' b ' to a trimming `set` calls it every time,
+   * writing 'b' calls it once. Nothing downstream repeats, so this only
+   * matters when `set` does more than write state, such as firing a request.
    */
   set?: (value: Input['state'][NoInfer<K>], store: StoreSource<Input>) => void;
   /**
@@ -188,6 +326,14 @@ export type LinkSourceOptions<
    * Override with a function or a premade name: 'reference', 'array'
    * (shallow, order sensitive), 'set' (order insensitive), 'stringify', a
    * property to compare by ('id'), or 'array.id' / 'set.id' per element.
+   *
+   * Applies to comparisons in the store's type. Where `readMap` or `writeMap`
+   * is used the values compared are the external type, so only a name that
+   * compares structure carries over — 'array', 'set', 'stringify' and
+   * 'reference'. A property name ('id', 'array.id', 'set.id') or a custom
+   * function describes the store's type, so that side falls back to the
+   * content comparison instead. Pass `writeEqual` on the link call to compare
+   * the outbound side in the type `writeMap` returns.
    */
   equal?: EqualOption<Input['state'][NoInfer<K>]>;
   /**
@@ -218,6 +364,14 @@ export type LinkComputedOptions<
    * Override with a function or a premade name: 'reference', 'array'
    * (shallow, order sensitive), 'set' (order insensitive), 'stringify', a
    * property to compare by ('id'), or 'array.id' / 'set.id' per element.
+   *
+   * Applies to comparisons in the store's type. Where `readMap` or `writeMap`
+   * is used the values compared are the external type, so only a name that
+   * compares structure carries over — 'array', 'set', 'stringify' and
+   * 'reference'. A property name ('id', 'array.id', 'set.id') or a custom
+   * function describes the store's type, so that side falls back to the
+   * content comparison instead. Pass `writeEqual` on the link call to compare
+   * the outbound side in the type `writeMap` returns.
    */
   equal?: EqualOption<NoInfer<T>>;
   /**
@@ -246,12 +400,20 @@ export type LinkComputedOptions<
  * - `readFrom`: one-way external → store, accepts any signal — including a
  *   writable one you only write yourself (e.g. a `model()` set by a button) —
  *   or a function receiving the previous value, to merge a partial signal in.
- * - `writeTo`: one-way store → external, a WritableSignal that is set or a
- *   function called with each committed change (e.g. an `output` emit).
+ * - `writeTo`: one-way store → external, a WritableSignal that is set, or an
+ *   `output()` / EventEmitter that is emitted, on each committed change.
  *
- * `readFrom` and `writeTo` combine into a two-way sync with a mapping in each
- * direction (e.g. a `model()` whose type differs from the store's); `syncWith`
- * is mutually exclusive with both, and `initialValueFrom` only applies to it.
+ * `readFrom` and `writeTo` combine into a two-way sync with a signal of its
+ * own in each direction; `syncWith` is mutually exclusive with both, and
+ * `initialValueFrom` only applies to it.
+ *
+ * When the external signal's type differs from the store's, `readMap` and
+ * `writeMap` map between them. Each becomes required only in the direction the
+ * value does not already fit. A `{ search: string }` store and a plain
+ * `string` signal need both. A signal carrying `{ search, page }` needs only
+ * `writeMap`: it already has what the store's filter needs coming in, while
+ * the store's value has no `page` to give back. Either can call `skip()` to reject the value it was
+ * given: `readMap` leaves the store as it is, `writeMap` pushes nothing out.
  *
  * Both sync directions are guarded by `equal`, which defaults to comparing
  * by content — see the `equal` option for the premade names it accepts.
@@ -299,8 +461,9 @@ export type LinkComputedOptions<
  * // valueField = form(this.store.linkSelectedGenreIds({ syncWith: this.value }));
  *
  * @example
- * // Premade equality for an object state that is rebuilt on every read
- * withLink('filter', { equal: 'stringify' });
+ * // Premade equality for an array of objects with no id, rebuilt on every
+ * // read (plain objects are already compared structurally by default)
+ * withLink('rows', { equal: 'stringify' });
  *
  * @example
  * // Compare by a property, autocompleted from the linked value's type: the
@@ -327,19 +490,22 @@ export type LinkComputedOptions<
  * // });
  *
  * @example
- * // Two-way with a model of a different type: map in with a computed,
- * // map back out with a function
+ * // Two-way with a model of a different type: the same signal both ways,
+ * // with a map in each direction
  * // search = model<string>(''); // store state is { search: string }
  * // linked = this.store.linkFilter({
- * //   readFrom: computed(() => ({ search: this.search() })),
- * //   writeTo: (value) => this.search.set(value.search),
+ * //   readFrom: this.search,
+ * //   readMap: (search) => ({ search }),
+ * //   writeTo: this.search,
+ * //   writeMap: (filter) => filter.search,
  * // });
  *
  * @example
- * // Emit committed changes as an output
- * // filterChange = output<{ search: string }>();
+ * // Emit committed changes as an output, skipping the ones it should not see
+ * // filterChange = output<string>();
  * // linked = this.store.linkFilter({
- * //   writeTo: (value) => this.filterChange.emit(value),
+ * //   writeTo: this.filterChange,
+ * //   writeMap: (filter, skip) => filter.search || skip(),
  * // });
  *
  * @example
@@ -415,6 +581,9 @@ export function withLink<Input extends SignalStoreFeatureResult>(
       : (store as any)[name];
 
     const equal = resolveEqual(options?.equal as EqualOption<any>);
+    // the comparison to use on a side that has a map, which moves the values
+    // being compared into the external type
+    const equalMapped = resolveEqualMapped(options?.equal as EqualOption<any>);
     const write = options?.set
       ? (value: any) => options.set!(value, store as any)
       : (value: any) => patchState(store as any, { [name]: value });
@@ -443,11 +612,27 @@ export function withLink<Input extends SignalStoreFeatureResult>(
             | (LinkCommonOptions<any> & {
                 syncWith?: WritableSignal<any>;
                 readFrom?: Signal<any> | ((prev: any) => any);
-                writeTo?: WritableSignal<any> | ((value: any) => void);
+                writeTo?: any;
+                readMap?: (value: any, skip: () => never) => any;
+                writeMap?: (value: any, skip: () => never) => any;
+                writeEqual?: EqualOption<any>;
                 initialValueFrom?: 'store' | 'external';
               })
             | undefined;
           const storeEditsWhen = linkOptions?.storeEditsWhen;
+          const readMap = linkOptions?.readMap;
+          const writeMap = linkOptions?.writeMap;
+          // `equal` describes the store's type, so a mapped side is compared
+          // by content instead — every comparison below a map is in the
+          // external type, which is the whole point of the maps
+          const equalIn = readMap ? equalMapped : equal;
+          // `writeEqual` is typed against what `writeMap` returns, so it is
+          // used as given — no shape guard, the user chose it for that type
+          const equalOut = linkOptions?.writeEqual
+            ? resolveEqual(linkOptions.writeEqual)
+            : writeMap
+              ? equalMapped
+              : equal;
           // one linkedSignal over the source for both modes. Without a gate
           // writes delegate straight to the store, which stays the single
           // source of truth. With a gate they land in the buffer first, so a
@@ -477,10 +662,27 @@ export function withLink<Input extends SignalStoreFeatureResult>(
             },
           );
 
-          // what the external side is known to hold. Seeded with the store's
-          // value at link time (writeTo pushes changes only), then updated by
-          // every value readFrom supplies and every value writeTo pushes out
-          let externalHolds: unknown = untracked(storeSource);
+          // writeTo is set up before readFrom so a value readFrom supplies can
+          // be recorded as one the external side already holds
+          const writeTo = linkOptions?.writeTo;
+          // a sink with `set` is a writable signal, so it is also readable and
+          // can be asked what it holds. An output() or EventEmitter only has
+          // emit(), so what it was last given has to be remembered
+          const readableSink =
+            !!writeTo && typeof writeTo.set === 'function'
+              ? writeTo
+              : undefined;
+          const mapOut = (value: any) => runMap(writeMap, value);
+          // external space: what an emit-only sink was last given. Seeded with
+          // the link-time value, and with every value readFrom supplies, so
+          // neither is emitted back at the side it came from
+          // only for an emit-only sink: a readable one is asked directly, so
+          // seeding this would just run writeMap for a value never consulted
+          let lastEmitted: unknown =
+            writeTo && !readableSink
+              ? mapOut(untracked(storeSource))
+              : undefined;
+
           const readFrom = linkOptions?.readFrom;
           if (readFrom) {
             // the function form receives the previous committed value
@@ -495,18 +697,24 @@ export function withLink<Input extends SignalStoreFeatureResult>(
             // one way: the store reads the signal, never writes it back.
             // Writes to the store, not through `linked`, so storeEditsWhen
             // never sees it — the gate is about edits made through the
-            // returned signal. externalHolds is recorded before the write, so
+            // returned signal. lastEmitted is recorded before the write, so
             // the writeTo effect can not observe the store change ahead of it
             // whatever order the effects run in
+            const supply = (value: unknown) => {
+              const mapped = runMap(readMap, value);
+              if (mapped === SKIP) return;
+              if (writeTo && !readableSink) lastEmitted = mapOut(mapped);
+              guardedWrite(mapped);
+            };
             let lastRead: unknown = untracked(read);
-            externalHolds = lastRead;
-            guardedWrite(lastRead);
+            supply(lastRead);
             effect(() => {
               const value = read();
-              if (equal(value, lastRead)) return;
+              // deduped on what was read, accepted or skipped alike: a value
+              // readMap rejected is rejected again if it comes back unchanged
+              if (equalIn(value, lastRead)) return;
               lastRead = value;
-              externalHolds = value;
-              untracked(() => guardedWrite(value));
+              untracked(() => supply(value));
             });
           }
 
@@ -534,30 +742,39 @@ export function withLink<Input extends SignalStoreFeatureResult>(
             });
           }
 
-          const writeTo = linkOptions?.writeTo;
           if (writeTo) {
-            const writeExternal =
-              typeof (writeTo as Partial<WritableSignal<any>>).set ===
-              'function'
-                ? (value: any) => (writeTo as WritableSignal<any>).set(value)
-                : (writeTo as (value: any) => void);
+            const push = readableSink
+              ? (value: any) => readableSink.set(value)
+              : (value: any) => writeTo.emit(value);
             // changes only: the link-time value is not pushed, so an output
-            // does not emit spuriously — checked on the first run only, since
-            // later a return to it is a real change. Reads the source, not
-            // the buffer, so only committed values go out. A value the
-            // external side already holds — last supplied by readFrom, or
-            // last pushed — is not pushed again, which is what stops an echo
+            // does not emit spuriously and a model() that disagrees with the
+            // store on link is left alone — checked on the first run only,
+            // since later a return to it is a real change. Read here, after
+            // readFrom's seed, so a value it transformed on the way in (a
+            // trimming `set`) counts as the link-time value too. Reads the
+            // source, not the buffer, so only committed values go out
             let linkTime: { value: unknown } | undefined = {
-              value: untracked(storeSource),
+              value: mapOut(untracked(storeSource)),
             };
             effect(() => {
               const value = storeSource();
-              const initial = linkTime;
-              linkTime = undefined;
-              if (initial && equal(value, initial.value)) return;
-              if (equal(value, externalHolds)) return;
-              externalHolds = value;
-              untracked(() => writeExternal(value));
+              untracked(() => {
+                const initial = linkTime;
+                linkTime = undefined;
+                const mapped = mapOut(value);
+                if (mapped === SKIP) return;
+                // a writable sink is the truth about what it holds; an
+                // emit-only one is only known through what it was last given
+                // a writable sink is the truth about what it holds; an
+                // emit-only one is only known through what it was last given
+                const held = readableSink ? readableSink() : lastEmitted;
+                if (initial && initial.value !== SKIP) {
+                  if (equalOut(mapped, initial.value)) return;
+                }
+                if (held !== SKIP && equalOut(mapped, held)) return;
+                lastEmitted = mapped;
+                push(mapped);
+              });
             });
           }
 
@@ -569,41 +786,58 @@ export function withLink<Input extends SignalStoreFeatureResult>(
             // made to it ourselves are not mistaken for user edits. Both
             // branches below seed it before the effects run
             let lastExternal: unknown;
+            const readIn = (value: unknown) => {
+              const mapped = runMap(readMap, value);
+              if (mapped !== SKIP) guardedWrite(mapped);
+            };
             if (initialValueFrom === 'external') {
               // straight to the store, not through `linked`: like readFrom,
               // a value the external signal supplies is not an edit made
               // through the returned signal, so storeEditsWhen does not
               // apply to it
-              guardedWrite(untracked(syncWith));
+              lastExternal = untracked(syncWith);
               // the initial sync above already applied this value, so the
               // effect below must not apply it again
-              lastExternal = untracked(syncWith);
+              readIn(lastExternal);
             } else {
-              syncWith.set(untracked(storeSource));
+              const mapped = mapOut(untracked(storeSource));
+              if (mapped !== SKIP) syncWith.set(mapped);
               // our own write: without recording it, the effect below would
               // treat its first run as a user edit and force-apply the
               // external snapshot — reverting a store change or clobbering a
               // buffered write made before the first tick
-              lastExternal = untracked(storeSource);
+              lastExternal = mapped === SKIP ? untracked(syncWith) : mapped;
             }
             // external -> store, bypassing the gate for the same reason as
             // the seed above
             effect(() => {
               const value = syncWith();
-              if (equal(value, lastExternal)) return;
+              if (equalIn(value, lastExternal)) return;
               lastExternal = value;
-              untracked(() => guardedWrite(value));
+              untracked(() => readIn(value));
             });
             // store -> external. Reads the source, not the buffer, so an
             // external model() only ever sees values committed to the store.
+            // Changes only on the first run, like writeTo: the seed above has
+            // already settled both sides, so a difference left over there is
+            // a value readMap rejected — and leaving that where the user put
+            // it is the point of skip, not something to correct
+            let linkTimeOut: { value: unknown } | undefined = {
+              value: mapOut(untracked(storeSource)),
+            };
             effect(() => {
               const value = storeSource();
               untracked(() => {
-                if (!equal(syncWith(), value)) {
+                const initial = linkTimeOut;
+                linkTimeOut = undefined;
+                const mapped = mapOut(value);
+                if (mapped === SKIP) return;
+                if (initial && equalOut(mapped, initial.value)) return;
+                if (!equalOut(syncWith(), mapped)) {
                   // our own write, not a user edit: recording it keeps the
                   // effect above from writing it straight back
-                  lastExternal = value;
-                  syncWith.set(value);
+                  lastExternal = mapped;
+                  syncWith.set(mapped);
                 }
               });
             });

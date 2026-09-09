@@ -11,4 +11,13 @@ export class UserService {
       .post<{ id: string }>('/api/register', data)
       .pipe(delay(500));
   }
+
+  checkEmail(email: string) {
+    return this.httpClient
+      .get<{
+        email: string;
+        available: boolean;
+      }>('/api/check-email', { params: { email } })
+      .pipe(delay(300));
+  }
 }
