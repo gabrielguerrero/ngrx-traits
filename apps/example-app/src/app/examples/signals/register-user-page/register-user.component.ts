@@ -1,10 +1,6 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
-import {
+  debounce,
   email,
   form,
   FormField,
@@ -20,34 +16,20 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
 
-import { RegisterUserStore } from './register-user.store';
+import { initialRegistration, RegisterUserStore } from './register-user.store';
 import { provideTemporalStringDateAdapter } from './temporal-string-date-adapter';
-
-interface RegisterData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  dateOfBirth: string;
-}
-
-const initialValue: RegisterData = {
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  dateOfBirth: '2000-01-01',
-};
 
 @Component({
   selector: 'register-user',
   template: `
+    <a mat-raised-button routerLink="/signals" class="mb-4">Back to Examples</a>
     <mat-card>
       <mat-card-header>
         <mat-card-title>Register User</mat-card-title>
         <mat-card-subtitle>
-          Example using withCalls + Angular Signal Forms
+          Example using withLink + withCalls + Angular Signal Forms
         </mat-card-subtitle>
       </mat-card-header>
       <mat-card-content>
@@ -65,10 +47,18 @@ const initialValue: RegisterData = {
           <mat-form-field>
             <mat-label>Email</mat-label>
             <input matInput type="email" [formField]="registerForm.email" />
+            @if (store.isCheckEmailLoading()) {
+              <mat-hint>Checking email...</mat-hint>
+            } @else {
+              <mat-hint>Try taken&#64;test.com</mat-hint>
+            }
             @if (
               registerForm.email().touched() && registerForm.email().invalid()
             ) {
-              <mat-error>Valid email is required</mat-error>
+              <mat-error>{{
+                registerForm.email().errors()[0].message ??
+                  'Valid email is required'
+              }}</mat-error>
             }
           </mat-form-field>
 
@@ -79,6 +69,9 @@ const initialValue: RegisterData = {
               type="password"
               [formField]="registerForm.password"
             />
+            @if (store.passwordStrength(); as strength) {
+              <mat-hint>Strength: {{ strength }}</mat-hint>
+            }
             @if (
               registerForm.password().touched() &&
               registerForm.password().invalid()
@@ -124,6 +117,7 @@ const initialValue: RegisterData = {
             [disabled]="
               !registerForm().dirty() ||
               registerForm().invalid() ||
+              store.isCheckEmailLoading() ||
               store.isRegisterUserLoading()
             "
           >
@@ -154,6 +148,7 @@ const initialValue: RegisterData = {
     MatProgressSpinnerModule,
     FormField,
     MatDatepickerModule,
+    RouterLink,
   ],
   providers: [RegisterUserStore, provideTemporalStringDateAdapter()],
 })
@@ -161,11 +156,20 @@ export class RegisterUserComponent {
   protected store = inject(RegisterUserStore);
   private snackBar = inject(MatSnackBar);
 
-  protected model = signal<RegisterData>({ ...initialValue });
-  protected registerForm = form(this.model, (path) => {
+  // the form writes straight into the store, so the store can derive from
+  // it (passwordStrength) and react to it (checkEmail) while it is filled in
+  protected registerForm = form(this.store.linkRegistration(), (path) => {
     required(path.name);
     required(path.email);
     email(path.email);
+    // the email only reaches the store, and the check, once typing pauses
+    debounce(path.email, 300);
+    validate(path.email, ({ value }) => {
+      const check = this.store.checkEmailResult();
+      return check?.email === value() && !check.available
+        ? { kind: 'emailTaken', message: 'Email already taken' }
+        : undefined;
+    });
     required(path.password);
     minLength(path.password, 6);
     required(path.confirmPassword);
@@ -179,7 +183,8 @@ export class RegisterUserComponent {
 
   async onSubmit() {
     await submit(this.registerForm, async () => {
-      const { name, email, password, dateOfBirth } = this.model();
+      // the store already holds the form value
+      const { name, email, password } = this.store.registration();
 
       const result = await this.store.registerUser({ name, email, password });
 
@@ -187,7 +192,7 @@ export class RegisterUserComponent {
         this.snackBar.open('Registration successful!', 'Close', {
           duration: 3000,
         });
-        this.registerForm().reset(initialValue);
+        this.registerForm().reset(initialRegistration);
       } else {
         this.snackBar.open(result.error() as string, 'Close', {
           duration: 5000,

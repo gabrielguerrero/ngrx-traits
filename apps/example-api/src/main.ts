@@ -130,9 +130,16 @@ app.delete('/api/orders/:id', (req, res) => {
   res.json(result);
 });
 
+const takenEmails = ['taken@test.com'];
+
+app.get('/api/check-email', (req, res) => {
+  const email = String(req.query.email ?? '');
+  res.json({ email, available: !takenEmails.includes(email) });
+});
+
 app.post('/api/register', (req, res) => {
   const body = req.body as { email: string };
-  if (body.email === 'taken@test.com') {
+  if (takenEmails.includes(body.email)) {
     return res.status(400).json({ message: 'Email already taken' });
   }
   res.json({ id: crypto.randomUUID() });

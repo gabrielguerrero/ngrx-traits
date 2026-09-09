@@ -208,6 +208,28 @@ const equals: Record<string, (a: unknown, b: unknown) => boolean> = {
 };
 
 /**
+ * The comparison to use on a side a map has moved into the external type.
+ *
+ * `equal` describes the store's type, so only the premades above carry over: a
+ * property name (`'id'`, `'array.id'`, `'set.id'`) names a property of that
+ * type, and a custom function was written for it. `'array'` and `'set'` carry
+ * over only while the values are still arrays — a map can turn an object into
+ * an array or back, and both report every non-array unequal, so a mapped side
+ * would stop deduping altogether and echo without end.
+ */
+export function resolveEqualMapped<T>(
+  equal?: EqualOption<T>,
+): (a: unknown, b: unknown) => boolean {
+  if (typeof equal !== 'string' || !Object.hasOwn(equals, equal)) {
+    return equalAuto;
+  }
+  const premade = equals[equal];
+  if (equal !== 'array' && equal !== 'set') return premade;
+  return (a, b) =>
+    Array.isArray(a) && Array.isArray(b) ? premade(a, b) : equalAuto(a, b);
+}
+
+/**
  * Resolves an `equal` option to a function, defaulting to `equalAuto`, which
  * compares by content rather than by reference — pass `'reference'` for
  * `Object.is`.
