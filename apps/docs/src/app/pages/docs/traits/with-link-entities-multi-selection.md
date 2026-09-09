@@ -7,7 +7,9 @@ order: 10
 
 > **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
 
-Generates a `link[Collection]IdsSelected()` method that connects the selected entity ids to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesMultiSelection`: reads the `[collection]IdsSelected` computed, writes route through `select[Collection]Entities` with `clearSelectionBeforeSelect` (so each write replaces the selection, and an empty array clears it), and syncs are guarded with an order-insensitive ids equality — the selection map does not preserve the order of the ids it was given, so an order-sensitive compare would cause echo loops.
+Generates a `link[Collection]IdsSelected()` method that connects the selected entity ids to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesMultiSelection`. It reads the `[collection]IdsSelected` computed, and writes route through `select[Collection]Entities` with `clearSelectionBeforeSelect`, so each write replaces the selection and an empty array clears it.
+
+Syncs are compared with an order-insensitive ids equality: the selection does not preserve the order it was given, and an order-sensitive compare would echo loop.
 
 Requires withEntitiesMultiSelection to be used before it.
 
@@ -73,7 +75,7 @@ withLinkEntitiesMultiSelection({ entity, collection? })
 }
 ```
 
-See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `initialValueFrom`, `storeEditsWhen`).
+See [`withLink`](/docs/traits/with-link) for the `options` parameter (`syncWith`, `readFrom`, `writeTo`, `readMap`, `writeMap`, `initialValueFrom`, `storeEditsWhen`).
 
 This feature passes `noSetter: true`, so no private `_set` method is generated — `select/clear[Collection]Entities` already covers that write.
 

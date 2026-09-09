@@ -90,7 +90,12 @@ export class GenreMultiSelect implements FormValueControl<Genre[]> {
   disabled = input<boolean>(false);
 
   protected idsSelectedField = form(
-    this.store.linkGenreIdsSelected({ syncWith: this.value }),
+    // the store holds plain entity ids, the model holds Genre: a Genre is
+    // already an id so it flows in unmapped, but going back out narrows
+    this.store.linkGenreIdsSelected({
+      syncWith: this.value,
+      writeMap: (ids) => ids as Genre[],
+    }),
     (path) => {},
   );
 }

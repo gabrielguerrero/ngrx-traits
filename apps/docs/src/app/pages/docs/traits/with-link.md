@@ -5,7 +5,7 @@ order: 19
 
 # withLink
 
-> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
+> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
 
 Generates a `link<Name>()` method that connects store state to component signals like `input()`, `model()` and Angular Signal Forms. The method returns a `WritableSignal` that is a live view of the store: reading it reads the state, writing it updates the store (via `patchState` by default, or a custom `set` callback, e.g. to call a store method like `filterEntities` instead).
 
@@ -13,13 +13,15 @@ The method takes an options object, which can also connect an external signal, i
 
 - `syncWith`: two-way sync, requires a `WritableSignal` (e.g. `model()`).
 - `readFrom`: one-way external → store. Accepts any signal, including a writable one you only write yourself (e.g. a `model()` set on a button click) — the store reads it and never writes back. Also accepts a function receiving the previous value, to merge a partial signal into it.
-- `writeTo`: one-way store → external. A `WritableSignal` that is set, or a function called with each committed change (e.g. to emit an output).
+- `writeTo`: one-way store → external. A `WritableSignal` that is set, or an `output()` / `EventEmitter` that is emitted, on each committed change.
 
-`readFrom` and `writeTo` combine into a two-way sync with a mapping in each direction (e.g. a `model()` whose type differs from the store's); `syncWith` is mutually exclusive with both, and `initialValueFrom` only applies to it.
+`readFrom` and `writeTo` combine into a two-way sync with a signal of its own in each direction; `syncWith` is mutually exclusive with both, and `initialValueFrom` only applies to it.
+
+When the external signal's type is not the store's, `readMap` and `writeMap` map between the two, and either can call `skip()` to reject a value (see [Mapping between types](#mapping-between-types)).
 
 Both sync directions are guarded by `equal`, so writes only happen when the value actually changed — this prevents echo loops when `set` transforms the value (e.g. normalizes or sorts it).
 
-Besides a function, `equal` accepts the name of a premade comparison — `'array'`, `'set'`, `'stringify'` — or a property to compare by, like `'id'` on an object and `'array.id'` / `'set.id'` on an array of them (see [Premade equality](#premade-equality)).
+Besides a function, `equal` accepts the name of a premade comparison — `'reference'`, `'array'`, `'set'`, `'stringify'` — or a property to compare by, like `'id'` on an object and `'array.id'` / `'set.id'` on an array of them (see [Equality](#equality)).
 
 The first argument names the generated method and doubles as the state key to link to (with autocompletion), unless `computation` is provided in the options — then it is just a custom name and the value is derived from the store.
 
@@ -77,11 +79,13 @@ const ProductsStore = signalStore(
 );
 ```
 
-`set` must write synchronously: by the time it returns, reading the source has to give the new value (or whatever `set` transformed it into). The link compares each write against the committed value to skip redundant ones, so while a write is still in flight the store still reads as the old value, and a write back to it is dropped as a no-op — leaving the store on the superseded value. That is why the example passes `debounce: 0`: typing `a` then deleting it within the debounce window would otherwise leave the filter on `a`.
+`set` must write synchronously — by the time it returns, reading the source has to give the new value.
+
+Redundant writes are skipped by comparing against the committed value. While a write is still in flight the store still reads as the old one, so a write back to that value looks redundant and is dropped, and the pending write wins. That is why the example passes `debounce: 0`: typing `a` and deleting it within the window would otherwise leave the filter on `a`.
 
 To debounce a form field, use Signal Forms' `debounce(path, ms)`, which delays the update reaching the signal at all instead of delaying the write. It only covers updates coming from a bound control — a programmatic `.set()` on the linked signal or model is not debounced. For that, and to debounce anything else, call the debouncing store method (`filterProductEntities`) directly rather than through the link.
 
-A `set` that transforms what it is given (normalizes, trims, sorts) is called on every write of the raw value — the store settles on the transformed value, so the comparison never matches. Worth knowing if `set` does more than write state.
+A `set` that transforms what it is given (normalizes, trims, sorts) is re-entered for any value the transform rewrites, since writes are compared against what the store settled on: writing `' b '` to a trimming `set` calls it every time, writing `'b'` calls it once. Nothing downstream repeats — `writeTo`, `syncWith` and the store's own consumers all compare against what they already hold — so this only matters when `set` does more than write state, such as firing a request.
 
 ### Two-way sync with a model()
 
@@ -146,11 +150,11 @@ export class ProductListComponent {
 
 The signals the function reads are tracked; the previous value is not — a store change alone does not re-run the merge, but the next external change merges into the latest value. `prev` is always the value committed to the store, never a pending edit the `storeEditsWhen` gate is holding back — merging one in would commit it behind the gate's back.
 
-This means a gated edit in progress is **lost** when `readFrom` changes the store: the returned signal is a `linkedSignal` over the store, so a new committed value resets it. If a user is part-way through an invalid form and a parent input feeding `readFrom` changes, their edit is replaced by the merged value. (A `readFrom` value that compares equal to the current state writes nothing, so it does not reset anything.) Where that matters, keep the external signal out of the same link — read it into separate state, or drive it from an explicit user action rather than continuously.
+So a gated edit in progress is **lost** when `readFrom` changes the store: the returned signal is a `linkedSignal` over the store, and a newly committed value resets it. A user part-way through an invalid form loses that edit if a parent input feeding `readFrom` changes. (A value equal to the current state writes nothing, so it resets nothing.) Where that matters, keep the external signal out of this link — read it into separate state, or drive it from an explicit user action.
 
 ### One-way out: pushing store changes with writeTo
 
-`writeTo` is the opposite direction: every change committed to the store is pushed out, either by setting a `WritableSignal` or by calling a function with the new value. The value at link time is not pushed — only changes after that. Use the function form to emit an output:
+`writeTo` is the opposite direction: every change committed to the store is pushed out. It takes a **sink**, not a callback — a `WritableSignal` (`model()`, `signal()`) that is set, or an `output()` / `EventEmitter` that is emitted. The value at link time is not pushed, only changes after it:
 
 ```typescript
 @Component({
@@ -162,18 +166,34 @@ export class ProductSearchComponent {
   filterChange = output<{ search: string }>();
 
   linked = this.store.linkProductEntitiesFilter({
-    writeTo: (value) => this.filterChange.emit(value),
+    writeTo: this.filterChange,
   });
 }
 ```
 
 `writeTo` cannot be combined with `syncWith` (which already writes back), but it combines with `readFrom` — see the next section.
 
-When both are used, a value the external side already holds is not pushed: the last one `readFrom` supplied, or the last one `writeTo` pushed out. So a `readFrom` value is not echoed straight back (an `output()` would otherwise fire on every change its own input drove), and neither is a store change back to the value the external side currently holds. Anything else — a reset to a value it does not hold, a write through the returned signal the gate commits, a field the merge does not control changing — is pushed.
+Redundant pushes are dropped, and the comparison happens with the store value or **after `writeMap`** if set, in the type the external side actually sees. With a mapping that drops part of the state, a change the parent could never observe never reaches it:
 
-### Two-way sync with a model() of a different type
+```typescript
+// store state is { search: string; page: number }, the parent only wants search
+searchChange = output<string>();
 
-When an external `model()` does not match the store's type, `syncWith` cannot be used directly. Combine `readFrom` with a `computed` that maps the model into the store's type, and `writeTo` with a function mapping store changes back to the model:
+linked = this.store.linkProductEntitiesFilter({
+  writeTo: this.searchChange,
+  writeMap: (filter) => filter.search,
+});
+// paging from 1 to 2 to 3 with the same search emits nothing
+```
+
+How "already holds" is decided depends on the sink:
+
+- A **writable sink** is readable, so it is simply asked: a mapped value it already holds is never set again, even if the parent put it there itself.
+- An **emit-only sink** (`output()`, `EventEmitter`) cannot be read, so the link remembers what it last gave it: the link-time value, whatever `readFrom` supplied (through `writeMap`), and everything it emitted. The guarantee is deliberately one-sided — **at most one redundant emit per value, never a missed one** — because a redundant emit is noise the parent can ignore, while a missed one diverges for good.
+
+### Mapping between types
+
+When the external signal's type is not the store's, `readMap` and `writeMap` map between them. Here the parent works with a plain search string while the store keeps a `{ search: string }` filter, so each direction needs a map:
 
 ```typescript
 @Component({
@@ -187,15 +207,50 @@ export class ProductSearchComponent {
   search = model<string>('');
 
   linked = this.store.linkProductEntitiesFilter({
-    // in: model -> store type
-    readFrom: computed(() => ({ search: this.search() })),
-    // out: store type -> model
-    writeTo: (value) => this.search.set(value.search),
+    // the same model both ways, with a map in each direction
+    readFrom: this.search,
+    readMap: (search) => ({ search }),
+    writeTo: this.search,
+    writeMap: (filter) => filter.search,
   });
 }
 ```
 
-On link, the mapped model value is pushed to the store (like `syncWith`'s default `initialValueFrom: 'external'`). The `equal` guard on the store side prevents echo loops between the two mappings.
+The types require a map, but only **in the direction the value does not already fit** — which here is both, since a `string` is not a `{ search: string }` and neither is the reverse.
+
+Change the parent's signal to `{ search: string; page: number }` and only one direction still needs one. Coming in, that object already has everything the store's filter needs, so `readMap` can go. Going out, the store's `{ search }` has no `page`, so `writeMap` stays required:
+
+```typescript
+// the parent's signal is { search: string; page: number }
+this.store.linkProductEntitiesFilter({ readFrom: this.parentFilter }); // fine, no readMap
+this.store.linkProductEntitiesFilter({ writeTo: this.parentFilter }); // error: writeMap is required
+```
+
+On link, the mapped model value is pushed to the store (like `syncWith`'s default `initialValueFrom: 'external'`), and nothing is pushed back out. The same pair works on `syncWith` when one signal covers both directions.
+
+Both maps receive a second argument, `skip`, which **rejects** the value they were given. Call it from anywhere in the function, not only in a return:
+
+```typescript
+// the store's selection is optional, the model is not:
+// a deselect leaves the last value in place
+protected idSelected = this.store.linkGenreIdSelected({
+  readFrom: () => this.value(),
+  writeTo: this.value,
+  writeMap: (id, skip) => (id ? (id as Genre) : skip()),
+});
+```
+
+- `writeMap` skipping means nothing is pushed out for that store value.
+- `readMap` skipping means the value is rejected and the store is left as it is — this is how you validate what an external signal supplies, on `readFrom` and `syncWith` alike.
+
+```typescript
+linked = this.store.linkProductEntitiesFilter({
+  readFrom: this.search,
+  readMap: (search, skip) => (search.length >= 3 ? { search } : skip()),
+});
+```
+
+A mapped side is compared in the external type, so `equal` only partly carries over, and `writeEqual` can replace it on the way out — see [Equality across maps](#equality-across-maps).
 
 ### Custom name with computation
 
@@ -216,11 +271,13 @@ const Store = signalStore(
 );
 ```
 
-### Premade equality
+### Equality
 
-`equal` defaults to comparing by content, chosen from the value at hand: `Object.is` for primitives, element by element for arrays, and structurally for plain objects. Reference equality is the wrong default for a two-way link — a value rebuilt on every read (a `computation` mapping the store, a form producing a fresh object, a spread in `set`) is never equal to its own previous value, so every write re-triggers the read and the link never settles.
+`equal` decides when a value counts as changed. A write equal to what the store already holds is skipped — `set` (or `patchState`) is not called — and a store value equal to what the external signal already has is not pushed out. That is what stops a two-way link from echoing forever.
 
-The one shape this does not settle on its own is an array whose _elements_ are rebuilt on every read, since arrays are compared element by element and never serialized. For that, and whenever you want different semantics, pass your own `equal` to create your own comparation or the name of one of the premade comparisons:
+It defaults to comparing by content, chosen from the value at hand: `Object.is` for primitives, element by element for arrays, and structurally for plain objects. Reference equality would be the wrong default — a value rebuilt on every read (a `computation` mapping the store, a form producing a fresh object, a spread in `set`) is never equal to its own previous value, so every write re-triggers the read and the link never settles.
+
+The one shape the default does not settle is an array whose _elements_ are rebuilt on every read, since array elements are compared by `Object.is`. For that, and whenever you want different semantics, pass your own function or the name of a premade comparison:
 
 | Name             | Compares                                                            | Offered for       |
 | ---------------- | ------------------------------------------------------------------- | ----------------- |
@@ -232,22 +289,18 @@ The one shape this does not settle on its own is an array whose _elements_ are r
 | `'array.<prop>'` | Element by element by that property, order sensitive                | arrays of objects |
 | `'set.<prop>'`   | The same property values regardless of order                        | arrays of objects |
 
-All of them are type-checked against the linked value, and the property names are autocompleted from its type — from the element's type for the `array.` and `set.` forms, so an array of entities is compared by id with `equal: 'array.id'` (same ids in the same positions) or `equal: 'set.id'` (same ids, any order), and never by a bare `'id'`, which is only offered for a value that is an object itself.
-
-> The structural comparison is JSON-based, so it only reads what JSON can represent. A `Date`, `Map`, `Set` or class instance nested in the linked value is flattened — two different ones can compare equal, and the update is dropped. Keeping non-serializable values in store state is discouraged for other reasons too (persistence, transfer state, devtools); if you do, pass your own `equal` that knows how to compare them, or `'reference'`.
-
-Use `'stringify'` for objects, or for arrays of objects — it walks the whole value, so key order matters (`{a,b}` and `{b,a}` are not equal) and values JSON can not represent are lost.
+All of them are type-checked against the linked value, and property names autocomplete from its type — from the element's type for the `array.` and `set.` forms. So an array of entities is compared by id with `equal: 'array.id'` (same ids, same positions) or `'set.id'` (same ids, any order); a bare `'id'` is only offered when the value is an object itself.
 
 ```typescript
 const Store = signalStore(
   withState({
-    filter: { search: '', category: '' },
+    rows: [] as { label: string; value: number }[],
     ids: [] as string[],
     selectedProduct: undefined as Product | undefined,
     products: [] as Product[],
   }),
-  // objects rebuilt on every read
-  withLink('filter', { equal: 'stringify' }),
+  // an array of objects with no id, rebuilt on every read
+  withLink('rows', { equal: 'stringify' }),
   // a selection is a set, order does not matter
   withLink('ids', { equal: 'set' }),
   // changed only when the id changes, whatever else the product carries
@@ -257,9 +310,27 @@ const Store = signalStore(
 );
 ```
 
-A premade name wins over a property of the same name, so a value with a prop called `array`, `set` or `stringify` has to be compared with the exported `equalByKey('stringify')` instead.
+> The structural comparison (the default for plain objects, and `'stringify'`) is JSON-based: key order matters (`{a,b}` and `{b,a}` are not equal), and a `Date`, `Map`, `Set` or class instance nested in the value is flattened — two different ones can compare equal, and the update is dropped. Keeping non-serializable values in store state is discouraged for other reasons too (persistence, transfer state, devtools); if you do, pass your own `equal` that knows how to compare them, or `'reference'`.
+
+A premade name wins over a property of the same name, so a value with a prop called `array`, `set` or `stringify` has to be compared with the exported `equalByKey('stringify')` instead or your own equal implementation.
 
 The same comparisons are exported as functions — `equalArray`, `equalSet`, `equalStringify`, `equalByKey(prop)` (the `'array.<prop>'` form on arrays) and `equalSetBy(prop)` — for use anywhere an equality function is taken (e.g. a `computed` or a `linkedSignal`).
+
+#### Equality across maps
+
+`equal` is written against the store's type. With  `writeMap`, the side being mapped is compared in the external type instead, so only a name that does not depend on the type carries over — `'reference'`, `'stringify'`, and `'array'` / `'set'` while both values are still arrays. A property name or a custom function falls back to the default content comparison on that side.
+
+That fallback is usually fine. The exception is a `writeMap` returning an **array of objects**, the shape the default cannot settle: nothing on the outbound side dedupes, and the link-time value is pushed out on the first tick. For that, pass `writeEqual` on the link call — it takes the same options as `equal`, checked against what `writeMap` returns, so `'id'` and `'array.id'` autocomplete from the external type:
+
+```typescript
+linked = this.store.linkSelectedIds({
+  writeTo: this.selectionChange,
+  writeMap: (ids) => ids.map((id) => ({ id })),
+  writeEqual: 'array.id',
+});
+```
+
+There is no `readEqual`: whatever `readMap` returns is already in the store's type, so `equal` guards it on the way in.
 
 ### Writing from inside the store with \_set&lt;Name&gt;
 
@@ -387,105 +458,139 @@ With `syncWith`, the external signal only ever receives values that were committ
 
 That also means the gate is never called while `link<Name>()` runs, so it can safely read a field declared after it, like the `filterForm` above.
 
-To reject values coming from `readFrom`, do it in the function form, which receives the previous committed value — return the new value to accept it, or `prev` to leave the store alone:
+To reject values coming from `readFrom` or `syncWith`, call `skip()` in `readMap` (see [Mapping between types](#mapping-between-types)):
 
 ```ts
 linked = this.store.linkProductEntitiesFilter({
-  readFrom: (prev) => {
-    const next = { ...prev, search: this.search() };
-    return next.search.length >= 3 ? next : prev;
-  },
+  readFrom: (prev) => ({ ...prev, search: this.search() }),
+  readMap: (filter, skip) => (filter.search.length >= 3 ? filter : skip()),
 });
 ```
-
-`syncWith` has no such hook. If you need to validate what an external signal supplies, use `readFrom` + `writeTo` instead of `syncWith`, with the check in `readFrom`.
 
 Because those values write through, they also reset the buffer, discarding an edit the gate is currently holding — see [Merging a partial signal with readFrom](#merging-a-partial-signal-with-readfrom).
 
 > `storeEditsWhen` requires an injection context (field initializer or constructor), because an effect is created.
 
-### On submission, only setting validated data in the store with Signal Forms
+### Submitting a form with Signal Forms
 
-There are two ways for this case:
-
-Use a `linkedSignal` that works as a buffer between the form and the store, but the changes are set in the store on form submission (or by your own method):
+`withLink` can really simplify complex forms, especially when there is derived data, calls that need to run while the form is being filled in, or the form has to sync with `model()` inputs or outputs. Link the form to the store, and the store can derive from and react to each field as it changes, like the example below. Submit with a [withCalls](/docs/traits/with-calls) call passed the stored value, rather than calling the backend from `set` — `set` has to write synchronously, and a call lets you await the result and show its errors in the form:
 
 ```ts
-export class ProductListComponent {
-  store = inject(ProductsStore);
+export const RegisterUserStore = signalStore(
+  withState({ registration: { name: '', email: '', password: '' } }),
+  // generates linkRegistration()
+  withLink('registration'),
+  withComputed(({ registration }) => ({
+    // derived as the user types
+    passwordStrength: computed(() => scorePassword(registration().password)),
+  })),
+  withCalls(({ registration }) => ({
+    // runs whenever the email changes, cancelling a check still in flight
+    checkEmail: callConfig({
+      call: (email: string) => inject(UserService).checkEmail(email),
+      callWith: () => registration().email || undefined,
+      mapPipe: 'switchMap',
+    }),
+    registerUser: callConfig({
+      call: (data: Registration) => inject(UserService).register(data),
+      mapError: (error) => (error as HttpErrorResponse).error.message,
+    }),
+  })),
+);
+```
 
-  storeSignal = this.store.linkProductEntitiesFilter();
-  // buffer signal
-  formData = linkedSignal(this.storeSignal);
+```ts
+export class RegisterUserComponent {
+  store = inject(RegisterUserStore);
 
-  filterForm = form(
-    this.formData,
-    (value) => {
-      required(value.search);
-    },
-    {
-      // using signal form submission requires the formRoot directive
-      submission: {
-        action: async () => {
-          // submit is only allowed if the form is valid
-          this.storeSignal.set(this.formData());
-        },
-      },
-    },
-  );
+  registerForm = form(this.store.linkRegistration(), (path) => {
+    required(path.name);
+    email(path.email);
+    // the email only reaches the store, and the check, once typing pauses
+    debounce(path.email, 300);
+    // checkEmailResult() is { email, available }, from the check above
+    validate(path.email, ({ value }) => {
+      const check = this.store.checkEmailResult();
+      return check?.email === value() && !check.available
+        ? { kind: 'emailTaken', message: 'Email already taken' }
+        : undefined;
+    });
+    minLength(path.password, 6);
+  });
 
-  // or <button (click)="onSubmit()">
   onSubmit() {
-    submit(this.filterForm, async () => {
-      // submit is only allowed if the form is valid
-      this.storeSignal.set(this.formData());
+    submit(this.registerForm, async () => {
+      // the store already holds the form value
+      const result = await this.store.registerUser(this.store.registration());
+      if (!result.ok) {
+        return {
+          kind: 'server',
+          fieldTree: this.registerForm.email,
+          message: result.error() as string,
+        } satisfies TreeValidationResult;
+      }
     });
   }
 }
 ```
 
-The second way is not using withLink, and instead reading the store filter signal directly and calling a store method that saves the state or calls the backend. This is very useful because you can handle backend errors:
+For very simple forms that only submit, you might not need `withLink`, like the case below. Keep the form value in the component — a `signal`, or a `linkedSignal` over store state when it starts from there — and pass it to the call on submit:
 
 ```ts
-export class ProductListComponent {
-  store = inject(ProductsStore);
+// route: /profile/:id
+export const ProfileStore = signalStore(
+  withRoute(({ params }) => ({ id: params['id'] as string })),
+  withCalls(({ id }) => ({
+    // loads into profile() whenever the id param changes
+    loadProfile: callConfig({
+      call: (id: string) => inject(ProfileService).getProfile(id),
+      callWith: id,
+      resultProp: 'profile',
+      defaultResult: { name: '', email: '' },
+    }),
+  })),
+  withCalls((store) => ({
+    saveProfile: callConfig({
+      call: (profile: Profile) => inject(ProfileService).save(store.id(), profile),
+      storeResult: false,
+      // only a saved profile reaches the store
+      onSuccess: (_, profile) => patchState(store, { profile }),
+      mapError: (error) => (error as HttpErrorResponse).error.message,
+    }),
+  })),
+);
+```
 
-  formData = linkedSignal(this.store.productEntitiesFilter);
+```ts
+export class ProfileComponent {
+  store = inject(ProfileStore);
 
-  filterForm = form(
+  // a buffer that starts from the loaded profile,
+  // and resets whenever it changes (a new id, or a save)
+  formData = linkedSignal(this.store.profile);
+
+  profileForm = form(
     this.formData,
-    (value) => {
-      required(value.search);
+    (path) => {
+      required(path.name);
+      email(path.email);
     },
     {
-      // using signal form submission requires the formRoot directive
+      // using signal form submission requires the formRoot directive,
+      // or call submit(this.profileForm, ...) from a click handler
       submission: {
         action: async () => {
-          // saveProductsFilter is your own store method that returns a result
-          const result = await this.store.saveProductsFilter(this.formData());
+          const result = await this.store.saveProfile(this.formData());
           if (!result.ok) {
             return {
               kind: 'server',
-              message: result.error as string,
+              message: result.error() as string,
             } satisfies TreeValidationResult;
           }
         },
       },
     },
   );
-
-  // or <button (click)="onSubmit()">
-  onSubmit() {
-    submit(this.filterForm, async () => {
-      const result = await this.store.saveProductsFilter(this.formData());
-      if (!result.ok) {
-        return {
-          kind: 'server',
-          message: result.error as string,
-        } satisfies TreeValidationResult;
-      }
-    });
-  }
 }
 ```
 
@@ -506,18 +611,23 @@ withLink(name, options?)
 ### Generated link method
 
 ```typescript
-link<Name>(options?: LinkOptions<T>): WritableSignal<T>
+link<Name>(options?: LinkOptions<T, E>): WritableSignal<T>
 ```
+
+`E` is the external type, inferred from the signal or sink that is passed.
 
 | Property           | Description                                                                                                               | Type                                      |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `syncWith`         | Signal kept in sync both ways: writing it updates the store, store changes are written back to it                         | `WritableSignal<T>`                       |
-| `readFrom`         | Signal the store only reads, never written back; or a function receiving the previous value, to merge a partial signal in | `Signal<T> \| (prev: T) => T`             |
-| `writeTo`          | Where store changes are pushed: a signal that is set or a function called with the new value                              | `WritableSignal<T> \| (value: T) => void` |
+| `syncWith`         | Signal kept in sync both ways: writing it updates the store, store changes are written back to it                         | `WritableSignal<E>`                       |
+| `readFrom`         | Signal the store only reads, never written back; or a function receiving the previous value, to merge a partial signal in | `Signal<E> \| (prev: T) => T`             |
+| `writeTo`          | Sink store changes are pushed to: a signal that is set, or an output/EventEmitter that is emitted                         | `WritableSignal<E> \| OutputEmitterRef<E> \| EventEmitter<E>` |
+| `readMap`          | Maps what the external side supplies into the store's type; required unless `E` is assignable to `T`. `skip()` rejects the value | `(value: E, skip: () => never) => T`      |
+| `writeMap`         | Maps a store value into what the external side expects; required unless `T` is assignable to `E`. `skip()` pushes nothing        | `(value: T, skip: () => never) => E`      |
+| `writeEqual`       | Equality for the outbound side, replacing `equal` there; only accepted with a `writeMap`                                  | `(a: E, b: E) => boolean` or the same names as `equal`, checked against `E` |
 | `initialValueFrom` | With `syncWith`, where the value that wins on link comes from: `'external'` (default) or `'store'`                        | `'external' \| 'store'`                   |
 | `storeEditsWhen` | Gate writes made through the returned signal: it buffers them and only pushes to the store when this returns true. Does not apply to `readFrom` / `syncWith` values | `(value: T) => boolean`                   |
 
-`syncWith` is mutually exclusive with `readFrom` and `writeTo` (which combine for a two-way sync with a mapping in each direction), and `initialValueFrom` is only accepted together with `syncWith` — all enforced by the types.
+`syncWith` is mutually exclusive with `readFrom` and `writeTo` (which combine for a two-way sync with a signal of its own in each direction), and `initialValueFrom` is only accepted together with `syncWith` — all enforced by the types.
 
 The returned `WritableSignal` is always the store view (or, with `storeEditsWhen`, the buffer over it), never the external signal.
 
