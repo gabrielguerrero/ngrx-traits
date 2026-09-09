@@ -73,11 +73,10 @@ export class GenreSelect implements FormValueControl<Genre> {
 
   // the store's selected id, as a writable signal the select binds to. The
   // mapping pair rather than syncWith: the selection is optional and value is
-  // not, so a deselect leaves the last genre in place
+  // not, so writeMap skips a deselect and leaves the last genre in place
   protected idSelected = this.store.linkGenreIdSelected({
     readFrom: () => this.value(),
-    writeTo: (id) => {
-      if (id) this.value.set(id as Genre);
-    },
+    writeTo: this.value,
+    writeMap: (id, skip) => (id ? (id as Genre) : skip()),
   });
 }
