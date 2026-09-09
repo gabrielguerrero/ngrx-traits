@@ -44,14 +44,14 @@ import { RouterLink } from '@angular/router';
               URL params pre-hydrate from server
             </div>
           </mat-list-item>
-          <mat-list-item [routerLink]="'products-shop'" style="height: 90px;">
+          <mat-list-item [routerLink]="'products-shop'">
             <div matListItemTitle>
               <b
                 >Complex example using two collections and most of the store
                 features</b
               >
             </div>
-            <div matListItemLine style="white-space: normal">
+            <div matListItemLine>
               Example using two collection in the store, one for products and
               one for a product basket, you can find here examples of withCalls,
               remote pagination,sorting and filtering , local sorting,
@@ -88,7 +88,22 @@ import { RouterLink } from '@angular/router';
       </mat-card-content>
     </mat-card>
   `,
-  styles: [],
+  styles: `
+    /* let items grow with their text instead of material's fixed heights */
+    :host {
+      --mat-list-list-item-one-line-container-height: auto;
+      --mat-list-list-item-two-line-container-height: auto;
+      --mat-list-list-item-three-line-container-height: auto;
+    }
+    .mat-mdc-list-item {
+      padding-block: 8px;
+    }
+    .mat-mdc-list-item .mat-mdc-list-item-title.mdc-list-item__primary-text,
+    .mat-mdc-list-item .mat-mdc-list-item-line.mdc-list-item__secondary-text {
+      white-space: normal;
+      -webkit-line-clamp: unset;
+    }
+  `,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

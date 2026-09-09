@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { EventEmitter, signal } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { patchState, signalStore, type, withMethods } from '@ngrx/signals';
 import { setAllEntities, withEntities } from '@ngrx/signals/entities';
@@ -91,9 +91,11 @@ describe('withLinkEntitiesFilter', () => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
       const emitted: { search: string }[] = [];
+      const emitter = new EventEmitter<{ search: string }>();
+      emitter.subscribe((value) => emitted.push(value));
       store.linkEntitiesFilter({
         readFrom: signal({ search: 'from-input' }),
-        writeTo: (value) => emitted.push(value),
+        writeTo: emitter,
       });
       TestBed.tick();
       tick(400);

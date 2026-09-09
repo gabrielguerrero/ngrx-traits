@@ -1,9 +1,27 @@
-import { computed, effect, Signal, signal, untracked } from '@angular/core';
+import {
+  computed,
+  effect,
+  EventEmitter,
+  output,
+  Signal,
+  signal,
+  untracked,
+} from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { required, form as signalForm } from '@angular/forms/signals';
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 
 import { LinkOptions, withLink } from './with-link';
+
+/**
+ * An emit-only sink, the shape of an `output()`: it can be emitted but not
+ * read, so the link has to remember what it was last given.
+ */
+function emitInto<T>(collected: T[]): EventEmitter<T> {
+  const emitter = new EventEmitter<T>();
+  emitter.subscribe((value) => collected.push(value));
+  return emitter;
+}
 
 describe('withLink', () => {
   // ── Method naming ──────────────────────────────────────────────
@@ -459,6 +477,67 @@ describe('withLink', () => {
   // ── Delegated signal (no external) ─────────────────────────────
 
   describe('store-delegating writes', () => {
+    it('re-calls a transforming set only for values it actually changes', () => {
+      // writes are compared against what the store settled on, so a value
+      // already in its final form dedupes as usual, while one the transform
+      // rewrites never matches and reaches `set` every time
+      const calls: string[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ v: 'x' }),
+        withLink('v', {
+          set: (value, store) => {
+            calls.push(value);
+            patchState(store as any, { v: value.trim() });
+          },
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkV();
+
+        linked.set(' b ');
+        linked.set(' b ');
+        linked.set(' b ');
+        expect(store.v()).toBe('b');
+        expect(calls).toEqual([' b ', ' b ', ' b ']);
+
+        calls.length = 0;
+        linked.set('c');
+        linked.set('c');
+        linked.set('c');
+        expect(store.v()).toBe('c');
+        expect(calls).toEqual(['c']);
+      });
+    });
+
+    it('does not repeat anything downstream of a re-entered set', () => {
+      // the repeat stops at `set`: writeTo compares against what it already
+      // gave the sink, so three writes of the same raw value emit once
+      const emitted: string[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ v: 'x' }),
+        withLink('v', {
+          set: (value, store) => patchState(store as any, { v: value.trim() }),
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const linked = store.linkV({ writeTo: emitInto(emitted) });
+
+        linked.set(' b ');
+        TestBed.tick();
+        linked.set(' b ');
+        TestBed.tick();
+        linked.set(' b ');
+        TestBed.tick();
+
+        expect(store.v()).toBe('b');
+        expect(emitted).toEqual(['b']);
+      });
+    });
+
     it('reads the source and patches state on set by default', () => {
       const Store = signalStore(
         { protectedState: false },
@@ -977,7 +1056,7 @@ describe('withLink', () => {
       });
     });
 
-    it('calls a function with each committed change', () => {
+    it('emits each committed change to the sink', () => {
       const emitted: number[] = [];
       const Store = signalStore(
         { protectedState: false },
@@ -987,7 +1066,7 @@ describe('withLink', () => {
       TestBed.runInInjectionContext(() => {
         const store = new Store();
         const linked = store.linkCount({
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
         expect(emitted).toEqual([]);
@@ -1032,7 +1111,7 @@ describe('withLink', () => {
         const search = signal('a');
         store.linkFilter({
           readFrom: computed(() => ({ search: search() })),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
         expect(emitted).toEqual([]);
@@ -1058,7 +1137,7 @@ describe('withLink', () => {
         const store = new Store();
         store.linkFilter({
           readFrom: signal({ search: 'a' }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
         expect(emitted).toEqual([]);
@@ -1095,7 +1174,7 @@ describe('withLink', () => {
         const store = new Store();
         store.linkFilter({
           readFrom: signal({ search: ' typed ' }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
         expect(store.filter()).toEqual({ search: 'typed' });
@@ -1132,7 +1211,7 @@ describe('withLink', () => {
         const store = new Store();
         store.linkFilter({
           readFrom: signal({ search: 'from-input' }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
 
@@ -1160,7 +1239,7 @@ describe('withLink', () => {
       );
       TestBed.runInInjectionContext(() => {
         const store = new Store();
-        store.linkFilter({ writeTo: (value) => emitted.push(value) });
+        store.linkFilter({ writeTo: emitInto(emitted) });
         patchState(store, { filter: { search: 'b' } });
         TestBed.tick();
         expect(emitted).toEqual([{ search: 'b' }]);
@@ -1178,7 +1257,7 @@ describe('withLink', () => {
         const store = new Store();
         store.linkFilter({
           readFrom: signal({ search: 'in' }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         patchState(store, { filter: { search: 'b' } });
         TestBed.tick();
@@ -1198,7 +1277,7 @@ describe('withLink', () => {
         const allowed = signal(false);
         const linked = store.linkFilter({
           readFrom: signal({ search: 'a' }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
           storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
@@ -1221,7 +1300,7 @@ describe('withLink', () => {
     });
 
     it('pushes a field the readFrom merge does not control', () => {
-      // externalHolds carries the whole merged value, category included, and
+      // lastEmitted carries the whole merged value, category included, and
       // every push replaces it — so a category the merge does not control is
       // never frozen on the value it had when the merge last ran
       const emitted: { search: string; category: string }[] = [];
@@ -1235,7 +1314,7 @@ describe('withLink', () => {
         const search = signal('x');
         store.linkFilter({
           readFrom: (prev) => ({ ...prev, search: search() }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
 
@@ -1262,7 +1341,8 @@ describe('withLink', () => {
         const search = signal('initial');
         const linked = store.linkFilter({
           readFrom: computed(() => ({ search: search() })),
-          writeTo: (value) => search.set(value.search),
+          writeTo: search,
+          writeMap: (value) => value.search,
         });
         TestBed.tick();
         // in: model mapped to store shape
@@ -1293,7 +1373,7 @@ describe('withLink', () => {
         const store = new Store();
         const allowed = signal(false);
         const linked = store.linkCount({
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
           storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
@@ -1321,7 +1401,7 @@ describe('withLink', () => {
         const search = signal('initial');
         store.linkFilter({
           readFrom: computed(() => ({ search: search() })),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
           storeEditsWhen: () => true,
         });
         TestBed.tick();
@@ -1360,7 +1440,7 @@ describe('withLink', () => {
         const allowed = signal(false);
         store.linkFilter({
           readFrom: computed(() => ({ search: search() })),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
           storeEditsWhen: () => allowed(),
         });
         TestBed.tick();
@@ -1388,7 +1468,7 @@ describe('withLink', () => {
 
     // regression: the link-time skip only covers the value the store held at
     // link time, which is still the pre-link one when `set` writes
-    // asynchronously. externalHolds is what suppresses the echo when the
+    // asynchronously. lastEmitted is what suppresses the echo when the
     // readFrom value finally lands.
     it('does not push the link-time value out when set writes asynchronously', async () => {
       const Store = signalStore(
@@ -1406,7 +1486,7 @@ describe('withLink', () => {
         const emitted: { search: string }[] = [];
         store.linkFilter({
           readFrom: signal({ search: 'from-input' }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
         await new Promise((resolve) => setTimeout(resolve, 10));
@@ -1437,7 +1517,7 @@ describe('withLink', () => {
         const search = signal('from-input');
         store.linkFilter({
           readFrom: (prev) => ({ ...prev, search: search() }),
-          writeTo: (value) => emitted.push(value),
+          writeTo: emitInto(emitted),
         });
         TestBed.tick();
         await new Promise((resolve) => setTimeout(resolve, 10));
@@ -1451,16 +1531,777 @@ describe('withLink', () => {
       });
     });
 
+    it('dedupes emissions in the external type, not the store type', () => {
+      // the point of writeMap: the parent only ever sees `search`, so a page
+      // change it can not observe must not reach it. Deduping in store space
+      // emitted 'a', 'a', 'b' here
+      const emitted: string[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a', page: 1 } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({
+          writeTo: emitInto(emitted),
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+
+        patchState(store, { filter: { search: 'a', page: 2 } });
+        TestBed.tick();
+        patchState(store, { filter: { search: 'a', page: 3 } });
+        TestBed.tick();
+        patchState(store, { filter: { search: 'b', page: 3 } });
+        TestBed.tick();
+
+        expect(emitted).toEqual(['b']);
+      });
+    });
+
+    it('checks a writable sink against what it currently holds', () => {
+      // a readable sink needs no memo: it is asked directly, so a mapped
+      // value it already holds is never set again
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a', page: 1 } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal('a');
+        const sets = vi.spyOn(external, 'set');
+        store.linkFilter({
+          writeTo: external,
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(sets).not.toHaveBeenCalled();
+
+        // invisible through the mapping, so the sink is left alone
+        patchState(store, { filter: { search: 'a', page: 2 } });
+        TestBed.tick();
+        expect(sets).not.toHaveBeenCalled();
+
+        patchState(store, { filter: { search: 'b', page: 2 } });
+        TestBed.tick();
+        expect(external()).toBe('b');
+        expect(sets).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('re-reads a writable sink the parent changed behind the link', () => {
+      // the live check is the whole point of not keeping a memo for a
+      // readable sink: the parent moved it on its own, so a store change to
+      // the value it now holds writes nothing
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a', page: 1 } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal('a');
+        store.linkFilter({
+          writeTo: external,
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+
+        external.set('b');
+        const sets = vi.spyOn(external, 'set');
+        patchState(store, { filter: { search: 'b', page: 1 } });
+        TestBed.tick();
+        expect(sets).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does not push at link time even when a writable sink disagrees', () => {
+      // changes only, whatever the sink holds — a model() and an output()
+      // behave the same on link
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store', page: 1 } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal('external');
+        store.linkFilter({
+          writeTo: external,
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(external()).toBe('external');
+      });
+    });
+
+    it('does not echo a mapped readFrom change back out', () => {
+      // every value readFrom supplies is recorded as one the sink holds, in
+      // the external type — so an output() does not fire on its own input
+      const emitted: string[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'store-initial', page: 1 } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('a');
+        store.linkFilter({
+          readFrom: search,
+          readMap: (value) => ({ search: value, page: 1 }),
+          writeTo: emitInto(emitted),
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        search.set('b');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'b', page: 1 });
+        expect(emitted).toEqual([]);
+      });
+    });
+
+    it('never misses an emit to a sink it can not read', () => {
+      // the memo has to follow every emit, not only what readFrom supplied:
+      // once 'b' went out the parent no longer knows 'a', so a change back to
+      // it is news again. At most one redundant emit per value, never a
+      // missed one — a readable sink has no such slack, it is just read
+      const emitted: string[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a', page: 1 } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('a');
+        store.linkFilter({
+          readFrom: search,
+          readMap: (value) => ({ search: value, page: 1 }),
+          writeTo: emitInto(emitted),
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { filter: { search: 'b', page: 1 } });
+        TestBed.tick();
+        expect(emitted).toEqual(['b']);
+
+        // readFrom still holds 'a', but the sink was last given 'b'
+        patchState(store, { filter: { search: 'a', page: 1 } });
+        TestBed.tick();
+        expect(emitted).toEqual(['b', 'a']);
+      });
+    });
+
+    it('does not push the value a transforming set produced at link time', () => {
+      // the store settles on the trimmed value while the link is still
+      // wiring, so that is the value at link time — and the untrimmed one
+      // readFrom supplied is what the external side is recorded as holding
+      const emitted: string[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'a' } }),
+        withLink('filter', {
+          set: (value, store) =>
+            patchState(store as any, {
+              filter: { search: value.search.trim() },
+            }),
+        }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkFilter({
+          readFrom: signal(' typed '),
+          readMap: (search) => ({ search }),
+          writeTo: emitInto(emitted),
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'typed' });
+        expect(emitted).toEqual([]);
+
+        // nor is the untrimmed value, which the store never held
+        patchState(store, { filter: { search: ' typed ' } });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+      });
+    });
+
+    it('emits to an output()', () => {
+      const emitted: number[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 1 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const changed = output<number>();
+        changed.subscribe((value) => emitted.push(value));
+        store.linkCount({ writeTo: changed });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { count: 2 });
+        TestBed.tick();
+        expect(emitted).toEqual([2]);
+      });
+    });
+
+    it('drops an array equal when the map changes the shape', () => {
+      // 'array' and 'set' report every non-array unequal, so carrying one onto
+      // an object-shaped mapped value would stop the side deduping at all —
+      // the link-time value would leak out and an unchanged value would emit
+      // again
+      const emitted: { list: string[] }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ ids: ['a'] as string[] }),
+        withLink('ids', { equal: 'set' }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkIds({
+          writeTo: emitInto(emitted),
+          writeMap: (ids) => ({ list: ids }),
+        });
+        TestBed.tick();
+        // changes only: the link-time value is not pushed
+        expect(emitted).toEqual([]);
+
+        patchState(store, { ids: ['a', 'b'] });
+        TestBed.tick();
+        patchState(store, { ids: ['b', 'a'] });
+        TestBed.tick();
+        // the same value again, which must not emit a second time
+        patchState(store, { ids: ['b', 'a'] });
+        TestBed.tick();
+        expect(emitted).toEqual([{ list: ['a', 'b'] }, { list: ['b', 'a'] }]);
+      });
+    });
+
+    it('keeps a structural equal across a map, drops a property one', () => {
+      // 'set' means "same members" whatever the members are, so it still
+      // holds after writeMap; 'id' names a property of the store's type and
+      // would compare undefined to undefined once mapped, dropping everything
+      const Ids = signalStore(
+        { protectedState: false },
+        withState({ ids: [] as (string | number)[] }),
+        withLink('ids', {
+          equal: 'set',
+          // the store does not preserve the order it was given
+          set: (v: any, store) =>
+            patchState(store as any, { ids: [...v].reverse() }),
+        }),
+      );
+      const Sel = signalStore(
+        { protectedState: false },
+        withState({ sel: { id: 1, label: 'a' } }),
+        withLink('sel', { equal: 'id' }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const ids = new Ids();
+        const model = signal<string[]>([]);
+        ids.linkIds({ syncWith: model, writeMap: (v) => v as string[] });
+        TestBed.tick();
+        model.set(['a', 'b']);
+        TestBed.tick();
+        // reordered in the store, but 'set' says they agree, so the model is
+        // left holding the order the user gave it
+        expect(ids.ids()).toEqual(['b', 'a']);
+        expect(model()).toEqual(['a', 'b']);
+
+        const sel = new Sel();
+        const sink = signal('a');
+        sel.linkSel({ writeTo: sink, writeMap: (v) => v.label });
+        TestBed.tick();
+        patchState(sel, { sel: { id: 1, label: 'zz' } });
+        TestBed.tick();
+        expect(sink()).toEqual('zz');
+      });
+    });
+
+    it('requires a map only in the direction the types do not flow', () => {
+      // a narrower external type is already a store value, so it flows in
+      // unmapped; sending a store value back out to it still narrows
+      type Genre = 'rock' | 'jazz';
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ ids: [] as (string | number)[] }),
+        withLink('ids'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const genres = signal<Genre[]>([]);
+
+        // readFrom alone: Genre[] is assignable to (string|number)[], no map
+        store.linkIds({ readFrom: genres });
+        // writeTo alone: the store's type does not narrow on its own
+        // @ts-expect-error writeMap is required, (string|number)[] is wider
+        store.linkIds({ writeTo: genres });
+        // syncWith: only the outbound direction needs the map
+        store.linkIds({
+          syncWith: genres,
+          writeMap: (ids) => ids as Genre[],
+        });
+      });
+    });
+
+    it('requires the maps when the external type differs', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('');
+        const changed = new EventEmitter<string>();
+
+        // @ts-expect-error readMap is required, the types differ
+        store.linkFilter({ readFrom: search });
+        // @ts-expect-error writeMap is required, the types differ
+        store.linkFilter({ writeTo: changed });
+        // @ts-expect-error both maps are required, the types differ
+        store.linkFilter({ syncWith: search });
+        // with the maps it compiles
+        store.linkFilter({
+          readFrom: search,
+          readMap: (value) => ({ search: value }),
+          writeTo: changed,
+          writeMap: (value) => value.search,
+        });
+        // and neither map is needed when the types match
+        store.linkFilter({ writeTo: signal({ search: '' }) });
+
+        expect(store.linkFilter).toBeDefined();
+      });
+    });
+
     it('rejects writeTo combined with syncWith at compile time', () => {
       const check = (options: LinkOptions<number>) => options;
 
       // @ts-expect-error syncWith and writeTo are mutually exclusive
       check({ syncWith: signal(1), writeTo: signal(2) });
       check({ writeTo: signal(1) });
+      check({ writeTo: new EventEmitter<number>() });
+      // @ts-expect-error writeTo takes a sink, not a callback
       check({ writeTo: (value: number) => value });
       check({ readFrom: signal(1), writeTo: signal(2) });
 
       expect(check).toBeDefined();
+    });
+  });
+
+  // ── readMap / writeMap ─────────────────────────────────────────
+
+  describe('readMap / writeMap', () => {
+    const CountStore = signalStore(
+      { protectedState: false },
+      withState({ count: 1 }),
+      withLink('count'),
+    );
+
+    it('maps a syncWith signal both ways', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: '' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('initial');
+        store.linkFilter({
+          syncWith: search,
+          readMap: (value) => ({ search: value }),
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'initial' });
+
+        search.set('typed');
+        TestBed.tick();
+        expect(store.filter()).toEqual({ search: 'typed' });
+
+        patchState(store, { filter: { search: 'from-store' } });
+        TestBed.tick();
+        expect(search()).toBe('from-store');
+      });
+    });
+
+    it('writes the mapped store value with initialValueFrom store', () => {
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ filter: { search: 'from-store' } }),
+        withLink('filter'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal('external');
+        store.linkFilter({
+          syncWith: search,
+          initialValueFrom: 'store',
+          readMap: (value) => ({ search: value }),
+          writeMap: (value) => value.search,
+        });
+        TestBed.tick();
+        expect(search()).toBe('from-store');
+        expect(store.filter()).toEqual({ search: 'from-store' });
+      });
+    });
+
+    it('leaves both sides alone when writeMap skips the initial store value', () => {
+      // initialValueFrom 'store' with a writeMap that rejects the store
+      // value: nothing is written to the signal, and its own value is not
+      // pushed to the store either — 'store' said the store wins, and skip
+      // only stopped the push
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ count: 2 }),
+        withLink('count'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal(9);
+        store.linkCount({
+          syncWith: external,
+          initialValueFrom: 'store',
+          writeMap: (value, skip) => (value % 2 ? value : skip()),
+        });
+        TestBed.tick();
+        expect(external()).toBe(9);
+        expect(store.count()).toBe(2);
+      });
+    });
+
+    it('compares readFrom values by content when readMap is in play', () => {
+      // `equal` describes the store's type: applying it to the external one
+      // deduped every change here, since no external value has an `id`
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ selected: { id: 1 } }),
+        withLink('selected', { equal: 'id' }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const search = signal({ search: 'a' });
+        store.linkSelected({
+          readFrom: search,
+          readMap: (value) => ({ id: value.search.length }),
+        });
+        TestBed.tick();
+        expect(store.selected()).toEqual({ id: 1 });
+
+        search.set({ search: 'bb' });
+        TestBed.tick();
+        expect(store.selected()).toEqual({ id: 2 });
+      });
+    });
+
+    it('compares pushed values by content when writeMap is in play', () => {
+      // same on the way out: `equal: 'id'` reports two mapped labels equal,
+      // since neither carries an id
+      const emitted: { label: string }[] = [];
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ selected: { id: 1 } }),
+        withLink('selected', { equal: 'id' }),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        store.linkSelected({
+          writeTo: emitInto(emitted),
+          writeMap: (value) => ({ label: `#${value.id}` }),
+        });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { selected: { id: 2 } });
+        TestBed.tick();
+        expect(emitted).toEqual([{ label: '#2' }]);
+      });
+    });
+
+    it('rejects a readFrom value with skip(), leaving the store as it is', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        const external = signal(2);
+        store.linkCount({
+          readFrom: external,
+          readMap: (value, skip) => (value % 2 ? value : skip()),
+        });
+        TestBed.tick();
+        // rejected at link time, so the store keeps its own value
+        expect(store.count()).toBe(1);
+
+        external.set(3);
+        TestBed.tick();
+        expect(store.count()).toBe(3);
+
+        external.set(4);
+        TestBed.tick();
+        expect(store.count()).toBe(3);
+      });
+    });
+
+    it('rejects a syncWith value with skip(), leaving the signal alone', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        const external = signal(4);
+        store.linkCount({
+          syncWith: external,
+          readMap: (value, skip) => (value % 2 ? value : skip()),
+        });
+        TestBed.tick();
+        // the store keeps its value, and the rejected one is left where it
+        // was put: correcting it would fight a user mid-edit
+        expect(store.count()).toBe(1);
+        expect(external()).toBe(4);
+
+        // and the same after link, not only on the first tick
+        external.set(6);
+        TestBed.tick();
+        expect(store.count()).toBe(1);
+        expect(external()).toBe(6);
+
+        // an accepted value still syncs
+        external.set(5);
+        TestBed.tick();
+        expect(store.count()).toBe(5);
+        expect(external()).toBe(5);
+
+        // and the store still pushes its own changes out
+        patchState(store, { count: 7 });
+        TestBed.tick();
+        expect(external()).toBe(7);
+      });
+    });
+
+    it('skips an emission with skip() in writeMap', () => {
+      const emitted: number[] = [];
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        store.linkCount({
+          writeTo: emitInto(emitted),
+          writeMap: (value, skip) => (value % 2 ? value : skip()),
+        });
+        TestBed.tick();
+
+        patchState(store, { count: 2 });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { count: 3 });
+        TestBed.tick();
+        expect(emitted).toEqual([3]);
+      });
+    });
+
+    it('leaves a writable sink alone when writeMap skips', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        const external = signal(0);
+        store.linkCount({
+          writeTo: external,
+          writeMap: (value, skip) => (value % 2 ? value : skip()),
+        });
+        TestBed.tick();
+
+        patchState(store, { count: 2 });
+        TestBed.tick();
+        expect(external()).toBe(0);
+
+        patchState(store, { count: 3 });
+        TestBed.tick();
+        expect(external()).toBe(3);
+      });
+    });
+
+    it('honours skip() called outside a return', () => {
+      const reached: number[] = [];
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        const external = signal(2);
+        store.linkCount({
+          readFrom: external,
+          readMap: (value, skip) => {
+            if (value % 2 === 0) skip();
+            reached.push(value);
+            return value;
+          },
+        });
+        TestBed.tick();
+        // the rest of the map never ran
+        expect(reached).toEqual([]);
+        expect(store.count()).toBe(1);
+
+        external.set(3);
+        TestBed.tick();
+        expect(reached).toEqual([3]);
+        expect(store.count()).toBe(3);
+      });
+    });
+
+    it('lets an error other than skip out of readMap', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        expect(() =>
+          store.linkCount({
+            readFrom: signal(2),
+            readMap: () => {
+              throw new Error('boom');
+            },
+          }),
+        ).toThrow('boom');
+      });
+    });
+
+    it('lets an error other than skip out of writeMap', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new CountStore();
+        expect(() =>
+          store.linkCount({
+            writeTo: signal(0),
+            writeMap: () => {
+              throw new Error('boom');
+            },
+          }),
+        ).toThrow('boom');
+      });
+    });
+  });
+
+  // ── writeEqual ─────────────────────────────────────────────────
+
+  describe('writeEqual', () => {
+    const PickedStore = signalStore(
+      { protectedState: false },
+      withState({ picked: [{ id: 1 }, { id: 2 }] }),
+      withLink('picked'),
+    );
+
+    it('dedupes the outbound side in the mapped type', () => {
+      const emitted: { key: string }[][] = [];
+      TestBed.runInInjectionContext(() => {
+        const store = new PickedStore();
+        store.linkPicked({
+          writeTo: emitInto(emitted),
+          writeMap: (value) => value.map((p) => ({ key: `k${p.id}` })),
+          writeEqual: 'set.key',
+        });
+        TestBed.tick();
+
+        // rebuilt and reordered: the same keys, so nothing goes out
+        patchState(store, { picked: [{ id: 2 }, { id: 1 }] });
+        TestBed.tick();
+        expect(emitted).toEqual([]);
+
+        patchState(store, { picked: [{ id: 3 }] });
+        TestBed.tick();
+        expect(emitted).toEqual([[{ key: 'k3' }]]);
+      });
+    });
+
+    it('pushes those same values without it', () => {
+      // the default on a mapped side compares element by element and writeMap
+      // builds fresh objects, so nothing above is ever equal — not even the
+      // link-time value against itself
+      const emitted: { key: string }[][] = [];
+      TestBed.runInInjectionContext(() => {
+        const store = new PickedStore();
+        store.linkPicked({
+          writeTo: emitInto(emitted),
+          writeMap: (value) => value.map((p) => ({ key: `k${p.id}` })),
+        });
+        TestBed.tick();
+
+        patchState(store, { picked: [{ id: 2 }, { id: 1 }] });
+        TestBed.tick();
+        expect(emitted).toEqual([
+          [{ key: 'k1' }, { key: 'k2' }],
+          [{ key: 'k2' }, { key: 'k1' }],
+        ]);
+      });
+    });
+
+    it('leaves the inbound side and store writes alone', () => {
+      // 'set.key' reports every store value equal — nothing there has a `key`
+      // — so a leak into either comparison drops the writes below
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ picked: [] as { id: string }[] }),
+        withLink('picked'),
+      );
+      TestBed.runInInjectionContext(() => {
+        const store = new Store();
+        const external = signal([{ key: 'a' }, { key: 'b' }]);
+        const linked = store.linkPicked({
+          syncWith: external,
+          readMap: (value) => value.map((k) => ({ id: k.key })),
+          writeMap: (value) => value.map((p) => ({ key: p.id })),
+          writeEqual: 'set.key',
+        });
+        TestBed.tick();
+        expect(store.picked()).toEqual([{ id: 'a' }, { id: 'b' }]);
+
+        // inbound: a reorder is a change, whatever writeEqual says about it
+        external.set([{ key: 'b' }, { key: 'a' }]);
+        TestBed.tick();
+        expect(store.picked()).toEqual([{ id: 'b' }, { id: 'a' }]);
+
+        // store space: the write path is guarded by `equal`, not writeEqual
+        linked.set([{ id: 'a' }, { id: 'b' }]);
+        expect(store.picked()).toEqual([{ id: 'a' }, { id: 'b' }]);
+      });
+    });
+
+    it('is type-checked against the external type', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new PickedStore();
+        const sink = signal<{ key: string }[]>([]);
+        const writeMap = (value: { id: number }[]) =>
+          value.map((p) => ({ key: `k${p.id}` }));
+
+        store.linkPicked({ writeTo: sink, writeMap, writeEqual: 'set.key' });
+        store.linkPicked({ writeTo: sink, writeMap, writeEqual: 'stringify' });
+        store.linkPicked({
+          writeTo: sink,
+          writeMap,
+          // @ts-expect-error 'id' is a property of the store's type, not the external one
+          writeEqual: 'set.id',
+        });
+        store.linkPicked({
+          writeTo: sink,
+          writeMap,
+          // @ts-expect-error the external value is an array, so it takes the prefixed form
+          writeEqual: 'key',
+        });
+
+        expect(store.linkPicked).toBeDefined();
+      });
+    });
+
+    it('is only offered when there is a writeMap', () => {
+      TestBed.runInInjectionContext(() => {
+        const store = new PickedStore();
+        const same = signal([{ id: 1 }]);
+
+        store.linkPicked({ writeTo: same });
+        // @ts-expect-error writeEqual needs a writeMap, `equal` covers the rest
+        store.linkPicked({ writeTo: same, writeEqual: 'array.id' });
+        // @ts-expect-error writeEqual needs a writeMap, `equal` covers the rest
+        store.linkPicked({ syncWith: same, writeEqual: 'array.id' });
+        // @ts-expect-error writeEqual needs a writeMap, `equal` covers the rest
+        store.linkPicked({ writeEqual: 'array.id' });
+
+        expect(store.linkPicked).toBeDefined();
+      });
     });
   });
 
@@ -1967,7 +2808,7 @@ describe('withLink', () => {
         class Cmp {
           data = store.linkFilter({
             readFrom: signal({ search: 'from-input' }),
-            writeTo: (value) => pushed.push(value),
+            writeTo: emitInto(pushed),
             storeEditsWhen: (): boolean => this.form().valid(),
           });
           form = fakeForm(this.data);
