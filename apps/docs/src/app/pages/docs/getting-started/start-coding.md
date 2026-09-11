@@ -60,10 +60,12 @@ Now let's see how we can use them in a component.
 } @else {
 <div>
   <mat-list>
-    <!-- 👇 we use store.entitiesCurrentPage().entities 
-      instead of store.entities() ↓ -->
+    <!-- 👇 we use store.entitiesCurrentPage.entities()
+      instead of store.entities() ↓
+      entitiesCurrentPage is a DeepSignal, so each prop is a signal of its
+      own and only recomputes when that prop changes -->
     @for (
-    product of store.entitiesCurrentPage().entities;
+    product of store.entitiesCurrentPage.entities();
     track product.id
     ) {
     <!-- 👇 using loadProductDetail -->
@@ -74,9 +76,9 @@ Now let's see how we can use them in a component.
        needed for the paginator, and loadEntitiesPage 
        handles page changes -->
   <mat-paginator
-    [length]="store.entitiesCurrentPage().total"
-    [pageSize]="store.entitiesCurrentPage().pageSize"
-    [pageIndex]="store.entitiesCurrentPage().pageIndex"
+    [length]="store.entitiesCurrentPage.total()"
+    [pageSize]="store.entitiesCurrentPage.pageSize()"
+    [pageIndex]="store.entitiesCurrentPage.pageIndex()"
     (page)="store.loadEntitiesPage($event)"
   />
 </div>
@@ -184,6 +186,36 @@ export const ProductsLocalStore = signalStore(
   })),
 );
 ```
+
+### Using Angular's Resource API
+
+If you prefer Angular's Resource API in your components, `withEntitiesLoadingCall` and `withCalls` also generate a factory of a resource view of the entities and of each call. Every signal in it reads the store, so it always agrees with the signals above. A call's resource is named after its `resultProp` when it has one, so `loadProductDetail` above generates `loadProductDetailResource`.
+
+```typescript
+// In component
+store = inject(ProductsLocalStore);
+products = this.store.productEntitiesResource();
+selectedProduct = signal<Product | undefined>(undefined);
+detail = this.store.loadProductDetailResource({
+  // runs the call each time the selection changes, undefined skips it
+  params: () => {
+    const product = this.selectedProduct();
+    return product ? { id: product.id } : undefined;
+  },
+});
+```
+
+```html
+@if (products.isLoading()) {
+  <mat-spinner />
+}
+<product-list [list]="products.value()" (selectProduct)="selectedProduct.set($event)" />
+@if (detail.hasValue()) {
+  <product-detail [product]="detail.value()" />
+}
+```
+
+See [withCalls](/docs/traits/with-calls#angular-resource-view-of-a-call) and [withEntitiesLoadingCall](/docs/traits/with-entities-loading-call#angular-resource-view-of-the-entities) for the details.
 
 ### Custom ids
 

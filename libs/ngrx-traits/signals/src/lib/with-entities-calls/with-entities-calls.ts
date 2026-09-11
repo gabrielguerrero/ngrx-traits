@@ -117,7 +117,7 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  *   // generates the following methods
  *   store.isLoadOrderDetailLoading(id: string) => boolean
  *   store.isLoadOrderDetailLoaded(id: string) => boolean
- *   store.loadOrderDetailError(id: string) => string | null
+ *   store.loadOrderDetailError(id: string) => string | undefined
  *   store.loadOrderDetail ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
  *   // same for changeOrderStatus and deleteOrder
  *

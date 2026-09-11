@@ -1,4 +1,4 @@
-import { computed, signal } from '@angular/core';
+import { computed, Injector, Resource, signal } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import {
   patchState,
@@ -17,7 +17,7 @@ import {
   throwError,
 } from 'rxjs';
 
-import { callConfig, withCalls } from '../index';
+import { callConfig, CallResource, withCalls } from '../index';
 
 describe('withCalls', () => {
   let apiResponse = new Subject<string>();
@@ -1597,6 +1597,398 @@ describe('withCalls', () => {
       expect(store.testCallResult().length).toEqual(
         'test initial value'.length,
       );
+    });
+  });
+
+  describe('resource view', () => {
+    function setup(mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap') {
+      const apiResponse = new Subject<string>();
+      const call = vi.fn(({ ok }: { ok: boolean }) =>
+        ok ? apiResponse.pipe(first()) : throwError(() => new Error('fail')),
+      );
+      const Store = signalStore(
+        { protectedState: false },
+        withCalls(() => ({
+          testCall: callConfig({ call, mapPipe }),
+          testCall2: callConfig({
+            call: ({ id }: { id: string }) => apiResponse.pipe(first()),
+            resultProp: 'detail',
+            mapError: (error) => (error as Error).message,
+          }),
+          noParamsCall: () => apiResponse.pipe(first()),
+          _privateCall: ({ ok }: { ok: boolean }) => apiResponse.pipe(first()),
+          noResult: callConfig({
+            call: () => apiResponse.pipe(first()),
+            storeResult: false,
+          }),
+        })),
+        withMethods((store) => ({
+          privateResource: () => store._privateCallResource(),
+          privateCall: (param: { ok: boolean }) => store._privateCall(param),
+        })),
+      );
+      return { apiResponse, call, Store };
+    }
+
+    it('should map the call status to a resource status', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.testCallResource();
+        expect(res.status()).toBe('idle');
+        expect(res.value()).toBeUndefined();
+        expect(res.hasValue()).toBe(false);
+        expect(res.isLoading()).toBe(false);
+        expect(res.snapshot()).toEqual({ status: 'idle', value: undefined });
+
+        store.testCall({ ok: true });
+        expect(res.status()).toBe('loading');
+        expect(res.isLoading()).toBe(true);
+        expect(res.snapshot()).toEqual({ status: 'loading', value: undefined });
+
+        apiResponse.next('test');
+        expect(res.status()).toBe('resolved');
+        expect(res.isLoading()).toBe(false);
+        expect(res.value()).toBe('test');
+        expect(res.hasValue()).toBe(true);
+        expect(res.snapshot()).toEqual({ status: 'resolved', value: 'test' });
+
+        // a load with a previous value is a reload, which keeps the value
+        store.testCall({ ok: true });
+        expect(res.status()).toBe('reloading');
+        expect(res.isLoading()).toBe(true);
+        expect(res.value()).toBe('test');
+        apiResponse.next('test2');
+        expect(res.status()).toBe('resolved');
+        expect(res.value()).toBe('test2');
+      });
+    });
+
+    it('should report the error state, keeping the last value', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.testCallResource();
+        store.testCall({ ok: true });
+        apiResponse.next('test');
+
+        store.testCall({ ok: false });
+        expect(res.status()).toBe('error');
+        expect(res.isLoading()).toBe(false);
+        expect(res.error()).toEqual(new Error('fail'));
+        expect(res.hasValue()).toBe(false);
+        expect(res.value()).toBe('test');
+        expect(res.snapshot()).toEqual({
+          status: 'error',
+          error: new Error('fail'),
+        });
+      });
+    });
+
+    it('should be read only, the result is written through the store', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.testCallResource();
+        expect('set' in res).toBe(false);
+        expect('update' in res).toBe(false);
+        // @ts-expect-error the value is a plain Signal, like the store's own
+        res.value.set;
+
+        // patching the store is what a store method would do, and every view
+        // reads it, there is nothing local about it
+        patchState(store, { testCallResult: 'written' });
+        expect(res.value()).toBe('written');
+        expect(res.status()).toBe('idle');
+
+        store.testCall({ ok: true });
+        apiResponse.next('loaded');
+        expect(res.status()).toBe('resolved');
+        expect(res.value()).toBe('loaded');
+      });
+    });
+
+    it('should count a hydrated loaded status as loaded', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store } = setup();
+        const store = new Store();
+        // what withServerStateTransfer or withSyncToWebStorage restore: the
+        // result and the status, without any call running here
+        patchState(store, {
+          testCallResult: 'from the server',
+          testCallCallStatus: 'loaded',
+        });
+
+        const res = store.testCallResource();
+        expect(res.status()).toBe('resolved');
+        // so a refresh keeps the value on screen instead of starting over
+        store.testCall({ ok: true });
+        expect(res.status()).toBe('reloading');
+      });
+    });
+
+    it('should report no error as undefined', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.testCallResource();
+        expect(res.error()).toBeUndefined();
+        expect(store.testCallError()).toBeUndefined();
+
+        store.testCall({ ok: true });
+        apiResponse.next('test');
+        expect(res.error()).toBeUndefined();
+
+        store.testCall({ ok: false });
+        expect(res.error()).toEqual(new Error('fail'));
+      });
+    });
+
+    it('should report reloading even if nothing read the status in between', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.testCallResource();
+        // nothing reads the resolved state, so it cannot be derived from the
+        // status transitions: a lazy computed would only see the last one
+        store.testCall({ ok: true });
+        apiResponse.next('a');
+
+        store.testCall({ ok: true });
+        expect(res.status()).toBe('reloading');
+      });
+    });
+
+    it('should report loading on the first call when there is a defaultResult', () => {
+      TestBed.runInInjectionContext(() => {
+        const apiResponse = new Subject<string[]>();
+        const Store = signalStore(
+          withCalls(() => ({
+            loadTags: callConfig({
+              call: () => apiResponse.pipe(first()),
+              // the result is seeded, so it is never undefined and the value
+              // alone cannot tell a first load from a reload
+              defaultResult: [] as string[],
+            }),
+          })),
+        );
+        const store = new Store();
+        const res = store.loadTagsResource();
+
+        store.loadTags();
+        expect(res.status()).toBe('loading');
+        apiResponse.next(['a']);
+        expect(res.status()).toBe('resolved');
+
+        store.loadTags();
+        expect(res.status()).toBe('reloading');
+      });
+    });
+
+    it('params should drive the call, skipping undefined, until destroyed', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse, call } = setup();
+        const store = new Store();
+        const param = signal<{ ok: boolean } | undefined>(undefined);
+        const res = store.testCallResource({ params: param });
+        TestBed.tick();
+        expect(call).not.toHaveBeenCalled();
+        expect(res.status()).toBe('idle');
+
+        param.set({ ok: true });
+        TestBed.tick();
+        expect(call).toHaveBeenCalledWith({ ok: true });
+        expect(res.status()).toBe('loading');
+        apiResponse.next('a');
+        expect(res.value()).toBe('a');
+
+        res.destroy();
+        param.set({ ok: false });
+        TestBed.tick();
+        expect(call).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('params should accept a function and an observable', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse, call } = setup();
+        const store = new Store();
+        const ok = signal(true);
+        store.testCallResource({ params: () => ({ ok: ok() }) });
+        TestBed.tick();
+        expect(call).toHaveBeenCalledWith({ ok: true });
+        apiResponse.next('a');
+
+        const param = new BehaviorSubject<{ ok: boolean } | undefined>(
+          undefined,
+        );
+        store.testCallResource({ params: param });
+        expect(call).toHaveBeenCalledTimes(1);
+        param.next({ ok: true });
+        expect(call).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it('params should require an injection context or an injector', () => {
+      const { Store, call } = setup();
+      const store = TestBed.runInInjectionContext(() => new Store());
+      const param = signal({ ok: true });
+      expect(() => store.testCallResource({ params: param })).toThrow();
+
+      const res = store.testCallResource({
+        params: param,
+        injector: TestBed.inject(Injector),
+      });
+      TestBed.tick();
+      expect(call).toHaveBeenCalledWith({ ok: true });
+      expect(res.status()).toBe('loading');
+    });
+
+    it('should not need an injection context without params', () => {
+      const { Store } = setup();
+      const store = TestBed.runInInjectionContext(() => new Store());
+      const res = store.testCallResource();
+      expect(res.status()).toBe('idle');
+    });
+
+    it('should generate a private resource method for a private call', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.privateResource();
+        expect(res.status()).toBe('idle');
+        store.privateCall({ ok: true });
+        expect(res.status()).toBe('loading');
+        apiResponse.next('a');
+        expect(res.value()).toBe('a');
+      });
+    });
+
+    it('should not generate a resource method for a call that does not store its result', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store } = setup();
+        const store = new Store();
+        // @ts-expect-error no value for a resource to hold
+        expect(store.noResultResource).toBeUndefined();
+      });
+    });
+
+    it('should name the resource after the resultProp when there is one', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store } = setup();
+        const store = new Store();
+        // testCall2 has resultProp 'detail'
+        expect(store.detailResource).toBeDefined();
+        // @ts-expect-error named after the resultProp, not the call
+        expect(store.testCall2Resource).toBeUndefined();
+        // testCall has none, so it falls back to the call name
+        expect(store.testCallResource).toBeDefined();
+        expectTypeOf(store.detailResource()).toEqualTypeOf<
+          CallResource<string | undefined, string>
+        >();
+      });
+    });
+
+    it('should make the resource public when a private call has a public resultProp', () => {
+      TestBed.runInInjectionContext(() => {
+        const apiResponse = new Subject<string>();
+        const Store = signalStore(
+          withCalls(() => ({
+            _loadProductDetail: callConfig({
+              call: ({ id }: { id: string }) => apiResponse.pipe(first()),
+              resultProp: 'productDetail',
+            }),
+            _loadPrivate: callConfig({
+              call: () => apiResponse.pipe(first()),
+              resultProp: '_privateDetail',
+            }),
+          })),
+        );
+        const store = new Store();
+        // the call, its status and error stay private, the result and the
+        // resource are public, so a component can only use the resource
+        // (private members are hidden from the store type, not at runtime)
+        // @ts-expect-error private call
+        store._loadProductDetail;
+        expect(store.productDetail).toBeDefined();
+        const res = store.productDetailResource();
+        expect(res.status()).toBe('idle');
+
+        // an underscore on the resultProp keeps the resource private too
+        // @ts-expect-error private resource
+        store._privateDetailResource;
+      });
+    });
+
+    it('should warn in dev mode when the resource name is already taken', () => {
+      TestBed.runInInjectionContext(() => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const apiResponse = new Subject<string>();
+        const Store = signalStore(
+          withCalls(() => ({
+            loadProductDetail: callConfig({
+              call: () => apiResponse.pipe(first()),
+              resultProp: 'productDetail',
+            }),
+            // its resource wants the same name as the one above
+            productDetail: () => apiResponse.pipe(first()),
+          })),
+        );
+        new Store();
+        expect(warn).toHaveBeenCalledWith(
+          expect.stringContaining('productDetailResource'),
+        );
+        warn.mockRestore();
+      });
+    });
+
+    it('should read a renamed result prop and type the error with mapError', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store, apiResponse } = setup();
+        const store = new Store();
+        const res = store.detailResource();
+        store.testCall2({ id: '1' });
+        apiResponse.next('detail');
+        expect(res.value()).toBe('detail');
+        expect(store.detail()).toBe('detail');
+        expectTypeOf(res.value()).toEqualTypeOf<string | undefined>();
+        expectTypeOf(res.error()).toEqualTypeOf<string | undefined>();
+        if (res.hasValue()) {
+          expectTypeOf(res.value()).toEqualTypeOf<string>();
+        }
+      });
+    });
+
+    it('should type the params option from the call parameter', () => {
+      TestBed.runInInjectionContext(() => {
+        const { Store } = setup();
+        const store = new Store();
+        store.detailResource({
+          // @ts-expect-error not the call parameter
+          params: () => ({ ok: true }),
+        });
+        store.noParamsCallResource({
+          // @ts-expect-error the call has no parameter
+          params: () => undefined,
+        });
+      });
+    });
+
+    it('should be assignable to an Angular Resource when the error is an Error', () => {
+      TestBed.runInInjectionContext(() => {
+        const apiResponse = new Subject<string>();
+        const Store = signalStore(
+          withCalls(() => ({
+            testCall: callConfig({
+              call: ({ ok }: { ok: boolean }) => apiResponse.pipe(first()),
+              mapError: (error) => error as Error,
+            }),
+          })),
+        );
+        const store = new Store();
+        const res: Resource<string | undefined> = store.testCallResource();
+        expect(res.status()).toBe('idle');
+      });
     });
   });
 });

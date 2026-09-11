@@ -151,7 +151,7 @@ Generates the following computed signals
 ```typescript
 isLoading: Signal<boolean>;
 isLoaded: Signal<boolean>;
-error: Signal<unknown | null>;
+error: Signal<unknown | undefined>;
 ```
 
 If collection provided, the following computed signals are generated, example: **users**
@@ -159,7 +159,7 @@ If collection provided, the following computed signals are generated, example: *
 ```typescript
 isUserEntitiesLoading: Signal<boolean>;
 isUserEntitiesLoaded: Signal<boolean>;
-userEntitiesError: Signal<unknown | null>;
+userEntitiesError: Signal<unknown | undefined>;
 ```
 
 ## Methods
