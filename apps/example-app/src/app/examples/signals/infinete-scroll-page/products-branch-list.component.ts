@@ -77,12 +77,12 @@ import { ProductsBranchStore } from './products-branch.store';
               </mat-list>
             </cdk-virtual-scroll-viewport>
           } @else {
-            @if (store.entitiesCurrentPage().isLoading) {
+            @if (store.entitiesCurrentPage.isLoading()) {
               <mat-spinner />
             } @else {
               <mat-list>
                 @for (
-                  product of store.entitiesCurrentPage().entities;
+                  product of store.entitiesCurrentPage.entities();
                   track product.id
                 ) {
                   <mat-list-item>{{ product.name }}</mat-list-item>
@@ -91,14 +91,14 @@ import { ProductsBranchStore } from './products-branch.store';
               <div>
                 <button
                   mat-button
-                  [disabled]="!store.entitiesCurrentPage().hasPrevious"
+                  [disabled]="!store.entitiesCurrentPage.hasPrevious()"
                   (click)="store.loadEntitiesPreviousPage()"
                 >
                   previous
                 </button>
                 <button
                   mat-button
-                  [disabled]="!store.entitiesCurrentPage().hasNext"
+                  [disabled]="!store.entitiesCurrentPage.hasNext()"
                   (click)="store.loadEntitiesNextPage()"
                 >
                   next
