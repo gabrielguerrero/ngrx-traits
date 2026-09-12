@@ -30,7 +30,7 @@ Set of prebuilt ngrx signals Custom Store Features that solve common problems su
 
 ### [Examples](../apps/example-app/src/app/examples/signals)
 
-### [API](../libs/ngrx-traits/signals/api-docs.md)
+### [API](https://ngrx-traits.dev/docs/traits/with-calls)
 
 ### [Articles](#articles) 
 
@@ -263,8 +263,7 @@ export const ProductsLocalStore = signalStore(
 ```
 Create a entityConfig like shown above, and then pass it as the first argument to all withEntities* features that you are using.
 
-```typescript
-To see a full list of the store features in the library with details and examples, check the [API](../libs/ngrx-traits/signals/api-docs.md) documentation.
+To see a full list of the store features in the library with details and examples, check the [API](https://ngrx-traits.dev/docs/traits/with-calls) documentation.
 
 Also, I recommend checking the example section, where you can see multiple use cases for the library. [Examples](../apps/example-app/src/app/examples/signals)
 

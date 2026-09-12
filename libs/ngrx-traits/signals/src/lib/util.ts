@@ -81,7 +81,7 @@ export function combineFunctionsInObject<
 
 // Normalizes a filterState option, which can be an array of state prop names or
 // a function, into a function that filters the state. Not part of the public api,
-// the jsdoc comment style is avoided here so it does not end up in api-docs.md
+// the jsdoc comment style is avoided here since this is not public api
 export function toFilterStateFn<T extends object>(
   filterState?: ((state: T) => Partial<T>) | readonly (keyof T)[],
 ): ((state: T) => Partial<T>) | undefined {
