@@ -298,10 +298,6 @@ export class SideNavigationComponent {
           name: 'withSyncToWebStorage',
         },
         {
-          link: './traits/with-route-params',
-          name: 'withRouteParams',
-        },
-        {
           link: './traits/with-route',
           name: 'withRoute',
         },
