@@ -8,6 +8,8 @@
 # dependencies
 /node_modules
 apps/*/node_modules
+# created when the libs are built, they are outside the pnpm workspace
+libs/*/*/node_modules
 apps/docs/dist
 
 # IDEs and editors

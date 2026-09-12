@@ -95,15 +95,15 @@ import { ProductLinkStore } from './product-link.store';
               <mat-spinner />
             } @else {
               <product-list
-                [list]="store.productEntitiesCurrentPage().entities"
+                [list]="store.productEntitiesCurrentPage.entities()"
                 [selectedProduct]="store.productEntitySelected()"
                 (selectProduct)="selectProduct($event)"
               />
               <mat-paginator
                 [pageSizeOptions]="[5, 10, 25, 100]"
                 [length]="store.productEntitiesCurrentPage.total()"
-                [pageSize]="store.productEntitiesCurrentPage().pageSize"
-                [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+                [pageSize]="store.productEntitiesCurrentPage.pageSize()"
+                [pageIndex]="store.productEntitiesCurrentPage.pageIndex()"
                 (page)="store.loadProductEntitiesPage($event)"
               />
             }
