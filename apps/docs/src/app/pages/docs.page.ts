@@ -6,6 +6,7 @@ import { filter } from 'rxjs';
 
 import { FooterComponent } from '../components/navbar/footer/footer.component';
 import { NavbarComponent } from '../components/navbar/navbar.component';
+import { PageTocComponent } from '../components/page-toc/page-toc.component';
 import { SideNavigationComponent } from '../components/side-navigation/side-navigation.component';
 
 @Component({
@@ -15,14 +16,16 @@ import { SideNavigationComponent } from '../components/side-navigation/side-navi
     RouterOutlet,
     NavbarComponent,
     SideNavigationComponent,
+    PageTocComponent,
     FooterComponent,
   ],
   template: ` <div>
       <docs-navbar [(menuOpen)]="menuOpen" class=" bg-white dark:bg-gray-900" />
       <div class="container  mx-auto px-8 pt-24">
-        <div class="flex">
+        <div class="flex" #docsBody>
           <docs-side-navigation class=" md:mr-12" [(menuOpen)]="menuOpen" />
           <router-outlet />
+          <docs-page-toc class="xl:ml-10" [container]="docsBody" />
         </div>
       </div>
     </div>
