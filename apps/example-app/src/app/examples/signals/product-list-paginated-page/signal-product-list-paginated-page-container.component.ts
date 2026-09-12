@@ -32,7 +32,7 @@ import { ProductsLocalStore } from './product.store';
           <div class="sm:m-4 grid sm:grid-cols-2 gap-8">
             <div>
               <product-list
-                [list]="store.productEntitiesCurrentPage().entities"
+                [list]="store.productEntitiesCurrentPage.entities()"
                 [selectedProduct]="store.productEntitySelected()"
                 [selectedSort]="{
                   active: $any(store.productEntitiesSort().field),
@@ -46,8 +46,8 @@ import { ProductsLocalStore } from './product.store';
               <mat-paginator
                 [pageSizeOptions]="[5, 10, 25, 100]"
                 [length]="store.productEntitiesCurrentPage.total()"
-                [pageSize]="store.productEntitiesCurrentPage().pageSize"
-                [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+                [pageSize]="store.productEntitiesCurrentPage.pageSize()"
+                [pageIndex]="store.productEntitiesCurrentPage.pageIndex()"
                 (page)="store.loadProductEntitiesPage($event)"
               ></mat-paginator>
             </div>

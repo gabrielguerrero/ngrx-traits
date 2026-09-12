@@ -26,11 +26,11 @@ import { ProductsShopStore } from '../../products-shop.store';
             [searchProduct]="store.productEntitiesFilter()"
             (searchProductChange)="filter($event)"
           />
-          @if (store.productEntitiesCurrentPage().isLoading) {
+          @if (store.productEntitiesCurrentPage.isLoading()) {
             <mat-spinner />
           } @else {
             <product-list
-              [list]="store.productEntitiesCurrentPage().entities"
+              [list]="store.productEntitiesCurrentPage.entities()"
               [selectedProduct]="store.productEntitySelected()"
               (selectProduct)="select($event)"
               [selectedSort]="materialSort()"
@@ -38,9 +38,9 @@ import { ProductsShopStore } from '../../products-shop.store';
             />
             <mat-paginator
               [pageSizeOptions]="[5, 10, 25, 100]"
-              [length]="store.productEntitiesCurrentPage().total"
-              [pageSize]="store.productEntitiesCurrentPage().pageSize"
-              [pageIndex]="store.productEntitiesCurrentPage().pageIndex"
+              [length]="store.productEntitiesCurrentPage.total()"
+              [pageSize]="store.productEntitiesCurrentPage.pageSize()"
+              [pageIndex]="store.productEntitiesCurrentPage.pageIndex()"
               (page)="store.loadProductEntitiesPage($event)"
             />
           }
