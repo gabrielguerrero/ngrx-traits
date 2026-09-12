@@ -47,19 +47,6 @@
         "cwd": "dist/libs/ngrx-traits/common",
         "parallel": false
       }
-    },
-    "api-docs": {
-      "executor": "nx:run-commands",
-      "options": {
-        "commands": [
-          {
-            "command": "jsdoc2md --files ./src/lib/**/*.ts --configure ../../../jsdoc2md.json --no-cache > ./api-docs.md",
-            "forwardAllArgs": false
-          }
-        ],
-        "cwd": "libs/ngrx-traits/common",
-        "parallel": false
-      }
     }
   },
   "tags": []
