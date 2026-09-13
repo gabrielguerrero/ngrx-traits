@@ -312,6 +312,8 @@ export function withEntitiesCalls<
                     ? (param: unknown) => param === undefined || param === false
                     : undefined)
                 : undefined;
+              const storesResult =
+                !isCallConfig(call) || call.storeResult !== false;
               const inFlight = new Set<number | string>();
               const reactiveMethod = rxMethod<unknown>(
                 pipe(
@@ -322,11 +324,9 @@ export function withEntitiesCalls<
                         : typeof params === 'object' && 'entity' in params
                           ? selectId(params.entity)
                           : selectId(params);
-                    const previousResult = isCallConfig(call)
-                      ? call.storeResult != false
-                        ? entityMap()[id]
-                        : undefined
-                      : entityMap()[id];
+                    const previousResult = storesResult
+                      ? entityMap()[id]
+                      : undefined;
                     const skip = skipWhenFn?.(params, previousResult) ?? false;
 
                     const filterDuplicateIds = filter((value) => {
@@ -357,37 +357,42 @@ export function withEntitiesCalls<
                           () => {
                             return callFn(params).pipe(
                               map((result) => {
-                                patchState(
-                                  state,
-                                  !!result // if result do an update
-                                    ? config.collection
-                                      ? updateEntity(
-                                          {
+                                // storeResult: false means the call changes
+                                // nothing about the entity, only the status
+                                // it is tracked under, so the result is not
+                                // merged and a falsy one does not remove it
+                                if (storesResult)
+                                  patchState(
+                                    state,
+                                    !!result // if result do an update
+                                      ? config.collection
+                                        ? updateEntity(
+                                            {
+                                              id,
+                                              changes: result,
+                                            },
+                                            {
+                                              collection: config.collection,
+                                              selectId:
+                                                config.selectId ??
+                                                ((entity: Entity) =>
+                                                  (entity as any).id),
+                                            } as any,
+                                          )
+                                        : updateEntity({
                                             id,
                                             changes: result,
-                                          },
-                                          {
+                                          })
+                                      : config.collection // if no result do a remove
+                                        ? removeEntity(id, {
                                             collection: config.collection,
                                             selectId:
                                               config.selectId ??
                                               ((entity: Entity) =>
                                                 (entity as any).id),
-                                          } as any,
-                                        )
-                                      : updateEntity({
-                                          id,
-                                          changes: result,
-                                        })
-                                    : config.collection // if no result do a remove
-                                      ? removeEntity(id, {
-                                          collection: config.collection,
-                                          selectId:
-                                            config.selectId ??
-                                            ((entity: Entity) =>
-                                              (entity as any).id),
-                                        } as any)
-                                      : removeEntity(id),
-                                );
+                                          } as any)
+                                        : removeEntity(id),
+                                  );
                                 setLoaded(id);
                                 isCallConfig(call) &&
                                   call.onSuccess &&
