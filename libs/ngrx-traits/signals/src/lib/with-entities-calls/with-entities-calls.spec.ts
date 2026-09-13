@@ -1501,6 +1501,69 @@ describe('withEntitiesCalls', () => {
     });
   });
 
+  it('storeFalse should leave the entity alone when the call returns nothing', () => {
+    TestBed.runInInjectionContext(() => {
+      // a call that changes nothing about the entity, such as starting a
+      // download, only the status it is tracked under
+      const apiResponse = new Subject<void>();
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withEntitiesCalls({
+          entity,
+          calls: () => ({
+            download: entityCallConfig({
+              call: ({ id }: { id: string }) => apiResponse.pipe(first()),
+              paramsSelectId: ({ id }) => id,
+              storeResult: false,
+            }),
+          }),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const product = mockProducts[0];
+
+      store.download({ id: product.id });
+      apiResponse.next(undefined);
+
+      expect(store.isDownloadLoaded(product.id)).toBeTruthy();
+      // a falsy result removes the entity when the result is stored, which is
+      // how a delete call works, but not here
+      expect(store.entityMap()[product.id]).toEqual(product);
+      expect(store.entities().length).toBe(mockProducts.length);
+    });
+  });
+
+  it('storeFalse should not merge a result unrelated to the entity', () => {
+    TestBed.runInInjectionContext(() => {
+      const apiResponse = new Subject<{ downloadId: string }>();
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({ entity }),
+        withEntitiesCalls({
+          entity,
+          calls: () => ({
+            download: entityCallConfig({
+              call: ({ id }: { id: string }) => apiResponse.pipe(first()),
+              paramsSelectId: ({ id }) => id,
+              storeResult: false,
+            }),
+          }),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      const product = mockProducts[0];
+
+      store.download({ id: product.id });
+      apiResponse.next({ downloadId: 'abc' });
+
+      expect(store.isDownloadLoaded(product.id)).toBeTruthy();
+      expect(store.entityMap()[product.id]).toEqual(product);
+    });
+  });
+
   it('Ensure call throws error is no id is provided', async () => {
     const consoleError = vi
       .spyOn(console, 'error')

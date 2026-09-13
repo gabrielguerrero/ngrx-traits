@@ -51,7 +51,7 @@ const ProductDetailStore = signalStore(
         <img
           mat-card-image
           class="h-96 w-full object-cover my-6"
-          src="/{{ store.loadProductDetailResult()?.image }}"
+          src="{{ store.loadProductDetailResult()?.image }}"
         />
         <mat-card-content>
           <p class="line-clamp-3 overflow-hidden">
