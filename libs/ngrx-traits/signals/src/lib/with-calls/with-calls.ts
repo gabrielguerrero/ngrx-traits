@@ -64,11 +64,12 @@ import {
   CallResourceOptions,
   ExtractCallResultPropName,
   ExtractCallResultType,
-  ExtractErrorType,
+  NamedCallMethods,
   NamedCallResourceMethods,
   NamedCallsStatusComputed,
   ObservableCall,
   RxMethodRef,
+  ValidateCallParams,
 } from './with-calls.model';
 import { getWithCallKeys } from './with-calls.util';
 
@@ -130,8 +131,8 @@ import { getWithCallKeys } from './with-calls.util';
  *   store.isCheckoutLoaded // boolean
  *   store.checkoutError // unknown | undefined
  *   // generates the following methods
- *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
- *   store.checkout // () => Promise<{value, ok: true} | {error, ok: false}>
+ *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => Promise<{ value, ok: true } | { error, ok: false }> | RxMethodRef
+ *   store.checkout // () => Promise<{ value, ok: true } | { error, ok: false }>
  *   // and a factory of an Angular Resource view of each call that stores its result,
  *   // for components: value, status, error, isLoading, hasValue()
  *   // named after the resultProp when there is one, after the call otherwise
@@ -154,7 +155,9 @@ export function withCalls<
   Input extends SignalStoreFeatureResult,
   const Calls extends Record<string, Call | CallConfig>,
 >(
-  callsFactory: (store: StoreSource<Input>) => Calls,
+  callsFactory: (
+    store: StoreSource<Input>,
+  ) => Calls & ValidateCallParams<Calls>,
 ): SignalStoreFeature<
   Input,
   {
@@ -165,43 +168,7 @@ export function withCalls<
       >]: ExtractCallResultType<Calls[K]>;
     };
     props: NamedCallsStatusComputed<Calls>;
-    methods: {
-      [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
-        ? P extends []
-          ? () => Promise<
-              | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
-              | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
-            >
-          : {
-              (
-                param: P[0],
-              ): Promise<
-                | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
-                | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
-              >;
-              (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
-            }
-        : Calls[K] extends CallConfig
-          ? Parameters<Calls[K]['call']> extends undefined[]
-            ? () => Promise<
-                | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
-                | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
-              >
-            : {
-                (
-                  param: Parameters<Calls[K]['call']>[0],
-                ): Promise<
-                  | { value: Signal<ExtractCallResultType<Calls[K]>>; ok: true }
-                  | { error: Signal<ExtractErrorType<Calls[K]>>; ok: false }
-                >;
-                (
-                  param:
-                    | Observable<Parameters<Calls[K]['call']>[0]>
-                    | (() => Parameters<Calls[K]['call']>[0]),
-                ): RxMethodRef;
-              }
-          : never;
-    } & NamedCallResourceMethods<Calls>;
+    methods: NamedCallMethods<Calls> & NamedCallResourceMethods<Calls>;
   }
 > {
   return withFeatureFactory((store) => {
@@ -559,4 +526,3 @@ function wrapMapPipeWarning<Param, Result>(
     return (params) => from(call(params));
   }
 }
-type NotUndefined<T> = T extends undefined ? never : T;
