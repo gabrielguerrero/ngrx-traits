@@ -929,7 +929,8 @@ describe('withCalls', () => {
   describe('withCalls with mapPipe', () => {
     it('when withCall has mapPipe = switchMap should only process last call', fakeAsync(() => {
       let aux = 0;
-      const call = vi.fn().mockImplementation(() => {
+      // typed, so the call has no parameter rather than one of `any`
+      const call = vi.fn(() => {
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -959,7 +960,8 @@ describe('withCalls', () => {
 
     it('when withCall has mapPipe= exhaustMap should only process first call', fakeAsync(() => {
       let aux = 0;
-      const call = vi.fn().mockImplementation(() => {
+      // typed, so the call has no parameter rather than one of `any`
+      const call = vi.fn(() => {
         aux++;
         return of('' + aux).pipe(delay(100));
       });
@@ -989,7 +991,8 @@ describe('withCalls', () => {
 
     it('when withCall has mapPipe = concatMap should process all calls in sequence', fakeAsync(() => {
       let aux = 0;
-      const call = vi.fn().mockImplementation(() => {
+      // typed, so the call has no parameter rather than one of `any`
+      const call = vi.fn(() => {
         aux++;
         return of('' + aux).pipe(delay(100));
       });

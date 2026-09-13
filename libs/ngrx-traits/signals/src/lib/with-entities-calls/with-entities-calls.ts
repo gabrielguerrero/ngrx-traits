@@ -47,15 +47,15 @@ import { getWithEntitiesKeys, insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import { NamedCallStatusMapState } from '../with-call-status-map/with-call-status-map.model';
 import { CallStatus } from '../with-call-status/with-call-status.model';
-import { ObservableCall, RxMethodRef } from '../with-calls/with-calls.model';
+import { ObservableCall } from '../with-calls/with-calls.model';
 import { withFeatureFactory } from '../with-feature-factory/with-feature-factory';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import {
   EntityCall,
   EntityCallConfig,
-  ExtractEntityCallErrorType,
   NamedEntitiesCallsStatusComputed,
   NamedEntitiesCallsStatusMethods,
+  NamedEntityCallMethods,
 } from './with-entities-calls.model';
 import { getWithEntitiesCallKeys } from './with-entities-calls.util';
 
@@ -118,7 +118,8 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  *   store.isLoadOrderDetailLoading(id: string) => boolean
  *   store.isLoadOrderDetailLoaded(id: string) => boolean
  *   store.loadOrderDetailError(id: string) => string | undefined
- *   store.loadOrderDetail ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
+ *   store.loadOrderDetail // ({id: string}) => Promise<{ value, ok: true } | { error, ok: false }>
+ *   // and (Signal<{id: string}> | Observable<{id: string}> | (() => {id: string})) => { destroy }
  *   // same for changeOrderStatus and deleteOrder
  *
  */
@@ -127,7 +128,7 @@ export function withEntitiesCalls<
   Entity,
   const Calls extends Record<
     string,
-    EntityCall<NoInfer<Entity>> | EntityCallConfig<NoInfer<Entity>>
+    EntityCall<Entity> | EntityCallConfig<Entity>
   >,
   Collection extends string = '',
 >(config: {
@@ -140,37 +141,8 @@ export function withEntitiesCalls<
   {
     state: NamedCallStatusMapState<keyof Calls & string>;
     props: NamedEntitiesCallsStatusComputed<Calls>;
-    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> & {
-      [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
-        ? {
-            (param: P[0]): Promise<
-              | { value: Signal<Entity>; ok: true }
-              | {
-                  error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
-                  ok: false;
-                }
-            >;
-            (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
-          }
-        : Calls[K] extends EntityCallConfig
-          ? Parameters<Calls[K]['call']> extends undefined[]
-            ? () => void
-            : {
-                (...param: Parameters<Calls[K]['call']>): Promise<
-                  | { value: Signal<Entity>; ok: true }
-                  | {
-                      error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
-                      ok: false;
-                    }
-                >;
-                (
-                  param:
-                    | Observable<Parameters<Calls[K]['call']>[0]>
-                    | (() => Parameters<Calls[K]['call']>[0]),
-                ): RxMethodRef;
-              }
-          : never;
-    };
+    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> &
+      NamedEntityCallMethods<Entity, Calls>;
   }
 >;
 export function withEntitiesCalls<
@@ -178,7 +150,7 @@ export function withEntitiesCalls<
   Entity,
   const Calls extends Record<
     string,
-    EntityCall<NoInfer<Entity>> | EntityCallConfig<NoInfer<Entity>>
+    EntityCall<Entity> | EntityCallConfig<Entity>
   >,
   Collection extends string = '',
 >(
@@ -193,37 +165,8 @@ export function withEntitiesCalls<
   {
     state: NamedCallStatusMapState<keyof Calls & string>;
     props: NamedEntitiesCallsStatusComputed<Calls>;
-    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> & {
-      [K in keyof Calls]: Calls[K] extends (...args: infer P) => any
-        ? {
-            (param: P[0]): Promise<
-              | { value: Signal<Entity>; ok: true }
-              | {
-                  error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
-                  ok: false;
-                }
-            >;
-            (param: Observable<P[0]> | (() => P[0])): RxMethodRef;
-          }
-        : Calls[K] extends EntityCallConfig
-          ? Parameters<Calls[K]['call']> extends undefined[]
-            ? () => void
-            : {
-                (...param: Parameters<Calls[K]['call']>): Promise<
-                  | { value: Signal<Entity>; ok: true }
-                  | {
-                      error: Signal<ExtractEntityCallErrorType<Calls[K]>>;
-                      ok: false;
-                    }
-                >;
-                (
-                  param:
-                    | Observable<Parameters<Calls[K]['call']>[0]>
-                    | (() => Parameters<Calls[K]['call']>[0]),
-                ): RxMethodRef;
-              }
-          : never;
-    };
+    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> &
+      NamedEntityCallMethods<Entity, Calls>;
   }
 >;
 export function withEntitiesCalls<
