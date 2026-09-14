@@ -13,6 +13,8 @@ type RecordSignals<T extends object> = {
 };
 
 /**
+ * @deprecated use withLink or withStateSetter instead.
+ *
  * Binds component inputs to the store, so that the store is updated with the latest values of the inputs.
  * @param inputs
  *
