@@ -265,6 +265,26 @@ export class SideNavigationComponent {
       ],
     },
     {
+      title: 'Link State To Component Signals',
+      links: [
+        {
+          link: './traits/with-link',
+          name: 'withLink',
+          badge: 'new',
+        },
+        {
+          link: './traits/with-state-setter',
+          name: 'withStateSetter',
+          badge: 'new',
+        },
+        {
+          link: './traits/with-state-private-setter',
+          name: 'withStatePrivateSetter',
+          badge: 'new',
+        },
+      ],
+    },
+    {
       title: 'Entities Filtering',
       links: [
         {
@@ -375,21 +395,6 @@ export class SideNavigationComponent {
         {
           link: './traits/with-feature-factory',
           name: 'withFeatureFactory',
-        },
-        {
-          link: './traits/with-link',
-          name: 'withLink',
-          badge: 'new',
-        },
-        {
-          link: './traits/with-state-setter',
-          name: 'withStateSetter',
-          badge: 'new',
-        },
-        {
-          link: './traits/with-state-private-setter',
-          name: 'withStatePrivateSetter',
-          badge: 'new',
         },
       ],
     },
