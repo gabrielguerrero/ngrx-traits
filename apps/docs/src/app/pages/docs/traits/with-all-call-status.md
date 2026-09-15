@@ -137,7 +137,7 @@ Generates the following computed signals
 
 ```typescript
 isAnyCallLoading: Signal<boolean>;
-callsErrors: Signal<(unknown | null)[]>;
+callsErrors: Signal<unknown[]>;
 ```
 
 ## Methods

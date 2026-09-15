@@ -921,4 +921,183 @@ describe('withEntitiesLoadingCall', () => {
       expect(Store).toBeDefined();
     });
   });
+
+  describe('entities resource view', () => {
+    it('should expose the entities and their loading call as a resource', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const fetchEntities = vi.fn(() =>
+          of([...mockProducts]).pipe(delay(10)),
+        );
+        const Store = signalStore(
+          withEntities({ entity }),
+          withCallStatus(),
+          withEntitiesLoadingCall({ fetchEntities }),
+        );
+        const store = new Store();
+        tick();
+        const res = store.entitiesResource();
+        expect(res.status()).toBe('idle');
+        expect(res.value()).toEqual([]);
+        expect(res.hasValue()).toBe(true);
+        expect(res.snapshot()).toEqual({ status: 'idle', value: [] });
+
+        // setLoading is what triggers the fetch, the view only reads it
+        store.setLoading();
+        expect(res.status()).toBe('loading');
+        expect(res.isLoading()).toBe(true);
+        expect(store.isLoading()).toBe(true);
+        tick(10);
+        expect(res.status()).toBe('resolved');
+        expect(res.isLoading()).toBe(false);
+        expect(res.value()).toEqual(mockProducts);
+        expect(res.value()).toBe(store.entities());
+        expect(fetchEntities).toHaveBeenCalledTimes(1);
+
+        store.setLoading();
+        expect(res.status()).toBe('reloading');
+        expect(res.value()).toEqual(mockProducts);
+        tick(10);
+        expect(res.status()).toBe('resolved');
+        expect(fetchEntities).toHaveBeenCalledTimes(2);
+        expectTypeOf(res.value()).toEqualTypeOf<Product[]>();
+      });
+    }));
+
+    it('should be named after the collection', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({ entity, collection }),
+          withCallStatus({ collection, initialValue: 'loading' }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: () => of([...mockProducts]).pipe(delay(10)),
+          }),
+        );
+        const store = new Store();
+        const res = store.productEntitiesResource();
+        // loading from init, never loaded before
+        expect(res.status()).toBe('loading');
+        tick(10);
+        expect(res.status()).toBe('resolved');
+        expect(res.value()).toBe(store.productEntities());
+      });
+    }));
+
+    it('should report the error state', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          withEntities({ entity, collection }),
+          withCallStatus({ collection, errorType: type<string>() }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: () => throwError(() => new Error('fail')),
+            mapError: (error) => (error as Error).message,
+          }),
+        );
+        const store = new Store();
+        tick();
+        const res = store.productEntitiesResource();
+        store.setProductEntitiesLoading();
+        tick();
+        expect(res.status()).toBe('error');
+        expect(res.error()).toBe('fail');
+        expect(res.hasValue()).toBe(false);
+        expect(res.snapshot()).toEqual({ status: 'error', error: 'fail' });
+        expectTypeOf(res.error()).toEqualTypeOf<string | undefined>();
+      });
+    }));
+
+    it('should be read only, the entities are written through the store', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          withCallStatus({ collection }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: () => of([...mockProducts]).pipe(delay(10)),
+          }),
+        );
+        const store = new Store();
+        tick();
+        const res = store.productEntitiesResource();
+        // @ts-expect-error the view does not write the store
+        expect(res.set).toBeUndefined();
+
+        // setAllEntities is what a store method would do, and the view reads it
+        patchState(
+          store,
+          setAllEntities(mockProducts.slice(0, 2), { collection }),
+        );
+        expect(res.value()).toEqual(mockProducts.slice(0, 2));
+        // entities are there but nothing has been loaded yet, so a load in
+        // progress is a first load, not a reload
+        store.setProductEntitiesLoading();
+        expect(res.status()).toBe('loading');
+        tick(10);
+        expect(res.status()).toBe('resolved');
+        expect(res.value()).toEqual(mockProducts);
+
+        store.setProductEntitiesLoading();
+        expect(res.status()).toBe('reloading');
+        tick(10);
+      });
+    }));
+
+    it('should count a hydrated loaded status as loaded', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          withCallStatus({ collection }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: () => of([...mockProducts]).pipe(delay(10)),
+          }),
+        );
+        const store = new Store();
+        tick();
+        // the entities and the status arrive without any fetch running here,
+        // as they do with withServerStateTransfer or withSyncToWebStorage
+        patchState(
+          store,
+          setAllEntities(mockProducts.slice(0, 2), { collection }),
+        );
+        store.setProductEntitiesLoaded();
+
+        const res = store.productEntitiesResource();
+        expect(res.status()).toBe('resolved');
+        // so a refresh keeps the list on screen instead of starting over
+        store.setProductEntitiesLoading();
+        expect(res.status()).toBe('reloading');
+        tick(10);
+        expect(res.status()).toBe('resolved');
+      });
+    }));
+
+    it('should report reloading even if nothing read the status in between', fakeAsync(() => {
+      TestBed.runInInjectionContext(() => {
+        const Store = signalStore(
+          { protectedState: false },
+          withEntities({ entity, collection }),
+          withCallStatus({ collection }),
+          withEntitiesLoadingCall({
+            collection,
+            fetchEntities: () => of([...mockProducts]).pipe(delay(10)),
+          }),
+        );
+        const store = new Store();
+        tick();
+        const res = store.productEntitiesResource();
+        // nothing reads the resolved state, so it cannot be derived from the
+        // status transitions: a lazy computed would only see the last one
+        store.setProductEntitiesLoading();
+        tick(10);
+
+        store.setProductEntitiesLoading();
+        expect(res.status()).toBe('reloading');
+        tick(10);
+      });
+    }));
+  });
 });

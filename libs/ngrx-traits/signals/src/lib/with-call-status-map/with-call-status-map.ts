@@ -87,7 +87,7 @@ import {
  *  // generates the following methods
  *  store.isLoadDetailsLoading(key: string) // boolean
  *  store.isLoadDetailsLoaded(key: string) // boolean
- *  store.loadDetailsError(key: string) // unknown | null
+ *  store.loadDetailsError(key: string) // unknown | undefined
  *  store.setLoadDetailsLoading(key: string) // () => void
  *  store.setLoadDetailsLoaded(key: string) // () => void
  *  store.setLoadDetailsError(key: string) // (error?: unknown) => void

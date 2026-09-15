@@ -296,6 +296,135 @@ protected store = inject(RegisterUserStore);
     });
   }
 ```
+
+### Angular Resource view of a call
+
+> **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
+
+For each call that stores its result, `withCalls` also generates a resource method: a factory of a read-only view of the call with the shape of Angular's `Resource`, for components that prefer the resource API (`value`, `status`, `error`, `isLoading`, `snapshot`, `hasValue()`, plus `destroy()`). Call it in a field initializer to get an instance; every signal in it reads the store, nothing is copied, so all views of the same call agree with each other and with the generated signals.
+
+The view is read-only on purpose. Angular's `ResourceRef` can be written because its value lives in the resource, here it lives in the store, so changing it is a store method's job. There is no `reload()` either: the generated call method is what runs the call, and it takes the params, so the component calls that.
+
+The resource is a view of the result, so it is named after the prop holding it: `<resultProp>Resource()` when the call renames its result, `<callName>Resource()` otherwise.
+
+| call | resultProp | resource |
+| --- | --- | --- |
+| `loadProductDetail` | `productDetail` | `productDetailResource()` |
+| `loadProductDetail` | none | `loadProductDetailResource()` |
+| `checkout` | none | `checkoutResource()` |
+
+```typescript
+const ProductsStore = signalStore(
+  withCalls(() => ({
+    loadProductDetail: callConfig({
+      call: ({ id }: { id: string }) => inject(ProductService).getProductDetail(id),
+      resultProp: 'productDetail',
+      mapError: (error) => error as HttpErrorResponse,
+    }),
+  })),
+);
+
+// In component
+store = inject(ProductsStore);
+// typed as CallResource<ProductDetail | undefined, HttpErrorResponse>
+detail = this.store.productDetailResource();
+```
+
+```html
+@if (detail.isLoading()) {
+  <mat-spinner />
+} @else if (detail.hasValue()) {
+  <!-- hasValue() narrows value() to ProductDetail -->
+  <product-detail [product]="detail.value()" />
+  <button (click)="store.loadProductDetail({ id: productId() })">Refresh</button>
+} @else if (detail.status() === 'error') {
+  {{ detail.error()?.message }}
+}
+```
+
+The view maps the store call status to Angular's `ResourceStatus`: `init` is `idle`, `loading` is `loading` the first time and `reloading` once the call has produced a value, `loaded` is `resolved`, and an error is `error`. `local` is never reported, since the value is the store's, not the view's. Unlike a resource created with `resource()`, `value()` never throws: when the call fails it keeps the last result. It is structurally an Angular `Resource` whenever the error type (see `mapError`) extends `Error`, so it can be passed to any API that takes one.
+
+- To run the call again, call the generated method, or the `params` source below. The view does not add a `reload()`: the call is the store's, and running it needs the params.
+- To change the result, patch the store from a store method, as usual. Every view reads the same signal, so they all see it.
+
+#### Exposing only the resource to components
+
+A name starting with an underscore is private to the store, the same rule every other generated member follows. Since the name comes from `resultProp`, a private call with a public `resultProp` keeps the method, the status and the error inside the store while components get the result and the resource:
+
+```typescript
+const ProductsStore = signalStore(
+  withCalls(() => ({
+    // the call is private
+    _loadProductDetail: callConfig({
+      call: ({ id }: { id: string }) => inject(ProductService).getProductDetail(id),
+      // the result and the resource are public
+      resultProp: 'productDetail',
+    }),
+  })),
+);
+
+// In component: store._loadProductDetail is not there, this is the way in
+detail = this.store.productDetailResource({ params: () => ({ id: this.productId() }) });
+```
+
+Give the `resultProp` an underscore too (`_productDetail`) to keep the resource private as well.
+
+#### Driving the call from the component
+
+The `params` option takes a signal, a function or an observable of the call parameter, and runs the call every time it emits, the same as calling the generated method with it, except that `undefined` skips the call, so it can be driven by an input that is not set yet. It requires an injection context (field initializer or constructor), or the `injector` option. `destroy()` stops it.
+
+```typescript
+// In component
+productId = input.required<string>();
+detail = this.store.productDetailResource({
+  params: () => ({ id: this.productId() }),
+});
+```
+
+#### Loading the detail of the selected row
+
+`params` can be any signal the component owns, like the row selected in a list. Returning `undefined` while nothing is selected skips the call, and `mapPipe: 'switchMap'` cancels a detail still loading when the selection changes.
+
+```typescript
+const ProductsStore = signalStore(
+  withCalls(() => ({
+    loadProductDetail: callConfig({
+      call: ({ id }: { id: string }) => inject(ProductService).getProductDetail(id),
+      resultProp: 'productDetail',
+      mapPipe: 'switchMap',
+    }),
+  })),
+);
+
+// In component
+store = inject(ProductsStore);
+selectedProduct = signal<Product | undefined>(undefined);
+detail = this.store.productDetailResource({
+  params: () => {
+    const product = this.selectedProduct();
+    return product ? { id: product.id } : undefined;
+  },
+});
+```
+
+```html
+<product-list [list]="products()" (selectProduct)="selectedProduct.set($event)" />
+
+@if (detail.hasValue()) {
+  <!-- keeps showing the previous detail while the next one loads -->
+  <product-detail [product]="detail.value()" [productLoading]="detail.isLoading()" />
+} @else if (detail.isLoading()) {
+  <mat-spinner />
+} @else if (detail.status() === 'error') {
+  <!-- the store method runs the call again, with the id of the selected row -->
+  <button (click)="store.loadProductDetail({ id: selectedProduct()!.id })">Retry</button>
+} @else {
+  <h2>Please select a product</h2>
+}
+```
+
+See [withEntitiesLoadingCall](/docs/traits/with-entities-loading-call#full-example-filtered-list-with-detail) for a full example combining this view with the one of an entities list.
+
 ## API Reference
 
 This trait receives and object to allow specific configurations:
@@ -331,7 +460,7 @@ Generates the following computed signals
 ```typescript
 isGetUserLoading: Signal<boolean>;
 isGetUserLoaded: Signal<boolean>;
-getUserError: Signal<ErrorType>;
+getUserError: Signal<ErrorType | undefined>;
 ```
 
 ## Methods
@@ -346,4 +475,24 @@ getUser: (param: ParamType) => Promise<
 >;
 // When called with a Signal or Observable, returns an RxMethodRef
 getUser: (param: Signal<ParamType> | Observable<ParamType>) => RxMethodRef;
+// Factory of an Angular Resource view of the call, only when storeResult is not false,
+// named after the resultProp ('user' here), or after the call when there is none
+userResource: (options?: {
+  params?: Signal<ParamType | undefined> | (() => ParamType | undefined) | Observable<ParamType | undefined>;
+  injector?: Injector;
+}) => CallResource<ResultType, ErrorType>;
+```
+
+Where `CallResource` has the shape of Angular's `Resource`, with the error typed by the call:
+
+```typescript
+interface CallResource<T, Error> {
+  value: Signal<T>;
+  status: Signal<'idle' | 'loading' | 'reloading' | 'resolved' | 'error'>;
+  error: Signal<Error | undefined>;
+  isLoading: Signal<boolean>;
+  snapshot: Signal<CallResourceSnapshot<T, Error>>;
+  hasValue(): boolean; // narrows value to Exclude<T, undefined>
+  destroy(): void; // stops the params source, when one was given
+}
 ```
