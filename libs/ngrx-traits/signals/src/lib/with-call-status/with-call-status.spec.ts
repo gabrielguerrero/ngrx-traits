@@ -1,4 +1,5 @@
 import { signalStore, type, withState } from '@ngrx/signals';
+import { entityConfig } from '@ngrx/signals/entities';
 
 import { CallStatus, withCallStatus } from '../index';
 
@@ -108,9 +109,14 @@ describe('withCallStatus', () => {
   });
 
   describe('two-arg (entityConfig, options) form', () => {
+    const petEntityConfig = entityConfig({
+      entity: type<{ id: string }>(),
+      collection: 'pet',
+    });
+
     it('generates Entities-suffixed methods for collection param, same as single object form', () => {
       const Store = signalStore(
-        withCallStatus({ collection: 'pet' }, { initialValue: 'loading' }),
+        withCallStatus(petEntityConfig, { initialValue: 'loading' }),
       );
       const store = new Store();
 
@@ -126,12 +132,35 @@ describe('withCallStatus', () => {
     it('options as config factory can read previous state', () => {
       const Store = signalStore(
         withState({ myValue: 'loading' }),
-        withCallStatus({ collection: 'pet' }, ({ myValue }) => ({
+        withCallStatus(petEntityConfig, ({ myValue }) => ({
           initialValue: myValue() as CallStatus,
         })),
       );
       const store = new Store();
       expect(store.isPetEntitiesLoading()).toEqual(true);
+    });
+
+    it('generates unnamed methods when entityConfig has no collection', () => {
+      const Store = signalStore(
+        withCallStatus(entityConfig({ entity: type<{ id: string }>() }), {
+          initialValue: 'loading',
+        }),
+      );
+      const store = new Store();
+
+      expect(store.callStatus()).toBe('loading');
+      expect(store.isLoading()).toBe(true);
+      store.setLoaded();
+      expect(store.isLoaded()).toBe(true);
+      store.setError('error');
+      expect(store.error()).toEqual('error');
+    });
+
+    it('requires entity in entityConfig', () => {
+      signalStore(
+        // @ts-expect-error entity is required in the two-arg form
+        withCallStatus({ collection: 'pet' }, { initialValue: 'loading' }),
+      );
     });
   });
 });

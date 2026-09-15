@@ -51,7 +51,7 @@ const store = signalStore(withCallStatus({ collection: 'user' }));
 ### Typing error
 
 ```typescript
-const store = signalStore(withCallStatus({ collection: 'user' }, { initialValue: 'loading', errorType: type<string>() }));
+const store = signalStore(withCallStatus({ entity: type<{ id: string }>(), collection: 'user' }, { initialValue: 'loading', errorType: type<string>() }));
 ```
 
 ### Using withCallStatus and withMethods to call backend

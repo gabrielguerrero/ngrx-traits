@@ -9,6 +9,7 @@ import {
   withState,
 } from '@ngrx/signals';
 
+import { EntitiesCallStatusRequirement } from '../feature-requirements.model';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import {
   broadcast,
@@ -137,12 +138,12 @@ export function withCallStatus<
 // Overload for entityConfig as first param, extra options as second
 export function withCallStatus<
   Input extends SignalStoreFeatureResult,
-  Prop extends string,
+  Collection extends string = '',
   Error = unknown,
 >(
   entityConfig: {
-    entity?: unknown;
-    collection: Prop;
+    entity: unknown;
+    collection?: Collection;
   },
   options?: FeatureConfigFactory<
     Input,
@@ -156,11 +157,7 @@ export function withCallStatus<
   >,
 ): SignalStoreFeature<
   Input & { state: {}; props: {}; methods: {} },
-  {
-    state: NamedCallStatusState<`${Prop}Entities`>;
-    props: NamedCallStatusComputed<`${Prop}Entities`, Error>;
-    methods: NamedCallStatusMethods<`${Prop}Entities`, Error>;
-  }
+  EntitiesCallStatusRequirement<Collection, Error>
 >;
 
 // Implementation
