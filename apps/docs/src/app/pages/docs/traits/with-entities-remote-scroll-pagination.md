@@ -161,18 +161,18 @@ usersPagination: Signal<{ currentPage: number, requestPage: number, pageSize: 5,
 
 ## Computed
 
-Generates the following computed signals
+Generates the following computed signals, they are `DeepSignal`s, so each prop can be read as a signal of its own, e.g. `entitiesCurrentPage.total()`
 
 ```typescript
-entitiesCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
-entitiesPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
+entitiesCurrentPage: DeepSignal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
+entitiesPagedRequest: DeepSignal<{ startIndex: number, size: number, page: number }>;
 ```
 
 If collection provided, the following computed signals are generated, example: **user**
 
 ```typescript
-userCurrentPage: Signal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
-userPagedRequest: Signal<{ startIndex: number, size: number, page: number }>;
+userCurrentPage: DeepSignal<{ entities: Product[], pageIndex: number, total: number, pageSize: 5, pagesCount: number, hasPrevious: boolean, hasNext: boolean, isLoading: boolean }>;
+userPagedRequest: DeepSignal<{ startIndex: number, size: number, page: number }>;
 ```
 
 ## Methods

@@ -81,6 +81,13 @@ export const routes: Routes = [
           ).then((m) => m.routes),
       },
       {
+        path: 'product-resource',
+        loadComponent: () =>
+          import(
+            './examples/signals/product-resource-page/product-resource-page.component'
+          ).then((m) => m.ProductResourcePageComponent),
+      },
+      {
         path: 'product-link',
         loadComponent: () =>
           import(

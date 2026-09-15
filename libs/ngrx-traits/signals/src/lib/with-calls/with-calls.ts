@@ -2,10 +2,13 @@ import {
   computed,
   EnvironmentInjector,
   inject,
+  Injector,
   isDevMode,
   isSignal,
   runInInjectionContext,
+  signal,
   Signal,
+  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
@@ -45,6 +48,7 @@ import {
 } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
+import { createCallResource } from '../call-resource/call-resource';
 import { insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import {
@@ -57,9 +61,11 @@ import { StoreSource } from '../with-feature-factory/with-feature-factory.model'
 import {
   Call,
   CallConfig,
+  CallResourceOptions,
   ExtractCallResultPropName,
   ExtractCallResultType,
   ExtractErrorType,
+  NamedCallResourceMethods,
   NamedCallsStatusComputed,
   ObservableCall,
   RxMethodRef,
@@ -119,13 +125,28 @@ import { getWithCallKeys } from './with-calls.util';
  *   // generates the following computed signals
  *   store.isLoadProductDetailLoading // boolean
  *   store.isLoadProductDetailLoaded // boolean
- *   store.loadProductDetailError // string | null
+ *   store.loadProductDetailError // string | undefined
  *   store.isCheckoutLoading // boolean
  *   store.isCheckoutLoaded // boolean
- *   store.checkoutError // unknown | null
+ *   store.checkoutError // unknown | undefined
  *   // generates the following methods
  *   store.loadProductDetail // ({id: string} | Signal<{id: string}> | Observable<{id: string}>) => void
  *   store.checkout // () => Promise<{value, ok: true} | {error, ok: false}>
+ *   // and a factory of an Angular Resource view of each call that stores its result,
+ *   // for components: value, status, error, isLoading, hasValue()
+ *   // named after the resultProp when there is one, after the call otherwise
+ *   store.productDetailResource // (options?: { params?, injector? }) => CallResource<ProductDetail | undefined>
+ *   store.checkoutResource // () => CallResource<CheckoutResult | undefined>
+ *
+ * @example
+ * // in a component, a resource view driven by an input
+ * productId = input.required<string>();
+ * detail = this.store.productDetailResource({
+ *   params: () => ({ id: this.productId() }),
+ * });
+ * // in the template
+ * // @if (detail.hasValue()) { <product-detail [product]="detail.value()" /> }
+ * // @else if (detail.isLoading()) { <mat-spinner /> }
  *
  * @warning The default mapPipe is {@link https://www.learnrxjs.io/learn-rxjs/operators/transformation/exhaustmap exhaustMap}. If your call returns an observable that does not complete after the first value is emitted, any changes to the input params will be ignored. Either specify {@link https://www.learnrxjs.io/learn-rxjs/operators/transformation/switchmap switchMap} as mapPipe, or use {@link https://www.learnrxjs.io/learn-rxjs/operators/filtering/take take(1)} or {@link https://www.learnrxjs.io/learn-rxjs/operators/filtering/first first()} as part of your call.
  */
@@ -180,7 +201,7 @@ export function withCalls<
                 ): RxMethodRef;
               }
           : never;
-    };
+    } & NamedCallResourceMethods<Calls>;
   }
 > {
   return withFeatureFactory((store) => {
@@ -220,7 +241,9 @@ export function withCalls<
             const isLoading = computed(() => callState() === 'loading');
             const error = computed(() => {
               const v = callState();
-              return typeof v === 'object' ? v.error : null;
+              // undefined, not null, so it matches the declared type, what
+              // withCallStatus reports, and Angular's Resource contract
+              return typeof v === 'object' ? v.error : undefined;
             });
             registerCallState(store, { loading: isLoading, error });
             acc[loadingKey] = isLoading;
@@ -237,16 +260,24 @@ export function withCalls<
         (state, environmentInjector = inject(EnvironmentInjector)) => {
           const methods = Object.entries(calls).reduce(
             (acc, [callName, call]) => {
-              const { callStatusKey, errorKey } = getWithCallStatusKeys({
-                prop: callName,
-              });
+              const { callStatusKey, errorKey, loadingKey } =
+                getWithCallStatusKeys({
+                  prop: callName,
+                  supportPrivate: true,
+                });
+              const customResultProp =
+                isCallConfig(call) && call.resultProp?.length
+                  ? call.resultProp
+                  : undefined;
               const { resultPropKey, callNameKey } = getWithCallKeys({
                 callName,
-                resultProp:
-                  isCallConfig(call) && call.resultProp?.length
-                    ? call.resultProp
-                    : `${callName}Result`,
+                resultProp: customResultProp ?? `${callName}Result`,
               });
+              // the resource is a view of the result, so it is named after
+              // the prop holding it, falling back to the call name. An
+              // underscore in that name makes it private, like any other
+              // generated member
+              const resourceKey = `${customResultProp ?? callName}Resource`;
 
               const mapPipe =
                 isCallConfig(call) && call.mapPipe
@@ -257,10 +288,17 @@ export function withCalls<
                 patchState(store, {
                   [callStatusKey]: 'loading',
                 } as WritableStateSource<Input['state']>);
-              const setLoaded = () =>
+              // whether the call has produced a value at least once, for the
+              // resource view: it is what tells a reload from a first load,
+              // and neither the status nor isLoaded can say, both are
+              // 'loading' at that point. A latch, never reset
+              const hasLoadedOnce = signal(false);
+              const setLoaded = () => {
+                hasLoadedOnce.set(true);
                 patchState(store, {
                   [callStatusKey]: 'loaded',
                 } as WritableStateSource<Input['state']>);
+              };
               const setError = (error: unknown) =>
                 patchState(store, {
                   [callStatusKey]: { error },
@@ -375,6 +413,52 @@ export function withCalls<
                 resultPromise.catch(() => {});
                 return resultPromise;
               };
+
+              const storesResult =
+                !isCallConfig(call) || call.storeResult !== false;
+              if (storesResult) {
+                const isLoading = state[loadingKey] as Signal<boolean>;
+                if (isDevMode() && (resourceKey in acc || resourceKey in state))
+                  console.warn(
+                    `withCalls: the resource of the call "${callName}" is named "${resourceKey}", which the store already has. Rename the call or its resultProp, otherwise one of them is lost.`,
+                  );
+                const callStatusSignal = state[
+                  callStatusKey
+                ] as Signal<CallStatus>;
+                acc[resourceKey] = (options?: CallResourceOptions<unknown>) => {
+                  // a status the store was already given, hydrated from the
+                  // server or from storage, counts as loaded: no call ran
+                  // here, but there is a value on screen to reload
+                  if (untracked(callStatusSignal) === 'loaded')
+                    hasLoadedOnce.set(true);
+                  let paramsRef: RxMethodRef | undefined;
+                  const params = options?.params;
+                  if (params !== undefined) {
+                    // inject throws a clear error outside an injection context
+                    const injector = options?.injector ?? inject(Injector);
+                    const source$ = isObservable(params)
+                      ? params
+                      : toObservable(
+                          isSignal(params) ? params : computed(params),
+                          { injector },
+                        );
+                    // undefined skips the call, like callWith, so an input not
+                    // yet set does not run it
+                    paramsRef = reactiveMethod(
+                      source$.pipe(filter((v) => v !== undefined)),
+                      { injector },
+                    );
+                  }
+                  return createCallResource({
+                    value: state[resultPropKey] as Signal<unknown>,
+                    callStatus: callStatusSignal,
+                    error: state[errorKey] as Signal<unknown>,
+                    isLoading,
+                    hasLoadedOnce,
+                    destroy: () => paramsRef?.destroy(),
+                  });
+                };
+              }
               return acc;
             },
             {} as Record<string, any>,
