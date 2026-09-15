@@ -2,15 +2,17 @@ import {
   EnvironmentInjector,
   inject,
   runInInjectionContext,
+  signal,
   Signal,
+  untracked,
 } from '@angular/core';
 import {
-  EmptyFeatureResult,
   patchState,
   signalStoreFeature,
   SignalStoreFeature,
   SignalStoreFeatureResult,
   withHooks,
+  withMethods,
   WritableStateSource,
 } from '@ngrx/signals';
 import { SelectEntityId, setAllEntities } from '@ngrx/signals/entities';
@@ -30,11 +32,14 @@ import {
   switchMap,
 } from 'rxjs';
 
+import { createCallResource } from '../call-resource/call-resource';
 import {
   EntitiesCallStatusRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
+import { getWithEntitiesKeys } from '../util';
+import { CallStatus } from '../with-call-status/with-call-status.model';
 import {
   getWithCallStatusEvents,
   getWithCallStatusKeys,
@@ -54,7 +59,14 @@ import {
 import {
   ExpectedFetchEntitiesResult,
   FetchEntitiesResult,
+  NamedEntitiesResourceMethods,
 } from './with-entities-loading-call.model';
+
+type EntitiesLoadingCallResult<Collection extends string, Entity, Error> = {
+  state: {};
+  props: {};
+  methods: NamedEntitiesResourceMethods<Collection, Entity, Error>;
+};
 
 /**
  * Generates a onInit hook that fetches entities from a remote source
@@ -65,6 +77,11 @@ import {
  * if an error occurs it will set the error to the store using set[Collection]Error with the error.
  *
  * Requires withEntities and withCallStatus to be present in the store.
+ *
+ * Also generates an `entitiesResource()` (or `[collection]EntitiesResource()`)
+ * method, a factory of an Angular Resource view of the entities and their
+ * loading call for components: value (the entities), status, error, isLoading
+ * and hasValue(). To fetch again call set[Collection]Loading().
  *
  * @param config - The full feature config or — in the two-argument form — just the entityConfig (`entityConfig({ entity, collection, selectId })`)
  * @param config.fetchEntities - A function that fetches the entities from a remote source, the return type can be an array of entities or an object with entities and total
@@ -120,6 +137,14 @@ import {
  *         );
  *     },
  *   })),
+ *
+ * @example
+ * // in a component, the resource view of the entities
+ * products = this.store.productEntitiesResource();
+ * // in the template
+ * // @if (products.isLoading()) { <mat-spinner /> }
+ * // @for (product of products.value(); track product.id) { ... }
+ * // <button (click)="store.setProductEntitiesLoading()">Refresh</button>
  */
 
 export function withEntitiesLoadingCall<
@@ -157,7 +182,7 @@ export function withEntitiesLoadingCall<
       'withEntitiesLoadingCall',
       EntitiesCallStatusRequirement<Collection, Error>
     >,
-  EmptyFeatureResult
+  EntitiesLoadingCallResult<Collection, Entity, Error>
 >;
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
@@ -199,7 +224,7 @@ export function withEntitiesLoadingCall<
       'withEntitiesLoadingCall',
       EntitiesCallStatusRequirement<Collection, Error>
     >,
-  EmptyFeatureResult
+  EntitiesLoadingCallResult<Collection, Entity, Error>
 >;
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
@@ -209,7 +234,7 @@ export function withEntitiesLoadingCall<
 >(
   configOrFactory: FeatureConfigFactory<Input, Record<string, any>>,
   options?: FeatureConfigFactory<Input, Record<string, any>>,
-): SignalStoreFeature<any, EmptyFeatureResult> {
+): SignalStoreFeature<any, any> {
   const config = combineFeatureConfig(configOrFactory, options);
   return withFeatureFactory(
     (
@@ -237,9 +262,20 @@ export function withEntitiesLoadingCall<
         selectId?: SelectEntityId<Entity>;
         storeResult?: boolean;
       };
-      const { loadingKey, setErrorKey, setLoadedKey } = getWithCallStatusKeys({
+      const {
+        loadingKey,
+        setErrorKey,
+        setLoadedKey,
+        setLoadingKey,
+        callStatusKey,
+        errorKey,
+      } = getWithCallStatusKeys({
         collection,
       });
+      const { entitiesKey } = getWithEntitiesKeys({ collection });
+      const resourceKey = collection
+        ? `${collection}EntitiesResource`
+        : 'entitiesResource';
       const { setEntitiesPagedResultKey } = getWithEntitiesRemotePaginationKeys(
         {
           collection,
@@ -247,8 +283,30 @@ export function withEntitiesLoadingCall<
       );
       const { callLoading } = getWithCallStatusEvents({ prop: collection });
 
-      const setLoaded = _store[setLoadedKey] as () => void;
+      // whether a fetch has produced entities at least once, for the resource
+      // view: it is what tells a reload from a first load, and neither the
+      // status and isLoaded (both 'loading' at that point) nor the entities
+      // (they start as an empty array) can say. A latch, never reset
+      const hasLoadedOnce = signal(false);
+      const setLoaded = () => {
+        hasLoadedOnce.set(true);
+        (_store[setLoadedKey] as () => void)();
+      };
+      const setLoading = _store[setLoadingKey] as () => void;
       const setError = _store[setErrorKey] as (error: unknown) => void;
+      const setEntities = (entities: Entity[]) =>
+        patchState(
+          _store as WritableStateSource<object>,
+          collection
+            ? setAllEntities(entities, {
+                collection,
+                selectId: selectId ?? ((entity) => (entity as any).id),
+              })
+            : setAllEntities(entities, {
+                selectId:
+                  selectId ?? ((entity) => (entity as any).id as string),
+              }),
+        );
       const setEntitiesPagedResult = _store[
         setEntitiesPagedResultKey
       ] as (result: { entities: Entity[] }) => void;
@@ -269,20 +327,7 @@ export function withEntitiesLoadingCall<
                     const entities = Array.isArray(result)
                       ? result
                       : (result as { entities: Entity[] }).entities;
-                    patchState(
-                      _store as WritableStateSource<object>,
-                      collection
-                        ? setAllEntities(entities as Entity[], {
-                            collection,
-                            selectId:
-                              selectId ?? ((entity) => (entity as any).id),
-                          })
-                        : setAllEntities(entities as Entity[], {
-                            selectId:
-                              selectId ??
-                              ((entity) => (entity as any).id as string),
-                          }),
-                    );
+                    setEntities(entities as Entity[]);
                   }
                 }
                 setLoaded();
@@ -303,16 +348,33 @@ export function withEntitiesLoadingCall<
           ),
         ),
       );
+      const storeSignals = _store as unknown as Record<string, Signal<unknown>>;
+      const loading = storeSignals[loadingKey] as Signal<boolean>;
       return signalStoreFeature(
         withEventHandler(() => [onEvent(callLoading, () => loadEntities())]),
-        withHooks((store: Record<string, Signal<unknown>>) => {
-          const loading = store[loadingKey] as Signal<boolean>;
-          return {
-            onInit: () => {
-              if (loading()) loadEntities();
-            },
-          };
-        }),
+        withHooks(() => ({
+          onInit: () => {
+            if (loading()) loadEntities();
+          },
+        })),
+        withMethods(() => ({
+          [resourceKey]: () => {
+            const callStatus = storeSignals[
+              callStatusKey
+            ] as Signal<CallStatus>;
+            // a status the store was already given, hydrated from the server
+            // or from storage, counts as loaded: no fetch ran here, but
+            // there are entities on screen
+            if (untracked(callStatus) === 'loaded') hasLoadedOnce.set(true);
+            return createCallResource<Entity[], Error>({
+              value: storeSignals[entitiesKey] as Signal<Entity[]>,
+              callStatus,
+              error: storeSignals[errorKey] as Signal<Error | undefined>,
+              isLoading: loading,
+              hasLoadedOnce,
+            });
+          },
+        })),
       );
     },
   ) as any;

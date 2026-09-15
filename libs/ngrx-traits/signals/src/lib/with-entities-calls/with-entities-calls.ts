@@ -117,7 +117,7 @@ import { getWithEntitiesCallKeys } from './with-entities-calls.util';
  *   // generates the following methods
  *   store.isLoadOrderDetailLoading(id: string) => boolean
  *   store.isLoadOrderDetailLoaded(id: string) => boolean
- *   store.loadOrderDetailError(id: string) => string | null
+ *   store.loadOrderDetailError(id: string) => string | undefined
  *   store.loadOrderDetail // ({id: string}) => Promise<{value, ok: true} | {error, ok: false}>
  *   //   passing a Signal or Observable instead returns an RxMethodRef
  *   // same for changeOrderStatus and deleteOrder

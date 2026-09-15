@@ -255,3 +255,28 @@ const productsStoreFeature = signalStoreFeature(
   ),
 );
 ```
+
+### Using the Entities as an Angular Resource
+
+`withEntitiesLoadingCall` also generates a `[collection]EntitiesResource()` method (`entitiesResource()` without a collection), a factory of a read-only view of the entities and their loading call with the shape of Angular's `Resource`. It works with any of the setups above: `value()` is the `[collection]Entities()` signal and `status()` maps the `withCallStatus` status. To fetch again call `set[Collection]Loading()`, which fetches with the current filter, sort and page.
+
+```typescript
+// In component
+store = inject(ProductsRemoteStore);
+products = this.store.productEntitiesResource();
+```
+
+```html
+@if (products.status() === 'loading') {
+  <mat-spinner />
+} @else {
+  <!-- 'reloading' while a filter, sort or page change fetches the next result -->
+  @if (products.status() === 'reloading') {
+    <mat-progress-bar mode="indeterminate" />
+  }
+  <product-list [list]="products.value()" />
+  <button (click)="store.setProductEntitiesLoading()">Refresh</button>
+}
+```
+
+See [withEntitiesLoadingCall](/docs/traits/with-entities-loading-call#angular-resource-view-of-the-entities) for the details and a full example with a detail view.

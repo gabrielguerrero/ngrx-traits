@@ -60,7 +60,7 @@ import {
  *  // generates the following computed signals
  *  store.isUserEntitiesLoading // boolean
  *  store.isUserEntitiesLoaded // boolean
- *  store.userEntitiesError // unknown | null
+ *  store.userEntitiesError // unknown | undefined
  *  // generates the following methods
  *  store.setUserEntitiesLoading // () => void
  *  store.setUserEntitiesLoaded // () => void
