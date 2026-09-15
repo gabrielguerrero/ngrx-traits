@@ -1,6 +1,22 @@
 import { SignalStoreFeatureResult } from '@ngrx/signals';
 
+import { CallResource } from '../call-resource/call-resource.model';
 import { NamedSetEntitiesResult } from '../with-entities-pagination/with-entities-local-pagination.model';
+
+/**
+ * The `entitiesResource()` or `<collection>EntitiesResource()` method generated
+ * by withEntitiesLoadingCall: returns a resource view of the entities and their
+ * loading call, see `CallResource`.
+ */
+export type NamedEntitiesResourceMethods<
+  Collection extends string,
+  Entity,
+  Error = unknown,
+> = {
+  [K in Collection extends ''
+    ? 'entitiesResource'
+    : `${Collection}EntitiesResource`]: () => CallResource<Entity[], Error>;
+};
 
 /**
  * The key an entities pagination feature generates to store a page result.
