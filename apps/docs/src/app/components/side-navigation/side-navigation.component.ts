@@ -279,6 +279,11 @@ export class SideNavigationComponent {
           badge: 'new',
         },
         {
+          link: './traits/with-link#copysignal',
+          name: 'copySignal',
+          badge: 'new',
+        },
+        {
           link: './traits/with-state-setter',
           name: 'withStateSetter',
           badge: 'new',
