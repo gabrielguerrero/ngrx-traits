@@ -107,7 +107,6 @@
     "jsdom": "^27.3.0",
     "jsonc-eslint-parser": "^2.1.0",
     "ng-packagr": "22.1.1",
-    "ngxtension": "^7.3.0",
     "nx": "23.1.1",
     "prettier": "3.2.5",
     "semantic-release": "^25.0.2",
