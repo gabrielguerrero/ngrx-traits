@@ -49,5 +49,6 @@ export * from './with-entities-calls/with-entities-calls.model';
 export * from './with-entities-calls/entity-call-config';
 export * from './cache/index';
 export * from './with-link/with-link';
+export * from './with-link/copy-signal';
 export * from './with-link/with-link.util';
 export * from './with-state-setter/with-state-setter';
