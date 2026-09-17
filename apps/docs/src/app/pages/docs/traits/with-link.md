@@ -594,6 +594,77 @@ export class ProfileComponent {
 }
 ```
 
+### Splitting a model() across two forms with copySignal
+
+A parent hands the component one object through a `model()`, but the component edits it as two separate forms, each with its own state in the store and its own validation. Each form links to its own slice and reads the model with `readFrom`, keeping the part it owns; the store puts the slices back together in a `computed`; and `copySignal` copies that computed into the model, so the parent gets the whole object back:
+
+```ts
+type Checkout = { name: string; email: string; street: string; city: string };
+
+export const CheckoutStore = signalStore(
+  withState({
+    contact: { name: '', email: '' },
+    address: { street: '', city: '' },
+  }),
+  // generates linkContact() and linkAddress()
+  withLink('contact'),
+  withLink('address'),
+  withComputed(({ contact, address }) => ({
+    // the two slices back together, in the shape the parent works with
+    checkout: computed<Checkout>(() => ({ ...contact(), ...address() })),
+  })),
+);
+```
+
+```ts
+@Component({
+  template: `
+    <input [formField]="contactForm.name" />
+    <input [formField]="contactForm.email" />
+    <input [formField]="addressForm.street" />
+    <input [formField]="addressForm.city" />
+  `,
+  imports: [FormField],
+})
+export class CheckoutComponent {
+  store = inject(CheckoutStore);
+
+  // the whole object, edited by the parent and written back to it
+  checkout = model<Checkout>({ name: '', email: '', street: '', city: '' });
+
+  // each link reads the model and keeps only the half it owns
+  contactData = this.store.linkContact({
+    readFrom: this.checkout,
+    readMap: ({ name, email }) => ({ name, email }),
+  });
+  contactForm = form(this.contactData, (path) => {
+    required(path.name);
+    email(path.email);
+  });
+
+  addressData = this.store.linkAddress({
+    readFrom: this.checkout,
+    readMap: ({ street, city }) => ({ street, city }),
+  });
+  addressForm = form(this.addressData, (path) => {
+    required(path.street);
+    required(path.city);
+  });
+
+  // the recombined value goes back to the parent. A field only to get an
+  // injection context; the returned EffectRef does not have to be kept
+  copy = copySignal(this.store.checkout, this.checkout);
+}
+```
+
+Typing in either form writes that slice to the store, the `computed` recombines both, and the copy sets the model. When the parent writes the model instead, both `readFrom`s pick up their slice and both forms follow.
+
+Neither link uses `writeTo`, because each one only owns half of the object and would push a partial value to a model the other half also writes. The recombined `computed` is the only value that is the whole object, and it is not the source of any link — copying it out is exactly what `copySignal` is for.
+
+The copy does not echo back through the forms: setting the model re-runs both `readFrom`s, each slice equals what the store already holds, and the `equal` guard drops the write.
+
+`copySignal` is a standalone function (`import { copySignal } from '@ngrx-traits/signals'`), not a store feature — see [copySignal](#copysignal).
+
 ## API
 
 ```typescript
@@ -640,6 +711,50 @@ _set<Name>(input: T | (() => T) | ((current: T) => T), config?: { injector?: Inj
 The same write path the linked signal uses, exposed as a store method. The `_` prefix makes it private to the store: other features and methods can write through it, consumers of the store cannot see it.
 
 Like the setters of [withStateSetter](/docs/traits/with-state-setter), it is a `signalMethod`, so it accepts a plain value, a signal or reactive fn (keeping the store in sync with it), or an updater `(current) => next` for partial updates.
+
+### copySignal
+
+```typescript
+copySignal(source, target, options?): EffectRef;
+```
+
+> **Experimental**, like `withLink` itself.
+
+A standalone function, not a store feature: it copies one signal into another signal, an `output()` or an `EventEmitter`, and keeps it up to date. It covers what is not a link source, like the recombined `computed` in [Splitting a model() across two forms](#splitting-a-model-across-two-forms-with-copysignal) — for a store value there is already `writeTo`.
+
+| Parameter          | Description                                                                                                                                               | Type                                                          |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `source`           | Signal copied from, or a function reading signals — tracked like a `computed` — to combine several, map into the target's type, or `skip()` a value     | `Signal<T> \| (skip: () => never) => T`                       |
+| `target`           | Copied to: a signal that is set, or an output/EventEmitter that is emitted                                                                                | `WritableSignal<T> \| OutputEmitterRef<T> \| EventEmitter<T>` |
+| `options.equal`    | When two values are the same, defaults to comparing by content                                                                                            | `(a, b) => boolean` or the same names as `equal` above        |
+| `options.injector` | Injector for the effect watching the source, when called outside an injection context                                                                     | `Injector`                                                    |
+
+```ts
+// mirror an input into a model
+copySignal(this.search, this.searchModel);
+
+// map into the target's type, and skip the values it should not see
+copySignal((skip) => this.filter().search || skip(), this.filterChange);
+
+// map to ids, compared by a premade equality
+copySignal(() => this.selected().map((p) => p.id), this.selectedIds, {
+  equal: 'array',
+});
+```
+
+`equal` decides when two values are the same: a value equal to the last one the source produced is not copied again, and one equal to what the target already holds is not written. The second only applies to a writable target, which can be edited on its own; an `output()` holds nothing to compare against.
+
+`skip()` rejects the value being read, from anywhere in the source function: nothing is copied and the target is left as it is. The signals read before it are still tracked, so the source is re-run when they change.
+
+Nothing is written back, so the target can be edited on its own. The edit survives until the source produces a different value: a recompute that ends up equal to the last value the source produced, or a return to it after a `skip()`, leaves the target alone.
+
+The value at call time is copied right away, so the target agrees with the source before the first change. For an `output()` that means it is emitted from wherever `copySignal` is called — in a field initializer the parent is not listening yet, so call it from `ngOnInit` (passing an `injector`) if the parent has to receive that first value.
+
+The source has to fit the target: `T` is taken from the target, and a source that is missing a property the target's type promises, or that can be `null` when the target cannot, is a type error — map it in the source function. A function returning a bare literal widens it, so `() => 'asc'` is a `string` and does not fit a `WritableSignal<'asc' | 'desc'>`: add `as const` or a return type. This is checked on the source rather than the target, because `set` and `emit` take their value as a method parameter and would accept any related type and then hold the wrong shape.
+
+There is no gate and no merge form taking the previous value, as there is on a link. A link merges into the store, which it re-reads every time; a copy would be merging into a stale idea of a target it does not own. To merge into the target, read it in the source function — the copy settles, since writing back what the target already holds is dropped by `equal`. That relies on `equal` recognizing the rebuilt value: the default does for primitives, plain objects and arrays of the same elements, but an array of fresh objects, or a `Date` or class instance as the value, never compares equal to its rebuild and loops, so pass an `equal` that knows it.
+
+The returned `EffectRef` destroys the copy, which otherwise lives as long as the injection context it was created in.
 
 ## Methods
 
