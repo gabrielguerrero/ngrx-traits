@@ -1,0 +1,9 @@
+{
+  "name": "ngrx-traits",
+  "description": "Compose, explain and debug @ngrx-traits/signals signal stores: trait ordering, generated signal and method names, entity loading, filtering, sorting, pagination, selection, per-entity calls, linking store state to component signals and Signal Forms, URL/web-storage/SSR sync, and call caching.",
+  "author": {
+    "name": "Gabriel Guerrero"
+  },
+  "homepage": "https://ngrx-traits.dev",
+  "repository": "https://github.com/gabrielguerrero/ngrx-traits"
+}
