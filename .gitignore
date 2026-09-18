@@ -58,3 +58,9 @@ apps/docs/.env
 .nx/polygraph
 .nx/self-healing
 .nx/migrate-runs
+
+# pnpm store created by local docs installs
+.pnpm-store
+
+# eval run outputs
+evals/results
