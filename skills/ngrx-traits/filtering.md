@@ -26,8 +26,11 @@ resetProductEntitiesFilter(options?: {
 ```
 
 Calling `filterProductEntities()` with no argument reapplies the current filter — useful after entities
-were changed by hand. The returned promise resolves once the resulting load settles, so a filter form can
-show a server error on submit.
+were changed by hand.
+
+The promise is only worth awaiting on the **remote** and **hybrid** filters: it settles once the load
+triggered by the filter finishes, so a form can show a server error on submit. The local filter
+resolves immediately with `{ ok: true, value: filteredEntities }` and never reports an error.
 
 ## withEntitiesLocalFilter
 
@@ -45,7 +48,7 @@ withEntitiesLocalFilter(productEntityConfig, {
 |---|---|
 | `defaultFilter` | Initial filter; its type is inferred from this value |
 | `filterFn` | `(entity, filter) => boolean` |
-| `defaultDebounce` | Debounce in ms applied to `filterProductEntities` |
+| `defaultDebounce` | Debounce in ms applied to `filterProductEntities` (default 300, as on the remote filter) |
 
 ## withEntitiesRemoteFilter
 
@@ -106,7 +109,7 @@ Apply button — pass `debounce: 0` so the filter is not delayed:
 </form>
 ```
 
-Signal Forms, applying on submit and surfacing a server error:
+Signal Forms, applying on submit and surfacing a server error (remote/hybrid filter — see above):
 
 ```typescript
 filter = linkedSignal(this.store.productEntitiesFilter);

@@ -1,6 +1,6 @@
 ---
 name: ngrx-traits
-description: Compose, explain and debug @ngrx-traits/signals signal stores — trait ordering, generated signal and method names, entity loading, filtering, sorting, pagination, selection, per-entity calls, linking store state to component signals and Signal Forms, URL/web-storage/SSR sync, and call caching. Use when the user mentions ngrx-traits or one of its store features (withCallStatus, withCalls, withEntitiesLoadingCall, withEntitiesCalls, withEntitiesLocalFilter, withEntitiesRemoteFilter, withEntitiesHybridFilter, withEntitiesLocalPagination, withEntitiesRemotePagination, withEntitiesRemoteScrollPagination, withEntitiesLocalSort, withEntitiesRemoteSort, withEntitiesSingleSelection, withEntitiesMultiSelection, withLink, withLinkEntitiesFilter, withStateSetter, withRoute, withSyncToWebStorage, withSyncToRouteQueryParams, withServerStateTransfer, withLogger, cacheRxCall). Do not use for plain @ngrx/signals stores that do not use ngrx-traits.
+description: Compose, explain and debug @ngrx-traits/signals signal stores — trait ordering, generated signal and method names, entity loading, filtering, sorting, pagination, selection, per-entity calls, linking store state to component signals and Signal Forms, URL/web-storage/SSR sync, and call caching. Use when the user mentions ngrx-traits or one of its store features (withCallStatus, withCalls, withEntitiesLoadingCall, withEntitiesCalls, withEntitiesLocalFilter, withEntitiesRemoteFilter, withEntitiesHybridFilter, withEntitiesLocalPagination, withEntitiesRemotePagination, withEntitiesRemoteScrollPagination, withEntitiesLocalSort, withEntitiesRemoteSort, withEntitiesSingleSelection, withEntitiesMultiSelection, withLink, withLinkEntitiesFilter, copySignal, withStateSetter, withRoute, withSyncToWebStorage, withEntitiesSyncToRouteQueryParams, withServerStateTransfer, withLogger, cacheRxCall). Do not use for plain @ngrx/signals stores that do not use ngrx-traits.
 ---
 
 # ngrx-traits
@@ -116,9 +116,12 @@ named `_loadProductDetail` keeps its method and status inside the store while it
 - A store needs an injection context, because traits call `inject()` in their factories. Either provide it —
   `TestBed.configureTestingModule({ providers: [MyStore] })`, then `TestBed.inject(MyStore)` — or build it inside
   `TestBed.runInInjectionContext(() => new Store())`, which is what this library's own specs do.
-- Fetching runs through rxjs, so wrap the test in `fakeAsync` and `tick()` after each action that triggers a call
-  (store creation with `initialValue: 'loading'`, `setProductEntitiesLoading()`, a filter/sort/page change).
-- Without `initialValue: 'loading'`, start a load with `store.setProductEntitiesLoading()` or
-  `patchState(store, { productEntitiesCallStatus: 'loading' })`.
+- Fetching runs through rxjs and effects, so flush after each action that triggers a call (store creation
+  with `initialValue: 'loading'`, `setProductEntitiesLoading()`, a filter/sort/page change): `TestBed.tick()`,
+  or `fakeAsync` + `tick()` when the call is delayed or debounced. The library's specs use both.
+- Without `initialValue: 'loading'`, start a load with `store.setProductEntitiesLoading()`. Use the
+  generated setters rather than patching the status state: the state key is `productCallStatus`
+  (no `Entities` infix, unlike every other generated name), so a `patchState` aimed at
+  `productEntitiesCallStatus` typechecks and silently does nothing.
 
 Full documentation: https://ngrx-traits.dev

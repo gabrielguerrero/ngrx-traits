@@ -39,7 +39,7 @@ withEntitiesSyncToRouteQueryParams(productEntityConfig, { prefix: 'p' });
 
 | Option | Description | Default |
 |---|---|---|
-| `prefix` | Prefix for the query params, to avoid clashes | the collection name |
+| `prefix` | Prefix for the query params, to avoid clashes; `false` disables prefixing | the collection name |
 | `filterMapper` | How the filter is serialized; `getFilterQueryMapper` builds one from the filter fields | JSON |
 | `onQueryParamsLoaded` | `(store) => void` after the URL state was restored | — |
 | `defaultDebounce` | Debounce for writing state changes back to the URL | — |
@@ -148,7 +148,10 @@ not refetch during hydration.
 withServerStateTransfer({
   key: 'product-list-ssr',
   filterState: ({ productEntityMap, productIds }) => ({ productEntityMap, productIds }),
-  onRestore: (store) => patchState(store, { productEntitiesCallStatus: 'loaded' }),
+  // the status is not part of the filtered state, so mark it loaded here —
+  // through the generated setter, not patchState: the state key is
+  // `productCallStatus`, without the `Entities` infix the other names carry
+  onRestore: (store) => store.setProductEntitiesLoaded(),
 });
 ```
 

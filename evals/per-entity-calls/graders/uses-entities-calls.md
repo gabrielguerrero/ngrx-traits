@@ -11,7 +11,9 @@ The answer must reach for `withEntitiesCalls`, which is what gives a per-entity 
 - Per-row status is read with the generated per-entity predicates —
   `store.isLoadOrderDetailLoading(order)` / `isLoadOrderDetailLoaded(order)` — not a single shared
   boolean, and not one store per row.
-- The status dropdown call, whose parameter is neither an id nor the entity, uses `entityCallConfig`
-  with `paramsSelectId`.
+- The status dropdown call carries the entity plus the new status. Both shapes are acceptable: a param
+  the library can find the id in on its own (`{ entity: Order; status: string }` — it looks for an
+  `entity` prop), or any other shape (e.g. `{ id, status }`) declared with `entityCallConfig` and
+  `paramsSelectId`. Do not fail an answer for omitting `paramsSelectId` when the param holds `entity`.
 
 Answering with a plain `withCalls` (one shared status for all rows) fails this case.
