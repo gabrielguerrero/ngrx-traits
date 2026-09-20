@@ -3,8 +3,8 @@
 ## ExtractStoreFeatureOutput
 
 Extracts the output type of a custom store feature so a dependent feature can declare it as input.
-Needed when splitting a store — `signalStore` takes at most 10 features, and a feature cannot see the
-signals of another one unless it says so.
+Needed when splitting a store: a feature cannot see the signals of another one unless it declares them
+(`signalStore` also caps out at 15 features).
 
 ```typescript
 import { ExtractStoreFeatureOutput } from '@ngrx-traits/signals';
@@ -102,8 +102,9 @@ ng g @ngrx-traits/signals:rename-collection --old-name=product
 | Parameter | Required | Default | Description |
 |---|---|---|---|
 | `--old-name` | yes | — | Current collection name |
-| `--new-name` | no | old name | New collection name |
+| `--new-name` | no | `""` | New collection name; empty only adds the `Entities` infix |
 | `--path` | no | `src` | Directory to search |
+| `--skip-git-check` | no | `false` | Run with uncommitted changes in the tree |
 
 It rewrites `productEntities()`, `isProductEntitiesLoading()`, `filterProductEntities()`,
 `productEntitySelected()`, `collection: 'product'` and the rest. Commit first, then review the diff and

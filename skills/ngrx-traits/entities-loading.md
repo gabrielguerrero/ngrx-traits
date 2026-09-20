@@ -30,7 +30,8 @@ The status every other entity trait talks through. Put it before them.
 withCallStatus(productEntityConfig, { initialValue: 'loading', errorType: type<string>() });
 // isProductEntitiesLoading(), isProductEntitiesLoaded(), productEntitiesError()
 // setProductEntitiesLoading(), setProductEntitiesLoaded(), setProductEntitiesError(err)
-// state: productEntitiesCallStatus: 'init' | 'loading' | 'loaded' | { error: unknown }
+// state: productCallStatus: 'init' | 'loading' | 'loaded' | { error: unknown }
+//        (the one generated name with no `Entities` infix — prefer the setters above over patchState)
 
 withCallStatus({ prop: 'user' });          // non-entity state: isUserLoading(), setUserLoading() ...
 withCallStatus({ collection: 'user' });    // same names as the entity form, without an entity type
@@ -80,8 +81,9 @@ withEntitiesLoadingCall(
 | `fetchEntities` | `Observable`/`Promise` of `Entity[]` or `{ entities, total? }` | required |
 | `mapPipe` | `'switchMap'` \| `'exhaustMap'` \| `'concatMap'` | `switchMap` |
 | `storeResult` | Store the entities automatically; `false` leaves it to `onSuccess` | `true` |
-| `onSuccess` | `(result, param) => void` | — |
-| `mapError` | `(error) => ErrorType` | — |
+| `onSuccess` | `(result) => void` | — |
+| `mapError` | `(error) => Error` | — |
+| `onError` | `(error) => void` | — |
 | `collection` / `selectId` | Come from the entity config | — |
 
 Reload with `store.setProductEntitiesLoading()` — it refetches with the current filter, sort and page.
@@ -145,7 +147,7 @@ withCallStatusMap({ prop: 'loadDetails' });
 // state: loadDetailsCallStatus: Record<string | number, CallStatus>
 // computed: areAllLoadDetailsLoaded(), isAnyLoadDetailsLoading(), loadDetailsErrors()
 // methods: isLoadDetailsLoading(id), isLoadDetailsLoaded(id), loadDetailsError(id),
-//          setLoadDetailsLoading(id), setLoadDetailsLoaded(id), setLoadDetailsError(id, error?)
+//          setLoadDetailsLoading(id), setLoadDetailsLoaded(id), setLoadDetailsError(id, error)
 ```
 
 ```typescript
@@ -172,6 +174,6 @@ withMethods((store, service = inject(OrderService)) => ({
 
 | Option | Description |
 |---|---|
-| `prop` | Name prefix for the generated map and methods |
+| `prop` | Name prefix for the generated map and methods (`collection` is an alias) |
 | `initialValue` | Initial status |
 | `errorType` | `type<T>()` to type the errors |

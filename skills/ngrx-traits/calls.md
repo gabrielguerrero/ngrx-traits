@@ -40,11 +40,11 @@ A call takes zero or one parameter — use an object when it needs several.
 | `resultProp` | Name of the result signal | `<callName>Result` |
 | `storeResult` | Store the result; `false` removes the result signal, keeps status and `onSuccess` | `true` |
 | `mapPipe` | `'exhaustMap'` \| `'switchMap'` \| `'concatMap'` | `exhaustMap` |
-| `onSuccess` | `(result, param) => void` | — |
-| `mapError` | `(error) => ErrorType` — also types `error()` | — |
+| `onSuccess` | `(result, param, previousResult) => void` | — |
+| `mapError` | `(error, param) => ErrorType` — also types `error()` | — |
 | `onError` | `(error, param) => void` | — |
-| `skipWhen` | `(param) => boolean \| Promise<boolean> \| Observable<boolean>` | — |
-| `callWith` | Value, signal, observable or fn — runs the call reactively; `undefined` skips it | — |
+| `skipWhen` | `(param, previousResult) => boolean \| Promise<boolean> \| Observable<boolean>` | — |
+| `callWith` | Value, signal, observable or fn — runs the call reactively; a **falsy** value skips it unless `skipWhen` overrides that | — |
 | `defaultResult` | Initial value of the result signal | — |
 
 Generated for `loadProductDetail` with `resultProp: 'productDetail'`:
@@ -55,7 +55,7 @@ isLoadProductDetailLoading: Signal<boolean>;
 isLoadProductDetailLoaded: Signal<boolean>;
 loadProductDetailError: Signal<ErrorType | undefined>;
 loadProductDetail(param): Promise<{ value: Signal<T>; ok: true } | { error: Signal<ErrorType>; ok: false }>;
-loadProductDetail(param: Signal<P> | Observable<P>): RxMethodRef;
+loadProductDetail(param: Observable<P> | (() => P)): RxMethodRef; // a Signal satisfies `() => P`
 productDetailResource(options?): CallResource<T, ErrorType>; // named after resultProp
 ```
 
@@ -91,7 +91,7 @@ withCalls(({ productEntitySelected }) => ({
   loadProductDetail: callConfig({
     call: ({ id }: { id: string }) => inject(ProductService).getProductDetail(id),
     resultProp: 'productDetail',
-    callWith: productEntitySelected, // Signal<Product | undefined>; undefined skips the call
+    callWith: productEntitySelected, // Signal<Product | undefined>; a falsy value skips the call
     // or a fn when the shapes differ:
     // callWith: () => productEntitySelected() ? { id: productEntitySelected()!.id } : undefined,
   }),
@@ -164,24 +164,25 @@ withEntitiesCalls(orderEntityConfig, (store, service = inject(OrderService)) => 
     service.getOrderDetail(entity.id).pipe(map(({ items }) => ({ items }))), // Partial<Entity> merges
   deleteOrder: (id: string) => service.deleteOrder(id).pipe(map(() => undefined)), // undefined removes the entity
 
-  // any other param shape needs paramsSelectId
+  // an id, an entity, or an object with an `entity` prop are found on their own;
+  // any other shape (e.g. `{ id, status }`) needs paramsSelectId
   changeOrderStatus: entityCallConfig({
     call: (option: { entity: OrderSummary; status: string }) =>
       service.changeStatus(option.entity.id, option.status),
     paramsSelectId: (param) => param.entity.id,
   }),
 
-  // handle the result yourself
+  // handle the result yourself — `store` is the one from the factory above
   loadDetails: entityCallConfig({
     call: (id: string) => service.getOrderDetail(id),
     storeResult: false,
-    onSuccess: (store, result, param) =>
+    onSuccess: (result, param) =>
       patchState(store, updateEntity({ id: param, changes: { items: result.items } }, orderEntityConfig)),
   }),
 }));
 ```
 
-Options: `call`, `paramsSelectId`, `storeResult`, `onSuccess`, `onError`, `mapError`, `skipWhen`.
+Options: `call`, `paramsSelectId`, `storeResult`, `callWith`, `onSuccess`, `onError`, `mapError`, `skipWhen`.
 
 Generated for `loadOrderDetail`:
 
@@ -189,13 +190,15 @@ Generated for `loadOrderDetail`:
 loadOrderDetailCallStatus: Record<string | number, CallStatus>;
 areAllLoadOrderDetailLoaded: Signal<boolean>;
 isAnyLoadOrderDetailLoading: Signal<boolean>;
-loadOrderDetailErrors: Signal<Error[]>;
+loadOrderDetailErrors: Signal<Error[] | undefined>;
 loadOrderDetail(entityOrIdOrParam): Promise<{ value: Signal<Entity>; ok: true } | { error: Signal<ErrorType>; ok: false }>;
 isLoadOrderDetailLoading(entityOrId): boolean;
 isLoadOrderDetailLoaded(entityOrId): boolean;
 loadOrderDetailError(entityOrId): Error | undefined;
-setLoadOrderDetailLoading(id) / setLoadOrderDetailLoaded(id) / setLoadOrderDetailError(id, error?);
 ```
+
+No `set*` status methods are generated here — those belong to
+[`withCallStatusMap`](entities-loading.md).
 
 ```html
 <mat-select

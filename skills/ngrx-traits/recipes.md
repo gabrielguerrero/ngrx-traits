@@ -96,7 +96,11 @@ export const ProductsScrollStore = signalStore(
 );
 
 // component
-dataSource = getInfiniteScrollDataSource(this.store, { collection: 'product' });
+dataSource = getInfiniteScrollDataSource({
+  store: this.store,
+  collection: 'product',
+  entity: type<Product>(),
+});
 ```
 
 ## 4. List + detail loaded from the selected row
@@ -225,7 +229,8 @@ export function withProductCalls() {
 export const ProductStore = signalStore(withProductEntities(), withProductCalls());
 ```
 
-`signalStore` takes at most 10 features — split before hitting that.
+`signalStore` takes at most 15 features — split before hitting that, and split anyway when a
+feature needs to declare what it depends on.
 
 ## 9. Persisting to web storage
 

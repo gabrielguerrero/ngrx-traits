@@ -30,7 +30,8 @@ withCalls((store, service = inject(ProductService)) => ({
 | `skip` | `true` bypasses the cache for this call, and still stores the result |
 | `cacheStore` | A scoped `CacheStore`; defaults to the global one |
 
-The cache only works in the browser: on the server the call always runs and nothing is stored.
+`cacheCall` / `cacheRxCall` work on the server too. It is the `CacheStore` methods below
+(`get`, `set`, `invalidate`, `delete`, `clear`) that no-op outside the browser.
 
 Caching a paged search — the query object is part of the key, so each search is cached separately, and
 `maxCacheSize` keeps only the most used ones:
