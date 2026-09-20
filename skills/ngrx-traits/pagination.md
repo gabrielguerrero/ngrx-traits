@@ -13,14 +13,14 @@ withEntitiesLocalPagination(productEntityConfig, { pageSize: 10 });
 
 | Option | Description | Default |
 |---|---|---|
-| `pageSize` | Entities per page | required |
+| `pageSize` | Entities per page | `10` |
 | `currentPage` | Initial page index | `0` |
 
 ```typescript
 productEntitiesPagination: Signal<{ currentPage: number; pageSize: number }>;
 productEntitiesCurrentPage: DeepSignal<{
-  entities: Product[]; pageIndex: number; total: number; pageSize: number;
-  pagesCount: number; hasPrevious: boolean; hasNext: boolean;
+  entities: Product[]; pageIndex: number; total: number | undefined; pageSize: number;
+  pagesCount: number | undefined; hasPrevious: boolean; hasNext: boolean;
 }>;
 loadProductEntitiesPage({ pageIndex, pageSize? }): void;
 ```
@@ -37,7 +37,7 @@ withEntitiesRemotePagination(productEntityConfig, { pageSize: 10, pagesToCache: 
 
 | Option | Description | Default |
 |---|---|---|
-| `pageSize` | Entities per page | required |
+| `pageSize` | Entities per page | `10` |
 | `pagesToCache` | Pages kept in memory | `3` |
 | `currentPage` | Initial page index | `0` |
 
@@ -47,8 +47,8 @@ productEntitiesPagination: Signal<{
   pagesToCache: number; cache: { start: number; end: number };
 }>;
 productEntitiesCurrentPage: DeepSignal<{
-  entities: Product[]; pageIndex: number; total: number; pageSize: number;
-  pagesCount: number; hasPrevious: boolean; hasNext: boolean; isLoading: boolean;
+  entities: Product[]; pageIndex: number; total: number | undefined; pageSize: number;
+  pagesCount: number | undefined; hasPrevious: boolean; hasNext: boolean; isLoading: boolean;
 }>;
 productEntitiesPagedRequest: DeepSignal<{ startIndex: number; size: number; page: number }>;
 loadProductEntitiesPage({ pageIndex, pageSize?, forceLoad?, skipLoadingCall? }): void;
@@ -92,7 +92,13 @@ setProductEntitiesPagedResult({ entities, total?, hasMore? }): void;
 ```typescript
 // component
 store = inject(ProductsScrollStore);
-dataSource = getInfiniteScrollDataSource(this.store, { collection: 'product' });
+// one options object; `entity` is required alongside `collection`
+dataSource = getInfiniteScrollDataSource({
+  store: this.store,
+  collection: 'product',
+  entity: type<Product>(),
+});
+// without a collection: getInfiniteScrollDataSource({ store: this.store })
 ```
 
 ```html
