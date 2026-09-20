@@ -139,7 +139,7 @@ import {
  *
  *  // in your component add
  *  store = inject(ProductsRemoteStore);
- *  dataSource = getInfiniteScrollDataSource(store, { collection: 'product' }) // pass this to your cdkVirtualFor see examples section
+ *  dataSource = getInfiniteScrollDataSource({ store, collection: 'product', entity: type<Product>() }) // pass this to your cdkVirtualFor see examples section
  *   // generates the following signals
  *   store.productEntitiesPagination // { currentPage: number,  pageSize: number,  pagesToCache: number, hasMore: boolean } used internally
  *  // generates the following computed signals

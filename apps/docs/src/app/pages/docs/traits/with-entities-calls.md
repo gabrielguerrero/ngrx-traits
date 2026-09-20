@@ -49,7 +49,9 @@ withEntitiesCalls(orderEntity, (store, orderService = inject(OrderService)) => (
     call: (option: { productId: string, extraProp: string }) => orderService.getOrderDetail(id),
     paramsSelectId: (param) => param.productId,
     storeResult: false,
-    onSuccess: (store, result, param) => {
+    onSuccess: (result, param) => {
+      // store comes from the calls factory above, onSuccess receives
+      // (result, param, previousResult)
       store.updateEntity(param.productId, { items: result.items });
     },
   }),
