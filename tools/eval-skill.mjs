@@ -9,48 +9,58 @@
  * back to evals/results/<timestamp>/.
  *
  * Any extra arguments are passed through to `claude plugin eval`, e.g.
- *   pnpm eval:skill --case remote-list --runs 3
+ *   pnpm eval:skill --case remote-list
+ * They land after the flags the npm script already sets, so a repeated flag
+ * (e.g. --runs) wins over the scripted one.
  */
-import { spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, mkdirSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { spawnSync } from "node:child_process";
+import { cpSync, mkdtempSync, mkdirSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const repo = dirname(dirname(fileURLToPath(import.meta.url)));
-const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-const outDir = join(repo, 'evals', 'results', stamp);
-const root = mkdtempSync(join(tmpdir(), 'ngrx-traits-eval-'));
+const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+const outDir = join(repo, "evals", "results", stamp);
+const root = mkdtempSync(join(tmpdir(), "ngrx-traits-eval-"));
+let exitCode = 1;
 
 try {
-  cpSync(join(repo, '.claude-plugin'), join(root, '.claude-plugin'), {
+  cpSync(join(repo, ".claude-plugin"), join(root, ".claude-plugin"), {
     recursive: true,
   });
-  cpSync(join(repo, 'skills', 'ngrx-traits'), join(root, 'skills', 'ngrx-traits'), {
+  cpSync(
+    join(repo, "skills", "ngrx-traits"),
+    join(root, "skills", "ngrx-traits"),
+    {
+      recursive: true,
+    },
+  );
+  cpSync(join(repo, "evals"), join(root, "evals"), {
     recursive: true,
-  });
-  cpSync(join(repo, 'evals'), join(root, 'evals'), {
-    recursive: true,
-    filter: (src) => !src.includes(`${join('evals', 'results')}`),
+    filter: (src) => !src.includes(`${join("evals", "results")}`),
   });
   mkdirSync(outDir, { recursive: true });
 
   const { status } = spawnSync(
-    'claude',
+    "claude",
     [
-      'plugin',
-      'eval',
-      '.',
-      '--trust-plugin',
-      '--output-dir',
+      "plugin",
+      "eval",
+      ".",
+      "--trust-plugin",
+      "--output-dir",
       outDir,
-      '--report',
-      join(outDir, 'report.html'),
+      "--report",
+      join(outDir, "report.html"),
       ...process.argv.slice(2),
     ],
-    { cwd: root, stdio: 'inherit' },
+    { cwd: root, stdio: "inherit" },
   );
-  process.exit(status ?? 1);
+  exitCode = status ?? 1;
 } finally {
+  // process.exit() below would skip this block, so clean up first
   rmSync(root, { recursive: true, force: true });
 }
+
+process.exit(exitCode);
