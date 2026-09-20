@@ -65,7 +65,9 @@ In your component you will need a data source if using angular cdk scroll direct
 ```typescript
  // in your component add
  store = inject(ProductsRemoteStore);
- dataSource = getInfiniteScrollDataSource(store, { collection: 'product' }) // pass this to your cdkVirtualFor see examples section
+ // one options object; entity is required alongside collection
+ dataSource = getInfiniteScrollDataSource({ store, collection: 'product', entity: type<Product>() })
+ // without a collection: getInfiniteScrollDataSource({ store })
 // pass the dataSource to your cdkVirtualFor
 ```
 
