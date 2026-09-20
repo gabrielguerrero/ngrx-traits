@@ -156,8 +156,9 @@ const store = signalStore(
       productIds,
     }),
     onRestore: (store) => {
-      // Custom logic after restoration, e.g., set loaded status
-      patchState(store, { productEntitiesCallStatus: 'loaded' });
+      // Custom logic after restoration, e.g., set loaded status.
+      // Use the generated setter: the state key is productCallStatus
+      store.setProductEntitiesLoaded();
     },
   }),
 );
