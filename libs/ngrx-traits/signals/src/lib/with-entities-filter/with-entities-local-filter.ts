@@ -173,7 +173,8 @@ export function withEntitiesLocalFilter<
       selectId?: SelectEntityId<Entity>;
     };
     const { entityMapKey, idsKey, entitiesKey } = getWithEntitiesKeys(config);
-    const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+    const { entitiesFilterChanged, entitiesLocalFilterApplied } =
+      getWithEntitiesFilterEvents(config);
     const {
       filterEntitiesKey,
       filterKey,
@@ -247,6 +248,7 @@ export function withEntitiesLocalFilter<
                   ),
                 },
               );
+              broadcast(state, entitiesLocalFilterApplied());
               if (value._emitEvent !== false)
                 broadcast(state, entitiesFilterChanged(value));
             }),

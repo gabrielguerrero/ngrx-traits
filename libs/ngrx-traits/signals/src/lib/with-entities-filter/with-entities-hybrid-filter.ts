@@ -266,7 +266,8 @@ export function withEntitiesHybridFilter<
       resetEntitiesFilterKey,
       isEntitiesFilterChangedKey,
     } = getWithEntitiesFilterKeys(config);
-    const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
+    const { entitiesFilterChanged, entitiesLocalFilterApplied } =
+      getWithEntitiesFilterEvents(config);
 
     return signalStoreFeature(
       withState({
@@ -344,6 +345,7 @@ export function withEntitiesHybridFilter<
                         : (entity as any)['id'],
                     ),
                   });
+                  broadcast(state, entitiesLocalFilterApplied());
                 }
                 if (value._emitEvent !== false)
                   broadcast(state, entitiesFilterChanged(value));
