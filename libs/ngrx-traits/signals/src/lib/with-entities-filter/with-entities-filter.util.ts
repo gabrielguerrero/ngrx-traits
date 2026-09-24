@@ -82,6 +82,11 @@ export function getWithEntitiesFilterEvents(config?: { collection?: string }) {
       `${collection}.entitiesFilterChanged`,
       props<{ filter: unknown; skipLoadingCall?: boolean }>(),
     ),
+    // internal: fired every time a local filter rewrites the ids, including the
+    // silent re-filter on load, so features that reorder ids (local sort) can re-apply
+    entitiesLocalFilterApplied: createEvent(
+      `${collection}.entitiesLocalFilterApplied`,
+    ),
   };
 }
 
