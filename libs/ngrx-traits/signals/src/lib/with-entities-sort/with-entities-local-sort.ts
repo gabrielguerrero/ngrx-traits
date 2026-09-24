@@ -228,9 +228,17 @@ export function withEntitiesLocalSort<
         };
       }),
       withEventHandler((state: Record<string, unknown>) => {
-        const sortEntities = state[sortEntitiesKey] as () => void;
-        const { entitiesFilterChanged } = getWithEntitiesFilterEvents(config);
-        return [onEvent(entitiesFilterChanged, () => sortEntities())];
+        const sortEntities = state[sortEntitiesKey] as (options?: {
+          _emitEvent?: boolean;
+        }) => void;
+        const { entitiesLocalFilterApplied } =
+          getWithEntitiesFilterEvents(config);
+        // re-apply current sort to the new filtered ids; sort itself didn't change so no event
+        return [
+          onEvent(entitiesLocalFilterApplied, () =>
+            sortEntities({ _emitEvent: false }),
+          ),
+        ];
       }),
       withHooks((state: Record<string, unknown>) => {
         const { loadedKey } = getWithCallStatusKeys({

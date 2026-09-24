@@ -457,7 +457,79 @@ describe('withEntitiesLocalSort', () => {
     });
   });
 
-  it('should sort entities after filter', fakeAsync(() => {
+  it('should sort entities when sort declared before filter', fakeAsync(() => {
+    TestBed.runInInjectionContext(() => {
+      const Store = signalStore(
+        { protectedState: false },
+        withEntities({
+          entity,
+        }),
+        withCallStatus(),
+        withEntitiesLocalSort({
+          entity,
+          defaultSort: { field: 'name', direction: 'asc' },
+        }),
+        withEntitiesLocalFilter({
+          entity,
+          defaultFilter: { search: '' },
+          filterFn: (entity, filter) =>
+            !filter?.search ||
+            entity?.name.toLowerCase().includes(filter?.search.toLowerCase()),
+        }),
+      );
+      const store = new Store();
+      patchState(store, setAllEntities(mockProducts));
+      store.setLoaded();
+      TestBed.tick();
+      expect(store.entitiesSort()).toEqual({ field: 'name', direction: 'asc' });
+      // check default sort
+      expect(
+        store
+          .entities()
+          .map((e) => e.name)
+          .slice(0, 5),
+      ).toEqual([
+        '1080° Avalanche',
+        'Animal Crossing',
+        'Arkanoid: Doh it Again',
+        'Battalion Wars',
+        'BattleClash',
+      ]);
+
+      store.filterEntities({
+        filter: { search: 'Yoshi' },
+      });
+      tick(400);
+      expect(store.entities()).toEqual([
+        {
+          name: "Super Mario World 2: Yoshi's Island",
+          id: '39',
+          description: 'Super Nintendo Game',
+          price: 88,
+          releaseDate: expect.any(Date),
+          categoryId: 'snes',
+        },
+        {
+          name: "Yoshi's Cookie",
+          id: '20',
+          description: 'Super Nintendo Game',
+          price: 50,
+          releaseDate: expect.any(Date),
+          categoryId: 'snes',
+        },
+        {
+          name: "Yoshi's Safari",
+          id: '15',
+          description: 'Super Nintendo Game',
+          price: 40,
+          releaseDate: expect.any(Date),
+          categoryId: 'snes',
+        },
+      ]);
+    });
+  }));
+
+  it('should sort entities when filter declared before sort', fakeAsync(() => {
     TestBed.runInInjectionContext(() => {
       const Store = signalStore(
         { protectedState: false },
