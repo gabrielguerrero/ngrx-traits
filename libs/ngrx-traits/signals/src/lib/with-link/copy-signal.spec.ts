@@ -1,4 +1,5 @@
 import {
+  Component,
   computed,
   EventEmitter,
   Injector,
@@ -310,11 +311,14 @@ describe('copySignal', () => {
   // ── Emit-only targets ──────────────────────────────────────────
 
   describe('emit-only target', () => {
-    it('emits the value at call time and every change after it', () => {
+    it('emits the value at call time on the first tick, and every change after it', () => {
       TestBed.runInInjectionContext(() => {
         const emitted: string[] = [];
         const source = signal('a');
         copySignal(source, emitInto(emitted));
+        // not synchronously: a parent binding would not be listening yet
+        expect(emitted).toEqual([]);
+        TestBed.tick();
         expect(emitted).toEqual(['a']);
         source.set('b');
         TestBed.tick();
@@ -342,10 +346,30 @@ describe('copySignal', () => {
         changed.subscribe((value) => emitted.push(value));
         const source = signal('a');
         copySignal(source, changed);
+        TestBed.tick();
         source.set('b');
         TestBed.tick();
         expect(emitted).toEqual(['a', 'b']);
       });
+    });
+
+    it('emits the first value to a parent bound to an output() in a field initializer', () => {
+      @Component({ selector: 'child', template: '' })
+      class Child {
+        readonly valid = signal(false);
+        readonly validChange = output<boolean>();
+        readonly copy = copySignal(this.valid, this.validChange);
+      }
+      @Component({
+        imports: [Child],
+        template: '<child (validChange)="emitted.push($event)" />',
+      })
+      class Parent {
+        readonly emitted: boolean[] = [];
+      }
+      const fixture = TestBed.createComponent(Parent);
+      fixture.detectChanges();
+      expect(fixture.componentInstance.emitted).toEqual([false]);
     });
 
     it('does not re-emit the value it was last given, across a skip', () => {
@@ -445,6 +469,7 @@ describe('copySignal', () => {
         copySignal(() => ({ id: id(), name: name() }), emitInto(emitted), {
           equal: 'id',
         });
+        TestBed.tick();
         // a new name with the same id is not a change under 'id'
         name.set('b');
         TestBed.tick();
