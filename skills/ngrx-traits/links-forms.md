@@ -145,8 +145,8 @@ copy3 = copySignal(() => this.selected().map((p) => p.id), this.selectedIds, { e
 | `options.equal` | Same options as `withLink`'s `equal`, compared in the target's type; defaults to comparing by content |
 | `options.injector` | Required when called outside an injection context |
 
-- The value at call time is copied immediately. For an `output()` in a field initializer the parent is
-  not listening yet — call it from `ngOnInit` with an `injector` if that first value must be received.
+- The value at call time is copied immediately to a writable signal. An `output()`/EventEmitter gets it on
+  the first change detection instead, once the parent is listening — a field initializer is fine.
 - Nothing is written back, so the target can be edited on its own; the edit survives until the source
   produces a different value.
 - `skip()` rejects the value being read from anywhere in the source function; signals read before it
