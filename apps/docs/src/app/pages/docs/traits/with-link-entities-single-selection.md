@@ -7,7 +7,9 @@ order: 9
 
 > **Experimental.** Ready to use, but the API may still change in response to feedback. If you hit a problem or something feels awkward, please [open an issue](https://github.com/gabrielguerrero/ngrx-traits/issues).
 
-Generates a `link[Collection]IdSelected()` method that connects the selected entity id to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesSingleSelection`: writes route through `select[Collection]Entity` / `deselect[Collection]Entity` (setting `undefined` deselects).
+Generates a `link[Collection]IdSelected()` method that connects the selected entity id to component signals like `input()`, `model()` and Angular Signal Forms. Prebuilt version of [`withLink`](/docs/traits/with-link) for `withEntitiesSingleSelection`: writes route through `select[Collection]Entity` / `deselect[Collection]Entity` (setting `null` deselects). No selection always reads as `null`, never `undefined`, so Signal Forms keeps the field instead of dropping it.
+
+It emits `string | number | null` but accepts `undefined` too: a signal it reads from (`readFrom`) can be `undefined`-typed with no map, while one it writes to (`syncWith`, `writeTo`) must accept `null`, or pass `writeMap: (id) => id ?? undefined`.
 
 Requires withEntitiesSingleSelection to be used before it.
 
@@ -39,7 +41,7 @@ export class ProductSelectComponent {
 
   // writes from the parent select the entity in the store,
   // selecting in the store updates the parent
-  selectedId = model<string | number | undefined>(undefined);
+  selectedId = model<string | number | null>(null);
   linked = this.store.linkProductIdSelected({ syncWith: this.selectedId });
 }
 ```
@@ -70,11 +72,11 @@ withLinkEntitiesSingleSelection({ entity, collection? })
 ## Methods
 
 ```typescript
-// link[Collection]IdSelected(options?) => WritableSignal<string | number | undefined>
+// link[Collection]IdSelected(options?) => WritableSignal<string | number | null>
 {
-  linkIdSelected: (options?) => WritableSignal<string | number | undefined>;
+  linkIdSelected: (options?) => WritableSignal<string | number | null>;
   // or with collection 'product':
-  linkProductIdSelected: (options?) => WritableSignal<string | number | undefined>;
+  linkProductIdSelected: (options?) => WritableSignal<string | number | null>;
 }
 ```
 

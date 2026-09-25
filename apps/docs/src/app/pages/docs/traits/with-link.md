@@ -98,7 +98,7 @@ export class ProductSelectComponent {
 
   // when the parent writes the model, the store updates;
   // when the store changes, the model (and the parent) updates
-  selectedId = model<string | undefined>(undefined);
+  selectedId = model<string | number | null>(null);
   linked = this.store.linkProductIdSelected({ syncWith: this.selectedId });
 }
 ```
@@ -375,7 +375,7 @@ The premade [withLinkEntities\*](#premade-withlink-for-entities) features all pa
 With `syncWith`, the signal's current value is pushed to the store on link by default. Use `initialValueFrom: 'store'` to write the store value to the signal instead (it is only available with `syncWith` — `readFrom` always pushes to the store, there is nothing to write back to):
 
 ```typescript
-selectedId = model<string | undefined>(undefined);
+selectedId = model<string | number | null>(null);
 linked = this.store.linkProductIdSelected({
   syncWith: this.selectedId,
   initialValueFrom: 'store',
