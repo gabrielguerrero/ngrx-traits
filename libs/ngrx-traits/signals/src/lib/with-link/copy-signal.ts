@@ -58,8 +58,8 @@ type CopySignalOptions<T> = {
 /**
  * @experimental
  * Copies a signal into another signal, an `output()` or an EventEmitter, and
- * keeps it up to date: the value at call time is copied right away, and every
- * change after that.
+ * keeps it up to date: the value at call time is copied, and every change
+ * after that.
  *
  * The source is a signal, or a function reading signals — tracked like a
  * `computed`, so to copy from several signals, or from part of one, read them
@@ -77,10 +77,10 @@ type CopySignalOptions<T> = {
  * recomputes to one equal to the last it produced, or returns to it after a
  * `skip()`, leaves the target alone.
  *
- * For an `output()`, the value at call time is emitted from wherever
- * `copySignal` is called — in a field initializer that is before the parent's
- * binding is listening, so that first emit is not seen. Call it in `ngOnInit`,
- * with an `injector`, to have the parent receive it.
+ * A writable signal gets the value at call time right away. An `output()` or
+ * EventEmitter gets it on the effect's first run instead: called in a field
+ * initializer, the parent's binding is not listening yet, and an emit made
+ * then would be lost — and, being the last value read, never emitted again.
  *
  * Requires an injection context (field initializer or constructor), since an
  * effect is created, unless an `injector` is passed.
@@ -132,10 +132,10 @@ export function copySignal<T>(
   target: CopyTarget<T>,
   options?: NoInfer<CopySignalOptions<T>>,
 ): EffectRef {
-  // before anything is written: the copy below runs synchronously, and
-  // without this the effect at the end would be the first to notice there is
-  // no injection context — after the target was already set, or an output()
-  // emitted a value that can not be taken back
+  // before anything is written: the copy below runs synchronously for a
+  // writable target, and without this the effect at the end would be the
+  // first to notice there is no injection context — after the target was
+  // already set
   if (!options?.injector) assertInInjectionContext(copySignal);
 
   const equal = resolveEqual(options?.equal);
@@ -182,8 +182,8 @@ export function copySignal<T>(
     push(value);
   };
 
-  // memoized: the synchronous copy below and the effect's first run must see
-  // the very same value, not two builds of it. A function source that
+  // memoized: for a writable target, the synchronous copy below and the
+  // effect's first run must see the very same value, not two builds of it. A function source that
   // rebuilds its value — an array of fresh objects, a Date — could otherwise
   // fail `equal` against itself and be copied twice, overwriting whatever the
   // target was set to in between. The signals the source reads, up to a
@@ -193,8 +193,11 @@ export function copySignal<T>(
   // the value at call time is copied synchronously, so the target agrees with
   // the source before the first tick — an effect alone would leave it stale
   // until then. The effect below dedupes against it, so its first run does
-  // not copy the same value again
-  untracked(() => copy(current()));
+  // not copy the same value again. Not for an emit-only target: in a field
+  // initializer the parent's binding is not listening yet, so the emit would
+  // be lost and, as the last value read, never repeated. The effect's first
+  // run happens after the listener is attached
+  if (readableTarget) untracked(() => copy(current()));
 
   return effect(
     () => {

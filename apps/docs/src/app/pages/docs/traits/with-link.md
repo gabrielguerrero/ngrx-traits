@@ -748,7 +748,7 @@ copySignal(() => this.selected().map((p) => p.id), this.selectedIds, {
 
 Nothing is written back, so the target can be edited on its own. The edit survives until the source produces a different value: a recompute that ends up equal to the last value the source produced, or a return to it after a `skip()`, leaves the target alone.
 
-The value at call time is copied right away, so the target agrees with the source before the first change. For an `output()` that means it is emitted from wherever `copySignal` is called — in a field initializer the parent is not listening yet, so call it from `ngOnInit` (passing an `injector`) if the parent has to receive that first value.
+The value at call time is copied right away to a writable signal, so the target agrees with the source before the first change. An `output()` or EventEmitter gets it on the first change detection instead, once the parent's binding is listening, so calling `copySignal` in a field initializer is fine.
 
 The source has to fit the target: `T` is taken from the target, and a source that is missing a property the target's type promises, or that can be `null` when the target cannot, is a type error — map it in the source function. A function returning a bare literal widens it, so `() => 'asc'` is a `string` and does not fit a `WritableSignal<'asc' | 'desc'>`: add `as const` or a return type. This is checked on the source rather than the target, because `set` and `emit` take their value as a method parameter and would accept any related type and then hold the wrong shape.
 
