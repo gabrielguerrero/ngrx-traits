@@ -2,6 +2,7 @@ import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
 import { RequireEntitiesSingleSelection } from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
+import { equalAuto } from '../with-link/with-link.util';
 import {
   EntitiesSingleSelectionState,
   NamedEntitiesSingleSelectionState,
@@ -15,7 +16,10 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  *
  * Prebuilt version of `withLink` for `withEntitiesSingleSelection`: writes
  * route through `select[Collection]Entity` / `deselect[Collection]Entity`
- * (undefined deselects).
+ * (null deselects). No selection reads as `null` rather than `undefined`, so
+ * Signal Forms keeps the field instead of dropping it. It emits `null` but
+ * accepts `undefined` too, so an `undefined`-typed signal it reads from needs
+ * no map; one it writes to must accept `null`, or use a `writeMap`.
  *
  * Requires withEntitiesSingleSelection to be used before it.
  *
@@ -31,7 +35,7 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  *   withLinkEntitiesSingleSelection({ entity }),
  * );
  * // in a component:
- * // selectedId = model<string | number | undefined>(undefined);
+ * // selectedId = model<string | number | null>(null);
  * // linked = this.store.linkIdSelected({ syncWith: this.selectedId });
  */
 export function withLinkEntitiesSingleSelection<
@@ -63,14 +67,22 @@ export function withLinkEntitiesSingleSelection<
         ? 'idSelected'
         : `${Collection}IdSelected` as `link${Capitalize<
         string & P
-      >}`]: LinkMethod<string | number | undefined>;
+      >}`]: LinkMethod<
+        // accepts undefined, so undefined-typed signals link without a map,
+        // but only ever emits null
+        string | number | null | undefined,
+        string | number | null
+      >;
     };
   }
 > {
   const { selectedIdKey, selectEntityKey, deselectEntityKey } =
     getEntitiesSingleSelectionKeys(config);
+  // a computation rather than the state key, to map no selection to null
   return withLink(selectedIdKey, {
-    set: (value: string | number | undefined, store: any) => {
+    computation: (store: any) =>
+      (store[selectedIdKey] as () => string | number | undefined)() ?? null,
+    set: (value: string | number | null | undefined, store: any) => {
       if (value == null) {
         (store[deselectEntityKey] as () => void)();
       } else {
@@ -79,6 +91,9 @@ export function withLinkEntitiesSingleSelection<
         });
       }
     },
+    // null and undefined both mean no selection, so writing one while the
+    // other is read must not deselect again
+    equal: (a: unknown, b: unknown) => equalAuto(a ?? null, b ?? null),
     // the store already exposes select/deselect[Collection]Entity for this write
     noSetter: true,
   } as any) as any;
