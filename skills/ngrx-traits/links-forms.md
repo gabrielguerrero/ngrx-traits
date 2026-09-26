@@ -58,7 +58,7 @@ separate signal each way. All three create effects, so call the link method in a
 constructor.
 
 ```typescript
-selectedId = model<string | undefined>(undefined);
+selectedId = model<string | number | null>(null);
 linked = this.store.linkProductIdSelected({ syncWith: this.selectedId });
 
 // only the parent writes; the store reads and never writes back
@@ -184,7 +184,7 @@ takes a single config object — `{ entity, collection? }`, so the entity config
 |---|---|---|
 | `withLinkEntitiesFilter(productEntityConfig)` | a `withEntities*Filter` | `linkProductEntitiesFilter()` → writes through `filterProductEntities` with no debounce |
 | `withLinkEntitiesSort(productEntityConfig)` | `withEntitiesLocalSort` / `withEntitiesRemoteSort` | `linkProductEntitiesSort()` |
-| `withLinkEntitiesSingleSelection(productEntityConfig)` | `withEntitiesSingleSelection` | `linkProductIdSelected()` — `undefined` deselects |
+| `withLinkEntitiesSingleSelection(productEntityConfig)` | `withEntitiesSingleSelection` | `linkProductIdSelected()` — emits `null` when none selected, accepts `undefined` too; `syncWith`/`writeTo` signal must accept `null` or use `writeMap: id => id ?? undefined` |
 | `withLinkEntitiesMultiSelection(productEntityConfig)` | `withEntitiesMultiSelection` | `linkProductIdsSelected()` — each write replaces the selection, `[]` clears it |
 
 ```typescript
