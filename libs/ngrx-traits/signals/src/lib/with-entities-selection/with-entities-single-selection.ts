@@ -13,7 +13,11 @@ import { EntityId, EntityMap, SelectEntityId } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 
-import { RequireEntities } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  NamedEntitiesRequirement,
+  RequireEntities,
+} from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
@@ -44,16 +48,22 @@ type EntitiesSingleSelectionFeature<
   Collection extends string,
   Id extends EntityId,
 > = Collection extends ''
-  ? {
-      state: EntitiesSingleSelectionState<Id>;
-      props: EntitiesSingleSelectionComputed<Entity>;
-      methods: EntitiesSingleSelectionMethods<Id>;
-    }
-  : {
-      state: NamedEntitiesSingleSelectionState<Collection, Id>;
-      props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
-      methods: NamedEntitiesSingleSelectionMethods<Collection, Id>;
-    };
+  ? UnnamedEntitiesSingleSelectionFeature<Entity, Id>
+  : NamedEntitiesSingleSelectionFeature<Entity, Collection, Id>;
+type UnnamedEntitiesSingleSelectionFeature<Entity, Id extends EntityId> = {
+  state: EntitiesSingleSelectionState<Id>;
+  props: EntitiesSingleSelectionComputed<Entity>;
+  methods: EntitiesSingleSelectionMethods<Id>;
+};
+type NamedEntitiesSingleSelectionFeature<
+  Entity,
+  Collection extends string,
+  Id extends EntityId,
+> = {
+  state: NamedEntitiesSingleSelectionState<Collection, Id>;
+  props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
+  methods: NamedEntitiesSingleSelectionMethods<Collection, Id>;
+};
 
 /**
  * Generates state, computed and methods for single selection of entities.
@@ -91,6 +101,109 @@ type EntitiesSingleSelectionFeature<
  *  store.toggleSelectProductEntity // (config: { id: Product['id'] }) => void
  */
 
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
+export function withEntitiesSingleSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: LiteralCollection<Collection>;
+    // not used at runtime, only for the id type (string | number with it).
+    // The NoInfer member types an inline arrow, SelectId records its presence
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesSingleSelection'>,
+  NamedEntitiesSingleSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
+>;
+export function withEntitiesSingleSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    // not used at runtime, only for the id type (string | number with it).
+    // The NoInfer member types an inline arrow, SelectId records its presence
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & NamedEntitiesRequirement<Entity, Collection>,
+  NamedEntitiesSingleSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
+>;
+export function withEntitiesSingleSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    // not used at runtime, only for the id type (string | number with it).
+    // The NoInfer member types an inline arrow, SelectId records its presence
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, '', 'withEntitiesSingleSelection'>,
+  UnnamedEntitiesSingleSelectionFeature<
+    Entity,
+    EntitySelectionId<Entity, SelectId>
+  >
+>;
+// the one arg version is declared after the two args ones, so a config
+// without options resolves to the two args overloads, that also work when
+// Collection is a generic param (issue #92)
 export function withEntitiesSingleSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
@@ -108,39 +221,6 @@ export function withEntitiesSingleSelection<
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
       defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
-    }
-  >,
-): SignalStoreFeature<
-  Input &
-    RequireEntities<Input, Entity, Collection, 'withEntitiesSingleSelection'>,
-  EntitiesSingleSelectionFeature<
-    Entity,
-    Collection,
-    EntitySelectionId<Entity, SelectId>
-  >
->;
-export function withEntitiesSingleSelection<
-  Input extends SignalStoreFeatureResult,
-  Entity,
-  Collection extends string = '',
-  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
->(
-  entityConfig: {
-    entity: Entity;
-    collection?: Collection;
-    // not used at runtime, only for the id type (string | number with it).
-    // The NoInfer member types an inline arrow, SelectId records its presence
-    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
-  },
-  options?: FeatureConfigFactory<
-    Input,
-    {
-      clearOnFilter?: boolean;
-      clearOnRemoteSort?: boolean;
-      defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
-      entity?: never;
-      collection?: never;
-      selectId?: never;
     }
   >,
 ): SignalStoreFeature<

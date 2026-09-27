@@ -270,3 +270,42 @@ products = this.store.productEntitiesResource();
 ```
 
 See [withEntitiesLoadingCall](/docs/traits/with-entities-loading-call#angular-resource-view-of-the-entities) for the details and a full example with a detail view.
+
+## Writing Generic Store Features
+
+You can wrap the `withEntities*` store features in your own reusable store feature with generic `Entity` and `Collection` params, and use it for different entities and collections:
+
+```typescript
+export function withEntityMethods<
+  Entity extends { id: string | number },
+  Collection extends string,
+>(
+  entity: Entity,
+  collection: Collection,
+  fetchEntities: () => Observable<{ entities: Entity[]; total: number }>,
+) {
+  return signalStoreFeature(
+    withEntities({ entity, collection }),
+    withCallStatus({ initialValue: 'loading', collection }),
+    withEntitiesLocalPagination({ entity, collection }, { pageSize: 10 }),
+    withEntitiesLoadingCall({ entity, collection }, { fetchEntities }),
+    withLogger(collection),
+  );
+}
+
+export const ProductsStore = signalStore(
+  withEntityMethods(type<Product>(), 'product', () =>
+    inject(ProductService)
+      .getProducts()
+      .pipe(map((res) => ({ entities: res.resultList, total: res.total }))),
+  ),
+);
+// generates productEntities(), isProductEntitiesLoading(), productEntitiesCurrentPage(),
+// loadProductEntitiesPage(), productEntitiesResource() ...
+```
+
+A few things to keep in mind:
+
+- Inside a generic store feature, use the two-argument form `withX(entityConfig, options)` of each feature, where `entityConfig` is just `{ entity, collection }`. The single config object form (`withEntitiesLocalPagination({ entity, collection, pageSize: 10 })`) doesn't compile when `Collection` is a generic param. The options argument can be omitted in features where all options are optional, like the pagination, selection and `withEntitiesSyncToRouteQueryParams` features. The `withLink*` features only take `{ entity, collection }`.
+- If a feature is missing a store feature it depends on (e.g. `withEntitiesLocalPagination` without `withEntities`), outside a generic feature you get a readable error like `Missing store feature: withEntitiesLocalPagination requires withEntities(...)`. Inside a generic feature you get TypeScript's default "missing properties" error instead.
+- In a generic feature with a generic `Collection` param, the result of `fetchEntities` in `withEntitiesLoadingCall` isn't checked against the pagination feature (with a literal collection like `'item'` it is), e.g. `withEntitiesRemotePagination` needs `{ entities, total }`, returning just the entities compiles but breaks the pagination.

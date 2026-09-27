@@ -42,7 +42,7 @@ withCallStatus();                          // isLoading(), setLoading() ...
 |---|---|
 | `initialValue` | `'init'` (default), `'loading'` — fetch on store init — or `'loaded'` |
 | `collection` / `prop` | Name prefix; `collection` adds the `Entities` infix |
-| `errorType` | `type<T>()` to type the error signal |
+| `errorType` | `type<T>()` to type the error signal; `withEntitiesLoadingCall` then needs a `mapError` returning `T` |
 
 ## withEntitiesLoadingCall
 
@@ -82,7 +82,7 @@ withEntitiesLoadingCall(
 | `mapPipe` | `'switchMap'` \| `'exhaustMap'` \| `'concatMap'` | `switchMap` |
 | `storeResult` | Store the entities automatically; `false` leaves it to `onSuccess` | `true` |
 | `onSuccess` | `(result) => void` | — |
-| `mapError` | `(error) => Error` | — |
+| `mapError` | `(error) => Error`; required when `withCallStatus` has an `errorType` | — |
 | `onError` | `(error) => void` | — |
 | `collection` / `selectId` | Come from the entity config | — |
 

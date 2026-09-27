@@ -35,6 +35,9 @@ import {
 import { createCallResource } from '../call-resource/call-resource';
 import {
   EntitiesCallStatusRequirement,
+  LiteralCollection,
+  NamedEntitiesCallStatusRequirement,
+  NamedEntitiesRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
@@ -57,12 +60,25 @@ import {
   StoreSource,
 } from '../with-feature-factory/with-feature-factory.model';
 import {
+  EntitiesResourceMethods,
+  EntitiesResourceMethodsFor,
   ExpectedFetchEntitiesResult,
   FetchEntitiesResult,
+  FetchEntitiesResultCheck,
+  GenericCollectionCheck,
   NamedEntitiesResourceMethods,
 } from './with-entities-loading-call.model';
 
 type EntitiesLoadingCallResult<Collection extends string, Entity, Error> = {
+  state: {};
+  props: {};
+  methods: EntitiesResourceMethodsFor<Collection, Entity, Error>;
+};
+type NamedEntitiesLoadingCallResult<
+  Collection extends string,
+  Entity,
+  Error,
+> = {
   state: {};
   props: {};
   methods: NamedEntitiesResourceMethods<Collection, Entity, Error>;
@@ -184,6 +200,28 @@ export function withEntitiesLoadingCall<
     >,
   EntitiesLoadingCallResult<Collection, Entity, Error>
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92).
+// The literal and no collection overloads keep the readable missing feature
+// and fetchEntities result errors. The generic one can not check the result
+// with ExpectedFetchEntitiesResult or type onSuccess with FetchEntitiesResult,
+// both are unresolvable conditionals there, instead it infers the Result from
+// fetchEntities, checks it with FetchEntitiesResultCheck, which only fails
+// when the store type is known, and passes it to onSuccess. As that onSuccess
+// accepts narrower annotations, GenericCollectionCheck rejects literal
+// collections, so a literal call the literal overload rejects never falls
+// through to the generic one (and its unreadable requirement types).
+// The literal Collection defaults to '' because typescript types a call that
+// matches no overload with the first overload that takes that many args (the
+// literal two args one, not the one arg one), for a no collection call that keeps
+// the readable missing feature errors, and its requirement and result types
+// are the Collection extends '' ones for the same reason.
+// A call with an error in the options fails the three overloads at different
+// args, so typescript reports it as No overload matches this call on the
+// withEntitiesLoadingCall name, the literal or no collection overload entry in
+// it has the readable error.
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,
   Entity,
@@ -192,7 +230,7 @@ export function withEntitiesLoadingCall<
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
     selectId?: SelectEntityId<NoInfer<Entity>>;
   },
   options: FeatureConfigFactory<
@@ -225,6 +263,91 @@ export function withEntitiesLoadingCall<
       EntitiesCallStatusRequirement<Collection, Error>
     >,
   EntitiesLoadingCallResult<Collection, Entity, Error>
+>;
+export function withEntitiesLoadingCall<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+  Error = unknown,
+  Result extends Entity[] | { entities: Entity[] } = Entity[],
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  } & GenericCollectionCheck<Collection>,
+  options: FeatureConfigFactory<
+    Input,
+    {
+      fetchEntities: (
+        store: StoreSource<Input>,
+      ) =>
+        | Observable<
+            Result &
+              FetchEntitiesResultCheck<Input, Collection, NoInfer<Result>>
+          >
+        | Promise<
+            Result &
+              FetchEntitiesResultCheck<Input, Collection, NoInfer<Result>>
+          >;
+      mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+      onSuccess?: (result: NoInfer<Result>) => void;
+      mapError?: (error: unknown) => Error;
+      onError?: (error: Error) => void;
+      storeResult?: boolean;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    NamedEntitiesRequirement<Entity, Collection> &
+    NamedEntitiesCallStatusRequirement<Collection, Error>,
+  NamedEntitiesLoadingCallResult<Collection, Entity, Error>
+>;
+export function withEntitiesLoadingCall<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Error = unknown,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      fetchEntities: (
+        store: StoreSource<Input>,
+      ) =>
+        | Observable<ExpectedFetchEntitiesResult<Input, '', Entity>>
+        | Promise<ExpectedFetchEntitiesResult<Input, '', Entity>>;
+      mapPipe?: 'switchMap' | 'concatMap' | 'exhaustMap';
+      onSuccess?: (result: FetchEntitiesResult<Input, '', Entity>) => void;
+      mapError?: (error: unknown) => Error;
+      onError?: (error: Error) => void;
+      storeResult?: boolean;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, '', 'withEntitiesLoadingCall'> &
+    RequireEntitiesCallStatus<
+      Input,
+      '',
+      'withEntitiesLoadingCall',
+      EntitiesCallStatusRequirement<'', Error>
+    >,
+  {
+    state: {};
+    props: {};
+    methods: EntitiesResourceMethods<Entity, Error>;
+  }
 >;
 export function withEntitiesLoadingCall<
   Input extends SignalStoreFeatureResult,

@@ -887,6 +887,38 @@ describe('withEntitiesLoadingCall', () => {
       );
     });
 
+    // the two args form has literal, generic and no collection overloads, so
+    // typescript reports a wrong result as No overload matches this call on
+    // the withEntitiesLoadingCall line (not on the signalStore call), the
+    // literal or no collection overload error in it has the readable
+    // explanation, checked manually, the directive only asserts an error
+    it('should require the result the pagination feature accepts in the two args form', () => {
+      signalStore(
+        withEntities({ entity, collection }),
+        withCallStatus({ collection }),
+        withEntitiesRemotePagination({ entity, collection }, { pageSize: 10 }),
+        // @ts-expect-error the store has an entities pagination feature, fetchEntities must return the result setProductEntitiesPagedResult accepts
+        withEntitiesLoadingCall(
+          { entity, collection },
+          {
+            fetchEntities: () => of([...mockProducts]),
+          },
+        ),
+      );
+      signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        withEntitiesRemotePagination({ entity }, { pageSize: 10 }),
+        // @ts-expect-error the store has an entities pagination feature, fetchEntities must return the result setEntitiesPagedResult accepts
+        withEntitiesLoadingCall(
+          { entity },
+          {
+            fetchEntities: () => of([...mockProducts]),
+          },
+        ),
+      );
+    });
+
     it('should allow any of the results the scroll pagination accepts', () => {
       const Store = signalStore(
         withEntities({ entity, collection }),
@@ -919,6 +951,182 @@ describe('withEntitiesLoadingCall', () => {
         }),
       );
       expect(Store).toBeDefined();
+    });
+  });
+
+  // compile time checks of the two args form overloads, the directives only
+  // assert an error on that line, the messages were checked manually
+  describe('two args form types', () => {
+    it('should report the missing feature with a literal collection', () => {
+      // @ts-expect-error withEntitiesLoadingCall requires withCallStatus({ collection: 'product' })
+      signalStore(
+        withEntities({ entity, collection }),
+        withEntitiesLoadingCall(
+          { entity, collection },
+          { fetchEntities: () => of([...mockProducts]) },
+        ),
+      );
+      // @ts-expect-error withEntitiesLoadingCall requires withEntities({ entity, collection: 'product' })
+      signalStore(
+        withCallStatus({ collection }),
+        withEntitiesLoadingCall(
+          { entity, collection },
+          { fetchEntities: () => of([...mockProducts]) },
+        ),
+      );
+    });
+
+    it('should report the missing feature without a collection', () => {
+      // @ts-expect-error withEntitiesLoadingCall requires withCallStatus()
+      signalStore(
+        withEntities({ entity }),
+        withEntitiesLoadingCall(
+          { entity },
+          { fetchEntities: () => of([...mockProducts]) },
+        ),
+      );
+      // @ts-expect-error withEntitiesLoadingCall requires withEntities({ entity })
+      signalStore(
+        withCallStatus(),
+        withEntitiesLoadingCall(
+          { entity },
+          { fetchEntities: () => of([...mockProducts]) },
+        ),
+      );
+    });
+
+    // onSuccess receives any result fetchEntities may return, not only the one
+    // this fetchEntities returns, so a narrower annotation is an error
+    it('should reject an onSuccess narrower than the fetchEntities result', () => {
+      signalStore(
+        withEntities({ entity, collection }),
+        withCallStatus({ collection }),
+        // @ts-expect-error onSuccess must accept Product[] | { entities: Product[] }
+        withEntitiesLoadingCall(
+          { entity, collection },
+          {
+            fetchEntities: () => of([...mockProducts]),
+            onSuccess: (result: Product[]) => void result,
+          },
+        ),
+      );
+      signalStore(
+        withEntities({ entity }),
+        withCallStatus(),
+        // @ts-expect-error onSuccess must accept Product[] | { entities: Product[] }
+        withEntitiesLoadingCall(
+          { entity },
+          {
+            fetchEntities: () => of([...mockProducts]),
+            onSuccess: (result: Product[]) => void result,
+          },
+        ),
+      );
+    });
+
+    // the onSuccess error must not make typescript pick another overload and
+    // report the missing feature with its unreadable requirement types
+    it('should report the missing feature with a narrower onSuccess', () => {
+      // @ts-expect-error withEntitiesLoadingCall requires withCallStatus({ collection: 'product' })
+      signalStore(
+        withEntities({ entity, collection }),
+        // @ts-expect-error onSuccess must accept Product[] | { entities: Product[] }
+        withEntitiesLoadingCall(
+          { entity, collection },
+          {
+            fetchEntities: () => of([...mockProducts]),
+            onSuccess: (result: Product[]) => void result,
+          },
+        ),
+      );
+      // @ts-expect-error withEntitiesLoadingCall requires withEntities({ entity, collection: 'product' })
+      signalStore(
+        withCallStatus({ collection }),
+        // @ts-expect-error onSuccess must accept Product[] | { entities: Product[] }
+        withEntitiesLoadingCall(
+          { entity, collection },
+          {
+            fetchEntities: () => of([...mockProducts]),
+            onSuccess: (result: Product[]) => void result,
+          },
+        ),
+      );
+      // @ts-expect-error withEntitiesLoadingCall requires withCallStatus()
+      signalStore(
+        withEntities({ entity }),
+        // @ts-expect-error onSuccess must accept Product[] | { entities: Product[] }
+        withEntitiesLoadingCall(
+          { entity },
+          {
+            fetchEntities: () => of([...mockProducts]),
+            onSuccess: (result: Product[]) => void result,
+          },
+        ),
+      );
+      // @ts-expect-error withEntitiesLoadingCall requires withEntities({ entity })
+      signalStore(
+        withCallStatus(),
+        // @ts-expect-error onSuccess must accept Product[] | { entities: Product[] }
+        withEntitiesLoadingCall(
+          { entity },
+          {
+            fetchEntities: () => of([...mockProducts]),
+            onSuccess: (result: Product[]) => void result,
+          },
+        ),
+      );
+    });
+
+    it('should infer the store and callback params', () => {
+      signalStore(
+        withEntities({ entity, collection }),
+        withCallStatus({ collection, errorType: type<string>() }),
+        withEntitiesRemotePagination({ entity, collection }, { pageSize: 10 }),
+        withEntitiesLoadingCall(
+          { entity, collection },
+          {
+            fetchEntities: (store) => {
+              expectTypeOf(store.productEntities()).toEqualTypeOf<Product[]>();
+              expectTypeOf(
+                store.productEntitiesPagedRequest().size,
+              ).toEqualTypeOf<number>();
+              return of({ entities: [...mockProducts], total: 1 });
+            },
+            onSuccess: (result) =>
+              expectTypeOf(result).toEqualTypeOf<{
+                entities: Product[];
+                total: number;
+              }>(),
+            mapError: (error) => {
+              expectTypeOf(error).toEqualTypeOf<unknown>();
+              return String(error);
+            },
+            onError: (error) => expectTypeOf(error).toEqualTypeOf<string>(),
+          },
+        ),
+      );
+      signalStore(
+        withEntities({ entity }),
+        withCallStatus({ errorType: type<string>() }),
+        withEntitiesLoadingCall(
+          { entity },
+          {
+            fetchEntities: (store) => {
+              expectTypeOf(store.entities()).toEqualTypeOf<Product[]>();
+              return of([...mockProducts]);
+            },
+            onSuccess: (result) =>
+              expectTypeOf(result).toEqualTypeOf<
+                Product[] | { entities: Product[] }
+              >(),
+            mapError: (error) => {
+              expectTypeOf(error).toEqualTypeOf<unknown>();
+              return String(error);
+            },
+            onError: (error) => expectTypeOf(error).toEqualTypeOf<string>(),
+          },
+        ),
+      );
     });
   });
 

@@ -65,6 +65,10 @@ compiles, but prefer the two-argument form — it is what the docs and examples 
 are the exception: they only take one config object, so spread the entity config into it when they need
 options of their own.
 
+Custom store features with generic `Entity`/`Collection` params **must** use the two-argument form
+(`withEntitiesLocalPagination({ entity, collection }, { pageSize: 10 })`); the single object form does not
+compile there. See [recipes.md](recipes.md) #12.
+
 ## Ordering rules
 
 Order matters: a trait that reads a signal must come after the trait that generates it.

@@ -14,7 +14,11 @@ import { EntityId, EntityMap } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 
-import { RequireEntities } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  NamedEntitiesRequirement,
+  RequireEntities,
+} from '../feature-requirements.model';
 import { getWithEntitiesKeys, toMap } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesRemoteSortEvents } from '../with-entities-sort/with-entities-remote-sort.util';
@@ -45,16 +49,22 @@ type EntitiesMultiSelectionFeature<
   Collection extends string,
   Id extends EntityId,
 > = Collection extends ''
-  ? {
-      state: EntitiesMultiSelectionState<Id>;
-      props: EntitiesMultiSelectionComputed<Entity, Id>;
-      methods: EntitiesMultiSelectionMethods<Id>;
-    }
-  : {
-      state: NamedEntitiesMultiSelectionState<Collection, Id>;
-      props: NamedEntitiesMultiSelectionComputed<Entity, Collection, Id>;
-      methods: NamedEntitiesMultiSelectionMethods<Collection, Id>;
-    };
+  ? UnnamedEntitiesMultiSelectionFeature<Entity, Id>
+  : NamedEntitiesMultiSelectionFeature<Entity, Collection, Id>;
+type UnnamedEntitiesMultiSelectionFeature<Entity, Id extends EntityId> = {
+  state: EntitiesMultiSelectionState<Id>;
+  props: EntitiesMultiSelectionComputed<Entity, Id>;
+  methods: EntitiesMultiSelectionMethods<Id>;
+};
+type NamedEntitiesMultiSelectionFeature<
+  Entity,
+  Collection extends string,
+  Id extends EntityId,
+> = {
+  state: NamedEntitiesMultiSelectionState<Collection, Id>;
+  props: NamedEntitiesMultiSelectionComputed<Entity, Collection, Id>;
+  methods: NamedEntitiesMultiSelectionMethods<Collection, Id>;
+};
 
 /**
  * Generates state, signals and methods for multi selection of entities.
@@ -95,6 +105,109 @@ type EntitiesMultiSelectionFeature<
  * store.toggleSelectAllProducts // () => void;
  */
 
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
+export function withEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: LiteralCollection<Collection>;
+    // the NoInfer member types an inline arrow, SelectId records its
+    // presence, which keeps the id type string | number
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesMultiSelection'>,
+  NamedEntitiesMultiSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
+>;
+export function withEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    // the NoInfer member types an inline arrow, SelectId records its
+    // presence, which keeps the id type string | number
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & NamedEntitiesRequirement<Entity, Collection>,
+  NamedEntitiesMultiSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
+>;
+export function withEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    // the NoInfer member types an inline arrow, SelectId records its
+    // presence, which keeps the id type string | number
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      clearOnFilter?: boolean;
+      clearOnRemoteSort?: boolean;
+      defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, '', 'withEntitiesMultiSelection'>,
+  UnnamedEntitiesMultiSelectionFeature<
+    Entity,
+    EntitySelectionId<Entity, SelectId>
+  >
+>;
+// the one arg version is declared after the two args ones, so a config
+// without options resolves to the two args overloads, that also work when
+// Collection is a generic param (issue #92)
 export function withEntitiesMultiSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
@@ -112,39 +225,6 @@ export function withEntitiesMultiSelection<
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
       defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
-    }
-  >,
-): SignalStoreFeature<
-  Input &
-    RequireEntities<Input, Entity, Collection, 'withEntitiesMultiSelection'>,
-  EntitiesMultiSelectionFeature<
-    Entity,
-    Collection,
-    EntitySelectionId<Entity, SelectId>
-  >
->;
-export function withEntitiesMultiSelection<
-  Input extends SignalStoreFeatureResult,
-  Entity,
-  Collection extends string = '',
-  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
->(
-  entityConfig: {
-    entity: Entity;
-    collection?: Collection;
-    // the NoInfer member types an inline arrow, SelectId records its
-    // presence, which keeps the id type string | number
-    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
-  },
-  options?: FeatureConfigFactory<
-    Input,
-    {
-      clearOnFilter?: boolean;
-      clearOnRemoteSort?: boolean;
-      defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
-      entity?: never;
-      collection?: never;
-      selectId?: never;
     }
   >,
 ): SignalStoreFeature<
