@@ -1,7 +1,10 @@
 import { Signal } from '@angular/core';
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
-import { RequireEntitiesMultiSelection } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  RequireEntitiesMultiSelection,
+} from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesMultiSelectionState,
@@ -9,6 +12,20 @@ import {
 } from './with-entities-multi-selection.model';
 import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.util';
 import { StoreMultiSelectionId } from './with-entities-selection.model';
+
+type NamedLinkEntitiesMultiSelectionFeature<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+> = {
+  state: {};
+  props: {};
+  methods: {
+    [K in `link${Capitalize<Collection>}IdsSelected`]: LinkMethod<
+      StoreMultiSelectionId<Input['state'], Collection>[]
+    >;
+  };
+};
 
 /**
  * @experimental
@@ -42,39 +59,73 @@ import { StoreMultiSelectionId } from './with-entities-selection.model';
  * // value = model<Product['id'][]>([]);
  * // valueField = form(this.store.linkIdsSelected({ syncWith: this.value }));
  */
+// split into literal collection, generic collection and no collection
+// overloads instead of using a Collection extends '' conditional, typescript
+// can not resolve that conditional when Collection is a generic param, which
+// breaks custom generic store features (issue #92), the literal and no
+// collection overloads keep the readable missing feature error
 export function withLinkEntitiesMultiSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
-  Collection extends string = '',
->(config?: {
+  Collection extends string,
+>(config: {
   entity?: Entity;
-  collection?: Collection;
+  collection: LiteralCollection<Collection>;
 }): SignalStoreFeature<
   Input &
     RequireEntitiesMultiSelection<
       Input,
       Collection,
       'withLinkEntitiesMultiSelection',
-      Collection extends ''
-        ? { state: EntitiesMultiSelectionState; props: {}; methods: {} }
-        : {
-            state: NamedEntitiesMultiSelectionState<Collection>;
-            props: {};
-            methods: {};
-          }
+      {
+        state: NamedEntitiesMultiSelectionState<Collection>;
+        props: {};
+        methods: {};
+      }
+    >,
+  NamedLinkEntitiesMultiSelectionFeature<Input, Entity, Collection>
+>;
+export function withLinkEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(config: {
+  entity?: Entity;
+  collection: Collection;
+}): SignalStoreFeature<
+  Input & {
+    state: NamedEntitiesMultiSelectionState<Collection>;
+    props: {};
+    methods: {};
+  },
+  NamedLinkEntitiesMultiSelectionFeature<Input, Entity, Collection>
+>;
+export function withLinkEntitiesMultiSelection<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(config?: {
+  entity?: Entity;
+  collection?: never;
+}): SignalStoreFeature<
+  Input &
+    RequireEntitiesMultiSelection<
+      Input,
+      '',
+      'withLinkEntitiesMultiSelection',
+      { state: EntitiesMultiSelectionState; props: {}; methods: {} }
     >,
   {
     state: {};
     props: {};
     methods: {
-      [P in Collection extends ''
-        ? 'idsSelected'
-        : `${Collection}IdsSelected` as `link${Capitalize<
-        string & P
-      >}`]: LinkMethod<StoreMultiSelectionId<Input['state'], Collection>[]>;
+      linkIdsSelected: LinkMethod<StoreMultiSelectionId<Input['state'], ''>[]>;
     };
   }
-> {
+>;
+export function withLinkEntitiesMultiSelection(config?: {
+  entity?: unknown;
+  collection?: string;
+}): SignalStoreFeature<any, any> {
   const {
     selectedEntitiesIdsKey,
     selectEntitiesKey,

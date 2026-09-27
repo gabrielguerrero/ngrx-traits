@@ -12,6 +12,9 @@ import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isObservable, map, Observable, pipe, tap } from 'rxjs';
 
 import {
+  LiteralCollection,
+  NamedEntitiesCallStatusRequirement,
+  NamedEntitiesRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
@@ -146,14 +149,19 @@ export function withEntitiesRemoteSort<
         methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
       }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesRemoteSort<
   Input extends SignalStoreFeatureResult,
   Entity,
-  Collection extends string = '',
+  Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
   },
   options: FeatureConfigFactory<
     Input,
@@ -167,17 +175,64 @@ export function withEntitiesRemoteSort<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesRemoteSort'> &
     RequireEntitiesCallStatus<Input, Collection, 'withEntitiesRemoteSort'>,
-  Collection extends ''
-    ? {
-        state: EntitiesSortState<Entity>;
-        props: {};
-        methods: EntitiesRemoteSortMethods<Entity>;
-      }
-    : {
-        state: NamedEntitiesSortState<Entity, Collection>;
-        props: {};
-        methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
-      }
+  {
+    state: NamedEntitiesSortState<Entity, Collection>;
+    props: {};
+    methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
+  }
+>;
+export function withEntitiesRemoteSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultSort: Sort<NoInfer<Entity>>;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    NamedEntitiesRequirement<Entity, Collection> &
+    NamedEntitiesCallStatusRequirement<Collection>,
+  {
+    state: NamedEntitiesSortState<Entity, Collection>;
+    props: {};
+    methods: NamedEntitiesRemoteSortMethods<Entity, Collection>;
+  }
+>;
+export function withEntitiesRemoteSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultSort: Sort<NoInfer<Entity>>;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, '', 'withEntitiesRemoteSort'> &
+    RequireEntitiesCallStatus<Input, '', 'withEntitiesRemoteSort'>,
+  {
+    state: EntitiesSortState<Entity>;
+    props: {};
+    methods: EntitiesRemoteSortMethods<Entity>;
+  }
 >;
 export function withEntitiesRemoteSort<
   Input extends SignalStoreFeatureResult,
