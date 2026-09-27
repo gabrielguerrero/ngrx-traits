@@ -2,7 +2,11 @@ import { computed, Signal } from '@angular/core';
 
 import { capitalize } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
+import {
+  ParseId,
+  parseQueryId,
+  QueryMapper,
+} from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
 import { EntitiesMultiSelectionMethods } from './with-entities-multi-selection.model';
 
 export function getEntitiesMultiSelectionKeys(config?: {
@@ -43,6 +47,7 @@ export function getEntitiesMultiSelectionKeys(config?: {
 
 export function getQueryMapperForMultiSelection(config?: {
   collection?: string;
+  parseId?: ParseId;
 }): QueryMapper<{
   selectedIds: string | undefined;
 }> {
@@ -59,10 +64,14 @@ export function getQueryMapperForMultiSelection(config?: {
           selectEntitiesKey
         ] as EntitiesMultiSelectionMethods['selectEntities'];
 
-        const ids = selectedIds
+        const stringIds = selectedIds
           .split(',')
           .map((id) => id.trim())
           .filter(Boolean);
+        // query params are always strings, parsed back into entity ids
+        const ids = stringIds
+          .map((id) => parseQueryId(id, config?.parseId))
+          .filter((id) => id !== undefined);
 
         selectEntities({ ids });
       }

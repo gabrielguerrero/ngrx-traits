@@ -64,3 +64,6 @@ apps/docs/.env
 
 # eval run outputs
 evals/results
+
+# HumanLayer (CodeLayer) local task notes
+.humanlayer

@@ -1,62 +1,66 @@
 import { Signal } from '@angular/core';
+import { EntityId } from '@ngrx/signals/entities';
 import { Observable } from 'rxjs';
 
-export type EntitiesMultiSelectionState = {
-  idsSelectedMap: Record<string | number, boolean>;
+export type EntitiesMultiSelectionState<Id extends EntityId = EntityId> = {
+  // partial: only the ids ever selected or deselected are keys
+  idsSelectedMap: Partial<Record<Id, boolean>>;
 };
-export type NamedEntitiesMultiSelectionState<Collection extends string> = {
-  [K in Collection as `${K}IdsSelectedMap`]: Record<string | number, boolean>;
+export type NamedEntitiesMultiSelectionState<
+  Collection extends string,
+  Id extends EntityId = EntityId,
+> = {
+  [K in Collection as `${K}IdsSelectedMap`]: Partial<Record<Id, boolean>>;
 };
-export type EntitiesMultiSelectionComputed<Entity> = {
+export type EntitiesMultiSelectionComputed<
+  Entity,
+  Id extends EntityId = EntityId,
+> = {
   entitiesSelected: Signal<Entity[]>;
-  idsSelected: Signal<(string | number)[]>;
+  idsSelected: Signal<Id[]>;
   isAllEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 };
 export type NamedEntitiesMultiSelectionComputed<
   Entity,
   Collection extends string,
+  Id extends EntityId = EntityId,
 > = {
   [K in Collection as `${K}EntitiesSelected`]: Signal<Entity[]>;
 } & {
-  [K in Collection as `${K}IdsSelected`]: Signal<(string | number)[]>;
+  [K in Collection as `${K}IdsSelected`]: Signal<Id[]>;
 } & {
   [K in Collection as `isAll${Capitalize<string & K>}EntitiesSelected`]: Signal<
     'all' | 'none' | 'some'
   >;
 };
-type EntitySelectOptions =
-  | { id: string | number }
-  | { ids: (string | number)[] };
-export type EntitiesMultiSelectionMethods = {
-  selectEntities: (
-    options:
-      | (EntitySelectOptions & { clearSelectionBeforeSelect?: boolean })
-      | Observable<
-          EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }
-        >
-      | (() => EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }),
-  ) => void;
-  deselectEntities: (options: EntitySelectOptions) => void;
-  toggleSelectEntities: (options: EntitySelectOptions) => void;
+type EntitySelectOptions<Id extends EntityId> = { id: Id } | { ids: Id[] };
+type EntitySelectInput<Id extends EntityId> =
+  | (EntitySelectOptions<Id> & { clearSelectionBeforeSelect?: boolean })
+  | Observable<
+      EntitySelectOptions<Id> & { clearSelectionBeforeSelect?: boolean }
+    >
+  | (() => EntitySelectOptions<Id> & { clearSelectionBeforeSelect?: boolean });
+export type EntitiesMultiSelectionMethods<Id extends EntityId = EntityId> = {
+  selectEntities: (options: EntitySelectInput<Id>) => void;
+  deselectEntities: (options: EntitySelectOptions<Id>) => void;
+  toggleSelectEntities: (options: EntitySelectOptions<Id>) => void;
   toggleSelectAllEntities: () => void;
   clearEntitiesSelection: () => void;
 };
-export type NamedEntitiesMultiSelectionMethods<Collection extends string> = {
+export type NamedEntitiesMultiSelectionMethods<
+  Collection extends string,
+  Id extends EntityId = EntityId,
+> = {
   [K in Collection as `select${Capitalize<string & K>}Entities`]: (
-    options:
-      | (EntitySelectOptions & { clearSelectionBeforeSelect?: boolean })
-      | Observable<
-          EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }
-        >
-      | (() => EntitySelectOptions & { clearSelectionBeforeSelect?: boolean }),
+    options: EntitySelectInput<Id>,
   ) => void;
 } & {
   [K in Collection as `deselect${Capitalize<string & K>}Entities`]: (
-    options: EntitySelectOptions,
+    options: EntitySelectOptions<Id>,
   ) => void;
 } & {
   [K in Collection as `toggleSelect${Capitalize<string & K>}Entities`]: (
-    options: EntitySelectOptions,
+    options: EntitySelectOptions<Id>,
   ) => void;
 } & {
   [K in Collection as `toggleSelectAll${Capitalize<
