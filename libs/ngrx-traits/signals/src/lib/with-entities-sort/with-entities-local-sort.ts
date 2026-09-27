@@ -13,7 +13,11 @@ import { SelectEntityId } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { isObservable, map, Observable, pipe, tap } from 'rxjs';
 
-import { RequireEntities } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  NamedEntitiesRequirement,
+  RequireEntities,
+} from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
@@ -103,14 +107,19 @@ export function withEntitiesLocalSort<
         methods: NamedEntitiesSortMethods<Entity, Collection>;
       }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesLocalSort<
   Input extends SignalStoreFeatureResult,
   Entity,
-  Collection extends string = '',
+  Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
     selectId?: SelectEntityId<NoInfer<Entity>>;
   },
   options: FeatureConfigFactory<
@@ -128,17 +137,72 @@ export function withEntitiesLocalSort<
   >,
 ): SignalStoreFeature<
   Input & RequireEntities<Input, Entity, Collection, 'withEntitiesLocalSort'>,
-  Collection extends ''
-    ? {
-        state: EntitiesSortState<Entity>;
-        props: {};
-        methods: EntitiesSortMethods<Entity>;
-      }
-    : {
-        state: NamedEntitiesSortState<Entity, Collection>;
-        props: {};
-        methods: NamedEntitiesSortMethods<Entity, Collection>;
-      }
+  {
+    state: NamedEntitiesSortState<Entity, Collection>;
+    props: {};
+    methods: NamedEntitiesSortMethods<Entity, Collection>;
+  }
+>;
+export function withEntitiesLocalSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultSort: Sort<NoInfer<Entity>>;
+      sortFunction?: (
+        entities: NoInfer<Entity>[],
+        sort: Sort<NoInfer<Entity>>,
+      ) => NoInfer<Entity>[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & NamedEntitiesRequirement<Entity, Collection>,
+  {
+    state: NamedEntitiesSortState<Entity, Collection>;
+    props: {};
+    methods: NamedEntitiesSortMethods<Entity, Collection>;
+  }
+>;
+export function withEntitiesLocalSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultSort: Sort<NoInfer<Entity>>;
+      sortFunction?: (
+        entities: NoInfer<Entity>[],
+        sort: Sort<NoInfer<Entity>>,
+      ) => NoInfer<Entity>[];
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, '', 'withEntitiesLocalSort'>,
+  {
+    state: EntitiesSortState<Entity>;
+    props: {};
+    methods: EntitiesSortMethods<Entity>;
+  }
 >;
 export function withEntitiesLocalSort<
   Input extends SignalStoreFeatureResult,

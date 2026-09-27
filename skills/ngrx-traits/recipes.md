@@ -65,6 +65,7 @@ export const ProductsRemoteStore = signalStore(
         );
         return { entities: res.resultList, total: res.total };
       },
+      mapError: (error) => (error as HttpErrorResponse).error.message, // required by errorType
     }),
   ),
 );
@@ -277,3 +278,33 @@ withCalls((store, service = inject(ProductService)) => ({
 ```
 
 See [caching.md](caching.md) for `cacheCall` (promises), scoped caches and manual invalidation.
+
+## 12. Reusable generic feature
+
+```typescript
+export function withEntityList<Entity extends { id: string | number }, Collection extends string>(
+  entity: Entity,
+  collection: Collection,
+  fetchEntities: () => Observable<{ entities: Entity[]; total: number }>,
+) {
+  return signalStoreFeature(
+    withEntities({ entity, collection }),
+    withCallStatus({ initialValue: 'loading', collection }),
+    withEntitiesRemotePagination({ entity, collection }, { pageSize: 10 }),
+    withEntitiesLoadingCall({ entity, collection }, { fetchEntities }),
+  );
+}
+
+export const ProductStore = signalStore(
+  withEntityList(type<Product>(), 'product', () =>
+    inject(ProductService).getProducts().pipe(map((r) => ({ entities: r.resultList, total: r.total }))),
+  ),
+);
+```
+
+- Always the two-argument form `withX({ entity, collection }, options)`; options can be omitted when
+  all are optional (pagination, selection, sync to route). `withLink*` take `{ entity, collection }`.
+- A missing dependency inside the generic feature is reported as TypeScript's plain "missing properties"
+  error, not the readable `Missing store feature: ...` one.
+- With a generic `Collection`, `fetchEntities`' result is not checked against the pagination feature — return
+  `{ entities, total }` for remote pagination yourself.

@@ -31,6 +31,9 @@ import {
 } from 'rxjs';
 
 import {
+  LiteralCollection,
+  NamedEntitiesCallStatusRequirement,
+  NamedEntitiesRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
@@ -188,15 +191,20 @@ export function withEntitiesHybridFilter<
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
       }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesHybridFilter<
   Input extends SignalStoreFeatureResult,
   Entity,
   Filter extends Record<string, unknown>,
-  Collection extends string = '',
+  Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
     selectId?: SelectEntityId<NoInfer<Entity>>;
   },
   options: FeatureConfigFactory<
@@ -218,17 +226,82 @@ export function withEntitiesHybridFilter<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesHybridFilter'> &
     RequireEntitiesCallStatus<Input, Collection, 'withEntitiesHybridFilter'>,
-  Collection extends ''
-    ? {
-        state: EntitiesFilterState<Filter>;
-        props: EntitiesFilterComputed<Filter>;
-        methods: EntitiesRemoteFilterMethods<Filter, Entity>;
-      }
-    : {
-        state: NamedEntitiesFilterState<Collection, Filter>;
-        props: NamedEntitiesFilterComputed<Collection, Filter>;
-        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
-      }
+  {
+    state: NamedEntitiesFilterState<Collection, Filter>;
+    props: NamedEntitiesFilterComputed<Collection, Filter>;
+    methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
+  }
+>;
+export function withEntitiesHybridFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      filterFn: (entity: NoInfer<Entity>, filter: NoInfer<Filter>) => boolean;
+      isRemoteFilter: (
+        previous: NoInfer<Filter>,
+        current: NoInfer<Filter>,
+      ) => boolean;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    NamedEntitiesRequirement<Entity, Collection> &
+    NamedEntitiesCallStatusRequirement<Collection>,
+  {
+    state: NamedEntitiesFilterState<Collection, Filter>;
+    props: NamedEntitiesFilterComputed<Collection, Filter>;
+    methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
+  }
+>;
+export function withEntitiesHybridFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      filterFn: (entity: NoInfer<Entity>, filter: NoInfer<Filter>) => boolean;
+      isRemoteFilter: (
+        previous: NoInfer<Filter>,
+        current: NoInfer<Filter>,
+      ) => boolean;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, '', 'withEntitiesHybridFilter'> &
+    RequireEntitiesCallStatus<Input, '', 'withEntitiesHybridFilter'>,
+  {
+    state: EntitiesFilterState<Filter>;
+    props: EntitiesFilterComputed<Filter>;
+    methods: EntitiesRemoteFilterMethods<Filter, Entity>;
+  }
 >;
 export function withEntitiesHybridFilter<
   Input extends SignalStoreFeatureResult,

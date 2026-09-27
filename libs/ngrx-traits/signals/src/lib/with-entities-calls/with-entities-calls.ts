@@ -42,7 +42,11 @@ import {
 } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
-import { RequireEntities } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  NamedEntitiesRequirement,
+  RequireEntities,
+} from '../feature-requirements.model';
 import { getWithEntitiesKeys, insertIf } from '../util';
 import { registerCallState } from '../with-all-call-status/with-all-call-status.util';
 import { NamedCallStatusMapState } from '../with-call-status-map/with-call-status-map.model';
@@ -145,6 +149,11 @@ export function withEntitiesCalls<
       NamedEntityCallMethods<Entity, Calls>;
   }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesCalls<
   Input extends SignalStoreFeatureResult,
   Entity,
@@ -152,16 +161,63 @@ export function withEntitiesCalls<
     string,
     EntityCall<Entity> | EntityCallConfig<Entity>
   >,
-  Collection extends string = '',
+  Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
     selectId?: SelectEntityId<NoInfer<Entity>>;
   },
   calls: (store: StoreSource<Input>) => Calls,
 ): SignalStoreFeature<
   Input & RequireEntities<Input, Entity, Collection, 'withEntitiesCalls'>,
+  {
+    state: NamedCallStatusMapState<keyof Calls & string>;
+    props: NamedEntitiesCallsStatusComputed<Calls>;
+    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> &
+      NamedEntityCallMethods<Entity, Calls>;
+  }
+>;
+export function withEntitiesCalls<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  const Calls extends Record<
+    string,
+    EntityCall<Entity> | EntityCallConfig<Entity>
+  >,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  calls: (store: StoreSource<Input>) => Calls,
+): SignalStoreFeature<
+  Input & NamedEntitiesRequirement<Entity, Collection>,
+  {
+    state: NamedCallStatusMapState<keyof Calls & string>;
+    props: NamedEntitiesCallsStatusComputed<Calls>;
+    methods: NamedEntitiesCallsStatusMethods<Entity, Calls> &
+      NamedEntityCallMethods<Entity, Calls>;
+  }
+>;
+export function withEntitiesCalls<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  const Calls extends Record<
+    string,
+    EntityCall<Entity> | EntityCallConfig<Entity>
+  >,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  calls: (store: StoreSource<Input>) => Calls,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, '', 'withEntitiesCalls'>,
   {
     state: NamedCallStatusMapState<keyof Calls & string>;
     props: NamedEntitiesCallsStatusComputed<Calls>;

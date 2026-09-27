@@ -23,6 +23,9 @@ import {
 } from 'rxjs';
 
 import {
+  LiteralCollection,
+  NamedEntitiesCallStatusRequirement,
+  NamedEntitiesRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
@@ -149,6 +152,110 @@ import {
  *  store.loadProductEntitiesPage({ pageIndex: number, forceLoad?: boolean, skipLoadingCall?:boolean }) // loads the page and sets the requestPage to the pageIndex
  *  store.setProductEntitiesPagedResult(entities: Product[], total: number) // appends the entities to the cache of entities and total
  */
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
+export function withEntitiesRemotePagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: LiteralCollection<Collection>;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      pagesToCache?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesRemotePagination'> &
+    RequireEntitiesCallStatus<
+      Input,
+      Collection,
+      'withEntitiesRemotePagination'
+    >,
+  {
+    state: NamedEntitiesPaginationRemoteState<Collection>;
+    props: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
+    methods: NamedEntitiesPaginationRemoteMethods<Entity, Collection>;
+  }
+>;
+export function withEntitiesRemotePagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      pagesToCache?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    NamedEntitiesRequirement<Entity, Collection> &
+    NamedEntitiesCallStatusRequirement<Collection>,
+  {
+    state: NamedEntitiesPaginationRemoteState<Collection>;
+    props: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
+    methods: NamedEntitiesPaginationRemoteMethods<Entity, Collection>;
+  }
+>;
+export function withEntitiesRemotePagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      pagesToCache?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, '', 'withEntitiesRemotePagination'> &
+    RequireEntitiesCallStatus<Input, '', 'withEntitiesRemotePagination'>,
+  {
+    state: EntitiesPaginationRemoteState;
+    props: EntitiesPaginationRemoteComputed<Entity>;
+    methods: EntitiesPaginationRemoteMethods<Entity>;
+  }
+>;
+// the one arg version is declared after the two args ones, so a config
+// without options resolves to the two args overloads, that also work when
+// Collection is a generic param (issue #92)
 export function withEntitiesRemotePagination<
   Input extends SignalStoreFeatureResult,
   Entity,
@@ -163,47 +270,6 @@ export function withEntitiesRemotePagination<
       entity: Entity;
       collection?: Collection;
       selectId?: SelectEntityId<Entity>;
-    }
-  >,
-): SignalStoreFeature<
-  Input &
-    RequireEntities<Input, Entity, Collection, 'withEntitiesRemotePagination'> &
-    RequireEntitiesCallStatus<
-      Input,
-      Collection,
-      'withEntitiesRemotePagination'
-    >,
-  Collection extends ''
-    ? {
-        state: EntitiesPaginationRemoteState;
-        props: EntitiesPaginationRemoteComputed<Entity>;
-        methods: EntitiesPaginationRemoteMethods<Entity>;
-      }
-    : {
-        state: NamedEntitiesPaginationRemoteState<Collection>;
-        props: NamedEntitiesPaginationRemoteComputed<Entity, Collection>;
-        methods: NamedEntitiesPaginationRemoteMethods<Entity, Collection>;
-      }
->;
-export function withEntitiesRemotePagination<
-  Input extends SignalStoreFeatureResult,
-  Entity,
-  Collection extends string = '',
->(
-  entityConfig: {
-    entity: Entity;
-    collection?: Collection;
-    selectId?: SelectEntityId<NoInfer<Entity>>;
-  },
-  options?: FeatureConfigFactory<
-    Input,
-    {
-      pageSize?: number;
-      currentPage?: number;
-      pagesToCache?: number;
-      entity?: never;
-      collection?: never;
-      selectId?: never;
     }
   >,
 ): SignalStoreFeature<
