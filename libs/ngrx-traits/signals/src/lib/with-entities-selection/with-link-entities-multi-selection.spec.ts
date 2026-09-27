@@ -87,7 +87,7 @@ describe('withLinkEntitiesMultiSelection', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
-      const external = signal<(string | number)[]>(['8', '4']);
+      const external = signal<Product['id'][]>(['8', '4']);
       store.linkIdsSelected({ syncWith: external });
       TestBed.tick();
 

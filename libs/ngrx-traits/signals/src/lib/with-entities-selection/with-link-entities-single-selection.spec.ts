@@ -75,7 +75,7 @@ describe('withLinkEntitiesSingleSelection', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
-      const external = signal<string | number | null>(mockProducts[4].id);
+      const external = signal<Product['id'] | null>(mockProducts[4].id);
       store.linkIdSelected({ syncWith: external });
 
       // external wins initially
@@ -104,7 +104,7 @@ describe('withLinkEntitiesSingleSelection', () => {
 
       linked.set(mockProducts[4].id);
       // typed to null only, but undefined from an untyped caller still deselects
-      (linked as WritableSignal<string | number | null | undefined>).set(
+      (linked as WritableSignal<Product['id'] | null | undefined>).set(
         undefined,
       );
       expect(store.idSelected()).toBeUndefined();
@@ -123,7 +123,7 @@ describe('withLinkEntitiesSingleSelection', () => {
       patches = 0;
 
       // typed to null only, but undefined from an untyped caller still deselects
-      (linked as WritableSignal<string | number | null | undefined>).set(
+      (linked as WritableSignal<Product['id'] | null | undefined>).set(
         undefined,
       );
       linked.set(null);
@@ -135,7 +135,7 @@ describe('withLinkEntitiesSingleSelection', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
-      const external = signal<string | number | undefined>(undefined);
+      const external = signal<Product['id'] | undefined>(undefined);
       const linked = store.linkIdSelected({ readFrom: external });
 
       external.set(mockProducts[4].id);
@@ -153,7 +153,7 @@ describe('withLinkEntitiesSingleSelection', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
-      const external = signal<string | number | null>(mockProducts[4].id);
+      const external = signal<Product['id'] | null>(mockProducts[4].id);
       store.linkIdSelected({ syncWith: external, initialValueFrom: 'store' });
 
       expect(external()).toBeNull();
@@ -165,7 +165,7 @@ describe('withLinkEntitiesSingleSelection', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
-      const external = signal<string | number | undefined>(undefined);
+      const external = signal<Product['id'] | undefined>(undefined);
       // @ts-expect-error writeMap is required, the link emits null
       store.linkIdSelected({ syncWith: external });
       store.linkIdSelected({
@@ -187,7 +187,7 @@ describe('withLinkEntitiesSingleSelection', () => {
     TestBed.runInInjectionContext(() => {
       const store = new Store();
       patchState(store, setAllEntities(mockProducts));
-      const external = signal<string | number | null>(null);
+      const external = signal<Product['id'] | null>(null);
       store.linkIdSelected({ writeTo: external });
 
       store.selectEntity({ id: mockProducts[4].id });

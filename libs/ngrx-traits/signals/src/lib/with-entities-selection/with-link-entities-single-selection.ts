@@ -3,6 +3,7 @@ import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 import { RequireEntitiesSingleSelection } from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import { equalAuto } from '../with-link/with-link.util';
+import { StoreSingleSelectionId } from './with-entities-selection.model';
 import {
   EntitiesSingleSelectionState,
   NamedEntitiesSingleSelectionState,
@@ -17,9 +18,12 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  * Prebuilt version of `withLink` for `withEntitiesSingleSelection`: writes
  * route through `select[Collection]Entity` / `deselect[Collection]Entity`
  * (null deselects). No selection reads as `null` rather than `undefined`, so
- * Signal Forms keeps the field instead of dropping it. It emits `null` but
- * accepts `undefined` too, so an `undefined`-typed signal it reads from needs
- * no map; one it writes to must accept `null`, or use a `writeMap`.
+ * Signal Forms keeps the field instead of dropping it. It emits `Id | null`
+ * but accepts `undefined` too, so an `undefined`-typed signal it reads from
+ * needs no map; one it writes to must accept `null`, or use a `writeMap`.
+ *
+ * The id type is the one withEntitiesSingleSelection generated: the
+ * entity's `id` prop type, or `string | number` when it has a selectId.
  *
  * Requires withEntitiesSingleSelection to be used before it.
  *
@@ -35,7 +39,7 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  *   withLinkEntitiesSingleSelection({ entity }),
  * );
  * // in a component:
- * // selectedId = model<string | number | null>(null);
+ * // selectedId = model<Product['id'] | null>(null);
  * // linked = this.store.linkIdSelected({ syncWith: this.selectedId });
  */
 export function withLinkEntitiesSingleSelection<
@@ -70,8 +74,8 @@ export function withLinkEntitiesSingleSelection<
       >}`]: LinkMethod<
         // accepts undefined, so undefined-typed signals link without a map,
         // but only ever emits null
-        string | number | null | undefined,
-        string | number | null
+        StoreSingleSelectionId<Input['state'], Collection> | null | undefined,
+        StoreSingleSelectionId<Input['state'], Collection> | null
       >;
     };
   }
