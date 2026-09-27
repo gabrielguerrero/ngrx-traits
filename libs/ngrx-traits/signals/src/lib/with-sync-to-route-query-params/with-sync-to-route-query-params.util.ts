@@ -6,6 +6,28 @@ import { patchState, SignalStoreFeatureResult } from '@ngrx/signals';
 // imports QueryMapper from here
 import type { FilterQueryMapper } from '../with-entities-filter/with-entities-filter.util';
 
+/**
+ * How a selected id read from the url, which is always a string, is turned
+ * back into an entity id: 'string' keeps it as is, 'number' parses it (values
+ * that are not finite numbers are ignored), and a function does its own
+ * parsing, returning undefined to ignore the value.
+ */
+export type ParseId =
+  | 'string'
+  | 'number'
+  | ((id: string) => string | number | undefined);
+
+export function parseQueryId(
+  id: string,
+  parseId: ParseId = 'string',
+): string | number | undefined {
+  if (typeof parseId === 'function') return parseId(id);
+  if (parseId === 'string') return id;
+  const trimmed = id.trim();
+  const parsed = Number(trimmed);
+  return trimmed !== '' && Number.isFinite(parsed) ? parsed : undefined;
+}
+
 export type QueryMapper<
   T extends Params = Params,
   Store extends Record<string, any> = Record<string, any>,

@@ -17,6 +17,7 @@ export * from './with-entities-sort/with-entities-local-sort';
 export * from './with-entities-sort/with-entities-local-sort.model';
 export * from './with-entities-sort/with-entities-remote-sort';
 export * from './with-entities-sort/with-link-entities-sort';
+export * from './with-entities-selection/with-entities-selection.model';
 export * from './with-entities-selection/with-entities-single-selection';
 export * from './with-entities-selection/with-entities-single-selection.model';
 export * from './with-entities-selection/with-entities-multi-selection';

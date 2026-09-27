@@ -98,16 +98,20 @@ To know more how it mixes and works with other local store features, check [Work
 
 ## State
 
+`Id` is the return type of the config's `selectId`, or else the type of the entity's `id` prop, or `string | number` when the entity has no `id` prop.
+
+Note the ngrx `entityConfig` widens `selectId` to `string | number`, so with it `Id` is `string | number`; an inline `selectId` keeps its return type.
+
 Generates the following signals
 
 ```typescript
-entitiesIdsSelectedMap: Record<string | number, boolean>;
+idsSelectedMap: Partial<Record<Id, boolean>>;
 ```
 
 If collection provided, the following signals are generated, example: **users**
 
 ```typescript
-usersIdsSelectedMap: Record<string | number, boolean>;
+usersIdsSelectedMap: Partial<Record<Id, boolean>>;
 ```
 
 ## Computed
@@ -115,6 +119,7 @@ usersIdsSelectedMap: Record<string | number, boolean>;
 Generates the following computed signals
 
 ```typescript
+idsSelected: Signal<Id[]>;
 entitiesSelected: Signal<Entity[]>;
 isAllEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 ```
@@ -122,8 +127,9 @@ isAllEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 If collection provided, the following computed signals are generated, example: **users**
 
 ```typescript
-userEntitiesSelected: Signal<Entity[]>;
-isAllUserEntitiesSelected: Signal<'all' | 'none' | 'some'>;
+usersIdsSelected: Signal<Id[]>;
+usersEntitiesSelected: Signal<Entity[]>;
+isAllUsersEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 ```
 
 ## Methods
@@ -131,17 +137,19 @@ isAllUserEntitiesSelected: Signal<'all' | 'none' | 'some'>;
 Generates the following methods
 
 ```typescript
-selectEntities: ({id:string | number} | {ids: (string | number[])}) => void;
-deselectEntities: ({id:string | number} | {ids: (string | number[])}) => void;
-toggleSelectEntities: ({id:string | number} | {ids: (string | number[])}) => void;
-toggleSelectAllEntities: ({id:string | number} | {ids: (string | number[])}) => void;
+selectEntities: (({id: Id} | {ids: Id[]}) & { clearSelectionBeforeSelect?: boolean }) => void;
+deselectEntities: ({id: Id} | {ids: Id[]}) => void;
+toggleSelectEntities: ({id: Id} | {ids: Id[]}) => void;
+toggleSelectAllEntities: () => void;
+clearEntitiesSelection: () => void;
 ```
 
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-selectUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
-deselectUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
-toggleSelectUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
-toggleSelectAllUserEntities: ({id:string | number} | {ids: (string | number[])}) => void;
+selectUsersEntities: (({id: Id} | {ids: Id[]}) & { clearSelectionBeforeSelect?: boolean }) => void;
+deselectUsersEntities: ({id: Id} | {ids: Id[]}) => void;
+toggleSelectUsersEntities: ({id: Id} | {ids: Id[]}) => void;
+toggleSelectAllUsersEntities: () => void;
+clearUsersEntitiesSelection: () => void;
 ```

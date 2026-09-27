@@ -96,16 +96,20 @@ export const ProductsLocalStore = signalStore(
 
 ## State
 
+`Id` is the return type of the config's `selectId`, or else the type of the entity's `id` prop, or `string | number` when the entity has no `id` prop.
+
+Note the ngrx `entityConfig` widens `selectId` to `string | number`, so with it `Id` is `string | number`; an inline `selectId` keeps its return type.
+
 Generates the following signals
 
 ```typescript
-entityIdSelected: Signal<string | number | undefined>;
+idSelected: Signal<Id | undefined>;
 ```
 
 If collection provided, the following signals are generated, example: **users**
 
 ```typescript
-usersIdSelected: Signal<string | number | undefined>;
+usersIdSelected: Signal<Id | undefined>;
 ```
 
 ## Computed
@@ -127,15 +131,15 @@ usersEntitySelected: Signal<Entity | undefined>;
 Generates the following methods
 
 ```typescript
-selectEntity: ({id:string | number}) => void;
-deselectEntity: ({id:string | number}) => void;
-toggleEntity: ({id:string | number}) => void;
+selectEntity: ({id: Id} | undefined) => void;
+deselectEntity: () => void;
+toggleSelectEntity: ({id: Id} | undefined) => void;
 ```
 
 If collection provided, the following methods are generated, example: **users**
 
 ```typescript
-selectUserEntity: ({id:string | number}) => void;
-deselectUserEntity: ({id:string | number}) => void;
-toggleUserEntity: ({id:string | number}) => void;
+selectUsersEntity: ({id: Id} | undefined) => void;
+deselectUsersEntity: () => void;
+toggleSelectUsersEntity: ({id: Id} | undefined) => void;
 ```

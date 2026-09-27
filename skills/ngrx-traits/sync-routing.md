@@ -47,6 +47,7 @@ withEntitiesSyncToRouteQueryParams(productEntityConfig, { prefix: 'p' });
 | `syncFilter` / `syncPagination` / `syncSort` | Sync those traits | `true` |
 | `syncSingleSelection` | Sync the selected id as `selectedId` | `true` |
 | `syncMultiSelection` | Sync the selected ids as a comma-separated `selectedIds` | `false` |
+| `parseId` | How selected ids from the URL (always strings) become entity ids: `'number'` parses them (non-finite ignored), or `(id: string) => id \| undefined` (`undefined` ignores). Set `'number'` for number ids | `'string'` |
 
 ```typescript
 // readable query params instead of a JSON blob

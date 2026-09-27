@@ -918,6 +918,129 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     }));
   });
 
+  describe('number ids', () => {
+    type NumberProduct = Omit<Product, 'id'> & { id: number };
+    const numberEntity = type<NumberProduct>();
+    const numberProducts: NumberProduct[] = mockProducts
+      .slice(0, 10)
+      .map((product, index) => ({ ...product, id: index + 1 }));
+    const numberStoreFeature = ({ load }: { load: Subject<boolean> }) =>
+      signalStoreFeature(
+        withEntities({ entity: numberEntity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesLoadingCall({
+          fetchEntities: () =>
+            load.pipe(
+              filter(Boolean),
+              map(() => ({ entities: numberProducts })),
+            ),
+        }),
+      );
+
+    it('parses selectedId as a number with parseId number', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        numberStoreFeature({ load }),
+        withEntitiesSingleSelection({ entity: numberEntity }),
+        withEntitiesSyncToRouteQueryParams({
+          entity: numberEntity,
+          parseId: 'number',
+        }),
+      );
+      const { store } = init({ Store, queryParams: { selectedId: '2' } });
+      tick();
+      load.next(true);
+      tick(400);
+      expect(store.idSelected()).toBe(2);
+      expect(store.entitySelected()).toEqual(numberProducts[1]);
+    }));
+
+    it('ignores a selectedId that is not a number with parseId number', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        numberStoreFeature({ load }),
+        withEntitiesSingleSelection({ entity: numberEntity }),
+        withEntitiesSyncToRouteQueryParams(
+          { entity: numberEntity },
+          { parseId: 'number' },
+        ),
+      );
+      const { store } = init({ Store, queryParams: { selectedId: 'abc' } });
+      tick();
+      load.next(true);
+      tick(400);
+      expect(store.idSelected()).toBeUndefined();
+    }));
+
+    it('selects id 0, which is falsy', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const zeroProducts = [{ ...numberProducts[0], id: 0 }, ...numberProducts];
+      const Store = signalStore(
+        withEntities({ entity: numberEntity }),
+        withCallStatus({ initialValue: 'loading' }),
+        withEntitiesLoadingCall({
+          fetchEntities: () =>
+            load.pipe(
+              filter(Boolean),
+              map(() => ({ entities: zeroProducts })),
+            ),
+        }),
+        withEntitiesSingleSelection({ entity: numberEntity }),
+        withEntitiesSyncToRouteQueryParams({
+          entity: numberEntity,
+          parseId: 'number',
+        }),
+      );
+      const { store } = init({ Store, queryParams: { selectedId: '0' } });
+      tick();
+      load.next(true);
+      tick(400);
+      expect(store.idSelected()).toBe(0);
+      expect(store.entitySelected()).toEqual(zeroProducts[0]);
+    }));
+
+    it('parses selectedId with a parseId function, ignoring undefined', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        numberStoreFeature({ load }),
+        withEntitiesSingleSelection({ entity: numberEntity }),
+        withEntitiesSyncToRouteQueryParams({
+          entity: numberEntity,
+          // e.g. ids shown in the url as order-2
+          parseId: (id) =>
+            id.startsWith('order-') ? Number(id.slice(6)) : undefined,
+        }),
+      );
+      const { store } = init({
+        Store,
+        queryParams: { selectedId: 'order-2' },
+      });
+      tick();
+      load.next(true);
+      tick(400);
+      expect(store.idSelected()).toBe(2);
+    }));
+
+    it('parses selectedIds as numbers with parseId number', fakeAsync(() => {
+      const load = new Subject<boolean>();
+      const Store = signalStore(
+        numberStoreFeature({ load }),
+        withEntitiesMultiSelection({ entity: numberEntity }),
+        withEntitiesSyncToRouteQueryParams({
+          entity: numberEntity,
+          syncSingleSelection: false,
+          syncMultiSelection: true,
+          parseId: 'number',
+        }),
+      );
+      const { store } = init({ Store, queryParams: { selectedIds: '2,x,3' } });
+      tick();
+      load.next(true);
+      tick(400);
+      expect(store.idsSelected()).toEqual([2, 3]);
+    }));
+  });
+
   describe('entities pagination', () => {
     it('url query params page should update store', fakeAsync(() => {
       const load = new Subject<boolean>();
