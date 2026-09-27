@@ -85,6 +85,30 @@ export const ProductsLocalStore = signalStore(
 );
 ```
 
+### Number ids
+
+Query params are always strings, so the selected ids read from the url are strings too. When the entity ids are numbers, pass `parseId: 'number'` to parse `selectedId` / `selectedIds` back into numbers (values that are not finite numbers are ignored), or a function for any other format, returning `undefined` to ignore a value.
+
+```typescript
+const orderEntityConfig = entityConfig({
+  entity: type<Order>(), // { id: number; ... }
+  collection: 'order',
+});
+
+export const OrdersStore = signalStore(
+  withEntities(orderEntityConfig),
+  withCallStatus(orderEntityConfig, { initialValue: 'loading' }),
+  withEntitiesSingleSelection(orderEntityConfig),
+  withEntitiesLoadingCall(orderEntityConfig, { ... }),
+  withEntitiesSyncToRouteQueryParams(orderEntityConfig, { parseId: 'number' }),
+);
+
+// or parse a custom format, e.g. ?order-selectedId=ORD-2
+withEntitiesSyncToRouteQueryParams(orderEntityConfig, {
+  parseId: (id) => (id.startsWith('ORD-') ? Number(id.slice(4)) : undefined),
+});
+```
+
 ### Two collections, with a short prefix
 
 You can sync more than one collection in the same store, each `withEntitiesSyncToRouteQueryParams` prefixes its own query params so the two never collide.
@@ -257,6 +281,7 @@ Also consider `syncPagination: false`, `syncSort: false` or `syncSingleSelection
 | syncSort            | Sync entities sort to route query params. Default: true                                                                                           | boolean                                      |
 | syncSingleSelection | Sync single selected entity id to route query params as `selectedId`. Default: true                                                               | boolean                                      |
 | syncMultiSelection  | Sync multi selected entity ids to route query params as `selectedIds` (comma-separated). Default: false                                           | boolean                                      |
+| parseId             | How the selected ids read from the url are turned back into entity ids: kept as strings, parsed as numbers, or with a function returning the id (`undefined` ignores it). Default: `'string'` | `'string' \| 'number' \| (id: string) => string \| number \| undefined` |
 
 ## State
 

@@ -7,12 +7,14 @@ Both require `withEntities` and go after it (and after `withCallStatus` when the
 | `clearOnFilter` | Clear the selection when the filter changes | `true` |
 | `clearOnRemoteSort` | Clear the selection when a remote sort changes | `true` |
 
+`Id` = return type of config `selectId`, else entity's `id` prop type, else `string | number`. ngrx `entityConfig` widens `selectId`, so with it `Id` is `string | number`; inline `selectId` keeps its type. Also applies to method args and `withLinkEntities*Selection` link signals.
+
 ## withEntitiesSingleSelection
 
 ```typescript
 withEntitiesSingleSelection(productEntityConfig);
 
-productIdSelected: Signal<string | number | undefined>;  // state
+productIdSelected: Signal<Id | undefined>;               // state
 productEntitySelected: Signal<Product | undefined>;      // computed
 selectProductEntity({ id }): void;
 deselectProductEntity(): void;
@@ -47,8 +49,8 @@ withCalls(({ productEntitySelected }) => ({
 ```typescript
 withEntitiesMultiSelection(productEntityConfig);
 
-productIdsSelectedMap: Record<string | number, boolean>;        // state
-productIdsSelected: Signal<(string | number)[]>;                // computed
+productIdsSelectedMap: Partial<Record<Id, boolean>>;            // state
+productIdsSelected: Signal<Id[]>;                               // computed
 productEntitiesSelected: Signal<Product[]>;                     // computed
 isAllProductEntitiesSelected: Signal<'all' | 'none' | 'some'>;  // computed
 selectProductEntities({ id } | { ids } | { ids, clearSelectionBeforeSelect }): void;

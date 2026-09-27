@@ -8,6 +8,7 @@ import {
   NamedEntitiesMultiSelectionState,
 } from './with-entities-multi-selection.model';
 import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.util';
+import { StoreMultiSelectionId } from './with-entities-selection.model';
 
 /**
  * @experimental
@@ -20,6 +21,9 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  * array clears the selection), and syncs are guarded with an order-insensitive
  * ids equality — the selection map does not preserve the order of the ids it
  * was given, so an order-sensitive compare would cause echo loops.
+ *
+ * The id type is the one withEntitiesMultiSelection generated: the entity's
+ * `id` prop type, or `string | number` when it has a selectId.
  *
  * Requires withEntitiesMultiSelection to be used before it.
  *
@@ -35,7 +39,7 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  *   withLinkEntitiesMultiSelection({ entity }),
  * );
  * // in a component:
- * // value = model<(string | number)[]>([]);
+ * // value = model<Product['id'][]>([]);
  * // valueField = form(this.store.linkIdsSelected({ syncWith: this.value }));
  */
 export function withLinkEntitiesMultiSelection<
@@ -67,7 +71,7 @@ export function withLinkEntitiesMultiSelection<
         ? 'idsSelected'
         : `${Collection}IdsSelected` as `link${Capitalize<
         string & P
-      >}`]: LinkMethod<(string | number)[]>;
+      >}`]: LinkMethod<StoreMultiSelectionId<Input['state'], Collection>[]>;
     };
   }
 > {

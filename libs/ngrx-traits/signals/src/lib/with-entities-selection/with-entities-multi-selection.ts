@@ -38,6 +38,23 @@ import {
   NamedEntitiesMultiSelectionState,
 } from './with-entities-multi-selection.model';
 import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.util';
+import { EntitySelectionId } from './with-entities-selection.model';
+
+type EntitiesMultiSelectionFeature<
+  Entity,
+  Collection extends string,
+  Id extends EntityId,
+> = Collection extends ''
+  ? {
+      state: EntitiesMultiSelectionState<Id>;
+      props: EntitiesMultiSelectionComputed<Entity, Id>;
+      methods: EntitiesMultiSelectionMethods<Id>;
+    }
+  : {
+      state: NamedEntitiesMultiSelectionState<Collection, Id>;
+      props: NamedEntitiesMultiSelectionComputed<Entity, Collection, Id>;
+      methods: NamedEntitiesMultiSelectionMethods<Collection, Id>;
+    };
 
 /**
  * Generates state, signals and methods for multi selection of entities.
@@ -63,15 +80,18 @@ import { getEntitiesMultiSelectionKeys } from './with-entities-multi-selection.u
  *   withEntitiesMultiSelection(productEntityConfig),
  *   );
  *
+ * // ids are typed from the entity's `id` prop, or string | number when the
+ * // config has a selectId
  * // generates the following signals
- * store.productIdsSelectedMap // Record<string | number, boolean>;
+ * store.productIdsSelectedMap // Partial<Record<Product['id'], boolean>>;
  * // generates the following computed signals
  * store.productEntitiesSelected // Entity[];
+ * store.productIdsSelected // Product['id'][];
  * store.isAllProductEntitiesSelected // 'all' | 'none' | 'some';
  * // generates the following methods
- * store.selectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.deselectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
- * store.toggleSelectProducts // (config: { id: string | number } | { ids: (string | number)[] }) => void;
+ * store.selectProducts // (config: { id: Product['id'] } | { ids: Product['id'][] }) => void;
+ * store.deselectProducts // (config: { id: Product['id'] } | { ids: Product['id'][] }) => void;
+ * store.toggleSelectProducts // (config: { id: Product['id'] } | { ids: Product['id'][] }) => void;
  * store.toggleSelectAllProducts // () => void;
  */
 
@@ -79,49 +99,49 @@ export function withEntitiesMultiSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
   Collection extends string = '',
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
 >(
   configFactory: FeatureConfigFactory<
     Input,
     {
       entity: Entity;
       collection?: Collection;
-      selectId?: SelectEntityId<Entity>;
+      // the NoInfer member types an inline arrow, SelectId records its
+      // presence, which keeps the id type string | number
+      selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
-      defaultSelectedIds?: (string | number)[];
+      defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
     }
   >,
 ): SignalStoreFeature<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesMultiSelection'>,
-  Collection extends ''
-    ? {
-        state: EntitiesMultiSelectionState;
-        props: EntitiesMultiSelectionComputed<Entity>;
-        methods: EntitiesMultiSelectionMethods;
-      }
-    : {
-        state: NamedEntitiesMultiSelectionState<Collection>;
-        props: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-        methods: NamedEntitiesMultiSelectionMethods<Collection>;
-      }
+  EntitiesMultiSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
 >;
 export function withEntitiesMultiSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
   Collection extends string = '',
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
 >(
   entityConfig: {
     entity: Entity;
     collection?: Collection;
-    selectId?: SelectEntityId<NoInfer<Entity>>;
+    // the NoInfer member types an inline arrow, SelectId records its
+    // presence, which keeps the id type string | number
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
   },
   options?: FeatureConfigFactory<
     Input,
     {
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
-      defaultSelectedIds?: (string | number)[];
+      defaultSelectedIds?: NoInfer<EntitySelectionId<Entity, SelectId>>[];
       entity?: never;
       collection?: never;
       selectId?: never;
@@ -130,17 +150,11 @@ export function withEntitiesMultiSelection<
 ): SignalStoreFeature<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesMultiSelection'>,
-  Collection extends ''
-    ? {
-        state: EntitiesMultiSelectionState;
-        props: EntitiesMultiSelectionComputed<Entity>;
-        methods: EntitiesMultiSelectionMethods;
-      }
-    : {
-        state: NamedEntitiesMultiSelectionState<Collection>;
-        props: NamedEntitiesMultiSelectionComputed<Entity, Collection>;
-        methods: NamedEntitiesMultiSelectionMethods<Collection>;
-      }
+  EntitiesMultiSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
 >;
 export function withEntitiesMultiSelection<
   Input extends SignalStoreFeatureResult,
