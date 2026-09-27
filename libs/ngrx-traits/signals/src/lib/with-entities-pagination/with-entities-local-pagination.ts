@@ -11,7 +11,11 @@ import {
   WritableStateSource,
 } from '@ngrx/signals';
 
-import { RequireEntities } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  NamedEntitiesRequirement,
+  RequireEntities,
+} from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithEntitiesFilterEvents } from '../with-entities-filter/with-entities-filter.util';
 import { getWithEntitiesLocalSortEvents } from '../with-entities-sort/with-entities-local-sort.util';
@@ -72,6 +76,92 @@ import {
  *   store.loadProductEntitiesPage // ({ pageIndex: number }) => void
  */
 
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
+export function withEntitiesLocalPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: LiteralCollection<Collection>;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, Collection, 'withEntitiesLocalPagination'>,
+  {
+    state: NamedEntitiesPaginationLocalState<Collection>;
+    props: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
+    methods: NamedEntitiesPaginationLocalMethods<Collection>;
+  }
+>;
+export function withEntitiesLocalPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & NamedEntitiesRequirement<Entity, Collection>,
+  {
+    state: NamedEntitiesPaginationLocalState<Collection>;
+    props: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
+    methods: NamedEntitiesPaginationLocalMethods<Collection>;
+  }
+>;
+export function withEntitiesLocalPagination<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+  },
+  options?: FeatureConfigFactory<
+    Input,
+    {
+      pageSize?: number;
+      currentPage?: number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, '', 'withEntitiesLocalPagination'>,
+  {
+    state: EntitiesPaginationLocalState;
+    props: EntitiesPaginationLocalComputed<Entity>;
+    methods: EntitiesPaginationLocalMethods;
+  }
+>;
+// the one arg version is declared after the two args ones, so a config
+// without options resolves to the two args overloads, that also work when
+// Collection is a generic param (issue #92)
 export function withEntitiesLocalPagination<
   Input extends SignalStoreFeatureResult,
   Entity,
@@ -84,39 +174,6 @@ export function withEntitiesLocalPagination<
       currentPage?: number;
       entity: Entity;
       collection?: Collection;
-    }
-  >,
-): SignalStoreFeature<
-  Input &
-    RequireEntities<Input, Entity, Collection, 'withEntitiesLocalPagination'>,
-  Collection extends ''
-    ? {
-        state: EntitiesPaginationLocalState;
-        props: EntitiesPaginationLocalComputed<Entity>;
-        methods: EntitiesPaginationLocalMethods;
-      }
-    : {
-        state: NamedEntitiesPaginationLocalState<Collection>;
-        props: NamedEntitiesPaginationLocalComputed<Entity, Collection>;
-        methods: NamedEntitiesPaginationLocalMethods<Collection>;
-      }
->;
-export function withEntitiesLocalPagination<
-  Input extends SignalStoreFeatureResult,
-  Entity,
-  Collection extends string = '',
->(
-  entityConfig: {
-    entity: Entity;
-    collection?: Collection;
-  },
-  options?: FeatureConfigFactory<
-    Input,
-    {
-      pageSize?: number;
-      currentPage?: number;
-      entity?: never;
-      collection?: never;
     }
   >,
 ): SignalStoreFeature<

@@ -102,6 +102,25 @@ export type EntitiesRequirement<
     };
 
 /**
+ * Collection only when it is already a known string literal, when it is still a
+ * generic param the conditional stays unresolved and the argument does not
+ * match it, so overload resolution skips to the next overload.
+ */
+export type LiteralCollection<Collection extends string> =
+  string extends Collection ? never : Collection;
+
+/**
+ * The state, props and methods withEntities generates for a named collection,
+ * unlike EntitiesRequirement it has no conditional, so it still resolves when
+ * Collection is a generic param of a custom store feature.
+ */
+export type NamedEntitiesRequirement<Entity, Collection extends string> = {
+  state: NamedEntityState<Entity, Collection>;
+  props: NamedEntityProps<Entity, Collection>;
+  methods: {};
+};
+
+/**
  * The state, props and methods withCallStatus generates for a collection.
  */
 export type EntitiesCallStatusRequirement<
@@ -118,6 +137,20 @@ export type EntitiesCallStatusRequirement<
       props: NamedCallStatusComputed<`${Collection}Entities`, Error>;
       methods: NamedCallStatusMethods<`${Collection}Entities`, Error>;
     };
+
+/**
+ * The state, props and methods withCallStatus generates for a named collection,
+ * unlike EntitiesCallStatusRequirement it has no conditional, so it still
+ * resolves when Collection is a generic param of a custom store feature.
+ */
+export type NamedEntitiesCallStatusRequirement<
+  Collection extends string,
+  Error = any,
+> = {
+  state: NamedCallStatusState<`${Collection}Entities`>;
+  props: NamedCallStatusComputed<`${Collection}Entities`, Error>;
+  methods: NamedCallStatusMethods<`${Collection}Entities`, Error>;
+};
 
 /**
  * Requires withEntities for the given collection to be present in the store,

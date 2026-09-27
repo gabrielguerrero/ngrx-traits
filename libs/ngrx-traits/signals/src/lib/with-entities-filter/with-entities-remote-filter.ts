@@ -22,6 +22,9 @@ import {
 } from 'rxjs';
 
 import {
+  LiteralCollection,
+  NamedEntitiesCallStatusRequirement,
+  NamedEntitiesRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
@@ -162,15 +165,20 @@ export function withEntitiesRemoteFilter<
         methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
       }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesRemoteFilter<
   Input extends SignalStoreFeatureResult,
   Entity,
   Filter extends Record<string, unknown>,
-  Collection extends string = '',
+  Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
   },
   options: FeatureConfigFactory<
     Input,
@@ -185,17 +193,68 @@ export function withEntitiesRemoteFilter<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesRemoteFilter'> &
     RequireEntitiesCallStatus<Input, Collection, 'withEntitiesRemoteFilter'>,
-  Collection extends ''
-    ? {
-        state: EntitiesFilterState<Filter>;
-        props: EntitiesFilterComputed<Filter>;
-        methods: EntitiesRemoteFilterMethods<Filter, Entity>;
-      }
-    : {
-        state: NamedEntitiesFilterState<Collection, Filter>;
-        props: NamedEntitiesFilterComputed<Collection, Filter>;
-        methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
-      }
+  {
+    state: NamedEntitiesFilterState<Collection, Filter>;
+    props: NamedEntitiesFilterComputed<Collection, Filter>;
+    methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
+  }
+>;
+export function withEntitiesRemoteFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    NamedEntitiesRequirement<Entity, Collection> &
+    NamedEntitiesCallStatusRequirement<Collection>,
+  {
+    state: NamedEntitiesFilterState<Collection, Filter>;
+    props: NamedEntitiesFilterComputed<Collection, Filter>;
+    methods: NamedEntitiesRemoteFilterMethods<Collection, Filter, Entity>;
+  }
+>;
+export function withEntitiesRemoteFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity?: never;
+      collection?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, '', 'withEntitiesRemoteFilter'> &
+    RequireEntitiesCallStatus<Input, '', 'withEntitiesRemoteFilter'>,
+  {
+    state: EntitiesFilterState<Filter>;
+    props: EntitiesFilterComputed<Filter>;
+    methods: EntitiesRemoteFilterMethods<Filter, Entity>;
+  }
 >;
 export function withEntitiesRemoteFilter<
   Input extends SignalStoreFeatureResult,

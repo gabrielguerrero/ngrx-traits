@@ -14,7 +14,11 @@ import { EntityMap, SelectEntityId } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { map, Observable, pipe, tap } from 'rxjs';
 
-import { RequireEntities } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  NamedEntitiesRequirement,
+  RequireEntities,
+} from '../feature-requirements.model';
 import { getWithEntitiesKeys } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
 import {
@@ -114,15 +118,20 @@ export function withEntitiesLocalFilter<
         methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
       }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesLocalFilter<
   Input extends SignalStoreFeatureResult,
   Entity,
   Filter extends Record<string, unknown>,
-  Collection extends string = '',
+  Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
     selectId?: SelectEntityId<NoInfer<Entity>>;
   },
   options: FeatureConfigFactory<
@@ -138,17 +147,70 @@ export function withEntitiesLocalFilter<
   >,
 ): SignalStoreFeature<
   Input & RequireEntities<Input, Entity, Collection, 'withEntitiesLocalFilter'>,
-  Collection extends ''
-    ? {
-        state: EntitiesFilterState<Filter>;
-        props: EntitiesFilterComputed<Filter>;
-        methods: EntitiesFilterMethods<Filter, Entity>;
-      }
-    : {
-        state: NamedEntitiesFilterState<Collection, Filter>;
-        props: NamedEntitiesFilterComputed<Collection, Filter>;
-        methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
-      }
+  {
+    state: NamedEntitiesFilterState<Collection, Filter>;
+    props: NamedEntitiesFilterComputed<Collection, Filter>;
+    methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
+  }
+>;
+export function withEntitiesLocalFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+  Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      filterFn: (entity: NoInfer<Entity>, filter: Filter) => boolean;
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & NamedEntitiesRequirement<Entity, Collection>,
+  {
+    state: NamedEntitiesFilterState<Collection, Filter>;
+    props: NamedEntitiesFilterComputed<Collection, Filter>;
+    methods: NamedEntitiesFilterMethods<Collection, Filter, Entity>;
+  }
+>;
+export function withEntitiesLocalFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter extends Record<string, unknown>,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+    selectId?: SelectEntityId<NoInfer<Entity>>;
+  },
+  options: FeatureConfigFactory<
+    Input,
+    {
+      filterFn: (entity: NoInfer<Entity>, filter: Filter) => boolean;
+      defaultFilter: Filter;
+      defaultDebounce?: number;
+      entity?: never;
+      collection?: never;
+      selectId?: never;
+    }
+  >,
+): SignalStoreFeature<
+  Input & RequireEntities<Input, Entity, '', 'withEntitiesLocalFilter'>,
+  {
+    state: EntitiesFilterState<Filter>;
+    props: EntitiesFilterComputed<Filter>;
+    methods: EntitiesFilterMethods<Filter, Entity>;
+  }
 >;
 export function withEntitiesLocalFilter<
   Input extends SignalStoreFeatureResult,
