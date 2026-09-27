@@ -24,7 +24,7 @@ import { getQueryMapperForSingleSelection } from '../with-entities-selection/wit
 import { getQueryMapperForEntitiesSort } from '../with-entities-sort/with-entities-local-sort.util';
 import { StoreSource } from '../with-feature-factory/with-feature-factory.model';
 import { withSyncToRouteQueryParams } from './with-sync-to-route-query-params';
-import { QueryMapper } from './with-sync-to-route-query-params.util';
+import { ParseId, QueryMapper } from './with-sync-to-route-query-params.util';
 
 /**
  * Syncs entities filter, pagination, sort and single selection to route query params for local or remote entities store features. If a collection is provided, it will be used as a prefix (if non is provided) for the query params.
@@ -40,6 +40,7 @@ import { QueryMapper } from './with-sync-to-route-query-params.util';
  * @param config.onQueryParamsLoaded A function to be called when the query params are loaded into the store, (only gets called once).
  * @param config.defaultDebounce The default debounce time to use sync the store changes back to the route query params.
  * @param config.skipLoadingCall When true, restoring state from query params will update the store state but will not trigger a backend call to fetch entities. Default is false.
+ * @param config.parseId How the selected ids read from the url (always strings) are turned back into entity ids: 'string' (default), 'number', or a function returning the id, or undefined to ignore it.
  * @param options - Two-argument form only: the behavior options listed above
  *
  * @example
@@ -169,6 +170,7 @@ export function withEntitiesSyncToRouteQueryParams<
   syncSort?: boolean;
   syncSingleSelection?: boolean;
   syncMultiSelection?: boolean;
+  parseId?: ParseId;
 }): SignalStoreFeature<
   Input &
     RequireEntities<
@@ -212,6 +214,7 @@ export function withEntitiesSyncToRouteQueryParams<
     syncSort?: boolean;
     syncSingleSelection?: boolean;
     syncMultiSelection?: boolean;
+    parseId?: ParseId;
     entity?: never;
     collection?: never;
   },
@@ -259,6 +262,7 @@ export function withEntitiesSyncToRouteQueryParams<
     syncSort?: boolean;
     syncSingleSelection?: boolean;
     syncMultiSelection?: boolean;
+    parseId?: ParseId;
   };
   const mappers = [
     ...(config?.syncSort !== false

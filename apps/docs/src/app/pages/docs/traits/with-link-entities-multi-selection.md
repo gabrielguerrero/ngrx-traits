@@ -38,8 +38,8 @@ export class GenreMultiSelectComponent {
 
   // writes from the parent select the entities in the store,
   // selecting in the store updates the parent
-  value = model<(string | number)[]>([]);
-  valueField = form(this.store.linkIdsSelected(this.value));
+  value = model<Genre['id'][]>([]);
+  valueField = form(this.store.linkIdsSelected({ syncWith: this.value }));
 }
 ```
 
@@ -66,12 +66,14 @@ withLinkEntitiesMultiSelection({ entity, collection? })
 
 ## Methods
 
+`Id` is the id type of the `withEntitiesMultiSelection` before it: the return type of its config's `selectId` (`string | number` with the ngrx `entityConfig`), or else the entity's `id` prop type.
+
 ```typescript
-// link[Collection]IdsSelected(options?) => WritableSignal<(string | number)[]>
+// link[Collection]IdsSelected(options?) => WritableSignal<Id[]>
 {
-  linkIdsSelected: (options?) => WritableSignal<(string | number)[]>;
+  linkIdsSelected: (options?) => WritableSignal<Id[]>;
   // or with collection 'product':
-  linkProductIdsSelected: (options?) => WritableSignal<(string | number)[]>;
+  linkProductIdsSelected: (options?) => WritableSignal<Id[]>;
 }
 ```
 

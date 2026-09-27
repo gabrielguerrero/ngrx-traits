@@ -2,7 +2,11 @@ import { computed, Signal } from '@angular/core';
 
 import { capitalize } from '../util';
 import { getWithCallStatusKeys } from '../with-call-status/with-call-status.util';
-import { QueryMapper } from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
+import {
+  ParseId,
+  parseQueryId,
+  QueryMapper,
+} from '../with-sync-to-route-query-params/with-sync-to-route-query-params.util';
 import {
   EntitiesSingleSelectionMethods,
   EntitiesSingleSelectionState,
@@ -32,6 +36,7 @@ export function getEntitiesSingleSelectionKeys(config?: {
 
 export function getQueryMapperForSingleSelection(config?: {
   collection?: string;
+  parseId?: ParseId;
 }): QueryMapper<{
   selectedId: string | number | undefined;
 }> {
@@ -42,16 +47,20 @@ export function getQueryMapperForSingleSelection(config?: {
   });
   return {
     queryParamsToState: (query, store) => {
-      const selectedId = query.selectedId;
-      if (selectedId) {
-        const selectEntity = store[
-          selectEntityKey
-        ] as EntitiesSingleSelectionMethods['selectEntity'];
+      if (!query.selectedId) return;
+      // query params are always strings, parsed back into an entity id
+      const selectedId = parseQueryId(
+        String(query.selectedId),
+        config?.parseId,
+      );
+      if (selectedId === undefined) return;
+      const selectEntity = store[
+        selectEntityKey
+      ] as EntitiesSingleSelectionMethods['selectEntity'];
 
-        selectEntity({
-          id: selectedId,
-        });
-      }
+      selectEntity({
+        id: selectedId,
+      });
     },
     stateToQueryParams: (store) => {
       const selectedId = store[selectedIdKey] as Signal<

@@ -10,6 +10,7 @@ import { of, Subject } from 'rxjs';
 
 import {
   getQueryMapperForState,
+  parseQueryId,
   withSyncToRouteQueryParams,
 } from '@ngrx-traits/signals';
 
@@ -943,5 +944,28 @@ describe('getQueryMapperForState with array props', () => {
       }),
     );
     expect(true).toBe(true);
+  });
+});
+
+describe('parseQueryId', () => {
+  it('keeps the id as a string by default', () => {
+    expect(parseQueryId('2')).toBe('2');
+    expect(parseQueryId('2', 'string')).toBe('2');
+  });
+
+  it('parses finite numbers, ignoring anything else', () => {
+    expect(parseQueryId('2', 'number')).toBe(2);
+    expect(parseQueryId('0', 'number')).toBe(0);
+    expect(parseQueryId('-1', 'number')).toBe(-1);
+    expect(parseQueryId(' 3 ', 'number')).toBe(3);
+    expect(parseQueryId(' ', 'number')).toBeUndefined();
+    expect(parseQueryId('', 'number')).toBeUndefined();
+    expect(parseQueryId('abc', 'number')).toBeUndefined();
+    expect(parseQueryId('Infinity', 'number')).toBeUndefined();
+  });
+
+  it('uses a parse function', () => {
+    expect(parseQueryId('a-2', (id) => Number(id.slice(2)))).toBe(2);
+    expect(parseQueryId('x', () => undefined)).toBeUndefined();
   });
 });

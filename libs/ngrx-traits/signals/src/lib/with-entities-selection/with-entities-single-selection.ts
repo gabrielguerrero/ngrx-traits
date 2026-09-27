@@ -9,7 +9,7 @@ import {
   withState,
   WritableStateSource,
 } from '@ngrx/signals';
-import { EntityMap } from '@ngrx/signals/entities';
+import { EntityId, EntityMap, SelectEntityId } from '@ngrx/signals/entities';
 import { rxMethod } from '@ngrx/signals/rxjs-interop';
 import { pipe, tap } from 'rxjs';
 
@@ -28,6 +28,7 @@ import {
   getFeatureConfig,
   StoreSource,
 } from '../with-feature-factory/with-feature-factory.model';
+import { EntitySelectionId } from './with-entities-selection.model';
 import {
   EntitiesSingleSelectionComputed,
   EntitiesSingleSelectionMethods,
@@ -37,6 +38,22 @@ import {
   NamedEntitiesSingleSelectionState,
 } from './with-entities-single-selection.model';
 import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection.util';
+
+type EntitiesSingleSelectionFeature<
+  Entity,
+  Collection extends string,
+  Id extends EntityId,
+> = Collection extends ''
+  ? {
+      state: EntitiesSingleSelectionState<Id>;
+      props: EntitiesSingleSelectionComputed<Entity>;
+      methods: EntitiesSingleSelectionMethods<Id>;
+    }
+  : {
+      state: NamedEntitiesSingleSelectionState<Collection, Id>;
+      props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
+      methods: NamedEntitiesSingleSelectionMethods<Collection, Id>;
+    };
 
 /**
  * Generates state, computed and methods for single selection of entities.
@@ -63,78 +80,77 @@ import { getEntitiesSingleSelectionKeys } from './with-entities-single-selection
  *  );
  *
  *  // generates the following signals
- *  store.productIdSelected // string | number | undefined
+ *  // ids are typed from the entity's `id` prop, or string | number when the
+ *  // config has a selectId
+ *  store.productIdSelected // Product['id'] | undefined
  *  // generates the following computed signals
  *  store.productEntitySelected // Entity | undefined
  *  // generates the following methods
- *  store.selectProductEntity // (config: { id: string | number }) => void
- *  store.deselectProductEntity // (config: { id: string | number }) => void
- *  store.toggleProductEntity // (config: { id: string | number }) => void
+ *  store.selectProductEntity // (config: { id: Product['id'] }) => void
+ *  store.deselectProductEntity // () => void
+ *  store.toggleSelectProductEntity // (config: { id: Product['id'] }) => void
  */
 
 export function withEntitiesSingleSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
   Collection extends string = '',
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
 >(
   configFactory: FeatureConfigFactory<
     Input,
     {
       entity: Entity;
       collection?: Collection;
+      // not used at runtime, only for the id type (string | number with it).
+      // The NoInfer member types an inline arrow, SelectId records its presence
+      selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
-      defaultSelectedId?: string | number;
+      defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
     }
   >,
 ): SignalStoreFeature<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesSingleSelection'>,
-  Collection extends ''
-    ? {
-        state: EntitiesSingleSelectionState;
-        props: EntitiesSingleSelectionComputed<Entity>;
-        methods: EntitiesSingleSelectionMethods;
-      }
-    : {
-        state: NamedEntitiesSingleSelectionState<Collection>;
-        props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
-        methods: NamedEntitiesSingleSelectionMethods<Collection>;
-      }
+  EntitiesSingleSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
 >;
 export function withEntitiesSingleSelection<
   Input extends SignalStoreFeatureResult,
   Entity,
   Collection extends string = '',
+  SelectId extends SelectEntityId<NoInfer<Entity>> | undefined = undefined,
 >(
   entityConfig: {
     entity: Entity;
     collection?: Collection;
+    // not used at runtime, only for the id type (string | number with it).
+    // The NoInfer member types an inline arrow, SelectId records its presence
+    selectId?: NoInfer<SelectEntityId<Entity>> | SelectId;
   },
   options?: FeatureConfigFactory<
     Input,
     {
       clearOnFilter?: boolean;
       clearOnRemoteSort?: boolean;
-      defaultSelectedId?: string | number;
+      defaultSelectedId?: NoInfer<EntitySelectionId<Entity, SelectId>>;
       entity?: never;
       collection?: never;
+      selectId?: never;
     }
   >,
 ): SignalStoreFeature<
   Input &
     RequireEntities<Input, Entity, Collection, 'withEntitiesSingleSelection'>,
-  Collection extends ''
-    ? {
-        state: EntitiesSingleSelectionState;
-        props: EntitiesSingleSelectionComputed<Entity>;
-        methods: EntitiesSingleSelectionMethods;
-      }
-    : {
-        state: NamedEntitiesSingleSelectionState<Collection>;
-        props: NamedEntitiesSingleSelectionComputed<Entity, Collection>;
-        methods: NamedEntitiesSingleSelectionMethods<Collection>;
-      }
+  EntitiesSingleSelectionFeature<
+    Entity,
+    Collection,
+    EntitySelectionId<Entity, SelectId>
+  >
 >;
 export function withEntitiesSingleSelection<
   Input extends SignalStoreFeatureResult,
@@ -189,7 +205,7 @@ export function withEntitiesSingleSelection<
         return {
           [selectedEntityKey]: computed(() => {
             const id = selectedId();
-            return id ? entityMap()[id] : undefined;
+            return id != null ? entityMap()[id] : undefined;
           }),
         };
       }),
