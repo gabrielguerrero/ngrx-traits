@@ -128,7 +128,7 @@ This trait receives an object to allow specific configurations:
 | prop         | The name of the property for which this represents the call status.                            | string                          |
 | initialValue | The initial value of the call status.                                                          | `init` \| `loading` \| `loaded` |
 | collection   | The name of the collection for which this represents the call status is an alias to prop param | string                          |
-| errorType    | The type of the error                                                                          | `T`                             |
+| errorType    | The type of the error, withEntitiesLoadingCall then needs a `mapError` that returns it          | `T`                             |
 
 ## State
 

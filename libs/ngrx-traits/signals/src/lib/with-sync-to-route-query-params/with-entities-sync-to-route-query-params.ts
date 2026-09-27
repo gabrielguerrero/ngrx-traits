@@ -10,6 +10,9 @@ import {
 import { concatMap, first } from 'rxjs';
 
 import {
+  LiteralCollection,
+  NamedEntitiesCallStatusRequirement,
+  NamedEntitiesRequirement,
   RequireEntities,
   RequireEntitiesCallStatus,
 } from '../feature-requirements.model';
@@ -158,7 +161,11 @@ export function withEntitiesSyncToRouteQueryParams<
   const Collection extends string = '',
 >(config: {
   entity: Entity;
-  collection?: Collection;
+  // a generic collection skips this overload, so a { entity, collection }
+  // config without options resolves to the two args overloads (issue #92),
+  // it can not be declared after them like in other features, the inline
+  // parseId and onQueryParamsLoaded would lose their contextual types
+  collection?: LiteralCollection<Collection>;
   filterMapper?: FilterQueryMapper<Filter>;
   prefix?: string | false;
   onQueryParamsLoaded?: (store: StoreSource<Input>) => void;
@@ -192,15 +199,20 @@ export function withEntitiesSyncToRouteQueryParams<
     };
   }
 >;
+// the two args version is split into literal collection, generic collection
+// and no collection overloads instead of using a Collection extends ''
+// conditional, typescript can not resolve that conditional when Collection is
+// a generic param, which breaks custom generic store features (issue #92), the
+// literal overload keeps the readable missing feature error
 export function withEntitiesSyncToRouteQueryParams<
   Input extends SignalStoreFeatureResult,
   Entity,
   Filter,
-  const Collection extends string = '',
+  const Collection extends string,
 >(
   entityConfig: {
     entity: Entity;
-    collection?: Collection;
+    collection: LiteralCollection<Collection>;
   },
   options?: {
     filterMapper?: FilterQueryMapper<Filter>;
@@ -231,6 +243,81 @@ export function withEntitiesSyncToRouteQueryParams<
       Collection,
       'withEntitiesSyncToRouteQueryParams'
     >,
+  {
+    state: {};
+    props: {};
+    methods: {
+      loadFromQueryParams: () => void;
+    };
+  }
+>;
+export function withEntitiesSyncToRouteQueryParams<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter,
+  const Collection extends string,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection: Collection;
+  },
+  options?: {
+    filterMapper?: FilterQueryMapper<Filter>;
+    prefix?: string | false;
+    onQueryParamsLoaded?: (store: StoreSource<Input>) => void;
+    defaultDebounce?: number;
+    restoreOnInit?: boolean;
+    skipLoadingCall?: boolean;
+    syncFilter?: boolean;
+    syncPagination?: boolean;
+    syncSort?: boolean;
+    syncSingleSelection?: boolean;
+    syncMultiSelection?: boolean;
+    parseId?: ParseId;
+    entity?: never;
+    collection?: never;
+  },
+): SignalStoreFeature<
+  Input &
+    NamedEntitiesRequirement<Entity, Collection> &
+    NamedEntitiesCallStatusRequirement<Collection>,
+  {
+    state: {};
+    props: {};
+    methods: {
+      loadFromQueryParams: () => void;
+    };
+  }
+>;
+export function withEntitiesSyncToRouteQueryParams<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Filter,
+>(
+  entityConfig: {
+    entity: Entity;
+    collection?: never;
+  },
+  options?: {
+    filterMapper?: FilterQueryMapper<Filter>;
+    prefix?: string | false;
+    onQueryParamsLoaded?: (store: StoreSource<Input>) => void;
+    defaultDebounce?: number;
+    restoreOnInit?: boolean;
+    skipLoadingCall?: boolean;
+    syncFilter?: boolean;
+    syncPagination?: boolean;
+    syncSort?: boolean;
+    syncSingleSelection?: boolean;
+    syncMultiSelection?: boolean;
+    parseId?: ParseId;
+    entity?: never;
+    collection?: never;
+  },
+): SignalStoreFeature<
+  Input &
+    RequireEntities<Input, Entity, '', 'withEntitiesSyncToRouteQueryParams'> &
+    RequireEntitiesCallStatus<Input, '', 'withEntitiesSyncToRouteQueryParams'>,
   {
     state: {};
     props: {};

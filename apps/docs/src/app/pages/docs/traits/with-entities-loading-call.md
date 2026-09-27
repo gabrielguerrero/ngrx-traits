@@ -269,7 +269,7 @@ This trait receives and object to allow specific configurations:
 | storeResult   | Whether to automatically store the fetched entities (default: `true`). When `false`, entities are not stored but `setLoaded` and `onSuccess` are still called, useful when you want to handle storing in `onSuccess` yourself | `boolean`                                                                                                                                             |
 | mapPipe       | Rxjs pipe to use for each call. Default value: `switchMap`                                                                                  | `switchMap` \| `exhaustMap` \| `concatMap`                                                                                                            |
 | onSuccess     | Callback executed after call emits value                                                                                                    | `()=> void \| (result, param: ParamType)=> void`                                                                                                      |
-| mapError      | Callback to transform and give type to error                                                                                                | `(error)=> ErrorType`                                                                                                                                 |
+| mapError      | Callback to transform and give type to error, required when withCallStatus has an `errorType`, it must return that type                     | `(error)=> ErrorType`                                                                                                                                 |
 
 ## State
 

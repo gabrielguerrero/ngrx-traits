@@ -1,6 +1,9 @@
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
-import { RequireEntitiesFilter } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  RequireEntitiesFilter,
+} from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import { getWithEntitiesFilterKeys } from './with-entities-filter.util';
 import {
@@ -15,6 +18,19 @@ type ExtractFilter<State, Collection extends string> = Collection extends ''
   : State extends { [K in `${Collection}EntitiesFilter`]: infer F }
     ? F
     : Record<string, unknown>;
+
+type NamedLinkEntitiesFilterFeature<
+  Input extends SignalStoreFeatureResult,
+  Collection extends string,
+> = {
+  state: {};
+  props: {};
+  methods: {
+    [K in `link${Capitalize<Collection>}EntitiesFilter`]: LinkMethod<
+      ExtractFilter<Input['state'], Collection>
+    >;
+  };
+};
 
 /**
  * @experimental
@@ -59,13 +75,18 @@ type ExtractFilter<State, Collection extends string> = Collection extends ''
  * // in a component:
  * // filterForm = form(this.store.linkEntitiesFilter());
  */
+// split into literal collection, generic collection and no collection
+// overloads instead of using a Collection extends '' conditional, typescript
+// can not resolve that conditional when Collection is a generic param, which
+// breaks custom generic store features (issue #92), the literal and no
+// collection overloads keep the readable missing feature error
 export function withLinkEntitiesFilter<
   Input extends SignalStoreFeatureResult,
   Entity,
-  Collection extends string = '',
->(config?: {
+  Collection extends string,
+>(config: {
   entity?: Entity;
-  collection?: Collection;
+  collection: LiteralCollection<Collection>;
   forceLoad?: boolean;
 }): SignalStoreFeature<
   Input &
@@ -73,35 +94,67 @@ export function withLinkEntitiesFilter<
       Input,
       Collection,
       'withLinkEntitiesFilter',
-      Collection extends ''
-        ? {
-            state: EntitiesFilterState<
-              ExtractFilter<Input['state'], Collection>
-            >;
-            props: {};
-            methods: {};
-          }
-        : {
-            state: NamedEntitiesFilterState<
-              Collection,
-              ExtractFilter<Input['state'], Collection>
-            >;
-            props: {};
-            methods: {};
-          }
+      {
+        state: NamedEntitiesFilterState<
+          Collection,
+          ExtractFilter<Input['state'], Collection>
+        >;
+        props: {};
+        methods: {};
+      }
+    >,
+  NamedLinkEntitiesFilterFeature<Input, Collection>
+>;
+export function withLinkEntitiesFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(config: {
+  entity?: Entity;
+  collection: Collection;
+  forceLoad?: boolean;
+}): SignalStoreFeature<
+  // the filter type can not be read from a generic store, so any filter is
+  // accepted here, the link method still gets it once Collection is known
+  Input & {
+    state: NamedEntitiesFilterState<Collection, any>;
+    props: {};
+    methods: {};
+  },
+  NamedLinkEntitiesFilterFeature<Input, Collection>
+>;
+export function withLinkEntitiesFilter<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(config?: {
+  entity?: Entity;
+  collection?: never;
+  forceLoad?: boolean;
+}): SignalStoreFeature<
+  Input &
+    RequireEntitiesFilter<
+      Input,
+      '',
+      'withLinkEntitiesFilter',
+      {
+        state: EntitiesFilterState<ExtractFilter<Input['state'], ''>>;
+        props: {};
+        methods: {};
+      }
     >,
   {
     state: {};
     props: {};
     methods: {
-      [P in Collection extends ''
-        ? 'entitiesFilter'
-        : `${Collection}EntitiesFilter` as `link${Capitalize<
-        string & P
-      >}`]: LinkMethod<ExtractFilter<Input['state'], Collection>>;
+      linkEntitiesFilter: LinkMethod<ExtractFilter<Input['state'], ''>>;
     };
   }
-> {
+>;
+export function withLinkEntitiesFilter(config?: {
+  entity?: unknown;
+  collection?: string;
+  forceLoad?: boolean;
+}): SignalStoreFeature<any, any> {
   const { filterKey, filterEntitiesKey } = getWithEntitiesFilterKeys(config);
   return withLink(filterKey, {
     set: (value: any, store: any) => {

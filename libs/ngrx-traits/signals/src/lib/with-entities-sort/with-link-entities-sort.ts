@@ -1,6 +1,9 @@
 import { SignalStoreFeature, SignalStoreFeatureResult } from '@ngrx/signals';
 
-import { RequireEntitiesSort } from '../feature-requirements.model';
+import {
+  LiteralCollection,
+  RequireEntitiesSort,
+} from '../feature-requirements.model';
 import { LinkMethod, withLink } from '../with-link/with-link';
 import {
   EntitiesSortState,
@@ -8,6 +11,20 @@ import {
   Sort,
 } from './with-entities-local-sort.model';
 import { getWithEntitiesSortKeys } from './with-entities-sort.util';
+
+type NamedLinkEntitiesSortFeature<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+> = {
+  state: {};
+  props: {};
+  methods: {
+    [K in `link${Capitalize<Collection>}EntitiesSort`]: LinkMethod<
+      Sort<Entity>
+    >;
+  };
+};
 
 /**
  * @experimental
@@ -39,39 +56,73 @@ import { getWithEntitiesSortKeys } from './with-entities-sort.util';
  * // sort = model<Sort<Product>>({ field: 'name', direction: 'asc' });
  * // linked = this.store.linkEntitiesSort({ syncWith: this.sort });
  */
+// split into literal collection, generic collection and no collection
+// overloads instead of using a Collection extends '' conditional, typescript
+// can not resolve that conditional when Collection is a generic param, which
+// breaks custom generic store features (issue #92), the literal and no
+// collection overloads keep the readable missing feature error
 export function withLinkEntitiesSort<
   Input extends SignalStoreFeatureResult,
   Entity,
-  Collection extends string = '',
->(config?: {
+  Collection extends string,
+>(config: {
   entity?: Entity;
-  collection?: Collection;
+  collection: LiteralCollection<Collection>;
 }): SignalStoreFeature<
   Input &
     RequireEntitiesSort<
       Input,
       Collection,
       'withLinkEntitiesSort',
-      Collection extends ''
-        ? { state: EntitiesSortState<Entity>; props: {}; methods: {} }
-        : {
-            state: NamedEntitiesSortState<Entity, Collection>;
-            props: {};
-            methods: {};
-          }
+      {
+        state: NamedEntitiesSortState<Entity, Collection>;
+        props: {};
+        methods: {};
+      }
+    >,
+  NamedLinkEntitiesSortFeature<Input, Entity, Collection>
+>;
+export function withLinkEntitiesSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+  Collection extends string,
+>(config: {
+  entity?: Entity;
+  collection: Collection;
+}): SignalStoreFeature<
+  Input & {
+    state: NamedEntitiesSortState<Entity, Collection>;
+    props: {};
+    methods: {};
+  },
+  NamedLinkEntitiesSortFeature<Input, Entity, Collection>
+>;
+export function withLinkEntitiesSort<
+  Input extends SignalStoreFeatureResult,
+  Entity,
+>(config?: {
+  entity?: Entity;
+  collection?: never;
+}): SignalStoreFeature<
+  Input &
+    RequireEntitiesSort<
+      Input,
+      '',
+      'withLinkEntitiesSort',
+      { state: EntitiesSortState<Entity>; props: {}; methods: {} }
     >,
   {
     state: {};
     props: {};
     methods: {
-      [P in Collection extends ''
-        ? 'entitiesSort'
-        : `${Collection}EntitiesSort` as `link${Capitalize<
-        string & P
-      >}`]: LinkMethod<Sort<Entity>>;
+      linkEntitiesSort: LinkMethod<Sort<Entity>>;
     };
   }
-> {
+>;
+export function withLinkEntitiesSort(config?: {
+  entity?: unknown;
+  collection?: string;
+}): SignalStoreFeature<any, any> {
   const { sortKey, sortEntitiesKey } = getWithEntitiesSortKeys(config);
   return withLink(sortKey, {
     set: (value: Sort<any>, store: any) => {
