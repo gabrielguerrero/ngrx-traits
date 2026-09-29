@@ -249,7 +249,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       ],
     });
     const router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate');
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
     return { store: TestBed.inject(Store) as InstanceType<S>, router };
   }
 
@@ -281,11 +281,12 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         // the initial push replaces the history entry instead of adding one
         replaceUrl: true,
       });
@@ -324,11 +325,12 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           filter: JSON.stringify({ search: 'foo3', foo: 'bar4' }),
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         // the initial push replaces the history entry instead of adding one
         replaceUrl: true,
       });
@@ -606,12 +608,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           search: 'foo3',
           'range.from': '2026-05-06',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         replaceUrl: true,
       });
     }));
@@ -634,13 +637,14 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           // one param per field instead of a single json blob
           search: 'foo3',
           foo: 'bar4',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         replaceUrl: true,
       });
     }));
@@ -693,12 +697,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           search: 'foo3',
           foo: 'bar4',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         // the initial push replaces the history entry instead of adding one
         replaceUrl: true,
       });
@@ -735,12 +740,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           sortBy: 'name',
           sortDirection: 'asc',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         // the initial push replaces the history entry instead of adding one
         replaceUrl: true,
       });
@@ -777,12 +783,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           sortBy: 'name',
           sortDirection: 'asc',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
         // the initial push replaces the history entry instead of adding one
         replaceUrl: true,
       });
@@ -822,11 +829,12 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       store.selectEntity({ id: '3' });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           selectedId: '3',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
       });
     }));
   });
@@ -909,11 +917,12 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       store.selectEntities({ ids: ['3', '5'] });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           selectedIds: '3,5',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
       });
     }));
   });
@@ -1091,12 +1100,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       store.loadEntitiesPage({ pageIndex: 2 });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
           pageSize: '10',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
       });
     }));
 
@@ -1133,12 +1143,13 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       store.loadEntitiesPage({ pageIndex: 2 });
       tick(400);
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
           pageSize: '10',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
       });
     }));
   });
@@ -1239,7 +1250,6 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
         pageSize: '10',
@@ -1249,6 +1259,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '35',
       }),
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
     });
   }));
 
@@ -1283,7 +1295,6 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'p-page': '3',
         'p-pageSize': '10',
@@ -1293,6 +1304,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'p-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
     });
   }));
 
@@ -1334,7 +1347,6 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'product-page': '3',
         'product-pageSize': '10',
@@ -1344,6 +1356,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'product-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
     });
   }));
 
@@ -1378,7 +1392,6 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         page: '3',
         pageSize: '10',
@@ -1388,6 +1401,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         selectedId: '35',
       }),
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
     });
   }));
 
@@ -1426,7 +1441,6 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
       tick(400);
       // Assert
       expect(router.navigate).toHaveBeenCalledWith([], {
-        relativeTo: expect.anything(),
         queryParams: expect.objectContaining({
           page: '3',
           pageSize: '10',
@@ -1436,6 +1450,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           selectedId: '35',
         }),
         queryParamsHandling: 'merge',
+        preserveFragment: true,
+        scroll: 'manual',
       });
     }));
   });
@@ -1535,7 +1551,6 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
     tick(400);
     // Assert
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'product-page': '3',
         'product-pageSize': '10',
@@ -1545,10 +1560,11 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'product-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
     });
 
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: expect.objectContaining({
         'order-page': '3',
         'order-pageSize': '10',
@@ -1558,6 +1574,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
         'order-selectedId': '35',
       }),
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
     });
   }));
 
@@ -1697,6 +1715,7 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           },
         ],
       });
+      vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
       TestBed.inject(Store);
       tick();
       tick(500);
@@ -1791,6 +1810,8 @@ describe('withEntitiesSyncToRouteQueryParams', () => {
           fetchEntitiesSpy,
           `fetchEntities should not be called for instance ${instance}`,
         ).not.toHaveBeenCalled();
+        // the next instance replaces this one, as when navigating back to a page
+        injector.destroy();
       }
     }));
   });

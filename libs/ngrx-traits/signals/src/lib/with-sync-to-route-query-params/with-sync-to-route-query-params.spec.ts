@@ -1,12 +1,24 @@
+import { ViewportScroller } from '@angular/common';
 import {
+  ApplicationRef,
+  Component,
   computed,
   createEnvironmentInjector,
   EnvironmentInjector,
+  inject,
 } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  ActivatedRouteSnapshot,
+  provideRouter,
+  Router,
+  withInMemoryScrolling,
+} from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { patchState, signalStore, withState } from '@ngrx/signals';
-import { of, Subject } from 'rxjs';
+import { map, of, Subject, timer } from 'rxjs';
+import { MockInstance } from 'vitest';
 
 import {
   getQueryMapperForState,
@@ -74,7 +86,7 @@ describe('withSyncToRouteQueryParams', () => {
     const { store } = init();
 
     const router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate');
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
     patchState(store, {
       test: 'test3',
@@ -84,9 +96,10 @@ describe('withSyncToRouteQueryParams', () => {
     TestBed.tick();
     tick(400);
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: { test: 'test3', foo: 'foo3', bar: 'false' },
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
       // the initial push replaces the history entry instead of adding one
       replaceUrl: true,
     });
@@ -275,70 +288,11 @@ describe('withSyncToRouteQueryParams', () => {
     expect(store2.bar()).toBe(true);
   }));
 
-  it('should ignore query params emitted after pushing params with undefined values', fakeAsync(() => {
-    const queryParams$ = new Subject<Record<string, string | undefined>>();
-    const queryParamsToStateSpy = vi.fn(
-      (query: Record<string, string | undefined>, store: any) => {
-        patchState(store, { test: query['test'], foo: query['foo'] });
-      },
-    );
-    const Store = signalStore(
-      { protectedState: false },
-      withState({
-        test: 'test' as string | undefined,
-        foo: 'foo',
-      }),
-      withSyncToRouteQueryParams({
-        mappers: [
-          {
-            queryParamsToState: queryParamsToStateSpy,
-            stateToQueryParams: (store: any) =>
-              computed(() => ({
-                test: store.test(),
-                foo: store.foo(),
-              })),
-          },
-        ],
-      }),
-    );
-    TestBed.configureTestingModule({
-      providers: [
-        Store,
-        provideRouter([]),
-        {
-          provide: ActivatedRoute,
-          useFactory: () => ({ queryParams: queryParams$ }),
-        },
-      ],
-    });
-    const router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate').mockResolvedValue(true);
-    const store = TestBed.inject(Store);
-
-    // undefined params get dropped from the url, so they must not be stored
-    // as part of the last pushed params
-    patchState(store, { test: undefined });
-    TestBed.tick();
-    tick(400);
-    expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
-      queryParams: { test: undefined, foo: 'foo' },
-      queryParamsHandling: 'merge',
-      // the initial push replaces the history entry instead of adding one
-      replaceUrl: true,
-    });
-
-    // the url now only has foo, which is what we just pushed, so the store
-    // should not be patched again
-    queryParams$.next({ foo: 'foo' });
-    expect(queryParamsToStateSpy).not.toHaveBeenCalled();
-  }));
-
   it('store should be synced with url query params with custom debounce', fakeAsync(() => {
     const { store } = init({ debounce: 1000 });
 
     const router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate');
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
     patchState(store, {
       test: 'test3',
@@ -348,9 +302,10 @@ describe('withSyncToRouteQueryParams', () => {
     TestBed.tick();
     tick(1100);
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: { test: 'test3', foo: 'foo3', bar: 'false' },
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
       // the initial push replaces the history entry instead of adding one
       replaceUrl: true,
     });
@@ -390,7 +345,6 @@ describe('withSyncToRouteQueryParams', () => {
           provide: ActivatedRoute,
           useFactory: () => ({
             queryParams: of({}),
-            snapshot: { queryParams: {} },
           }),
         },
       ],
@@ -419,6 +373,776 @@ describe('withSyncToRouteQueryParams', () => {
 
     tick(1000);
   }));
+});
+
+describe('withSyncToRouteQueryParams with several stores on the same page', () => {
+  @Component({ template: '' })
+  class PageComponent {}
+
+  type FormStoreOptions = {
+    debounce?: number;
+    // leaves the param out of the url while the value is the default one
+    omitDefault?: boolean;
+  };
+
+  function createFormStore(
+    param: string,
+    { debounce, omitDefault }: FormStoreOptions = {},
+  ) {
+    return signalStore(
+      { protectedState: false },
+      withState({ value: 'v0' }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: (query, store) => {
+              if (query[param] !== undefined) {
+                patchState(store, { value: query[param] });
+              }
+            },
+            stateToQueryParams: (store) =>
+              computed(() =>
+                omitDefault && store.value() === 'v0'
+                  ? {}
+                  : { [param]: store.value() },
+              ),
+          },
+        ],
+        defaultDebounce: debounce,
+      }),
+    );
+  }
+
+  // the router navigates with native promises, which fakeAsync cannot flush,
+  // so these tests use vitest fake timers and await each advance
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  async function advance(ms: number) {
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(ms);
+  }
+
+  async function init({
+    form1Options,
+    form2Options,
+    initialUrl = '/',
+    settle = true,
+  }: {
+    form1Options?: FormStoreOptions;
+    form2Options?: FormStoreOptions;
+    initialUrl?: string;
+    // wait for the initial pushes of both stores to complete
+    settle?: boolean;
+  } = {}) {
+    const Form1Store = createFormStore('form1', form1Options);
+    const Form2Store = createFormStore('form2', form2Options);
+    TestBed.configureTestingModule({
+      providers: [
+        Form1Store,
+        Form2Store,
+        provideRouter([
+          {
+            path: '',
+            component: PageComponent,
+            // a slow resolver keeps each navigation in flight for a while, so
+            // a push from one store can start while the other's is running
+            runGuardsAndResolvers: 'always',
+            resolve: { slow: () => timer(50).pipe(map(() => true)) },
+            canActivate: [
+              (route: ActivatedRouteSnapshot) => {
+                const router = inject(Router);
+                // corrects an invalid value in place
+                if (route.queryParams['form1'] === 'bad') {
+                  return router.createUrlTree(['/'], {
+                    queryParams: { ...route.queryParams, form1: 'fixed' },
+                  });
+                }
+                // sends the user to another page, after a while so pushes
+                // can land meanwhile
+                if (route.queryParams['form1'] === 'logout') {
+                  return timer(100).pipe(
+                    map(() => router.createUrlTree(['/other'])),
+                  );
+                }
+                // rejects the value by sending the user back to the url they
+                // are on, after a while so a loop of pushes would show up as
+                // many navigations instead of hanging the test
+                if (route.queryParams['form1'] === 'rejected') {
+                  const current = router.parseUrl(router.url);
+                  return timer(10).pipe(map(() => current));
+                }
+                return true;
+              },
+            ],
+          },
+          { path: 'other', component: PageComponent },
+          {
+            path: 'slow',
+            component: PageComponent,
+            resolve: { slow: () => timer(200).pipe(map(() => true)) },
+          },
+          {
+            path: 'guarded',
+            component: PageComponent,
+            canActivate: [() => false],
+          },
+        ]),
+      ],
+    });
+    const router = TestBed.inject(Router);
+    const navigated = router.navigateByUrl(initialUrl);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(await navigated).toBe(true);
+    const form1 = TestBed.inject(Form1Store);
+    const form2 = TestBed.inject(Form2Store);
+    if (settle) await advance(1000);
+    return { router, form1, form2 };
+  }
+
+  it('should keep both stores changes when they push at the same time', async () => {
+    const { router, form1, form2 } = await init();
+
+    patchState(form1, { value: 'v1' });
+    patchState(form2, { value: 'v1' });
+    await advance(1000);
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v1',
+    });
+    expect(form1.value()).toBe('v1');
+    expect(form2.value()).toBe('v1');
+  });
+
+  it('should not reset a pending change when another store pushes first', async () => {
+    const { router, form1, form2 } = await init({
+      form1Options: { debounce: 300 },
+      form2Options: { debounce: 50 },
+    });
+
+    patchState(form1, { value: 'v1' });
+    patchState(form2, { value: 'v1' });
+    // form2 pushes and its navigation completes while form1 is still debouncing
+    await advance(150);
+    expect(form1.value()).toBe('v1');
+
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v1',
+    });
+    expect(form1.value()).toBe('v1');
+    expect(form2.value()).toBe('v1');
+  });
+
+  it('should drop a push cancelled by another navigation', async () => {
+    const { router, form1, form2 } = await init();
+
+    patchState(form1, { value: 'v1' });
+    // form1 push starts and waits on the slow resolver
+    await advance(310);
+    // the user navigates away before it completes, cancelling it
+    const navigated = router.navigateByUrl('/other');
+    await advance(0);
+    expect(await navigated).toBe(true);
+
+    // a later push must not bring back the cancelled form1 param
+    patchState(form2, { value: 'v1' });
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({ form2: 'v1' });
+  });
+
+  it('should restore a param the store left out of its last push', async () => {
+    const { router, form1 } = await init({
+      form1Options: { omitDefault: true },
+    });
+    expect(router.parseUrl(router.url).queryParams).toEqual({ form2: 'v0' });
+
+    const navigated = router.navigateByUrl('/?form1=foo&form2=v0');
+    await advance(100);
+    expect(await navigated).toBe(true);
+    expect(form1.value()).toBe('foo');
+  });
+
+  it('should keep the url fragment', async () => {
+    const { router, form1 } = await init({ initialUrl: '/#frag' });
+
+    patchState(form1, { value: 'v1' });
+    await advance(1000);
+
+    expect(router.url).toBe('/?form1=v1&form2=v0#frag');
+  });
+
+  // navigates to the url with router scrolling enabled, runs the test, then
+  // removes the bootstrapped root
+  async function withScrolling(
+    initialUrl: string,
+    test: (setup: {
+      router: Router;
+      form: InstanceType<ReturnType<typeof createFormStore>>;
+      scrollToAnchor: MockInstance<ViewportScroller['scrollToAnchor']>;
+      scrollToPosition: MockInstance<ViewportScroller['scrollToPosition']>;
+    }) => Promise<void>,
+  ) {
+    const FormStore = createFormStore('form1');
+    @Component({ selector: 'scroll-root', template: '' })
+    class RootComponent {}
+    TestBed.configureTestingModule({
+      providers: [
+        FormStore,
+        provideRouter(
+          [{ path: '', component: PageComponent }],
+          withInMemoryScrolling({
+            anchorScrolling: 'enabled',
+            scrollPositionRestoration: 'enabled',
+          }),
+        ),
+      ],
+    });
+    const viewportScroller = TestBed.inject(ViewportScroller);
+    const scrollToAnchor = vi
+      .spyOn(viewportScroller, 'scrollToAnchor')
+      .mockImplementation(() => undefined);
+    const scrollToPosition = vi
+      .spyOn(viewportScroller, 'scrollToPosition')
+      .mockImplementation(() => undefined);
+    // the router starts scrolling when the app bootstraps
+    const rootElement = document.createElement('scroll-root');
+    document.body.appendChild(rootElement);
+    try {
+      TestBed.inject(ApplicationRef).bootstrap(RootComponent);
+      const router = TestBed.inject(Router);
+      const navigated = router.navigateByUrl(initialUrl);
+      await advance(100);
+      expect(await navigated).toBe(true);
+      const form = TestBed.inject(FormStore);
+      await test({ router, form, scrollToAnchor, scrollToPosition });
+    } finally {
+      rootElement.remove();
+    }
+  }
+
+  it('should not scroll the page when it pushes', async () => {
+    await withScrolling(
+      '/#frag',
+      async ({ router, form, scrollToAnchor, scrollToPosition }) => {
+        // a navigation from elsewhere does scroll
+        expect(scrollToAnchor).toHaveBeenCalledWith('frag');
+        scrollToAnchor.mockClear();
+        scrollToPosition.mockClear();
+
+        await advance(1000);
+        patchState(form, { value: 'v1' });
+        await advance(1000);
+
+        expect(router.url).toBe('/?form1=v1#frag');
+        expect(scrollToAnchor).not.toHaveBeenCalled();
+        expect(scrollToPosition).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  it('should not scroll the page to the top when it pushes', async () => {
+    await withScrolling(
+      '/',
+      async ({ router, form, scrollToAnchor, scrollToPosition }) => {
+        // a navigation from elsewhere does scroll
+        expect(scrollToPosition).toHaveBeenCalledWith([0, 0]);
+        scrollToAnchor.mockClear();
+        scrollToPosition.mockClear();
+
+        await advance(1000);
+        patchState(form, { value: 'v1' });
+        await advance(1000);
+
+        expect(router.url).toBe('/?form1=v1');
+        expect(scrollToAnchor).not.toHaveBeenCalled();
+        expect(scrollToPosition).not.toHaveBeenCalled();
+      },
+    );
+  });
+
+  it('should keep child routes, matrix params and auxiliary outlets', async () => {
+    const FormStore = createFormStore('x');
+    TestBed.configureTestingModule({
+      providers: [
+        FormStore,
+        provideRouter([
+          {
+            path: 'p',
+            loadChildren: () => [{ path: 'c', component: PageComponent }],
+          },
+          { path: 'aux', component: PageComponent, outlet: 'side' },
+        ]),
+      ],
+    });
+    const router = TestBed.inject(Router);
+    const navigated = router.navigateByUrl('/p;m=1/c;n=2(side:aux)?y=1#frag');
+    await advance(0);
+    expect(await navigated).toBe(true);
+    const form = TestBed.inject(FormStore);
+    await advance(1000);
+
+    patchState(form, { value: 'v1' });
+    await advance(1000);
+
+    expect(router.url).toBe('/p;m=1/c;n=2(side:aux)?y=1&x=v1#frag');
+  });
+
+  it('should keep a pending change when a destroyed store params stay in the url', async () => {
+    const { router, form1, form2 } = await init({
+      form2Options: { debounce: 50 },
+    });
+    // a store on part of the page, like a tab, pushes its params and is
+    // destroyed while the page stays
+    const Form3Store = createFormStore('form3');
+    const form3Injector = createEnvironmentInjector(
+      [Form3Store],
+      TestBed.inject(EnvironmentInjector),
+    );
+    form3Injector.get(Form3Store);
+    await advance(1000);
+    form3Injector.destroy();
+
+    patchState(form1, { value: 'user' });
+    patchState(form2, { value: 'v1' });
+    // form2 pushes and its navigation completes while form1 is still debouncing
+    await advance(150);
+    expect(form1.value()).toBe('user');
+
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'user',
+      form2: 'v1',
+      form3: 'v0',
+    });
+  });
+
+  it('should keep a change made after a url change before the store first push', async () => {
+    const { router, form1, form2 } = await init({
+      initialUrl: '/?form1=u',
+      form2Options: { debounce: 20 },
+      settle: false,
+    });
+    await advance(100);
+    const navigated = router.navigateByUrl('/?form1=w&form2=v0');
+    await advance(100);
+    expect(await navigated).toBe(true);
+
+    patchState(form1, { value: 'user' });
+    patchState(form2, { value: 'v1' });
+    // form2 push completes while form1 is still debouncing its first push
+    await advance(100);
+    expect(form1.value()).toBe('user');
+  });
+
+  it('should keep a change made before the store first push', async () => {
+    const { router, form1, form2 } = await init({
+      initialUrl: '/?form1=u',
+      form2Options: { debounce: 20 },
+      settle: false,
+    });
+    expect(form1.value()).toBe('u');
+
+    patchState(form1, { value: 'user' });
+    // form2 initial push completes while form1 is still debouncing its first
+    await advance(100);
+    expect(form1.value()).toBe('user');
+
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'user',
+      form2: 'v0',
+    });
+    expect(form2.value()).toBe('v0');
+  });
+
+  it('should only replace the history entry when every merged push asked to', async () => {
+    const { router, form1, form2 } = await init({
+      form1Options: { debounce: 10 },
+      form2Options: { debounce: 0 },
+    });
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    // form2 navigates first, while it runs a user change on form1 and the
+    // initial push of a store created meanwhile wait for their turn
+    patchState(form2, { value: 'v1' });
+    patchState(form1, { value: 'v1' });
+    const Form3Store = createFormStore('form3', { debounce: 10 });
+    TestBed.runInInjectionContext(() => new Form3Store());
+    await advance(1000);
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v1',
+      form3: 'v0',
+    });
+    expect(navigateSpy).toHaveBeenCalledTimes(2);
+    const mergedExtras = navigateSpy.mock.calls[1][1];
+    expect(mergedExtras?.queryParams).toEqual({ form1: 'v1', form3: 'v0' });
+    // the user change keeps its own history entry
+    expect(mergedExtras?.replaceUrl).toBeUndefined();
+  });
+
+  it('should keep every push when pushes land while navigations run', async () => {
+    const { router, form1, form2 } = await init({
+      form1Options: { debounce: 300 },
+      form2Options: { debounce: 310 },
+    });
+    const Form3Store = createFormStore('form3', { debounce: 320 });
+    const form3 = TestBed.runInInjectionContext(() => new Form3Store());
+    await advance(1000);
+
+    patchState(form1, { value: 'v1' });
+    patchState(form2, { value: 'v1' });
+    patchState(form3, { value: 'v1' });
+    await advance(1000);
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v1',
+      form3: 'v1',
+    });
+  });
+
+  it('should not restore the store from its own push', async () => {
+    const { router, form1 } = await init();
+    const restoreSpy = vi.fn();
+    const Store = signalStore(
+      { protectedState: false },
+      withState({ test: 'test' as string | undefined, foo: 'foo' }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: restoreSpy,
+            stateToQueryParams: (store) =>
+              computed(() => ({ test: store.test(), foo: store.foo() })),
+          },
+        ],
+      }),
+    );
+    const store = TestBed.runInInjectionContext(() => new Store());
+    await advance(1000);
+    restoreSpy.mockClear();
+
+    patchState(store, { test: undefined, foo: 'foo2' });
+    patchState(form1, { value: 'v1' });
+    await advance(1000);
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v0',
+      foo: 'foo2',
+    });
+    // neither its own push nor the one of another store is restored
+    expect(restoreSpy).not.toHaveBeenCalled();
+  });
+
+  it('should restore a store created while a push navigates', async () => {
+    const { router, form1 } = await init({ initialUrl: '/?form3=foo' });
+
+    patchState(form1, { value: 'v1' });
+    // form1 push starts and waits on the slow resolver
+    await advance(310);
+    const Form3Store = createFormStore('form3');
+    const form3 = TestBed.runInInjectionContext(() => new Form3Store());
+    expect(form3.value()).toBe('foo');
+
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v0',
+      form3: 'foo',
+    });
+  });
+
+  it('should not navigate when the url already holds the pushed values', async () => {
+    const { router } = await init({
+      initialUrl: '/?page=5&active=true&ids=1&ids=2',
+    });
+    const navigateSpy = vi.spyOn(router, 'navigate');
+    const Store = signalStore(
+      { protectedState: false },
+      withState({ page: 5, active: true, ids: [1, 2], selected: null }),
+      withSyncToRouteQueryParams({
+        mappers: [
+          {
+            queryParamsToState: () => {},
+            stateToQueryParams: (store) =>
+              computed(() => ({
+                page: store.page(),
+                active: store.active(),
+                ids: store.ids(),
+                selected: store.selected(),
+              })),
+          },
+        ],
+      }),
+    );
+    TestBed.runInInjectionContext(() => new Store());
+    await advance(1000);
+
+    // the url holds everything as strings and has no null param, which is
+    // still what the store pushed
+    expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  it('should restore a key a destroyed store used to push when it is created again', async () => {
+    const { router } = await init();
+    const Form3Store = createFormStore('form3', { omitDefault: true });
+    const firstInjector = createEnvironmentInjector(
+      [Form3Store],
+      TestBed.inject(EnvironmentInjector),
+    );
+    patchState(firstInjector.get(Form3Store), { value: 'foo' });
+    await advance(1000);
+    firstInjector.destroy();
+
+    let navigated = router.navigateByUrl('/');
+    await advance(100);
+    expect(await navigated).toBe(true);
+    const secondInjector = createEnvironmentInjector(
+      [Form3Store],
+      TestBed.inject(EnvironmentInjector),
+    );
+    const form3 = secondInjector.get(Form3Store);
+    await advance(1000);
+
+    navigated = router.navigateByUrl('/?form3=bar');
+    await advance(100);
+    expect(await navigated).toBe(true);
+    expect(form3.value()).toBe('bar');
+  });
+
+  it('should restore a url change made before the store first push', async () => {
+    const { router, form1 } = await init({
+      initialUrl: '/?form1=u',
+      form2Options: { debounce: 20 },
+      settle: false,
+    });
+    expect(form1.value()).toBe('u');
+
+    // form2 initial push completes, then the url changes again before form1
+    // pushes for the first time
+    await advance(100);
+    const navigated = router.navigateByUrl('/?form1=w&form2=v0');
+    await advance(100);
+    expect(await navigated).toBe(true);
+    expect(form1.value()).toBe('w');
+  });
+
+  it('should not cancel a navigation from elsewhere with pushes waiting for their turn', async () => {
+    const { router, form1, form2 } = await init({
+      form1Options: { debounce: 0 },
+      form2Options: { debounce: 10 },
+    });
+
+    patchState(form1, { value: 'v1' });
+    patchState(form2, { value: 'v1' });
+    // form1 navigates, form2 waits for its turn, then the user navigates away
+    // cancelling form1, whose end must not flush form2 over the navigation
+    await advance(20);
+    const navigated = router.navigateByUrl('/other');
+    await advance(1000);
+    expect(await navigated).toBe(true);
+
+    expect(router.url).toBe('/other');
+  });
+
+  it('should not cancel a navigation from elsewhere when a store pushes', async () => {
+    const { router, form1 } = await init({ form1Options: { debounce: 50 } });
+
+    // the user goes to a slow page and a store pushes before it completes
+    const navigated = router.navigateByUrl('/slow');
+    patchState(form1, { value: 'v1' });
+    await advance(1000);
+
+    expect(await navigated).toBe(true);
+    expect(router.url).toBe('/slow');
+  });
+
+  it('should restore the store when a guard corrects its push', async () => {
+    const { router, form1 } = await init();
+
+    patchState(form1, { value: 'bad' });
+    await advance(1000);
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'fixed',
+      form2: 'v0',
+    });
+    expect(form1.value()).toBe('fixed');
+  });
+
+  it('should stay on the page a guard redirects a push to', async () => {
+    const { router, form1, form2 } = await init({
+      form2Options: { debounce: 350 },
+    });
+
+    patchState(form1, { value: 'logout' });
+    patchState(form2, { value: 'v1' });
+    // form1 navigates, form2 pushes while its guard runs, then the guard
+    // sends the user to another page. The redirect keeps form1 navigation
+    // running, so form2 must be dropped when the redirect starts
+    await advance(1000);
+
+    expect(router.url).toBe('/other');
+  });
+
+  it('should not push a store of the page a guard redirects away from', async () => {
+    const Form1Store = createFormStore('form1', { debounce: 0 });
+    const Form2Store = createFormStore('form2', { debounce: 150 });
+    @Component({
+      selector: 'form-page',
+      template: '',
+      providers: [Form2Store],
+    })
+    class FormPageComponent {
+      form2 = inject(Form2Store);
+    }
+    TestBed.configureTestingModule({
+      providers: [
+        Form1Store,
+        provideRouter([
+          {
+            path: 'page',
+            component: FormPageComponent,
+            runGuardsAndResolvers: 'always',
+            canActivate: [
+              (route: ActivatedRouteSnapshot) => {
+                const router = inject(Router);
+                return route.queryParams['form1'] === 'logout'
+                  ? timer(100).pipe(map(() => router.createUrlTree(['/other'])))
+                  : true;
+              },
+            ],
+          },
+          {
+            path: 'other',
+            component: PageComponent,
+            resolve: { slow: () => timer(300).pipe(map(() => true)) },
+          },
+        ]),
+      ],
+    });
+    const router = TestBed.inject(Router);
+    const form1 = TestBed.inject(Form1Store);
+    const harness = await RouterTestingHarness.create();
+    const navigated = harness.navigateByUrl('/page', FormPageComponent);
+    await advance(100);
+    const { form2 } = await navigated;
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v0',
+      form2: 'v0',
+    });
+
+    patchState(form1, { value: 'logout' });
+    patchState(form2, { value: 'v1' });
+    // form1 navigates, its guard redirects to /other, and form2 pushes while
+    // the redirect waits on the slow resolver
+    await advance(1000);
+
+    expect(router.url).toBe('/other');
+  });
+
+  it('should not loop when a guard redirects a push to the current url', async () => {
+    const { router, form1 } = await init();
+    const navigateSpy = vi.spyOn(router, 'navigate');
+
+    patchState(form1, { value: 'rejected' });
+    await advance(1000);
+
+    // the push is given up, the store keeps the value until its next change
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v0',
+      form2: 'v0',
+    });
+    expect(form1.value()).toBe('rejected');
+
+    patchState(form1, { value: 'v1' });
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v1',
+      form2: 'v0',
+    });
+  });
+
+  it('should keep syncing after a navigation to the current url cancels a push', async () => {
+    const { router, form1, form2 } = await init();
+
+    patchState(form1, { value: 'v1' });
+    // form1 push starts and waits on the slow resolver
+    await advance(310);
+    // a link to the page the user is on is skipped by the router, but still
+    // cancels the push navigation, whose push is lost
+    const navigated = router.navigateByUrl(router.url);
+    await advance(1000);
+    expect(await navigated).toBe(false);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v0',
+      form2: 'v0',
+    });
+
+    // a later push of another store still reaches the url
+    patchState(form2, { value: 'v1' });
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v0',
+      form2: 'v1',
+    });
+    expect(form1.value()).toBe('v1');
+  });
+
+  it('should restore the stores from a url change made while a push navigates', async () => {
+    const { router, form1, form2 } = await init({
+      form1Options: { debounce: 0 },
+      form2Options: { debounce: 10 },
+    });
+
+    patchState(form1, { value: 'v1' });
+    patchState(form2, { value: 'v1' });
+    // form1 navigates, form2 waits for its turn, then the url changes
+    await advance(20);
+    const navigated = router.navigateByUrl('/?form1=w1&form2=w2');
+    await advance(1000);
+    expect(await navigated).toBe(true);
+
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'w1',
+      form2: 'w2',
+    });
+    expect(form1.value()).toBe('w1');
+    expect(form2.value()).toBe('w2');
+  });
+
+  it('should keep syncing after a navigation throws', async () => {
+    const { router, form1 } = await init();
+    vi.spyOn(router, 'navigate').mockImplementationOnce(() => {
+      throw new Error('navigate failed');
+    });
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => undefined);
+
+    patchState(form1, { value: 'v1' });
+    await advance(1000);
+    expect(consoleError).toHaveBeenCalled();
+
+    patchState(form1, { value: 'v2' });
+    await advance(1000);
+    expect(router.parseUrl(router.url).queryParams).toEqual({
+      form1: 'v2',
+      form2: 'v0',
+    });
+  });
 });
 
 describe('getQueryMapperForState', () => {
@@ -464,7 +1188,6 @@ describe('getQueryMapperForState', () => {
           provide: ActivatedRoute,
           useFactory: () => ({
             queryParams: of(queryParams),
-            snapshot: { queryParams },
           }),
         },
       ],
@@ -589,7 +1312,6 @@ describe('getQueryMapperForState', () => {
     tick(400);
 
     expect(router.navigate).toHaveBeenCalledWith([], {
-      relativeTo: expect.anything(),
       queryParams: {
         // only json props are stringified, the rest stay readable
         search: 'boots',
@@ -603,6 +1325,8 @@ describe('getQueryMapperForState', () => {
         optional: undefined,
       },
       queryParamsHandling: 'merge',
+      preserveFragment: true,
+      scroll: 'manual',
       replaceUrl: true,
     });
     tick(1000);
@@ -625,6 +1349,10 @@ describe('getQueryMapperForState', () => {
 
 describe('getQueryMapperForState with nested props', () => {
   const day = new Date(2026, 2, 4);
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
 
   function init(queryParams: Record<string, string> = {}) {
     const Store = signalStore(
@@ -660,7 +1388,6 @@ describe('getQueryMapperForState with nested props', () => {
           provide: ActivatedRoute,
           useFactory: () => ({
             queryParams: of(queryParams),
-            snapshot: { queryParams },
           }),
         },
       ],
@@ -730,20 +1457,31 @@ describe('getQueryMapperForState with nested props', () => {
     tick(1000);
   }));
 
-  it('should remove the params of a prop that holds nothing', fakeAsync(() => {
-    const { store } = init();
+  it('should remove the params of a prop that holds nothing', async () => {
+    // the router navigates with native promises, which fakeAsync cannot flush
+    vi.useFakeTimers();
+    const queryParams = {
+      'filter.color': 'blue',
+      'filter.nested.deep': 'restored',
+    };
+    const { store } = init(queryParams);
     const router = TestBed.inject(Router);
-    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    // the url holds the params, otherwise removing them is skipped as the url
+    // already lacks them
+    const navigated = router.navigate([], { queryParams });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(await navigated).toBe(true);
+    const navigate = vi.spyOn(router, 'navigate');
 
     patchState(store, { filter: undefined as any });
     TestBed.tick();
-    tick(400);
+    await vi.advanceTimersByTimeAsync(400);
 
     const params = navigate.mock.calls[0][1]?.queryParams as any;
     expect(params['filter.color']).toBe(undefined);
     expect(params['filter.nested.deep']).toBe(undefined);
-    tick(1000);
-  }));
+    expect(router.parseUrl(router.url).queryParams).toEqual({});
+  });
 });
 
 describe('getQueryMapperForState prop checking', () => {
@@ -811,7 +1549,6 @@ describe('getQueryMapperForState with array props', () => {
           provide: ActivatedRoute,
           useFactory: () => ({
             queryParams: of(queryParams),
-            snapshot: { queryParams },
           }),
         },
       ],
