@@ -126,21 +126,21 @@ const productsEntity = entityConfig({
 const productsStoreFeature = signalStoreFeature(
   withEntities(productsEntity),
   withCallStatus(productsEntity),
-  withEntitiesRemoteFilter({
-    ...productsEntity,
+  withEntitiesRemoteFilter(productsEntity, {
     defaultFilter: { search: '' },
   }),
-  withEntitiesRemotePagination({
-    ...productsEntity,
+  withEntitiesRemotePagination(productsEntity, {
     pageSize: 10,
   }),
-  withEntitiesRemoteSort({
-    ...productsEntity,
+  withEntitiesRemoteSort(productsEntity, {
     defaultSort: { field: 'name', direction: 'asc' },
   }),
   withEntitiesLoadingCall(
-    ({ productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort }) => ({
-      ...productsEntity,
+    productsEntity,
+    (
+      { productEntitiesPagedRequest, productEntitiesFilter, productEntitiesSort },
+      service = inject(ProductService),
+    ) => ({
       fetchEntities: async () => {
         const query = {
           search: productEntitiesFilter().search,
