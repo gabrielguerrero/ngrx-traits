@@ -39,6 +39,11 @@ export type QueryMapper<
    *   it once all mappers have run.
    */
   queryParamsToState: (query: T, store: Store, firstLoad: boolean) => void;
+  /**
+   * The returned params are merged into the url, so a key left out keeps its
+   * current value there. Always return every key the mapper syncs, with
+   * undefined for the ones to remove from the url.
+   */
   stateToQueryParams: (store: Store) => Signal<T> | undefined | null;
 };
 
