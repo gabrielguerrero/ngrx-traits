@@ -147,9 +147,9 @@
   width: 100%;
   height: 100%;
   background: var(--home-logo-fill);
-  -webkit-mask: url('/ngrx-traits/logo_name_transparent.PNG') center / contain
+  -webkit-mask: url('/ngrx-traits/logo_name_transparent.webp') center / contain
     no-repeat;
-  mask: url('/ngrx-traits/logo_name_transparent.PNG') center / contain no-repeat;
+  mask: url('/ngrx-traits/logo_name_transparent.webp') center / contain no-repeat;
 }
 
 .wave {

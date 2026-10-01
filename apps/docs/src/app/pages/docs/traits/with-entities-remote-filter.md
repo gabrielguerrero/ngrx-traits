@@ -1,6 +1,20 @@
 ---
-name: withEntitiesRemoteFilter 
+name: withEntitiesRemoteFilter
 order: 4
+title: "withEntitiesRemoteFilter | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, computed signals and methods to filter entities remotely: the debounced filter[Collection]Entities stores the filter and triggers a fetch."
+  - property: og:title
+    content: "withEntitiesRemoteFilter | NgRx Traits"
+  - property: og:description
+    content: "Generates state, computed signals and methods to filter entities remotely: the debounced filter[Collection]Entities stores the filter and triggers a fetch."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-remote-filter/"
+  - name: twitter:title
+    content: "withEntitiesRemoteFilter | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, computed signals and methods to filter entities remotely: the debounced filter[Collection]Entities stores the filter and triggers a fetch."
 ---
 
 # withEntitiesRemoteFilter

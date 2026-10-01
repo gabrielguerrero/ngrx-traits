@@ -6,3 +6,10 @@
   command = "pnpm build"
   publish = "dist/analog/public"
   functions = "dist/analog"
+
+# vite's content-hashed output, safe to cache forever (set here rather than via
+# nitro routeRules, see apps/docs/vite.config.ts)
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

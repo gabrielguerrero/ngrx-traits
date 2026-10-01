@@ -9,6 +9,7 @@ import {
   PLATFORM_ID,
   signal,
 } from '@angular/core';
+import { Router } from '@angular/router';
 
 interface TocHeading {
   id: string;
@@ -18,6 +19,13 @@ interface TocHeading {
 
 /** keeps the heading clear of the fixed navbar when jumping or scroll-spying */
 const HEADING_OFFSET = 96;
+
+/** smooth unless the user prefers reduced motion */
+export function scrollBehavior(): ScrollBehavior {
+  return matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? 'auto'
+    : 'smooth';
+}
 
 /**
  * "On this page" menu. Reads the h2/h3 headings of the rendered markdown
@@ -93,6 +101,7 @@ export class PageTocComponent {
   private pinnedId: string | null = null;
   /** page whose #hash deep link has already been honoured */
   private deepLinkedPath: string | null = null;
+  private readonly router = inject(Router);
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -137,20 +146,28 @@ export class PageTocComponent {
     // leave modified clicks (new tab, etc.) to the browser, the href is real
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey)
       return;
-    // a router fragment navigation would trigger the layout's scroll-to-top
+    // go through the router so its url (side-nav active links, re-clicks)
+    // matches the address bar; the docs layout does the jump on NavigationEnd
     event.preventDefault();
-    this.jumpTo(id, this.scrollBehavior());
-    history.replaceState(history.state, '', `${this.path()}#${id}`);
+    this.router.navigate([], {
+      fragment: id,
+      queryParamsHandling: 'preserve',
+      replaceUrl: true,
+    });
   }
 
   backToTop(): void {
     this.pinnedId = null;
-    window.scrollTo({ top: 0, behavior: this.scrollBehavior() });
+    window.scrollTo({ top: 0, behavior: scrollBehavior() });
   }
 
-  private jumpTo(id: string, behavior: ScrollBehavior): void {
+  /**
+   * scrolls the heading with this id just below the navbar and highlights it
+   * until the user scrolls; returns false if it is not on the page
+   */
+  jumpTo(id: string, behavior: ScrollBehavior = scrollBehavior()): boolean {
     const target = document.getElementById(id);
-    if (!target) return;
+    if (!target) return false;
 
     this.pinnedId = id;
     this.activeId.set(id);
@@ -160,7 +177,7 @@ export class PageTocComponent {
     const maxTop = document.documentElement.scrollHeight - window.innerHeight;
     // no movement means no scrollend, so there is nothing to wait for
     if (Math.abs(Math.min(Math.max(top, 0), maxTop) - window.scrollY) < 1)
-      return;
+      return true;
 
     this.jumping = true;
     clearTimeout(this.jumpTimer);
@@ -169,6 +186,7 @@ export class PageTocComponent {
       this.jumpTimer = setTimeout(() => this.endJump(), 1000);
 
     window.scrollTo({ top, behavior });
+    return true;
   }
 
   private endJump(): void {
@@ -244,11 +262,5 @@ export class PageTocComponent {
     }
     // before the first heading, point at it rather than at nothing
     this.activeId.set(active ?? headings[0]?.id ?? null);
-  }
-
-  private scrollBehavior(): ScrollBehavior {
-    return matchMedia('(prefers-reduced-motion: reduce)').matches
-      ? 'auto'
-      : 'smooth';
   }
 }

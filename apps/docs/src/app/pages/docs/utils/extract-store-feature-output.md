@@ -1,6 +1,20 @@
 ---
 name: ExtractStoreFeatureOutput
 order: 1
+title: "ExtractStoreFeatureOutput | NgRx Traits"
+meta:
+  - name: description
+    content: "A TypeScript utility type that extracts the output type from a custom signalStoreFeature function. Essential when splitting large signal stores into features."
+  - property: og:title
+    content: "ExtractStoreFeatureOutput | NgRx Traits"
+  - property: og:description
+    content: "A TypeScript utility type that extracts the output type from a custom signalStoreFeature function. Essential when splitting large signal stores into features."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/utils/extract-store-feature-output/"
+  - name: twitter:title
+    content: "ExtractStoreFeatureOutput | NgRx Traits"
+  - name: twitter:description
+    content: "A TypeScript utility type that extracts the output type from a custom signalStoreFeature function. Essential when splitting large signal stores into features."
 ---
 
 # ExtractStoreFeatureOutput
