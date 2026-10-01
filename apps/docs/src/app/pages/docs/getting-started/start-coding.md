@@ -126,17 +126,20 @@ store = inject(ProductsLocalStore);
 }))
 ````
 
-Most store features support a collection param that allows you have custom names in the generated signals and methods for example:
+Most store features support a collection param that allows you have custom names in the generated signals and methods. Declare it once with `entityConfig(...)` and pass that config to each feature, for example:
 
 ```typescript
-  const entity = type<Product>();
-const collection = 'product';
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
+
 export const ProductsLocalStore = signalStore(
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: 'loading' }),
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: 'loading' }),
   // 👆 adds signals isProductEntitiesLoading(), isProductEntitiesLoaded(), productEntitiesError()
   // and methods setProductEntitiesLoading() setProductEntitiesLoaded(), setProductEntitiesError(error)
-  withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
+  withEntitiesLocalPagination(productEntityConfig, { pageSize: 5 }),
   // 👆 adds signal productEntitiesCurrentPage()
   // and method loadProductEntitiesPage({pageIndex: number})"
   withHooks(({ setProductEntitiesLoaded, setProductEntitiesError, ...store }) => ({
@@ -144,7 +147,7 @@ export const ProductsLocalStore = signalStore(
       const productService = inject(ProductService);
       try {
         const res = await lastValueFrom(productService.getProducts());
-        patchState(store, setAllEntities(res.resultList));
+        patchState(store, setAllEntities(res.resultList, productEntityConfig));
         setProductEntitiesLoaded();
       } catch (e) {
         setProductEntitiesError(e);
@@ -164,21 +167,21 @@ Now we can also replace that withHook with withEntitiesLoadingCall, which is sim
 it will call the fetchEntities, when the entities status it set to loading, and will handle the storing the result, status changes and errors if any for you.
 
 ```typescript
-const entity = type<Product>();
-****
-const collection = "product";
+const productEntityConfig = entityConfig({
+  entity: type<Product>(),
+  collection: 'product',
+});
+
 export const ProductsLocalStore = signalStore(
-  withEntities({ entity, collection }),
-  withCallStatus({ collection, initialValue: "loading" }),
-  withEntitiesLocalPagination({ entity, collection, pageSize: 5 }),
+  withEntities(productEntityConfig),
+  withCallStatus(productEntityConfig, { initialValue: "loading" }),
+  withEntitiesLocalPagination(productEntityConfig, { pageSize: 5 }),
   // 👇 replaces withHook, will store entities result, change the status and handle errors
-  withEntitiesLoadingCall({
-    entity,
-    collection,
+  withEntitiesLoadingCall(productEntityConfig, {
     fetchEntities: () =>
       inject(ProductService)
         .getProducts()
-        .pipe((res) => res.resultList),
+        .pipe(map((res) => res.resultList)),
   }),
   withCalls(() => ({
     loadProductDetail: ({ id }: { id: string }) =>
@@ -236,7 +239,7 @@ export const ProductsLocalStore = signalStore(
     fetchEntities: () =>
       inject(ProductService)
         .getProducts()
-        .pipe((res) => res.resultList),
+        .pipe(map((res) => res.resultList)),
   }),
   withCalls(() => ({
     loadProductDetail: ({ id }: { id: string }) =>
@@ -245,7 +248,7 @@ export const ProductsLocalStore = signalStore(
 );
 ```
 
-You create an entityConfig like shown above using as const, and then you need to spread it to all withEntities* that you are using
+Create an entityConfig with `entityConfig(...)` as shown above, then pass it as the first arg to each withEntities* feature you use.
 
 ## Next Steps
 [Working with Entities](/docs/getting-started/working-with-entities), here you will learn how to work with entities in ngrx-traits.

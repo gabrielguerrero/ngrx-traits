@@ -7,8 +7,12 @@
       "schema": "./rename-collection/schema.json"
     },
     "migrate-entities-suffix": {
-      "description": "Migrate to Entities suffix naming convention (v20 migration)",
+      "description": "Migrate to Entities suffix naming convention (v21 migration)",
       "factory": "./migrate-entities-suffix"
+    },
+    "migrate-entity-config-args": {
+      "description": "Migrate withEntities* features to the (entityConfig, options) call form (v22 migration)",
+      "factory": "./migrate-entity-config-args"
     }
   }
 }
