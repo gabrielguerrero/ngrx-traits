@@ -1,5 +1,19 @@
 ---
 name: Working with Entities
+title: "Working with Entities | NgRx Traits"
+meta:
+  - name: description
+    content: "Learn how the NgRx Traits entity store features work, how to combine them for loading, filtering, sorting, pagination and selection, and best practices."
+  - property: og:title
+    content: "Working with Entities | NgRx Traits"
+  - property: og:description
+    content: "Learn how the NgRx Traits entity store features work, how to combine them for loading, filtering, sorting, pagination and selection, and best practices."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/working-with-entities/"
+  - name: twitter:title
+    content: "Working with Entities | NgRx Traits"
+  - name: twitter:description
+    content: "Learn how the NgRx Traits entity store features work, how to combine them for loading, filtering, sorting, pagination and selection, and best practices."
 ---
 
 # Working with Entities

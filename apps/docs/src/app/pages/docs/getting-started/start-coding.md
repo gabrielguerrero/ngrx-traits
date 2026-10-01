@@ -1,6 +1,20 @@
 ---
 name: Start Coding
 order: 3
+title: "Start Coding | NgRx Traits"
+meta:
+  - name: description
+    content: "Learn the basics of NgRx Traits with a simple example: a product list signal store with call status, local pagination and backend calls via withCalls."
+  - property: og:title
+    content: "Start Coding | NgRx Traits"
+  - property: og:description
+    content: "Learn the basics of NgRx Traits with a simple example: a product list signal store with call status, local pagination and backend calls via withCalls."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/start-coding/"
+  - name: twitter:title
+    content: "Start Coding | NgRx Traits"
+  - name: twitter:description
+    content: "Learn the basics of NgRx Traits with a simple example: a product list signal store with call status, local pagination and backend calls via withCalls."
 ---
 
 # Getting Started

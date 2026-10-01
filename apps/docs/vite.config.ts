@@ -25,6 +25,25 @@ export default defineConfig(({ mode, command }) => {
           highlighter: 'prism',
         },
         ssr: true,
+        // netlify's CDN compresses on its own, so precompressed files only
+        // bloat the deploy there; and analog rewrites every routeRule, which
+        // the netlify preset writes into _headers with literal "undefined"
+        // values, so netlify gets the cache header from netlify.toml instead
+        nitro: process.env['NETLIFY']
+          ? {}
+          : {
+              // ship .gz/.br next to every public file so they are served
+              // precompressed instead of raw
+              compressPublicAssets: true,
+              routeRules: {
+                // vite's content-hashed output, safe to cache forever
+                '/assets/**': {
+                  headers: {
+                    'cache-control': 'public, max-age=31536000, immutable',
+                  },
+                },
+              },
+            },
         prerender: {
           routes: async () => [
             '/',

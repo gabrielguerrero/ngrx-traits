@@ -1,6 +1,20 @@
 ---
 name: What is Ngrx Traits?
 order: 1
+title: "What is NgRx Traits? | NgRx Traits"
+meta:
+  - name: description
+    content: "NgRx Traits is a set of prebuilt NgRx Signals custom store features that solve common problems: backend calls, pagination, sorting, filtering, selection."
+  - property: og:title
+    content: "What is NgRx Traits? | NgRx Traits"
+  - property: og:description
+    content: "NgRx Traits is a set of prebuilt NgRx Signals custom store features that solve common problems: backend calls, pagination, sorting, filtering, selection."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/what-is-ngrx-traits/"
+  - name: twitter:title
+    content: "What is NgRx Traits? | NgRx Traits"
+  - name: twitter:description
+    content: "NgRx Traits is a set of prebuilt NgRx Signals custom store features that solve common problems: backend calls, pagination, sorting, filtering, selection."
 ---
 
 # Introduction

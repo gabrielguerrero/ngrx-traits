@@ -1,6 +1,20 @@
 ---
 name: withCallStatus
 order: 1
+title: "withCallStatus | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates the state, computed signals and methods to track the progress status of a call (loading, loaded, error) in an NgRx signal store."
+  - property: og:title
+    content: "withCallStatus | NgRx Traits"
+  - property: og:description
+    content: "Generates the state, computed signals and methods to track the progress status of a call (loading, loaded, error) in an NgRx signal store."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-call-status/"
+  - name: twitter:title
+    content: "withCallStatus | NgRx Traits"
+  - name: twitter:description
+    content: "Generates the state, computed signals and methods to track the progress status of a call (loading, loaded, error) in an NgRx signal store."
 ---
 
 # withCallStatus

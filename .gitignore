@@ -11,6 +11,8 @@ apps/*/node_modules
 # created when the libs are built, they are outside the pnpm workspace
 libs/*/*/node_modules
 apps/docs/dist
+# netlify build output (NETLIFY=1 builds)
+apps/docs/netlify
 
 # IDEs and editors
 /.idea

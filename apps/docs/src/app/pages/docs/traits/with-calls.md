@@ -1,6 +1,20 @@
 ---
-name: withCalls 
+name: withCalls
 order: 2
+title: "withCalls | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates the state, computed signals and methods to track the progress of backend calls and store their results in an NgRx signal store."
+  - property: og:title
+    content: "withCalls | NgRx Traits"
+  - property: og:description
+    content: "Generates the state, computed signals and methods to track the progress of backend calls and store their results in an NgRx signal store."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-calls/"
+  - name: twitter:title
+    content: "withCalls | NgRx Traits"
+  - name: twitter:description
+    content: "Generates the state, computed signals and methods to track the progress of backend calls and store their results in an NgRx signal store."
 ---
 
 # withCalls

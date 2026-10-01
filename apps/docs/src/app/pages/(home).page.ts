@@ -1,7 +1,24 @@
+import { RouteMeta } from '@analogjs/router';
 import { Component } from '@angular/core';
 
 import { FooterComponent } from '../components/navbar/footer/footer.component';
 import { NavbarComponent } from '../components/navbar/navbar.component';
+
+const title = 'NgRx Traits';
+const description =
+  'NgRx Traits is a set of NgRx Signals custom store features that speed up development: backend calls, pagination, sorting, filtering, entity selection and more.';
+
+export const routeMeta: RouteMeta = {
+  title,
+  meta: [
+    { name: 'description', content: description },
+    { property: 'og:title', content: title },
+    { property: 'og:description', content: description },
+    { property: 'og:url', content: 'https://ngrx-traits.dev/' },
+    { name: 'twitter:title', content: title },
+    { name: 'twitter:description', content: description },
+  ],
+};
 
 @Component({
   selector: 'app-home',
@@ -10,7 +27,7 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
     <div class="background-container grid grid-rows-[auto_1fr_auto]">
       <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
       <div class="circuit" aria-hidden="true"><i></i></div>
-      <div>
+      <main>
         <section class="max-w-max m-auto  mt-16 sm:mt-24 mb-4 ">
           <div class="grid gap-6 relative z-30">
             <div class="hero-logo" role="img" aria-label="NgRx Traits">
@@ -44,7 +61,7 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
             </div>
           </div>
         </section>
-      </div>
+      </main>
 
       <div class="flex justify-center items-center h-50 relative">
         <docs-footer class="z-10 mt-80 sm:mt-0" />

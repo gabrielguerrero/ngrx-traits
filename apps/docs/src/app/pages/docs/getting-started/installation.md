@@ -1,6 +1,20 @@
 ---
 name: Installation
 order: 2
+title: "Installation | NgRx Traits"
+meta:
+  - name: description
+    content: "Install @ngrx/signals and @ngrx-traits/signals with npm or yarn to start using NgRx Traits store features in your Angular app."
+  - property: og:title
+    content: "Installation | NgRx Traits"
+  - property: og:description
+    content: "Install @ngrx/signals and @ngrx-traits/signals with npm or yarn to start using NgRx Traits store features in your Angular app."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/installation/"
+  - name: twitter:title
+    content: "Installation | NgRx Traits"
+  - name: twitter:description
+    content: "Install @ngrx/signals and @ngrx-traits/signals with npm or yarn to start using NgRx Traits store features in your Angular app."
 ---
 
 # Installation

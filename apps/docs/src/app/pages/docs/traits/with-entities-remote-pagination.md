@@ -1,6 +1,20 @@
 ---
-name: withEntitiesRemotePagination 
+name: withEntitiesRemotePagination
 order: 7
+title: "withEntitiesRemotePagination | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, computed signals and methods for remote pagination of entities with a page cache: load[Collection]Page loads pages from cache or backend."
+  - property: og:title
+    content: "withEntitiesRemotePagination | NgRx Traits"
+  - property: og:description
+    content: "Generates state, computed signals and methods for remote pagination of entities with a page cache: load[Collection]Page loads pages from cache or backend."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-remote-pagination/"
+  - name: twitter:title
+    content: "withEntitiesRemotePagination | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, computed signals and methods for remote pagination of entities with a page cache: load[Collection]Page loads pages from cache or backend."
 ---
 
 # withEntitiesRemotePagination

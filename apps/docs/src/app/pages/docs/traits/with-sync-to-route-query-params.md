@@ -1,6 +1,20 @@
 ---
 name: withSyncToRouteQueryParams
 order: 18
+title: "withSyncToRouteQueryParams | NgRx Traits"
+meta:
+  - name: description
+    content: "Syncs the route query params with the store and back, using a mapper to load the query params into the state on init and reflect state changes in the URL."
+  - property: og:title
+    content: "withSyncToRouteQueryParams | NgRx Traits"
+  - property: og:description
+    content: "Syncs the route query params with the store and back, using a mapper to load the query params into the state on init and reflect state changes in the URL."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-sync-to-route-query-params/"
+  - name: twitter:title
+    content: "withSyncToRouteQueryParams | NgRx Traits"
+  - name: twitter:description
+    content: "Syncs the route query params with the store and back, using a mapper to load the query params into the state on init and reflect state changes in the URL."
 ---
 
 # withSyncToRouteQueryParams

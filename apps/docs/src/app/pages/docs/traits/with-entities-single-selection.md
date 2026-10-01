@@ -1,6 +1,20 @@
 ---
-name: withEntitiesSingleSelection 
+name: withEntitiesSingleSelection
 order: 9
+title: "withEntitiesSingleSelection | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates the state, computed signals and methods for single selection of entities in an NgRx signal store."
+  - property: og:title
+    content: "withEntitiesSingleSelection | NgRx Traits"
+  - property: og:description
+    content: "Generates the state, computed signals and methods for single selection of entities in an NgRx signal store."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-single-selection/"
+  - name: twitter:title
+    content: "withEntitiesSingleSelection | NgRx Traits"
+  - name: twitter:description
+    content: "Generates the state, computed signals and methods for single selection of entities in an NgRx signal store."
 ---
 
 # withEntitiesSingleSelection

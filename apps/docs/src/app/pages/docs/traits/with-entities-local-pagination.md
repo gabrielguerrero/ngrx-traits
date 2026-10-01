@@ -1,6 +1,20 @@
 ---
-name: withEntitiesLocalPagination 
+name: withEntitiesLocalPagination
 order: 6
+title: "withEntitiesLocalPagination | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates the state, computed signals and methods for local pagination of entities in an NgRx signal store."
+  - property: og:title
+    content: "withEntitiesLocalPagination | NgRx Traits"
+  - property: og:description
+    content: "Generates the state, computed signals and methods for local pagination of entities in an NgRx signal store."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-local-pagination/"
+  - name: twitter:title
+    content: "withEntitiesLocalPagination | NgRx Traits"
+  - name: twitter:description
+    content: "Generates the state, computed signals and methods for local pagination of entities in an NgRx signal store."
 ---
 
 # withEntitiesLocalPagination

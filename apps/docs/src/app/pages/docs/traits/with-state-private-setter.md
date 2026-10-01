@@ -1,6 +1,20 @@
 ---
 name: withStatePrivateSetter
 order: 21
+title: "withStatePrivateSetter | NgRx Traits"
+meta:
+  - name: description
+    content: "Like withStateSetter, but generates private _set<Prop>() methods, so a state prop is publicly readable but only writable from inside the store."
+  - property: og:title
+    content: "withStatePrivateSetter | NgRx Traits"
+  - property: og:description
+    content: "Like withStateSetter, but generates private _set<Prop>() methods, so a state prop is publicly readable but only writable from inside the store."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-state-private-setter/"
+  - name: twitter:title
+    content: "withStatePrivateSetter | NgRx Traits"
+  - name: twitter:description
+    content: "Like withStateSetter, but generates private _set<Prop>() methods, so a state prop is publicly readable but only writable from inside the store."
 ---
 
 # withStatePrivateSetter

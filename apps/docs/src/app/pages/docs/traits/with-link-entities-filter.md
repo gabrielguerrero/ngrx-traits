@@ -1,6 +1,20 @@
 ---
 name: withLinkEntitiesFilter
 order: 5
+title: "withLinkEntitiesFilter | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates a link[Collection]EntitiesFilter() method that connects the entities filter to component signals like input(), model() and Angular Signal Forms."
+  - property: og:title
+    content: "withLinkEntitiesFilter | NgRx Traits"
+  - property: og:description
+    content: "Generates a link[Collection]EntitiesFilter() method that connects the entities filter to component signals like input(), model() and Angular Signal Forms."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-link-entities-filter/"
+  - name: twitter:title
+    content: "withLinkEntitiesFilter | NgRx Traits"
+  - name: twitter:description
+    content: "Generates a link[Collection]EntitiesFilter() method that connects the entities filter to component signals like input(), model() and Angular Signal Forms."
 ---
 
 # withLinkEntitiesFilter

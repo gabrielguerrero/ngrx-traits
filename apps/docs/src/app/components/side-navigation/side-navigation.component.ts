@@ -192,7 +192,7 @@ export class SideNavigationComponent {
       links: [
         {
           link: './getting-started/what-is-ngrx-traits',
-          name: 'What is Ngrx Traits?',
+          name: 'What is NgRx Traits?',
         },
         {
           link: './getting-started/installation',

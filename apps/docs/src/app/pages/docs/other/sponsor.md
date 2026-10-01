@@ -1,3 +1,20 @@
+---
+title: "Sponsor | NgRx Traits"
+meta:
+  - name: description
+    content: "If you or your company find value in NgRx Traits, please consider sponsoring the project to support its development, maintenance and new features."
+  - property: og:title
+    content: "Sponsor | NgRx Traits"
+  - property: og:description
+    content: "If you or your company find value in NgRx Traits, please consider sponsoring the project to support its development, maintenance and new features."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/other/sponsor/"
+  - name: twitter:title
+    content: "Sponsor | NgRx Traits"
+  - name: twitter:description
+    content: "If you or your company find value in NgRx Traits, please consider sponsoring the project to support its development, maintenance and new features."
+---
+
 ## Sponsor Ngrx-Traits
 
 

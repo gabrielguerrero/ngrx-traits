@@ -1,6 +1,20 @@
 ---
 name: withLink
 order: 19
+title: "withLink | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates a link<Name>() method returning a WritableSignal that connects store state to component signals like input(), model() and Angular Signal Forms."
+  - property: og:title
+    content: "withLink | NgRx Traits"
+  - property: og:description
+    content: "Generates a link<Name>() method returning a WritableSignal that connects store state to component signals like input(), model() and Angular Signal Forms."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-link/"
+  - name: twitter:title
+    content: "withLink | NgRx Traits"
+  - name: twitter:description
+    content: "Generates a link<Name>() method returning a WritableSignal that connects store state to component signals like input(), model() and Angular Signal Forms."
 ---
 
 # withLink

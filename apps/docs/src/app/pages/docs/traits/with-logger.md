@@ -1,6 +1,20 @@
 ---
-name: withLogger 
+name: withLogger
 order: 14
+title: "withLogger | NgRx Traits"
+meta:
+  - name: description
+    content: "Log the state signals and computed signals of the store on every change, with the option to provide a filter function to log only the necessary signals."
+  - property: og:title
+    content: "withLogger | NgRx Traits"
+  - property: og:description
+    content: "Log the state signals and computed signals of the store on every change, with the option to provide a filter function to log only the necessary signals."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-logger/"
+  - name: twitter:title
+    content: "withLogger | NgRx Traits"
+  - name: twitter:description
+    content: "Log the state signals and computed signals of the store on every change, with the option to provide a filter function to log only the necessary signals."
 ---
 
 # withLogger
