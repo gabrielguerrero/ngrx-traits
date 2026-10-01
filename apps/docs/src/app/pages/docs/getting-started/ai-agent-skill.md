@@ -1,6 +1,20 @@
 ---
 name: AI Agent Skill
 order: 6
+title: "AI Agent Skill | NgRx Traits"
+meta:
+  - name: description
+    content: "Install the NgRx Traits Agent Skill so coding agents pick the right store features, compose them in the right order and use the exact generated names."
+  - property: og:title
+    content: "AI Agent Skill | NgRx Traits"
+  - property: og:description
+    content: "Install the NgRx Traits Agent Skill so coding agents pick the right store features, compose them in the right order and use the exact generated names."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/ai-agent-skill/"
+  - name: twitter:title
+    content: "AI Agent Skill | NgRx Traits"
+  - name: twitter:description
+    content: "Install the NgRx Traits Agent Skill so coding agents pick the right store features, compose them in the right order and use the exact generated names."
 ---
 
 # AI Agent Skill

@@ -1,6 +1,20 @@
 ---
 name: withServerStateTransfer
 order: 16
+title: "withServerStateTransfer | NgRx Traits"
+meta:
+  - name: description
+    content: "Sync store state using Angular's TransferState API for SSR hydration, so state serialized on the server is restored on the client without extra API calls."
+  - property: og:title
+    content: "withServerStateTransfer | NgRx Traits"
+  - property: og:description
+    content: "Sync store state using Angular's TransferState API for SSR hydration, so state serialized on the server is restored on the client without extra API calls."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-server-state-transfer/"
+  - name: twitter:title
+    content: "withServerStateTransfer | NgRx Traits"
+  - name: twitter:description
+    content: "Sync store state using Angular's TransferState API for SSR hydration, so state serialized on the server is restored on the client without extra API calls."
 ---
 
 # withServerStateTransfer

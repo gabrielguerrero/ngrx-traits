@@ -1,6 +1,20 @@
 ---
-name: withEntitiesLoadingCall 
+name: withEntitiesLoadingCall
 order: 5
+title: "withEntitiesLoadingCall | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates an onInit hook that fetches entities from a remote source when is[Collection]Loading is true, then stores the entities, loaded status or error."
+  - property: og:title
+    content: "withEntitiesLoadingCall | NgRx Traits"
+  - property: og:description
+    content: "Generates an onInit hook that fetches entities from a remote source when is[Collection]Loading is true, then stores the entities, loaded status or error."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-loading-call/"
+  - name: twitter:title
+    content: "withEntitiesLoadingCall | NgRx Traits"
+  - name: twitter:description
+    content: "Generates an onInit hook that fetches entities from a remote source when is[Collection]Loading is true, then stores the entities, loaded status or error."
 ---
 
 # withEntitiesLoadingCall

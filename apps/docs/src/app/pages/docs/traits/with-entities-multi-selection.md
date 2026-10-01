@@ -1,6 +1,20 @@
 ---
-name: withEntitiesMultiSelection 
+name: withEntitiesMultiSelection
 order: 10
+title: "withEntitiesMultiSelection | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates the state, computed signals and methods for multi selection of entities in an NgRx signal store, including select all."
+  - property: og:title
+    content: "withEntitiesMultiSelection | NgRx Traits"
+  - property: og:description
+    content: "Generates the state, computed signals and methods for multi selection of entities in an NgRx signal store, including select all."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-multi-selection/"
+  - name: twitter:title
+    content: "withEntitiesMultiSelection | NgRx Traits"
+  - name: twitter:description
+    content: "Generates the state, computed signals and methods for multi selection of entities in an NgRx signal store, including select all."
 ---
 
 # withEntitiesMultiSelection

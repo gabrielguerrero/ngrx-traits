@@ -1,6 +1,10 @@
 import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, model } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import {
+  IsActiveMatchOptions,
+  RouterLink,
+  RouterLinkActive,
+} from '@angular/router';
 
 @Component({
   selector: 'docs-side-navigation',
@@ -47,6 +51,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                     <a
                       class="flex min-h-8 items-center py-1 rounded-lg px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [routerLink]="link.link"
+                      [fragment]="link.fragment"
+                      [routerLinkActiveOptions]="
+                        link.fragment ? fragmentActiveOptions : pathActiveOptions
+                      "
                       routerLinkActive="text-sm font-medium text-[#629ef8] "
                     >
                       {{ link.name }}
@@ -96,6 +104,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                     <a
                       class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [routerLink]="link.link"
+                      [fragment]="link.fragment"
+                      [routerLinkActiveOptions]="
+                        link.fragment ? fragmentActiveOptions : pathActiveOptions
+                      "
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
@@ -140,6 +152,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
                     <a
                       class="flex min-h-8 items-center py-1  px-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 hover:text-blue-500"
                       [routerLink]="link.link"
+                      [fragment]="link.fragment"
+                      [routerLinkActiveOptions]="
+                        link.fragment ? fragmentActiveOptions : pathActiveOptions
+                      "
                       routerLinkActive="text-sm font-medium text-blue-400 "
                     >
                       {{ link.name }}
@@ -186,13 +202,21 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class SideNavigationComponent {
   readonly menuOpen = model(false);
+  /** a link to a page section is only active while its #fragment is in the url */
+  protected readonly fragmentActiveOptions: IsActiveMatchOptions = {
+    paths: 'exact',
+    fragment: 'exact',
+    queryParams: 'ignored',
+    matrixParams: 'ignored',
+  };
+  protected readonly pathActiveOptions = { exact: false };
   readonly sections = [
     {
       title: 'Getting Started',
       links: [
         {
           link: './getting-started/what-is-ngrx-traits',
-          name: 'What is Ngrx Traits?',
+          name: 'What is NgRx Traits?',
         },
         {
           link: './getting-started/installation',
@@ -288,7 +312,8 @@ export class SideNavigationComponent {
           badge: 'new',
         },
         {
-          link: './traits/with-link#copysignal',
+          link: './traits/with-link',
+          fragment: 'copysignal',
           name: 'copySignal',
           badge: 'new',
         },
@@ -446,6 +471,8 @@ interface Link {
   link: string;
   external?: boolean;
   name: string;
+  /** heading id on the linked page, kept apart from link so the # is not url-encoded */
+  fragment?: string;
   /** optional marker shown as a pill next to the name */
   badge?: 'new' | 'updated';
 }

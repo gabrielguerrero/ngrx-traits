@@ -1,6 +1,20 @@
 ---
 name: Migrating to v22
 order: 0
+title: "Migrating to v22 | NgRx Traits"
+meta:
+  - name: description
+    content: "Upgrade to NgRx Traits v22 with Angular 22 and @ngrx/signals 22: replace the removed typedCallConfig and withRouteParams, and adopt the new call form."
+  - property: og:title
+    content: "Migrating to v22 | NgRx Traits"
+  - property: og:description
+    content: "Upgrade to NgRx Traits v22 with Angular 22 and @ngrx/signals 22: replace the removed typedCallConfig and withRouteParams, and adopt the new call form."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/migrating-to-v22/"
+  - name: twitter:title
+    content: "Migrating to v22 | NgRx Traits"
+  - name: twitter:description
+    content: "Upgrade to NgRx Traits v22 with Angular 22 and @ngrx/signals 22: replace the removed typedCallConfig and withRouteParams, and adopt the new call form."
 ---
 
 # Migrating to v22

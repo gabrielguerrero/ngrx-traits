@@ -1,6 +1,20 @@
 ---
-name: withEntitiesSyncToRouteQueryParams 
+name: withEntitiesSyncToRouteQueryParams
 order: 17
+title: "withEntitiesSyncToRouteQueryParams | NgRx Traits"
+meta:
+  - name: description
+    content: "Syncs entities filter, pagination, sort and selection to route query params for local or remote entities store features, with optional prefix and filter mapper."
+  - property: og:title
+    content: "withEntitiesSyncToRouteQueryParams | NgRx Traits"
+  - property: og:description
+    content: "Syncs entities filter, pagination, sort and selection to route query params for local or remote entities store features, with optional prefix and filter mapper."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-sync-to-route-query-params/"
+  - name: twitter:title
+    content: "withEntitiesSyncToRouteQueryParams | NgRx Traits"
+  - name: twitter:description
+    content: "Syncs entities filter, pagination, sort and selection to route query params for local or remote entities store features, with optional prefix and filter mapper."
 ---
 
 # withEntitiesSyncToRouteQueryParams

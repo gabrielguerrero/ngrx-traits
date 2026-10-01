@@ -1,6 +1,20 @@
 ---
 name: withRoute
 order: 17
+title: "withRoute | NgRx Traits"
+meta:
+  - name: description
+    content: "Gives the store access to route params, query params and route data; the mapParams function transforms them into store computed signals."
+  - property: og:title
+    content: "withRoute | NgRx Traits"
+  - property: og:description
+    content: "Gives the store access to route params, query params and route data; the mapParams function transforms them into store computed signals."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-route/"
+  - name: twitter:title
+    content: "withRoute | NgRx Traits"
+  - name: twitter:description
+    content: "Gives the store access to route params, query params and route data; the mapParams function transforms them into store computed signals."
 ---
 
 # withRoute

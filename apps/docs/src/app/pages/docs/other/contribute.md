@@ -1,3 +1,20 @@
+---
+title: "Contributing | NgRx Traits"
+meta:
+  - name: description
+    content: "How to contribute to NgRx Traits: clone the repo, set up your development environment with Dev Containers or manually, and run the tests."
+  - property: og:title
+    content: "Contributing | NgRx Traits"
+  - property: og:description
+    content: "How to contribute to NgRx Traits: clone the repo, set up your development environment with Dev Containers or manually, and run the tests."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/other/contribute/"
+  - name: twitter:title
+    content: "Contributing | NgRx Traits"
+  - name: twitter:description
+    content: "How to contribute to NgRx Traits: clone the repo, set up your development environment with Dev Containers or manually, and run the tests."
+---
+
 # CONTRIBUTING
 
 <!-- ## Getting started with GitHub Codespaces

@@ -1,6 +1,20 @@
 ---
-name: withEntitiesLocalFilter 
+name: withEntitiesLocalFilter
 order: 3
+title: "withEntitiesLocalFilter | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, computed signals and methods to filter entities locally with a filter function; filter[Collection]Entities is debounced by default."
+  - property: og:title
+    content: "withEntitiesLocalFilter | NgRx Traits"
+  - property: og:description
+    content: "Generates state, computed signals and methods to filter entities locally with a filter function; filter[Collection]Entities is debounced by default."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-local-filter/"
+  - name: twitter:title
+    content: "withEntitiesLocalFilter | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, computed signals and methods to filter entities locally with a filter function; filter[Collection]Entities is debounced by default."
 ---
 
 # withEntitiesLocalFilter

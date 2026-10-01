@@ -1,5 +1,19 @@
 ---
 name: Support
+title: "Support | NgRx Traits"
+meta:
+  - name: description
+    content: "Get help with NgRx Traits: ask questions in the community Discord, report bugs and suggest features on GitHub, or contact us for premium support."
+  - property: og:title
+    content: "Support | NgRx Traits"
+  - property: og:description
+    content: "Get help with NgRx Traits: ask questions in the community Discord, report bugs and suggest features on GitHub, or contact us for premium support."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/other/support/"
+  - name: twitter:title
+    content: "Support | NgRx Traits"
+  - name: twitter:description
+    content: "Get help with NgRx Traits: ask questions in the community Discord, report bugs and suggest features on GitHub, or contact us for premium support."
 ---
 
 # Get Help & Support
@@ -8,7 +22,7 @@ There are different ways you can get support for Ngrx Traits:
 
 ## Join the Community
 
-Hop into our [community Discord](https://chat.analogjs.org) to:
+Hop into our [community Discord](https://discord.gg/CEjF5D3NCh) to:
 
 - Ask questions or troubleshoot
 - Share ideas and feedback

@@ -1,6 +1,20 @@
 ---
 name: withStateSetter
 order: 20
+title: "withStateSetter | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates a set<Prop>() method for each provided state prop that patches the state with a plain value, a signal or an updater function."
+  - property: og:title
+    content: "withStateSetter | NgRx Traits"
+  - property: og:description
+    content: "Generates a set<Prop>() method for each provided state prop that patches the state with a plain value, a signal or an updater function."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-state-setter/"
+  - name: twitter:title
+    content: "withStateSetter | NgRx Traits"
+  - name: twitter:description
+    content: "Generates a set<Prop>() method for each provided state prop that patches the state with a plain value, a signal or an updater function."
 ---
 
 # withStateSetter

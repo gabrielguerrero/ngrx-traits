@@ -1,6 +1,20 @@
 ---
 name: Articles and Videos
 order: 5
+title: "Articles and Videos | NgRx Traits"
+meta:
+  - name: description
+    content: "NgRx Traits release announcements and articles: what's new in each version, infinite scroll with Angular CDK, remote pagination and more."
+  - property: og:title
+    content: "Articles and Videos | NgRx Traits"
+  - property: og:description
+    content: "NgRx Traits release announcements and articles: what's new in each version, infinite scroll with Angular CDK, remote pagination and more."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/articles-and-videos/"
+  - name: twitter:title
+    content: "Articles and Videos | NgRx Traits"
+  - name: twitter:description
+    content: "NgRx Traits release announcements and articles: what's new in each version, infinite scroll with Angular CDK, remote pagination and more."
 ---
 
 # Release blogs

@@ -1,6 +1,20 @@
 ---
-name: withAllCallStatus 
+name: withAllCallStatus
 order: 1
+title: "withAllCallStatus | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates helper signals like isAnyCallLoading that track the status of all the calls added after it, and lets you handle their errors in one place."
+  - property: og:title
+    content: "withAllCallStatus | NgRx Traits"
+  - property: og:description
+    content: "Generates helper signals like isAnyCallLoading that track the status of all the calls added after it, and lets you handle their errors in one place."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-all-call-status/"
+  - name: twitter:title
+    content: "withAllCallStatus | NgRx Traits"
+  - name: twitter:description
+    content: "Generates helper signals like isAnyCallLoading that track the status of all the calls added after it, and lets you handle their errors in one place."
 ---
 
 # withAllCallStatus

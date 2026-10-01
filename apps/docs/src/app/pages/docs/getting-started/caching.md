@@ -1,6 +1,20 @@
 ---
 name: Caching
 order: 4
+title: "Caching | NgRx Traits"
+meta:
+  - name: description
+    content: "Cache the results of calls that return an observable or a promise: expiry times, maximum cache size, scoped caches, invalidation and manual cache control."
+  - property: og:title
+    content: "Caching | NgRx Traits"
+  - property: og:description
+    content: "Cache the results of calls that return an observable or a promise: expiry times, maximum cache size, scoped caches, invalidation and manual cache control."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/caching/"
+  - name: twitter:title
+    content: "Caching | NgRx Traits"
+  - name: twitter:description
+    content: "Cache the results of calls that return an observable or a promise: expiry times, maximum cache size, scoped caches, invalidation and manual cache control."
 ---
 
 # Caching
