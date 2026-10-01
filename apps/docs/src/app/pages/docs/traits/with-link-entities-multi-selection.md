@@ -1,6 +1,20 @@
 ---
 name: withLinkEntitiesMultiSelection
 order: 10
+title: "withLinkEntitiesMultiSelection | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates a link[Collection]IdsSelected() method that connects the selected entity ids to component signals like input(), model() and Angular Signal Forms."
+  - property: og:title
+    content: "withLinkEntitiesMultiSelection | NgRx Traits"
+  - property: og:description
+    content: "Generates a link[Collection]IdsSelected() method that connects the selected entity ids to component signals like input(), model() and Angular Signal Forms."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-link-entities-multi-selection/"
+  - name: twitter:title
+    content: "withLinkEntitiesMultiSelection | NgRx Traits"
+  - name: twitter:description
+    content: "Generates a link[Collection]IdsSelected() method that connects the selected entity ids to component signals like input(), model() and Angular Signal Forms."
 ---
 
 # withLinkEntitiesMultiSelection

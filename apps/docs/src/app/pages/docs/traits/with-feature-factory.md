@@ -1,6 +1,20 @@
 ---
-name: withFeatureFactory 
+name: withFeatureFactory
 order: 15
+title: "withFeatureFactory | NgRx Traits"
+meta:
+  - name: description
+    content: "Gives store features without a config factory access to the store's state, computed signals and methods, useful to wrap or build custom store features."
+  - property: og:title
+    content: "withFeatureFactory | NgRx Traits"
+  - property: og:description
+    content: "Gives store features without a config factory access to the store's state, computed signals and methods, useful to wrap or build custom store features."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-feature-factory/"
+  - name: twitter:title
+    content: "withFeatureFactory | NgRx Traits"
+  - name: twitter:description
+    content: "Gives store features without a config factory access to the store's state, computed signals and methods, useful to wrap or build custom store features."
 ---
 
 # withFeatureFactory

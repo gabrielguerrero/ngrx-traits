@@ -1,6 +1,20 @@
 ---
-name: withEntitiesRemoteScrollPagination 
+name: withEntitiesRemoteScrollPagination
 order: 8
+title: "withEntitiesRemoteScrollPagination | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, computed signals and methods for remote infinite scroll pagination of entities, or next/previous paging when the total count is unknown."
+  - property: og:title
+    content: "withEntitiesRemoteScrollPagination | NgRx Traits"
+  - property: og:description
+    content: "Generates state, computed signals and methods for remote infinite scroll pagination of entities, or next/previous paging when the total count is unknown."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-remote-scroll-pagination/"
+  - name: twitter:title
+    content: "withEntitiesRemoteScrollPagination | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, computed signals and methods for remote infinite scroll pagination of entities, or next/previous paging when the total count is unknown."
 ---
 
 # withEntitiesRemoteScrollPagination

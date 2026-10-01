@@ -1,6 +1,20 @@
 ---
 name: Migrating to v21
 order: 1
+title: "Migrating to v21 | NgRx Traits"
+meta:
+  - name: description
+    content: "Version 21 introduces a breaking change: collection-based properties now include an Entities suffix. Migrate automatically with the schematic or manually."
+  - property: og:title
+    content: "Migrating to v21 | NgRx Traits"
+  - property: og:description
+    content: "Version 21 introduces a breaking change: collection-based properties now include an Entities suffix. Migrate automatically with the schematic or manually."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/getting-started/migrating-to-v21/"
+  - name: twitter:title
+    content: "Migrating to v21 | NgRx Traits"
+  - name: twitter:description
+    content: "Version 21 introduces a breaking change: collection-based properties now include an Entities suffix. Migrate automatically with the schematic or manually."
 ---
 
 # Migrating to v21

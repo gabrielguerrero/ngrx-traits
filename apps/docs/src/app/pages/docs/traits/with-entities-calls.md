@@ -1,6 +1,20 @@
 ---
-name: withEntitiesCalls 
+name: withEntitiesCalls
 order: 1
+title: "withEntitiesCalls | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, computed signals and methods for per-entity calls, allowing parallel calls with a status per entity id; results merge into the entities."
+  - property: og:title
+    content: "withEntitiesCalls | NgRx Traits"
+  - property: og:description
+    content: "Generates state, computed signals and methods for per-entity calls, allowing parallel calls with a status per entity id; results merge into the entities."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-calls/"
+  - name: twitter:title
+    content: "withEntitiesCalls | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, computed signals and methods for per-entity calls, allowing parallel calls with a status per entity id; results merge into the entities."
 ---
 
 # withEntitiesCalls

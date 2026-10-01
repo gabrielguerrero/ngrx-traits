@@ -1,6 +1,20 @@
 ---
 name: withLinkEntitiesSort
 order: 12
+title: "withLinkEntitiesSort | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates a link[Collection]EntitiesSort() method that connects the entities sort to component signals like input(), model() and Angular Signal Forms."
+  - property: og:title
+    content: "withLinkEntitiesSort | NgRx Traits"
+  - property: og:description
+    content: "Generates a link[Collection]EntitiesSort() method that connects the entities sort to component signals like input(), model() and Angular Signal Forms."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-link-entities-sort/"
+  - name: twitter:title
+    content: "withLinkEntitiesSort | NgRx Traits"
+  - name: twitter:description
+    content: "Generates a link[Collection]EntitiesSort() method that connects the entities sort to component signals like input(), model() and Angular Signal Forms."
 ---
 
 # withLinkEntitiesSort
