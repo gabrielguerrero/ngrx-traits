@@ -237,6 +237,10 @@ export class SideNavigationComponent {
           name: 'Articles and Videos',
         },
         {
+          link: './getting-started/migrating-to-v22',
+          name: 'Migrating to v22',
+        },
+        {
           link: './getting-started/migrating-to-v21',
           name: 'Migrating to v21',
         },

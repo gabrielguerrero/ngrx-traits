@@ -9,6 +9,7 @@
     "start": "nx run-many --target=serve --projects=example-api,example-app --parallel",
     "start:api": "nx serve example-api",
     "start:docs": "pnpm --dir apps/docs install && pnpm --dir apps/docs start",
+    "start:docs:prod": "pnpm --dir apps/docs install && pnpm --dir apps/docs start:prod",
     "build:ssr": "nx build example-app",
     "serve:ssr": "node dist/apps/example-app/server/server.mjs",
     "test": "nx affected:test",

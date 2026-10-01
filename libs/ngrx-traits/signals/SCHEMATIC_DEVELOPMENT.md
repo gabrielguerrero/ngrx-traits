@@ -122,7 +122,7 @@ ng new myapp --skip-install
 
 # Copy sample component with old naming
 # Run migration
-ng update @ngrx-traits/signals --migrate-only --verbose
+ng update @ngrx-traits/signals --name update-21-0-0 --verbose
 ```
 
 ### Manual Testing

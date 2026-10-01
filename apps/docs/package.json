@@ -8,6 +8,7 @@
   "scripts": {
     "build": "vite build",
     "start": "vite",
+    "start:prod": "vite build && PORT=${PORT:-4300} node dist/analog/server/index.mjs",
     "test": "vitest run"
   },
   "dependencies": {
