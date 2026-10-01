@@ -4,6 +4,13 @@
       "version": "21.0.0",
       "description": "Migrate to Entities suffix naming convention",
       "factory": "./update-21-0-0"
+    },
+    "update-22-0-0": {
+      "version": "22.0.0",
+      "description": "Migrate withEntities* features to the (entityConfig, options) call form",
+      "factory": "./update-22-0-0",
+      "optional": true,
+      "recommended": true
     }
   }
 }
