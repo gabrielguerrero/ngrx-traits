@@ -21,12 +21,12 @@ meta:
 
 ## Install @ngrx/signals
 
-Besides angular, you will need to have ngrx/signals installed with this lib you can do so with:
+Besides Angular, you will need NgRx Signals installed to use this lib. You can install it with:
 
 <tab-group>
 <tab-item label="Npm">
 
-```bash npm
+```bash
 npm i @ngrx/signals --save
 ```
 
@@ -34,8 +34,8 @@ npm i @ngrx/signals --save
 
 <tab-item label="Yarn">
 
-```bash npm
-npm i @ngrx-traits/signals --save
+```bash
+yarn add @ngrx/signals
 ```
 
 </tab-item>
@@ -43,12 +43,12 @@ npm i @ngrx-traits/signals --save
 
 ## Install @ngrx-traits/signals
 
-Then you can install  @ngrx-traits/signals with:
+Then you can install @ngrx-traits/signals with:
 
 <tab-group>
 <tab-item label="Npm">
 
-```bash npm
+```bash
 npm i @ngrx-traits/signals --save
 ```
 
@@ -56,7 +56,7 @@ npm i @ngrx-traits/signals --save
 
 <tab-item label="Yarn">
 
-```bash npm
+```bash
 yarn add @ngrx-traits/signals
 ```
 
@@ -64,4 +64,4 @@ yarn add @ngrx-traits/signals
 </tab-group>
 
 ## Next Steps
-Now you are ready to [start Coding](/docs/getting-started/start-coding)
+Now you are ready to [start coding](/docs/getting-started/start-coding).

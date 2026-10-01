@@ -51,18 +51,18 @@ const store = signalStore(
     })
 );
 ```
-Now we use it in a component, the generated usersCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
+Now we use it in a component, the generated userEntitiesCurrentPage signal will provide the entities for the current page, the pageIndex and the total number of entities:
 
 ```html
-@for (user of store.usersCurrentPage.entities(); track user.id){
+@for (user of store.userEntitiesCurrentPage.entities(); track user.id){
   {{ user.name }}
 }
 <mat-paginator
   [pageSizeOptions]="[5, 10, 25, 100]"
-  [length]="store.usersCurrentPage.total()"
-  [pageSize]="store.usersCurrentPage.pageSize()"
-  [pageIndex]="store.usersCurrentPage.pageIndex()"
-  (page)="store.loadUsersPage($event)"
+  [length]="store.userEntitiesCurrentPage.total()"
+  [pageSize]="store.userEntitiesCurrentPage.pageSize()"
+  [pageIndex]="store.userEntitiesCurrentPage.pageIndex()"
+  (page)="store.loadUserEntitiesPage($event)"
 ></mat-paginator>
 ```
 
@@ -121,10 +121,10 @@ Generates the following signals
 entitiesPagination: Signal<{ currentPage: number; pageSize: number }>;
 ```
 
-If collection provided, the following signals are generated, example: **users**
+If collection provided, the following signals are generated, example: **user**
 
 ```typescript
-usersPagination: Signal<{ currentPage: number; pageSize: number }>;
+userEntitiesPagination: Signal<{ currentPage: number; pageSize: number }>;
 ```
 
 ## Computed
@@ -132,13 +132,29 @@ usersPagination: Signal<{ currentPage: number; pageSize: number }>;
 Generates the following computed signals, they are `DeepSignal`s, so each prop can be read as a signal of its own, e.g. `entitiesCurrentPage.total()`
 
 ```typescript
-entitiesCurrentPage: DeepSignal<{ entities: T[]; pageIndex: number; total: number }>;
+entitiesCurrentPage: DeepSignal<{
+  entities: T[];
+  pageIndex: number;
+  total: number | undefined;
+  pageSize: number;
+  pagesCount: number | undefined;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}>;
 ```
 
-If collection provided, the following computed signals are generated, example: **users**
+If collection provided, the following computed signals are generated, example: **user**
 
 ```typescript
-usersCurrentPage: DeepSignal<{ entities: T[]; pageIndex: number; total: number }>;
+userEntitiesCurrentPage: DeepSignal<{
+  entities: T[];
+  pageIndex: number;
+  total: number | undefined;
+  pageSize: number;
+  pagesCount: number | undefined;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}>;
 ```
 
 ## Methods
@@ -146,11 +162,11 @@ usersCurrentPage: DeepSignal<{ entities: T[]; pageIndex: number; total: number }
 Generates the following methods
 
 ```typescript
-loadEntitiesPage: ({pageIndex:number}) => void;
+loadEntitiesPage: (options: { pageIndex: number; pageSize?: number }) => void;
 ```
 
-If collection provided, the following methods are generated, example: **users**
+If collection provided, the following methods are generated, example: **user**
 
 ```typescript
-loadUsersPage: ({pageIndex:number}) => void;
+loadUserEntitiesPage: (options: { pageIndex: number; pageSize?: number }) => void;
 ```

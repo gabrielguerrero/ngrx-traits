@@ -33,7 +33,7 @@ import { withCallStatus } from '@ngrx-traits/signals';
 
 ## Usage
 
-Use this when you need a special way to call you backend that is not handled by [withCalls](/docs/traits/withCalls)
+Use this when you need a special way to call you backend that is not handled by [withCalls](/docs/traits/with-calls)
 
 ### Minimal use case
 
@@ -131,7 +131,7 @@ export const ProductsRemoteStore = signalStore(
   });
 ```
 
-To know more about withEntitiesLoadingCall see docs [here](/docs/traits/withEntitiesLoadingCall)
+To know more about withEntitiesLoadingCall see docs [here](/docs/traits/with-entities-loading-call)
 
 ## API Reference
 
