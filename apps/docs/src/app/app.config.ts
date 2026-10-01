@@ -13,6 +13,7 @@ import {
   provideZoneChangeDetection,
 } from '@angular/core';
 import { provideClientHydration } from '@angular/platform-browser';
+import { withRouterConfig } from '@angular/router';
 
 import { TabGroupComponent } from './components/tab-group/tab-group.component';
 import { TabComponent } from './components/tab/tab.component';
@@ -20,7 +21,9 @@ import { TabComponent } from './components/tab/tab.component';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideFileRouter(),
+    // re-clicking a #section link on its own page should jump again; route
+    // resolvers only rerun on param/query changes, so this reloads nothing
+    provideFileRouter(withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideClientHydration(),
     provideContent(withMarkdownRenderer(), withPrismHighlighter()),
     provideHttpClient(withFetch()),

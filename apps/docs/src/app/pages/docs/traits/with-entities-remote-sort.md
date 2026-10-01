@@ -1,6 +1,20 @@
 ---
-name: withEntitiesRemoteSort 
+name: withEntitiesRemoteSort
 order: 12
+title: "withEntitiesRemoteSort | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, signals and methods to sort entities remotely: sort[Collection]Entities stores the sort and triggers a backend load of the sorted entities."
+  - property: og:title
+    content: "withEntitiesRemoteSort | NgRx Traits"
+  - property: og:description
+    content: "Generates state, signals and methods to sort entities remotely: sort[Collection]Entities stores the sort and triggers a backend load of the sorted entities."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-remote-sort/"
+  - name: twitter:title
+    content: "withEntitiesRemoteSort | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, signals and methods to sort entities remotely: sort[Collection]Entities stores the sort and triggers a backend load of the sorted entities."
 ---
 
 # withEntitiesRemoteSort

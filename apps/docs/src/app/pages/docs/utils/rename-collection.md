@@ -1,6 +1,20 @@
 ---
 name: Rename Collection Schematic
 order: 2
+title: "Rename Collection Schematic | NgRx Traits"
+meta:
+  - name: description
+    content: "A schematic to rename collection-based properties in your NgRx store and related files, for refactoring or finishing migrations the migrator couldn't handle."
+  - property: og:title
+    content: "Rename Collection Schematic | NgRx Traits"
+  - property: og:description
+    content: "A schematic to rename collection-based properties in your NgRx store and related files, for refactoring or finishing migrations the migrator couldn't handle."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/utils/rename-collection/"
+  - name: twitter:title
+    content: "Rename Collection Schematic | NgRx Traits"
+  - name: twitter:description
+    content: "A schematic to rename collection-based properties in your NgRx store and related files, for refactoring or finishing migrations the migrator couldn't handle."
 ---
 
 # Rename Collection Schematic

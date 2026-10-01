@@ -1,6 +1,20 @@
 ---
 name: withLinkEntitiesSingleSelection
 order: 9
+title: "withLinkEntitiesSingleSelection | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates a link[Collection]IdSelected() method that connects the selected entity id to component signals like input(), model() and Angular Signal Forms."
+  - property: og:title
+    content: "withLinkEntitiesSingleSelection | NgRx Traits"
+  - property: og:description
+    content: "Generates a link[Collection]IdSelected() method that connects the selected entity id to component signals like input(), model() and Angular Signal Forms."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-link-entities-single-selection/"
+  - name: twitter:title
+    content: "withLinkEntitiesSingleSelection | NgRx Traits"
+  - name: twitter:description
+    content: "Generates a link[Collection]IdSelected() method that connects the selected entity id to component signals like input(), model() and Angular Signal Forms."
 ---
 
 # withLinkEntitiesSingleSelection

@@ -1,6 +1,20 @@
 ---
 name: withEntitiesHybridFilter
 order: 4
+title: "withEntitiesHybridFilter | NgRx Traits"
+meta:
+  - name: description
+    content: "Filter entities remotely or locally with one store feature: the debounced filter[Collection]Entities either triggers a backend load or filters with filterFn."
+  - property: og:title
+    content: "withEntitiesHybridFilter | NgRx Traits"
+  - property: og:description
+    content: "Filter entities remotely or locally with one store feature: the debounced filter[Collection]Entities either triggers a backend load or filters with filterFn."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-hybrid-filter/"
+  - name: twitter:title
+    content: "withEntitiesHybridFilter | NgRx Traits"
+  - name: twitter:description
+    content: "Filter entities remotely or locally with one store feature: the debounced filter[Collection]Entities either triggers a backend load or filters with filterFn."
 ---
 
 # withEntitiesHybridFilter

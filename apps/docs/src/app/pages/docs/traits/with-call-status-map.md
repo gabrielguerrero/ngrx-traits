@@ -1,6 +1,20 @@
 ---
-name: withCallStatus 
+name: withCallStatus
 order: 1
+title: "withCallStatusMap | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates state, computed signals and methods for call progress status mapped by a key, so calls of the same type can run in parallel, each with its own status."
+  - property: og:title
+    content: "withCallStatusMap | NgRx Traits"
+  - property: og:description
+    content: "Generates state, computed signals and methods for call progress status mapped by a key, so calls of the same type can run in parallel, each with its own status."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-call-status-map/"
+  - name: twitter:title
+    content: "withCallStatusMap | NgRx Traits"
+  - name: twitter:description
+    content: "Generates state, computed signals and methods for call progress status mapped by a key, so calls of the same type can run in parallel, each with its own status."
 ---
 
 # withCallStatusMap
@@ -20,7 +34,7 @@ import { withCallStatusMap } from '@ngrx-traits/signals';
 
 ## Usage
 
-Use this when you need a special way to call you backend that is not handle by [withEntitiesCall](/docs/traits/withEntitiesCalls)
+Use this when you need a special way to call you backend that is not handle by [withEntitiesCalls](/docs/traits/with-entities-calls)
 
 ### Minimal use case
 ```typescript

@@ -1,6 +1,20 @@
 ---
-name: withEntitiesLocalSort 
+name: withEntitiesLocalSort
 order: 11
+title: "withEntitiesLocalSort | NgRx Traits"
+meta:
+  - name: description
+    content: "Generates the state, computed signals and methods to sort entities locally in an NgRx signal store."
+  - property: og:title
+    content: "withEntitiesLocalSort | NgRx Traits"
+  - property: og:description
+    content: "Generates the state, computed signals and methods to sort entities locally in an NgRx signal store."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-entities-local-sort/"
+  - name: twitter:title
+    content: "withEntitiesLocalSort | NgRx Traits"
+  - name: twitter:description
+    content: "Generates the state, computed signals and methods to sort entities locally in an NgRx signal store."
 ---
 
 # withEntitiesLocalSort

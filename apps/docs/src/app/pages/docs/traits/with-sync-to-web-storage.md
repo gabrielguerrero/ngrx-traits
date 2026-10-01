@@ -1,6 +1,20 @@
 ---
-name: withSyncToWebStorage 
+name: withSyncToWebStorage
 order: 15
+title: "withSyncToWebStorage | NgRx Traits"
+meta:
+  - name: description
+    content: "Sync the state of the store, or part of it, to local or session web storage, with optional expiry."
+  - property: og:title
+    content: "withSyncToWebStorage | NgRx Traits"
+  - property: og:description
+    content: "Sync the state of the store, or part of it, to local or session web storage, with optional expiry."
+  - property: og:url
+    content: "https://ngrx-traits.dev/docs/traits/with-sync-to-web-storage/"
+  - name: twitter:title
+    content: "withSyncToWebStorage | NgRx Traits"
+  - name: twitter:description
+    content: "Sync the state of the store, or part of it, to local or session web storage, with optional expiry."
 ---
 
 # withSyncToWebStorage
