@@ -9,7 +9,7 @@ order: 5
 
 NgRx Traits 22 targets Angular 22, adding withLink to sync store state with component signals and Signal Forms.
 
-Also: Resource-style call views, state setters, shorter withEntities* syntax, refreshed docs, two removed APIs.s
+Also: Resource-style call views, state setters, shorter withEntities* syntax, refreshed docs, two removed APIs.
 
 **Published:** Sept 15, 2026  
 **Reading Time:** 6 min

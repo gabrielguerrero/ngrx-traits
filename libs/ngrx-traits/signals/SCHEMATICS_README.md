@@ -6,21 +6,22 @@ This directory contains Angular schematics and migration tools for @ngrx-traits/
 
 ```
 .
-├── src/migrations/                      # ng update migrations
-│   ├── migration-collection.json         # Migration registry
-│   └── update-21-0-0/                    # Version 21.0.0 migrations
-│       ├── index.ts                      # Migration entry point
-│       ├── rename-entities-suffix.ts     # Main migration logic
-│       └── utils/
-│           ├── pattern-matchers.ts       # 17 rename patterns
-│           ├── ast-helpers.ts            # TypeScript AST utilities
-│           └── file-visitor.ts           # File processing
-├── schematics/                           # ng generate schematics
-│   ├── collection.json                   # Schematic registry
-│   └── rename-collection/
-│       ├── schema.json                   # CLI parameter schema
-│       └── index.ts                      # Implementation
-└── MIGRATION_GUIDE.md                    # User migration guide
+├── src/migrations/                              # ng update migrations
+│   ├── migration-collection.json                 # Migration registry
+│   ├── update-21-0-0/                            # v21.0.0: Entities suffix rename
+│   │   ├── index.ts                              # Migration entry point
+│   │   ├── targeted/                             # Store analysis, dependency resolution, rename patterns, transforms
+│   │   └── __tests__/                            # Specs + fixtures
+│   └── update-22-0-0/                            # v22.0.0: (entityConfig, options) call form
+│       ├── index.ts                              # Migration entry point
+│       ├── entity-config-args-transformer.ts     # Call transformation logic
+│       └── __tests__/                            # Specs
+├── schematics/                                   # ng generate schematics
+│   ├── collection.json                           # Schematic registry
+│   ├── rename-collection/                        # index.ts, schema.json, index.spec.ts
+│   ├── migrate-entities-suffix/                  # index.ts (runs update-21-0-0)
+│   └── migrate-entity-config-args/               # index.ts (runs update-22-0-0)
+└── MIGRATION_GUIDE.md                            # User migration guide
 ```
 
 ## Schematics
@@ -31,22 +32,59 @@ Automatically migrates code to use the new "Entities" suffix naming convention.
 
 **Usage:**
 ```bash
-ng update @ngrx-traits/signals --migrate-only
+ng update @ngrx-traits/signals --name update-21-0-0
 ```
 
 **What it does:**
-- Renames 17 property/method patterns across traits
+- Renames trait-generated property/method patterns for each collection
 - Processes `.ts` and `.html` files
-- Requires clean git working directory (override with `--skip-git-check`)
-- Shows migration report with statistics
+- Requires clean git working directory (override with `--allow-dirty`)
+- Logs a summary to the console
 
 **Patterns migrated:**
 - CallStatus: 7 patterns
 - Pagination: 9 patterns
 - Filter: 3 patterns
 - Sort: 2 patterns
+- Selection: 2 patterns
 
-### 2. Rename Collection Schematic (ng generate)
+### 2. entityConfig Args Migration (ng update / ng generate)
+
+Moves the entityConfig of the withEntities* features out of their single config
+object into the first arg, `withX({ ...entityConfig, ...options })` ->
+`withX(entityConfig, options)`. Optional and recommended on `ng update` to v22:
+pre-selected in the interactive prompt; in non-interactive runs (no TTY or `CI`
+set) the Angular CLI skips it and prints the command to run it later. `nx migrate`
+ignores `optional`, so Nx users remove `update-22-0-0` from `migrations.json` to
+skip it. Run it later, or on its own:
+
+```bash
+ng update @ngrx-traits/signals --name update-22-0-0
+ng generate @ngrx-traits/signals:migrate-entity-config-args
+```
+
+**What it does:**
+- `withEntitiesLocalFilter({ ...cfg, defaultFilter, filterFn })` -> `withEntitiesLocalFilter(cfg, { defaultFilter, filterFn })`
+- `withEntitiesSyncToRouteQueryParams({ ...cfg })` -> `withEntitiesSyncToRouteQueryParams(cfg)`
+- `withEntitiesLocalSort({ entity, collection, defaultSort })` -> `withEntitiesLocalSort({ entity, collection }, { defaultSort })`
+- `withEntitiesCalls({ ...cfg, calls: (store) => ({...}) })` -> `withEntitiesCalls(cfg, (store) => ({...}))`
+- `withEntitiesLoadingCall((store) => ({ ...cfg, fetchEntities }))` -> `withEntitiesLoadingCall(cfg, (store) => ({ fetchEntities }))`
+- Leaves inline configs without a collection (`withX({ entity, ...options })`),
+  `withCallStatus({ prop })` and `withCallStatus({ collection })` as they are
+- The spread is taken as an entityConfig when it is a variable; one declared in
+  the same file must hold `entityConfig(...)` or a literal with only
+  entity/collection/selectId, otherwise the call is skipped
+- Warns and skips ambiguous calls (several spreads, spread plus
+  entity/collection, options before the spread, a spread that is not a
+  variable, a factory spread reading the store or declared after the call,
+  calls through `import * as`); the single object form still works so they
+  need no change
+- A factory spread of an imported entityConfig is now read when the store is
+  defined rather than created, which matters only with circular imports
+- Only touches features imported from `@ngrx-traits/signals`; run your
+  formatter afterwards
+
+### 3. Rename Collection Schematic (ng generate)
 
 Refactors collection names from plural to singular form.
 
@@ -150,7 +188,6 @@ HTML templates use regex-based replacement for:
 
 ### Unit Tests
 
-- **pattern-matchers.spec.ts**: Tests all 17 rename patterns
 - **rename-entities-suffix.spec.ts**: Tests migration logic with fixtures
 - **rename-collection/index.spec.ts**: Tests collection renaming
 
@@ -164,7 +201,7 @@ npm test -- --include='**/migrations/**' --include='**/schematics/**'
 To test with a real project:
 
 1. Create a test project with old naming
-2. Run migration: `ng update @ngrx-traits/signals --migrate-only`
+2. Run migration: `ng update @ngrx-traits/signals --name update-21-0-0`
 3. Verify all properties renamed correctly
 4. Run app tests to ensure functionality
 
@@ -200,7 +237,7 @@ context.logger.debug(`Matched: ${match[0]}`);
 
 Run with verbose flag:
 ```bash
-ng update @ngrx-traits/signals --migrate-only --verbose
+ng update @ngrx-traits/signals --name update-21-0-0 --verbose
 ```
 
 ## Known Limitations
@@ -218,9 +255,9 @@ ng update @ngrx-traits/signals --migrate-only --verbose
 
 ## Version History
 
-### v20.0.0
+### v21.0.0
 - Initial release
-- 17 CallStatus, Pagination, Filter, Sort patterns
+- CallStatus, Pagination, Filter, Sort, Selection patterns
 - Collection rename schematic
 - Both ng update and ng generate support
 

@@ -1,8 +1,8 @@
-# Migration Guide: @ngrx-traits/signals v20.0.0
+# Migration Guide: @ngrx-traits/signals v21.0.0
 
 ## Overview
 
-Version 20.0.0 introduces a naming convention change for all trait-generated properties and methods. Collection names are now followed by the `Entities` suffix for consistency with ngrx/signals patterns.
+Version 21.0.0 introduces a naming convention change for all trait-generated properties and methods. Collection names are now followed by the `Entities` suffix for consistency with ngrx/signals patterns.
 
 **Example:** `productFilter` → `productEntitiesFilter`
 
@@ -45,21 +45,27 @@ All trait-generated properties now include the `Entities` suffix between the col
 
 ### Method 1: Using `ng update` (Recommended)
 
-Run the automatic migration schematic:
+Upgrading to v21 runs the migration schematic automatically:
 
 ```bash
-ng update @ngrx-traits/signals --migrate-only
+ng update @ngrx-traits/signals
+```
+
+To run (or re-run) only the migration, without upgrading:
+
+```bash
+ng update @ngrx-traits/signals --name update-21-0-0
 ```
 
 This will:
 - Scan your project for @ngrx-traits/signals usage
-- Rename all 17 property patterns automatically
+- Rename all trait-generated property patterns automatically
 - Process both `.ts` and `.html` files
-- Generate a migration report
+- Log a summary of changed files to the console
 
 **Requirements:**
-- Clean git working directory (use `--skip-git-check` to override)
-- Angular 20.0.0 or later
+- Clean git working directory (use `--allow-dirty` to override)
+- Angular 21.0.0 or later (and `@ngrx/signals` 21.0.0 or later)
 
 ### Method 2: Manual Migration
 
@@ -88,29 +94,28 @@ This will:
 
 ```typescript
 // Store definition
-export const createProductsStore = () =>
-  signalStore(
-    withEntities({ entity: Product }),
-    withCallStatus({ initialState: LoadingState.Init }),
-    withPagination()
-  );
+const entity = type<Product>();
+const collection = 'products';
+export const ProductsStore = signalStore(
+  withEntities({ entity, collection }),
+  withCallStatus({ collection }),
+  withEntitiesRemoteFilter({ entity, collection, defaultFilter: { search: '' } }),
+  withEntitiesRemoteSort({ entity, collection, defaultSort: { field: 'name', direction: 'asc' } }),
+  withEntitiesRemotePagination({ entity, collection, pageSize: 10 }),
+);
 
 // Component usage
 export class ProductsComponent {
-  store = inject(createProductsStore);
+  store = inject(ProductsStore);
 
   loadData() {
-    // Properties
     const filter = this.store.productsFilter();
     const page = this.store.productsCurrentPage();
     const loading = this.store.isProductsLoading();
-    const error = this.store.productsError();
 
-    // Methods
-    this.store.setProductsLoading(true);
-    this.store.loadProductsPage({ page: 1 });
+    this.store.loadProductsPage({ pageIndex: 1 });
     this.store.resetProductsFilter();
-    this.store.sortProducts({ field: 'name' });
+    this.store.sortProducts({ sort: { field: 'price', direction: 'desc' } });
   }
 }
 ```
@@ -119,29 +124,19 @@ export class ProductsComponent {
 
 ```typescript
 // Store definition (unchanged)
-export const createProductsStore = () =>
-  signalStore(
-    withEntities({ entity: Product }),
-    withCallStatus({ initialState: LoadingState.Init }),
-    withPagination()
-  );
 
 // Component usage
 export class ProductsComponent {
-  store = inject(createProductsStore);
+  store = inject(ProductsStore);
 
   loadData() {
-    // Properties
     const filter = this.store.productsEntitiesFilter();
     const page = this.store.productsEntitiesCurrentPage();
     const loading = this.store.isProductsEntitiesLoading();
-    const error = this.store.productsEntitiesError();
 
-    // Methods
-    this.store.setProductsEntitiesLoading(true);
-    this.store.loadProductsEntitiesPage({ page: 1 });
+    this.store.loadProductsEntitiesPage({ pageIndex: 1 });
     this.store.resetProductsEntitiesFilter();
-    this.store.sortProductsEntities({ field: 'name' });
+    this.store.sortProductsEntities({ sort: { field: 'price', direction: 'desc' } });
   }
 }
 ```
@@ -150,12 +145,12 @@ export class ProductsComponent {
 
 ```html
 <!-- Before -->
-<div *ngIf="store.isProductsLoading()">Loading...</div>
-<button (click)="store.loadProductsPage(1)">Next</button>
+@if (store.isProductsLoading()) { <p>Loading...</p> }
+<button (click)="store.loadProductsPage({ pageIndex: 2 })">Next</button>
 
 <!-- After -->
-<div *ngIf="store.isProductsEntitiesLoading()">Loading...</div>
-<button (click)="store.loadProductsEntitiesPage(1)">Next</button>
+@if (store.isProductsEntitiesLoading()) { <p>Loading...</p> }
+<button (click)="store.loadProductsEntitiesPage({ pageIndex: 2 })">Next</button>
 ```
 
 ## Testing After Migration
@@ -184,16 +179,16 @@ A: No, your store definitions remain the same. Only the property and method name
 A: The types are automatically updated during migration.
 
 **Q: What about third-party packages using @ngrx-traits/signals?**
-A: They'll need to update to v20.0.0+ which includes the new naming convention.
+A: They'll need to update to v21.0.0+ which includes the new naming convention.
 
 **Q: Can I migrate selectively?**
-A: The migration tool processes all files, but you can use `--skip-confirmation` for batch processing or manually edit files.
+A: The migration scans the workspace but only modifies files that define stores or custom features using a `collection` param, plus the files and templates that consume them. To limit it further, run it on a clean working tree and revert unwanted changes with git, or edit files manually.
 
 ## Troubleshooting
 
 **Issue: Git check failed**
 ```bash
-ng update @ngrx-traits/signals --migrate-only --skip-git-check
+ng update @ngrx-traits/signals --name update-21-0-0 --allow-dirty
 ```
 
 **Issue: Migration didn't find files**
