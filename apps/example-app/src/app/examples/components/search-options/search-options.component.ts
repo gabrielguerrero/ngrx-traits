@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   effect,
   ElementRef,
@@ -60,6 +61,7 @@ import { delay } from 'rxjs/operators';
     `,
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatInputModule,
     ReactiveFormsModule,

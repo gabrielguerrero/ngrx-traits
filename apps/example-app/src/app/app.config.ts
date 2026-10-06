@@ -12,7 +12,10 @@ import {
   MAT_FORM_FIELD_DEFAULT_OPTIONS,
   MatFormFieldDefaultOptions,
 } from '@angular/material/form-field';
-import { provideClientHydration } from '@angular/platform-browser';
+import {
+  provideClientHydration,
+  withNoIncrementalHydration,
+} from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
   provideRouter,
@@ -59,6 +62,6 @@ export const appConfig: ApplicationConfig = {
       } satisfies MatFormFieldDefaultOptions,
     },
     provideHttpClient(withInterceptorsFromDi(), withFetch()),
-    provideClientHydration(),
+    provideClientHydration(withNoIncrementalHydration()),
   ],
 };

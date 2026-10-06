@@ -4,7 +4,7 @@ import {
   CdkVirtualForOf,
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -124,6 +124,7 @@ import { ProductsBranchStore } from './products-branch.store';
       width: 100%;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ProductsBranchStore],
 })
 export class ProductsBranchListComponent {

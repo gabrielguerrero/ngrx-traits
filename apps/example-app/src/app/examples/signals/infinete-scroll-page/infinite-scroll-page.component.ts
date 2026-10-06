@@ -1,5 +1,4 @@
-
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
@@ -28,6 +27,7 @@ import { ProductsBranchStore } from './products-branch.store';
     </mat-card>
   `,
   styles: ``,
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ProductsBranchStore],
 })
 export class InfiniteScrollPageComponent {}

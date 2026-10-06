@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { MatFormField, MatPrefix } from '@angular/material/form-field';
@@ -200,9 +200,7 @@ import { OrderStore } from './order-list.store';
             mat-row
             *matRowDef="let order; columns: displayedColumns"
             class="example-element-row"
-            [class.example-expanded-row]="
-              store.orderIdsSelectedMap()[order.id]
-            "
+            [class.example-expanded-row]="store.orderIdsSelectedMap()[order.id]"
           ></tr>
           <tr
             mat-row
@@ -215,6 +213,7 @@ import { OrderStore } from './order-list.store';
   `,
   styleUrls: ['./order-table.component.scss'],
   providers: [OrderStore],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     MatTable,
     MatColumnDef,

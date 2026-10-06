@@ -26,7 +26,7 @@
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"]
     },
     "lint": {
-      "executor": "@nx/linter:eslint",
+      "executor": "@nx/eslint:lint",
       "options": {
         "lintFilePatterns": [
           "libs/ngrx-traits/core/src/**/*.ts",

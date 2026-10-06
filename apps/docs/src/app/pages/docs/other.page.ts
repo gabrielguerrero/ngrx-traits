@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -15,6 +15,7 @@ import { RouterOutlet } from '@angular/router';
     </div>
   `,
   imports: [RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: {
     class: 'flex-1 overflow-hidden',
   },

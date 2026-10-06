@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 
 import { ProductPickerComponent } from './components/product-picker/product-picker.component';
@@ -27,6 +27,7 @@ import { ProductPickerComponent } from './components/product-picker/product-pick
     `,
   ],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [MatCardModule, ProductPickerComponent],
 })
 export class ProductPickerPageContainerComponent {}

@@ -1,5 +1,12 @@
 import { isPlatformBrowser } from '@angular/common';
-import { Component, effect, inject, PLATFORM_ID, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -7,6 +14,7 @@ import { filter } from 'rxjs';
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ` <router-outlet />`,
 })
 export class AppComponent {

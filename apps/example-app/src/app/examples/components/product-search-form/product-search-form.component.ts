@@ -13,7 +13,7 @@ import { ProductFilter } from '@example-api/shared/models';
         <input
           type="text"
           matInput
-          [ngModel]="searchProduct()?.search"
+          [ngModel]="$safeNavigationMigration(searchProduct()?.search)"
           name="search"
           (ngModelChange)="searchProduct.set({ search: $event })"
         />

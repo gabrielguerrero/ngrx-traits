@@ -3,7 +3,12 @@ import {
   CdkVirtualForOf,
   CdkVirtualScrollViewport,
 } from '@angular/cdk/scrolling';
-import { Component, inject, input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  input,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -87,6 +92,7 @@ import { ProductsBranchStore } from './products-branch.store';
       }
     `,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ProductsBranchStore],
 })
 export class ProductsBranchDropdownComponent {

@@ -319,7 +319,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
+        expect(onSuccess).toHaveBeenCalledWith('test', undefined, undefined);
       });
     });
 
@@ -344,7 +344,7 @@ describe('withCalls', () => {
         apiResponse.next('test');
         expect(store.isTestCall2Loaded()).toBeTruthy();
         expect(store.testCall2Result()).toBe('test');
-        expect(onSuccess).toHaveBeenCalledWith('test', { ok: true }, undefined);
+        expect(onSuccess).toHaveBeenCalledWith('test', undefined, undefined);
       });
     });
 

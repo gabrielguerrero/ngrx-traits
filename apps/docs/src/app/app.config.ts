@@ -12,7 +12,10 @@ import {
   provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideClientHydration } from '@angular/platform-browser';
+import {
+  provideClientHydration,
+  withNoIncrementalHydration,
+} from '@angular/platform-browser';
 
 import { TabGroupComponent } from './components/tab-group/tab-group.component';
 import { TabComponent } from './components/tab/tab.component';
@@ -21,7 +24,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideFileRouter(),
-    provideClientHydration(),
+    provideClientHydration(withNoIncrementalHydration()),
     provideContent(withMarkdownRenderer(), withPrismHighlighter()),
     provideHttpClient(withFetch()),
     provideAppInitializer(initializeCustomElements),

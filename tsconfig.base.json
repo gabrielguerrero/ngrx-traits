@@ -14,14 +14,18 @@
     "lib": ["es2022", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
     "paths": {
-      "@ngrx-traits/common": ["libs/ngrx-traits/common/src/lib/index.ts"],
-      "@ngrx-traits/core": ["libs/ngrx-traits/core/src/lib/index.ts"],
-      "@ngrx-traits/core/testing": ["libs/ngrx-traits/core/src/lib/index.ts"],
-      "@ngrx-traits/signals": ["libs/ngrx-traits/signals/src/index.ts"],
-      "@example-api/shared/*": ["apps/example-api/src/shared/*"]
-    }
+      "@ngrx-traits/common": ["./libs/ngrx-traits/common/src/lib/index.ts"],
+      "@ngrx-traits/core": ["./libs/ngrx-traits/core/src/lib/index.ts"],
+      "@ngrx-traits/core/testing": ["./libs/ngrx-traits/core/src/lib/index.ts"],
+      "@ngrx-traits/signals": ["./libs/ngrx-traits/signals/src/index.ts"],
+      "@example-api/shared/*": ["./apps/example-api/src/shared/*"]
+    },
+    "strict": false,
+    "noUncheckedSideEffectImports": false,
+    "types": ["*"],
+    "esModuleInterop": false,
+    "ignoreDeprecations": "6.0"
   },
   "exclude": ["node_modules", "tmp"]
 }

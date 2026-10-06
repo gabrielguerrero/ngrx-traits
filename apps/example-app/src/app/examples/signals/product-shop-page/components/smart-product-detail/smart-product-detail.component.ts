@@ -40,7 +40,10 @@ const ProductDetailStore = signalStore(
             store.loadProductDetailResult()?.name
           }}</mat-card-title>
           <mat-card-subtitle
-            >Price: £{{ store.loadProductDetailResult()?.price | currency }}
+            >Price: £{{
+              $safeNavigationMigration(store.loadProductDetailResult()?.price)
+                | currency
+            }}
             Released:
             {{
               store.loadProductDetailResult()?.releaseDate

@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'docs-footer',
   standalone: true,
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<footer class="grid pt-24 text-zinc-300 z-10">
     <div class="grid sm:grid-cols-3 gap-8 sm:gap-24">
       <ul class="flex flex-col gap-2">

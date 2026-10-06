@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -105,6 +105,7 @@ import { ProductsSSRStore } from './product.store';
     ProductDetailComponent,
     RouterLink,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ProductsSSRStore],
 })
 export class ProductListSSRPageComponent {

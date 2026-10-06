@@ -1,6 +1,13 @@
 import { RouteMeta } from '@analogjs/router';
 import { isPlatformBrowser } from '@angular/common';
-import { Component, effect, inject, PLATFORM_ID, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -17,6 +24,7 @@ import { SideNavigationComponent } from '../components/side-navigation/side-navi
     SideNavigationComponent,
     FooterComponent,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: ` <div>
       <docs-navbar [(menuOpen)]="menuOpen" class=" bg-white dark:bg-gray-900" />
       <div class="container  mx-auto px-8 pt-24">

@@ -1,5 +1,5 @@
 import { NgOptimizedImage } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { FooterComponent } from '../components/navbar/footer/footer.component';
@@ -60,13 +60,11 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
       </div>
     </div>`,
   styleUrls: ['./index.page.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgOptimizedImage,
-    RouterLink,
-    RouterLinkActive,
-    RouterOutlet,
     NavbarComponent,
-    FooterComponent,
-  ],
+    FooterComponent
+],
 })
 export default class HomeComponent {}

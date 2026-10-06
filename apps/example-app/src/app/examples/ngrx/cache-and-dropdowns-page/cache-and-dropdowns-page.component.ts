@@ -23,7 +23,7 @@ import { DepartmentDropdownComponent } from './components/department-dropdown/de
           <div></div>
           <department-dropdown
             style="width: 300px"
-            [storeId]="form.get('branch')?.value?.id"
+            [storeId]="$safeNavigationMigration(form.get('branch')?.value?.id)"
             formControlName="department"
           ></department-dropdown>
         </form>

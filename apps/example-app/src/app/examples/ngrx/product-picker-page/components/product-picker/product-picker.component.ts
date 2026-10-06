@@ -26,7 +26,7 @@ import { ProductSelectDialogComponent } from '../product-select-dialog/product-s
       (click)="open()"
       [formControl]="control"
       [placeholder]="'Select a Product'"
-      [value]="selectedProduct?.name"
+      [value]="$safeNavigationMigration(selectedProduct?.name)"
       [readonly]="true"
     />
 

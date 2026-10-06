@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatPaginatorModule } from '@angular/material/paginator';
@@ -103,6 +103,7 @@ import { ProductsLocalStore } from './product.store';
     ProductDetailComponent,
     RouterLink,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   providers: [ProductsLocalStore],
 })
 export class SignalProductListPaginatedPageContainerComponent {

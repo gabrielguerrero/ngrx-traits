@@ -7,7 +7,20 @@
     "useDefineForClassFields": false,
     "moduleResolution": "bundler"
   },
-  "files": ["src/main.ts", "src/polyfills.ts", "src/main.server.ts", "src/server.ts"],
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts",
+    "src/main.server.ts",
+    "src/server.ts"
+  ],
   "include": ["src/**/*.d.ts"],
-  "exclude": ["jest.config.ts"]
+  "exclude": ["jest.config.ts"],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }
