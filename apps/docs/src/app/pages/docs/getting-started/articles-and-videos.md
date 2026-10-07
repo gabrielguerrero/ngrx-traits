@@ -19,7 +19,7 @@ meta:
 
 # Release blogs
 
-## [Announcing Ngrx Traits 22](https://medium.com/@gabrieldavidguerrero/announcing-ngrx-traits-22-600ef7e6974e)
+## [Announcing Ngrx Traits 22](/docs/getting-started/announcing-ngrx-traits-22)
 
 NgRx Traits 22 targets Angular 22, adding withLink to sync store state with component signals and Signal Forms.
 
