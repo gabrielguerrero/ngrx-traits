@@ -251,9 +251,8 @@ export class SideNavigationComponent {
           external: true,
         },
         {
-          link: 'https://medium.com/@gabrieldavidguerrero/announcing-ngrx-traits-22-600ef7e6974e',
+          link: './getting-started/announcing-ngrx-traits-22',
           name: 'Whats New',
-          external: true,
           badge: 'new',
         },
         {
